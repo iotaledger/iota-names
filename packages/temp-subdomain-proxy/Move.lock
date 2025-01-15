@@ -7,7 +7,6 @@ deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { name = "Iota" },
   { name = "subdomains" },
-  { name = "utils" },
 ]
 
 [[move.package]]

@@ -10,7 +10,7 @@ dependencies = [
 
 [[move.package]]
 name = "Iota"
-source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/iota-framework" }
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
