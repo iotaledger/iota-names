@@ -1,5 +1,4 @@
 // Copyright (c) Mysten Labs, Inc.
-// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -15,6 +14,7 @@ use iota_names::iota_names::{Self, AdminCap, IotaNames};
 // === Config management ===
 
 public struct TestConfig has store, drop { a: u8 }
+public struct USDC has drop {}
 
 #[test]
 /// Add a configuration; get it back; remove it.
@@ -52,7 +52,7 @@ fun registry_management() {
 public struct TestApp has drop {}
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
-/// Only authorized applications can add balance to IotaNames.
+/// Only authorized applications can add balance to iota_names.
 fun app_add_to_balance_fail() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, _cap) = iota_names::new_for_testing(&mut ctx);
@@ -71,7 +71,7 @@ fun app_registry_mut_fail() {
 
 #[test]
 /// 1. Authorize TestApp;
-/// 2. Adds balance to IotaNames, access registry mut.
+/// 2. Adds balance to iota_names, access registry mut.
 fun authorize_and_access() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
@@ -124,6 +124,47 @@ fun balance_and_withdraw_fail_no_profits() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
     let _withdrawn = iota_names::withdraw(&cap, &mut iota_names, &mut ctx);
+
+    abort 1337
+}
+
+#[test]
+fun balance_and_withdraw_v2() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
+    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+
+    let paid = balance::create_for_testing<IOTA>(1000);
+    iota_names.app_add_custom_balance<TestApp, IOTA>(TestApp {}, paid);
+
+    let withdrawn = iota_names.withdraw_custom<IOTA>(&cap, &mut ctx);
+    assert_eq(coin::burn_for_testing(withdrawn), 1000);
+
+    wrapup(iota_names, cap);
+}
+
+#[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
+/// 1. Authorize TestApp and add to balance;
+/// 2. Admin tries to withdraw an empty balance.
+fun balance_and_withdraw_fail_no_profits_in_type_v2() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
+    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+
+    let paid = balance::create_for_testing<IOTA>(1000);
+    iota_names.app_add_custom_balance<TestApp, IOTA>(TestApp {}, paid);
+    let _withdrawn = iota_names.withdraw_custom<USDC>(&cap, &mut ctx);
+
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
+/// 1. Authorize TestApp and add to balance;
+/// 2. Admin tries to withdraw an empty balance.
+fun balance_and_withdraw_fail_no_profits_v2() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
+    let _withdrawn = iota_names.withdraw_custom<IOTA>(&cap, &mut ctx);
 
     abort 1337
 }

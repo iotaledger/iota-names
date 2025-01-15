@@ -9,80 +9,73 @@ use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::domain;
 use iota_names::registry::Registry;
+use iota_names::subdomain_registration::SubDomainRegistration;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
+const WALRUS_SITE_ID: vector<u8> = b"walrus_site_id";
+
+use fun registry_mut as IotaNames.registry_mut;
 
 const EUnsupportedKey: u64 = 0;
 
-/// Authorization token for the controller.
-public struct Controller has drop {}
+/// Authorization token for the controller (v2) which
+/// is used to call protected functions.
+public struct ControllerV2() has drop;
 
-// === Update Records Functionality ===
-
-/// User-facing function (upgradable) - set the target address of a domain.
-entry fun set_target_address(
+/// Set the target address of a domain.
+public fun set_target_address(
     iota_names: &mut IotaNames,
     nft: &IotaNamesRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
-    let registry = iota_names::app_registry_mut<Controller, Registry>(
-        Controller {},
-        iota_names,
-    );
+    let registry = iota_names.registry_mut();
     registry.assert_nft_is_authorized(nft, clock);
 
     let domain = nft.domain();
     registry.set_target_address(domain, new_target);
 }
 
-/// User-facing function (upgradable) - set the reverse lookup address for the
-/// domain.
-entry fun set_reverse_lookup(
-    iota_names: &mut IotaNames,
-    domain_name: String,
-    ctx: &TxContext,
-) {
-    let domain = domain::new(domain_name);
-    let registry = iota_names::app_registry_mut<Controller, Registry>(
-        Controller {},
-        iota_names,
-    );
-    registry.set_reverse_lookup(sender(ctx), domain);
+/// Set the reverse lookup address for the domain
+public fun set_reverse_lookup(iota_names: &mut IotaNames, domain_name: String, ctx: &TxContext) {
+    iota_names.registry_mut().set_reverse_lookup(ctx.sender(), domain::new(domain_name));
 }
 
-/// User-facing function (upgradable) - unset the reverse lookup address for the
-/// domain.
-entry fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
-    let registry = iota_names::app_registry_mut<Controller, Registry>(
-        Controller {},
-        iota_names,
-    );
-    registry.unset_reverse_lookup(sender(ctx));
+/// User-facing function - unset the reverse lookup address for the domain.
+public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
+    iota_names.registry_mut().unset_reverse_lookup(ctx.sender());
 }
 
-/// User-facing function (upgradable) - add a new key-value pair to the name
-/// record's data.
-entry fun set_user_data(
+/// Allows setting the reverse lookup address for an object.
+/// Expects a mutable reference of the object.
+public fun set_object_reverse_lookup(iota_names: &mut IotaNames, obj: &mut UID, domain_name: String) {
+    iota_names.registry_mut().set_reverse_lookup(obj.to_address(), domain::new(domain_name));
+}
+
+/// Allows unsetting the reverse lookup address for an object.
+/// Expects a mutable reference of the object.
+public fun unset_object_reverse_lookup(iota_names: &mut IotaNames, obj: &mut UID) {
+    iota_names.registry_mut().unset_reverse_lookup(obj.to_address());
+}
+
+/// User-facing function - add a new key-value pair to the name record's data.
+public fun set_user_data(
     iota_names: &mut IotaNames,
     nft: &IotaNamesRegistration,
     key: String,
     value: String,
     clock: &Clock,
 ) {
-    let registry = iota_names::app_registry_mut<Controller, Registry>(
-        Controller {},
-        iota_names,
-    );
+    let registry = iota_names.registry_mut();
     let mut data = *registry.get_data(nft.domain());
     let domain = nft.domain();
 
     registry.assert_nft_is_authorized(nft, clock);
     let key_bytes = *key.as_bytes();
-    assert!(key_bytes == AVATAR || key_bytes == CONTENT_HASH, EUnsupportedKey);
+    assert!(key_bytes == AVATAR || key_bytes == CONTENT_HASH || key_bytes == WALRUS_SITE_ID, EUnsupportedKey);
 
     if (data.contains(&key)) {
         data.remove(&key);
@@ -92,18 +85,9 @@ entry fun set_user_data(
     registry.set_data(domain, data);
 }
 
-/// User-facing function (upgradable) - remove a key from the name record's
-/// data.
-entry fun unset_user_data(
-    iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
-    key: String,
-    clock: &Clock,
-) {
-    let registry = iota_names::app_registry_mut<Controller, Registry>(
-        Controller {},
-        iota_names,
-    );
+/// User-facing function - remove a key from the name record's data.
+public fun unset_user_data(iota_names: &mut IotaNames, nft: &IotaNamesRegistration, key: String, clock: &Clock) {
+    let registry = iota_names.registry_mut();
     let mut data = *registry.get_data(nft.domain());
     let domain = nft.domain();
 
@@ -116,52 +100,19 @@ entry fun unset_user_data(
     registry.set_data(domain, data);
 }
 
-// === Testing ===
-
-#[test_only]
-public fun set_target_address_for_testing(
-    iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
-    new_target: Option<address>,
-    clock: &Clock,
-) {
-    set_target_address(iota_names, nft, new_target, clock)
+public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, clock: &Clock) {
+    iota_names.registry_mut().burn_registration_object(nft, clock);
 }
 
-#[test_only]
-public fun set_reverse_lookup_for_testing(
-    iota_names: &mut IotaNames,
-    domain_name: String,
-    ctx: &TxContext,
-) {
-    set_reverse_lookup(iota_names, domain_name, ctx)
+public fun burn_expired_subname(iota_names: &mut IotaNames, nft: SubDomainRegistration, clock: &Clock) {
+    iota_names.registry_mut().burn_subdomain_object(nft, clock);
 }
 
-#[test_only]
-public fun unset_reverse_lookup_for_testing(
-    iota_names: &mut IotaNames,
-    ctx: &TxContext,
-) {
-    unset_reverse_lookup(iota_names, ctx)
+/// Get a mutable reference to the registry, if the app is authorized.
+fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
+    iota_names::app_registry_mut<_, Registry>(ControllerV2(), iota_names)
 }
 
-#[test_only]
-public fun set_user_data_for_testing(
-    iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
-    key: String,
-    value: String,
-    clock: &Clock,
-) {
-    set_user_data(iota_names, nft, key, value, clock);
-}
-
-#[test_only]
-public fun unset_user_data_for_testing(
-    iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
-    key: String,
-    clock: &Clock,
-) {
-    unset_user_data(iota_names, nft, key, clock);
-}
+/// Authorization token for the controller.
+#[deprecated(note = b"Use ControllerV2 instead")]
+public struct Controller has drop {}

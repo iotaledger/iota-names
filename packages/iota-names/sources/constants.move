@@ -9,7 +9,7 @@
 /// single place of storing constants and proving convenient APIs for reading.
 module iota_names::constants;
 
-use std::string::{utf8, String};
+use std::string::String;
 
 /// The amount of NANOS in 1 IOTA.
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
@@ -45,10 +45,10 @@ const ALLOW_TIME_EXTENSION: vector<u8> = b"S_ATE";
 // === Public functions ===
 
 /// Top level domain for IOTA as a String.
-public fun iota_tld(): String { utf8(IOTA_TLD) }
+public fun iota_tld(): String { IOTA_TLD.to_string() }
 
 /// Default value for the image_url.
-public fun default_image(): String { utf8(DEFAULT_IMAGE) }
+public fun default_image(): String { DEFAULT_IMAGE.to_string() }
 
 /// The amount of NANOS in 1 IOTA.
 public fun nanos_per_iota(): u64 { NANOS_PER_IOTA }
@@ -67,12 +67,15 @@ public fun grace_period_ms(): u64 { GRACE_PERIOD_MS }
 
 /// Subdomain constants
 /// The NameRecord key that a subdomain can create child names.
-public fun subdomain_allow_creation_key(): String { utf8(ALLOW_CREATION) }
+public fun subdomain_allow_creation_key(): String { ALLOW_CREATION.to_string() }
 
 /// The NameRecord key that a subdomain can self-renew.
 public fun subdomain_allow_extension_key(): String {
-    utf8(ALLOW_TIME_EXTENSION)
+   ALLOW_TIME_EXTENSION.to_string()
 }
 
 /// A getter for a leaf name record's expiration timestamp.
 public fun leaf_expiration_timestamp(): u64 { LEAF_EXPIRATION_TIMESTAMP }
+
+/// The `PaymentIntent` version that can be used by this package for payments.
+public macro fun payments_version(): u8 { 1 }
