@@ -21,9 +21,9 @@ use fun registry_mut as IotaNames.registry_mut;
 
 const EUnsupportedKey: u64 = 0;
 
-/// Authorization token for the controller (v2) which
+/// Authorization token for the controller which
 /// is used to call protected functions.
-public struct ControllerV2() has drop;
+public struct Controller() has drop;
 
 /// Set the target address of a domain.
 public fun set_target_address(
@@ -110,9 +110,5 @@ public fun burn_expired_subname(iota_names: &mut IotaNames, nft: SubDomainRegist
 
 /// Get a mutable reference to the registry, if the app is authorized.
 fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    iota_names::app_registry_mut<_, Registry>(ControllerV2(), iota_names)
+    iota_names::app_registry_mut<_, Registry>(Controller(), iota_names)
 }
-
-/// Authorization token for the controller.
-#[deprecated(note = b"Use ControllerV2 instead")]
-public struct Controller has drop {}

@@ -18,11 +18,13 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 	// split by ordering, and publish in batch.
 	const orderings = [...new Set([...Object.values(packages).map((x) => x.order)])];
 
-	// We do the publishing in batches, because some
+	// We do the publishing in batches, because some needs to be published before others
 	for (const ordering of orderings) {
 		const list = Object.entries(packages).filter((x) => x[1].order === ordering);
 
 		for (const [key, pkg] of list) {
+			console.log(`Publishing ${key}...`);
+			console.log(`Package folder: ${pkg.folder}`);
 			const packageFolder = path.resolve(contractsPath, pkg.folder);
 			// remove the lockfile on CI to allow fresh flows.
 			if (isCiJob) {
@@ -70,11 +72,9 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 					v1: data.IotaNames.packageId,
 				},
 				iotaNamesObjectId: data.IotaNames.iotaNames,
-				utilsPackageId: data.Utils.packageId,
-				registrationPackageId: data.Registration.packageId,
-				renewalPackageId: data.Renewal.packageId,
 				subNamesPackageId: data.Subdomains.packageId,
 				tempSubNamesProxyPackageId: data.TempSubdomainProxy.packageId,
+				paymentsPackageId: data.Payments.packageId,
 			},
 			null,
 			2,

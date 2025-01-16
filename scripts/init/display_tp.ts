@@ -16,19 +16,19 @@ export const createDisplay = ({
 	txb,
 	publisher,
 	isSubdomain,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 	subdomainsPackageId,
 	network = 'mainnet',
 }: {
 	txb: Transaction;
 	publisher: string;
 	isSubdomain: boolean;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 	subdomainsPackageId: string;
 	network: 'mainnet' | 'testnet';
 }) => {
 	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubDomainRegistration`;
-	const iotaNamesRegistration = `${iotaNamesPackageIdV1}::iota_names_registration::IotaNamesRegistration`;
+	const iotaNamesRegistration = `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
 
 	const display = txb.moveCall({
 		target: `0x2::display::new`,

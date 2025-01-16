@@ -21,7 +21,7 @@ const mainPackageUpgrade = async () => {
 	const currentDir = process.cwd();
 	const iotaNamesDir = `${currentDir}/../packages/iota-names`;
 	const txFilePath = `${currentDir}/tx/tx-data.txt`;
-	const upgradeCall = `sui client upgrade --upgrade-capability ${mainPackage[network].upgradeCap} --gas-budget 2000000000 --gas ${gasObjectId} --skip-dependency-verification --serialize-unsigned-transaction`;
+	const upgradeCall = `iota client upgrade --upgrade-capability ${mainPackage[network].upgradeCap} --gas-budget 2000000000 --gas ${gasObjectId} --skip-dependency-verification --serialize-unsigned-transaction`;
 
 	try {
 		// Execute the command with the specified working directory and capture the output

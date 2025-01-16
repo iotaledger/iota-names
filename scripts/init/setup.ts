@@ -8,7 +8,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { getClient, signAndExecute } from '../utils/utils';
-import { authorizeApp } from './authorization';
+import { authorizeApp, deauthorizeApp } from './authorization';
 import { Network, Packages } from './packages';
 import { queryRegistryTable } from './queries';
 import { PackageInfo } from './types';
@@ -26,7 +26,7 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 				adminCap: packageInfo.IotaNames.adminCap,
 				iotaNames: packageInfo.IotaNames.iotaNames,
 				type: data.authorizationType(pkg.packageId),
-				iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
+				iotaNamesPackageId: packageInfo.IotaNames.packageId,
 			});
 		}
 	}
@@ -51,19 +51,13 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		packageInfo.IotaNames.iotaNames,
 		packageInfo.IotaNames.publisher,
 	);
-	packages.Renewal.setupFunction({
+	packages.Payments.setupFunction({
 		txb,
+		packageId: packageInfo.Payments.packageId,
 		adminCap: packageInfo.IotaNames.adminCap,
 		iotaNames: packageInfo.IotaNames.iotaNames,
-		packageId: packageInfo.Renewal.packageId,
-		iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
-		priceList: {
-			three: 2 * Number(NANOS_PER_IOTA),
-			four: 1 * Number(NANOS_PER_IOTA),
-			fivePlus: 0.2 * Number(NANOS_PER_IOTA),
-		},
+		iotaNamesPackageId: packageInfo.IotaNames.packageId,
 	});
-
 	let retries = 0;
 
 	try {
