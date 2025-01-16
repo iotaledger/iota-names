@@ -105,12 +105,15 @@ export const upgradePackage = (
 			encoding: 'utf-8',
 		}),
 	);
+	console.log(digest);
+	console.log(packageId);
+	console.log(upgradeCapId);
 
 	const cap = txb.object(upgradeCapId);
 
 	const ticket = txb.moveCall({
 		target: '0x2::package::authorize_upgrade',
-		arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure(digest)],
+		arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure.vector('u8', digest)],
 	});
 
 	const receipt = txb.upgrade({
@@ -267,4 +270,26 @@ export const getAllObjectsByType = async (type: string, owner: string, client: I
 	}
 
 	return objects;
+};
+
+export const getCoinMetadataId = async (type: string) => {
+	const iotaClient = new IotaClient({
+		url: getFullnodeUrl('mainnet'),
+	});
+	const metadata = await iotaClient.getCoinMetadata({ coinType: type });
+	if (!metadata || !metadata.id) {
+		throw new Error('Coin metadata or ID not found.');
+	}
+	return metadata.id;
+};
+
+export const getObjectType = async (network: Network, objectId: string): Promise<string> => {
+	const iotaClient = new IotaClient({
+		url: getFullnodeUrl(network),
+	});
+	const objectResponse = await iotaClient.getObject({ id: objectId, options: { showType: true } });
+	if (objectResponse && objectResponse.data && objectResponse.data.type) {
+		return objectResponse.data.type;
+	}
+	throw new Error('Object data not found');
 };
