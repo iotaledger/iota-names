@@ -12,7 +12,7 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Secp256k1Keypair } from '@iota/iota-sdk/keypairs/secp256k1';
 import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
-import { fromB64, toB64 } from '@iota/iota-sdk/utils';
+import { toB64 } from '@iota/iota-sdk/utils';
 
 import { Network } from '../init/packages';
 
@@ -103,12 +103,9 @@ export const getSigner = () => {
 	);
 
 	for (const priv of keystore) {
-		const raw = fromB64(priv);
-		if (raw[0] !== 0) {
-			continue;
-		}
+		const keypair = decodeIotaPrivateKey(priv);
 
-		const pair = Ed25519Keypair.fromSecretKey(raw.slice(1));
+		const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
 		if (pair.getPublicKey().toIotaAddress() === sender) {
 			return pair;
 		}
