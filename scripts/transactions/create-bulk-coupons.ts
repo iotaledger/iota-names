@@ -1,24 +1,24 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { writeFileSync } from 'fs';
+
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
-import { newCouponRules, optionalRangeConstructor, PercentageOffCoupon } from '../coupons/coupon';
+import { PercentageOffCoupon } from '../coupons/coupon';
 import { prepareMultisigTx } from '../utils/utils';
 
-function generateRandomString(length: number) {
-	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	let result = '';
-	const charactersLength = characters.length;
+// function generateRandomString(length: number) {
+// 	const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+// 	let result = '';
+// 	const charactersLength = characters.length;
 
-	for (let i = 0; i < length; i++) {
-		result += characters.charAt(Math.floor(Math.random() * charactersLength));
-	}
+// 	for (let i = 0; i < length; i++) {
+// 		result += characters.charAt(Math.floor(Math.random() * charactersLength));
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 const create = async () => {
 	const pkg = mainPackage.mainnet;

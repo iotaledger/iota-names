@@ -1,9 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { bcs } from '@iota/iota-sdk/bcs';
 import type { Transaction } from '@iota/iota-sdk/transactions';
-import { isValidIOTANSName, normalizeIOTANSName, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
+import { IOTA_CLOCK_OBJECT_ID, isValidIOTANSName, normalizeIOTANSName } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants.js';
 import { isNestedSubName, isSubName, validateYears } from './helpers.js';

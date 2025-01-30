@@ -45,7 +45,7 @@ jobs:
           pnpm install
 
       - name: Prepare local network & run SDK tests
-        env: 
+        env:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |

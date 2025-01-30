@@ -57,7 +57,11 @@ module.exports = {
 		'header/header': [
 			2,
 			'line',
-			[' Copyright (c) Mysten Labs, Inc.', ' SPDX-License-Identifier: Apache-2.0'],
+			[
+				' Copyright (c) Mysten Labs, Inc.',
+				' Modifications Copyright (c) 2025 IOTA Stiftung',
+				' SPDX-License-Identifier: Apache-2.0',
+			],
 		],
 		'unused-imports/no-unused-imports': [
 			'error',

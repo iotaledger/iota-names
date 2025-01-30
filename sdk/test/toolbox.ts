@@ -1,12 +1,17 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
-import { FaucetRateLimitError, getFaucetHost, requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import {
+	FaucetRateLimitError,
+	getFaucetHost,
+	requestIotaFromFaucetV0,
+} from '@iota/iota-sdk/faucet';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { retry } from 'ts-retry-promise';
 

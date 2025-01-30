@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';

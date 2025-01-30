@@ -1,8 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { KioskClient, Network as KioskNetwork, TransferPolicyTransaction } from '@iota/kiosk';
+
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { KioskClient, Network as KioskNetwork, TransferPolicyTransaction } from '@iota/kiosk';
 
 import { mainPackage, Network } from '../config/constants';
 import { addressConfig, AirdropConfig, mainnetConfig } from '../config/day_one';

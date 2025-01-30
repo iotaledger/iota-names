@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { execFileSync, execSync } from 'child_process';
 import fs, { readFileSync } from 'fs';
 import { homedir } from 'os';
@@ -11,7 +12,7 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Secp256k1Keypair } from '@iota/iota-sdk/keypairs/secp256k1';
 import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
-import { fromBase64, toB64, toBase64 } from '@iota/iota-sdk/utils';
+import { fromB64, toB64 } from '@iota/iota-sdk/utils';
 
 import { Network } from '../init/packages';
 
@@ -102,7 +103,7 @@ export const getSigner = () => {
 	);
 
 	for (const priv of keystore) {
-		const raw = fromBase64(priv);
+		const raw = fromB64(priv);
 		if (raw[0] !== 0) {
 			continue;
 		}
@@ -139,11 +140,7 @@ export const signAndExecute = async (txb: Transaction, network: Network) => {
 
 /// Builds a transaction (unsigned) and saves it on `setup/tx/tx-data.txt` (on production)
 /// or `setup/src/tx-data.local.txt` on mainnet.
-export const prepareMultisigTx = async (
-	tx: Transaction,
-	network: Network,
-	address?: string,
-) => {
+export const prepareMultisigTx = async (tx: Transaction, network: Network, address?: string) => {
 	const adminAddress = address ?? getActiveAddress();
 	const client = getClient(network);
 	const gasObjectId = process.env.GAS_OBJECT;
@@ -168,7 +165,7 @@ export const prepareMultisigTx = async (
 	tx.build({
 		client,
 	}).then((bytes) => {
-		let serializedBase64 = toBase64(bytes);
+		let serializedBase64 = toB64(bytes);
 
 		const output_location =
 			process.env.NODE_ENV === 'development' ? './tx/tx-data-local.txt' : './tx/tx-data.txt';

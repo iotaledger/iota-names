@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import type { IotaClient } from '@iota/iota-sdk/client';
 import { isValidIOTANSName, normalizeIOTANSName } from '@iota/iota-sdk/utils';
 
@@ -13,7 +14,7 @@ import {
 	TESTNET_CONFIG,
 } from './constants.js';
 import { isSubName, parsePriceListFromConfig, validateYears } from './helpers.js';
-import type { Constants, NameRecord, IotansClientConfig, IotansPriceList } from './types.js';
+import type { Constants, IotansClientConfig, IotansPriceList, NameRecord } from './types.js';
 
 /// The IotansClient is the main entry point for the IOTANSSDK.
 /// It allows you to interact with IOTANS.
