@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A renewal module for the IOTANS app.
+/// A renewal module for the IotaNS app.
 /// This module allows users to renew their domains.
 ///
 /// The renewal is capped at 5 years.
@@ -10,14 +10,14 @@ module renewal::renew {
     use iota::{
         coin::{Self, Coin},
         clock::Clock,
-        iota::iota
+        iota::IOTA
     };
 
     use iotans::{
         constants,
         domain::Domain,
         registry::Registry,
-        iotans::{Self, IOTANS, AdminCap},
+        iotans::{Self, IotaNS, AdminCap},
         config::{Self, Config},
         iotans_registration::IotansRegistration
     };
@@ -56,7 +56,7 @@ module renewal::renew {
     /// We still set this up by using the default config functionality from iotans package.
     /// The `public_key` passed in the `Config` can be a random u8 array with length 33.
     public fun setup(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         cap: &AdminCap,
         config: Config
     ) {
@@ -71,10 +71,10 @@ module renewal::renew {
     // - the domain is not a subdomain
     // - number of years is within [1-5] interval
     public fun renew(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: &mut IotansRegistration,
         no_years: u8,
-        payment: Coin<iota>,
+        payment: Coin<IOTA>,
         clock: &Clock
     ) {
         // authorization occurs inside the call.
@@ -159,8 +159,8 @@ module renewal::renew {
 
     /// Validates that the payment Coin is correct for the domain + number of years
     fun validate_payment(
-        iotans: &IOTANS,
-        payment: &Coin<iota>,
+        iotans: &IotaNS,
+        payment: &Coin<IOTA>,
         domain: &Domain,
         no_years: u8
     ) {

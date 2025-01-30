@@ -15,12 +15,12 @@
 module iotans::iotans_registration;
 
 use std::string::String;
-use iotaaa::clock::{timestamp_ms, Clock};
-use iotaaaans::constants;
-use iotaaaans::domain::Domain;
+use iota::clock::{timestamp_ms, Clock};
+use iotans::constants;
+use iotans::domain::Domain;
 
-/* friend iotaaaans::registry; */
-/* friend iotaaaans::update_image; */
+/* friend iotans::registry; */
+/* friend iotans::update_image; */
 
 /// The main access point for the user.
 public struct IotansRegistration has key, store {

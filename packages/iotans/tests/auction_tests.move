@@ -27,7 +27,7 @@ use iotans::config;
 use iotans::constants::{Self, nanos_per_iota};
 use iotans::domain;
 use iotans::registry;
-use iotans::iotans::{Self, IOTANS, AdminCap};
+use iotans::iotans::{Self, IotaNS, AdminCap};
 use iotans::iotans_registration::IotansRegistration;
 
 const IOTANS_ADDRESS: address = @0xA001;
@@ -52,7 +52,7 @@ public fun test_init(): Scenario {
     {
         scenario.next_tx(IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         registry::init_for_testing(&admin_cap, &mut iotans, ctx(scenario));
 
@@ -70,7 +70,7 @@ public fun start_auction_and_place_bid_util(
 ) {
     scenario.next_tx(sender);
     let mut auction_house = scenario.take_shared<AuctionHouse>();
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let payment = coin::mint_for_testing<IOTA>(amount, ctx(scenario));
     let clock = scenario.take_shared<Clock>();
 
@@ -212,7 +212,7 @@ fun admin_withdraw_funds_util(scenario: &mut Scenario): Coin<IOTA> {
 fun deauthorize_app_util(scenario: &mut Scenario) {
     scenario.next_tx(IOTANS_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     iotans::deauthorize_app<AuctionApp>(&admin_cap, &mut iotans);
 

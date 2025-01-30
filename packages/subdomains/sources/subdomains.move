@@ -31,7 +31,7 @@ module subdomains::subdomains {
     use iotans::{
         domain::{Self, Domain, is_subdomain}, 
         registry::Registry, 
-        iotans::{Self, IOTANS}, 
+        iotans::{Self, IotaNS}, 
         iotans_registration::IotansRegistration, 
         subdomain_registration::SubDomainRegistration, 
         constants::{subdomain_allow_extension_key, subdomain_allow_creation_key}
@@ -57,7 +57,7 @@ module subdomains::subdomains {
     /// Enabled metadata value.
     const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
 
-    /// The authentication scheme for IOTANS.
+    /// The authentication scheme for IotaNS.
     public struct SubDomains has drop {}
 
     /// The key to store the parent's ID in the subdomain object.
@@ -66,7 +66,7 @@ module subdomains::subdomains {
     /// Creates a `leaf` subdomain
     /// A `leaf` subdomain, is a subdomain that is managed by the parent's NFT.
     public fun new_leaf(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         parent: &IotansRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -86,7 +86,7 @@ module subdomains::subdomains {
     /// Removes a `leaf` subdomain from the registry.
     /// Management of the `leaf` subdomain can only be achieved through the parent's valid NFT.
     public fun remove_leaf(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         parent: &IotansRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -116,7 +116,7 @@ module subdomains::subdomains {
     /// 
     /// It then saves the configuration for that child (manage-able by the parent), and returns the IotansRegistration object.
     public fun new(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         parent: &IotansRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -155,7 +155,7 @@ module subdomains::subdomains {
 
     /// Extends the expiration of a `node` subdomain.
     public fun extend_expiration(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         sub_nft: &mut SubDomainRegistration,
         expiration_timestamp_ms: u64,
     ) {
@@ -191,7 +191,7 @@ module subdomains::subdomains {
     /// - Allows the parent to toggle subdomain (grand-children) creation
     /// --> For creations: A parent can't retract already created children, nor can limit the depth if creation capability is on.
     public fun edit_setup(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         parent: &IotansRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -216,7 +216,7 @@ module subdomains::subdomains {
 
     /// Burns a `SubDomainRegistration` object if it is expired.
     public fun burn(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: SubDomainRegistration,
         clock: &Clock,
     ) {
@@ -231,7 +231,7 @@ module subdomains::subdomains {
     // Sets/removes a (key,value) on the domain's NameRecord metadata (depending on cases).
     // Validation needs to happen on the calling function.
     fun internal_set_flag(
-        self: &mut IOTANS,
+        self: &mut IotaNS,
         subdomain: Domain,
         key: String,
         enable: bool
@@ -262,7 +262,7 @@ module subdomains::subdomains {
 
     /// Get the name record's metadata for a subdomain.
     fun record_metadata(
-        self: &IOTANS,
+        self: &IotaNS,
         subdomain: Domain
     ): VecMap<String, String> {
         *registry(self).get_data(subdomain)
@@ -275,7 +275,7 @@ module subdomains::subdomains {
     /// 2. Checks that the parent can create subdomains (applies to subdomain `node` names).
     /// 3. Validates that the subdomain is valid (accepted TLD, depth, length, is child of given parent, etc).
     fun internal_validate_nft_can_manage_subdomain(
-        iotans: &IOTANS,
+        iotans: &IotaNS,
         parent: &IotansRegistration,
         clock: &Clock,
         subdomain: Domain,
@@ -299,7 +299,7 @@ module subdomains::subdomains {
     /// 1. If the NFT is authorized (not expired, active)
     /// 2. If the parent is a subdomain, check whether it is allowed to create subdomains.
     fun internal_assert_parent_can_create_subdomains(
-        self: &IOTANS,
+        self: &IotaNS,
         parent: Domain,
     ) {
         // if the parent is not a subdomain, we can always create subdomains.
@@ -337,15 +337,15 @@ module subdomains::subdomains {
 
     // == Internal helper to access registry & app setup ==
 
-    fun registry(iotans: &IOTANS): &Registry {
+    fun registry(iotans: &IotaNS): &Registry {
         iotans.registry<Registry>()
     }
 
-    fun registry_mut(iotans: &mut IOTANS): &mut Registry {
+    fun registry_mut(iotans: &mut IotaNS): &mut Registry {
         iotans::app_registry_mut<SubDomains, Registry>(SubDomains {}, iotans)
     }
 
-    fun app_config(iotans: &IOTANS): &SubDomainConfig {
+    fun app_config(iotans: &IotaNS): &SubDomainConfig {
         iotans.get_config<SubDomainConfig>()
     }
 

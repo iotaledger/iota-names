@@ -7,7 +7,7 @@ module denylist::denylist {
 
     use iota::table::{Self, Table};
 
-    use iotans::iotans::{Self, AdminCap, IOTANS};
+    use iotans::iotans::{Self, AdminCap, IotaNS};
 
     /// No names in the passed list
     const ENoWordsInList: u64 = 1;
@@ -26,7 +26,7 @@ module denylist::denylist {
     public struct DenyListAuth has drop {}
 
     public fun setup(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         cap: &AdminCap,
         ctx: &mut TxContext
     ) {
@@ -41,18 +41,18 @@ module denylist::denylist {
     }
 
     /// Check for a reserved name
-    public fun is_reserved_name(iotans: &IOTANS, name: String): bool {
+    public fun is_reserved_name(iotans: &IotaNS, name: String): bool {
         denylist(iotans).reserved.contains(name)
     }
 
     /// Checks for a blocked name.
-    public fun is_blocked_name(iotans: &IOTANS, name: String): bool {
+    public fun is_blocked_name(iotans: &IotaNS, name: String): bool {
         denylist(iotans).blocked.contains(name)
     }
 
     /// Add a list of reserved names to the list as admin.
     public fun add_reserved_names(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         _: &AdminCap,
         words: vector<String>
     ) {
@@ -64,7 +64,7 @@ module denylist::denylist {
 
     /// Add a list of offensive names to the list as admin.
     public fun add_blocked_names(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         _: &AdminCap,
         words: vector<String>
     ) {
@@ -76,7 +76,7 @@ module denylist::denylist {
 
     /// Remove a list of words from the reserved names list.
     public fun remove_reserved_names(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         _: &AdminCap,
         words: vector<String>
     ) {
@@ -88,7 +88,7 @@ module denylist::denylist {
 
     /// Remove a list of words from the list as admin.
     public fun remove_blocked_names(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         _: &AdminCap,
         words: vector<String>
     ) {
@@ -99,12 +99,12 @@ module denylist::denylist {
     }
 
     /// Get immutable access to the registry.
-    fun denylist(iotans: &IOTANS): &Denylist {
+    fun denylist(iotans: &IotaNS): &Denylist {
         iotans.registry()
     }
 
     /// Internal helper to get access to the BlockedNames object
-    fun denylist_mut(iotans: &mut IOTANS): &mut Denylist {
+    fun denylist_mut(iotans: &mut IotaNS): &mut Denylist {
         iotans::app_registry_mut<DenyListAuth, Denylist>(DenyListAuth {}, iotans)
     }
 

@@ -8,17 +8,17 @@ module iotans::auction;
 
 use std::option::{none, some, is_some};
 use std::string::String;
-use iotaaa::balance::{Self, Balance};
-use iotaaa::clock::Clock;
-use iotaaa::coin::{Self, Coin};
-use iotaaa::event;
-use iotaaa::linked_table::{Self, LinkedTable};
-use iotaaaiotataiota:iota;
-use iotaaaans::config::{Self, Config};
-use iotaaaans::domain::{Self, Domain};
-use iotaaaans::registry::Registry;
-use iotaaaaniotatatatans::{Self, AdminCap, IOTANS};
-use iotaaaaniotatatatans_registration::IotansRegistration;
+use iota::balance::{Self, Balance};
+use iota::clock::Clock;
+use iota::coin::{Self, Coin};
+use iota::event;
+use iota::linked_table::{Self, LinkedTable};
+use iota::iota::IOTA;
+use iotans::config::{Self, Config};
+use iotans::domain::{Self, Domain};
+use iotans::registry::Registry;
+use iotans::iotans::{Self, AdminCap, IotaNS};
+use iotans::iotans_registration::IotansRegistration;
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;
@@ -42,13 +42,13 @@ const EWinnerCannotPlaceBid: u64 = 11;
 const EBidAmountTooLow: u64 = 12;
 const ENoProfits: u64 = 13;
 
-/// Authorization witness to call protected functions of iotaaaans.
+/// Authorization witness to call protected functions of iotans.
 public struct App has drop {}
 
 /// The AuctionHouse application.
 public struct AuctionHouse has key, store {
     id: UID,
-    balance: Balance<iota>,
+    balance: Balance<IOTA>,
     auctions: LinkedTable<Domain, Auction>,
 }
 
@@ -58,12 +58,12 @@ public struct Auction has store {
     start_timestamp_ms: u64,
     end_timestamp_ms: u64,
     winner: address,
-    current_bid: Coin<iota>,
+    current_bid: Coin<IOTA>,
     nft: IotansRegistration,
 }
 
 fun init(ctx: &mut TxContext) {
-    iotaaa::transfer::share_object(AuctionHouse {
+    iota::transfer::share_object(AuctionHouse {
         id: object::new(ctx),
         balance: balance::zero(),
         auctions: linked_table::new(ctx),
@@ -73,23 +73,23 @@ fun init(ctx: &mut TxContext) {
 /// Start an auction if it's not started yet; and make the first bid.
 public fun start_auction_and_place_bid(
     self: &mut AuctionHouse,
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
-    bid: Coin<iota>,
+    bid: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    iotaaaans.assert_app_is_authorized<App>();
+    iotans.assert_app_is_authorized<App>();
 
     let domain = domain::new(domain_name);
 
-    // make sure the domain is a .iotaaa domain and not a subdomain
+    // make sure the domain is a .iota domain and not a subdomain
     config::assert_valid_user_registerable_domain(&domain);
 
     assert!(!self.auctions.contains(domain), EAuctionStarted);
 
     // The minimum price only applies to newly created auctions
-    let config = iotaaaans.get_config<Config>();
+    let config = iotans.get_config<Config>();
     let label = domain.sld();
     let min_price = config.calculate_price(
         (label.length() as u8),
@@ -97,7 +97,7 @@ public fun start_auction_and_place_bid(
     );
     assert!(bid.value() >= min_price, EInvalidBidValue);
 
-    let registry = iotaaaans::app_registry_mut<App, Registry>(App {iotatatatans);
+    let registry = iotans::app_registry_mut<App, Registry>(App {}, iotans);
     let nft = registry.add_record(domain, DEFAULT_DURATION, clock, ctx);
     let starting_bid = bid.value();
 
@@ -131,7 +131,7 @@ public fun start_auction_and_place_bid(
 public fun place_bid(
     self: &mut AuctionHouse,
     domain_name: String,
-    bid: Coin<iota>,
+    bid: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
@@ -161,7 +161,7 @@ public fun place_bid(
     assert!(bid_amount > current_winning_bid, EBidAmountTooLow);
 
     // Return the previous winner their bid
-    iotaaa::transfer::public_transfer(current_bid, winner);
+    iota::transfer::public_transfer(current_bid, winner);
 
     event::emit(BidEvent {
         domain,
@@ -241,7 +241,7 @@ public fun claim(
     });
 
     // Extract the NFT and their bid, returning the NFT to the user
-    // and sending the proceeds of the auction to iotaaaans
+    // and sending the proceeds of the auction to iotans
     self.balance.join(current_bid.into_balance());
     nft
 }
@@ -299,7 +299,7 @@ public fun admin_withdraw_funds(
     _: &AdminCap,
     self: &mut AuctionHouse,
     ctx: &mut TxContext,
-): Coin<iota> {
+): Coin<IOTA> {
     let amount = self.balance.value();
     assert!(amount > 0, ENoProfits);
     coin::take(&mut self.balance, amount, ctx)
@@ -430,7 +430,7 @@ public struct AuctionExtendedEvent has copy, drop {
 
 #[test_only]
 public fun init_for_testing(ctx: &mut TxContext) {
-    iotaaa::transfer::share_object(AuctionHouse {
+    iota::transfer::share_object(AuctionHouse {
         id: object::new(ctx),
         balance: balance::zero(),
         auctions: linked_table::new(ctx),

@@ -20,7 +20,7 @@ const MIN_LABEL_LENGTH: u64 = 1;
 /// The maximum length of an individual label in a domain.
 const MAX_LABEL_LENGTH: u64 = 63;
 
-/// Representation of a valid IOTANS `Domain`.
+/// Representation of a valid IotaNS `Domain`.
 public struct Domain has copy, drop, store {
     /// Vector of labels that make up a domain.
     ///

@@ -7,7 +7,7 @@ module denylist::denylist_tests {
 
     use iota::test_scenario::{Self as ts, Scenario};
 
-    use iotans::iotans::{Self, IOTANS};
+    use iotans::iotans::{Self, IotaNS};
 
     use denylist::denylist::{Self, DenyListAuth};
 
@@ -19,7 +19,7 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
         denylist::add_reserved_names(&mut iotans, &cap, some_reserved_names());
@@ -47,7 +47,7 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
         denylist::add_reserved_names(&mut iotans, &cap, vector[]);
@@ -62,7 +62,7 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
         denylist::add_blocked_names(&mut iotans, &cap, vector[]);
@@ -76,7 +76,7 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
         denylist::add_blocked_names(&mut iotans, &cap, some_offensive_names());
@@ -99,7 +99,7 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
         denylist::add_reserved_names(&mut iotans, &cap, some_reserved_names());

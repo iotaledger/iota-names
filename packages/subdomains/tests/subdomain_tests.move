@@ -11,7 +11,7 @@ module subdomains::subdomain_tests {
     use iotans::{
         domain, 
         constants::{grace_period_ms, year_ms}, 
-        iotans::{Self, IOTANS, AdminCap}, 
+        iotans::{Self, IotaNS, AdminCap}, 
         registry::{Self, Registry}, 
         iotans_registration::{Self, IotansRegistration}, 
         subdomain_registration::{Self, SubDomainRegistration}, 
@@ -188,7 +188,7 @@ module subdomains::subdomain_tests {
         {
             ts::next_tx(scenario, USER_ADDRESS);
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            let mut iotans = ts::take_shared<IOTANS>(scenario);
+            let mut iotans = ts::take_shared<IotaNS>(scenario);
             iotans::add_config(&admin_cap, &mut iotans, config::default());
 
             registry::init_for_testing(&admin_cap, &mut iotans, ctx(scenario));
@@ -201,7 +201,7 @@ module subdomains::subdomain_tests {
     }
 
     /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
-    public fun registry_mut(iotans: &mut IOTANS): &mut Registry {
+    public fun registry_mut(iotans: &mut IotaNS): &mut Registry {
 
         let registry_mut = iotans::app_registry_mut<SubDomains, Registry>(subdomains::auth_for_testing(), iotans);
 
@@ -211,7 +211,7 @@ module subdomains::subdomain_tests {
     /// Create a regular name to help with our tests.
     public fun create_sld_name(name: String, scenario: &mut Scenario): IotansRegistration {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
         let registry_mut = registry_mut(&mut iotans);
 
@@ -225,7 +225,7 @@ module subdomains::subdomain_tests {
     /// Create a leaf subdomain
     public fun create_leaf_subdomain(parent: &IotansRegistration, name: String, target: address, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
         subdomains::new_leaf(&mut iotans, parent, &clock, name, target, ctx(scenario));
@@ -237,7 +237,7 @@ module subdomains::subdomain_tests {
     /// Remove a leaf subdomain
     public fun remove_leaf_subdomain(parent: &IotansRegistration, name: String, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
         
         subdomains::remove_leaf(&mut iotans, parent, &clock, name);
@@ -249,7 +249,7 @@ module subdomains::subdomain_tests {
     /// Create a node subdomain
     public fun create_node_subdomain(parent: &IotansRegistration, name: String, expiration: u64, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario): SubDomainRegistration {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
         let nft = subdomains::new(&mut iotans, parent, &clock, name, expiration, allow_creation, allow_extension, ctx(scenario));
@@ -263,7 +263,7 @@ module subdomains::subdomain_tests {
     /// Extend a node subdomain's expiration.
     public fun extend_node_subdomain(nft: &mut SubDomainRegistration, expiration: u64, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
         subdomains::extend_expiration(&mut iotans, nft, expiration);
@@ -274,7 +274,7 @@ module subdomains::subdomain_tests {
 
     public fun update_subdomain_setup(parent: &IotansRegistration, subdomain: String, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
 
@@ -287,7 +287,7 @@ module subdomains::subdomain_tests {
 
     public fun burn_subdomain(nft: SubDomainRegistration, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IOTANS>(scenario);
+        let mut iotans = ts::take_shared<IotaNS>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
         subdomains::burn(&mut iotans, nft, &clock);

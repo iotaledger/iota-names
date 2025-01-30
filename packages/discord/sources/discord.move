@@ -37,7 +37,7 @@ module discord::discord {
         range,
         constants::{percentage_discount_type},
     };
-    use iotans::iotans::IOTANS;
+    use iotans::iotans::IotaNS;
 
     /// Errors
 
@@ -166,7 +166,7 @@ module discord::discord {
 
     /// A user protected function to generate a coupon based on Membership data.
     /// Only claimable if there's a mapping {discord_id -> address (which needs to be the sender)}
-    public fun claim_coupon(discord: &mut Discord, iotans: &mut IOTANS, discord_id: String, amount: u8, ctx: &mut TxContext) {
+    public fun claim_coupon(discord: &mut Discord, iotans: &mut IotaNS, discord_id: String, amount: u8, ctx: &mut TxContext) {
         let coupon_code = discord.claim_coupon_internal(discord_id, amount, ctx);
         let app = coupon_house::app_data_mut(iotans, DiscordApp {});
 

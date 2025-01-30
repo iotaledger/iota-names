@@ -10,8 +10,8 @@
 /// We maintain all core functionality unchanged for registry, expiration etc.
 module iotans::subdomain_registration;
 
-use iotaaa::clock::Clock;
-use iotaaaaniotatatatans_registration::IotansRegistration;
+use iota::clock::Clock;
+use iotans::iotans_registration::IotansRegistration;
 
 /* friend iotaaaans::registry; */
 /* #[test_only] */

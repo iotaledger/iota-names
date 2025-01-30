@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Module holding the application configuration for the V1 of the IOTANS
+/// Module holding the application configuration for the V1 of the IotaNS
 /// application. Responsible for providing the configuration type `Config` as
 /// well as methods to read it. Additionally, implements necessary input checks
 /// to lessen the chance of a mistake during deployment / configuration stages.
@@ -10,7 +10,7 @@
 /// Contains no access-control checks and all methods are public for the
 /// following reasons:
 /// - configuration can only be attached by the application Admin;
-/// - attached to the IOTANS object directly and can only be *read* by other
+/// - attached to the IotaNS object directly and can only be *read* by other
 /// parts of the system;
 ///
 /// Notes:
@@ -38,7 +38,7 @@ const EInvalidDomain: u64 = 5;
 /// Trying to register a domain name in a different TLD (not .iota).
 const EInvalidTld: u64 = 6;
 
-/// The configuration object, holds current settings of the IOTANS
+/// The configuration object, holds current settings of the IotaNS
 /// application. Does not carry any business logic and can easily
 /// be replaced with any other module providing similar interface
 /// and fitting the needs of the application.

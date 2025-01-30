@@ -10,7 +10,7 @@ use iota::balance;
 use iota::coin;
 use iota::iota::IOTA;
 use iota::test_utils::assert_eq;
-use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans::{Self, AdminCap, IotaNS};
 
 // === Config management ===
 
@@ -52,7 +52,7 @@ fun registry_management() {
 public struct TestApp has drop {}
 
 #[test, expected_failure(abort_code = ::iotans::iotans::EAppNotAuthorized)]
-/// Only authorized applications can add balance to IOTANS.
+/// Only authorized applications can add balance to IotaNS.
 fun app_add_to_balance_fail() {
     let mut ctx = tx_context::dummy();
     let (mut iotans, _cap) = iotans::new_for_testing(&mut ctx);
@@ -71,7 +71,7 @@ fun app_registry_mut_fail() {
 
 #[test]
 /// 1. Authorize TestApp;
-/// 2. Adds balance to IOTANS, access registry mut.
+/// 2. Adds balance to IotaNS, access registry mut.
 fun authorize_and_access() {
     let mut ctx = tx_context::dummy();
     let (mut iotans, cap) = iotans::new_for_testing(&mut ctx);
@@ -131,7 +131,7 @@ fun balance_and_withdraw_fail_no_profits() {
 // === Helpers ===
 
 // for a softer and simpler wrapup we can just share the object
-fun wrapup(iotans: IOTANS, cap: AdminCap) {
+fun wrapup(iotans: IotaNS, cap: AdminCap) {
     iotans.share_for_testing();
     iotans::burn_admin_cap_for_testing(cap);
 }

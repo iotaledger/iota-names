@@ -6,14 +6,14 @@ module iotans::registry;
 
 use std::option::{none, some};
 use std::string::String;
-use iotaaa::clock::Clock;
-use iotaaa::table::{Self, Table};
-use iotaaa::vec_map::VecMap;
-use iotaaaans::domain::Domain;
-use iotaaaans::name_record::{Self, NameRecord};
-use iotaaaans::subdomain_registration::{Self, SubDomainRegistration};
-use iotaaaaniotatatatans::AdminCap;
-use iotaaaaniotatatatans_registration::{Self as nft, IotansRegistration};
+use iota::clock::Clock;
+use iota::table::{Self, Table};
+use iota::vec_map::VecMap;
+use iotans::domain::Domain;
+use iotans::name_record::{Self, NameRecord};
+use iotans::subdomain_registration::{Self, SubDomainRegistration};
+use iotans::iotans::AdminCap;
+use iotans::iotans_registration::{Self as nft, IotansRegistration};
 
 /// The `IotansRegistration` has expired.
 const ENftExpired: u64 = 0;
@@ -35,8 +35,8 @@ const EInvalidDepth: u64 = 7;
 /// Trying to lookup a record that doesn't exist.
 const ERecordNotFound: u64 = 8;
 
-/// The `Registry` object. Attached as a dynamic field to the `IOTANS` object,
-/// and the `iotaaaans` module controls the access to the `Registry`.
+/// The `Registry` object. Attached as a dynamic field to the `IotaNS` object,
+/// and the `iotans` module controls the access to the `Registry`.
 ///
 /// Contains two tables necessary for the lookup.
 public struct Registry has store {
@@ -72,7 +72,7 @@ public fun add_record_ignoring_grace_period(
 /// Attempts to add a new record to the registry and returns a
 /// `IotansRegistration` upon success.
 /// Only use with second-level names. Enforces a `grace_period` by default.
-/// Not iotaaatable for subdomains (unless a grace period is needed).
+/// Not iotatable for subdomains (unless a grace period is needed).
 public fun add_record(
     self: &mut Registry,
     domain: Domain,
@@ -443,15 +443,15 @@ fun handle_invalidate_reverse_record(
 
 // === Test Functions ===
 #[test_only]
-use iotaaaaniotatatatans::{add_registry, IOTANS};
+use iotans::iotans::{add_registry, IotaNS};
 
 #[test_only]
 public fun init_for_testing(
     cap: &AdminCap,
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     ctx: &mut TxContext,
 ) {
-    add_registry(cap, iotaaaans, new(cap, ctx));
+    add_registry(cap, iotans, new(cap, ctx));
 }
 
 #[test_only]

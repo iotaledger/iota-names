@@ -14,7 +14,7 @@ use iota::coin::{Self, Coin};
 use iota::iota::iota;
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iotans::registry;
-use iotans::iotans::{Self, IOTANS, AdminCap};
+use iotans::iotans::{Self, IotaNS, AdminCap};
 
 // an authorized type to test.
 public struct TestAuthorized has copy, store, drop {}
@@ -25,13 +25,13 @@ public struct AnotherAuthorized has copy, store, drop {}
 // an unauthorized type to test.
 public struct TestUnauthorized has copy, store, drop {}
 
-const iotaNS_ADDRESS: address = @0xA001;
+const IOTANS_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
 
 const NANOS_PER_iota: u64 = 1_000_000_000;
 
 fun test_init(): Scenario {
-    let mut scenario_val = ts::begin(iotaNS_ADDRESS);
+    let mut scenario_val = ts::begin(IOTANS_ADDRESS);
     let scenario = &mut scenario_val;
     {
         let mut iotans = iotans::init_for_testing(scenario.ctx());
@@ -42,9 +42,9 @@ fun test_init(): Scenario {
         clock.share_for_testing();
     };
     {
-        scenario.next_tx(iotaNS_ADDRESS);
+        scenario.next_tx(IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();
 
         // a more expensive alternative.
@@ -84,11 +84,11 @@ fun register_with_type<T>(
     item: &T,
     scenario: &mut Scenario,
     domain_name: String,
-    payment: Coin<iota>,
+    payment: Coin<IOTA>,
     user: address,
 ) {
     scenario.next_tx(user);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let mut discount_house = scenario.take_shared<DiscountHouse>();
     let clock = scenario.take_shared<Clock>();
 
@@ -114,11 +114,11 @@ fun register_with_day_one(
     item: &DayOne,
     scenario: &mut Scenario,
     domain_name: String,
-    payment: Coin<iota>,
+    payment: Coin<IOTA>,
     user: address,
 ) {
     scenario.next_tx(user);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let mut discount_house = scenario.take_shared<DiscountHouse>();
     let clock = scenario.take_shared<Clock>();
 
@@ -146,7 +146,7 @@ fun test_e2e() {
     let scenario = &mut scenario_val;
 
     let test_item = TestAuthorized {};
-    let payment: Coin<iota> = coin::mint_for_testing(
+    let payment: Coin<IOTA> = coin::mint_for_testing(
         2*NANOS_PER_iota,
         scenario.ctx(),
     );
@@ -168,7 +168,7 @@ fun register_with_unauthorized_type() {
     let scenario = &mut scenario_val;
 
     let test_item = TestUnauthorized {};
-    let payment: Coin<iota> = coin::mint_for_testing(
+    let payment: Coin<IOTA> = coin::mint_for_testing(
         2*NANOS_PER_iota,
         scenario.ctx(),
     );
@@ -190,7 +190,7 @@ fun use_day_one() {
 
     let mut day_one = day_one::mint_for_testing(scenario.ctx());
     day_one::set_is_active_for_testing(&mut day_one, true);
-    let payment: Coin<iota> = coin::mint_for_testing(
+    let payment: Coin<IOTA> = coin::mint_for_testing(
         NANOS_PER_iota,
         scenario.ctx(),
     );
@@ -219,7 +219,7 @@ fun use_day_one_for_casual_flow_failure() {
 
     let mut day_one = day_one::mint_for_testing(scenario.ctx());
     day_one::set_is_active_for_testing(&mut day_one, true);
-    let payment: Coin<iota> = coin::mint_for_testing(
+    let payment: Coin<IOTA> = coin::mint_for_testing(
         NANOS_PER_iota,
         scenario.ctx(),
     );
@@ -242,7 +242,7 @@ fun use_inactive_day_one_failure() {
     let scenario = &mut scenario_val;
 
     let day_one = day_one::mint_for_testing(scenario.ctx());
-    let payment: Coin<iota> = coin::mint_for_testing(
+    let payment: Coin<IOTA> = coin::mint_for_testing(
         NANOS_PER_iota,
         scenario.ctx(),
     );

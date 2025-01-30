@@ -7,13 +7,13 @@ module registration::register {
     use iota::{
         coin::Coin,
         clock::Clock,
-        iota::iota
+        iota::IOTA
     };
 
     use iotans::{
         domain,
         registry::Registry,
-        iotans::{Self, IOTANS},
+        iotans::{Self, IotaNS},
         config::{Self, Config},
         iotans_registration::IotansRegistration
     };
@@ -35,10 +35,10 @@ module registration::register {
     // - the domain is not a subdomain
     // - number of years is within [1-5] interval
     public fun register(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         domain_name: String,
         no_years: u8,
-        payment: Coin<iota>,
+        payment: Coin<IOTA>,
         clock: &Clock,
         ctx: &mut TxContext
     ): IotansRegistration {

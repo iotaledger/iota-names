@@ -10,7 +10,7 @@ use iota::clock::Clock;
 use iota::ecdsa_k1;
 use iotans::config::Config;
 use iotans::registry::Registry;
-use iotans::iotans::IOTANS;
+use iotans::iotans::IotaNS;
 use iotans::iotans_registration::IotansRegistration;
 
 /// Message data cannot be parsed.
@@ -25,7 +25,7 @@ public struct UpdateImage has drop {}
 
 /// Updates the image attached to a `IotansRegistration`.
 entry fun update_image_url(
-    iotans: &IOTANS,
+    iotans: &IotaNS,
     nft: &mut IotansRegistration,
     raw_msg: vector<u8>,
     signature: vector<u8>,

@@ -12,7 +12,7 @@ module discord::discord_tests {
         coupon_house
     };
     use iotans::{
-        iotans::{IOTANS, AdminCap}
+        iotans::{IotaNS, AdminCap}
     };
 
     const ADMIN_ADDRESS: address = @0xA001;
@@ -44,7 +44,7 @@ module discord::discord_tests {
         };
         {
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
             coupon_house::authorize_app<DiscordApp>(&admin_cap, &mut iotans);
             scenario.return_to_sender(admin_cap);
             test_scenario::return_shared(iotans);
@@ -76,7 +76,7 @@ module discord::discord_tests {
         {
             scenario.next_tx(tp::get_nth_user(0));
             let mut discord = scenario.take_shared<Discord>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
             discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(0), 50, scenario.ctx());
             test_scenario::return_shared(discord);
             test_scenario::return_shared(iotans);
@@ -84,7 +84,7 @@ module discord::discord_tests {
         {
             scenario.next_tx(tp::get_nth_user(1));
             let mut discord = scenario.take_shared<Discord>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
             discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 100, scenario.ctx());
 
             test_scenario::return_shared(discord);
@@ -93,7 +93,7 @@ module discord::discord_tests {
         {
             scenario.next_tx(tp::get_nth_user(1));
             let mut discord = scenario.take_shared<Discord>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
             discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 40, scenario.ctx());
 
             test_scenario::return_shared(discord);
@@ -267,7 +267,7 @@ module discord::discord_tests {
 
         scenario.next_tx(tp::get_nth_user(0));
         let mut discord = scenario.take_shared<Discord>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 50, scenario.ctx());
 
         abort 1337
@@ -282,7 +282,7 @@ module discord::discord_tests {
     
         scenario.next_tx(tp::get_nth_user(0));
         let mut discord = scenario.take_shared<Discord>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         discord.claim_coupon(&mut iotans, b"non_existent".to_string(), 50, scenario.ctx());
 
         abort 1337

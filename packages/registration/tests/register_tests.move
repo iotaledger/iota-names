@@ -7,12 +7,12 @@ module registration::register_tests {
 
     use std::string::{utf8, String};
 
-    use iota::{test_scenario::{Self, Scenario, ctx}, clock::{Self, Clock}, coin, iota::iota};
+    use iota::{test_scenario::{Self, Scenario, ctx}, clock::{Self, Clock}, coin, iota::IOTA};
 
     use registration::register::{Self, Register, register};
     use iotans::{
         constants::{nanos_per_iota, grace_period_ms, year_ms}, 
-        iotans::{Self, IOTANS, total_balance, AdminCap}, 
+        iotans::{Self, IotaNS, total_balance, AdminCap}, 
         iotans_registration::IotansRegistration, 
         iotans_registration, 
         domain, 
@@ -22,12 +22,12 @@ module registration::register_tests {
         auction::{Self, App as AuctionApp}
     };
 
-    const iotaNS_ADDRESS: address = @0xA001;
+    const IOTANS_ADDRESS: address = @0xA001;
     const AUCTIONED_DOMAIN_NAME: vector<u8> = b"tes-t2.iota";
     const DOMAIN_NAME: vector<u8> = b"abc.iota";
 
     public fun test_init(): Scenario {
-        let mut scenario_val = test_scenario::begin(iotaNS_ADDRESS);
+        let mut scenario_val = test_scenario::begin(IOTANS_ADDRESS);
         let scenario = &mut scenario_val;
         {
             let mut iotans = iotans::init_for_testing(scenario.ctx());
@@ -38,9 +38,9 @@ module registration::register_tests {
             clock::share_for_testing(clock);
         };
         {
-            test_scenario::next_tx(scenario, iotaNS_ADDRESS);
+            test_scenario::next_tx(scenario, IOTANS_ADDRESS);
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
 
             registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
 
@@ -57,9 +57,9 @@ module registration::register_tests {
         amount: u64,
         clock_tick: u64
     ): IotansRegistration {
-        scenario.next_tx(iotaNS_ADDRESS);
-        let mut iotans = scenario.take_shared<IOTANS>();
-        let payment = coin::mint_for_testing<iota>(amount, scenario.ctx());
+        scenario.next_tx(IOTANS_ADDRESS);
+        let mut iotans = scenario.take_shared<IotaNS>();
+        let payment = coin::mint_for_testing<IOTA>(amount, scenario.ctx());
         let mut clock = scenario.take_shared<Clock>();
 
         clock.increment_for_testing(clock_tick);
@@ -72,9 +72,9 @@ module registration::register_tests {
     }
 
     fun deauthorize_app_util(scenario: &mut Scenario) {
-        test_scenario::next_tx(scenario, iotaNS_ADDRESS);
+        test_scenario::next_tx(scenario, IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         iotans::deauthorize_app<Register>(&admin_cap, &mut iotans);
 
@@ -83,8 +83,8 @@ module registration::register_tests {
     }
 
     public fun assert_balance(scenario: &mut Scenario, amount: u64) {
-        scenario.next_tx(iotaNS_ADDRESS);
-        let auction_house = scenario.take_shared<IOTANS>();
+        scenario.next_tx(IOTANS_ADDRESS);
+        let auction_house = scenario.take_shared<IotaNS>();
         assert!(auction_house.total_balance() == amount, 0);
         test_scenario::return_shared(auction_house);
     }

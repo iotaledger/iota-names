@@ -5,7 +5,7 @@
 /// The `NameRecord` is a struct that represents a single record in the
 /// registry.
 /// Can be replaced by any other data structure due to the way `NameRecord`s are
-/// stored and managed. IOTANS has no direct and permanent dependency on this
+/// stored and managed. IotaNS has no direct and permanent dependency on this
 /// module.
 module iotans::name_record;
 

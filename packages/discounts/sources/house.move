@@ -11,7 +11,7 @@ use iota::clock::Clock;
 use iotans::config;
 use iotans::domain::Domain;
 use iotans::registry::Registry;
-use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans::{Self, AdminCap, IotaNS};
 use iotans::iotans_registration::IotansRegistration;
 
 // The `free_claims` module can use the shared object to attach configuration & claim names.
@@ -28,7 +28,7 @@ const VERSION: u8 = 1;
 /// All promotions in this package are valid only for 1 year
 const REGISTRATION_YEARS: u8 = 1;
 
-/// A key to authorize DiscountHouse to register names on IOTANS.
+/// A key to authorize DiscountHouse to register names on IotaNS.
 public struct DiscountHouseApp has drop {}
 
 // The Shared object responsible for the discounts.
@@ -57,10 +57,10 @@ public fun assert_version_is_valid(self: &DiscountHouse) {
     assert!(self.version == VERSION, ENotValidVersion);
 }
 
-/// A function to save a new IOTANS name in the registry.
+/// A function to save a new IotaNS name in the registry.
 /// Helps re-use the same code for all discounts based on type T of the package.
 public(package) fun friend_add_registry_entry(
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain: Domain,
     clock: &Clock,
     ctx: &mut TxContext,
@@ -84,7 +84,7 @@ public(package) fun uid_mut(self: &mut DiscountHouse): &mut UID {
     &mut self.id
 }
 
-/// Allows the friend modules to call functions to the IOTANS registry.
+/// Allows the friend modules to call functions to the IotaNS registry.
 public(package) fun iotans_app_auth(): DiscountHouseApp {
     DiscountHouseApp {}
 }

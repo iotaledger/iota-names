@@ -10,7 +10,7 @@ module renewal::renew_tests {
 
     use iotans::{
         constants::{nanos_per_iota, year_ms, grace_period_ms}, 
-        iotans::{Self, IOTANS}, 
+        iotans::{Self, IotaNS}, 
         iotans_registration::{Self as nft, IotansRegistration}, 
         registry, 
         domain, 
@@ -111,13 +111,13 @@ module renewal::renew_tests {
         abort 1337
     }
     
-    public fun renew_util(iotans: &mut IOTANS, nft: &mut IotansRegistration, no_years: u8, clock: &Clock, ctx: &mut TxContext) {
+    public fun renew_util(iotans: &mut IotaNS, nft: &mut IotansRegistration, no_years: u8, clock: &Clock, ctx: &mut TxContext) {
         renewal::renew(iotans, nft, no_years,coin::mint_for_testing<IOTA>((no_years as u64) * REGULAR_PRICE * nanos_per_iota(), ctx), clock);
     }
 
     /// Local test to prepare a registry with a domain. 
     /// Authorizes registry, adds domain, and burns admin cap.
-    public fun prepare_registry(ctx: &mut TxContext): (IOTANS, IotansRegistration) {
+    public fun prepare_registry(ctx: &mut TxContext): (IotaNS, IotansRegistration) {
 
         let mut iotans = iotans::init_for_testing(ctx);
         let mut registry = registry::new_for_testing(ctx);
@@ -156,7 +156,7 @@ module renewal::renew_tests {
         iota::transfer::public_transfer(nft, @0x2);
     }
 
-    public fun wrapup(iotans: IOTANS) {
+    public fun wrapup(iotans: IotaNS) {
         iotans.share_for_testing();
     }
 }

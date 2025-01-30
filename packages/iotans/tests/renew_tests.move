@@ -15,7 +15,7 @@ use iotans::register_sample::Register;
 use iotans::register_sample_tests::{register_util, assert_balance};
 use iotans::registry;
 use iotans::renew::{Self, Renew, renew};
-use iotans::iotans::{Self, IOTANS, AdminCap};
+use iotans::iotans::{Self, IotaNS, AdminCap};
 use iotans::iotans_registration::IotansRegistration;
 
 const IOTANS_ADDRESS: address = @0xA001;
@@ -35,7 +35,7 @@ public fun test_init(): Scenario {
     {
         scenario.next_tx(IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         registry::init_for_testing(&admin_cap, &mut iotans, ctx(scenario));
 
@@ -53,7 +53,7 @@ fun renew_util(
     clock_tick: u64,
 ) {
     scenario.next_tx(IOTANS_ADDRESS);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let payment = coin::mint_for_testing<IOTA>(amount, ctx(scenario));
     let mut clock = test_scenario::take_shared<Clock>(scenario);
 
@@ -67,7 +67,7 @@ fun renew_util(
 fun deauthorize_app_util(scenario: &mut Scenario) {
     scenario.next_tx(IOTANS_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     iotans::deauthorize_app<Renew>(&admin_cap, &mut iotans);
 

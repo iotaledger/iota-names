@@ -15,7 +15,7 @@ module day_one::bogo {
     use iotans::{
         config,
         domain::{Self, Domain},
-        iotans::{Self, IOTANS},
+        iotans::{Self, IotaNS},
         iotans_registration::IotansRegistration,
         registry::Registry,
     };
@@ -49,7 +49,7 @@ module day_one::bogo {
     /// instead of hard-coding the limits here.
     public fun claim(
         day_one_nft: &mut DayOne,
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         domain_nft: &mut IotansRegistration,
         domain_name: String,
         clock: &Clock,

@@ -12,7 +12,7 @@ module utils::direct_setup {
     use iotans::{
         domain,
         registry::Registry,
-        iotans::{Self, IOTANS},
+        iotans::{Self, IotaNS},
         iotans_registration::IotansRegistration,
         subdomain_registration::SubDomainRegistration
     };
@@ -28,7 +28,7 @@ module utils::direct_setup {
 
     /// Set the target address of a domain.
     public fun set_target_address(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: &IotansRegistration,
         new_target: Option<address>,
         clock: &Clock,
@@ -42,7 +42,7 @@ module utils::direct_setup {
 
     /// Set the reverse lookup address for the domain
     public fun set_reverse_lookup(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         domain_name: String,
         ctx: &TxContext
     ) {
@@ -53,13 +53,13 @@ module utils::direct_setup {
     }
 
     /// User-facing function - unset the reverse lookup address for the domain.
-    public fun unset_reverse_lookup(iotans: &mut IOTANS, ctx: &TxContext) {
+    public fun unset_reverse_lookup(iotans: &mut IotaNS, ctx: &TxContext) {
         registry_mut(iotans).unset_reverse_lookup(ctx.sender());
     }
 
     /// User-facing function - add a new key-value pair to the name record's data.
     public fun set_user_data(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: &IotansRegistration, key: String,
         value: String,
         clock: &Clock
@@ -85,7 +85,7 @@ module utils::direct_setup {
 
     /// User-facing function - remove a key from the name record's data.
     public fun unset_user_data(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: &IotansRegistration, key: String,
         clock: &Clock
     ) {
@@ -103,7 +103,7 @@ module utils::direct_setup {
     }
 
     public fun burn_expired(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: IotansRegistration,
         clock: &Clock
     ) {
@@ -111,14 +111,14 @@ module utils::direct_setup {
     }
 
     public fun burn_expired_subname(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         nft: SubDomainRegistration,
         clock: &Clock
     ) {
         registry_mut(iotans).burn_subdomain_object(nft, clock);
     }
 
-    fun registry_mut(iotans: &mut IOTANS): &mut Registry {
+    fun registry_mut(iotans: &mut IotaNS): &mut Registry {
         iotans::app_registry_mut<DirectSetup, Registry>(DirectSetup {}, iotans)
     }
 }

@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// This module defines the `DayOne` Object airdropped to early supporters of the IOTANS project.
+/// This module defines the `DayOne` Object airdropped to early supporters of the IotaNS project.
 module day_one::day_one {
 
     use iota::{
@@ -42,7 +42,7 @@ module day_one::day_one {
         package::claim_and_keep(otw, ctx);
 
         transfer::share_object(DropList { id: object::new(ctx), total_minted: 0 });
-        // For IOTANS, we need 1 SetupCap to manage all the required addresses. We'll be setting up around 75K addresses.
+        // For IotaNS, we need 1 SetupCap to manage all the required addresses. We'll be setting up around 75K addresses.
         // We can mint 2K objects per run!
         transfer::transfer(SetupCap { id: object::new(ctx) }, ctx.sender());
     }

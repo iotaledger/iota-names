@@ -9,7 +9,7 @@ module coupons::app_authorization_tests;
 use coupons::coupon_house::{Self, deauthorize_app};
 use coupons::setup::{Self, TestApp, admin, user, test_init};
 use iota::test_scenario::{return_shared, return_to_sender, end};
-use iotans::iotans::IOTANS;
+use iotans::iotans::IotaNS;
 
 #[test]
 fun admin_get_app_success() {
@@ -18,7 +18,7 @@ fun admin_get_app_success() {
     // auth style as authorized app
     {
         scenario.next_tx(user());
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         coupon_house::app_data_mut<TestApp>(&mut iotans, setup::test_app());
         return_shared(iotans);
     };
@@ -59,7 +59,7 @@ fun unauthorized_app_failure() {
     let scenario = &mut scenario_val;
     {
         scenario.next_tx(user());
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         coupon_house::app_data_mut(&mut iotans, setup::unauthorized_test_app());
         return_shared(iotans);
     };

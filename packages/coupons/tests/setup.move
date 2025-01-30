@@ -16,7 +16,7 @@ use iota::coin;
 use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iotans::registry;
-use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans::{Self, AdminCap, IotaNS};
 
 public struct TestApp has drop {}
 
@@ -47,7 +47,7 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         scenario.next_tx(ADMIN_ADDRESS);
         // get admin cap
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         // initialize coupon data.
         coupon_house::setup(&mut iotans, &admin_cap, scenario.ctx());
         registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
@@ -204,7 +204,7 @@ public fun admin_add_coupon(
     scenario: &mut Scenario,
 ) {
     scenario.next_tx(admin());
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let cap = scenario.take_from_sender<AdminCap>();
     coupon_house::admin_add_coupon(
         &cap,
@@ -222,7 +222,7 @@ public fun admin_add_coupon(
 // Adds a 0 rule coupon that gives 15% discount to test admin additions.
 public fun admin_remove_coupon(code_name: String, scenario: &mut Scenario) {
     scenario.next_tx(admin());
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let cap = scenario.take_from_sender<AdminCap>();
     coupon_house::admin_remove_coupon(
         &cap,
@@ -251,7 +251,7 @@ public fun register_with_coupon(
     scenario.next_tx(user);
     let mut clock = scenario.take_shared<Clock>();
     clock.increment_for_testing(clock_value);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     let payment = coin::mint_for_testing<IOTA>(amount, scenario.ctx());
 

@@ -12,7 +12,7 @@ use iota::iota::IOTA;
 use iotans::config::{Self, Config};
 use iotans::domain;
 use iotans::registry::{Self, Registry};
-use iotans::iotans::{Self, IOTANS};
+use iotans::iotans::{Self, IotaNS};
 use iotans::iotans_registration::IotansRegistration;
 
 /// Number of years passed is not within [1-5] interval.
@@ -32,7 +32,7 @@ public struct Register has drop {}
 // - the domain is not a subdomain
 // - number of years is within [1-5] interval
 public fun register(
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
     no_years: u8,
     payment: Coin<IOTA>,

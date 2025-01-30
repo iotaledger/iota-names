@@ -20,7 +20,7 @@ use iota::coin::Coin;
 use iota::dynamic_field as df;
 use iota::iota::iota;
 use iotans::domain;
-use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans::{Self, AdminCap, IotaNS};
 use iotans::iotans_registration::IotansRegistration;
 
 /// A configuration already exists
@@ -49,10 +49,10 @@ public struct DiscountConfig has copy, store, drop {
 /// A function to register a name with a discount using type `T`.
 public fun register<T>(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     _: &T,
     domain_name: String,
-    payment: Coin<iota>,
+    payment: Coin<IOTA>,
     clock: &Clock,
     _reseller: Option<String>,
     ctx: &mut TxContext,
@@ -72,10 +72,10 @@ public fun register<T>(
 /// for activated DayOnes.
 public fun register_with_day_one(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     day_one: &DayOne,
     domain_name: String,
-    payment: Coin<iota>,
+    payment: Coin<IOTA>,
     clock: &Clock,
     _reseller: Option<String>,
     ctx: &mut TxContext,
@@ -142,9 +142,9 @@ public fun deauthorize_type<T>(_: &AdminCap, self: &mut DiscountHouse) {
 /// Internal helper to handle the registration process
 fun internal_register_name<T>(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
-    payment: Coin<iota>,
+    payment: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotansRegistration {

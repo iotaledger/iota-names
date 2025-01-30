@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Admin features of the IOTANS application. Meant to be called directly
+/// Admin features of the IotaNS application. Meant to be called directly
 /// by the iotans admin.
 module iotans::admin;
 
@@ -12,23 +12,23 @@ use iota::tx_context::sender;
 use iotans::config;
 use iotans::domain;
 use iotans::registry::Registry;
-use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans::{Self, AdminCap, IotaNS};
 use iotans::iotans_registration::IotansRegistration;
 
 /// The authorization witness.
 public struct Admin has drop {}
 
-/// Authorize the admin application in the IOTANS to get access
+/// Authorize the admin application in the IotaNS to get access
 /// to protected functions. Must be called in order to use the rest
 /// of the functions.
-public fun authorize(cap: &AdminCap, iotans: &mut IOTANS) {
+public fun authorize(cap: &AdminCap, iotans: &mut IotaNS) {
     iotans::authorize_app<Admin>(cap, iotans)
 }
 
-/// Reserve a `domain` in the `IOTANS`.
+/// Reserve a `domain` in the `IotaNS`.
 public fun reserve_domain(
     _: &AdminCap,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
     no_years: u8,
     clock: &Clock,
@@ -43,7 +43,7 @@ public fun reserve_domain(
 /// Reserve a list of domains.
 entry fun reserve_domains(
     _: &AdminCap,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     mut domains: vector<String>,
     no_years: u8,
     clock: &Clock,

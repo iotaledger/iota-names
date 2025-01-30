@@ -5,7 +5,8 @@ published-at="0xbf1431324a4a6eadd70e0ac6c5a16f36492f255ed4d011978b2cf34ad738efe6
 edition = "2024.beta"
 
 [dependencies]
-IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override=true }
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
 
 iotans = { local = "../iotans" }
 

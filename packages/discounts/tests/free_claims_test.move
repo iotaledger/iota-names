@@ -12,7 +12,7 @@ use std::string::{utf8, String};
 use iota::clock::{Self, Clock};
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iotans::registry;
-use iotans::iotans::{Self, IOTANS, AdminCap};
+use iotans::iotans::{Self, IotaNS, AdminCap};
 
 // An authorized type to test.
 public struct TestAuthorized has key, store { id: UID }
@@ -20,11 +20,11 @@ public struct TestAuthorized has key, store { id: UID }
 // An unauthorized type to test.
 public struct TestUnauthorized has key { id: UID }
 
-const iotaNS_ADDRESS: address = @0xA001;
+const IOTANS_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
 
 fun test_init(): Scenario {
-    let mut scenario_val = ts::begin(iotaNS_ADDRESS);
+    let mut scenario_val = ts::begin(IOTANS_ADDRESS);
     let scenario = &mut scenario_val;
     {
         let mut iotans = iotans::init_for_testing(scenario.ctx());
@@ -35,9 +35,9 @@ fun test_init(): Scenario {
         clock.share_for_testing();
     };
     {
-        ts::next_tx(scenario, iotaNS_ADDRESS);
+        ts::next_tx(scenario, IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();
 
         // a more expensive alternative.
@@ -65,7 +65,7 @@ fun test_init(): Scenario {
 fun test_end(mut scenario_val: Scenario) {
     let scenario = &mut scenario_val;
     {
-        ts::next_tx(scenario, iotaNS_ADDRESS);
+        ts::next_tx(scenario, IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();
         free_claims::deauthorize_type<TestAuthorized>(
@@ -91,7 +91,7 @@ fun free_claim_with_type<T: key>(
     user: address,
 ) {
     ts::next_tx(scenario, user);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let mut discount_house = scenario.take_shared<DiscountHouse>();
     let clock = scenario.take_shared<Clock>();
 
@@ -118,7 +118,7 @@ fun free_claim_with_day_one(
     user: address,
 ) {
     ts::next_tx(scenario, user);
-    let mut iotans = ts::take_shared<IOTANS>(scenario);
+    let mut iotans = ts::take_shared<IotaNS>(scenario);
     let mut discount_house = ts::take_shared<DiscountHouse>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 

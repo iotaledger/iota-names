@@ -10,7 +10,7 @@ module iotans::day_one_tests {
         iotans_registration::{Self as nft, IotansRegistration},
         domain,
         registry,
-        iotans::{Self, IOTANS, AdminCap},
+        iotans::{Self, IotaNS, AdminCap},
     };
 
     use day_one::{
@@ -34,7 +34,7 @@ module iotans::day_one_tests {
         {
             scenario.next_tx(IOTANS_ADDRESS);
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut iotans = scenario.take_shared<IOTANS>();
+            let mut iotans = scenario.take_shared<IotaNS>();
 
             registry::init_for_testing(
                 &admin_cap,
@@ -61,7 +61,7 @@ module iotans::day_one_tests {
             mut domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let new_name_1 = bogo::claim(
             &mut day_one,
@@ -116,7 +116,7 @@ module iotans::day_one_tests {
             domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let new_name_1 = bogo::claim(
             &mut day_one,
@@ -157,7 +157,7 @@ module iotans::day_one_tests {
             domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let mut new_name_1 = bogo::claim(
             &mut day_one,
@@ -201,7 +201,7 @@ module iotans::day_one_tests {
             domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let new_name_1 = bogo::claim(
             &mut day_one,
@@ -230,7 +230,7 @@ module iotans::day_one_tests {
         scenario.next_tx(USER_ADDRESS);
         let mut clock = scenario.take_shared<Clock>();
         let (domain1, domain2, domain3, mut day_one) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         // increment the clock by a lot.
         clock::increment_for_testing(
@@ -278,7 +278,7 @@ module iotans::day_one_tests {
             domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         // using a 4 digit domain and trying to get a 3 digit one.
         let new_name_1 = bogo::claim(
@@ -313,7 +313,7 @@ module iotans::day_one_tests {
             mut domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let new_name_1 = bogo::claim(
             &mut day_one,
@@ -348,7 +348,7 @@ module iotans::day_one_tests {
             domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         let new_name_1 = bogo::claim(
             &mut day_one,
@@ -382,7 +382,7 @@ module iotans::day_one_tests {
             mut domain3,
             mut day_one
         ) = prepare(ctx(scenario), &clock);
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
         let new_name_1 = bogo::claim(
             &mut day_one,
             &mut iotans,

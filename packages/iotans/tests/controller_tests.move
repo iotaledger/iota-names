@@ -26,7 +26,7 @@ use iotans::domain::{Self, Domain};
 use iotans::register_sample::Register;
 use iotans::register_sample_tests::register_util;
 use iotans::registry::{Self, Registry, lookup, reverse_lookup};
-use iotans::iotans::{Self, IOTANS, AdminCap};
+use iotans::iotans::{Self, IotaNS, AdminCap};
 use iotans::iotans_registration::IotansRegistration;
 
 const IOTANS_ADDRESS: address = @0xA001;
@@ -50,7 +50,7 @@ fun test_init(): Scenario {
     {
         scenario.next_tx(IOTANS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IOTANS>();
+        let mut iotans = scenario.take_shared<IotaNS>();
 
         registry::init_for_testing(&admin_cap, &mut iotans, ctx(scenario));
 
@@ -78,7 +78,7 @@ public fun set_target_address_util(
     clock_tick: u64,
 ) {
     scenario.next_tx(sender);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let nft = scenario.take_from_sender<IotansRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
@@ -96,7 +96,7 @@ public fun set_reverse_lookup_util(
     domain_name: String,
 ) {
     scenario.next_tx(sender);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     set_reverse_lookup_for_testing(&mut iotans, domain_name, ctx(scenario));
 
@@ -105,7 +105,7 @@ public fun set_reverse_lookup_util(
 
 public fun unset_reverse_lookup_util(scenario: &mut Scenario, sender: address) {
     scenario.next_tx(sender);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     unset_reverse_lookup_for_testing(&mut iotans, ctx(scenario));
 
@@ -120,7 +120,7 @@ public fun set_user_data_util(
     clock_tick: u64,
 ) {
     scenario.next_tx(sender);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let nft = scenario.take_from_sender<IotansRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
@@ -139,7 +139,7 @@ public fun unset_user_data_util(
     clock_tick: u64,
 ) {
     scenario.next_tx(sender);
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
     let nft = scenario.take_from_sender<IotansRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
@@ -157,7 +157,7 @@ fun lookup_util(
     expected_target_addr: Option<address>,
 ) {
     scenario.next_tx(IOTANS_ADDRESS);
-    let iotans = scenario.take_shared<IOTANS>();
+    let iotans = scenario.take_shared<IotaNS>();
 
     let registry = iotans.registry<Registry>();
     let record = extract(&mut lookup(registry, domain::new(domain_name)));
@@ -171,7 +171,7 @@ fun get_user_data(
     domain_name: String,
 ): VecMap<String, String> {
     scenario.next_tx(IOTANS_ADDRESS);
-    let iotans = scenario.take_shared<IOTANS>();
+    let iotans = scenario.take_shared<IotaNS>();
 
     let registry = iotans.registry<Registry>();
     let record = extract(&mut lookup(registry, domain::new(domain_name)));
@@ -187,7 +187,7 @@ fun reverse_lookup_util(
     expected_domain_name: Option<Domain>,
 ) {
     scenario.next_tx(IOTANS_ADDRESS);
-    let iotans = scenario.take_shared<IOTANS>();
+    let iotans = scenario.take_shared<IotaNS>();
 
     let registry = iotans.registry<Registry>();
     let domain_name = reverse_lookup(registry, addr);
@@ -199,7 +199,7 @@ fun reverse_lookup_util(
 fun deauthorize_app_util(scenario: &mut Scenario) {
     scenario.next_tx(IOTANS_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     iotans::deauthorize_app<Controller>(&admin_cap, &mut iotans);
 

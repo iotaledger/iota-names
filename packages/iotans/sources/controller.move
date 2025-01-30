@@ -5,12 +5,12 @@
 module iotans::controller;
 
 use std::string::String;
-use iotaaa::clock::Clock;
-use iotaaa::tx_context::sender;
-use iotaaaans::domain;
-use iotaaaans::registry::Registry;
-use iotaaaaniotatatatans::{Self, IOTANS};
-use iotaaaaniotatatatans_registration::IotansRegistration;
+use iota::clock::Clock;
+use iota::tx_context::sender;
+use iotans::domain;
+use iotans::registry::Registry;
+use iotans::iotans::{Self, IotaNS};
+use iotans::iotans_registration::IotansRegistration;
 
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
@@ -24,14 +24,14 @@ public struct Controller has drop {}
 
 /// User-facing function (upgradable) - set the target address of a domain.
 entry fun set_target_address(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
-    let registry = iotaaaans::app_registry_mut<Controller, Registry>(
+    let registry = iotans::app_registry_mut<Controller, Registry>(
         Controller {},
-        iotaaaans,
+        iotans,
     );
     registry.assert_nft_is_authorized(nft, clock);
 
@@ -42,24 +42,24 @@ entry fun set_target_address(
 /// User-facing function (upgradable) - set the reverse lookup address for the
 /// domain.
 entry fun set_reverse_lookup(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
     ctx: &TxContext,
 ) {
     let domain = domain::new(domain_name);
-    let registry = iotaaaans::app_registry_mut<Controller, Registry>(
+    let registry = iotans::app_registry_mut<Controller, Registry>(
         Controller {},
-        iotaaaans,
+        iotans,
     );
     registry.set_reverse_lookup(sender(ctx), domain);
 }
 
 /// User-facing function (upgradable) - unset the reverse lookup address for the
 /// domain.
-entry fun unset_reverse_lookup(iotaaaans: &mut IOTANS, ctx: &TxContext) {
-    let registry = iotaaaans::app_registry_mut<Controller, Registry>(
+entry fun unset_reverse_lookup(iotans: &mut IotaNS, ctx: &TxContext) {
+    let registry = iotans::app_registry_mut<Controller, Registry>(
         Controller {},
-        iotaaaans,
+        iotans,
     );
     registry.unset_reverse_lookup(sender(ctx));
 }
@@ -67,15 +67,15 @@ entry fun unset_reverse_lookup(iotaaaans: &mut IOTANS, ctx: &TxContext) {
 /// User-facing function (upgradable) - add a new key-value pair to the name
 /// record's data.
 entry fun set_user_data(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     key: String,
     value: String,
     clock: &Clock,
 ) {
-    let registry = iotaaaans::app_registry_mut<Controller, Registry>(
+    let registry = iotans::app_registry_mut<Controller, Registry>(
         Controller {},
-        iotaaaans,
+        iotans,
     );
     let mut data = *registry.get_data(nft.domain());
     let domain = nft.domain();
@@ -95,14 +95,14 @@ entry fun set_user_data(
 /// User-facing function (upgradable) - remove a key from the name record's
 /// data.
 entry fun unset_user_data(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     key: String,
     clock: &Clock,
 ) {
-    let registry = iotaaaans::app_registry_mut<Controller, Registry>(
+    let registry = iotans::app_registry_mut<Controller, Registry>(
         Controller {},
-        iotaaaans,
+        iotans,
     );
     let mut data = *registry.get_data(nft.domain());
     let domain = nft.domain();
@@ -120,48 +120,48 @@ entry fun unset_user_data(
 
 #[test_only]
 public fun set_target_address_for_testing(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
-    set_target_address(iotaaaans, nft, new_target, clock)
+    set_target_address(iotans, nft, new_target, clock)
 }
 
 #[test_only]
 public fun set_reverse_lookup_for_testing(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
     ctx: &TxContext,
 ) {
-    set_reverse_lookup(iotaaaans, domain_name, ctx)
+    set_reverse_lookup(iotans, domain_name, ctx)
 }
 
 #[test_only]
 public fun unset_reverse_lookup_for_testing(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     ctx: &TxContext,
 ) {
-    unset_reverse_lookup(iotaaaans, ctx)
+    unset_reverse_lookup(iotans, ctx)
 }
 
 #[test_only]
 public fun set_user_data_for_testing(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     key: String,
     value: String,
     clock: &Clock,
 ) {
-    set_user_data(iotaaaans, nft, key, value, clock);
+    set_user_data(iotans, nft, key, value, clock);
 }
 
 #[test_only]
 public fun unset_user_data_for_testing(
-    iotaaaans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &IotansRegistration,
     key: String,
     clock: &Clock,
 ) {
-    unset_user_data(iotaaaans, nft, key, clock);
+    unset_user_data(iotans, nft, key, clock);
 }

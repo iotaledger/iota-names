@@ -14,7 +14,7 @@ use iotans::constants;
 use iotans::domain;
 use iotans::name_record;
 use iotans::registry::{Self, Registry};
-use iotans::iotans::{Self, IOTANS};
+use iotans::iotans::{Self, IotaNS};
 use iotans::iotans_registration::{Self as nft, IotansRegistration};
 
 /// Number of years passed is not within [1-5] interval.
@@ -42,7 +42,7 @@ public struct Renew has drop {}
 /// - the new expiration does not exceed 5 years from now
 /// - the payment matches the price for the domain
 public fun renew(
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     nft: &mut IotansRegistration,
     no_years: u8,
     payment: Coin<IOTA>,

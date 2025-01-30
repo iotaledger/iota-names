@@ -19,7 +19,7 @@ use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::linked_table::{Self, LinkedTable};
 use iotans::domain::{Self, Domain};
-use iotans::iotans::{AdminCap, IOTANS};
+use iotans::iotans::{AdminCap, IotaNS};
 use iotans::iotans_registration::IotansRegistration;
 
 /// A configuration already exists
@@ -35,7 +35,7 @@ const ENotValidForDayOne: u64 = 5;
 /// Tries to claim with a non active DayOne
 const ENotActiveDayOne: u64 = 6;
 
-/// A key to authorize DiscountHouse to register names on IOTANS.
+/// A key to authorize DiscountHouse to register names on IotaNS.
 public struct FreeClaimsApp has drop {}
 
 /// A key that opens up free claims for type T.
@@ -53,7 +53,7 @@ public struct FreeClaimsConfig has store {
 /// A function to register a name with a discount using type `T`.
 public fun free_claim<T: key>(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     object: &T,
     domain_name: String,
     clock: &Clock,
@@ -72,7 +72,7 @@ public fun free_claim<T: key>(
 // A function to register a free name using `DayOne`.
 public fun free_claim_with_day_one(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     day_one: &DayOne,
     domain_name: String,
     clock: &Clock,
@@ -94,7 +94,7 @@ public fun free_claim_with_day_one(
 /// registration.
 fun internal_claim_free_name<T: key>(
     self: &mut DiscountHouse,
-    iotans: &mut IOTANS,
+    iotans: &mut IotaNS,
     domain_name: String,
     clock: &Clock,
     object: &T,

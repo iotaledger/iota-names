@@ -23,13 +23,13 @@ use coupons::setup::{
 };
 use iota::test_scenario::{Self, Scenario, return_shared};
 use iota::test_utils;
-use iotans::iotans::IOTANS;
+use iotans::iotans::IotaNS;
 
 // populate a lot of coupons with different cases.
 // This populates the coupon as an authorized app
 fun populate_coupons(scenario: &mut Scenario) {
     scenario.next_tx(user());
-    let mut iotans = scenario.take_shared<IOTANS>();
+    let mut iotans = scenario.take_shared<IotaNS>();
 
     let data_mut = coupon_house::app_data_mut<TestApp>(&mut iotans, test_app());
     setup::populate_coupons(data_mut, scenario.ctx());
@@ -179,7 +179,7 @@ fun test_price_calculation() {
     populate_coupons(scenario);
     {
         test_scenario::next_tx(scenario, user());
-        let iotans = test_scenario::take_shared<IOTANS>(scenario);
+        let iotans = test_scenario::take_shared<IotaNS>(scenario);
 
         let sale_price = coupon_house::calculate_sale_price(
             &iotans,

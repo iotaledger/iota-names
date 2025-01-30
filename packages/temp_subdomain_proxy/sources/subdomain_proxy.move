@@ -15,7 +15,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     use iota::clock::Clock;
 
     use iotans::{
-        iotans::IOTANS,
+        iotans::IotaNS,
         subdomain_registration::SubDomainRegistration
     };
 
@@ -23,7 +23,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     use utils::direct_setup;
 
     public fun new(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -45,7 +45,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun new_leaf(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -63,7 +63,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun remove_leaf(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -77,7 +77,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun edit_setup(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         parent: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -95,7 +95,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_target_address(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         new_target: Option<address>,
         clock: &Clock,
@@ -109,7 +109,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_user_data(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration, key: String,
         value: String,
         clock: &Clock
@@ -123,7 +123,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun unset_user_data(
-        iotans: &mut IOTANS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration, key: String,
         clock: &Clock
     ) {
