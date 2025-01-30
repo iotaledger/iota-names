@@ -2,7 +2,7 @@ module coupons::data;
 
 use coupons::coupon::Coupon;
 use std::string::String;
-use sui::bag::{Self, Bag};
+use iota::bag::{Self, Bag};
 
 const ECouponAlreadyExists: u64 = 1;
 const ECouponDoesNotExist: u64 = 2;

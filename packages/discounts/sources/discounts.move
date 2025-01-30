@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// A module that allows purchasing names in a different price by presenting a
@@ -14,13 +15,13 @@ use day_one::day_one::{DayOne, is_active};
 use discounts::house::{Self, DiscountHouse};
 use std::string::String;
 use std::type_name as `type`;
-use sui::clock::Clock;
-use sui::coin::Coin;
-use sui::dynamic_field as df;
-use sui::sui::SUI;
-use suins::domain;
-use suins::suins::{Self, AdminCap, SuiNS};
-use suins::suins_registration::SuinsRegistration;
+use iota::clock::Clock;
+use iota::coin::Coin;
+use iota::dynamic_field as df;
+use iota::iota::iota;
+use iotans::domain;
+use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans_registration::IotansRegistration;
 
 /// A configuration already exists
 const EConfigExists: u64 = 1;
@@ -48,21 +49,21 @@ public struct DiscountConfig has copy, store, drop {
 /// A function to register a name with a discount using type `T`.
 public fun register<T>(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     _: &T,
     domain_name: String,
-    payment: Coin<SUI>,
+    payment: Coin<iota>,
     clock: &Clock,
     _reseller: Option<String>,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     // For normal flow, we do not allow DayOne to be used.
     // DayOne can only be used on `register_with_day_one` function.
     assert!(
         `type`::into_string(`type`::get<T>()) != `type`::into_string(`type`::get<DayOne>()),
         ENotValidForDayOne,
     );
-    internal_register_name<T>(self, suins, domain_name, payment, clock, ctx)
+    internal_register_name<T>(self, iotans, domain_name, payment, clock, ctx)
 }
 
 /// A special function for DayOne registration.
@@ -71,18 +72,18 @@ public fun register<T>(
 /// for activated DayOnes.
 public fun register_with_day_one(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     day_one: &DayOne,
     domain_name: String,
-    payment: Coin<SUI>,
+    payment: Coin<iota>,
     clock: &Clock,
     _reseller: Option<String>,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     assert!(is_active(day_one), ENotActiveDayOne);
     internal_register_name<DayOne>(
         self,
-        suins,
+        iotans,
         domain_name,
         payment,
         clock,
@@ -141,12 +142,12 @@ public fun deauthorize_type<T>(_: &AdminCap, self: &mut DiscountHouse) {
 /// Internal helper to handle the registration process
 fun internal_register_name<T>(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     domain_name: String,
-    payment: Coin<SUI>,
+    payment: Coin<iota>,
     clock: &Clock,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     self.assert_version_is_valid();
     // validate that there's a configuration for type T.
     assert_config_exists<T>(self);
@@ -158,13 +159,13 @@ fun internal_register_name<T>(
     );
 
     assert!(payment.value() == price, EIncorrectAmount);
-    suins::app_add_balance(
-        house::suins_app_auth(),
-        suins,
+    iotans::app_add_balance(
+        house::iotans_app_auth(),
+        iotans,
         payment.into_balance(),
     );
 
-    house::friend_add_registry_entry(suins, domain, clock, ctx)
+    house::friend_add_registry_entry(iotans, domain, clock, ctx)
 }
 
 fun assert_config_exists<T>(self: &mut DiscountHouse) {

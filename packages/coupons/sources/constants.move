@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 // Some constants used in coupons.
@@ -7,7 +8,7 @@ module coupons::constants;
 /// discount types
 /// Percentage discount (0,100]
 const PERCENTAGE_DISCOUNT: u8 = 0;
-/// Fixed MIST discount (e.g. -5 SUI)
+/// Fixed NANOS discount (e.g. -5 IOTA)
 const FIXED_PRICE_DISCOUNT: u8 = 1;
 
 /// A getter for the percentage discount type.

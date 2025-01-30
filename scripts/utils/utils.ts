@@ -1,23 +1,24 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { execFileSync, execSync } from 'child_process';
 import fs, { readFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { Secp256k1Keypair } from '@mysten/sui/keypairs/secp256k1';
-import { Secp256r1Keypair } from '@mysten/sui/keypairs/secp256r1';
-import { Transaction, UpgradePolicy } from '@mysten/sui/transactions';
-import { fromBase64, toB64, toBase64 } from '@mysten/sui/utils';
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { decodeIotaPrivateKey } from '@iota/iota-sdk/cryptography';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+import { Secp256k1Keypair } from '@iota/iota-sdk/keypairs/secp256k1';
+import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
+import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
+import { fromBase64, toB64, toBase64 } from '@iota/iota-sdk/utils';
 
 import { Network } from '../init/packages';
 
-const SUI = process.env.SUI_BINARY ?? `sui`;
+const IOTA = process.env.IOTA_BINARY ?? `iota`;
 
 export const getActiveAddress = () => {
-	return execSync(`${SUI} client active-address`, { encoding: 'utf8' }).trim();
+	return execSync(`${IOTA} client active-address`, { encoding: 'utf8' }).trim();
 };
 
 export const publishPackage = (txb: Transaction, path: string, configPath?: string) => {
@@ -31,7 +32,7 @@ export const publishPackage = (txb: Transaction, path: string, configPath?: stri
 	];
 
 	const { modules, dependencies } = JSON.parse(
-		execFileSync(SUI, command, {
+		execFileSync(IOTA, command, {
 			encoding: 'utf-8',
 		}),
 	);
@@ -56,7 +57,7 @@ export const upgradePackage = (
 	upgradeCapId: string,
 ) => {
 	const { modules, dependencies, digest } = JSON.parse(
-		execFileSync(SUI, ['move', 'build', '--dump-bytecode-as-base64', '--path', path], {
+		execFileSync(IOTA, ['move', 'build', '--dump-bytecode-as-base64', '--path', path], {
 			encoding: 'utf-8',
 		}),
 	);
@@ -81,11 +82,11 @@ export const upgradePackage = (
 	});
 };
 
-/// Returns a signer based on the active address of system's sui.
+/// Returns a signer based on the active address of system's iota.
 export const getSigner = () => {
 	if (process.env.PRIVATE_KEY) {
 		console.log('Using supplied private key.');
-		const { schema, secretKey } = decodeSuiPrivateKey(process.env.PRIVATE_KEY);
+		const { schema, secretKey } = decodeIotaPrivateKey(process.env.PRIVATE_KEY);
 
 		if (schema === 'ED25519') return Ed25519Keypair.fromSecretKey(secretKey);
 		if (schema === 'Secp256k1') return Secp256k1Keypair.fromSecretKey(secretKey);
@@ -97,7 +98,7 @@ export const getSigner = () => {
 	const sender = getActiveAddress();
 
 	const keystore = JSON.parse(
-		readFileSync(path.join(homedir(), '.sui', 'sui_config', 'sui.keystore'), 'utf8'),
+		readFileSync(path.join(homedir(), '.iota', 'iota_config', 'iota.keystore'), 'utf8'),
 	);
 
 	for (const priv of keystore) {
@@ -107,7 +108,7 @@ export const getSigner = () => {
 		}
 
 		const pair = Ed25519Keypair.fromSecretKey(raw.slice(1));
-		if (pair.getPublicKey().toSuiAddress() === sender) {
+		if (pair.getPublicKey().toIotaAddress() === sender) {
 			return pair;
 		}
 	}
@@ -118,7 +119,7 @@ export const getSigner = () => {
 /// Get the client for the specified network.
 export const getClient = (network: Network) => {
 	const url = process.env.RPC_URL || getFullnodeUrl(network);
-	return new SuiClient({ url });
+	return new IotaClient({ url });
 };
 
 /// A helper to sign & execute a transaction.
@@ -177,7 +178,7 @@ export const prepareMultisigTx = async (
 };
 
 /// Fetch the gas Object and setup the payment for the tx.
-async function setupGasPayment(tx: Transaction, gasObjectId: string, client: SuiClient) {
+async function setupGasPayment(tx: Transaction, gasObjectId: string, client: IotaClient) {
 	const gasObject = await client.getObject({
 		id: gasObjectId,
 	});
@@ -195,7 +196,7 @@ async function setupGasPayment(tx: Transaction, gasObjectId: string, client: Sui
 }
 
 /// A helper to dev inspect a transaction.
-async function inspectTransaction(tx: Transaction, client: SuiClient) {
+async function inspectTransaction(tx: Transaction, client: IotaClient) {
 	const result = await client.dryRunTransactionBlock({
 		transactionBlock: await tx.build({ client: client }),
 	});
@@ -205,7 +206,7 @@ async function inspectTransaction(tx: Transaction, client: SuiClient) {
 	return result.effects.status.status === 'success';
 }
 
-export const getAllObjectsByType = async (type: string, owner: string, client: SuiClient) => {
+export const getAllObjectsByType = async (type: string, owner: string, client: IotaClient) => {
 	let objects = [];
 	let hasNextPage = true;
 	let cursor = null;

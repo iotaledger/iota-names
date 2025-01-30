@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 // A set of tests for the authorization of different apps in the CouponHouse.
@@ -7,8 +8,8 @@ module coupons::app_authorization_tests;
 
 use coupons::coupon_house::{Self, deauthorize_app};
 use coupons::setup::{Self, TestApp, admin, user, test_init};
-use sui::test_scenario::{return_shared, return_to_sender, end};
-use suins::suins::SuiNS;
+use iota::test_scenario::{return_shared, return_to_sender, end};
+use iotans::iotans::IOTANS;
 
 #[test]
 fun admin_get_app_success() {
@@ -17,9 +18,9 @@ fun admin_get_app_success() {
     // auth style as authorized app
     {
         scenario.next_tx(user());
-        let mut suins = scenario.take_shared<SuiNS>();
-        coupon_house::app_data_mut<TestApp>(&mut suins, setup::test_app());
-        return_shared(suins);
+        let mut iotans = scenario.take_shared<IOTANS>();
+        coupon_house::app_data_mut<TestApp>(&mut iotans, setup::test_app());
+        return_shared(iotans);
     };
 
     end(scenario_val);
@@ -58,9 +59,9 @@ fun unauthorized_app_failure() {
     let scenario = &mut scenario_val;
     {
         scenario.next_tx(user());
-        let mut suins = scenario.take_shared<SuiNS>();
-        coupon_house::app_data_mut(&mut suins, setup::unauthorized_test_app());
-        return_shared(suins);
+        let mut iotans = scenario.take_shared<IOTANS>();
+        coupon_house::app_data_mut(&mut iotans, setup::unauthorized_test_app());
+        return_shared(iotans);
     };
     end(scenario_val);
 }

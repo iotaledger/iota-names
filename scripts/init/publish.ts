@@ -1,8 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { getClient, publishPackage, signAndExecute } from '../utils/utils';
 import { Network, Packages } from './packages';
@@ -64,11 +65,11 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 		path.resolve(path.resolve(__dirname, '../'), 'constants.sdk.json'),
 		JSON.stringify(
 			{
-				suinsPackageId: {
-					latest: data.SuiNS.packageId,
-					v1: data.SuiNS.packageId,
+				iotansPackageId: {
+					latest: data.IOTANS.packageId,
+					v1: data.IOTANS.packageId,
 				},
-				suinsObjectId: data.SuiNS.suins,
+				iotansObjectId: data.IOTANS.iotans,
 				utilsPackageId: data.Utils.packageId,
 				registrationPackageId: data.Registration.packageId,
 				renewalPackageId: data.Renewal.packageId,

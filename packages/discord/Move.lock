@@ -4,20 +4,20 @@
 version = 0
 
 dependencies = [
-  { name = "Sui" },
+  { name = "IOTA" },
   { name = "coupons" },
-  { name = "suins" },
+  { name = "iotans" },
 ]
 manifest_digest = "C488D0BD18C8290C46485B8528126369EF13493F2C62ECAC18F402AB22973B8F"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
+name = "IOTA"
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
@@ -25,25 +25,25 @@ dependencies = [
 
 [[move.package]]
 name = "coupons"
-source = { git = "https://github.com/mystenlabs/suins-contracts/", rev = "releases/mainnet/coupons/v1", subdir = "packages/coupons" }
+source = { git = "https://github.com/iotaledger/iotans-contracts/", rev = "releases/mainnet/coupons/v1", subdir = "packages/coupons" }
 
 dependencies = [
-  { name = "Sui" },
-  { name = "suins" },
+  { name = "IOTA" },
+  { name = "iotans" },
 ]
 
 [[move.package]]
-name = "suins"
-source = { git = "https://github.com/mystenlabs/suins-contracts/", rev = "releases/mainnet/core/v3", subdir = "packages/suins" }
+name = "iotans"
+source = { git = "https://github.com/iotaledger/iotans-contracts/", rev = "releases/mainnet/core/v3", subdir = "packages/iotans" }
 
 dependencies = [
-  { name = "Sui" },
+  { name = "IOTA" },
 ]
 
 [move.toolchain-version]
 compiler-version = "1.27.0"
 edition = "2024.beta"
-flavor = "sui"
+flavor = "iota"
 
 [env]
 

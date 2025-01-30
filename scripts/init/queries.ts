@@ -1,22 +1,23 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { SuiClient } from '@mysten/sui/client';
+import { IotaClient } from '@iota/iota-sdk/client';
 
 export const queryRegistryTable = async (
-	client: SuiClient,
-	suins: string,
-	suinsPackageId: string,
+	client: IotaClient,
+	iotans: string,
+	iotansPackageId: string,
 ) => {
 	const allFields = await client.getDynamicFields({
-		parentId: suins,
+		parentId: iotans,
 	});
 
 	// just for testing..
 	console.log(allFields);
 	const table = await client.getDynamicFieldObject({
-		parentId: suins,
+		parentId: iotans,
 		name: {
-			type: `${suinsPackageId}::suins::RegistryKey<${suinsPackageId}::registry::Registry>`,
+			type: `${iotansPackageId}::iotans::RegistryKey<${iotansPackageId}::registry::Registry>`,
 			value: {
 				dummy_field: false,
 			},
@@ -24,10 +25,10 @@ export const queryRegistryTable = async (
 	});
 
 	console.log(table);
-	console.log(suins);
+	console.log(iotans);
 
 	if (table.data?.content?.dataType !== 'moveObject')
-		throw new Error(`Invalid data ${suinsPackageId}`);
+		throw new Error(`Invalid data ${iotansPackageId}`);
 
 	const data = table.data?.content.fields as Record<string, any>;
 	return data.value.fields.registry.fields.id.id;

@@ -1,21 +1,22 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { Network, PackageInfo } from './constants';
 
-export const SUIFREN_BULLSHARK_TYPE: Record<Network, string> = {
+export const IOTAFREN_BULLSHARK_TYPE: Record<Network, string> = {
 	mainnet:
-		'0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::suifrens::SuiFren<0x8894fa02fc6f36cbc485ae9145d05f247a78e220814fb8419ab261bd81f08f32::bullshark::Bullshark>',
+		'0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::iotafrens::IotaFren<0x8894fa02fc6f36cbc485ae9145d05f247a78e220814fb8419ab261bd81f08f32::bullshark::Bullshark>',
 	testnet:
-		'0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::suifrens::SuiFren<0x297d8afb6ede450529d347cf9254caeea2b685c8baef67b084122291ebaefb38::bullshark::Bullshark>',
+		'0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::iotafrens::IotaFren<0x297d8afb6ede450529d347cf9254caeea2b685c8baef67b084122291ebaefb38::bullshark::Bullshark>',
 };
 
-export const SUIFREN_CAPY_TYPE: Record<Network, string> = {
+export const IOTAFREN_CAPY_TYPE: Record<Network, string> = {
 	mainnet:
-		'0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::suifrens::SuiFren<0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::capy::Capy>',
+		'0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::iotafrens::IotaFren<0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1::capy::Capy>',
 	testnet:
-		'0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::suifrens::SuiFren<0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::capy::Capy>',
+		'0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::iotafrens::IotaFren<0x80d7de9c4a56194087e0ba0bf59492aa8e6a5ee881606226930827085ddf2332::capy::Capy>',
 };
 
 export const DAY_ONE_TYPE: Record<Network, string> = {

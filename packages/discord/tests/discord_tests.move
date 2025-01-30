@@ -1,17 +1,18 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
 module discord::discord_tests {
-    use sui::test_scenario::{Self, Scenario};
+    use iota::test_scenario::{Self, Scenario};
     use discord::discord::{Self, Discord, DiscordCap, DiscordApp};
     use discord::test_payloads::{Self as tp};
     use coupons::{
         setup as coupon_setup,
         coupon_house
     };
-    use suins::{
-        suins::{SuiNS, AdminCap}
+    use iotans::{
+        iotans::{IOTANS, AdminCap}
     };
 
     const ADMIN_ADDRESS: address = @0xA001;
@@ -43,10 +44,10 @@ module discord::discord_tests {
         };
         {
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut suins = scenario.take_shared<SuiNS>();
-            coupon_house::authorize_app<DiscordApp>(&admin_cap, &mut suins);
+            let mut iotans = scenario.take_shared<IOTANS>();
+            coupon_house::authorize_app<DiscordApp>(&admin_cap, &mut iotans);
             scenario.return_to_sender(admin_cap);
-            test_scenario::return_shared(suins);
+            test_scenario::return_shared(iotans);
         };
         scenario_val
     }
@@ -75,28 +76,28 @@ module discord::discord_tests {
         {
             scenario.next_tx(tp::get_nth_user(0));
             let mut discord = scenario.take_shared<Discord>();
-            let mut suins = scenario.take_shared<SuiNS>();
-            discord.claim_coupon(&mut suins, tp::get_nth_discord_id(0), 50, scenario.ctx());
+            let mut iotans = scenario.take_shared<IOTANS>();
+            discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(0), 50, scenario.ctx());
             test_scenario::return_shared(discord);
-            test_scenario::return_shared(suins);
+            test_scenario::return_shared(iotans);
         };
         {
             scenario.next_tx(tp::get_nth_user(1));
             let mut discord = scenario.take_shared<Discord>();
-            let mut suins = scenario.take_shared<SuiNS>();
-            discord.claim_coupon(&mut suins, tp::get_nth_discord_id(1), 100, scenario.ctx());
+            let mut iotans = scenario.take_shared<IOTANS>();
+            discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 100, scenario.ctx());
 
             test_scenario::return_shared(discord);
-            test_scenario::return_shared(suins);
+            test_scenario::return_shared(iotans);
         };
         {
             scenario.next_tx(tp::get_nth_user(1));
             let mut discord = scenario.take_shared<Discord>();
-            let mut suins = scenario.take_shared<SuiNS>();
-            discord.claim_coupon(&mut suins, tp::get_nth_discord_id(1), 40, scenario.ctx());
+            let mut iotans = scenario.take_shared<IOTANS>();
+            discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 40, scenario.ctx());
 
             test_scenario::return_shared(discord);
-            test_scenario::return_shared(suins);
+            test_scenario::return_shared(iotans);
         };
         {
             scenario.next_tx(tp::get_nth_user(1));
@@ -266,8 +267,8 @@ module discord::discord_tests {
 
         scenario.next_tx(tp::get_nth_user(0));
         let mut discord = scenario.take_shared<Discord>();
-        let mut suins = scenario.take_shared<SuiNS>();
-        discord.claim_coupon(&mut suins, tp::get_nth_discord_id(1), 50, scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        discord.claim_coupon(&mut iotans, tp::get_nth_discord_id(1), 50, scenario.ctx());
 
         abort 1337
     }
@@ -281,8 +282,8 @@ module discord::discord_tests {
     
         scenario.next_tx(tp::get_nth_user(0));
         let mut discord = scenario.take_shared<Discord>();
-        let mut suins = scenario.take_shared<SuiNS>();
-        discord.claim_coupon(&mut suins, b"non_existent".to_string(), 50, scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        discord.claim_coupon(&mut iotans, b"non_existent".to_string(), 50, scenario.ctx());
 
         abort 1337
     }

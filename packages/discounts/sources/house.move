@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// A base module that holds a shared object for the configuration of the
@@ -6,12 +7,12 @@
 /// and exports some package utilities for the 2 systems to use.
 module discounts::house;
 
-use sui::clock::Clock;
-use suins::config;
-use suins::domain::Domain;
-use suins::registry::Registry;
-use suins::suins::{Self, AdminCap, SuiNS};
-use suins::suins_registration::SuinsRegistration;
+use iota::clock::Clock;
+use iotans::config;
+use iotans::domain::Domain;
+use iotans::registry::Registry;
+use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans_registration::IotansRegistration;
 
 // The `free_claims` module can use the shared object to attach configuration & claim names.
 /* friend discounts::free_claims; */
@@ -27,7 +28,7 @@ const VERSION: u8 = 1;
 /// All promotions in this package are valid only for 1 year
 const REGISTRATION_YEARS: u8 = 1;
 
-/// A key to authorize DiscountHouse to register names on SuiNS.
+/// A key to authorize DiscountHouse to register names on IOTANS.
 public struct DiscountHouseApp has drop {}
 
 // The Shared object responsible for the discounts.
@@ -56,23 +57,23 @@ public fun assert_version_is_valid(self: &DiscountHouse) {
     assert!(self.version == VERSION, ENotValidVersion);
 }
 
-/// A function to save a new SuiNS name in the registry.
+/// A function to save a new IOTANS name in the registry.
 /// Helps re-use the same code for all discounts based on type T of the package.
 public(package) fun friend_add_registry_entry(
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     domain: Domain,
     clock: &Clock,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     // Verify that app is authorized to register names.
-    suins.assert_app_is_authorized<DiscountHouseApp>();
+    iotans.assert_app_is_authorized<DiscountHouseApp>();
 
     // Validate that the name can be registered.
     config::assert_valid_user_registerable_domain(&domain);
 
-    let registry = suins::app_registry_mut<DiscountHouseApp, Registry>(
+    let registry = iotans::app_registry_mut<DiscountHouseApp, Registry>(
         DiscountHouseApp {},
-        suins,
+        iotans,
     );
     registry.add_record(domain, REGISTRATION_YEARS, clock, ctx)
 }
@@ -83,8 +84,8 @@ public(package) fun uid_mut(self: &mut DiscountHouse): &mut UID {
     &mut self.id
 }
 
-/// Allows the friend modules to call functions to the SuiNS registry.
-public(package) fun suins_app_auth(): DiscountHouseApp {
+/// Allows the friend modules to call functions to the IOTANS registry.
+public(package) fun iotans_app_auth(): DiscountHouseApp {
     DiscountHouseApp {}
 }
 

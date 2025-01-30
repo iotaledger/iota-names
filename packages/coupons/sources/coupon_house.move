@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A module to support coupons for SuiNS.
+/// A module to support coupons for IOTANS.
 /// This module allows secondary modules (e.g. Discord) to add or remove coupons
 /// too.
 /// This allows for separation of logic & ease of de-authorization in case we
@@ -11,7 +12,7 @@
 /// rules) to claim discounts in the app.
 /// Each coupon is validated towards a list of rules. View `rules` module for
 /// explanation.
-/// The app is authorized on `SuiNS` to be able to claim names and add earnings
+/// The app is authorized on `IOTANS` to be able to claim names and add earnings
 /// to the registry.
 module coupons::coupon_house;
 
@@ -19,15 +20,15 @@ use coupons::coupon::{Self, Coupon};
 use coupons::data::{Self, Data};
 use coupons::rules::CouponRules;
 use std::string::String;
-use sui::clock::Clock;
-use sui::coin::Coin;
-use sui::dynamic_field as df;
-use sui::sui::SUI;
-use suins::config::{Self, Config};
-use suins::domain;
-use suins::registry::Registry;
-use suins::suins::{Self, AdminCap, SuiNS};
-use suins::suins_registration::SuinsRegistration;
+use iota::clock::Clock;
+use iota::coin::Coin;
+use iota::dynamic_field as df;
+use iota::iota::IOTA;
+use iotans::config::{Self, Config};
+use iotans::domain;
+use iotans::registry::Registry;
+use iotans::iotans::{Self, AdminCap, IOTANS};
+use iotans::iotans_registration::IotansRegistration;
 
 /// An app that's not authorized tries to access private data.
 const EAppNotAuthorized: u64 = 1;
@@ -45,7 +46,7 @@ const ECouponNotExists: u64 = 5;
 /// Our versioning of the coupons package.
 const VERSION: u8 = 1;
 
-// Authorization for the Coupons on SuiNS, to be able to register names on the
+// Authorization for the Coupons on IOTANS, to be able to register names on the
 // app.
 public struct CouponsApp has drop {}
 
@@ -61,10 +62,10 @@ public struct CouponHouse has store {
     storage: UID,
 }
 
-/// Called once to setup the CouponHouse on SuiNS.
-public fun setup(suins: &mut SuiNS, cap: &AdminCap, ctx: &mut TxContext) {
+/// Called once to setup the CouponHouse on IOTANS.
+public fun setup(iotans: &mut IOTANS, cap: &AdminCap, ctx: &mut TxContext) {
     cap.add_registry(
-        suins,
+        iotans,
         CouponHouse {
             storage: object::new(ctx),
             data: data::new(ctx),
@@ -75,18 +76,18 @@ public fun setup(suins: &mut SuiNS, cap: &AdminCap, ctx: &mut TxContext) {
 
 /// Register a name using a coupon code.
 public fun register_with_coupon(
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     coupon_code: String,
     domain_name: String,
     no_years: u8,
-    payment: Coin<SUI>,
+    payment: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     // Validate registration years are in [0,5] range.
     assert!(no_years > 0 && no_years <= 5, EInvalidYearsArgument);
 
-    let config = suins.get_config<Config>();
+    let config = iotans.get_config<Config>();
     let domain = domain::new(domain_name);
     let label = domain.sld();
     let domain_length = (label.length() as u8);
@@ -96,7 +97,7 @@ public fun register_with_coupon(
     config::assert_valid_user_registerable_domain(&domain);
 
     // Verify coupon house is authorized to get the registry / register names.
-    let coupon_house = coupon_house_mut(suins);
+    let coupon_house = coupon_house_mut(iotans);
 
     // Validate that specified coupon is valid.
     assert!(
@@ -131,8 +132,8 @@ public fun register_with_coupon(
         coupon_house.data.remove_coupon(coupon_code);
     };
 
-    suins::app_add_balance(CouponsApp {}, suins, payment.into_balance());
-    let registry: &mut Registry = suins::app_registry_mut(CouponsApp {}, suins);
+    iotans::app_add_balance(CouponsApp {}, iotans, payment.into_balance());
+    let registry: &mut Registry = iotans::app_registry_mut(CouponsApp {}, iotans);
     registry.add_record(domain, no_years, clock, ctx)
 }
 
@@ -142,11 +143,11 @@ public fun register_with_coupon(
 // Nor does it calculate the original price. This is part of the Frontend
 // anyways.
 public fun calculate_sale_price(
-    suins: &SuiNS,
+    iotans: &IOTANS,
     price: u64,
     coupon_code: String,
 ): u64 {
-    let coupon_house = coupon_house(suins);
+    let coupon_house = coupon_house(iotans);
     // Validate that specified coupon is valid.
     assert!(
         coupon_house.data.coupons().contains(coupon_code),
@@ -160,8 +161,8 @@ public fun calculate_sale_price(
 }
 
 // Get `Data` as an authorized app.
-public fun app_data_mut<A: drop>(suins: &mut SuiNS, _: A): &mut Data {
-    let coupon_house_mut = coupon_house_mut(suins);
+public fun app_data_mut<A: drop>(iotans: &mut IOTANS, _: A): &mut Data {
+    let coupon_house_mut = coupon_house_mut(iotans);
     coupon_house_mut.assert_version_is_valid();
     // verify app is authorized to get a mutable reference.
     coupon_house_mut.assert_app_is_authorized<A>();
@@ -170,19 +171,19 @@ public fun app_data_mut<A: drop>(suins: &mut SuiNS, _: A): &mut Data {
 
 /// Authorize an app on the coupon house. This allows to a secondary module to
 /// add/remove coupons.
-public fun authorize_app<A: drop>(_: &AdminCap, suins: &mut SuiNS) {
-    df::add(&mut coupon_house_mut(suins).storage, AppKey<A> {}, true);
+public fun authorize_app<A: drop>(_: &AdminCap, iotans: &mut IOTANS) {
+    df::add(&mut coupon_house_mut(iotans).storage, AppKey<A> {}, true);
 }
 
 /// De-authorize an app. The app can no longer add or remove
-public fun deauthorize_app<A: drop>(_: &AdminCap, suins: &mut SuiNS): bool {
-    df::remove(&mut coupon_house_mut(suins).storage, AppKey<A> {})
+public fun deauthorize_app<A: drop>(_: &AdminCap, iotans: &mut IOTANS): bool {
+    df::remove(&mut coupon_house_mut(iotans).storage, AppKey<A> {})
 }
 
 /// An admin helper to set the version of the shared object.
 /// Registrations are only possible if the latest version is being used.
-public fun set_version(_: &AdminCap, suins: &mut SuiNS, version: u8) {
-    coupon_house_mut(suins).version = version;
+public fun set_version(_: &AdminCap, iotans: &mut IOTANS, version: u8) {
+    coupon_house_mut(iotans).version = version;
 }
 
 /// Validate that the version of the app is the latest.
@@ -197,21 +198,21 @@ public fun assert_version_is_valid(self: &CouponHouse) {
 /// 2. Call rules::coupon_rules(...) to create the coupon's ruleset.
 public fun admin_add_coupon(
     _: &AdminCap,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     code: String,
     kind: u8,
     amount: u64,
     rules: CouponRules,
     ctx: &mut TxContext,
 ) {
-    let coupon_house = coupon_house_mut(suins);
+    let coupon_house = coupon_house_mut(iotans);
     coupon_house.assert_version_is_valid();
     coupon_house.data.save_coupon(code, coupon::new(kind, amount, rules, ctx));
 }
 
 // Remove a coupon as a system's admin.
-public fun admin_remove_coupon(_: &AdminCap, suins: &mut SuiNS, code: String) {
-    let coupon_house = coupon_house_mut(suins);
+public fun admin_remove_coupon(_: &AdminCap, iotans: &mut IOTANS, code: String) {
+    let coupon_house = coupon_house_mut(iotans);
     coupon_house.assert_version_is_valid();
     coupon_house.data.remove_coupon(code);
 }
@@ -246,22 +247,22 @@ fun assert_app_is_authorized<A: drop>(coupon_house: &CouponHouse) {
     assert!(coupon_house.is_app_authorized<A>(), EAppNotAuthorized);
 }
 
-/// local helper to get the `coupon house` object from the SuiNS object.
-fun coupon_house(suins: &SuiNS): &CouponHouse {
+/// local helper to get the `coupon house` object from the IOTANS object.
+fun coupon_house(iotans: &IOTANS): &CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
-    suins.assert_app_is_authorized<CouponsApp>();
-    let coupons = suins.registry<CouponHouse>();
+    iotans.assert_app_is_authorized<CouponsApp>();
+    let coupons = iotans.registry<CouponHouse>();
     coupons.assert_version_is_valid();
     coupons
 }
 
 /// Gets a mutable reference to the coupon's house
-fun coupon_house_mut(suins: &mut SuiNS): &mut CouponHouse {
+fun coupon_house_mut(iotans: &mut IOTANS): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
-    suins.assert_app_is_authorized<CouponsApp>();
-    let coupons = suins::app_registry_mut<CouponsApp, CouponHouse>(
+    iotans.assert_app_is_authorized<CouponsApp>();
+    let coupons = iotans::app_registry_mut<CouponsApp, CouponHouse>(
         CouponsApp {},
-        suins,
+        iotans,
     );
     coupons.assert_version_is_valid();
     coupons

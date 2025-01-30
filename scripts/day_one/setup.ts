@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { KioskClient, Network as KioskNetwork, TransferPolicyTransaction } from '@mysten/kiosk';
-import { Transaction } from '@mysten/sui/transactions';
+import { KioskClient, Network as KioskNetwork, TransferPolicyTransaction } from '@iota/kiosk';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage, Network } from '../config/constants';
 import { addressConfig, AirdropConfig, mainnetConfig } from '../config/day_one';
@@ -14,10 +15,10 @@ export const createDayOneDisplay = async (tx: Transaction, network: Network) => 
 	const displayObject = {
 		keys: ['name', 'description', 'link', 'image_url'],
 		values: [
-			'SuiNS Day 1 NFT #{serial}',
-			'The SuiNS Day 1 NFT represents community members who have been with SuiNS since day 1 of launch.',
-			'https://suins.io/',
-			'https://suins.io/day_one_active_{active}.webp',
+			'IOTANS Day 1 NFT #{serial}',
+			'The IOTANS Day 1 NFT represents community members who have been with IOTANS since day 1 of launch.',
+			'https://iotans.io/',
+			'https://iotans.io/day_one_active_{active}.webp',
 		],
 	};
 

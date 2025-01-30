@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction, TransactionArgument } from '@mysten/sui/transactions';
-import { isValidSuiAddress } from '@mysten/sui/utils';
+import { Transaction, TransactionArgument } from '@iota/iota-sdk/transactions';
+import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { PackageInfo } from '../config/constants';
 
@@ -36,7 +37,7 @@ export class CouponType {
 	}
 
 	setUser(user: string) {
-		if (!isValidSuiAddress(user)) throw new Error('Invalid address for user.');
+		if (!isValidIotaAddress(user)) throw new Error('Invalid address for user.');
 		this.rules.user = user;
 		return this;
 	}
@@ -81,7 +82,7 @@ export class CouponType {
 			target: `${config.coupons.packageId}::coupon_house::admin_add_coupon`,
 			arguments: [
 				adminCap,
-				txb.object(config.suins),
+				txb.object(config.iotans),
 				txb.pure.string(this.name),
 				txb.pure.u8(this.type),
 				txb.pure.u64(this.value),

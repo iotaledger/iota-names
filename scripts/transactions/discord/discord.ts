@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage, PackageInfo } from '../../config/constants';
 import { signAndExecute } from '../../utils/utils';
@@ -36,11 +37,11 @@ export const discordRoles = {
 		id: 6,
 		percentage: 10,
 	},
-	suinsFriend: {
+	iotansFriend: {
 		id: 7,
 		percentage: 50,
 	},
-	suinsVip: {
+	iotansVip: {
 		id: 8,
 		percentage: 100,
 	},
@@ -53,7 +54,7 @@ export const discordRoles = {
 export const authorizeDiscordApp = (txb: Transaction, config: PackageInfo) => {
 	txb.moveCall({
 		target: `${config.coupons.packageId}::coupon_house::authorize_app`,
-		arguments: [txb.object(config.adminCap), txb.object(config.suins)],
+		arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
 		typeArguments: [`${config.discord?.packageId}::discord::DiscordApp`],
 	});
 };

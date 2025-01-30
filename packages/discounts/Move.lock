@@ -6,18 +6,18 @@ manifest_digest = "375878261B925668FF3FC67E2044B4E43ED2B719C637683E8EEB06DE22781
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 
 dependencies = [
-  { name = "Sui" },
+  { name = "IOTA" },
   { name = "day_one" },
-  { name = "suins" },
+  { name = "iotans" },
 ]
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/move-stdlib" }
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-name = "Sui"
-source = { git = "https://github.com/MystenLabs/sui.git", rev = "framework/mainnet", subdir = "crates/sui-framework/packages/sui-framework" }
+name = "IOTA"
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
@@ -28,19 +28,19 @@ name = "day_one"
 source = { local = "../day_one" }
 
 dependencies = [
-  { name = "Sui" },
-  { name = "suins" },
+  { name = "IOTA" },
+  { name = "iotans" },
 ]
 
 [[move.package]]
-name = "suins"
-source = { local = "../suins" }
+name = "iotans"
+source = { local = "../iotans" }
 
 dependencies = [
-  { name = "Sui" },
+  { name = "IOTA" },
 ]
 
 [move.toolchain-version]
 compiler-version = "1.23.1"
 edition = "2024.beta"
-flavor = "sui"
+flavor = "iota"

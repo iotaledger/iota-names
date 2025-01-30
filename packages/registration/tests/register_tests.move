@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -6,14 +7,14 @@ module registration::register_tests {
 
     use std::string::{utf8, String};
 
-    use sui::{test_scenario::{Self, Scenario, ctx}, clock::{Self, Clock}, coin, sui::SUI};
+    use iota::{test_scenario::{Self, Scenario, ctx}, clock::{Self, Clock}, coin, iota::iota};
 
     use registration::register::{Self, Register, register};
-    use suins::{
-        constants::{mist_per_sui, grace_period_ms, year_ms}, 
-        suins::{Self, SuiNS, total_balance, AdminCap}, 
-        suins_registration::SuinsRegistration, 
-        suins_registration, 
+    use iotans::{
+        constants::{nanos_per_iota, grace_period_ms, year_ms}, 
+        iotans::{Self, IOTANS, total_balance, AdminCap}, 
+        iotans_registration::IotansRegistration, 
+        iotans_registration, 
         domain, 
         registry, 
         config, 
@@ -21,29 +22,29 @@ module registration::register_tests {
         auction::{Self, App as AuctionApp}
     };
 
-    const SUINS_ADDRESS: address = @0xA001;
-    const AUCTIONED_DOMAIN_NAME: vector<u8> = b"tes-t2.sui";
-    const DOMAIN_NAME: vector<u8> = b"abc.sui";
+    const iotaNS_ADDRESS: address = @0xA001;
+    const AUCTIONED_DOMAIN_NAME: vector<u8> = b"tes-t2.iota";
+    const DOMAIN_NAME: vector<u8> = b"abc.iota";
 
     public fun test_init(): Scenario {
-        let mut scenario_val = test_scenario::begin(SUINS_ADDRESS);
+        let mut scenario_val = test_scenario::begin(iotaNS_ADDRESS);
         let scenario = &mut scenario_val;
         {
-            let mut suins = suins::init_for_testing(scenario.ctx());
-            suins.authorize_app_for_testing<Register>();
-            suins.authorize_app_for_testing<AuctionApp>();
-            suins.share_for_testing();
+            let mut iotans = iotans::init_for_testing(scenario.ctx());
+            iotans.authorize_app_for_testing<Register>();
+            iotans.authorize_app_for_testing<AuctionApp>();
+            iotans.share_for_testing();
             let clock = clock::create_for_testing(scenario.ctx());
             clock::share_for_testing(clock);
         };
         {
-            test_scenario::next_tx(scenario, SUINS_ADDRESS);
+            test_scenario::next_tx(scenario, iotaNS_ADDRESS);
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut suins = scenario.take_shared<SuiNS>();
+            let mut iotans = scenario.take_shared<IOTANS>();
 
-            registry::init_for_testing(&admin_cap, &mut suins, scenario.ctx());
+            registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
 
-            test_scenario::return_shared(suins);
+            test_scenario::return_shared(iotans);
             scenario.return_to_sender(admin_cap);
         };
         scenario_val
@@ -55,35 +56,35 @@ module registration::register_tests {
         no_years: u8,
         amount: u64,
         clock_tick: u64
-    ): SuinsRegistration {
-        scenario.next_tx(SUINS_ADDRESS);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let payment = coin::mint_for_testing<SUI>(amount, scenario.ctx());
+    ): IotansRegistration {
+        scenario.next_tx(iotaNS_ADDRESS);
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let payment = coin::mint_for_testing<iota>(amount, scenario.ctx());
         let mut clock = scenario.take_shared<Clock>();
 
         clock.increment_for_testing(clock_tick);
-        let nft = register(&mut suins, domain_name, no_years, payment, &clock, scenario.ctx());
+        let nft = register(&mut iotans, domain_name, no_years, payment, &clock, scenario.ctx());
 
         test_scenario::return_shared(clock);
-        test_scenario::return_shared(suins);
+        test_scenario::return_shared(iotans);
 
         nft
     }
 
     fun deauthorize_app_util(scenario: &mut Scenario) {
-        test_scenario::next_tx(scenario, SUINS_ADDRESS);
+        test_scenario::next_tx(scenario, iotaNS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut suins = scenario.take_shared<SuiNS>();
+        let mut iotans = scenario.take_shared<IOTANS>();
 
-        suins::deauthorize_app<Register>(&admin_cap, &mut suins);
+        iotans::deauthorize_app<Register>(&admin_cap, &mut iotans);
 
-        test_scenario::return_shared(suins);
+        test_scenario::return_shared(iotans);
         scenario.return_to_sender(admin_cap);
     }
 
     public fun assert_balance(scenario: &mut Scenario, amount: u64) {
-        scenario.next_tx(SUINS_ADDRESS);
-        let auction_house = scenario.take_shared<SuiNS>();
+        scenario.next_tx(iotaNS_ADDRESS);
+        let auction_house = scenario.take_shared<IOTANS>();
         assert!(auction_house.total_balance() == amount, 0);
         test_scenario::return_shared(auction_house);
     }
@@ -93,21 +94,21 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * mist_per_sui(), 10);
-        assert_balance(scenario, 1200 * mist_per_sui());
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * nanos_per_iota(), 10);
+        assert_balance(scenario, 1200 * nanos_per_iota());
         assert!(nft.domain() == domain::new(utf8(DOMAIN_NAME)), 0);
         assert!(nft.expiration_timestamp_ms() == year_ms() + 10, 0);
         nft.burn_for_testing();
 
-        let nft = register_util(scenario, utf8(b"abcd.sui"), 2, 400 * mist_per_sui(), 20);
-        assert_balance(scenario, 1600 * mist_per_sui());
-        assert!(nft.domain() == domain::new(utf8(b"abcd.sui")), 0);
+        let nft = register_util(scenario, utf8(b"abcd.iota"), 2, 400 * nanos_per_iota(), 20);
+        assert_balance(scenario, 1600 * nanos_per_iota());
+        assert!(nft.domain() == domain::new(utf8(b"abcd.iota")), 0);
         assert!(nft.expiration_timestamp_ms() == 2 * year_ms() + 30, 0);
         nft.burn_for_testing();
 
-        let nft = register_util(scenario, utf8(b"abce-f12.sui"), 3, 150 * mist_per_sui(), 30);
-        assert_balance(scenario, 1750 * mist_per_sui());
-        assert!(nft.domain() == domain::new(utf8(b"abce-f12.sui")), 0);
+        let nft = register_util(scenario, utf8(b"abce-f12.iota"), 3, 150 * nanos_per_iota(), 30);
+        assert_balance(scenario, 1750 * nanos_per_iota());
+        assert!(nft.domain() == domain::new(utf8(b"abce-f12.iota")), 0);
         assert!(nft.expiration_timestamp_ms() == 3 * year_ms() + 60, 0);
         nft.burn_for_testing();
 
@@ -115,11 +116,11 @@ module registration::register_tests {
     }
 
     #[test, expected_failure(abort_code = config::EInvalidTld)]
-    fun test_register_if_not_sui_tld() {
+    fun test_register_if_not_iota_tld() {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"abc.move"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"abc.move"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -130,7 +131,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1210 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1210 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -141,7 +142,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 90 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 90 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -152,7 +153,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 6, 6 * 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 6, 6 * 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -163,7 +164,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 0, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 0, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -174,8 +175,8 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * mist_per_sui(), 10);
-        assert_balance(scenario, 1200 * mist_per_sui());
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * nanos_per_iota(), 10);
+        assert_balance(scenario, 1200 * nanos_per_iota());
         assert!(nft.domain() == domain::new(utf8(DOMAIN_NAME)), 0);
         assert!(nft.expiration_timestamp_ms() == year_ms() + 10, 0);
         nft.burn_for_testing();
@@ -184,10 +185,10 @@ module registration::register_tests {
             scenario,
             utf8(DOMAIN_NAME),
             1,
-            1200 * mist_per_sui(),
+            1200 * nanos_per_iota(),
             year_ms() + grace_period_ms() + 20,
         );
-        assert_balance(scenario, 2400 * mist_per_sui());
+        assert_balance(scenario, 2400 * nanos_per_iota());
         assert!(nft.domain() == domain::new(utf8(DOMAIN_NAME)), 0);
         assert!(
             nft.expiration_timestamp_ms() == 2 * year_ms() + grace_period_ms() + 30,
@@ -203,13 +204,13 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * mist_per_sui(), 10);
-        assert_balance(scenario, 1200 * mist_per_sui());
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * nanos_per_iota(), 10);
+        assert_balance(scenario, 1200 * nanos_per_iota());
         assert!(nft.domain() == domain::new(utf8(DOMAIN_NAME)), 0);
         assert!(nft.expiration_timestamp_ms() == year_ms() + 10, 0);
         nft.burn_for_testing();
 
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * mist_per_sui(), 20);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * nanos_per_iota(), 20);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -220,7 +221,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"-ab.sui"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"-ab.iota"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -231,7 +232,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"ab-.sui"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"ab-.iota"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -242,7 +243,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"Abc.com"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"Abc.com"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -253,7 +254,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"ab.sui"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"ab.iota"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -264,7 +265,7 @@ module registration::register_tests {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
-        let nft = register_util(scenario, utf8(b"abc.xyz.sui"), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(b"abc.xyz.iota"), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -277,7 +278,7 @@ module registration::register_tests {
         auction::init_for_testing(scenario.ctx());
 
         auction_tests::normal_auction_flow(scenario);
-        let nft = register_util(scenario, utf8(AUCTIONED_DOMAIN_NAME), 1, 50 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(AUCTIONED_DOMAIN_NAME), 1, 50 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();
@@ -294,23 +295,23 @@ module registration::register_tests {
             scenario,
             utf8(AUCTIONED_DOMAIN_NAME),
             1,
-            50 * mist_per_sui(),
+            50 * nanos_per_iota(),
             year_ms() + grace_period_ms() + 20,
         );
-        assert_balance(scenario, 50 * mist_per_sui());
-        assert!(suins_registration::domain(&nft) == domain::new(utf8(AUCTIONED_DOMAIN_NAME)), 0);
+        assert_balance(scenario, 50 * nanos_per_iota());
+        assert!(iotans_registration::domain(&nft) == domain::new(utf8(AUCTIONED_DOMAIN_NAME)), 0);
         nft.burn_for_testing();
 
         scenario_val.end();
     }
 
-    #[test, expected_failure(abort_code = ::suins::suins::EAppNotAuthorized)]
+    #[test, expected_failure(abort_code = ::iotans::iotans::EAppNotAuthorized)]
     fun test_register_aborts_if_register_is_deauthorized() {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
 
         deauthorize_app_util(scenario);
-        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * mist_per_sui(), 10);
+        let nft = register_util(scenario, utf8(DOMAIN_NAME), 1, 1200 * nanos_per_iota(), 10);
         nft.burn_for_testing();
 
         scenario_val.end();

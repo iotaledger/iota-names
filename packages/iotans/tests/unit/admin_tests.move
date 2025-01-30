@@ -1,0 +1,68 @@
+// Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+#[test_only]
+/// Testing strategy:
+///
+/// - Admin can add new records to IOTANS and get the IotansRegistrations
+/// for the registered domains.
+/// - Admin keeps the registration NFTs at their account for now.
+///
+module iotans::admin_tests;
+
+use std::string::utf8;
+use iota::clock;
+use iota::test_utils::assert_eq;
+use iotans::admin::{Self, Admin};
+use iotans::constants;
+use iotans::domain;
+use iotans::registry;
+use iotans::iotans;
+
+#[test, expected_failure(abort_code = ::iotans::iotans::EAppNotAuthorized)]
+fun try_unathorized_fail() {
+    let mut ctx = tx_context::dummy();
+    let mut iotans = iotans::init_for_testing(&mut ctx);
+    let cap = iotans::create_admin_cap_for_testing(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+
+    let _nft = admin::reserve_domain(
+        &cap,
+        &mut iotans,
+        utf8(b"test.iota"),
+        1,
+        &clock,
+        &mut ctx,
+    );
+
+    abort 1337
+}
+
+#[test]
+fun authorized() {
+    let mut ctx = tx_context::dummy();
+    let mut iotans = iotans::init_for_testing(&mut ctx);
+    let cap = iotans::create_admin_cap_for_testing(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+    registry::init_for_testing(&cap, &mut iotans, &mut ctx);
+
+    iotans::authorize_app_for_testing<Admin>(&mut iotans);
+
+    let nft = admin::reserve_domain(
+        &cap,
+        &mut iotans,
+        utf8(b"test.iota"),
+        1,
+        &clock,
+        &mut ctx,
+    );
+
+    assert_eq(nft.domain(), domain::new(utf8(b"test.iota")));
+    assert_eq(nft.expiration_timestamp_ms(), constants::year_ms());
+
+    nft.burn_for_testing();
+    clock.destroy_for_testing();
+    iotans::burn_admin_cap_for_testing(cap);
+    iotans::share_for_testing(iotans);
+}

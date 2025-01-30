@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// A module that allows claiming names of a set length for free by presenting
@@ -14,12 +15,12 @@ use day_one::day_one::{DayOne, is_active};
 use discounts::house::{Self, DiscountHouse};
 use std::string::String;
 use std::type_name as `type`;
-use sui::clock::Clock;
-use sui::dynamic_field as df;
-use sui::linked_table::{Self, LinkedTable};
-use suins::domain::{Self, Domain};
-use suins::suins::{AdminCap, SuiNS};
-use suins::suins_registration::SuinsRegistration;
+use iota::clock::Clock;
+use iota::dynamic_field as df;
+use iota::linked_table::{Self, LinkedTable};
+use iotans::domain::{Self, Domain};
+use iotans::iotans::{AdminCap, IOTANS};
+use iotans::iotans_registration::IotansRegistration;
 
 /// A configuration already exists
 const EConfigExists: u64 = 1;
@@ -34,7 +35,7 @@ const ENotValidForDayOne: u64 = 5;
 /// Tries to claim with a non active DayOne
 const ENotActiveDayOne: u64 = 6;
 
-/// A key to authorize DiscountHouse to register names on SuiNS.
+/// A key to authorize DiscountHouse to register names on IOTANS.
 public struct FreeClaimsApp has drop {}
 
 /// A key that opens up free claims for type T.
@@ -52,12 +53,12 @@ public struct FreeClaimsConfig has store {
 /// A function to register a name with a discount using type `T`.
 public fun free_claim<T: key>(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     object: &T,
     domain_name: String,
     clock: &Clock,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     // For normal flow, we do not allow DayOne to be used.
     // DayOne can only be used on `register_with_day_one` function.
     assert!(
@@ -65,22 +66,22 @@ public fun free_claim<T: key>(
         ENotValidForDayOne,
     );
 
-    internal_claim_free_name<T>(self, suins, domain_name, clock, object, ctx)
+    internal_claim_free_name<T>(self, iotans, domain_name, clock, object, ctx)
 }
 
 // A function to register a free name using `DayOne`.
 public fun free_claim_with_day_one(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     day_one: &DayOne,
     domain_name: String,
     clock: &Clock,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     assert!(is_active(day_one), ENotActiveDayOne);
     internal_claim_free_name<DayOne>(
         self,
-        suins,
+        iotans,
         domain_name,
         clock,
         day_one,
@@ -93,12 +94,12 @@ public fun free_claim_with_day_one(
 /// registration.
 fun internal_claim_free_name<T: key>(
     self: &mut DiscountHouse,
-    suins: &mut SuiNS,
+    iotans: &mut IOTANS,
     domain_name: String,
     clock: &Clock,
     object: &T,
     ctx: &mut TxContext,
-): SuinsRegistration {
+): IotansRegistration {
     self.assert_version_is_valid();
     // validate that there's a configuration for type T.
     assert_config_exists<T>(self);
@@ -121,7 +122,7 @@ fun internal_claim_free_name<T: key>(
     let domain = domain::new(domain_name);
     assert_domain_length_eligible(&domain, config);
 
-    house::friend_add_registry_entry(suins, domain, clock, ctx)
+    house::friend_add_registry_entry(iotans, domain, clock, ctx)
 }
 
 /// An admin action to authorize a type T for free claiming of names by

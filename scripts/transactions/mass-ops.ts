@@ -1,8 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { writeFileSync } from 'fs';
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
 import { removeDiscountForType } from '../config/discounts';
@@ -55,13 +56,13 @@ const run = async () => {
 
 	const tx = new Transaction();
 
-	const NS_TYPE = `${config.packageId}::suins_registration::SuinsRegistration`;
+	const NS_TYPE = `${config.packageId}::iotans_registration::IotansRegistration`;
 
 	// remove discount for NS objects
 	removeDiscountForType(tx, config, NS_TYPE);
 
 	// Transfer list of names to the specified wallet
-	const namesToTransfer = ['gateio.sui', 'bybit.sui', 'okx.sui', 'binance.sui', 'kucoin.sui'];
+	const namesToTransfer = ['gateio.iota', 'bybit.iota', 'okx.iota', 'binance.iota', 'kucoin.iota'];
 
 	const names = reservedObjects
 		.filter((obj) => namesToTransfer.includes(obj.data.content.fields.domain_name))
@@ -72,16 +73,16 @@ const run = async () => {
 		tx.pure.address('0x11469060268ba1d611e3ad95f3134332f68e21198ce068a14f30975336be9ca1'),
 	);
 
-	// transfer `notifi.sui` to `0x2a25e5d858849bf2af0bf30aaa106bff8cdce25b9ae8ec3acfe1f2c346f30c36`
-	const obj = reservedObjects.find((obj) => obj.data.content.fields.domain_name === 'notifi.sui');
+	// transfer `notifi.iota` to `0x2a25e5d858849bf2af0bf30aaa106bff8cdce25b9ae8ec3acfe1f2c346f30c36`
+	const obj = reservedObjects.find((obj) => obj.data.content.fields.domain_name === 'notifi.iota');
 	tx.transferObjects(
 		[obj!.data.objectId],
 		tx.pure.address('0x2a25e5d858849bf2af0bf30aaa106bff8cdce25b9ae8ec3acfe1f2c346f30c36'),
 	);
 
-	// transfer `stashed.sui` to `0x5a3afb4e2d6421488d4417f8cbdaf276079dd6f9c0195d8c8453c7a56d863194`
+	// transfer `stashed.iota` to `0x5a3afb4e2d6421488d4417f8cbdaf276079dd6f9c0195d8c8453c7a56d863194`
 	const stashedObj = reservedObjects.find(
-		(obj) => obj.data.content.fields.domain_name === 'stashed.sui',
+		(obj) => obj.data.content.fields.domain_name === 'stashed.iota',
 	);
 
 	const EnokiManagedObjects = {

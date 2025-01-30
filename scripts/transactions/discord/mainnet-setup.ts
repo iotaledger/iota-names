@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../../config/constants';
 import { authorizeApp } from '../../init/authorization';
@@ -17,15 +18,15 @@ export const prepareMainnetSetupPTB = async () => {
 		txb,
 		packageId: config.coupons.packageId,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotans: config.iotans,
 	});
 
 	authorizeApp({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotans: config.iotans,
 		type: Packages('mainnet').Coupons.authorizationType(config.coupons.packageId),
-		suinsPackageIdV1: config.packageId,
+		iotansPackageIdV1: config.packageId,
 	});
 
 	authorizeDiscordApp(txb, config);

@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 // A module with a couple of helpers for validation of coupons
@@ -7,8 +8,8 @@ module coupons::rules;
 
 use coupons::constants;
 use coupons::range::Range;
-use sui::clock::Clock;
-use suins::constants as suins_constants;
+use iota::clock::Clock;
+use iotans::constants as iotans_constants;
 
 // Errors
 /// Error when you try to create a DomainLengthRule with invalid type.
@@ -206,5 +207,5 @@ fun is_valid_years_range(range: &Option<Range>): bool {
 fun is_valid_length_range(range: &Option<Range>): bool {
     if (range.is_none()) return true;
     let range = range.borrow();
-    range.from() >= suins_constants::min_domain_length() && range.to() <= suins_constants::max_domain_length()
+    range.from() >= iotans_constants::min_domain_length() && range.to() <= iotans_constants::max_domain_length()
 }

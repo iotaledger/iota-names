@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -14,25 +15,25 @@ use coupons::setup::{
     TestApp,
     user,
     user_two,
-    mist_per_sui,
+    nanos_per_iota,
     test_app,
     admin_add_coupon,
     register_with_coupon,
     test_init
 };
-use sui::test_scenario::{Self, Scenario, return_shared};
-use sui::test_utils;
-use suins::suins::SuiNS;
+use iota::test_scenario::{Self, Scenario, return_shared};
+use iota::test_utils;
+use iotans::iotans::IOTANS;
 
 // populate a lot of coupons with different cases.
 // This populates the coupon as an authorized app
 fun populate_coupons(scenario: &mut Scenario) {
     scenario.next_tx(user());
-    let mut suins = scenario.take_shared<SuiNS>();
+    let mut iotans = scenario.take_shared<IOTANS>();
 
-    let data_mut = coupon_house::app_data_mut<TestApp>(&mut suins, test_app());
+    let data_mut = coupon_house::app_data_mut<TestApp>(&mut iotans, test_app());
     setup::populate_coupons(data_mut, scenario.ctx());
-    return_shared(suins);
+    return_shared(iotans);
 }
 
 // Please look up at `setup` file to see all the coupon names and their
@@ -46,12 +47,12 @@ fun test_e2e() {
     // populate all coupons.
     populate_coupons(scenario);
 
-    // 5 SUI discount coupon.
+    // 5 IOTA discount coupon.
     register_with_coupon(
-        b"5_SUI_DISCOUNT".to_string(),
-        b"test.sui".to_string(),
+        b"5_IOTA_DISCOUNT".to_string(),
+        b"test.iota".to_string(),
         1,
-        195 * mist_per_sui(),
+        195 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -61,9 +62,9 @@ fun test_e2e() {
     // down to 300.
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_MAX_2_YEARS".to_string(),
-        b"jest.sui".to_string(),
+        b"jest.iota".to_string(),
         2,
-        300 * mist_per_sui(),
+        300 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -72,9 +73,9 @@ fun test_e2e() {
     // Test that this user-specific coupon works as expected
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"fest.sui".to_string(),
+        b"fest.iota".to_string(),
         2,
-        300 * mist_per_sui(),
+        300 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -83,9 +84,9 @@ fun test_e2e() {
     // 50% discount only on names 5+ digits
     register_with_coupon(
         b"50_PERCENT_5_PLUS_NAMES".to_string(),
-        b"testo.sui".to_string(),
+        b"testo.iota".to_string(),
         1,
-        25 * mist_per_sui(),
+        25 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -94,9 +95,9 @@ fun test_e2e() {
     // 50% discount only on names 3 digit names.
     register_with_coupon(
         b"50_PERCENT_3_DIGITS".to_string(),
-        b"tes.sui".to_string(),
+        b"tes.iota".to_string(),
         1,
-        600 * mist_per_sui(),
+        600 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -105,9 +106,9 @@ fun test_e2e() {
     // 50% DISCOUNT, with all possible rules involved.
     register_with_coupon(
         b"50_DISCOUNT_SALAD".to_string(),
-        b"teso.sui".to_string(),
+        b"teso.iota".to_string(),
         1,
-        100 * mist_per_sui(),
+        100 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -121,19 +122,19 @@ fun zero_fee_purchase() {
     let scenario = &mut scenario_val;
     // populate all coupons.
     populate_coupons(scenario);
-    // 5 SUI discount coupon.
+    // 5 IOTA discount coupon.
     admin_add_coupon(
-        b"100_SUI_OFF".to_string(),
+        b"100_IOTA_OFF".to_string(),
         constants::fixed_price_discount_type(),
-        100 * mist_per_sui(),
+        100 * nanos_per_iota(),
         scenario,
     );
-    // Buy a name for free using the 100 SUI OFF coupon!
+    // Buy a name for free using the 100 IOTA OFF coupon!
     register_with_coupon(
-        b"100_SUI_OFF".to_string(),
-        b"testo.sui".to_string(),
+        b"100_IOTA_OFF".to_string(),
+        b"testo.iota".to_string(),
         1,
-        0 * mist_per_sui(),
+        0 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -178,15 +179,15 @@ fun test_price_calculation() {
     populate_coupons(scenario);
     {
         test_scenario::next_tx(scenario, user());
-        let suins = test_scenario::take_shared<SuiNS>(scenario);
+        let iotans = test_scenario::take_shared<IOTANS>(scenario);
 
         let sale_price = coupon_house::calculate_sale_price(
-            &suins,
+            &iotans,
             100,
             b"50_PERCENT_5_PLUS_NAMES".to_string(),
         );
         assert!(sale_price == 50, 1);
-        test_scenario::return_shared(suins);
+        test_scenario::return_shared(iotans);
     };
     scenario_val.end();
 }
@@ -203,12 +204,12 @@ fun test_invalid_coin_failure() {
     let scenario = &mut scenario_val;
     // populate all coupons.
     populate_coupons(scenario);
-    // 5 SUI discount coupon.
+    // 5 IOTA discount coupon.
     register_with_coupon(
-        b"5_SUI_DISCOUNT".to_string(),
-        b"test.sui".to_string(),
+        b"5_IOTA_DISCOUNT".to_string(),
+        b"test.iota".to_string(),
         1,
-        200 * mist_per_sui(),
+        200 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -227,18 +228,18 @@ fun no_more_available_claims_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user(),
         scenario,
     );
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"tost.sui".to_string(),
+        b"tost.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -257,9 +258,9 @@ fun invalid_years_claim_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         6,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -278,9 +279,9 @@ fun invalid_years_claim_1_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         0,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -295,9 +296,9 @@ fun invalid_user_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user_two(),
         scenario,
@@ -312,9 +313,9 @@ fun coupon_expired_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"50_PERCENT_3_DIGITS".to_string(),
-        b"tes.sui".to_string(),
+        b"tes.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         2,
         user_two(),
         scenario,
@@ -329,9 +330,9 @@ fun coupon_not_valid_for_years_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"50_DISCOUNT_SALAD".to_string(),
-        b"tes.sui".to_string(),
+        b"tes.iota".to_string(),
         3,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         0,
         user(),
         scenario,
@@ -351,9 +352,9 @@ fun coupon_invalid_length_1_failure() {
     populate_coupons(scenario);
     register_with_coupon(
         b"50_PERCENT_3_DIGITS".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         2,
         user_two(),
         scenario,
@@ -374,9 +375,9 @@ fun coupon_invalid_length_2_failure() {
     // Tries to use 5 digit name for a <=4 digit one.
     register_with_coupon(
         b"50_DISCOUNT_SALAD".to_string(),
-        b"testo.sui".to_string(),
+        b"testo.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         2,
         user(),
         scenario,
@@ -397,9 +398,9 @@ fun coupon_invalid_length_3_failure() {
     // Tries to use 4 digit name for a 5+ chars coupon.
     register_with_coupon(
         b"50_PERCENT_5_PLUS_NAMES".to_string(),
-        b"test.sui".to_string(),
+        b"test.iota".to_string(),
         1,
-        150 * mist_per_sui(),
+        150 * nanos_per_iota(),
         2,
         user(),
         scenario,
@@ -416,7 +417,7 @@ fun add_coupon_as_admin() {
     admin_add_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
         constants::fixed_price_discount_type(),
-        100 * mist_per_sui(),
+        100 * nanos_per_iota(),
         scenario,
     );
     setup::admin_remove_coupon(b"TEST_SUCCESS_ADDITION".to_string(), scenario);
@@ -432,7 +433,7 @@ fun add_coupon_invalid_type_failure() {
     admin_add_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
         5,
-        100 * mist_per_sui(),
+        100 * nanos_per_iota(),
         scenario,
     );
     scenario_val.end();

@@ -1,12 +1,13 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 module denylist::denylist_tests {
     use std::string::{utf8, String};
 
-    use sui::test_scenario::{Self as ts, Scenario};
+    use iota::test_scenario::{Self as ts, Scenario};
 
-    use suins::suins::{Self, SuiNS};
+    use iotans::iotans::{Self, IOTANS};
 
     use denylist::denylist::{Self, DenyListAuth};
 
@@ -18,25 +19,25 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let cap = suins::create_admin_cap_for_testing(scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
-        denylist::add_reserved_names(&mut suins, &cap, some_reserved_names());
-        denylist::add_blocked_names(&mut suins, &cap, some_offensive_names());
+        denylist::add_reserved_names(&mut iotans, &cap, some_reserved_names());
+        denylist::add_blocked_names(&mut iotans, &cap, some_offensive_names());
 
 
-        assert!(denylist::is_reserved_name(&suins, utf8(b"test")), 0);
-        assert!(denylist::is_reserved_name(&suins, utf8(b"test2")), 0);
+        assert!(denylist::is_reserved_name(&iotans, utf8(b"test")), 0);
+        assert!(denylist::is_reserved_name(&iotans, utf8(b"test2")), 0);
     
-        assert!(denylist::is_blocked_name(&suins, utf8(b"bad_test")), 0);
+        assert!(denylist::is_blocked_name(&iotans, utf8(b"bad_test")), 0);
 
-        assert!(!denylist::is_blocked_name(&suins, utf8(b"example")), 0);
+        assert!(!denylist::is_blocked_name(&iotans, utf8(b"example")), 0);
 
-        assert!(!denylist::is_reserved_name(&suins, utf8(b"example")), 0);
+        assert!(!denylist::is_reserved_name(&iotans, utf8(b"example")), 0);
 
-        suins::burn_admin_cap_for_testing(cap);
+        iotans::burn_admin_cap_for_testing(cap);
 
-        ts::return_shared(suins);
+        ts::return_shared(iotans);
         scenario_val.end();
     }
 
@@ -46,10 +47,10 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let cap = suins::create_admin_cap_for_testing(scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
-        denylist::add_reserved_names(&mut suins, &cap, vector[]);
+        denylist::add_reserved_names(&mut iotans, &cap, vector[]);
 
         abort 1337
     }
@@ -61,10 +62,10 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let cap = suins::create_admin_cap_for_testing(scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
-        denylist::add_blocked_names(&mut suins, &cap, vector[]);
+        denylist::add_blocked_names(&mut iotans, &cap, vector[]);
 
         abort 1337
     }
@@ -75,20 +76,20 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let cap = suins::create_admin_cap_for_testing(scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
-        denylist::add_blocked_names(&mut suins, &cap, some_offensive_names());
+        denylist::add_blocked_names(&mut iotans, &cap, some_offensive_names());
 
-        assert!(denylist::is_blocked_name(&suins, utf8(b"bad_test")), 0);
+        assert!(denylist::is_blocked_name(&iotans, utf8(b"bad_test")), 0);
 
-        denylist::remove_blocked_names(&mut suins, &cap, vector[utf8(b"bad_test")]);
+        denylist::remove_blocked_names(&mut iotans, &cap, vector[utf8(b"bad_test")]);
 
-        assert!(!denylist::is_blocked_name(&suins, utf8(b"bad_test")), 0);
+        assert!(!denylist::is_blocked_name(&iotans, utf8(b"bad_test")), 0);
 
-        suins::burn_admin_cap_for_testing(cap);
+        iotans::burn_admin_cap_for_testing(cap);
 
-        ts::return_shared(suins);
+        ts::return_shared(iotans);
         scenario_val.end();
     }
 
@@ -98,22 +99,22 @@ module denylist::denylist_tests {
         let scenario = &mut scenario_val;
 
         scenario.next_tx(ADDR);
-        let mut suins = scenario.take_shared<SuiNS>();
-        let cap = suins::create_admin_cap_for_testing(scenario.ctx());
+        let mut iotans = scenario.take_shared<IOTANS>();
+        let cap = iotans::create_admin_cap_for_testing(scenario.ctx());
 
-        denylist::add_reserved_names(&mut suins, &cap, some_reserved_names());
+        denylist::add_reserved_names(&mut iotans, &cap, some_reserved_names());
 
         let name = utf8(b"test");
 
-        assert!(denylist::is_reserved_name(&suins, name), 0);
+        assert!(denylist::is_reserved_name(&iotans, name), 0);
 
-        denylist::remove_reserved_names(&mut suins, &cap, vector[name]);
+        denylist::remove_reserved_names(&mut iotans, &cap, vector[name]);
 
-        assert!(!denylist::is_reserved_name(&suins, name), 0);
+        assert!(!denylist::is_reserved_name(&iotans, name), 0);
 
-        suins::burn_admin_cap_for_testing(cap);
+        iotans::burn_admin_cap_for_testing(cap);
 
-        ts::return_shared(suins);
+        ts::return_shared(iotans);
         scenario_val.end();
     }
 
@@ -124,15 +125,15 @@ module denylist::denylist_tests {
         {
             scenario.next_tx(ADDR);
 
-            let (mut suins, cap) = suins::new_for_testing(scenario.ctx());
+            let (mut iotans, cap) = iotans::new_for_testing(scenario.ctx());
 
-            suins.authorize_app_for_testing<DenyListAuth>();
+            iotans.authorize_app_for_testing<DenyListAuth>();
 
-            denylist::setup(&mut suins, &cap, scenario.ctx());
+            denylist::setup(&mut iotans, &cap, scenario.ctx());
 
-            suins.share_for_testing();
+            iotans.share_for_testing();
         
-            suins::burn_admin_cap_for_testing(cap);
+            iotans::burn_admin_cap_for_testing(cap);
         };
 
         scenario

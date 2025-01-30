@@ -1,9 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import fs from 'fs';
-import { SuiObjectResponse } from '@mysten/sui/client';
-import { Transaction } from '@mysten/sui/transactions';
-import { isValidSuiAddress } from '@mysten/sui/utils';
+import { IotaObjectResponse } from '@iota/iota-sdk/client';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { mainPackage } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
@@ -29,7 +30,7 @@ type DomainData = {
 const parseOwnedObjects = () => {
 	const ownedObjects = JSON.parse(
 		fs.readFileSync('./reserved-names/owned-objects.json').toString(),
-	) as SuiObjectResponse[];
+	) as IotaObjectResponse[];
 
 	const names: DomainData[] = ownedObjects.map(({ data }) => ({
 		objectId: data?.objectId || '',
@@ -58,12 +59,12 @@ const parseCsvFile = () => {
 				}) as TransferObject,
 		)
 		.filter((x) => {
-			const isValid = isValidSuiAddress(x.address);
+			const isValid = isValidIotaAddress(x.address);
 			if (!isValid) console.info(`Invalid address: ${x.address} | ${x.name} | ${x.domain}`);
 			return isValid;
 		})
 		.map((x) => {
-			x.domain = x.domain.endsWith('.sui') ? x.domain : `${x.domain}.sui`;
+			x.domain = x.domain.endsWith('.iota') ? x.domain : `${x.domain}.iota`;
 			return x;
 		})
 		.map((x) => {
@@ -94,7 +95,7 @@ const prepareTx = () => {
 };
 
 // parses all owned OBjects from `json` file.
-// If you want to refresh the owned data for the SuiNS admin, re-run `ts-node objects.ts`.
+// If you want to refresh the owned data for the IOTANS admin, re-run `ts-node objects.ts`.
 parseOwnedObjects();
 // Parses the `transfers.csv` file, and creates the list of object transfers
 parseCsvFile();

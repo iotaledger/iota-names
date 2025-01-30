@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
@@ -26,7 +27,7 @@ const UPGRADE_CAPS_TO_TRANSFER = [
     '0x929162c097e47cffabb57e8c1cf334ff44a84b963f0bbaacfbaf792d79993866',
     // discounts
     '0x94e2a248ea1c6885b873eb0185abfd3a60fe1e4e552c419233a4ad4a0a5053ca',
-    // SuiNS (!! core package)
+    // IOTANS (!! core package)
     '0x9cda28244a0d0de294d2b271e772a9c33eb47d316c59913d7369b545b4af098c',
     // subnames
     '0xc70ac60c1d65da22ed5f30def1a7dfd33ff3a70eb0bf75f12ab559c5f342ea12',
@@ -61,7 +62,7 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 
     // Publisher: Aeon
     '0x47339900499df62ac40c21d44198331119d5335c7f94777295e5a84f5ae351f7',
-    // Publisher: SuiNS
+    // Publisher: IOTANS
     '0x7339f23f06df3601167d67a31752781d307136fd18304c48c928778e752caae1',
     // Publisher: DayOne NFT
     '0x7b9fa20eb51210af6060f88fd1468b405d6306f6518deecf93c5ab1955165ce0',
@@ -70,14 +71,14 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 const APP_CAPS_TO_TRANSFER = [
     // DiscordCap
     '0xd369c89ef88534b5ba9a78f16fec6adb3b5bc5d2ae72c990fd8aaccae1f2c56b',
-    // SuiNS Admin Cap (!! core package)
+    // IOTANS Admin Cap (!! core package)
     '0x3f8d702d90c572b60ac692fb5074f7a7ac350b80d9c59eab4f6b7692786cae0a'
 ];
 
 const profitsToTreasury = (txb: Transaction) => {
 	const generalProfits = txb.moveCall({
-		target: `${config.packageId}::suins::withdraw`,
-		arguments: [txb.object(config.adminCap), txb.object(config.suins)],
+		target: `${config.packageId}::iotans::withdraw`,
+		arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
 	});
 
 	txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));

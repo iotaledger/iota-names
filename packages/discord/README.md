@@ -1,6 +1,6 @@
 # Discord package
 
-A package that allows discord member loyalty for SuiNS
+A package that allows discord member loyalty for IOTANS
 
 
 ## Testnet

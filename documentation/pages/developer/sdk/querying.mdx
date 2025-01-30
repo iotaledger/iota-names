@@ -1,18 +1,18 @@
 # Querying
 
-Use the `SuinsClient` that was previously created to query on-chain data.
+Use the `IotansClient` that was previously created to query on-chain data.
 
 ## Querying a NameRecord
 
-You can query a name record's latest state by calling the `getNameRecord` method on the `SuinsClient` instance.
+You can query a name record's latest state by calling the `getNameRecord` method on the `IotansClient` instance.
 
 ```js
-const nameRecord = await suinsClient.getNameRecord('demo.sui');
+const nameRecord = await iotansClient.getNameRecord('demo.iota');
 console.log(nameRecord);
 
 // Example output 
 // {
-//   name: 'demo.sui',
+//   name: 'demo.iota',
 //   nftId: '0x1309c4b6fefb38127333eba70ac9ed63e211ac44e92695d423e51baf655e42e2',
 //   targetAddress: '0xfe09cf0b3d77678b99250572624bf74fe3b12af915c5db95f0ed5d755612eb68',
 //   expirationTimestampMs: '1746018571863',
@@ -22,13 +22,13 @@ console.log(nameRecord);
 
 ## Query active pricing
 
-Call the `getPricelist` method on the `SuinsClient` instance to query the active names price list.
+Call the `getPricelist` method on the `IotansClient` instance to query the active names price list.
 
 ```js
-const priceList = await suinsClient.getPriceList();
+const priceList = await iotansClient.getPriceList();
 console.log(priceList);
 
-// Example output (Prices are in MIST; 1 SUI = 1_000_000_000 MIST)
+// Example output (Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
 // {
 //   threeLetters: 500000000000,
 //   fourLetters: 100000000000,
@@ -38,13 +38,13 @@ console.log(priceList);
 
 ## Query active renewals pricing
 
-Call the `getRenewalPricelist` method on the `SuinsClient` instance to query the active renewals price list.
+Call the `getRenewalPricelist` method on the `IotansClient` instance to query the active renewals price list.
 
 ```js
-const renewalPriceList = await suinsClient.getRenewalPricelist();
+const renewalPriceList = await iotansClient.getRenewalPricelist();
 console.log(renewalPriceList);
 
-// Example output (Prices are in MIST; 1 SUI = 1_000_000_000 MIST)
+// Example output (Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
 // {
 //   threeLetters: 50000000000,
 //   fourLetters: 10000000000,

@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -8,10 +9,10 @@ use day_one::day_one::{Self, DayOne};
 use discounts::free_claims;
 use discounts::house::{Self, DiscountHouse, DiscountHouseApp};
 use std::string::{utf8, String};
-use sui::clock::{Self, Clock};
-use sui::test_scenario::{Self as ts, Scenario, ctx};
-use suins::registry;
-use suins::suins::{Self, SuiNS, AdminCap};
+use iota::clock::{Self, Clock};
+use iota::test_scenario::{Self as ts, Scenario, ctx};
+use iotans::registry;
+use iotans::iotans::{Self, IOTANS, AdminCap};
 
 // An authorized type to test.
 public struct TestAuthorized has key, store { id: UID }
@@ -19,24 +20,24 @@ public struct TestAuthorized has key, store { id: UID }
 // An unauthorized type to test.
 public struct TestUnauthorized has key { id: UID }
 
-const SUINS_ADDRESS: address = @0xA001;
+const iotaNS_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
 
 fun test_init(): Scenario {
-    let mut scenario_val = ts::begin(SUINS_ADDRESS);
+    let mut scenario_val = ts::begin(iotaNS_ADDRESS);
     let scenario = &mut scenario_val;
     {
-        let mut suins = suins::init_for_testing(scenario.ctx());
-        suins.authorize_app_for_testing<DiscountHouseApp>();
-        suins.share_for_testing();
+        let mut iotans = iotans::init_for_testing(scenario.ctx());
+        iotans.authorize_app_for_testing<DiscountHouseApp>();
+        iotans.share_for_testing();
         house::init_for_testing(scenario.ctx());
         let clock = clock::create_for_testing(scenario.ctx());
         clock.share_for_testing();
     };
     {
-        ts::next_tx(scenario, SUINS_ADDRESS);
+        ts::next_tx(scenario, iotaNS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut suins = scenario.take_shared<SuiNS>();
+        let mut iotans = scenario.take_shared<IOTANS>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();
 
         // a more expensive alternative.
@@ -52,10 +53,10 @@ fun test_init(): Scenario {
             vector[10, 63],
             scenario.ctx(),
         );
-        registry::init_for_testing(&admin_cap, &mut suins, scenario.ctx());
+        registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
 
         ts::return_shared(discount_house);
-        ts::return_shared(suins);
+        ts::return_shared(iotans);
         ts::return_to_sender(scenario, admin_cap);
     };
     scenario_val
@@ -64,7 +65,7 @@ fun test_init(): Scenario {
 fun test_end(mut scenario_val: Scenario) {
     let scenario = &mut scenario_val;
     {
-        ts::next_tx(scenario, SUINS_ADDRESS);
+        ts::next_tx(scenario, iotaNS_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();
         free_claims::deauthorize_type<TestAuthorized>(
@@ -90,13 +91,13 @@ fun free_claim_with_type<T: key>(
     user: address,
 ) {
     ts::next_tx(scenario, user);
-    let mut suins = scenario.take_shared<SuiNS>();
+    let mut iotans = scenario.take_shared<IOTANS>();
     let mut discount_house = scenario.take_shared<DiscountHouse>();
     let clock = scenario.take_shared<Clock>();
 
     let name = free_claims::free_claim<T>(
         &mut discount_house,
-        &mut suins,
+        &mut iotans,
         item,
         domain_name,
         &clock,
@@ -106,7 +107,7 @@ fun free_claim_with_type<T: key>(
     transfer::public_transfer(name, user);
 
     ts::return_shared(discount_house);
-    ts::return_shared(suins);
+    ts::return_shared(iotans);
     ts::return_shared(clock);
 }
 
@@ -117,13 +118,13 @@ fun free_claim_with_day_one(
     user: address,
 ) {
     ts::next_tx(scenario, user);
-    let mut suins = ts::take_shared<SuiNS>(scenario);
+    let mut iotans = ts::take_shared<IOTANS>(scenario);
     let mut discount_house = ts::take_shared<DiscountHouse>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
     let name = free_claims::free_claim_with_day_one(
         &mut discount_house,
-        &mut suins,
+        &mut iotans,
         item,
         domain_name,
         &clock,
@@ -133,7 +134,7 @@ fun free_claim_with_day_one(
     transfer::public_transfer(name, user);
 
     ts::return_shared(discount_house);
-    ts::return_shared(suins);
+    ts::return_shared(iotans);
     ts::return_shared(clock);
 }
 
@@ -149,7 +150,7 @@ fun test_e2e() {
     free_claim_with_type<TestAuthorized>(
         &test_item,
         scenario,
-        utf8(b"01234567890.sui"),
+        utf8(b"01234567890.iota"),
         USER_ADDRESS,
     );
 
@@ -168,7 +169,7 @@ fun use_day_one() {
     free_claim_with_day_one(
         &day_one,
         scenario,
-        utf8(b"0123456789.sui"),
+        utf8(b"0123456789.iota"),
         USER_ADDRESS,
     );
 
@@ -188,7 +189,7 @@ fun test_tries_to_claim_again_with_same_object_failure() {
     free_claim_with_type<TestAuthorized>(
         &test_item,
         scenario,
-        utf8(b"01234567890.sui"),
+        utf8(b"01234567890.iota"),
         USER_ADDRESS,
     );
 
@@ -196,7 +197,7 @@ fun test_tries_to_claim_again_with_same_object_failure() {
     free_claim_with_type<TestAuthorized>(
         &test_item,
         scenario,
-        utf8(b"01234567891.sui"),
+        utf8(b"01234567891.iota"),
         USER_ADDRESS,
     );
 
@@ -221,7 +222,7 @@ fun test_invalid_size_failure() {
     free_claim_with_type<TestAuthorized>(
         &test_item,
         scenario,
-        utf8(b"012345678.sui"),
+        utf8(b"012345678.iota"),
         USER_ADDRESS,
     );
 
@@ -241,7 +242,7 @@ fun register_with_unauthorized_type() {
     free_claim_with_type<TestUnauthorized>(
         &test_item,
         scenario,
-        utf8(b"test.sui"),
+        utf8(b"test.iota"),
         USER_ADDRESS,
     );
 

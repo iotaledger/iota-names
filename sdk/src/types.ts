@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import type { SuiClient } from '@mysten/sui/client';
-import type { TransactionObjectArgument } from '@mysten/sui/transactions';
+import type { IotaClient } from '@iota/iota-sdk/client';
+import type { TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 
 /** You can pass in a TransactionArgument OR an objectId by string. */
 export type ObjectArgument = string | TransactionObjectArgument;
@@ -16,8 +17,8 @@ export type VersionedPackageId = {
 
 // A list of constants
 export type Constants = {
-	suinsPackageId?: VersionedPackageId;
-	suinsObjectId?: string;
+	iotansPackageId?: VersionedPackageId;
+	iotansObjectId?: string;
 	registryTableId?: string;
 	utilsPackageId?: string;
 	registrationPackageId?: string;
@@ -26,9 +27,9 @@ export type Constants = {
 	tempSubNamesProxyPackageId?: string;
 };
 
-// The config for the SuinsClient.
-export type SuinsClientConfig = {
-	client: SuiClient;
+// The config for the IotansClient.
+export type IotansClientConfig = {
+	client: IotaClient;
 	/**
 	 * The network to use. Defaults to mainnet.
 	 */
@@ -41,16 +42,16 @@ export type SuinsClientConfig = {
 };
 
 /**
- * The price list for SuiNS names.
+ * The price list for IOTANS names.
  */
-export type SuinsPriceList = {
+export type IotansPriceList = {
 	threeLetters: number;
 	fourLetters: number;
 	fivePlusLetters: number;
 };
 
 /**
- * A NameRecord entry of SuiNS Names.
+ * A NameRecord entry of IOTANS Names.
  */
 export type NameRecord = {
 	name: string;

@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -10,18 +11,18 @@ use coupons::data::Data;
 use coupons::range;
 use coupons::rules;
 use std::string::{utf8, String};
-use sui::clock::{Self, Clock};
-use sui::coin;
-use sui::sui::SUI;
-use sui::test_scenario::{Self, Scenario, ctx};
-use suins::registry;
-use suins::suins::{Self, AdminCap, SuiNS};
+use iota::clock::{Self, Clock};
+use iota::coin;
+use iota::iota::IOTA;
+use iota::test_scenario::{Self, Scenario, ctx};
+use iotans::registry;
+use iotans::iotans::{Self, AdminCap, IOTANS};
 
 public struct TestApp has drop {}
 
 public struct UnauthorizedTestApp has drop {}
 
-const MIST_PER_SUI: u64 = 1_000_000_000;
+const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 const ADMIN_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
@@ -36,9 +37,9 @@ public fun test_init(): Scenario {
 
 public fun initialize_coupon_house(scenario: &mut Scenario) {
     {
-        let mut suins = suins::init_for_testing(scenario.ctx());
-        suins::authorize_app_for_testing<CouponsApp>(&mut suins);
-        suins::share_for_testing(suins);
+        let mut iotans = iotans::init_for_testing(scenario.ctx());
+        iotans::authorize_app_for_testing<CouponsApp>(&mut iotans);
+        iotans::share_for_testing(iotans);
         let clock = clock::create_for_testing(scenario.ctx());
         clock::share_for_testing(clock);
     };
@@ -46,14 +47,14 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         scenario.next_tx(ADMIN_ADDRESS);
         // get admin cap
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut suins = scenario.take_shared<SuiNS>();
+        let mut iotans = scenario.take_shared<IOTANS>();
         // initialize coupon data.
-        coupon_house::setup(&mut suins, &admin_cap, scenario.ctx());
-        registry::init_for_testing(&admin_cap, &mut suins, scenario.ctx());
+        coupon_house::setup(&mut iotans, &admin_cap, scenario.ctx());
+        registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
         // authorize TestApp to CouponHouse.
-        coupon_house::authorize_app<TestApp>(&admin_cap, &mut suins);
+        coupon_house::authorize_app<TestApp>(&admin_cap, &mut iotans);
         test_scenario::return_to_sender(scenario, admin_cap);
-        test_scenario::return_shared(suins);
+        test_scenario::return_shared(iotans);
     };
 }
 
@@ -69,8 +70,8 @@ public fun user_two(): address {
     USER_2_ADDRESS
 }
 
-public fun mist_per_sui(): u64 {
-    MIST_PER_SUI
+public fun nanos_per_iota(): u64 {
+    NANOS_PER_IOTA
 }
 
 // global getters.
@@ -86,12 +87,12 @@ public fun unauthorized_test_app(): UnauthorizedTestApp {
 /// A helper to add a bunch of coupons (with different setups) that we can use
 /// on the coupon tests.
 public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
-    // 5 SUI DISCOUNT, ONLY CLAIMABLE TWICE
+    // 5 IOTA DISCOUNT, ONLY CLAIMABLE TWICE
     coupon_house::app_add_coupon(
         data_mut,
-        utf8(b"5_SUI_DISCOUNT"),
+        utf8(b"5_IOTA_DISCOUNT"),
         constants::fixed_price_discount_type(),
-        5 * MIST_PER_SUI,
+        5 * NANOS_PER_IOTA,
         rules::new_coupon_rules(
             option::none(),
             option::some(2),
@@ -203,11 +204,11 @@ public fun admin_add_coupon(
     scenario: &mut Scenario,
 ) {
     scenario.next_tx(admin());
-    let mut suins = scenario.take_shared<SuiNS>();
+    let mut iotans = scenario.take_shared<IOTANS>();
     let cap = scenario.take_from_sender<AdminCap>();
     coupon_house::admin_add_coupon(
         &cap,
-        &mut suins,
+        &mut iotans,
         code_name,
         kind,
         value,
@@ -215,21 +216,21 @@ public fun admin_add_coupon(
         scenario.ctx(),
     );
     scenario.return_to_sender(cap);
-    test_scenario::return_shared(suins);
+    test_scenario::return_shared(iotans);
 }
 
 // Adds a 0 rule coupon that gives 15% discount to test admin additions.
 public fun admin_remove_coupon(code_name: String, scenario: &mut Scenario) {
     scenario.next_tx(admin());
-    let mut suins = scenario.take_shared<SuiNS>();
+    let mut iotans = scenario.take_shared<IOTANS>();
     let cap = scenario.take_from_sender<AdminCap>();
     coupon_house::admin_remove_coupon(
         &cap,
-        &mut suins,
+        &mut iotans,
         code_name,
     );
     scenario.return_to_sender(cap);
-    test_scenario::return_shared(suins);
+    test_scenario::return_shared(iotans);
 }
 
 // Internal helper that tries to claim a name using a coupon.
@@ -250,12 +251,12 @@ public fun register_with_coupon(
     scenario.next_tx(user);
     let mut clock = scenario.take_shared<Clock>();
     clock.increment_for_testing(clock_value);
-    let mut suins = scenario.take_shared<SuiNS>();
+    let mut iotans = scenario.take_shared<IOTANS>();
 
-    let payment = coin::mint_for_testing<SUI>(amount, scenario.ctx());
+    let payment = coin::mint_for_testing<IOTA>(amount, scenario.ctx());
 
     let nft = coupon_house::register_with_coupon(
-        &mut suins,
+        &mut iotans,
         coupon_code,
         domain_name,
         no_years,
@@ -265,6 +266,6 @@ public fun register_with_coupon(
     );
 
     transfer::public_transfer(nft, user);
-    test_scenario::return_shared(suins);
+    test_scenario::return_shared(iotans);
     test_scenario::return_shared(clock);
 }

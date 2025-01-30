@@ -1,10 +1,11 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// This module defines the `DayOne` Object airdropped to early supporters of the SuiNS project.
+/// This module defines the `DayOne` Object airdropped to early supporters of the IOTANS project.
 module day_one::day_one {
 
-    use sui::{
+    use iota::{
         package,
         hash,
         dynamic_field as df,
@@ -41,7 +42,7 @@ module day_one::day_one {
         package::claim_and_keep(otw, ctx);
 
         transfer::share_object(DropList { id: object::new(ctx), total_minted: 0 });
-        // For SuiNS, we need 1 SetupCap to manage all the required addresses. We'll be setting up around 75K addresses.
+        // For IOTANS, we need 1 SetupCap to manage all the required addresses. We'll be setting up around 75K addresses.
         // We can mint 2K objects per run!
         transfer::transfer(SetupCap { id: object::new(ctx) }, ctx.sender());
     }
@@ -67,7 +68,7 @@ module day_one::day_one {
         let hash = hash::blake2b256(&bytes);
 
         // fails if not found.
-        let lookup = df::remove_if_exists(&mut self.id, sui::address::from_bytes(hash));
+        let lookup = df::remove_if_exists(&mut self.id, iota::address::from_bytes(hash));
         assert!(lookup.is_some<bool>(), ENotFound);
 
         let mut i: u32 = self.total_minted;

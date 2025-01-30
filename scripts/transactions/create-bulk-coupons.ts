@@ -1,7 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { writeFileSync } from 'fs';
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
 import { newCouponRules, optionalRangeConstructor, PercentageOffCoupon } from '../coupons/coupon';

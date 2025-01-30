@@ -92,10 +92,10 @@ importers:
 
   scripts:
     dependencies:
-      '@mysten/kiosk':
+      '@iota/kiosk':
         specifier: 0.9.21
         version: 0.9.21(svelte@4.2.15)(typescript@5.4.5)
-      '@mysten/sui':
+      '@iota/iota-sdk':
         specifier: ^1.12.0
         version: 1.12.0(svelte@4.2.15)(typescript@5.4.5)
       '@noble/hashes':
@@ -117,7 +117,7 @@ importers:
 
   sdk:
     dependencies:
-      '@mysten/sui':
+      '@iota/iota-sdk':
         specifier: ^1.17.0
         version: 1.17.0(svelte@4.2.15)(typescript@5.4.5)
     devDependencies:
@@ -748,7 +748,7 @@ packages:
       '@babel/core': ^7.0.0-0
 
   '@babel/plugin-transform-react-jsx@7.23.4':
-    resolution: {integrity: sha512-5xOpoPguCZCRbo/JeHlloSkTA8Bld1J/E1/kLfD1nsuiW1m8tduTA1ERCgIZokDflX/IBzKcqR3l7VlRgiIfHA==}
+    resolution: {integrity: sha512-5xOpoPguCZCRbo/JeHlloSkTA8Bld1J/E1/kLfD1niotaW1m8tduTA1ERCgIZokDflX/IBzKcqR3l7VlRgiIfHA==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -1250,7 +1250,7 @@ packages:
   '@hapi/topo@5.1.0':
     resolution: {integrity: sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==}
 
-  '@headlessui/react@1.7.19':
+  '@headlesiota/react@1.7.19':
     resolution: {integrity: sha512-Ll+8q3OlMJfJbAKM/+/Y2q6PPYbryqNTXDbryx7SXLIDamkF6iQFbriYHga0dY44PvDhvvBWCx1Xj4U5+G4hOw==}
     engines: {node: '>=10'}
     peerDependencies:
@@ -1328,29 +1328,29 @@ packages:
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
 
-  '@mysten/bcs@0.10.1':
+  '@iota/bcs@0.10.1':
     resolution: {integrity: sha512-cQDb7Rhz2J82ZqgVQiHykuwKUlgiLWS2bjoajPPW0uvXlb75qrgKuaxh1UzsaRhHy3egk/APc0xjiZoqdbzB4w==}
 
-  '@mysten/bcs@1.1.0':
+  '@iota/bcs@1.1.0':
     resolution: {integrity: sha512-yy9/1Y4d0FlRywS1+9ze/T7refCbrvwFwJIOKs9M3QBK1njbcHZp+LkVeLqBvIJA5eZ3ZCzmhQ1Xq4Sed5mEBA==}
 
-  '@mysten/bcs@1.2.0':
+  '@iota/bcs@1.2.0':
     resolution: {integrity: sha512-LuKonrGdGW7dq/EM6U2L9/as7dFwnhZnsnINzB/vu08Xfrj0qzWwpLOiXagAa5yZOPLK7anRZydMonczFkUPzA==}
 
-  '@mysten/kiosk@0.9.21':
+  '@iota/kiosk@0.9.21':
     resolution: {integrity: sha512-W1X1oGzkB46gipyxlFs9qRnaiXW5jePgTjl0e4swQ6Ux0pZe2/B9TvCHeO9NYUVp2imSggqf2F6tQTdDzL3tvg==}
     engines: {node: '>=18'}
 
-  '@mysten/sui.js@0.49.1':
+  '@iota/iota-sdk.js@0.49.1':
     resolution: {integrity: sha512-xMndhhlnlVYjMVmBkXnGs9wdw7/bh3R/QggD/DkqGG7Iq7RL2uldtAeIFYsPGfTua/TJW8RFX7q59RagIOwWdw==}
     engines: {node: '>=16'}
-    deprecated: This package has been renamed to @mysten/sui, please update to use the renamed package.
+    deprecated: This package has been renamed to @iota/iota-sdk, please update to use the renamed package.
 
-  '@mysten/sui@1.12.0':
+  '@iota/iota-sdk@1.12.0':
     resolution: {integrity: sha512-DrSyja04xyGrTGlIQKMwZ6MywxNPkjyIcDLm915Zisoy1/uIgPoHc4cx53JyiG92z/HgowTVGGCCIzH53DIYXA==}
     engines: {node: '>=18'}
 
-  '@mysten/sui@1.17.0':
+  '@iota/iota-sdk@1.17.0':
     resolution: {integrity: sha512-vL6QrH3l10dTatimPmz/feqMbYfEjvh8MPf3Xwn5tjuwDwBCS0ha1kdN+4vUpu6t0aCFviK+Df/vanORS8cbGQ==}
     engines: {node: '>=18'}
 
@@ -6398,7 +6398,7 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@headlessui/react@1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@headlesiota/react@1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@tanstack/react-virtual': 3.8.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       client-only: 0.0.1
@@ -6517,28 +6517,28 @@ snapshots:
 
   '@microsoft/tsdoc@0.14.2': {}
 
-  '@mysten/bcs@0.10.1':
+  '@iota/bcs@0.10.1':
     dependencies:
       bs58: 5.0.0
 
-  '@mysten/bcs@1.1.0':
+  '@iota/bcs@1.1.0':
     dependencies:
       bs58: 6.0.0
 
-  '@mysten/bcs@1.2.0':
+  '@iota/bcs@1.2.0':
     dependencies:
       bs58: 6.0.0
 
-  '@mysten/kiosk@0.9.21(svelte@4.2.15)(typescript@5.4.5)':
+  '@iota/kiosk@0.9.21(svelte@4.2.15)(typescript@5.4.5)':
     dependencies:
-      '@mysten/sui': 1.12.0(svelte@4.2.15)(typescript@5.4.5)
+      '@iota/iota-sdk': 1.12.0(svelte@4.2.15)(typescript@5.4.5)
     transitivePeerDependencies:
       - svelte
       - typescript
 
-  '@mysten/sui.js@0.49.1':
+  '@iota/iota-sdk.js@0.49.1':
     dependencies:
-      '@mysten/bcs': 0.10.1
+      '@iota/bcs': 0.10.1
       '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
@@ -6547,10 +6547,10 @@ snapshots:
       superstruct: 1.0.4
       tweetnacl: 1.0.3
 
-  '@mysten/sui@1.12.0(svelte@4.2.15)(typescript@5.4.5)':
+  '@iota/iota-sdk@1.12.0(svelte@4.2.15)(typescript@5.4.5)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
-      '@mysten/bcs': 1.1.0
+      '@iota/bcs': 1.1.0
       '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
@@ -6565,10 +6565,10 @@ snapshots:
       - svelte
       - typescript
 
-  '@mysten/sui@1.17.0(svelte@4.2.15)(typescript@5.4.5)':
+  '@iota/iota-sdk@1.17.0(svelte@4.2.15)(typescript@5.4.5)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.9.0)
-      '@mysten/bcs': 1.2.0
+      '@iota/bcs': 1.2.0
       '@noble/curves': 1.4.2
       '@noble/hashes': 1.4.0
       '@scure/bip32': 1.4.0
@@ -6709,7 +6709,7 @@ snapshots:
 
   '@pythnetwork/pyth-sui-js@2.0.0':
     dependencies:
-      '@mysten/sui.js': 0.49.1
+      '@iota/iota-sdk.js': 0.49.1
       '@pythnetwork/price-service-client': 1.9.0
       buffer: 6.0.3
     transitivePeerDependencies:
@@ -9805,7 +9805,7 @@ snapshots:
 
   nextra-theme-docs@2.13.4(next@14.2.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nextra@2.13.4(next@14.2.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@headlesiota/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@popperjs/core': 2.11.8
       clsx: 2.1.1
       escape-string-regexp: 5.0.0
@@ -9825,7 +9825,7 @@ snapshots:
 
   nextra@2.13.4(next@14.2.4(@babel/core@7.24.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@headlessui/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@headlesiota/react': 1.7.19(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@mdx-js/mdx': 2.3.0
       '@mdx-js/react': 2.3.0(react@18.3.1)
       '@napi-rs/simple-git': 0.1.16

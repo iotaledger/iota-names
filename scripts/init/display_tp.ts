@@ -1,12 +1,13 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 export const getImageUrl = (isSubdomain: boolean, network: 'mainnet' | 'testnet') => {
 	const name = `{${isSubdomain ? 'nft.' : ''}domain_name}`;
 	const expiration = `{${isSubdomain ? 'nft.' : ''}expiration_timestamp_ms}`;
 
-	return `https://api-${network}.suins.io/nfts/${name}/${expiration}`;
+	return `https://api-${network}.iotans.io/nfts/${name}/${expiration}`;
 };
 
 /** Creates the display. Should be called for both subnames and names. */
@@ -14,24 +15,24 @@ export const createDisplay = ({
 	txb,
 	publisher,
 	isSubdomain,
-	suinsPackageIdV1,
+	iotansPackageIdV1,
 	subdomainsPackageId,
 	network = 'mainnet',
 }: {
 	txb: Transaction;
 	publisher: string;
 	isSubdomain: boolean;
-	suinsPackageIdV1: string;
+	iotansPackageIdV1: string;
 	subdomainsPackageId: string;
 	network: 'mainnet' | 'testnet';
 }) => {
 	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubDomainRegistration`;
-	const suinsRegistration = `${suinsPackageIdV1}::suins_registration::SuinsRegistration`;
+	const iotansRegistration = `${iotansPackageIdV1}::iotans_registration::IotansRegistration`;
 
 	const display = txb.moveCall({
 		target: `0x2::display::new`,
 		arguments: [txb.object(publisher)],
-		typeArguments: [isSubdomain ? subnameRegistration : suinsRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : iotansRegistration],
 	});
 
 	txb.moveCall({
@@ -43,17 +44,17 @@ export const createDisplay = ({
 				`{${isSubdomain ? 'nft.' : ''}domain_name}`,
 				`https://{${isSubdomain ? 'nft.' : ''}domain_name}.id`,
 				getImageUrl(isSubdomain, network),
-				'SuiNS - Sculpt Your Identity',
-				'https://suins.io',
+				'IOTANS - Sculpt Your Identity',
+				'https://iotans.io',
 			]),
 		],
-		typeArguments: [isSubdomain ? subnameRegistration : suinsRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : iotansRegistration],
 	});
 
 	txb.moveCall({
 		target: `0x2::display::update_version`,
 		arguments: [display],
-		typeArguments: [isSubdomain ? subnameRegistration : suinsRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : iotansRegistration],
 	});
 
 	const sender = txb.moveCall({
