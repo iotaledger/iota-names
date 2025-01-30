@@ -4,7 +4,7 @@
 
 import { IotaObjectRef } from '@iota/iota-sdk/client';
 import { Transaction, TransactionArgument } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
+import { IOTA_CLOCK_OBJECT_ID, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { mainPackage, PackageInfo } from '../../config/constants';
 import reservedObjects from '../../reserved-names/owned-objects.json';
