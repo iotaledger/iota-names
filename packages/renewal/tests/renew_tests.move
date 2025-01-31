@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
-module renewal::renew_tests {
+module renewal::renewal_tests {
     use std::string::utf8;
 
     use iota::{coin, iota::IOTA, clock::{Self, Clock}};

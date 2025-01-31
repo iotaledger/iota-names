@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
-module iotans::renew;
+module iotans::renew_v2;
 
 use std::string;
 use iota::clock::{timestamp_ms, Clock};
