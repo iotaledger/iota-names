@@ -18,7 +18,7 @@ use std::type_name as `type`;
 use iota::clock::Clock;
 use iota::coin::Coin;
 use iota::dynamic_field as df;
-use iota::iota::iota;
+use iota::iota::IOTA;
 use iotans::domain;
 use iotans::iotans::{Self, AdminCap, IotaNS};
 use iotans::iotans_registration::IotansRegistration;

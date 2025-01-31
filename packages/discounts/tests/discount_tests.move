@@ -11,7 +11,7 @@ use discounts::house::{Self, DiscountHouse, DiscountHouseApp};
 use std::string::{utf8, String};
 use iota::clock::{Self, Clock};
 use iota::coin::{Self, Coin};
-use iota::iota::iota;
+use iota::iota::IOTA;
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iotans::registry;
 use iotans::iotans::{Self, IotaNS, AdminCap};
