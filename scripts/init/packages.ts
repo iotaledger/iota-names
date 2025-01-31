@@ -48,7 +48,7 @@ export const Packages = (network: Network) => {
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-				const iotans = parseCreatedObject(data, `${packageId}::iotans::IOTANS`);
+				const iotans = parseCreatedObject(data, `${packageId}::iotans::IotaNS`);
 				const adminCap = parseCreatedObject(data, `${packageId}::iotans::AdminCap`);
 
 				return {
