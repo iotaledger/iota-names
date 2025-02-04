@@ -1,0 +1,39 @@
+{
+	"name": "scripts",
+	"version": "1.0.0",
+	"description": "",
+	"private": true,
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"publish-and-setup": "ts-node init/init.ts",
+		"transactions::main_package::upgrade": "ts-node transactions/main_package_upgrade.ts",
+		"transfer::names": "ts-node reserved-names/transfer-names.ts",
+		"transfer::caps": "ts-node transactions/caps-to-foundation.ts",
+		"withdraw:profits": "ts-node transactions/funds_to_treasury.ts",
+		"create-deepbook-pools": "ts-node transactions/deepbook/create_pools.ts",
+		"authorize-renewals": "ts-node transactions/renewals/authorize_renewals.ts",
+		"renew-reserved-names": "ts-node transactions/reserved_names/extend_reserved_names.ts",
+		"prettier:check": "prettier -c --ignore-unknown .",
+		"prettier:fix": "prettier -w --ignore-unknown .",
+		"eslint:check": "eslint --max-warnings=0 '**/*.{ts,tsx}'",
+		"eslint:fix": "pnpm run eslint:check --fix",
+		"lint": "pnpm run eslint:check && pnpm run prettier:check",
+		"lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
+		"setup-dayone-discount": "ts-node transactions/authorize-day-one-discount.ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@iota/kiosk": "0.3.1",
+		"@iota/iota-sdk": "^0.4.0",
+		"@noble/hashes": "^1.4.0",
+		"@pythnetwork/pyth-sui-js": "2.0.0",
+		"dotenv": "^16.3.1"
+	},
+	"devDependencies": {
+		"esbuild": "^0.20.2",
+		"ts-node": "^10.9.1"
+	}
+}

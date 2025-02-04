@@ -1,0 +1,44 @@
+# Examples
+
+The following code sample is an initial example of how to integrate with IOTANS on chain. This page will host more examples in the future.
+
+## Transferring any object to a IOTANS name fully on-chain
+
+The following `demo` module demonstrates how to transfer an object of any type to a IOTANS name. This is a basic example of how to interact with IOTANS on chain.
+
+```rust
+module demo::demo {
+    use std::string::String;
+    use iota::clock::Clock;
+
+    /// Import the IOTANS dependency.
+    use iotans::{ 
+        iotans::IOTANS,
+        registry::Registry,
+        domain
+    };
+
+    /// Different custom error messages.
+    const ENameNotFound: u64 = 0;
+    const ENameNotPointingToAddress: u64 = 1;
+    const ENameExpired: u64 = 2;
+
+    /// A function to transfer an object of any type T to a name (for instance `example.iota`)
+    public fun send_to_name<T: key + store>(iotans: &IOTANS, obj: T, name: String, clock: &Clock) {
+        // Look up the name on the registry.
+        let mut optional = iotans.registry<Registry>().lookup(domain::new(name));
+        // Check that the name indeed exists.
+        assert!(optional.is_some(), ENameNotFound);
+
+        let name_record = optional.extract();
+        // Check that name has not expired. 
+        // This check is optional, but it's recommended you perform the verification.
+        assert!(!name_record.has_expired(clock), ENameExpired);
+        // Check that the name has a target address set.
+        assert!(name_record.target_address().is_some(), ENameNotPointingToAddress);
+
+        // Transfer the object to that name.
+        transfer::public_transfer(obj, name_record.target_address().extract())
+    }
+}
+```

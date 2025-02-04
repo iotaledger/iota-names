@@ -1,0 +1,14 @@
+[package]
+name = "temp_subdomain_proxy"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x5356dd9fc2174d7622d7d8b8a21c629844d95afedfbb0915011d5daf6f9cbba2"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+subdomains = { local = "../subdomains" }
+utils = { local = "../utils" }
+
+[addresses]
+temp_subdomain_proxy = "0x5356dd9fc2174d7622d7d8b8a21c629844d95afedfbb0915011d5daf6f9cbba2"

@@ -1,0 +1,14 @@
+[package]
+name = "registration"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x51f69ff4853e6db1b3c640149e7f7aa703d2234df70759fa8418590666a76853"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+
+
+[addresses]
+registration = "0x51f69ff4853e6db1b3c640149e7f7aa703d2234df70759fa8418590666a76853"

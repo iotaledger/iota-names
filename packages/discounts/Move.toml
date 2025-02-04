@@ -1,0 +1,14 @@
+[package]
+name = "discounts"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x0465ff9bfe81c68b387588d86f97c60111beff8eb06fa91fe7dc2ce41b6571c0"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+day_one = { local = "../day_one" }
+
+[addresses]
+discounts = "0x0465ff9bfe81c68b387588d86f97c60111beff8eb06fa91fe7dc2ce41b6571c0"

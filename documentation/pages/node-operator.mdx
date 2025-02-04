@@ -1,0 +1,29 @@
+import { Callout } from 'nextra/components'
+
+# Node Operators
+
+Full nodes for the Mainnet environment process IOTANS names without additional configuration. The Mysten Labs public nodes for Testnet also resolve IOTANS names. 
+
+Mysten Labs public nodes.
+- Mainnet: https://api.mainnet.iota.cafe
+- Testnet: https://api.testnet.iota.cafe
+- Devnet: https://api.devnet.iota.cafe:443
+    - IOTANS name resolution unavailable for Devnet.
+
+## Full node configuration
+
+Full node configuration is necessary for nodes to resolve IOTANS names in the Testnet environment. Devnet is not supported because of its frequent updates.
+
+<Callout type="info" emoji="ℹ️">
+Mainnet nodes resolve IOTANS names without additional configuration.
+</Callout>
+
+To configure a node for IOTANS name resolution on Testnet, add the following options to your yaml configuration file:
+
+```sh
+name-service-package-address: 0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93
+name-service-registry-id: 0xb120c0d55432630fce61f7854795a3463deb6e3b443cc4ae72e1282073ff56e4
+name-service-reverse-registry-id: 0xcee9dbb070db70936c3a374439a6adb16f3ba97eac5468d2e1e6fff6ed93e465
+```
+
+For complete details on configuring a IOTA Full node, see [IOTA Full Node Configuration](https://docs.iota.org/guides/operator/iota-full-node) on docs.iota.org.

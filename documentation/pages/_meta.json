@@ -1,0 +1,14 @@
+{
+    "index": "IOTANS Documentation",
+    "dao": "IOTANS DAO",
+    "developer": "Developer",
+    "user": "User",
+    "node-operator": "Node Operator",
+    "move-registry": "Move Registry (Experimental)",
+    "dashboard": {
+        "title": "IOTANS Dashboard ↗",
+        "type": "page",
+        "href": "https://iotans.io/",
+        "newWindow": true
+    }
+}

@@ -1,0 +1,14 @@
+[package]
+name = "day_one"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x40c7ab56a4a6c32b571c5ce2575f5b6f7648d4605d3f0faff559d9ad106b47ab"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+
+
+[addresses]
+day_one = "0x40c7ab56a4a6c32b571c5ce2575f5b6f7648d4605d3f0faff559d9ad106b47ab"

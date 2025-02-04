@@ -1,0 +1,14 @@
+[package]
+name = "subdomains"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x9d4bbb77db78317a358149445ea458255a22d93015829d9d2426564196e0fcaf"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+denylist = { local = "../denylist" }
+
+[addresses]
+subdomains = "0x9d4bbb77db78317a358149445ea458255a22d93015829d9d2426564196e0fcaf"

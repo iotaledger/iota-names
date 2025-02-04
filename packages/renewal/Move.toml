@@ -1,0 +1,14 @@
+[package]
+name = "renewal"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x1bd546526a5c7ba9d4bac2e3292f68cb1c572fa6d9e42ba2472d5585dab61c3d"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+
+
+[addresses]
+renewal = "0x1bd546526a5c7ba9d4bac2e3292f68cb1c572fa6d9e42ba2472d5585dab61c3d"

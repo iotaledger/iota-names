@@ -1,0 +1,12 @@
+[package]
+name = "iotans"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x323b9fd87dcf0c5cbfdddeb43bf9834b4da5493246cfac2ae59e7b9b0fa62a99"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet" }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+
+[addresses]
+iotans = "0x323b9fd87dcf0c5cbfdddeb43bf9834b4da5493246cfac2ae59e7b9b0fa62a99"
