@@ -1,0 +1,15 @@
+[package]
+name = "dev_util"
+version = "0.0.1"
+edition = "2024.beta"
+published-at = "0x0"
+
+[dependencies]
+# IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/devnet", override=true }
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+registration = { local = "../registration" }
+utils = { local = "../utils" }
+
+[addresses]
+dev_util = "0x0"
