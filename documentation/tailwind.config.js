@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /** @type {import("tailwindcss").Config} */
@@ -12,8 +13,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        blurple: "rgb(var(--suins-blurple) / <alpha-value>)",
-        blurpleDark: "rgb(var(--suins-blurple-dark) / <alpha-value>)",
+        blurple: "rgb(var(--iotans-blurple) / <alpha-value>)",
+        blurpleDark: "rgb(var(--iotans-blurple-dark) / <alpha-value>)",
       }
     },
   },

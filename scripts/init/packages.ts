@@ -1,9 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SuiTransactionBlockResponse } from '@mysten/sui/client';
-import { Transaction } from '@mysten/sui/transactions';
-import { MIST_PER_SUI } from '@mysten/sui/utils';
+import { IotaTransactionBlockResponse } from '@iota/iota-sdk/client';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import {
 	addConfig,
@@ -13,11 +14,11 @@ import {
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';
-import { SuiNS, SuiNSDependentPackages, TempSubdomainProxy } from './manifests';
+import { IOTANS, IOTANSDependentPackages, TempSubdomainProxy } from './manifests';
 
 export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
-const parseCorePackageObjects = (data: SuiTransactionBlockResponse) => {
+const parseCorePackageObjects = (data: IotaTransactionBlockResponse) => {
 	const packageId = data.objectChanges!.find((x) => x.type === 'published');
 	if (!packageId || packageId.type !== 'published') throw new Error('Expected Published object');
 	const upgradeCap = parseCreatedObject(data, '0x2::package::UpgradeCap');
@@ -28,7 +29,7 @@ const parseCorePackageObjects = (data: SuiTransactionBlockResponse) => {
 	};
 };
 
-const parseCreatedObject = (data: SuiTransactionBlockResponse, objectType: string) => {
+const parseCreatedObject = (data: IotaTransactionBlockResponse, objectType: string) => {
 	const obj = data.objectChanges!.find((x) => x.type === 'created' && x.objectType === objectType);
 	if (!obj || obj.type !== 'created') throw new Error(`Expected ${objectType} object`);
 
@@ -40,21 +41,21 @@ export const Packages = (network: Network) => {
 	const subdomainExtraDependencies = `denylist = { local = "../denylist" }`;
 
 	return {
-		SuiNS: {
+		IOTANS: {
 			order: 1,
-			folder: 'suins',
-			manifest: SuiNS(rev),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			folder: 'iotans',
+			manifest: IOTANS(rev),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-				const suins = parseCreatedObject(data, `${packageId}::suins::SuiNS`);
-				const adminCap = parseCreatedObject(data, `${packageId}::suins::AdminCap`);
+				const iotans = parseCreatedObject(data, `${packageId}::iotans::IotaNS`);
+				const adminCap = parseCreatedObject(data, `${packageId}::iotans::AdminCap`);
 
 				return {
 					packageId,
 					upgradeCap,
 					publisher,
-					suins,
+					iotans,
 					adminCap,
 				};
 			},
@@ -62,31 +63,31 @@ export const Packages = (network: Network) => {
 				txb: Transaction,
 				packageId: string,
 				adminCap: string,
-				suins: string,
+				iotans: string,
 				publisher: string,
 			) => {
 				// Adds the default registry where name records and reverse records will live
 				addRegistry({
 					txb,
 					adminCap,
-					suins,
-					suinsPackageIdV1: packageId,
-					registry: newLookupRegistry({ txb, suinsPackageIdV1: packageId, adminCap: adminCap }),
+					iotans,
+					iotansPackageIdV1: packageId,
+					registry: newLookupRegistry({ txb, iotansPackageIdV1: packageId, adminCap: adminCap }),
 					type: `${packageId}::registry::Registry`,
 				});
 				// Adds the configuration file (pricelist and public key)
 				addConfig({
 					txb,
 					adminCap,
-					suins,
-					suinsPackageIdV1: packageId,
+					iotans,
+					iotansPackageIdV1: packageId,
 					config: newPriceConfig({
 						txb,
-						suinsPackageIdV1: packageId,
+						iotansPackageIdV1: packageId,
 						priceList: {
-							three: 5 * Number(MIST_PER_SUI),
-							four: 2 * Number(MIST_PER_SUI),
-							fivePlus: 0.5 * Number(MIST_PER_SUI),
+							three: 5 * Number(NANOS_PER_IOTA),
+							four: 2 * Number(NANOS_PER_IOTA),
+							fivePlus: 0.5 * Number(NANOS_PER_IOTA),
 						},
 					}),
 					type: `${packageId}::config::Config`,
@@ -96,7 +97,7 @@ export const Packages = (network: Network) => {
 					txb,
 					publisher,
 					isSubdomain: false,
-					suinsPackageIdV1: packageId,
+					iotansPackageIdV1: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
@@ -105,7 +106,7 @@ export const Packages = (network: Network) => {
 					txb,
 					publisher,
 					isSubdomain: true,
-					suinsPackageIdV1: packageId,
+					iotansPackageIdV1: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
@@ -114,8 +115,8 @@ export const Packages = (network: Network) => {
 		Utils: {
 			order: 2,
 			folder: 'utils',
-			manifest: SuiNSDependentPackages(rev, 'utils'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			manifest: IOTANSDependentPackages(rev, 'utils'),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
 				return {
@@ -128,8 +129,8 @@ export const Packages = (network: Network) => {
 		DenyList: {
 			order: 2,
 			folder: 'denylist',
-			manifest: SuiNSDependentPackages(rev, 'denylist'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			manifest: IOTANSDependentPackages(rev, 'denylist'),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
 				return {
@@ -138,15 +139,15 @@ export const Packages = (network: Network) => {
 				};
 			},
 			authorizationType: (packageId: string) => `${packageId}::denylist::DenyListAuth`,
-			setupFunction: (txb: Transaction, packageId: string, adminCap: string, suins: string) => {
-				setupApp({ txb, adminCap, suins, target: `${packageId}::denylist` });
+			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotans: string) => {
+				setupApp({ txb, adminCap, iotans, target: `${packageId}::denylist` });
 			},
 		},
 		Registration: {
 			order: 2,
 			folder: 'registration',
-			manifest: SuiNSDependentPackages(rev, 'registration'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			manifest: IOTANSDependentPackages(rev, 'registration'),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
 				return {
@@ -159,8 +160,8 @@ export const Packages = (network: Network) => {
 		Renewal: {
 			order: 2,
 			folder: 'renewal',
-			manifest: SuiNSDependentPackages(rev, 'renewal'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			manifest: IOTANSDependentPackages(rev, 'renewal'),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
 				return {
@@ -173,26 +174,26 @@ export const Packages = (network: Network) => {
 				txb,
 				packageId,
 				adminCap,
-				suinsPackageIdV1,
-				suins,
+				iotansPackageIdV1,
+				iotans,
 				priceList,
 			}: {
 				txb: Transaction;
 				packageId: string;
-				suinsPackageIdV1: string;
+				iotansPackageIdV1: string;
 				adminCap: string;
-				suins: string;
+				iotans: string;
 				priceList: { [key: string]: number };
 			}) => {
 				const configuration = newPriceConfig({
 					txb,
-					suinsPackageIdV1,
+					iotansPackageIdV1,
 					priceList,
 				});
 				setupApp({
 					txb,
 					adminCap,
-					suins: suins,
+					iotans: iotans,
 					target: `${packageId}::renew::setup`,
 					args: [configuration],
 				});
@@ -201,8 +202,8 @@ export const Packages = (network: Network) => {
 		Subdomains: {
 			order: 3,
 			folder: 'subdomains',
-			manifest: SuiNSDependentPackages(rev, 'subdomains', subdomainExtraDependencies),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			manifest: IOTANSDependentPackages(rev, 'subdomains', subdomainExtraDependencies),
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
 				return {
@@ -214,14 +215,14 @@ export const Packages = (network: Network) => {
 				txb: Transaction,
 				packageId: string,
 				adminCap: string,
-				suins: string,
-				suinsPackageIdV1: string,
+				iotans: string,
+				iotansPackageIdV1: string,
 			) => {
 				addConfig({
 					txb,
 					adminCap,
-					suins,
-					suinsPackageIdV1,
+					iotans,
+					iotansPackageIdV1,
 					config: txb.moveCall({
 						target: `${packageId}::config::default`,
 					}),
@@ -234,7 +235,7 @@ export const Packages = (network: Network) => {
 			order: 3,
 			folder: 'temp_subdomain_proxy',
 			manifest: TempSubdomainProxy(rev),
-			processPublish: (data: SuiTransactionBlockResponse) => {
+			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				return {
 					packageId,

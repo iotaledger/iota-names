@@ -1,19 +1,19 @@
 # Examples
 
-The following code sample is an initial example of how to integrate with SuiNS on chain. This page will host more examples in the future.
+The following code sample is an initial example of how to integrate with IOTANS on chain. This page will host more examples in the future.
 
-## Transferring any object to a SuiNS name fully on-chain
+## Transferring any object to a IOTANS name fully on-chain
 
-The following `demo` module demonstrates how to transfer an object of any type to a SuiNS name. This is a basic example of how to interact with SuiNS on chain.
+The following `demo` module demonstrates how to transfer an object of any type to a IOTANS name. This is a basic example of how to interact with IOTANS on chain.
 
 ```rust
 module demo::demo {
     use std::string::String;
-    use sui::clock::Clock;
+    use iota::clock::Clock;
 
-    /// Import the SuiNS dependency.
-    use suins::{ 
-        suins::SuiNS,
+    /// Import the IOTANS dependency.
+    use iotans::{ 
+        iotans::IOTANS,
         registry::Registry,
         domain
     };
@@ -23,10 +23,10 @@ module demo::demo {
     const ENameNotPointingToAddress: u64 = 1;
     const ENameExpired: u64 = 2;
 
-    /// A function to transfer an object of any type T to a name (for instance `example.sui`)
-    public fun send_to_name<T: key + store>(suins: &SuiNS, obj: T, name: String, clock: &Clock) {
+    /// A function to transfer an object of any type T to a name (for instance `example.iota`)
+    public fun send_to_name<T: key + store>(iotans: &IOTANS, obj: T, name: String, clock: &Clock) {
         // Look up the name on the registry.
-        let mut optional = suins.registry<Registry>().lookup(domain::new(name));
+        let mut optional = iotans.registry<Registry>().lookup(domain::new(name));
         // Check that the name indeed exists.
         assert!(optional.is_some(), ENameNotFound);
 

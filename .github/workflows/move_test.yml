@@ -27,8 +27,8 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
-      - name: Install Sui using Homebrew
-        run: brew install sui
+      - name: Install IOTA using Homebrew
+        run: brew install iota
 
       - name: Run move tests in all package subdirectories, with exclusions
         run: |
@@ -36,7 +36,7 @@ jobs:
           for dir in packages/*; do
             dir_name=$(basename "$dir")
             if [[ ! " ${exclude_dirs[@]} " =~ " ${dir_name} " ]] && [ -d "$dir" ]; then
-              echo "Running sui move test in $dir"
-              (cd "$dir" && sui move test)
+              echo "Running iota move test in $dir"
+              (cd "$dir" && iota move test)
             fi
           done

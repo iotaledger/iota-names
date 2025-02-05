@@ -29,8 +29,8 @@ jobs:
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
           echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
-      - name: Install Sui using Homebrew
-        run: brew install sui
+      - name: Install IOTA using Homebrew
+        run: brew install iota
 
       - uses: actions/setup-node@v4
         with:
@@ -49,4 +49,4 @@ jobs:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
-          sui start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 & cd sdk && VITE_SUI_BIN="sui" pnpm test:e2e
+          iota start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 & cd sdk && VITE_IOTA_BIN="iota" pnpm test:e2e

@@ -1,17 +1,17 @@
 {
-	"name": "@mysten/suins",
+	"name": "@iota/iota-ns",
 	"version": "0.4.2",
-	"description": "An SDK to simplify SuiNS integration.",
+	"description": "An SDK to simplify IOTANS integration.",
 	"license": "Apache-2.0",
 	"private": false,
 	"type": "commonjs",
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/cjs/index.d.ts",
-	"author": "Mysten Labs <build@mystenlabs.com>",
+	"author": "Mysten Labs <build@iotaledger.com>",
 	"keywords": [
-		"Sui",
-		"suins",
+		"IOTA",
+		"iotans",
 		"mysten"
 	],
 	"exports": {
@@ -28,7 +28,7 @@
 	],
 	"scripts": {
 		"build": "cd ../scripts && pnpm ts-node build-tools/build.ts",
-		"test": "echo 'No unit tests for SuiNS SDK'",
+		"test": "echo 'No unit tests for IOTANS SDK'",
 		"pre-commit": "pnpm prettier:fix && pnpm lint && pnpm build",
 		"prepublishOnly": "pnpm build",
 		"prettier:check": "prettier -c --ignore-unknown .",
@@ -38,13 +38,13 @@
 		"lint": "pnpm run eslint:check && pnpm run prettier:check",
 		"lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
 		"test:e2e": "wait-on http://127.0.0.1:9123 -l --timeout 120000 && vitest run",
-		"prepare:e2e": "cargo build --bin sui --profile dev && cross-env RUST_LOG=info,sui=error,anemo_tower=warn,consensus=off cargo run --bin sui -- start --with-faucet --force-regenesis --epoch-duration-ms 300000"
+		"prepare:e2e": "cargo build --bin iota --profile dev && cross-env RUST_LOG=info,iota=error,anemo_tower=warn,consensus=off cargo run --bin iota -- start --with-faucet --force-regenesis --epoch-duration-ms 300000"
 	},
 	"engines": {
 		"node": ">=16"
 	},
 	"dependencies": {
-		"@mysten/sui": "^1.17.0"
+		"@iota/iota-sdk": "^1.17.0"
 	},
 	"devDependencies": {
 		"@types/tmp": "^0.2.3",
@@ -58,9 +58,9 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/mystenlabs/suins-contracts.git"
+		"url": "git+https://github.com/iotaledger/iotans-contracts.git"
 	},
 	"bugs": {
-		"url": "https://github.com/mystenlabs/suins-contracts/issues"
+		"url": "https://github.com/iotaledger/iotans-contracts/issues"
 	}
 }

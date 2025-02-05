@@ -2,9 +2,9 @@
 
 This directory contains different scripts used to build transactions (for multi-sig operations).
 
-## Setup SuiNS locally
+## Setup IOTANS locally
 
-To setup a local instance of SuiNS (or in any network of your choosing), all you need to do is call:
+To setup a local instance of IOTANS (or in any network of your choosing), all you need to do is call:
 
 ```
 # choose from mainnet, testnet, devnet, localnet

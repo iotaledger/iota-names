@@ -1,8 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { SuiObjectRef } from '@mysten/sui/client';
-import { Transaction, TransactionArgument } from '@mysten/sui/transactions';
-import { MIST_PER_SUI, SUI_CLOCK_OBJECT_ID } from '@mysten/sui/utils';
+import { IotaObjectRef } from '@iota/iota-sdk/client';
+import { Transaction, TransactionArgument } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
 import { mainPackage, PackageInfo } from '../../config/constants';
 import reservedObjects from '../../reserved-names/owned-objects.json';
@@ -10,7 +11,7 @@ import { prepareMultisigTx } from '../../utils/utils';
 
 const RUN = process.env.RUN_ID || '';
 
-/// MystenLabs treasury address.
+/// iotaledger treasury address.
 const ADDRESS_TO_TRANSFER_FUNDS =
 	'0x638791b625c4482bc1b917847cdf8aa76fe226c0f3e0a9b1aa595625989e98a1';
 
@@ -20,9 +21,9 @@ const names: Record<string, any[]> = {
 	fivePlus: [],
 };
 const PRICE_LIST: Record<string, bigint> = {
-	three: 50n * MIST_PER_SUI,
-	four: 10n * MIST_PER_SUI,
-	fivePlus: 2n * MIST_PER_SUI,
+	three: 50n * NANOS_PER_IOTA,
+	four: 10n * NANOS_PER_IOTA,
+	fivePlus: 2n * NANOS_PER_IOTA,
 };
 
 const MAX_NAMES_PER_BATCH = 815;
@@ -61,25 +62,25 @@ const parseReservedObjects = () => {
 // we always wanna group these.
 parseReservedObjects();
 
-// Does withdraw from suins and returns the funds to be used in the PTB.
+// Does withdraw from iotans and returns the funds to be used in the PTB.
 const withdrawTx = (txb: Transaction, config: PackageInfo) => {
 	return txb.moveCall({
-		target: `${config.packageId}::suins::withdraw`,
-		arguments: [txb.object(config.adminCap), txb.object(config.suins)],
+		target: `${config.packageId}::iotans::withdraw`,
+		arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
 	});
 };
 
 const renewTx = (
 	txb: Transaction,
 	config: PackageInfo,
-	name: SuiObjectRef,
+	name: IotaObjectRef,
 	price: bigint,
 	splitFrom: TransactionArgument,
 ) => {
 	txb.moveCall({
 		target: `${config.renewalsPackageId}::renew::renew`,
 		arguments: [
-			txb.object(config.suins),
+			txb.object(config.iotans),
 			txb.objectRef({
 				objectId: name.objectId,
 				version: name.version,
@@ -87,7 +88,7 @@ const renewTx = (
 			}),
 			txb.pure.u8(5),
 			splitFrom,
-			txb.object(SUI_CLOCK_OBJECT_ID),
+			txb.object(IOTA_CLOCK_OBJECT_ID),
 		],
 	});
 };
@@ -97,7 +98,7 @@ export const prepareFirstTransaction = async () => {
 	const txb = new Transaction();
 	const config = mainPackage.mainnet;
 
-	// let's work with the first batch of 5Plus names (so we need 10 SUI / name (2*5))
+	// let's work with the first batch of 5Plus names (so we need 10 IOTA / name (2*5))
 	const batchToWork = chunkArray(names.fivePlus)[0];
 	const coin = withdrawTx(txb, config);
 
@@ -123,7 +124,7 @@ export const prepareFirstTransaction = async () => {
 		renewTx(txb, config, name, PRICE_LIST.fivePlus, splitFrom);
 	}
 
-	// now, we've spent plenty of sui renewing, but we re-withdraw it
+	// now, we've spent plenty of iota renewing, but we re-withdraw it
 	// to make next operations easier to work with.
 	const coin2 = withdrawTx(txb, config);
 
@@ -177,7 +178,7 @@ export const prepareInbetweenTransactions = async (run: string) => {
 		renewTx(txb, config, name, PRICE_LIST.fivePlus, splitFrom);
 	}
 
-	// now, we've spent plenty of sui renewing, but we re-withdraw it
+	// now, we've spent plenty of iota renewing, but we re-withdraw it
 	// to make next operations easier to work with.
 	const coin2 = withdrawTx(txb, config);
 
@@ -195,7 +196,7 @@ export const prepareLastTransaction = async () => {
 		txb.gas,
 		[...Array(names.four.length).keys()].map((x) => txb.pure.u64(YEARS_TO_RENEW * PRICE_LIST.four)),
 	);
-	// now we shall handle 4 letter names (that's 50 sui / name)
+	// now we shall handle 4 letter names (that's 50 iota / name)
 	for (const [idx, name] of names.four.entries()) {
 		renewTx(txb, config, name, PRICE_LIST.four, { NestedResult: [0, idx] });
 	}
@@ -203,7 +204,7 @@ export const prepareLastTransaction = async () => {
 	const firstWithdrawal = withdrawTx(txb, config);
 	txb.mergeCoins(txb.gas, [firstWithdrawal]);
 
-	// we'll process 3 letter names 100 at a time, because we need 250 SUI / name
+	// we'll process 3 letter names 100 at a time, because we need 250 IOTA / name
 	const threeLetterBatches = chunkArray(names.three, 100);
 
 	for (const batch of threeLetterBatches) {
@@ -222,9 +223,9 @@ export const prepareLastTransaction = async () => {
 	}
 
 	// transfer profits to treasury in the same PTB :)
-	// We transfer 47K from the SuiNS app profits.
+	// We transfer 47K from the IOTANS app profits.
 	txb.transferObjects(
-		[txb.splitCoins(txb.gas, [txb.pure.u64(47_350n * MIST_PER_SUI)])],
+		[txb.splitCoins(txb.gas, [txb.pure.u64(47_350n * NANOS_PER_IOTA)])],
 		txb.pure.address(ADDRESS_TO_TRANSFER_FUNDS),
 	);
 

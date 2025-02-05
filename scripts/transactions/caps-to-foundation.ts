@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
@@ -49,7 +50,7 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 
     // Publisher: Aeon
     '0x47339900499df62ac40c21d44198331119d5335c7f94777295e5a84f5ae351f7',
-    // Publisher: SuiNS
+    // Publisher: IOTANS
     '0x7339f23f06df3601167d67a31752781d307136fd18304c48c928778e752caae1',
 ];
 
@@ -60,8 +61,8 @@ const APP_CAPS_TO_TRANSFER = [
 
 const profitsToTreasury = (txb: Transaction) => {
     const generalProfits = txb.moveCall({
-        target: `${config.packageId}::suins::withdraw`,
-        arguments: [txb.object(config.adminCap), txb.object(config.suins)],
+        target: `${config.packageId}::iotans::withdraw`,
+        arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
     });
 
     txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));

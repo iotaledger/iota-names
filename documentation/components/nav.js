@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { useConfig } from 'nextra-theme-docs';
@@ -10,7 +11,7 @@ const NavBar = () => {
     const themeSwitch = useConfig().themeSwitch.component({lite: false, className: 'bg-white'});
 
     return (
-        <div className="suins-nav-container sticky top-0 text-white w-full bg-blurple z-10">
+        <div className="iotans-nav-container sticky top-0 text-white w-full bg-blurple z-10">
             <nav className="max-w-[110rem] grid grid-cols-12 h-16 gap-4 items-center">
                 <div className="col-span-3 ml-2">
                     <Link href="/">
@@ -28,9 +29,9 @@ const NavBar = () => {
                             </a>
                         </li>
                         <li>
-                            <a href="https://suins.io/account/my-names" target="_blank">
+                            <a href="https://iotans.io/account/my-names" target="_blank">
                                 <span className="external-link text-xs ">
-                                    <span className='hidden sm:inline'>SuiNS </span>
+                                    <span className='hidden sm:inline'>IOTANS </span>
                                     Dashboard
                                 </span>
                             </a>

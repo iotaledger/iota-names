@@ -1,9 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { Transaction } from '@mysten/sui/transactions';
-import { MIST_PER_SUI } from '@mysten/sui/utils';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { getClient, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
@@ -21,10 +22,10 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		if (data && 'authorizationType' in data) {
 			authorizeApp({
 				txb,
-				adminCap: packageInfo.SuiNS.adminCap,
-				suins: packageInfo.SuiNS.suins,
+				adminCap: packageInfo.IOTANS.adminCap,
+				iotans: packageInfo.IOTANS.iotans,
 				type: data.authorizationType(pkg.packageId),
-				suinsPackageIdV1: packageInfo.SuiNS.packageId,
+				iotansPackageIdV1: packageInfo.IOTANS.packageId,
 			});
 		}
 	}
@@ -32,33 +33,33 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 	packages.Subdomains.setupFunction(
 		txb,
 		packageInfo.Subdomains.packageId,
-		packageInfo.SuiNS.adminCap,
-		packageInfo.SuiNS.suins,
-		packageInfo.SuiNS.packageId,
+		packageInfo.IOTANS.adminCap,
+		packageInfo.IOTANS.iotans,
+		packageInfo.IOTANS.packageId,
 	);
 	packages.DenyList.setupFunction(
 		txb,
 		packageInfo.DenyList.packageId,
-		packageInfo.SuiNS.adminCap,
-		packageInfo.SuiNS.suins,
+		packageInfo.IOTANS.adminCap,
+		packageInfo.IOTANS.iotans,
 	);
-	packages.SuiNS.setupFunction(
+	packages.IOTANS.setupFunction(
 		txb,
-		packageInfo.SuiNS.packageId,
-		packageInfo.SuiNS.adminCap,
-		packageInfo.SuiNS.suins,
-		packageInfo.SuiNS.publisher,
+		packageInfo.IOTANS.packageId,
+		packageInfo.IOTANS.adminCap,
+		packageInfo.IOTANS.iotans,
+		packageInfo.IOTANS.publisher,
 	);
 	packages.Renewal.setupFunction({
 		txb,
-		adminCap: packageInfo.SuiNS.adminCap,
-		suins: packageInfo.SuiNS.suins,
+		adminCap: packageInfo.IOTANS.adminCap,
+		iotans: packageInfo.IOTANS.iotans,
 		packageId: packageInfo.Renewal.packageId,
-		suinsPackageIdV1: packageInfo.SuiNS.packageId,
+		iotansPackageIdV1: packageInfo.IOTANS.packageId,
 		priceList: {
-			three: 2 * Number(MIST_PER_SUI),
-			four: 1 * Number(MIST_PER_SUI),
-			fivePlus: 0.2 * Number(MIST_PER_SUI),
+			three: 2 * Number(NANOS_PER_IOTA),
+			four: 1 * Number(NANOS_PER_IOTA),
+			fivePlus: 0.2 * Number(NANOS_PER_IOTA),
 		},
 	});
 
@@ -100,8 +101,8 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 
 			constants.registryTableId = await queryRegistryTable(
 				getClient(network),
-				packageInfo.SuiNS.suins,
-				packageInfo.SuiNS.packageId,
+				packageInfo.IOTANS.iotans,
+				packageInfo.IOTANS.packageId,
 			);
 
 			writeFileSync(

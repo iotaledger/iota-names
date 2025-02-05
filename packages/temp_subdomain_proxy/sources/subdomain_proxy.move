@@ -1,25 +1,29 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// A `temporary` proxy used to proxy subdomain requests
 /// because we can't use references in a PTB.
-/// 
-/// Module has no tests as it's a plain proxy for other function calls. 
+///
+/// Module has no tests as it's a plain proxy for other function calls.
 /// All validation happens on those functions.
-/// 
+///
 /// This package will stop being used when we've implemented references in PTBs.
 module temp_subdomain_proxy::subdomain_proxy {
     use std::string::String;
 
-    use sui::clock::Clock;
+    use iota::clock::Clock;
 
-    use suins::{suins::SuiNS, subdomain_registration::SubDomainRegistration};
-    
+    use iotans::{
+        iotans::IotaNS,
+        subdomain_registration::SubDomainRegistration
+    };
+
     use subdomains::subdomains;
     use utils::direct_setup;
 
     public fun new(
-        suins: &mut SuiNS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -29,7 +33,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         ctx: &mut TxContext
     ): SubDomainRegistration {
         subdomains::new(
-            suins,
+            iotans,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -41,15 +45,15 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun new_leaf(
-        suins: &mut SuiNS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
         target: address,
         ctx: &mut TxContext
-    ){
+    ) {
         subdomains::new_leaf(
-            suins,
+            iotans,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -57,15 +61,15 @@ module temp_subdomain_proxy::subdomain_proxy {
             ctx
         );
     }
-    
+
     public fun remove_leaf(
-        suins: &mut SuiNS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
     ) {
         subdomains::remove_leaf(
-            suins,
+            iotans,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -73,7 +77,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun edit_setup(
-        suins: &mut SuiNS,
+        iotans: &mut IotaNS,
         parent: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -81,7 +85,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         allow_time_extension: bool
     ) {
         subdomains::edit_setup(
-            suins,
+            iotans,
             parent.nft(),
             clock,
             subdomain_name,
@@ -91,13 +95,13 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_target_address(
-        suins: &mut SuiNS,
+        iotans: &mut IotaNS,
         subdomain: &SubDomainRegistration,
         new_target: Option<address>,
         clock: &Clock,
     ) {
         direct_setup::set_target_address(
-            suins,
+            iotans,
             subdomain.nft(),
             new_target,
             clock,
@@ -105,32 +109,24 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_user_data(
-        suins: &mut SuiNS, 
-        subdomain: &SubDomainRegistration, 
-        key: String, 
-        value: String, 
+        iotans: &mut IotaNS,
+        subdomain: &SubDomainRegistration, key: String,
+        value: String,
         clock: &Clock
     ) {
         direct_setup::set_user_data(
-            suins,
-            subdomain.nft(),
-            key,
+            iotans,
+            subdomain.nft(), key,
             value,
             clock
         );
     }
 
     public fun unset_user_data(
-        suins: &mut SuiNS, 
-        subdomain: &SubDomainRegistration, 
-        key: String, 
+        iotans: &mut IotaNS,
+        subdomain: &SubDomainRegistration, key: String,
         clock: &Clock
     ) {
-        direct_setup::unset_user_data(
-            suins,
-            subdomain.nft(),
-            key,
-            clock
-        );
+        direct_setup::unset_user_data(iotans, subdomain.nft(), key, clock);
     }
 }
