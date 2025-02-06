@@ -8,7 +8,7 @@ edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}" }
 
 [addresses]
 iotans = "${packageId || '0x0'}"`;
@@ -21,7 +21,7 @@ edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
 iotans = { local = "../iotans" }
 ${extraDependencies || ''}
 
@@ -35,7 +35,7 @@ edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-IOTA = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
 subdomains = { local = "../subdomains" }
 utils = { local = "../utils" }
 

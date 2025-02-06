@@ -8,11 +8,10 @@
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/cjs/index.d.ts",
-	"author": "Mysten Labs <build@iotaledger.com>",
+	"author": "IOTA Foundation <info@iota.org>",
 	"keywords": [
 		"IOTA",
-		"iotans",
-		"mysten"
+		"iotans"
 	],
 	"exports": {
 		".": {
