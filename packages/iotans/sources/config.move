@@ -58,6 +58,9 @@ public fun new(
     five_plus_char_price: u64,
 ): Config {
     assert!(public_key.length() == 33, EInvalidPublicKey);
+    check_price(three_char_price);
+    check_price(four_char_price);
+    check_price(five_plus_char_price);
 
     Config {
         public_key,
