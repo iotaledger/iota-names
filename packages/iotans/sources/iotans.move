@@ -174,12 +174,12 @@ public fun config_mut<C: store + drop>(
     _: &AdminCap,
     self: &mut IotaNS,
 ): &mut C {
-    df::borrow_mut(&mut self.id, ConfigKey<Config> {});
+    df::borrow_mut(&mut self.id, ConfigKey<C> {})
 }
 
 /// Borrow configuration object. Read-only mode for applications.
-public fun get_config<Config: store + drop>(self: &IotaNS): &Config {
-    df::borrow(&self.id, ConfigKey<Config> {})
+public fun get_config<C: store + drop>(self: &IotaNS): &C {
+    df::borrow(&self.id, ConfigKey<C> {})
 }
 
 /// Get the configuration object for editing. The admin should put it back
@@ -188,11 +188,11 @@ public fun get_config<Config: store + drop>(self: &IotaNS): &Config {
 /// from removing the configuration object and adding a new one.
 ///
 /// Fully taking the config also allows for edits within a transaction.
-public fun remove_config<Config: store + drop>(
+public fun remove_config<C: store + drop>(
     _: &AdminCap,
     self: &mut IotaNS,
-): Config {
-    df::remove(&mut self.id, ConfigKey<Config> {})
+): C {
+    df::remove(&mut self.id, ConfigKey<C> {})
 }
 
 // === Registry ===
