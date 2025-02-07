@@ -149,8 +149,7 @@ public fun app_add_balance<App: drop>(
 }
 
 /// Get a mutable access to the `Registry` object. Can only be performed by
-/// authorized
-/// applications.
+/// authorized applications.
 public fun app_registry_mut<App: drop, R: store>(
     _: App,
     self: &mut IotaNS,
@@ -162,12 +161,20 @@ public fun app_registry_mut<App: drop, R: store>(
 // === Config management ===
 
 /// Attach dynamic configuration object to the application.
-public fun add_config<Config: store + drop>(
+public fun add_config<C: store + drop>(
     _: &AdminCap,
     self: &mut IotaNS,
-    config: Config,
+    config: C,
 ) {
-    df::add(&mut self.id, ConfigKey<Config> {}, config);
+    df::add(&mut self.id, ConfigKey<C> {}, config);
+}
+
+/// Get mutable access to the `Config` object. Can only be performed by the admin.
+public fun config_mut<C: store + drop>(
+    _: &AdminCap,
+    self: &mut IotaNS,
+): &mut C {
+    df::borrow_mut(&mut self.id, ConfigKey<Config> {});
 }
 
 /// Borrow configuration object. Read-only mode for applications.
