@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 export const IOTANS = (rev: string) => (packageId?: string) => `[package]
 name = "iotans"
 version = "0.0.1"
