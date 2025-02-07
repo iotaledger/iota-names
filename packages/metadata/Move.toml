@@ -1,0 +1,12 @@
+[package]
+name = "metadata"
+edition = "2024.beta"
+version = "0.0.1"
+published-at="0x0"
+
+[dependencies]
+Iota = { local = "../../../iota/crates/iota-framework/packages/iota-framework" }
+iotans = { local = "../iotans" }
+
+[addresses]
+metadata = "0x0"
