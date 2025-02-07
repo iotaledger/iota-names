@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { IotaObjectRef } from '@iota/iota-sdk/client';
 import { Transaction, TransactionArgument } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';

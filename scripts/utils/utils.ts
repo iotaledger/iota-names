@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { execFileSync, execSync } from 'child_process';
 import fs, { readFileSync } from 'fs';
 import { homedir } from 'os';
