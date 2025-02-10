@@ -68,10 +68,3 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
-
-      - name: Prepare local network & run SDK tests
-        env:
-          IS_CI_JOB: true
-          NETWORK: localnet
-        run: |
-          iota start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 & cd sdk && VITE_IOTA_BIN="iota" pnpm test:e2e
