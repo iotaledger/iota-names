@@ -6,7 +6,7 @@ manifest_digest = "25B169BC624F0C3A81458FFA44ACED5C929841F53D650DF93E6B03FC01829
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
   { name = "iotans" },
 ]
 
@@ -15,7 +15,7 @@ name = "MoveStdlib"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-name = "IOTA"
+name = "Iota"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/mainnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
@@ -27,7 +27,7 @@ name = "iotans"
 source = { local = "../iotans" }
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
 ]
 
 [move.toolchain-version]

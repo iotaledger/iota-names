@@ -5,7 +5,7 @@ version = 2
 manifest_digest = "5B3CC880F9BF3F296CD220EE9A75E5A07404B45E00D25457EC0EB60A1D3CFFCA"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
   { name = "subdomains" },
   { name = "utils" },
 ]
@@ -15,7 +15,7 @@ name = "MoveStdlib"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-name = "IOTA"
+name = "Iota"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
@@ -27,7 +27,7 @@ name = "denylist"
 source = { local = "../denylist" }
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
   { name = "iotans" },
 ]
 
@@ -36,7 +36,7 @@ name = "subdomains"
 source = { local = "../subdomains" }
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
   { name = "denylist" },
   { name = "iotans" },
 ]
@@ -46,7 +46,7 @@ name = "iotans"
 source = { local = "../iotans" }
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
 ]
 
 [[move.package]]
@@ -54,7 +54,7 @@ name = "utils"
 source = { local = "../utils" }
 
 dependencies = [
-  { name = "IOTA" },
+  { name = "Iota" },
   { name = "iotans" },
 ]
 
