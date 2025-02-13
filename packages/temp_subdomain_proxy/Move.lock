@@ -43,7 +43,7 @@ dependencies = [
 
 [[move.package]]
 name = "IotaNames"
-source = { local = "../iota_names" }
+source = { local = "../iota-names" }
 
 dependencies = [
   { name = "Iota" },

@@ -11,7 +11,7 @@
 	"author": "IOTA Foundation <info@iota.org>",
 	"keywords": [
 		"IOTA",
-		"IOTANames"
+		"IOTA-Names"
 	],
 	"exports": {
 		".": {
