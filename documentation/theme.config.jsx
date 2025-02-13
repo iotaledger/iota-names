@@ -8,9 +8,9 @@ import Footer from './components/footer';
 
 export default {
   logo: <><img className="w-[200px] mx-4 inline text-white" src="/logo.svg"></img><span>IOTA-Names Docs</span></>,
-  docsRepositoryBase: 'https://github.com/iotaledger/iota-names-contracts/tree/main/documentation',
+  docsRepositoryBase: 'https://github.com/iotaledger/iota-names/tree/main/documentation',
   project: {
-    link: 'https://github.com/iotaledger/iota-names-contracts'
+    link: 'https://github.com/iotaledger/iota-names'
   },
   useNextSeoProps() {
     const { asPath } = useRouter();

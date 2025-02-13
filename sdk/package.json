@@ -57,9 +57,9 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/iota-names-contracts.git"
+		"url": "git+https://github.com/iotaledger/iota-names.git"
 	},
 	"bugs": {
-		"url": "https://github.com/iotaledger/iota-names-contracts/issues"
+		"url": "https://github.com/iotaledger/iota-names/issues"
 	}
 }
