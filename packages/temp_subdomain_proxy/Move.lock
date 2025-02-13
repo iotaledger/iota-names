@@ -28,7 +28,7 @@ source = { local = "../denylist" }
 
 dependencies = [
   { name = "Iota" },
-  { name = "iota_names" },
+  { name = "IotaNames" },
 ]
 
 [[move.package]]
@@ -38,11 +38,11 @@ source = { local = "../subdomains" }
 dependencies = [
   { name = "Iota" },
   { name = "denylist" },
-  { name = "iota_names" },
+  { name = "IotaNames" },
 ]
 
 [[move.package]]
-name = "iota_names"
+name = "IotaNames"
 source = { local = "../iota_names" }
 
 dependencies = [
@@ -55,7 +55,7 @@ source = { local = "../utils" }
 
 dependencies = [
   { name = "Iota" },
-  { name = "iota_names" },
+  { name = "IotaNames" },
 ]
 
 [move.toolchain-version]
