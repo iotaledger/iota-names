@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export type PackageInfo = {
-	IOTANames: IOTANames;
+	IotaNames: IotaNames;
 	Utils: Package;
 	DenyList: Package;
 	Registration: Package;
@@ -17,7 +17,7 @@ export type Package = {
 	upgradeCap: string;
 };
 
-export type IOTANames = {
+export type IotaNames = {
 	packageId: string;
 	upgradeCap: string;
 	publisher: string;

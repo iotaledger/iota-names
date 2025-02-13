@@ -67,10 +67,10 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 		JSON.stringify(
 			{
 				iotaNamesPackageId: {
-					latest: data.IOTANames.packageId,
-					v1: data.IOTANames.packageId,
+					latest: data.IotaNames.packageId,
+					v1: data.IotaNames.packageId,
 				},
-				iotaNamesObjectId: data.IOTANames.iotaNames,
+				iotaNamesObjectId: data.IotaNames.iotaNames,
 				utilsPackageId: data.Utils.packageId,
 				registrationPackageId: data.Registration.packageId,
 				renewalPackageId: data.Renewal.packageId,

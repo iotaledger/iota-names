@@ -1,4 +1,4 @@
-# IOTA-Names Contracts
+# IOTA-Names
 
 This repository holds the IOTA-Names contracts (both the core and all system packages).
 

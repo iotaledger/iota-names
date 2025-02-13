@@ -22,7 +22,7 @@ const UPGRADE_CAPS_TO_TRANSFER = [
     '0x779ed3df4bdfa55948580f1688ab1fede83f09d6d38fedb2a87b90d5c5179e58',
     // utils (direct_setup), extended with subnames.
     '0x929162c097e47cffabb57e8c1cf334ff44a84b963f0bbaacfbaf792d79993866',
-    // SuiNS (!! core package)
+    // IOTA-Names (!! core package)
     '0x9cda28244a0d0de294d2b271e772a9c33eb47d316c59913d7369b545b4af098c',
     // subnames
     '0xc70ac60c1d65da22ed5f30def1a7dfd33ff3a70eb0bf75f12ab559c5f342ea12',
@@ -56,7 +56,7 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 ];
 
 const APP_CAPS_TO_TRANSFER = [
-    // SuiNS Admin Cap (!! core package)
+    // IOTA-Names Admin Cap (!! core package)
     '0x3f8d702d90c572b60ac692fb5074f7a7ac350b80d9c59eab4f6b7692786cae0a'
 ];
 

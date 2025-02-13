@@ -370,7 +370,7 @@ fun test_register_if_domain_name_contains_subdomain() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::suins::suins::EAppNotAuthorized)]
+#[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
 fun test_register_aborts_if_register_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
