@@ -43,7 +43,7 @@ export type IotaNamesClientConfig = {
 };
 
 /**
- * The price list for IOTA-Names names.
+ * The price list for IOTA names.
  */
 export type IotaNamesPriceList = {
 	threeLetters: number;
@@ -52,7 +52,7 @@ export type IotaNamesPriceList = {
 };
 
 /**
- * A NameRecord entry of IOTA-Names Names.
+ * A NameRecord entry of IOTA Names.
  */
 export type NameRecord = {
 	name: string;

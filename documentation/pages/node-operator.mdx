@@ -2,23 +2,23 @@ import { Callout } from 'nextra/components'
 
 # Node Operators
 
-Full nodes for the Mainnet environment process IOTA-Names names without additional configuration. The IOTA public nodes for Testnet also resolve IOTA-Names names. 
+Full nodes for the Mainnet environment process IOTA names without additional configuration. The IOTA public nodes for Testnet also resolve IOTA names. 
 
 IOTA public nodes.
 - Mainnet: https://api.mainnet.iota.cafe
 - Testnet: https://api.testnet.iota.cafe
 - Devnet: https://api.devnet.iota.cafe:443
-    - IOTA-Names name resolution unavailable for Devnet.
+    - IOTA name resolution unavailable for Devnet.
 
 ## Full node configuration
 
-Full node configuration is necessary for nodes to resolve IOTA-Names names in the Testnet environment. Devnet is not supported because of its frequent updates.
+Full node configuration is necessary for nodes to resolve IOTA names in the Testnet environment. Devnet is not supported because of its frequent updates.
 
 <Callout type="info" emoji="ℹ️">
-Mainnet nodes resolve IOTA-Names names without additional configuration.
+Mainnet nodes resolve IOTA names without additional configuration.
 </Callout>
 
-To configure a node for IOTA-Names name resolution on Testnet, add the following options to your yaml configuration file:
+To configure a node for IOTA name resolution on Testnet, add the following options to your yaml configuration file:
 
 ```sh
 name-service-package-address: 0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93
