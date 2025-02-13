@@ -62,13 +62,6 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		},
 	});
 
-	packages.Coupons.setupFunction({
-		txb,
-		adminCap: packageInfo.SuiNS.adminCap,
-		suins: packageInfo.SuiNS.suins,
-		packageId: packageInfo.Coupons.packageId,
-	});
-
 	let retries = 0;
 
 	try {

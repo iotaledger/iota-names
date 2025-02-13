@@ -6,21 +6,13 @@ export type PackageInfo = {
 	DenyList: Package;
 	Registration: Package;
 	Renewal: Package;
-	DayOne: Package;
-	Coupons: Coupons;
 	Subdomains: Package;
-	Discounts: Package & {
-		discountHouse: string;
-	};
 	TempSubdomainProxy: Package;
 };
 
 export type Package = {
 	packageId: string;
 	upgradeCap: string;
-};
-export type Coupons = Package & {
-	couponHouse: string;
 };
 
 export type SuiNS = {
