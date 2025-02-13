@@ -45,7 +45,7 @@ export const createDisplay = ({
 				`{${isSubdomain ? 'nft.' : ''}domain_name}`,
 				`https://{${isSubdomain ? 'nft.' : ''}domain_name}.id`,
 				getImageUrl(isSubdomain, network),
-				'IOTANames - Sculpt Your Identity',
+				'IOTA-Names - Sculpt Your Identity',
 				'https://iota-names.io',
 			]),
 		],

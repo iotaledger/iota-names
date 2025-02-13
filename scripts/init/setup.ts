@@ -23,10 +23,10 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		if (data && 'authorizationType' in data) {
 			authorizeApp({
 				txb,
-				adminCap: packageInfo.IOTANames.adminCap,
-				iotaNames: packageInfo.IOTANames.iotaNames,
+				adminCap: packageInfo.IotaNames.adminCap,
+				iotaNames: packageInfo.IotaNames.iotaNames,
 				type: data.authorizationType(pkg.packageId),
-				iotaNamesPackageIdV1: packageInfo.IOTANames.packageId,
+				iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
 			});
 		}
 	}
