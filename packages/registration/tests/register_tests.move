@@ -17,12 +17,9 @@ module registration::register_tests {
         domain, 
         registry, 
         config, 
-        auction_tests, 
-        auction::{Self, App as AuctionApp}
     };
 
     const SUINS_ADDRESS: address = @0xA001;
-    const AUCTIONED_DOMAIN_NAME: vector<u8> = b"tes-t2.sui";
     const DOMAIN_NAME: vector<u8> = b"abc.sui";
 
     public fun test_init(): Scenario {
@@ -31,7 +28,6 @@ module registration::register_tests {
         {
             let mut suins = suins::init_for_testing(scenario.ctx());
             suins.authorize_app_for_testing<Register>();
-            suins.authorize_app_for_testing<AuctionApp>();
             suins.share_for_testing();
             let clock = clock::create_for_testing(scenario.ctx());
             clock::share_for_testing(clock);
@@ -83,9 +79,9 @@ module registration::register_tests {
 
     public fun assert_balance(scenario: &mut Scenario, amount: u64) {
         scenario.next_tx(SUINS_ADDRESS);
-        let auction_house = scenario.take_shared<SuiNS>();
-        assert!(auction_house.total_balance() == amount, 0);
-        test_scenario::return_shared(auction_house);
+        let suins = scenario.take_shared<SuiNS>();
+        assert!(suins.total_balance() == amount, 0);
+        test_scenario::return_shared(suins);
     }
 
     #[test]
@@ -265,40 +261,6 @@ module registration::register_tests {
         let scenario = &mut scenario_val;
 
         let nft = register_util(scenario, utf8(b"abc.xyz.sui"), 1, 1200 * mist_per_sui(), 10);
-        nft.burn_for_testing();
-
-        scenario_val.end();
-    }
-
-    #[test, expected_failure(abort_code = registry::ERecordNotExpired)]
-    fun test_register_aborts_if_domain_name_went_through_auction() {
-        let mut scenario_val = test_init();
-        let scenario = &mut scenario_val;
-        auction::init_for_testing(scenario.ctx());
-
-        auction_tests::normal_auction_flow(scenario);
-        let nft = register_util(scenario, utf8(AUCTIONED_DOMAIN_NAME), 1, 50 * mist_per_sui(), 10);
-        nft.burn_for_testing();
-
-        scenario_val.end();
-    }
-
-    #[test]
-    fun test_register_works_if_auctioned_domain_name_expired() {
-        let mut scenario_val = test_init();
-        let scenario = &mut scenario_val;
-        auction::init_for_testing(scenario.ctx());
-
-        auction_tests::normal_auction_flow(scenario);
-        let nft = register_util(
-            scenario,
-            utf8(AUCTIONED_DOMAIN_NAME),
-            1,
-            50 * mist_per_sui(),
-            year_ms() + grace_period_ms() + 20,
-        );
-        assert_balance(scenario, 50 * mist_per_sui());
-        assert!(suins_registration::domain(&nft) == domain::new(utf8(AUCTIONED_DOMAIN_NAME)), 0);
         nft.burn_for_testing();
 
         scenario_val.end();

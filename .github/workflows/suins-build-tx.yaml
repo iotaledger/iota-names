@@ -12,8 +12,6 @@ on:
           - Profits to Treasury
           - Transfer Reserved Names
           - Transfer Admin Caps
-          - Free Coupons
-          - Create Coupons
       sui_tools_image:
         description: 'image reference of sui_tools'
         default: 'mysten/sui-tools:mainnet'
@@ -92,50 +90,6 @@ jobs:
           ORIGIN: gh_action
         run: |
           cd scripts && pnpm transfer::caps
-
-      - name: Multi Purpose Operation
-        if: ${{ inputs.transaction_type == 'Multi Purpose Operation' }}
-        env:
-          NODE_ENV: production
-          GAS_OBJECT: ${{ inputs.gas_object_id }}
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/mass-ops.ts
-
-      - name: Finalize Auctions And Discount
-        if: ${{ inputs.transaction_type == 'Finalize Auctions And Discount' }}
-        env:
-          NODE_ENV: production
-          GAS_OBJECT: ${{ inputs.gas_object_id }}
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/discount-and-auction-profits.ts
-
-      - name: Free Coupons
-        if: ${{ inputs.transaction_type == 'Free Coupons' }}
-        env:
-          NODE_ENV: production
-          GAS_OBJECT: ${{ inputs.gas_object_id }}
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/free-three-digit.ts
-
-      - name: Create Coupons
-        if: ${{ inputs.transaction_type == 'Create Coupons' }}
-        env:
-          NODE_ENV: production
-          GAS_OBJECT: ${{ inputs.gas_object_id }}
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/create-bulk-coupons.ts
 
       - name: Show Transaction Data (To sign)
         run: |

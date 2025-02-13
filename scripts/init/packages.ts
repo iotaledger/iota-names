@@ -198,47 +198,6 @@ export const Packages = (network: Network) => {
 				});
 			},
 		},
-		DayOne: {
-			order: 2,
-			folder: 'day_one',
-			manifest: SuiNSDependentPackages(rev, 'day_one'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
-			authorizationType: (packageId: string) => `${packageId}::bogo::BogoApp`,
-		},
-		Coupons: {
-			order: 2,
-			folder: 'coupons',
-			manifest: SuiNSDependentPackages(rev, 'coupons'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
-			authorizationType: (packageId: string) => `${packageId}::coupon_house::CouponsApp`,
-			setupFunction: ({
-				txb,
-				packageId,
-				adminCap,
-				suins,
-			}: {
-				txb: Transaction;
-				packageId: string;
-				adminCap: string;
-				suins: string;
-			}) => {
-				setupApp({ txb, adminCap, suins, target: `${packageId}::coupon_house` });
-			},
-		},
 		Subdomains: {
 			order: 3,
 			folder: 'subdomains',
@@ -270,22 +229,6 @@ export const Packages = (network: Network) => {
 				});
 			},
 			authorizationType: (packageId: string) => `${packageId}::subdomains::SubDomains`,
-		},
-		Discounts: {
-			order: 3,
-			folder: 'discounts',
-			manifest: SuiNSDependentPackages(rev, 'discounts', 'day_one = { local = "../day_one" }'),
-			processPublish: (data: SuiTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-				const discountHouse = parseCreatedObject(data, `${packageId}::house::DiscountHouse`);
-
-				return {
-					packageId,
-					upgradeCap,
-					discountHouse,
-				};
-			},
-			authorizationType: (packageId: string) => `${packageId}::house::DiscountHouseApp`,
 		},
 		TempSubdomainProxy: {
 			order: 3,
