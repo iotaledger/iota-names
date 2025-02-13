@@ -10,7 +10,7 @@ published-at = "0xc967b7862d926720761ee15fbd0254a975afa928712abcaa4f7c17bb2b38d3
 
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override = true }
-iota_names = { local = "../iota_names" }
+IotaNames = { local = "../iota_names" }
 
 [addresses]
 denylist = "0xc967b7862d926720761ee15fbd0254a975afa928712abcaa4f7c17bb2b38d38b"
