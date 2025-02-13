@@ -11,8 +11,6 @@ module iota_names::constants;
 
 use std::string::{utf8, String};
 
-/// Max value for basis points.
-const MAX_BPS: u16 = 10000;
 /// The amount of NANOS in 1 IOTA.
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
 /// The minimum length of a domain name.
@@ -60,9 +58,6 @@ public fun min_domain_length(): u8 { MIN_DOMAIN_LENGTH }
 
 /// The maximum length of a domain name.
 public fun max_domain_length(): u8 { MAX_DOMAIN_LENGTH }
-
-/// Maximum value for basis points.
-public fun max_bps(): u16 { MAX_BPS }
 
 /// The amount of milliseconds in a year.
 public fun year_ms(): u64 { YEAR_MS }

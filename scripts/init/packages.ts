@@ -14,7 +14,6 @@ import {
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';
-import { IotaNames, IotaNamesDependentPackages, TempSubdomainProxy } from './manifests';
 
 export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
@@ -44,7 +43,6 @@ export const Packages = (network: Network) => {
 		IotaNames: {
 			order: 1,
 			folder: 'iota-names',
-			manifest: IotaNames(rev),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				const publisher = parseCreatedObject(data, '0x2::package::Publisher');
@@ -115,7 +113,6 @@ export const Packages = (network: Network) => {
 		Utils: {
 			order: 2,
 			folder: 'utils',
-			manifest: IotaNamesDependentPackages(rev, 'utils'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -129,7 +126,6 @@ export const Packages = (network: Network) => {
 		DenyList: {
 			order: 2,
 			folder: 'denylist',
-			manifest: IotaNamesDependentPackages(rev, 'denylist'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -146,7 +142,6 @@ export const Packages = (network: Network) => {
 		Registration: {
 			order: 2,
 			folder: 'registration',
-			manifest: IotaNamesDependentPackages(rev, 'registration'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -160,7 +155,6 @@ export const Packages = (network: Network) => {
 		Renewal: {
 			order: 2,
 			folder: 'renewal',
-			manifest: IotaNamesDependentPackages(rev, 'renewal'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -202,7 +196,6 @@ export const Packages = (network: Network) => {
 		Subdomains: {
 			order: 3,
 			folder: 'subdomains',
-			manifest: IotaNamesDependentPackages(rev, 'subdomains', subdomainExtraDependencies),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -234,7 +227,6 @@ export const Packages = (network: Network) => {
 		TempSubdomainProxy: {
 			order: 3,
 			folder: 'temp_subdomain_proxy',
-			manifest: TempSubdomainProxy(rev),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				return {

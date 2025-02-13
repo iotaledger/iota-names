@@ -6,7 +6,7 @@ import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { getClient, publishPackage, signAndExecute } from '../utils/utils';
+import { getClient, publishPackage, managePackage, signAndExecute } from '../utils/utils';
 import { Network, Packages } from './packages';
 import { PackageInfo } from './types';
 
@@ -35,8 +35,6 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 				}
 			}
 
-			writeFileSync(manifestFile, pkg.manifest()); // save the manifest as is.
-
 			const txb = new Transaction();
 			publishPackage(txb, packageFolder, configPath);
 			const res = await signAndExecute(txb, network);
@@ -51,7 +49,10 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 
 			console.info(`Published ${key} with packageId: ${data.packageId}`);
 
-			writeFileSync(manifestFile, pkg.manifest(data.packageId)); // update the manifest with the published-at field.
+			managePackage(data.packageId, packageFolder, configPath);
+
+			console.info(`Update lock file for package: ${data.packageId}`);
+
 		}
 	}
 	writeFileSync(

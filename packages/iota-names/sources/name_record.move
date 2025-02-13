@@ -2,11 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// The `NameRecord` is a struct that represents a single record in the
-/// registry.
-/// Can be replaced by any other data structure due to the way `NameRecord`s are
-/// stored and managed. IotaNames has no direct and permanent dependency on this
-/// module.
+/// Provides the records which are stored for each domain in the `Registry`.
 module iota_names::name_record;
 
 use std::string::String;
