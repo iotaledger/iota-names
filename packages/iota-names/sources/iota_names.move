@@ -51,7 +51,7 @@ public struct IotaNames has key {
 }
 
 /// The one-time-witness used to claim Publisher object.
-public struct IOTANames has drop {}
+public struct IOTA_NAMES has drop {}
 
 // === Keys ===
 
@@ -71,7 +71,7 @@ public struct RegistryKey<phantom Config> has copy, store, drop {}
 /// - create IotaNames object
 /// - create admin capability
 /// - claim Publisher object (for Display and TransferPolicy)
-fun init(otw: IOTANames, ctx: &mut TxContext) {
+fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
     iota::package::claim_and_keep(otw, ctx);
 
     // Create the admin capability; only performed once.
