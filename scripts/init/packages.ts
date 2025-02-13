@@ -14,7 +14,7 @@ import {
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';
-import { IOTANS, IOTANSDependentPackages, TempSubdomainProxy } from './manifests';
+import { IOTANames, IOTANamesDependentPackages, TempSubdomainProxy } from './manifests';
 
 export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
@@ -41,21 +41,21 @@ export const Packages = (network: Network) => {
 	const subdomainExtraDependencies = `denylist = { local = "../denylist" }`;
 
 	return {
-		IOTANS: {
+		IOTANames: {
 			order: 1,
-			folder: 'iotans',
-			manifest: IOTANS(rev),
+			folder: 'iota_names',
+			manifest: IOTANames(rev),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-				const iotans = parseCreatedObject(data, `${packageId}::iotans::IotaNS`);
-				const adminCap = parseCreatedObject(data, `${packageId}::iotans::AdminCap`);
+				const iotaNames = parseCreatedObject(data, `${packageId}::iota_names::IotaNames`);
+				const adminCap = parseCreatedObject(data, `${packageId}::iota_names::AdminCap`);
 
 				return {
 					packageId,
 					upgradeCap,
 					publisher,
-					iotans,
+					iotaNames,
 					adminCap,
 				};
 			},
@@ -63,27 +63,27 @@ export const Packages = (network: Network) => {
 				txb: Transaction,
 				packageId: string,
 				adminCap: string,
-				iotans: string,
+				iotaNames: string,
 				publisher: string,
 			) => {
 				// Adds the default registry where name records and reverse records will live
 				addRegistry({
 					txb,
 					adminCap,
-					iotans,
-					iotansPackageIdV1: packageId,
-					registry: newLookupRegistry({ txb, iotansPackageIdV1: packageId, adminCap: adminCap }),
+					iotaNames,
+					iotaNamesPackageIdV1: packageId,
+					registry: newLookupRegistry({ txb, iotaNamesPackageIdV1: packageId, adminCap: adminCap }),
 					type: `${packageId}::registry::Registry`,
 				});
 				// Adds the configuration file (pricelist and public key)
 				addConfig({
 					txb,
 					adminCap,
-					iotans,
-					iotansPackageIdV1: packageId,
+					iotaNames,
+					iotaNamesPackageIdV1: packageId,
 					config: newPriceConfig({
 						txb,
-						iotansPackageIdV1: packageId,
+						iotaNamesPackageIdV1: packageId,
 						priceList: {
 							three: 5 * Number(NANOS_PER_IOTA),
 							four: 2 * Number(NANOS_PER_IOTA),
@@ -97,7 +97,7 @@ export const Packages = (network: Network) => {
 					txb,
 					publisher,
 					isSubdomain: false,
-					iotansPackageIdV1: packageId,
+					iotaNamesPackageIdV1: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
@@ -106,7 +106,7 @@ export const Packages = (network: Network) => {
 					txb,
 					publisher,
 					isSubdomain: true,
-					iotansPackageIdV1: packageId,
+					iotaNamesPackageIdV1: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
@@ -115,7 +115,7 @@ export const Packages = (network: Network) => {
 		Utils: {
 			order: 2,
 			folder: 'utils',
-			manifest: IOTANSDependentPackages(rev, 'utils'),
+			manifest: IOTANamesDependentPackages(rev, 'utils'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -129,7 +129,7 @@ export const Packages = (network: Network) => {
 		DenyList: {
 			order: 2,
 			folder: 'denylist',
-			manifest: IOTANSDependentPackages(rev, 'denylist'),
+			manifest: IOTANamesDependentPackages(rev, 'denylist'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -139,14 +139,14 @@ export const Packages = (network: Network) => {
 				};
 			},
 			authorizationType: (packageId: string) => `${packageId}::denylist::DenyListAuth`,
-			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotans: string) => {
-				setupApp({ txb, adminCap, iotans, target: `${packageId}::denylist` });
+			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotaNames: string) => {
+				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::denylist` });
 			},
 		},
 		Registration: {
 			order: 2,
 			folder: 'registration',
-			manifest: IOTANSDependentPackages(rev, 'registration'),
+			manifest: IOTANamesDependentPackages(rev, 'registration'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -160,7 +160,7 @@ export const Packages = (network: Network) => {
 		Renewal: {
 			order: 2,
 			folder: 'renewal',
-			manifest: IOTANSDependentPackages(rev, 'renewal'),
+			manifest: IOTANamesDependentPackages(rev, 'renewal'),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -174,26 +174,26 @@ export const Packages = (network: Network) => {
 				txb,
 				packageId,
 				adminCap,
-				iotansPackageIdV1,
-				iotans,
+				iotaNamesPackageIdV1,
+				iotaNames,
 				priceList,
 			}: {
 				txb: Transaction;
 				packageId: string;
-				iotansPackageIdV1: string;
+				iotaNamesPackageIdV1: string;
 				adminCap: string;
-				iotans: string;
+				iotaNames: string;
 				priceList: { [key: string]: number };
 			}) => {
 				const configuration = newPriceConfig({
 					txb,
-					iotansPackageIdV1,
+					iotaNamesPackageIdV1,
 					priceList,
 				});
 				setupApp({
 					txb,
 					adminCap,
-					iotans: iotans,
+					iotaNames: iotaNames,
 					target: `${packageId}::renew::setup`,
 					args: [configuration],
 				});
@@ -202,7 +202,7 @@ export const Packages = (network: Network) => {
 		Subdomains: {
 			order: 3,
 			folder: 'subdomains',
-			manifest: IOTANSDependentPackages(rev, 'subdomains', subdomainExtraDependencies),
+			manifest: IOTANamesDependentPackages(rev, 'subdomains', subdomainExtraDependencies),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -215,14 +215,14 @@ export const Packages = (network: Network) => {
 				txb: Transaction,
 				packageId: string,
 				adminCap: string,
-				iotans: string,
-				iotansPackageIdV1: string,
+				iotaNames: string,
+				iotaNamesPackageIdV1: string,
 			) => {
 				addConfig({
 					txb,
 					adminCap,
-					iotans,
-					iotansPackageIdV1,
+					iotaNames,
+					iotaNamesPackageIdV1,
 					config: txb.moveCall({
 						target: `${packageId}::config::default`,
 					}),

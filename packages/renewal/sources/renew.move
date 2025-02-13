@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A renewal module for the IotaNS app.
+/// A renewal module for the IotaNames app.
 /// This module allows users to renew their domains.
 ///
 /// The renewal is capped at 5 years.
@@ -13,13 +13,13 @@ module renewal::renew {
         iota::IOTA
     };
 
-    use iotans::{
+    use iota_names::{
         constants,
         domain::Domain,
         registry::Registry,
-        iotans::{Self, IotaNS, AdminCap},
+        iota_names::{Self, IotaNames, AdminCap},
         config::{Self, Config},
-        iotans_registration::IotansRegistration
+        iota_names_registration::IotaNamesRegistration
     };
 
     /// Number of years passed is not within [1-5] interval.
@@ -52,15 +52,15 @@ module renewal::renew {
 
     /// Allows admin to initalize the custom pricing config for the renewal module.
     /// We're wrapping initial `Config` because we want to add custom pricing for renewals,
-    /// and we can only have 1 config of each type in the iotans app.
-    /// We still set this up by using the default config functionality from iotans package.
+    /// and we can only have 1 config of each type in the iota_names app.
+    /// We still set this up by using the default config functionality from iota_names package.
     /// The `public_key` passed in the `Config` can be a random u8 array with length 33.
     public fun setup(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         cap: &AdminCap,
         config: Config
     ) {
-        iotans::add_config<RenewalConfig>(cap, iotans, RenewalConfig { config });
+        iota_names::add_config<RenewalConfig>(cap, iota_names, RenewalConfig { config });
     }
 
     // Allows renewals of names.
@@ -71,8 +71,8 @@ module renewal::renew {
     // - the domain is not a subdomain
     // - number of years is within [1-5] interval
     public fun renew(
-        iotans: &mut IotaNS,
-        nft: &mut IotansRegistration,
+        iota_names: &mut IotaNames,
+        nft: &mut IotaNamesRegistration,
         no_years: u8,
         payment: Coin<IOTA>,
         clock: &Clock
@@ -84,10 +84,10 @@ module renewal::renew {
         config::assert_valid_user_registerable_domain(&domain);
 
         // check that the payment is correct for the specified name.
-        validate_payment(iotans, &payment, &domain, no_years);
+        validate_payment(iota_names, &payment, &domain, no_years);
 
         // Get registry (also checks that app is authorized) + start validating.
-        let registry = iotans::app_registry_mut<Renew, Registry>(Renew {}, iotans);
+        let registry = iota_names::app_registry_mut<Renew, Registry>(Renew {}, iota_names);
 
         // Calculate target expiration. Aborts if expiration or selected years are invalid.
         let target_expiration = target_expiration(registry, nft, domain, clock, no_years);
@@ -101,9 +101,9 @@ module renewal::renew {
                 amount: coin::value(&payment)
             }
         );
-        iotans::app_add_balance(
+        iota_names::app_add_balance(
             Renew {},
-            iotans,
+            iota_names,
             coin::into_balance(payment)
         );
     }
@@ -112,7 +112,7 @@ module renewal::renew {
     /// or abort if the domain or the expiration setup is invalid.
     fun target_expiration(
         registry: &Registry,
-        nft: &IotansRegistration,
+        nft: &IotaNamesRegistration,
         domain: Domain,
         clock: &Clock,
         no_years: u8,
@@ -159,12 +159,12 @@ module renewal::renew {
 
     /// Validates that the payment Coin is correct for the domain + number of years
     fun validate_payment(
-        iotans: &IotaNS,
+        iota_names: &IotaNames,
         payment: &Coin<IOTA>,
         domain: &Domain,
         no_years: u8
     ) {
-        let config = iotans.get_config<RenewalConfig>();
+        let config = iota_names.get_config<RenewalConfig>();
         let label = domain.sld();
         let price = config.config.calculate_price((label.length() as u8), no_years);
         assert!(

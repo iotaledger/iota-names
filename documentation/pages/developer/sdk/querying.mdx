@@ -1,13 +1,13 @@
 # Querying
 
-Use the `IotansClient` that was previously created to query on-chain data.
+Use the `IotaNamesClient` that was previously created to query on-chain data.
 
 ## Querying a NameRecord
 
-You can query a name record's latest state by calling the `getNameRecord` method on the `IotansClient` instance.
+You can query a name record's latest state by calling the `getNameRecord` method on the `IotaNamesClient` instance.
 
 ```js
-const nameRecord = await iotansClient.getNameRecord('demo.iota');
+const nameRecord = await iotaNamesClient.getNameRecord('demo.iota');
 console.log(nameRecord);
 
 // Example output 
@@ -22,10 +22,10 @@ console.log(nameRecord);
 
 ## Query active pricing
 
-Call the `getPricelist` method on the `IotansClient` instance to query the active names price list.
+Call the `getPricelist` method on the `IotaNamesClient` instance to query the active names price list.
 
 ```js
-const priceList = await iotansClient.getPriceList();
+const priceList = await iotaNamesClient.getPriceList();
 console.log(priceList);
 
 // Example output (Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
@@ -38,10 +38,10 @@ console.log(priceList);
 
 ## Query active renewals pricing
 
-Call the `getRenewalPricelist` method on the `IotansClient` instance to query the active renewals price list.
+Call the `getRenewalPricelist` method on the `IotaNamesClient` instance to query the active renewals price list.
 
 ```js
-const renewalPriceList = await iotansClient.getRenewalPricelist();
+const renewalPriceList = await iotaNamesClient.getRenewalPricelist();
 console.log(renewalPriceList);
 
 // Example output (Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)

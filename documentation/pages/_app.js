@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import '../public/iotans.css';
+import '../public/iota-names.css';
 
-const IOTANSApp = ({Component, pageProps }) => {
+const IOTANamesApp = ({ Component, pageProps }) => {
     return <Component {...pageProps} />
 }
 
-export default IOTANSApp;
+export default IOTANamesApp;

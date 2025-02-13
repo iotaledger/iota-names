@@ -51,7 +51,7 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 
     // Publisher: Aeon
     '0x47339900499df62ac40c21d44198331119d5335c7f94777295e5a84f5ae351f7',
-    // Publisher: IOTANS
+    // Publisher: IOTANames
     '0x7339f23f06df3601167d67a31752781d307136fd18304c48c928778e752caae1',
 ];
 
@@ -62,8 +62,8 @@ const APP_CAPS_TO_TRANSFER = [
 
 const profitsToTreasury = (txb: Transaction) => {
     const generalProfits = txb.moveCall({
-        target: `${config.packageId}::iotans::withdraw`,
-        arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
+        target: `${config.packageId}::iota_names::withdraw`,
+        arguments: [txb.object(config.adminCap), txb.object(config.iotaNames)],
     });
 
     txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));

@@ -12,23 +12,23 @@ export const ALLOWED_METADATA = {
 	avatar: 'avatar',
 };
 
-export const getConfigType = (iotansPackageV1: string, innerType: string) =>
-	`${iotansPackageV1}::iotans::ConfigKey<${innerType}>`;
+export const getConfigType = (iotaNamesPackageV1: string, innerType: string) =>
+	`${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 
-export const getDomainType = (iotansPackageV1: string) => `${iotansPackageV1}::domain::Domain`;
+export const getDomainType = (iotaNamesPackageV1: string) => `${iotaNamesPackageV1}::domain::Domain`;
 
-export const getPricelistConfigType = (iotansPackageV1: string) =>
-	`${iotansPackageV1}::config::Config`;
+export const getPricelistConfigType = (iotaNamesPackageV1: string) =>
+	`${iotaNamesPackageV1}::config::Config`;
 
 export const getRenewalPricelistConfigType = (renewalsPackageId: string) =>
 	`${renewalsPackageId}::renew::RenewalConfig`;
 
 export const MAINNET_CONFIG: Constants = {
-	iotansPackageId: {
+	iotaNamesPackageId: {
 		latest: '0xb7004c7914308557f7afbaf0dca8dd258e18e306cb7a45b28019f3d0a693f162',
 		v1: '0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0',
 	},
-	iotansObjectId: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
+	iotaNamesObjectId: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
 	utilsPackageId: '0xf7854c81cf500d60a4437f4599f7ff3b89abd13f645ae08f62345c7a25317bee',
 	registrationPackageId: '0x9d451fa0139fef8f7c1f0bd5d7e45b7fa9dbb84c2e63c2819c7abd0a7f7d749d',
 	renewalPackageId: '0xd5e5f74126e7934e35991643b0111c3361827fc0564c83fa810668837c6f0b0f',
@@ -38,11 +38,11 @@ export const MAINNET_CONFIG: Constants = {
 };
 
 export const TESTNET_CONFIG: Constants = {
-	iotansPackageId: {
+	iotaNamesPackageId: {
 		latest: '0x67072134f0867b886c9541873d1cb327feb7e161cd56dd76cb6aa9e464410db1',
 		v1: '0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93',
 	},
-	iotansObjectId: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
+	iotaNamesObjectId: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
 	utilsPackageId: '0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b',
 	registrationPackageId: '0x4255184a0143c0ce4394a3f16a6f5aa5d64507269e54e51ea396d569fe8f1ba5',
 	renewalPackageId: '0x54800ebb4606fd0c03b4554976264373b3374eeb3fd63e7ff69f31cac786ba8c',

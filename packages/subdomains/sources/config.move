@@ -5,7 +5,7 @@
 module subdomains::config {
     use std::string::String;
 
-    use iotans::{
+    use iota_names::{
         domain::{Domain, is_parent_of},
         constants::iota_tld
     };

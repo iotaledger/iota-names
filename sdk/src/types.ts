@@ -18,8 +18,8 @@ export type VersionedPackageId = {
 
 // A list of constants
 export type Constants = {
-	iotansPackageId?: VersionedPackageId;
-	iotansObjectId?: string;
+	iotaNamesPackageId?: VersionedPackageId;
+	iotaNamesObjectId?: string;
 	registryTableId?: string;
 	utilsPackageId?: string;
 	registrationPackageId?: string;
@@ -28,8 +28,8 @@ export type Constants = {
 	tempSubNamesProxyPackageId?: string;
 };
 
-// The config for the IotansClient.
-export type IotansClientConfig = {
+// The config for the IotaNamesClient.
+export type IotaNamesClientConfig = {
 	client: IotaClient;
 	/**
 	 * The network to use. Defaults to mainnet.
@@ -43,16 +43,16 @@ export type IotansClientConfig = {
 };
 
 /**
- * The price list for IOTANS names.
+ * The price list for IOTA-Names names.
  */
-export type IotansPriceList = {
+export type IotaNamesPriceList = {
 	threeLetters: number;
 	fourLetters: number;
 	fivePlusLetters: number;
 };
 
 /**
- * A NameRecord entry of IOTANS Names.
+ * A NameRecord entry of IOTA-Names Names.
  */
 export type NameRecord = {
 	name: string;

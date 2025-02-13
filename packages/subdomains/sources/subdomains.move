@@ -21,18 +21,18 @@
 /// turn off this package completely, and retain the state on a different package's deployment. This is useful
 /// both for effort-less upgradeability and gas savings.
 /// 2. For any `registry_mut` call, we know that if this module is not authorized, we'll get an abort
-/// from the core iotans package.
+/// from the core iota_names package.
 /// 
 module subdomains::subdomains {
     use std::string::{String, utf8};
 
     use iota::{clock::Clock, dynamic_field as df, vec_map::VecMap};
 
-    use iotans::{
+    use iota_names::{
         domain::{Self, Domain, is_subdomain}, 
         registry::Registry, 
-        iotans::{Self, IotaNS}, 
-        iotans_registration::IotansRegistration, 
+        iota_names::{Self, IotaNames}, 
+        iota_names_registration::IotaNamesRegistration, 
         subdomain_registration::SubDomainRegistration, 
         constants::{subdomain_allow_extension_key, subdomain_allow_creation_key}
     };
@@ -57,7 +57,7 @@ module subdomains::subdomains {
     /// Enabled metadata value.
     const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
 
-    /// The authentication scheme for IotaNS.
+    /// The authentication scheme for IotaNames.
     public struct SubDomains has drop {}
 
     /// The key to store the parent's ID in the subdomain object.
@@ -66,28 +66,28 @@ module subdomains::subdomains {
     /// Creates a `leaf` subdomain
     /// A `leaf` subdomain, is a subdomain that is managed by the parent's NFT.
     public fun new_leaf(
-        iotans: &mut IotaNS,
-        parent: &IotansRegistration,
+        iota_names: &mut IotaNames,
+        parent: &IotaNamesRegistration,
         clock: &Clock,
         subdomain_name: String,
         target: address,
         ctx: &mut TxContext
     ) {
-        assert!(!denylist::is_blocked_name(iotans, subdomain_name), ENotAllowedName);
+        assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
         let subdomain = domain::new(subdomain_name);
         // all validation logic for subdomain creation / management.
-        internal_validate_nft_can_manage_subdomain(iotans, parent, clock, subdomain, true);
+        internal_validate_nft_can_manage_subdomain(iota_names, parent, clock, subdomain, true);
 
-        // Aborts with `iotans::registry::ERecordExists` if the subdomain already exists.
-        registry_mut(iotans).add_leaf_record(subdomain, clock, target, ctx)
+        // Aborts with `iota_names::registry::ERecordExists` if the subdomain already exists.
+        registry_mut(iota_names).add_leaf_record(subdomain, clock, target, ctx)
     }
 
     /// Removes a `leaf` subdomain from the registry.
     /// Management of the `leaf` subdomain can only be achieved through the parent's valid NFT.
     public fun remove_leaf(
-        iotans: &mut IotaNS,
-        parent: &IotansRegistration,
+        iota_names: &mut IotaNames,
+        parent: &IotaNamesRegistration,
         clock: &Clock,
         subdomain_name: String,
     ) {
@@ -96,9 +96,9 @@ module subdomains::subdomains {
         // All validation logic for subdomain creation / management.
         // We pass `false` as last argument because even if we don't have create capabilities (anymore),
         // we can still remove a leaf name (we just can't add a new one).
-        internal_validate_nft_can_manage_subdomain(iotans, parent, clock, subdomain, false);
+        internal_validate_nft_can_manage_subdomain(iota_names, parent, clock, subdomain, false);
 
-        registry_mut(iotans).remove_leaf_record(subdomain)
+        registry_mut(iota_names).remove_leaf_record(subdomain)
     }
 
     /// Creates a new `node` subdomain
@@ -114,10 +114,10 @@ module subdomains::subdomains {
     ///     2.4 Validates that the subdomain's expiration timestamp is less or equal to the parents.
     ///     2.5 Checks if this subdomain already exists. [If it does, it aborts if it's not expired, overrides otherwise]
     /// 
-    /// It then saves the configuration for that child (manage-able by the parent), and returns the IotansRegistration object.
+    /// It then saves the configuration for that child (manage-able by the parent), and returns the IotaNamesRegistration object.
     public fun new(
-        iotans: &mut IotaNS,
-        parent: &IotansRegistration,
+        iota_names: &mut IotaNames,
+        parent: &IotaNamesRegistration,
         clock: &Clock,
         subdomain_name: String,
         expiration_timestamp_ms: u64,
@@ -125,29 +125,29 @@ module subdomains::subdomains {
         allow_time_extension: bool,
         ctx: &mut TxContext
     ): SubDomainRegistration {
-        assert!(!denylist::is_blocked_name(iotans, subdomain_name), ENotAllowedName);
+        assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
         let subdomain = domain::new(subdomain_name);
         // all validation logic for subdomain creation / management.
-        internal_validate_nft_can_manage_subdomain(iotans, parent, clock, subdomain, true);
+        internal_validate_nft_can_manage_subdomain(iota_names, parent, clock, subdomain, true);
 
         // Validate that the duration is at least the minimum duration.
-        assert!(expiration_timestamp_ms >= clock.timestamp_ms() + app_config(iotans).minimum_duration(), EInvalidExpirationDate);
+        assert!(expiration_timestamp_ms >= clock.timestamp_ms() + app_config(iota_names).minimum_duration(), EInvalidExpirationDate);
         // validate that the requested expiration timestamp is not greater than the parent's one.
         assert!(expiration_timestamp_ms <= parent.expiration_timestamp_ms(), EInvalidExpirationDate);
 
-        // We register the subdomain (e.g. `subdomain.example.iota`) and return the IotansRegistration object.
-        // Aborts with `iotans::registry::ERecordExists` if the subdomain already exists.
-        let nft = internal_create_subdomain(registry_mut(iotans), subdomain, expiration_timestamp_ms, object::id(parent), clock, ctx);
+        // We register the subdomain (e.g. `subdomain.example.iota`) and return the IotaNamesRegistration object.
+        // Aborts with `iota_names::registry::ERecordExists` if the subdomain already exists.
+        let nft = internal_create_subdomain(registry_mut(iota_names), subdomain, expiration_timestamp_ms, object::id(parent), clock, ctx);
 
         // We create the `setup` for the particular SubDomainRegistration.
         // We save a setting like: `subdomain.example.iota` -> { allow_creation: true/false, allow_time_extension: true/false }
         if (allow_creation) {
-            internal_set_flag(iotans, subdomain, subdomain_allow_creation_key(), allow_creation);
+            internal_set_flag(iota_names, subdomain, subdomain_allow_creation_key(), allow_creation);
         };
 
         if (allow_time_extension){
-            internal_set_flag(iotans, subdomain, subdomain_allow_extension_key(), allow_time_extension);
+            internal_set_flag(iota_names, subdomain, subdomain_allow_extension_key(), allow_time_extension);
         };
 
         nft
@@ -155,18 +155,18 @@ module subdomains::subdomains {
 
     /// Extends the expiration of a `node` subdomain.
     public fun extend_expiration(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         sub_nft: &mut SubDomainRegistration,
         expiration_timestamp_ms: u64,
     ) {
-        let registry = registry(iotans);
+        let registry = registry(iota_names);
 
         let nft = sub_nft.nft_mut();
         let subdomain = nft.domain();
         let parent_domain = subdomain.parent();
 
         // Check if time extension is allowed for this subdomain.
-        assert!(is_extension_allowed(&record_metadata(iotans, subdomain)), EExtensionDisabledForSubDomain);
+        assert!(is_extension_allowed(&record_metadata(iota_names, subdomain)), EExtensionDisabledForSubDomain);
 
         let existing_name_record = registry.lookup(subdomain);
         let parent_name_record = registry.lookup(parent_domain);
@@ -183,7 +183,7 @@ module subdomains::subdomains {
         // validate that the requested expiration timestamp is not greater than the parent's one.
         assert!(expiration_timestamp_ms <= option::borrow(&parent_name_record).expiration_timestamp_ms(), EInvalidExpirationDate);
 
-        registry_mut(iotans).set_expiration_timestamp_ms(nft, subdomain, expiration_timestamp_ms);
+        registry_mut(iota_names).set_expiration_timestamp_ms(nft, subdomain, expiration_timestamp_ms);
     }
 
     /// Called by the parent domain to edit a subdomain's settings.
@@ -191,47 +191,47 @@ module subdomains::subdomains {
     /// - Allows the parent to toggle subdomain (grand-children) creation
     /// --> For creations: A parent can't retract already created children, nor can limit the depth if creation capability is on.
     public fun edit_setup(
-        iotans: &mut IotaNS,
-        parent: &IotansRegistration,
+        iota_names: &mut IotaNames,
+        parent: &IotaNamesRegistration,
         clock: &Clock,
         subdomain_name: String,
         allow_creation: bool,
         allow_time_extension: bool
     ) {
         // validate that parent is a valid, non expired object.
-        registry(iotans).assert_nft_is_authorized(parent, clock);
+        registry(iota_names).assert_nft_is_authorized(parent, clock);
 
         let parent_domain = parent.domain();
         let subdomain = domain::new(subdomain_name);
 
         // validate that the subdomain is valid for the supplied parent
         // (as well as it is valid in label length, total length, depth, etc).
-        config::assert_is_valid_subdomain(&parent_domain, &subdomain, app_config(iotans));
+        config::assert_is_valid_subdomain(&parent_domain, &subdomain, app_config(iota_names));
 
         // We create the `setup` for the particular SubDomainRegistration.
         // We save a setting like: `subdomain.example.iota` -> { allow_creation: true/false, allow_time_extension: true/false }
-        internal_set_flag(iotans, subdomain, subdomain_allow_creation_key(), allow_creation);
-        internal_set_flag(iotans, subdomain, subdomain_allow_extension_key(), allow_time_extension);
+        internal_set_flag(iota_names, subdomain, subdomain_allow_creation_key(), allow_creation);
+        internal_set_flag(iota_names, subdomain, subdomain_allow_extension_key(), allow_time_extension);
     }
 
     /// Burns a `SubDomainRegistration` object if it is expired.
     public fun burn(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         nft: SubDomainRegistration,
         clock: &Clock,
     ) {
-        registry_mut(iotans).burn_subdomain_object(nft, clock);
+        registry_mut(iota_names).burn_subdomain_object(nft, clock);
     }
 
     /// Parent ID of a subdomain
-    public fun parent(subdomain: &IotansRegistration): ID {
+    public fun parent(subdomain: &IotaNamesRegistration): ID {
         *df::borrow(subdomain.uid(), ParentKey {})
     }
 
     // Sets/removes a (key,value) on the domain's NameRecord metadata (depending on cases).
     // Validation needs to happen on the calling function.
     fun internal_set_flag(
-        self: &mut IotaNS,
+        self: &mut IotaNames,
         subdomain: Domain,
         key: String,
         enable: bool
@@ -262,21 +262,21 @@ module subdomains::subdomains {
 
     /// Get the name record's metadata for a subdomain.
     fun record_metadata(
-        self: &IotaNS,
+        self: &IotaNames,
         subdomain: Domain
     ): VecMap<String, String> {
         *registry(self).get_data(subdomain)
     }
 
-    /// Does all the regular checks for validating that a parent `IotansRegistration` object
+    /// Does all the regular checks for validating that a parent `IotaNamesRegistration` object
     /// can operate on a given subdomain.
     /// 
     /// 1. Checks that NFT is authorized.
     /// 2. Checks that the parent can create subdomains (applies to subdomain `node` names).
     /// 3. Validates that the subdomain is valid (accepted TLD, depth, length, is child of given parent, etc).
     fun internal_validate_nft_can_manage_subdomain(
-        iotans: &IotaNS,
-        parent: &IotansRegistration,
+        iota_names: &IotaNames,
+        parent: &IotaNamesRegistration,
         clock: &Clock,
         subdomain: Domain,
         // Set to `true` for `validate_creation` if you want to validate that the parent can create subdomains.
@@ -284,22 +284,22 @@ module subdomains::subdomains {
         check_creation_auth: bool
     ) {
         // validate that parent is a valid, non expired object.
-        registry(iotans).assert_nft_is_authorized(parent, clock);
+        registry(iota_names).assert_nft_is_authorized(parent, clock);
 
         if (check_creation_auth) {
             // validate that the parent can create subdomains.
-            internal_assert_parent_can_create_subdomains(iotans, parent.domain());
+            internal_assert_parent_can_create_subdomains(iota_names, parent.domain());
         };
 
         // validate that the subdomain is valid for the supplied parent.
-        config::assert_is_valid_subdomain(&parent.domain(), &subdomain, app_config(iotans));
+        config::assert_is_valid_subdomain(&parent.domain(), &subdomain, app_config(iota_names));
     }
 
-    /// Validate whether a `IotansRegistration` object is eligible for creating a subdomain.
+    /// Validate whether a `IotaNamesRegistration` object is eligible for creating a subdomain.
     /// 1. If the NFT is authorized (not expired, active)
     /// 2. If the parent is a subdomain, check whether it is allowed to create subdomains.
     fun internal_assert_parent_can_create_subdomains(
-        self: &IotaNS,
+        self: &IotaNames,
         parent: Domain,
     ) {
         // if the parent is not a subdomain, we can always create subdomains.
@@ -328,7 +328,7 @@ module subdomains::subdomains {
         // set the timestamp to the correct one. `add_record` only works with years but we can correct it easily here.
         registry.set_expiration_timestamp_ms(&mut nft, subdomain, expiration_timestamp_ms);
 
-        // attach the `ParentID` to the IotansRegistration, so we validate that the parent who created this subdomain
+        // attach the `ParentID` to the IotaNamesRegistration, so we validate that the parent who created this subdomain
         // is the same as the one currently holding the parent domain.
         df::add(nft.uid_mut(), ParentKey {}, parent_nft_id);
 
@@ -337,16 +337,16 @@ module subdomains::subdomains {
 
     // == Internal helper to access registry & app setup ==
 
-    fun registry(iotans: &IotaNS): &Registry {
-        iotans.registry<Registry>()
+    fun registry(iota_names: &IotaNames): &Registry {
+        iota_names.registry<Registry>()
     }
 
-    fun registry_mut(iotans: &mut IotaNS): &mut Registry {
-        iotans::app_registry_mut<SubDomains, Registry>(SubDomains {}, iotans)
+    fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
+        iota_names::app_registry_mut<SubDomains, Registry>(SubDomains {}, iota_names)
     }
 
-    fun app_config(iotans: &IotaNS): &SubDomainConfig {
-        iotans.get_config<SubDomainConfig>()
+    fun app_config(iota_names: &IotaNames): &SubDomainConfig {
+        iota_names.get_config<SubDomainConfig>()
     }
 
     #[test_only]

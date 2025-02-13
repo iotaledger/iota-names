@@ -7,7 +7,7 @@ module denylist::denylist {
 
     use iota::table::{Self, Table};
 
-    use iotans::iotans::{Self, AdminCap, IotaNS};
+    use iota_names::iota_names::{Self, AdminCap, IotaNames};
 
     /// No names in the passed list
     const ENoWordsInList: u64 = 1;
@@ -26,13 +26,13 @@ module denylist::denylist {
     public struct DenyListAuth has drop {}
 
     public fun setup(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         cap: &AdminCap,
         ctx: &mut TxContext
     ) {
-        iotans::add_registry(
+        iota_names::add_registry(
             cap,
-            iotans,
+            iota_names,
             Denylist {
                 reserved: table::new(ctx),
                 blocked: table::new(ctx)
@@ -41,71 +41,71 @@ module denylist::denylist {
     }
 
     /// Check for a reserved name
-    public fun is_reserved_name(iotans: &IotaNS, name: String): bool {
-        denylist(iotans).reserved.contains(name)
+    public fun is_reserved_name(iota_names: &IotaNames, name: String): bool {
+        denylist(iota_names).reserved.contains(name)
     }
 
     /// Checks for a blocked name.
-    public fun is_blocked_name(iotans: &IotaNS, name: String): bool {
-        denylist(iotans).blocked.contains(name)
+    public fun is_blocked_name(iota_names: &IotaNames, name: String): bool {
+        denylist(iota_names).blocked.contains(name)
     }
 
     /// Add a list of reserved names to the list as admin.
     public fun add_reserved_names(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         _: &AdminCap,
         words: vector<String>
     ) {
         internal_add_names_to_list(
-            &mut denylist_mut(iotans).reserved,
+            &mut denylist_mut(iota_names).reserved,
             words
         );
     }
 
     /// Add a list of offensive names to the list as admin.
     public fun add_blocked_names(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         _: &AdminCap,
         words: vector<String>
     ) {
         internal_add_names_to_list(
-            &mut denylist_mut(iotans).blocked,
+            &mut denylist_mut(iota_names).blocked,
             words
         );
     }
 
     /// Remove a list of words from the reserved names list.
     public fun remove_reserved_names(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         _: &AdminCap,
         words: vector<String>
     ) {
         internal_remove_names_from_list(
-            &mut denylist_mut(iotans).reserved,
+            &mut denylist_mut(iota_names).reserved,
             words
         );
     }
 
     /// Remove a list of words from the list as admin.
     public fun remove_blocked_names(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         _: &AdminCap,
         words: vector<String>
     ) {
         internal_remove_names_from_list(
-            &mut denylist_mut(iotans).blocked,
+            &mut denylist_mut(iota_names).blocked,
             words
         );
     }
 
     /// Get immutable access to the registry.
-    fun denylist(iotans: &IotaNS): &Denylist {
-        iotans.registry()
+    fun denylist(iota_names: &IotaNames): &Denylist {
+        iota_names.registry()
     }
 
     /// Internal helper to get access to the BlockedNames object
-    fun denylist_mut(iotans: &mut IotaNS): &mut Denylist {
-        iotans::app_registry_mut<DenyListAuth, Denylist>(DenyListAuth {}, iotans)
+    fun denylist_mut(iota_names: &mut IotaNames): &mut Denylist {
+        iota_names::app_registry_mut<DenyListAuth, Denylist>(DenyListAuth {}, iota_names)
     }
 
     /// Internal helper to batch add words to a table.

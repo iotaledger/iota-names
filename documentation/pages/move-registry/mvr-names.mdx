@@ -11,7 +11,7 @@ import { Callout } from 'nextra/components';
 
 ## Creating a new application
 
-To create a new application, you must provide a IOTANS name and a package name, as long as it is not 
+To create a new application, you must provide an IOTA-Names name and a package name, as long as it is not 
 already registered.
 
 ```typescript
@@ -20,9 +20,9 @@ const transaction = new Transaction();
 const appCap = transaction.moveCall({
     target: `@mvr/core::move_registry::register`,
     arguments: [
-        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTANS.
+        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTA-Names.
         transaction.object('0x0e5d473a055b6b7d014af557a13ad9075157fdc19b6d51562a18511afd397727'),
-        transaction.object(iotansObjectId),
+        transaction.object(iotaNamesObjectId),
         transaction.pure.string(name),
         transaction.object.clock(),
     ],
@@ -47,7 +47,7 @@ const transaction = new Transaction();
  transaction.moveCall({
     target: `@mvr/core::move_registry::assign_package`,
     arguments: [
-        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTANS.
+        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTA-Names.
         transaction.object(`0x0e5d473a055b6b7d014af557a13ad9075157fdc19b6d51562a18511afd397727`),
         transaction.object('<The AppCap object>'),
         transaction.object('<The PackageInfo object on mainnet>'),
@@ -78,7 +78,7 @@ const appInfo = transaction.moveCall({
 transaction.moveCall({
     target: `@mvr/core::move_registry::set_network`,
     arguments: [
-        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTANS.
+        // the registry obj: Can also be resolved as `registry-obj@mvr` from mainnet IOTA-Names.
         transaction.object('0x0e5d473a055b6b7d014af557a13ad9075157fdc19b6d51562a18511afd397727'),
         transaction.object('<The AppCap object>'),
         transaction.pure.string("<chain id of the network: use `4c78adac` for testnet>"),

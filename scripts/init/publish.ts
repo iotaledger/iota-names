@@ -66,11 +66,11 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 		path.resolve(path.resolve(__dirname, '../'), 'constants.sdk.json'),
 		JSON.stringify(
 			{
-				iotansPackageId: {
-					latest: data.IOTANS.packageId,
-					v1: data.IOTANS.packageId,
+				iotaNamesPackageId: {
+					latest: data.IOTANames.packageId,
+					v1: data.IOTANames.packageId,
 				},
-				iotansObjectId: data.IOTANS.iotans,
+				iotaNamesObjectId: data.IOTANames.iotaNames,
 				utilsPackageId: data.Utils.packageId,
 				registrationPackageId: data.Registration.packageId,
 				renewalPackageId: data.Renewal.packageId,

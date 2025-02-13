@@ -1,19 +1,19 @@
 # Examples
 
-The following code sample is an initial example of how to integrate with IOTANS on chain. This page will host more examples in the future.
+The following code sample is an initial example of how to integrate with IOTA-Names on chain. This page will host more examples in the future.
 
-## Transferring any object to a IOTANS name fully on-chain
+## Transferring any object to an IOTA-Names name fully on-chain
 
-The following `demo` module demonstrates how to transfer an object of any type to a IOTANS name. This is a basic example of how to interact with IOTANS on chain.
+The following `demo` module demonstrates how to transfer an object of any type to an IOTA-Names name. This is a basic example of how to interact with IOTA-Names on chain.
 
 ```rust
 module demo::demo {
     use std::string::String;
     use iota::clock::Clock;
 
-    /// Import the IOTANS dependency.
-    use iotans::{ 
-        iotans::IOTANS,
+    /// Import the IOTA-Names dependency.
+    use iota_names::{ 
+        iota_names::IOTANames,
         registry::Registry,
         domain
     };
@@ -24,9 +24,9 @@ module demo::demo {
     const ENameExpired: u64 = 2;
 
     /// A function to transfer an object of any type T to a name (for instance `example.iota`)
-    public fun send_to_name<T: key + store>(iotans: &IOTANS, obj: T, name: String, clock: &Clock) {
+    public fun send_to_name<T: key + store>(iota_names: &IOTANames, obj: T, name: String, clock: &Clock) {
         // Look up the name on the registry.
-        let mut optional = iotans.registry<Registry>().lookup(domain::new(name));
+        let mut optional = iota_names.registry<Registry>().lookup(domain::new(name));
         // Check that the name indeed exists.
         assert!(optional.is_some(), ENameNotFound);
 

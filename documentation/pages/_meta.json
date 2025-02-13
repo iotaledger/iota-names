@@ -1,14 +1,14 @@
 {
-    "index": "IOTANS Documentation",
-    "dao": "IOTANS DAO",
+    "index": "IOTA-Names Documentation",
+    "dao": "IOTA-Names DAO",
     "developer": "Developer",
     "user": "User",
     "node-operator": "Node Operator",
     "move-registry": "Move Registry (Experimental)",
     "dashboard": {
-        "title": "IOTANS Dashboard ↗",
+        "title": "IOTA-Names Dashboard ↗",
         "type": "page",
-        "href": "https://iotans.io/",
+        "href": "https://iota-names.io/",
         "newWindow": true
     }
 }

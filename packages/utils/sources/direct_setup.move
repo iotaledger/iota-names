@@ -9,11 +9,11 @@ module utils::direct_setup {
 
     use iota::clock::Clock;
 
-    use iotans::{
+    use iota_names::{
         domain,
         registry::Registry,
-        iotans::{Self, IotaNS},
-        iotans_registration::IotansRegistration,
+        iota_names::{Self, IotaNames},
+        iota_names_registration::IotaNamesRegistration,
         subdomain_registration::SubDomainRegistration
     };
 
@@ -28,12 +28,12 @@ module utils::direct_setup {
 
     /// Set the target address of a domain.
     public fun set_target_address(
-        iotans: &mut IotaNS,
-        nft: &IotansRegistration,
+        iota_names: &mut IotaNames,
+        nft: &IotaNamesRegistration,
         new_target: Option<address>,
         clock: &Clock,
     ) {
-        let registry = registry_mut(iotans);
+        let registry = registry_mut(iota_names);
         registry.assert_nft_is_authorized(nft, clock);
 
         let domain = nft.domain();
@@ -42,29 +42,29 @@ module utils::direct_setup {
 
     /// Set the reverse lookup address for the domain
     public fun set_reverse_lookup(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         domain_name: String,
         ctx: &TxContext
     ) {
-        registry_mut(iotans).set_reverse_lookup(
+        registry_mut(iota_names).set_reverse_lookup(
             ctx.sender(),
             domain::new(domain_name)
         );
     }
 
     /// User-facing function - unset the reverse lookup address for the domain.
-    public fun unset_reverse_lookup(iotans: &mut IotaNS, ctx: &TxContext) {
-        registry_mut(iotans).unset_reverse_lookup(ctx.sender());
+    public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
+        registry_mut(iota_names).unset_reverse_lookup(ctx.sender());
     }
 
     /// User-facing function - add a new key-value pair to the name record's data.
     public fun set_user_data(
-        iotans: &mut IotaNS,
-        nft: &IotansRegistration, key: String,
+        iota_names: &mut IotaNames,
+        nft: &IotaNamesRegistration, key: String,
         value: String,
         clock: &Clock
     ) {
-        let registry = registry_mut(iotans);
+        let registry = registry_mut(iota_names);
         let mut data = *registry.get_data(nft.domain());
         let domain = nft.domain();
 
@@ -85,11 +85,11 @@ module utils::direct_setup {
 
     /// User-facing function - remove a key from the name record's data.
     public fun unset_user_data(
-        iotans: &mut IotaNS,
-        nft: &IotansRegistration, key: String,
+        iota_names: &mut IotaNames,
+        nft: &IotaNamesRegistration, key: String,
         clock: &Clock
     ) {
-        let registry = registry_mut(iotans);
+        let registry = registry_mut(iota_names);
         let mut data = *registry.get_data(nft.domain());
         let domain = nft.domain();
 
@@ -103,22 +103,22 @@ module utils::direct_setup {
     }
 
     public fun burn_expired(
-        iotans: &mut IotaNS,
-        nft: IotansRegistration,
+        iota_names: &mut IotaNames,
+        nft: IotaNamesRegistration,
         clock: &Clock
     ) {
-        registry_mut(iotans).burn_registration_object(nft, clock);
+        registry_mut(iota_names).burn_registration_object(nft, clock);
     }
 
     public fun burn_expired_subname(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         nft: SubDomainRegistration,
         clock: &Clock
     ) {
-        registry_mut(iotans).burn_subdomain_object(nft, clock);
+        registry_mut(iota_names).burn_subdomain_object(nft, clock);
     }
 
-    fun registry_mut(iotans: &mut IotaNS): &mut Registry {
-        iotans::app_registry_mut<DirectSetup, Registry>(DirectSetup {}, iotans)
+    fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
+        iota_names::app_registry_mut<DirectSetup, Registry>(DirectSetup {}, iota_names)
     }
 }

@@ -6,12 +6,12 @@ import { useConfig } from 'nextra-theme-docs';
 import Link from 'next/link';
 
 const NavBar = () => {
-    const search = useConfig().search.component({className: 'bg-slate-100'});
+    const search = useConfig().search.component({ className: 'bg-slate-100' });
     const logo = useConfig().logo;
-    const themeSwitch = useConfig().themeSwitch.component({lite: false, className: 'bg-white'});
+    const themeSwitch = useConfig().themeSwitch.component({ lite: false, className: 'bg-white' });
 
     return (
-        <div className="iotans-nav-container sticky top-0 text-white w-full bg-blurple z-10">
+        <div className="iota-names-nav-container sticky top-0 text-white w-full bg-blurple z-10">
             <nav className="max-w-[110rem] grid grid-cols-12 h-16 gap-4 items-center">
                 <div className="col-span-3 ml-2">
                     <Link href="/">
@@ -23,15 +23,15 @@ const NavBar = () => {
                     <ul>
                         <li>
                             <a href={useConfig().project.link} target="_blank">
-                                <span className="external-link text-xs ">GitHub 
+                                <span className="external-link text-xs ">GitHub
                                     <span className='hidden sm:inline'> Repo</span>
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://iotans.io/account/my-names" target="_blank">
+                            <a href="https://iota-names.io/account/my-names" target="_blank">
                                 <span className="external-link text-xs ">
-                                    <span className='hidden sm:inline'>IOTANS </span>
+                                    <span className='hidden sm:inline'>IOTA-Names </span>
                                     Dashboard
                                 </span>
                             </a>

@@ -20,17 +20,17 @@ export const authorize = async (network: Network) => {
 	authorizeApp({
 		txb,
 		adminCap: config.adminCap,
-		iotans: config.iotans,
+		iotaNames: config.iotaNames,
 		type: `${config.renewalsPackageId}::renew::Renew`,
-		iotansPackageIdV1: config.packageId,
+		iotaNamesPackageIdV1: config.packageId,
 	});
 
 	Packages('mainnet').Renewal.setupFunction({
 		txb,
 		adminCap: config.adminCap,
-		iotans: config.iotans,
+		iotaNames: config.iotaNames,
 		packageId: config.renewalsPackageId,
-		iotansPackageIdV1: config.packageId,
+		iotaNamesPackageIdV1: config.packageId,
 		priceList: {
 			three: 50 * Number(NANOS_PER_IOTA),
 			four: 10 * Number(NANOS_PER_IOTA),

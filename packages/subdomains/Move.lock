@@ -7,7 +7,7 @@ deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { name = "Iota" },
   { name = "denylist" },
-  { name = "iotans" },
+  { name = "iota_names" },
 ]
 
 [[move.package]]
@@ -28,12 +28,12 @@ source = { local = "../denylist" }
 
 dependencies = [
   { name = "Iota" },
-  { name = "iotans" },
+  { name = "iota_names" },
 ]
 
 [[move.package]]
-name = "iotans"
-source = { local = "../iotans" }
+name = "iota_names"
+source = { local = "../iota_names" }
 
 dependencies = [
   { name = "Iota" },

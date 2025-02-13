@@ -10,12 +10,12 @@ module registration::register {
         iota::IOTA
     };
 
-    use iotans::{
+    use iota_names::{
         domain,
         registry::Registry,
-        iotans::{Self, IotaNS},
+        iota_names::{Self, IotaNames},
         config::{Self, Config},
-        iotans_registration::IotansRegistration
+        iota_names_registration::IotaNamesRegistration
     };
 
     /// Number of years passed is not within [1-5] interval.
@@ -35,16 +35,16 @@ module registration::register {
     // - the domain is not a subdomain
     // - number of years is within [1-5] interval
     public fun register(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         domain_name: String,
         no_years: u8,
         payment: Coin<IOTA>,
         clock: &Clock,
         ctx: &mut TxContext
-    ): IotansRegistration {
-        iotans.assert_app_is_authorized<Register>();
+    ): IotaNamesRegistration {
+        iota_names.assert_app_is_authorized<Register>();
 
-        let config = iotans.get_config<Config>();
+        let config = iota_names.get_config<Config>();
 
         let domain = domain::new(domain_name);
         config::assert_valid_user_registerable_domain(&domain);
@@ -62,12 +62,12 @@ module registration::register {
             EIncorrectAmount
         );
 
-        iotans::app_add_balance(
+        iota_names::app_add_balance(
             Register {},
-            iotans,
+            iota_names,
             payment.into_balance()
         );
-        let registry = iotans::app_registry_mut<Register, Registry>(Register {}, iotans);
+        let registry = iota_names::app_registry_mut<Register, Registry>(Register {}, iota_names);
         registry.add_record(domain, no_years, clock, ctx)
     }
 }

@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2024.beta"
 
 [dependencies]
-Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override=true }
-iotans = { local = "../iotans" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override = true }
+iota_names = { local = "../iota_names" }
 
 [addresses]
 renewal = "0x0"

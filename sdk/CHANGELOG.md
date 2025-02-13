@@ -1,4 +1,4 @@
-# @iota/iota-ns
+# @iota/iota-names
 
 ## 0.4.2
 
@@ -64,4 +64,4 @@
 
 ### Patch Changes
 
-- 6ba502e: Introduces iotans
+- 6ba502e: Introduces iota_names

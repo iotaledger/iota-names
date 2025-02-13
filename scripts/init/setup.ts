@@ -23,10 +23,10 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		if (data && 'authorizationType' in data) {
 			authorizeApp({
 				txb,
-				adminCap: packageInfo.IOTANS.adminCap,
-				iotans: packageInfo.IOTANS.iotans,
+				adminCap: packageInfo.IOTANames.adminCap,
+				iotaNames: packageInfo.IOTANames.iotaNames,
 				type: data.authorizationType(pkg.packageId),
-				iotansPackageIdV1: packageInfo.IOTANS.packageId,
+				iotaNamesPackageIdV1: packageInfo.IOTANames.packageId,
 			});
 		}
 	}
@@ -34,29 +34,29 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 	packages.Subdomains.setupFunction(
 		txb,
 		packageInfo.Subdomains.packageId,
-		packageInfo.IOTANS.adminCap,
-		packageInfo.IOTANS.iotans,
-		packageInfo.IOTANS.packageId,
+		packageInfo.IOTANames.adminCap,
+		packageInfo.IOTANames.iotaNames,
+		packageInfo.IOTANames.packageId,
 	);
 	packages.DenyList.setupFunction(
 		txb,
 		packageInfo.DenyList.packageId,
-		packageInfo.IOTANS.adminCap,
-		packageInfo.IOTANS.iotans,
+		packageInfo.IOTANames.adminCap,
+		packageInfo.IOTANames.iotaNames,
 	);
-	packages.IOTANS.setupFunction(
+	packages.IOTANames.setupFunction(
 		txb,
-		packageInfo.IOTANS.packageId,
-		packageInfo.IOTANS.adminCap,
-		packageInfo.IOTANS.iotans,
-		packageInfo.IOTANS.publisher,
+		packageInfo.IOTANames.packageId,
+		packageInfo.IOTANames.adminCap,
+		packageInfo.IOTANames.iotaNames,
+		packageInfo.IOTANames.publisher,
 	);
 	packages.Renewal.setupFunction({
 		txb,
-		adminCap: packageInfo.IOTANS.adminCap,
-		iotans: packageInfo.IOTANS.iotans,
+		adminCap: packageInfo.IOTANames.adminCap,
+		iotaNames: packageInfo.IOTANames.iotaNames,
 		packageId: packageInfo.Renewal.packageId,
-		iotansPackageIdV1: packageInfo.IOTANS.packageId,
+		iotaNamesPackageIdV1: packageInfo.IOTANames.packageId,
 		priceList: {
 			three: 2 * Number(NANOS_PER_IOTA),
 			four: 1 * Number(NANOS_PER_IOTA),
@@ -102,8 +102,8 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 
 			constants.registryTableId = await queryRegistryTable(
 				getClient(network),
-				packageInfo.IOTANS.iotans,
-				packageInfo.IOTANS.packageId,
+				packageInfo.IOTANames.iotaNames,
+				packageInfo.IOTANames.packageId,
 			);
 
 			writeFileSync(

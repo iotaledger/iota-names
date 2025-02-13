@@ -96,7 +96,7 @@ const prepareTx = () => {
 };
 
 // parses all owned OBjects from `json` file.
-// If you want to refresh the owned data for the IOTANS admin, re-run `ts-node objects.ts`.
+// If you want to refresh the owned data for the IOTA-Names admin, re-run `ts-node objects.ts`.
 parseOwnedObjects();
 // Parses the `transfers.csv` file, and creates the list of object transfers
 parseCsvFile();

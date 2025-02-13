@@ -15,7 +15,7 @@ export type PackageInfo = {
 	publisherId: string;
 	adminAddress: string;
 	adminCap: string;
-	iotans: string;
+	iotaNames: string;
 	displayObject?: string;
 	directSetupPackageId: string;
 	renewalsPackageId: string;
@@ -34,7 +34,7 @@ export const mainPackage: Config = {
 			'0xa81a2328b7bbf70ab196d6aca400b5b0721dec7615bf272d95e0b0df04517e72',
 		),
 		adminCap: '0x3f8d702d90c572b60ac692fb5074f7a7ac350b80d9c59eab4f6b7692786cae0a',
-		iotans: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
+		iotaNames: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
 		displayObject: '0x866fbd8e51b6637c25f0e811ece9a85eb417f3987ecdfefb80f15d1192d72b4c',
 		directSetupPackageId: '0xdac22652eb400beb1f5e2126459cae8eedc116b73b8ad60b71e3e8d7fdb317e2',
 		renewalsPackageId: '0xd5e5f74126e7934e35991643b0111c3361827fc0564c83fa810668837c6f0b0f',
@@ -50,7 +50,7 @@ export const mainPackage: Config = {
 		adminCap: normalizeIotaAddress(
 			'0x5def5bd9dc94b7d418d081a91c533ec619fb4350e6c4e4602aea96fd49331b15',
 		),
-		iotans: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
+		iotaNames: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
 		directSetupPackageId: '0xb82c701b383df8e5e55e2c8f201ee5a9fe43fc252dad291d52cc7da32f44161f',
 		renewalsPackageId: '0x54800ebb4606fd0c03b4554976264373b3374eeb3fd63e7ff69f31cac786ba8c',
 		subNamesPackageId: '0x3c272bc45f9157b7818ece4f7411bdfa8af46303b071aca4e18c03119c9ff636',

@@ -10,37 +10,37 @@ module registration::register_tests {
     use iota::{test_scenario::{Self, Scenario, ctx}, clock::{Self, Clock}, coin, iota::IOTA};
 
     use registration::register::{Self, Register, register};
-    use iotans::{
+    use iota_names::{
         constants::{nanos_per_iota, grace_period_ms, year_ms}, 
-        iotans::{Self, IotaNS, total_balance, AdminCap}, 
-        iotans_registration::IotansRegistration, 
-        iotans_registration, 
+        iota_names::{Self, IotaNames, total_balance, AdminCap}, 
+        iota_names_registration::IotaNamesRegistration, 
+        iota_names_registration, 
         domain, 
         registry, 
         config, 
     };
 
-    const IOTANS_ADDRESS: address = @0xA001;
+    const IOTA_NAMES_ADDRESS: address = @0xA001;
     const DOMAIN_NAME: vector<u8> = b"abc.iota";
 
     public fun test_init(): Scenario {
-        let mut scenario_val = test_scenario::begin(IOTANS_ADDRESS);
+        let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
         let scenario = &mut scenario_val;
         {
-            let mut iotans = iotans::init_for_testing(scenario.ctx());
-            iotans.authorize_app_for_testing<Register>();
-            iotans.share_for_testing();
+            let mut iota_names = iota_names::init_for_testing(scenario.ctx());
+            iota_names.authorize_app_for_testing<Register>();
+            iota_names.share_for_testing();
             let clock = clock::create_for_testing(scenario.ctx());
             clock::share_for_testing(clock);
         };
         {
-            test_scenario::next_tx(scenario, IOTANS_ADDRESS);
+            test_scenario::next_tx(scenario, IOTA_NAMES_ADDRESS);
             let admin_cap = scenario.take_from_sender<AdminCap>();
-            let mut iotans = scenario.take_shared<IotaNS>();
+            let mut iota_names = scenario.take_shared<IotaNames>();
 
-            registry::init_for_testing(&admin_cap, &mut iotans, scenario.ctx());
+            registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
 
-            test_scenario::return_shared(iotans);
+            test_scenario::return_shared(iota_names);
             scenario.return_to_sender(admin_cap);
         };
         scenario_val
@@ -52,35 +52,35 @@ module registration::register_tests {
         no_years: u8,
         amount: u64,
         clock_tick: u64
-    ): IotansRegistration {
-        scenario.next_tx(IOTANS_ADDRESS);
-        let mut iotans = scenario.take_shared<IotaNS>();
+    ): IotaNamesRegistration {
+        scenario.next_tx(IOTA_NAMES_ADDRESS);
+        let mut iota_names = scenario.take_shared<IotaNames>();
         let payment = coin::mint_for_testing<IOTA>(amount, scenario.ctx());
         let mut clock = scenario.take_shared<Clock>();
 
         clock.increment_for_testing(clock_tick);
-        let nft = register(&mut iotans, domain_name, no_years, payment, &clock, scenario.ctx());
+        let nft = register(&mut iota_names, domain_name, no_years, payment, &clock, scenario.ctx());
 
         test_scenario::return_shared(clock);
-        test_scenario::return_shared(iotans);
+        test_scenario::return_shared(iota_names);
 
         nft
     }
 
     fun deauthorize_app_util(scenario: &mut Scenario) {
-        test_scenario::next_tx(scenario, IOTANS_ADDRESS);
+        test_scenario::next_tx(scenario, IOTA_NAMES_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
-        let mut iotans = scenario.take_shared<IotaNS>();
+        let mut iota_names = scenario.take_shared<IotaNames>();
 
-        iotans::deauthorize_app<Register>(&admin_cap, &mut iotans);
+        iota_names::deauthorize_app<Register>(&admin_cap, &mut iota_names);
 
-        test_scenario::return_shared(iotans);
+        test_scenario::return_shared(iota_names);
         scenario.return_to_sender(admin_cap);
     }
 
     public fun assert_balance(scenario: &mut Scenario, amount: u64) {
-        scenario.next_tx(IOTANS_ADDRESS);
-        let iota_names = scenario.take_shared<IotaNS>();
+        scenario.next_tx(IOTA_NAMES_ADDRESS);
+        let iota_names = scenario.take_shared<IotaNames>();
         assert!(iota_names.total_balance() == amount, 0);
         test_scenario::return_shared(iota_names);
     }

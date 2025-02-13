@@ -13,8 +13,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        blurple: "rgb(var(--iotans-blurple) / <alpha-value>)",
-        blurpleDark: "rgb(var(--iotans-blurple-dark) / <alpha-value>)",
+        blurple: "rgb(var(--iota-names-blurple) / <alpha-value>)",
+        blurpleDark: "rgb(var(--iota-names-blurple-dark) / <alpha-value>)",
       }
     },
   },

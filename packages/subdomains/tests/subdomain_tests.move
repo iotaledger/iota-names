@@ -8,12 +8,12 @@ module subdomains::subdomain_tests {
 
     use iota::{test_scenario::{Self as ts, Scenario, ctx}, clock::{Self, Clock}};
 
-    use iotans::{
+    use iota_names::{
         domain, 
         constants::{grace_period_ms, year_ms}, 
-        iotans::{Self, IotaNS, AdminCap}, 
+        iota_names::{Self, IotaNames, AdminCap}, 
         registry::{Self, Registry}, 
-        iotans_registration::{Self, IotansRegistration}, 
+        iota_names_registration::{Self, IotaNamesRegistration}, 
         subdomain_registration::{Self, SubDomainRegistration}, 
         registry_tests::{burn_nfts}
     };
@@ -51,7 +51,7 @@ module subdomains::subdomain_tests {
         let nested = create_node_subdomain(subdomain_registration::nft(&child), utf8(b"nested.node.test.iota"), MIN_SUBDOMAIN_DURATION, true, true, scenario);
 
         // extend node's subdomain expiration to the limit.
-        extend_node_subdomain(&mut child, iotans_registration::expiration_timestamp_ms(&parent), scenario);
+        extend_node_subdomain(&mut child, iota_names_registration::expiration_timestamp_ms(&parent), scenario);
 
         // update subdomain's setup for testing
         update_subdomain_setup(&parent, utf8(b"node.test.iota"), false, false, scenario);
@@ -72,7 +72,7 @@ module subdomains::subdomain_tests {
         let scenario = &mut scenario_val;
         let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-        let _child = create_node_subdomain(&parent, utf8(b"node.test.iota"), iotans_registration::expiration_timestamp_ms(&parent) + 1, true, true, scenario);
+        let _child = create_node_subdomain(&parent, utf8(b"node.test.iota"), iota_names_registration::expiration_timestamp_ms(&parent) + 1, true, true, scenario);
 
         abort 1337
     }
@@ -84,7 +84,7 @@ module subdomains::subdomain_tests {
         let scenario = &mut scenario_val;
         let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-        let _child = create_node_subdomain(&parent, utf8(b"node.example.iota"), iotans_registration::expiration_timestamp_ms(&parent), true, true, scenario);
+        let _child = create_node_subdomain(&parent, utf8(b"node.example.iota"), iota_names_registration::expiration_timestamp_ms(&parent), true, true, scenario);
 
         abort 1337  
     }
@@ -96,10 +96,10 @@ module subdomains::subdomain_tests {
         let scenario = &mut scenario_val;
         let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-        let child = create_node_subdomain(&parent, utf8(b"node.test.iota"), iotans_registration::expiration_timestamp_ms(&parent), false, true, scenario);
+        let child = create_node_subdomain(&parent, utf8(b"node.test.iota"), iota_names_registration::expiration_timestamp_ms(&parent), false, true, scenario);
 
         let child_nft = subdomain_registration::nft(&child);
-        let _nested = create_node_subdomain(child_nft, utf8(b"test.node.test.iota"), iotans_registration::expiration_timestamp_ms(child_nft), false, true, scenario);
+        let _nested = create_node_subdomain(child_nft, utf8(b"test.node.test.iota"), iota_names_registration::expiration_timestamp_ms(child_nft), false, true, scenario);
 
         abort 1337  
     }
@@ -126,7 +126,7 @@ module subdomains::subdomain_tests {
         // child is an expired name ofc.
         let mut child = create_node_subdomain(&parent, utf8(b"node.test.iota"), MIN_SUBDOMAIN_DURATION, true, true, scenario);
 
-        increment_clock(iotans_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1 , scenario);
+        increment_clock(iota_names_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1 , scenario);
 
         let _parent_w_different_owner = create_sld_name(utf8(b"test.iota"), scenario);
 
@@ -136,7 +136,7 @@ module subdomains::subdomain_tests {
         abort 1337  
     }
     
-    #[test, expected_failure(abort_code=::iotans::registry::ERecordExpired)]
+    #[test, expected_failure(abort_code=::iota_names::registry::ERecordExpired)]
     fun tries_to_use_expired_subdomain_to_create_new() {
         let mut scenario_val = test_init();
         let scenario = &mut scenario_val;
@@ -179,82 +179,82 @@ module subdomains::subdomain_tests {
         let mut scenario_val = ts::begin(USER_ADDRESS);
         let scenario = &mut scenario_val;
         {
-            let mut iotans = iotans::init_for_testing(ctx(scenario));
-            iotans::authorize_app_for_testing<SubDomains>(&mut iotans);
-            iotans::share_for_testing(iotans);
+            let mut iota_names = iota_names::init_for_testing(ctx(scenario));
+            iota_names::authorize_app_for_testing<SubDomains>(&mut iota_names);
+            iota_names::share_for_testing(iota_names);
             let clock = clock::create_for_testing(ctx(scenario));
             clock::share_for_testing(clock);
         };
         {
             ts::next_tx(scenario, USER_ADDRESS);
             let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-            let mut iotans = ts::take_shared<IotaNS>(scenario);
-            iotans::add_config(&admin_cap, &mut iotans, config::default());
+            let mut iota_names = ts::take_shared<IotaNames>(scenario);
+            iota_names::add_config(&admin_cap, &mut iota_names, config::default());
 
-            registry::init_for_testing(&admin_cap, &mut iotans, ctx(scenario));
-            denylist::setup(&mut iotans, &admin_cap, ctx(scenario));
+            registry::init_for_testing(&admin_cap, &mut iota_names, ctx(scenario));
+            denylist::setup(&mut iota_names, &admin_cap, ctx(scenario));
 
-            ts::return_shared(iotans);
+            ts::return_shared(iota_names);
             ts::return_to_sender(scenario, admin_cap);
         };
         scenario_val
     }
 
     /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
-    public fun registry_mut(iotans: &mut IotaNS): &mut Registry {
+    public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
 
-        let registry_mut = iotans::app_registry_mut<SubDomains, Registry>(subdomains::auth_for_testing(), iotans);
+        let registry_mut = iota_names::app_registry_mut<SubDomains, Registry>(subdomains::auth_for_testing(), iota_names);
 
         registry_mut
     }
     
     /// Create a regular name to help with our tests.
-    public fun create_sld_name(name: String, scenario: &mut Scenario): IotansRegistration {
+    public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegistration {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
-        let registry_mut = registry_mut(&mut iotans);
+        let registry_mut = registry_mut(&mut iota_names);
 
         let parent = registry::add_record(registry_mut, domain::new(name), 1, &clock, ctx(scenario));
 
         ts::return_shared(clock);
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         parent
     } 
 
     /// Create a leaf subdomain
-    public fun create_leaf_subdomain(parent: &IotansRegistration, name: String, target: address, scenario: &mut Scenario) {
+    public fun create_leaf_subdomain(parent: &IotaNamesRegistration, name: String, target: address, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
-        subdomains::new_leaf(&mut iotans, parent, &clock, name, target, ctx(scenario));
+        subdomains::new_leaf(&mut iota_names, parent, &clock, name, target, ctx(scenario));
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
     }
 
     /// Remove a leaf subdomain
-    public fun remove_leaf_subdomain(parent: &IotansRegistration, name: String, scenario: &mut Scenario) {
+    public fun remove_leaf_subdomain(parent: &IotaNamesRegistration, name: String, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
         
-        subdomains::remove_leaf(&mut iotans, parent, &clock, name);
+        subdomains::remove_leaf(&mut iota_names, parent, &clock, name);
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
     }
 
     /// Create a node subdomain
-    public fun create_node_subdomain(parent: &IotansRegistration, name: String, expiration: u64, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario): SubDomainRegistration {
+    public fun create_node_subdomain(parent: &IotaNamesRegistration, name: String, expiration: u64, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario): SubDomainRegistration {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
-        let nft = subdomains::new(&mut iotans, parent, &clock, name, expiration, allow_creation, allow_extension, ctx(scenario));
+        let nft = subdomains::new(&mut iota_names, parent, &clock, name, expiration, allow_creation, allow_extension, ctx(scenario));
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
 
         nft
@@ -263,36 +263,36 @@ module subdomains::subdomain_tests {
     /// Extend a node subdomain's expiration.
     public fun extend_node_subdomain(nft: &mut SubDomainRegistration, expiration: u64, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
-        subdomains::extend_expiration(&mut iotans, nft, expiration);
+        subdomains::extend_expiration(&mut iota_names, nft, expiration);
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
     }
 
-    public fun update_subdomain_setup(parent: &IotansRegistration, subdomain: String, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario) {
+    public fun update_subdomain_setup(parent: &IotaNamesRegistration, subdomain: String, allow_creation: bool, allow_extension: bool, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
 
-        subdomains::edit_setup(&mut iotans, parent, &clock, subdomain, allow_creation, allow_extension);
+        subdomains::edit_setup(&mut iota_names, parent, &clock, subdomain, allow_creation, allow_extension);
 
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
     } 
 
     public fun burn_subdomain(nft: SubDomainRegistration, scenario: &mut Scenario) {
         ts::next_tx(scenario, USER_ADDRESS);
-        let mut iotans = ts::take_shared<IotaNS>(scenario);
+        let mut iota_names = ts::take_shared<IotaNames>(scenario);
         let clock = ts::take_shared<Clock>(scenario);
 
-        subdomains::burn(&mut iotans, nft, &clock);
+        subdomains::burn(&mut iota_names, nft, &clock);
 
-        ts::return_shared(iotans);
+        ts::return_shared(iota_names);
         ts::return_shared(clock);
     } 
 

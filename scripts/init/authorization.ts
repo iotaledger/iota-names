@@ -5,47 +5,47 @@
 import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
 
 /**
- * A helper to authorize any app in the IOTANS object.
+ * A helper to authorize any app in the IOTANames object.
  */
 export const authorizeApp = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	type,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
+	iotaNames: string;
 	type: string;
-	iotansPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }) => {
 	txb.moveCall({
-		target: `${iotansPackageIdV1}::iotans::authorize_app`,
-		arguments: [txb.object(adminCap), txb.object(iotans)],
+		target: `${iotaNamesPackageIdV1}::iota_names::authorize_app`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
 
 /**
- * A helper to deauthorize any app that has been authorized on the IOTANS object.
+ * A helper to deauthorize any app that has been authorized on the IOTANames object.
  */
 export const deauthorizeApp = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	type,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
+	iotaNames: string;
 	type: string;
-	iotansPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }) => {
 	txb.moveCall({
-		target: `${iotansPackageIdV1}::iotans::deauthorize_app`,
-		arguments: [txb.object(adminCap), txb.object(iotans)],
+		target: `${iotaNamesPackageIdV1}::iota_names::deauthorize_app`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
@@ -56,66 +56,66 @@ export const deauthorizeApp = ({
 export const setupApp = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	target,
 	args,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
+	iotaNames: string;
 	target: `${string}::${string}`;
 	args?: TransactionArgument[];
 }) => {
 	txb.moveCall({
 		target: `${target}::setup`,
-		arguments: [txb.object(iotans), txb.object(adminCap), ...(args || [])],
+		arguments: [txb.object(iotaNames), txb.object(adminCap), ...(args || [])],
 	});
 };
 
 /**
- * Add a config to the IOTANS object.
+ * Add a config to the IOTANames object.
  */
 export const addConfig = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	type,
 	config,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
-	iotansPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	config: TransactionArgument;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${iotansPackageIdV1}::iotans::add_config`,
-		arguments: [txb.object(adminCap), txb.object(iotans), config],
+		target: `${iotaNamesPackageIdV1}::iota_names::add_config`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames), config],
 		typeArguments: [type],
 	});
 };
 
 /**
- * Remove a config from IOTANS object.
+ * Remove a config from IOTANames object.
  */
 export const removeConfig = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	type,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
-	iotansPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${iotansPackageIdV1}::iotans::remove_config`,
-		arguments: [txb.object(adminCap), txb.object(iotans)],
+		target: `${iotaNamesPackageIdV1}::iota_names::remove_config`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
@@ -125,17 +125,17 @@ export const removeConfig = ({
  */
 export const newPriceConfig = ({
 	txb,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 	priceList,
 	publicKey = [...Array(33).keys()],
 }: {
 	txb: Transaction;
-	iotansPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 	priceList: { [key: string]: number };
 	publicKey?: number[];
 }): TransactionArgument => {
 	return txb.moveCall({
-		target: `${iotansPackageIdV1}::config::new`,
+		target: `${iotaNamesPackageIdV1}::config::new`,
 		arguments: [
 			txb.pure.vector('u8', publicKey),
 			txb.pure.u64(priceList.three),
@@ -146,45 +146,45 @@ export const newPriceConfig = ({
 };
 
 /**
- * Add a registry to the IOTANS object.
+ * Add a registry to the IOTANames object.
  */
 export const addRegistry = ({
 	txb,
 	adminCap,
-	iotans,
+	iotaNames,
 	type,
 	registry,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotans: string;
-	iotansPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	registry: TransactionArgument;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${iotansPackageIdV1}::iotans::add_registry`,
-		arguments: [txb.object(adminCap), txb.object(iotans), registry],
+		target: `${iotaNamesPackageIdV1}::iota_names::add_registry`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames), registry],
 		typeArguments: [type],
 	});
 };
 
 /**
  * Creates a default `registry` which saves direct/reverse lookups.
- * That serves as the main registry for the IOTANS object after adding it.
+ * That serves as the main registry for the IOTANames object after adding it.
  */
 export const newLookupRegistry = ({
 	txb,
 	adminCap,
-	iotansPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotansPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }): TransactionArgument => {
 	return txb.moveCall({
-		target: `${iotansPackageIdV1}::registry::new`,
+		target: `${iotaNamesPackageIdV1}::registry::new`,
 		arguments: [txb.object(adminCap)],
 	});
 };

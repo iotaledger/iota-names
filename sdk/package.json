@@ -1,7 +1,7 @@
 {
-	"name": "@iota/iota-ns",
+	"name": "@iota/iota-names",
 	"version": "0.4.2",
-	"description": "An SDK to simplify IOTANS integration.",
+	"description": "An SDK to simplify IOTA-Names integration.",
 	"license": "Apache-2.0",
 	"private": false,
 	"type": "commonjs",
@@ -11,7 +11,7 @@
 	"author": "IOTA Foundation <info@iota.org>",
 	"keywords": [
 		"IOTA",
-		"iotans"
+		"IOTANames"
 	],
 	"exports": {
 		".": {
@@ -27,7 +27,7 @@
 	],
 	"scripts": {
 		"build": "cd ../scripts && pnpm ts-node build-tools/build.ts",
-		"test": "echo 'No unit tests for IOTANS SDK'",
+		"test": "echo 'No unit tests for IOTA-Names SDK'",
 		"pre-commit": "pnpm prettier:fix && pnpm lint && pnpm build",
 		"prepublishOnly": "pnpm build",
 		"prettier:check": "prettier -c --ignore-unknown .",
@@ -57,9 +57,9 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/iotaledger/iotans-contracts.git"
+		"url": "git+https://github.com/iotaledger/iota-names-contracts.git"
 	},
 	"bugs": {
-		"url": "https://github.com/iotaledger/iotans-contracts/issues"
+		"url": "https://github.com/iotaledger/iota-names-contracts/issues"
 	}
 }

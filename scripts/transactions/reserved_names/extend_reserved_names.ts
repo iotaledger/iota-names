@@ -63,11 +63,11 @@ const parseReservedObjects = () => {
 // we always wanna group these.
 parseReservedObjects();
 
-// Does withdraw from iotans and returns the funds to be used in the PTB.
+// Does withdraw from iotaNames and returns the funds to be used in the PTB.
 const withdrawTx = (txb: Transaction, config: PackageInfo) => {
 	return txb.moveCall({
-		target: `${config.packageId}::iotans::withdraw`,
-		arguments: [txb.object(config.adminCap), txb.object(config.iotans)],
+		target: `${config.packageId}::iota_names::withdraw`,
+		arguments: [txb.object(config.adminCap), txb.object(config.iotaNames)],
 	});
 };
 
@@ -81,7 +81,7 @@ const renewTx = (
 	txb.moveCall({
 		target: `${config.renewalsPackageId}::renew::renew`,
 		arguments: [
-			txb.object(config.iotans),
+			txb.object(config.iotaNames),
 			txb.objectRef({
 				objectId: name.objectId,
 				version: name.version,
@@ -224,7 +224,7 @@ export const prepareLastTransaction = async () => {
 	}
 
 	// transfer profits to treasury in the same PTB :)
-	// We transfer 47K from the IOTANS app profits.
+	// We transfer 47K from the IOTANames app profits.
 	txb.transferObjects(
 		[txb.splitCoins(txb.gas, [txb.pure.u64(47_350n * NANOS_PER_IOTA)])],
 		txb.pure.address(ADDRESS_TO_TRANSFER_FUNDS),

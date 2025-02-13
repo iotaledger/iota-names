@@ -16,7 +16,7 @@ const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
  * Publishes the contracts and does the initial setups needed.
  * Returns the constants from the contracts.
  * */
-export async function publishAndSetupIotansContracts(toolbox: TestToolbox): Promise<Constants> {
+export async function publishAndSetupIotaNamesContracts(toolbox: TestToolbox): Promise<Constants> {
 	const folder = path.resolve(__dirname, './../../scripts');
 
 	// publishes & sets-up the contracts on our localnet.
@@ -34,7 +34,7 @@ export async function publishAndSetupIotansContracts(toolbox: TestToolbox): Prom
 		encoding: 'utf8',
 	});
 
-	console.log('IOTANS Contract published & set up successfully.');
+	console.log('IOTA-Names Contract published & set up successfully.');
 
 	return JSON.parse(fs.readFileSync(`${folder}/constants.sdk.json`, 'utf8'));
 }

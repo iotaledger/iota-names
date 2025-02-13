@@ -14,8 +14,8 @@ module temp_subdomain_proxy::subdomain_proxy {
 
     use iota::clock::Clock;
 
-    use iotans::{
-        iotans::IotaNS,
+    use iota_names::{
+        iota_names::IotaNames,
         subdomain_registration::SubDomainRegistration
     };
 
@@ -23,7 +23,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     use utils::direct_setup;
 
     public fun new(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -33,7 +33,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         ctx: &mut TxContext
     ): SubDomainRegistration {
         subdomains::new(
-            iotans,
+            iota_names,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -45,7 +45,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun new_leaf(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -53,7 +53,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         ctx: &mut TxContext
     ) {
         subdomains::new_leaf(
-            iotans,
+            iota_names,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -63,13 +63,13 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun remove_leaf(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
     ) {
         subdomains::remove_leaf(
-            iotans,
+            iota_names,
             subdomain.nft(),
             clock,
             subdomain_name,
@@ -77,7 +77,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun edit_setup(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         parent: &SubDomainRegistration,
         clock: &Clock,
         subdomain_name: String,
@@ -85,7 +85,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         allow_time_extension: bool
     ) {
         subdomains::edit_setup(
-            iotans,
+            iota_names,
             parent.nft(),
             clock,
             subdomain_name,
@@ -95,13 +95,13 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_target_address(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration,
         new_target: Option<address>,
         clock: &Clock,
     ) {
         direct_setup::set_target_address(
-            iotans,
+            iota_names,
             subdomain.nft(),
             new_target,
             clock,
@@ -109,13 +109,13 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun set_user_data(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration, key: String,
         value: String,
         clock: &Clock
     ) {
         direct_setup::set_user_data(
-            iotans,
+            iota_names,
             subdomain.nft(), key,
             value,
             clock
@@ -123,10 +123,10 @@ module temp_subdomain_proxy::subdomain_proxy {
     }
 
     public fun unset_user_data(
-        iotans: &mut IotaNS,
+        iota_names: &mut IotaNames,
         subdomain: &SubDomainRegistration, key: String,
         clock: &Clock
     ) {
-        direct_setup::unset_user_data(iotans, subdomain.nft(), key, clock);
+        direct_setup::unset_user_data(iota_names, subdomain.nft(), key, clock);
     }
 }

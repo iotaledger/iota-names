@@ -5,7 +5,7 @@
 #[test_only]
 module subdomains::unit_tests {
     use std::string::{ utf8 };
-    use iotans::domain::{Self, new as new_domain, parent};
+    use iota_names::domain::{Self, new as new_domain, parent};
     use subdomains::config::{
         assert_is_valid_subdomain,
         default
