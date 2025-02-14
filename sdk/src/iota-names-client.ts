@@ -100,7 +100,7 @@ export class IotaNamesClient {
 
 	async getNameRecord(name: string): Promise<NameRecord | null> {
 		if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
-		if (!this.constants.iotaNamesPackageId) throw new Error('IOTANamespackage ID is not set');
+		if (!this.constants.iotaNamesPackageId) throw new Error('iotaNamesPackageId is not set');
 		if (!this.constants.registryTableId) throw new Error('Registry table ID is not set');
 
 		const nameRecord = await this.#client.getDynamicFieldObject({
