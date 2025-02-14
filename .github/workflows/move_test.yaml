@@ -1,0 +1,42 @@
+name: Move Test CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/move_test.yaml'
+      - 'packages/**'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - name: Install IOTA using Homebrew
+        run: brew install iota
+
+      - name: Run move tests in all package subdirectories, with exclusions
+        run: |
+          exclude_dirs=(governance) # Add excluded directories to this array
+          for dir in packages/*; do
+            dir_name=$(basename "$dir")
+            if [[ ! " ${exclude_dirs[@]} " =~ " ${dir_name} " ]] && [ -d "$dir" ]; then
+              echo "Running iota move test in $dir"
+              (cd "$dir" && iota move test)
+            fi
+          done

@@ -1,6 +1,6 @@
 # Building Transactions
 
-`SuinsTransaction` is the client used similar to `Transaction`, and helps in building a transaction.
+`IotaNamesTransaction` is the client used similar to `Transaction`, and helps in building a transaction.
 You need to instatiate it once in every programmable transaction block (PTB) that you're building.
 
 ## Available functions
@@ -13,17 +13,17 @@ Here's a list of all the available PTB commands supported through the SDK.
 
 const register = async (name: string, years: number) => {
     // Query the latest price list from the chain.
-    const priceList = await suinsClient.getPriceList();
+    const priceList = await iotaNamesClient.getPriceList();
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
 	// Build the transaction to register the name.
-	const nft = suinsTransaction.register({
+	const nft = iotaNamesTransaction.register({
 		name,
 		years,
-		price: suinsClient.calculatePrice({ name, years, priceList }),
+		price: iotaNamesClient.calculatePrice({ name, years, priceList }),
 	});
 
     // Transfer the name's NFT
@@ -38,17 +38,17 @@ const register = async (name: string, years: number) => {
 ```js
 const renew = async (nftId: string, name: string, years: number) => {
     // Query the latest pricelist from the chain.
-    const priceList = await suinsClient.getRenewalPriceList();
+    const priceList = await iotaNamesClient.getRenewalPriceList();
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to renew the name.
-    suinsTransaction.renew({
+    iotaNamesTransaction.renew({
         nftId,
         years,
-        price: suinsClient.calculatePrice({ name, years, priceList }),
+        price: iotaNamesClient.calculatePrice({ name, years, priceList }),
     });
 
     // ... sign and execute the transaction
@@ -63,11 +63,11 @@ This works the same for names and subnames.
 const setTargetAddress = async (nftId: string, address: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to set the target address.
-    suinsTransaction.setTargetAddress({
+    iotaNamesTransaction.setTargetAddress({
         nftId,
         address,
         isSubname: false,
@@ -85,13 +85,13 @@ This works the same for names and subnames.
 const setDefault = async (name: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to set that name as default for the sender.
     // Important: This is only possible if the address signing/executing
     // the transaction is the same as the target address of that name.
-    suinsTransaction.setDefault(name);
+    iotaNamesTransaction.setDefault(name);
 
     // ... sign and execute the transaction
 }
@@ -103,11 +103,11 @@ const setDefault = async (name: string) => {
 const createSubname = async (subName: string, parentNftId: string, expirationMs: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to create a subname.
-	const subNameNft = suinsTransaction.createSubName({
+	const subNameNft = iotaNamesTransaction.createSubName({
         // The NFT of the parent
         parentNft: parentNftId,
         // The subname to be created.
@@ -115,7 +115,7 @@ const createSubname = async (subName: string, parentNftId: string, expirationMs:
         // The expiration timestamp needs to be less than or equal to the parent's expiration.
         expirationTimestampMs: expirationMs,
         // Whether the subname can create more nested subnames.
-        // E.g. more.inner.sui could create even.more.inner.sui
+        // E.g. more.inner.iota could create even.more.inner.iota
         allowChildCreation: true,
         // Whether the subname can manually extend the expiration time to 
         // the expiration time of the parent name. Can be tweaked after creation too.
@@ -136,11 +136,11 @@ Allows the parent holder to edit the setup (allow child creation and allow time 
 const editSetup = async (name: stringify, parentNftId: string, allowChildCreation: boolean, allowTimeExtension: boolean) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to edit the setup of a subname.
-    suinsTransaction.editSetup({
+    iotaNamesTransaction.editSetup({
         name,
         parentNft: parentNftId,
         allowChildCreation,
@@ -159,11 +159,11 @@ This functionality is available only if the parent allows time extension for the
 const extendExpiration = async (nftId: string, expirationMs: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to extend the expiration of a subname.
-    suinsTransaction.extendExpiration({
+    iotaNamesTransaction.extendExpiration({
         nft: nftId,
         expirationTimestampMs: expirationMs,
     });
@@ -180,17 +180,17 @@ Read more about the differences between a [subname and a leaf subname](../subnam
 const createLeafSubname = async (name: stringify, parentNftId: string, targetAddress: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to create a leaf subname.
     // A leaf subname is a subname that has a target address and no NFT of its own.
-    suinsTransaction.createLeafSubName({
+    iotaNamesTransaction.createLeafSubName({
         // The NFT of the parent
         parentNft: parentNftId,
         // The leaf subname to be created.
         name,
-        // the target address of the leaf subname (any valid Sui address)
+        // the target address of the leaf subname (any valid IOTA address)
         targetAddress
     });
 
@@ -204,11 +204,11 @@ const createLeafSubname = async (name: stringify, parentNftId: string, targetAdd
 const removeLeafSubname = async (name: string, parentNftId: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to remove a leaf subname.
-    suinsTransaction.removeLeafSubName({
+    iotaNamesTransaction.removeLeafSubName({
         // The NFT of the parent
         parentNft: parentNftId,
         // The leaf subname to be removed.
@@ -227,18 +227,18 @@ Currently supports AVATAR and IPFS hash.
 const setMetadata = async (nft: string, avatar: string, contentHash: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to set the metadata.
     // Set the avatar to the supplied value.
-    suinsTransaction.setMetadata({
+    iotaNamesTransaction.setMetadata({
         nft,
         key: ALLOWED_METADATA.avatar,
         value: avatar
     });
     // Set the contentHash to the supplied value.
-    suinsTransaction.setMetadata({
+    iotaNamesTransaction.setMetadata({
         nft,
         key: ALLOWED_METADATA.contentHash,
         value: contentHash
@@ -256,11 +256,11 @@ Allows burning an expired name to get back storage rebates.
 const burn = async (nftId: string) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to burn the expired name.
-    suinsTransaction.burn({
+    iotaNamesTransaction.burn({
         nft: nftId,
         // Whether it's a subname.
         isSubname: false,
@@ -273,35 +273,35 @@ const burn = async (nftId: string) => {
 
 ## Combined example
 
-The following code snippet registers a SuiNS name, sets its target address, and sets it as the default name for the target address in a single PTB. You could also add transaction commands to do even more in the same PTB if you wanted to, like create subnames and so on, but that is beyond the scope of this example.
+The following code snippet registers an IOTA name, sets its target address, and sets it as the default name for the target address in a single PTB. You could also add transaction commands to do even more in the same PTB if you wanted to, like create subnames and so on, but that is beyond the scope of this example.
 
 ```js
 // Years must be between 1-5.
 const composedExample = async (name: string, years: number) => {
     // Query the latest price list from the chain.
-    const priceList = await suinsClient.getPriceList();
+    const priceList = await iotaNamesClient.getPriceList();
     
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const suinsTransaction = new SuinsTransaction(suinsClient, transaction);
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
 	// Build the transaction to register the name.
-	const nft = suinsTransaction.register({
+	const nft = iotaNamesTransaction.register({
 		name,
 		years,
-		price: suinsClient.calculatePrice({ name, years, priceList }),
+		price: iotaNamesClient.calculatePrice({ name, years, priceList }),
 	});
 
     // You can now use this NFT, for instance to set its target address.
-	suinsTransaction.setTargetAddress({
+	iotaNamesTransaction.setTargetAddress({
 		nft,
 		address: '0xMyAddress',
 	});
 
     // And you could also set this name as the default name for `0xMyAddress`.
     // This is only possible if the address signs and executes the transaction.
-	suinsTransaction.setDefault(name);
+	iotaNamesTransaction.setDefault(name);
 
     // Transfer the name's NFT to the address.
     transaction.transferObjects([nft], transaction.pure.address('0xMyAddress'));

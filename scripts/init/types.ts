@@ -1,7 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 export type PackageInfo = {
-	SuiNS: SuiNS;
+	IotaNames: IotaNames;
 	Utils: Package;
 	DenyList: Package;
 	Registration: Package;
@@ -15,10 +17,10 @@ export type Package = {
 	upgradeCap: string;
 };
 
-export type SuiNS = {
+export type IotaNames = {
 	packageId: string;
 	upgradeCap: string;
 	publisher: string;
-	suins: string;
+	iotaNames: string;
 	adminCap: string;
 };

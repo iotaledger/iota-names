@@ -1,19 +1,20 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { normalizeSuiNSName } from '@mysten/sui/utils';
+import { normalizeIotaName } from '@iota/iota-sdk/utils';
 
 export function isSubName(name: string): boolean {
-	return normalizeSuiNSName(name, 'dot').split('.').length > 2;
+	return normalizeIotaName(name, 'dot').split('.').length > 2;
 }
 
 /**
  * Checks if a name is a nested subname.
  * A nested subdomain is a subdomain that is a subdomain of another subdomain.
- * @param name The name to check (e.g test.example.sub.sui)
+ * @param name The name to check (e.g test.example.sub.iota)
  */
 export function isNestedSubName(name: string): boolean {
-	return normalizeSuiNSName(name, 'dot').split('.').length > 3;
+	return normalizeIotaName(name, 'dot').split('.').length > 3;
 }
 
 /**

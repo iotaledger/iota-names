@@ -1,11 +1,11 @@
-# SuiNS Contracts
+# IOTA-Names
 
-This repository holds the SuiNS contracts (both the core and all system packages).
+This repository holds the IOTA-Names contracts (both the core and all system packages).
 
 ## Packages
 
 The [packages](./packages/) folder contains a list of all the packages that are being used
-for SuiNS, as well as their tests.
+for IOTA-Names, as well as their tests.
 
 ## Scripts
 

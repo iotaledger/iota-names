@@ -1,59 +1,61 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { Transaction } from '@mysten/sui/transactions';
-import { normalizeSuiAddress } from '@mysten/sui/utils';
 
-import { ALLOWED_METADATA, SuinsClient, SuinsTransaction } from '../src';
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { normalizeIotaAddress } from '@iota/iota-sdk/utils';
+
+import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src';
 
 export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') => {
-	const client = new SuiClient({ url: getFullnodeUrl(network) });
+	const client = new IotaClient({ url: getFullnodeUrl(network) });
 
-	const sender = normalizeSuiAddress('0x2');
-	const suinsClient = new SuinsClient({
+	const sender = normalizeIotaAddress('0x2');
+	const iotaNamesClient = new IotaNamesClient({
 		client,
 		network,
 	});
 
 	const tx = new Transaction();
-	const suinsTx = new SuinsTransaction(suinsClient, tx);
+	const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
 	const uniqueName =
-		(Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.sui';
+		(Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
 
-	const priceList = await suinsClient.getPriceList();
-	// const _renewalPriceList = await suinsClient.getRenewalPriceList();
+	const priceList = await iotaNamesClient.getPriceList();
+	// const _renewalPriceList = await iotaNamesClient.getRenewalPriceList();
 	const years = 1;
 
-	// register test.sui for a year.
-	const nft = suinsTx.register({
+	// register test.iota for a year.
+	const nft = iotaNamesTx.register({
 		name: uniqueName,
 		years,
-		price: suinsClient.calculatePrice({ name: uniqueName, years, priceList }),
+		price: iotaNamesClient.calculatePrice({ name: uniqueName, years, priceList }),
 	});
 	// Sets the target address of the NFT.
-	suinsTx.setTargetAddress({
+	iotaNamesTx.setTargetAddress({
 		nft,
 		address: sender,
 		isSubname: false,
 	});
 
-	suinsTx.setDefault(uniqueName);
+	iotaNamesTx.setDefault(uniqueName);
 
 	// Sets the avatar of the NFT.
-	suinsTx.setUserData({
+	iotaNamesTx.setUserData({
 		nft,
 		key: ALLOWED_METADATA.avatar,
 		value: '0x0',
 	});
 
-	suinsTx.setUserData({
+	iotaNamesTx.setUserData({
 		nft,
 		key: ALLOWED_METADATA.contentHash,
 		value: '0x1',
 	});
 
-	const subNft = suinsTx.createSubName({
+	const subNft = iotaNamesTx.createSubName({
 		parentNft: nft,
 		name: 'node.' + uniqueName,
 		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -62,28 +64,28 @@ export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') =
 	});
 
 	// create/remove some leaf names as an NFT
-	suinsTx.createLeafSubName({
+	iotaNamesTx.createLeafSubName({
 		parentNft: nft,
 		name: 'leaf.' + uniqueName,
 		targetAddress: sender,
 	});
-	suinsTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
+	iotaNamesTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
 
 	// do it for sub nft too
-	suinsTx.createLeafSubName({
+	iotaNamesTx.createLeafSubName({
 		parentNft: subNft,
 		name: 'leaf.node.' + uniqueName,
 		targetAddress: sender,
 	});
-	suinsTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+	iotaNamesTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
 
 	// extend expiration a bit further for the subNft
-	suinsTx.extendExpiration({
+	iotaNamesTx.extendExpiration({
 		nft: subNft,
 		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30 * 2,
 	});
 
-	suinsTx.editSetup({
+	iotaNamesTx.editSetup({
 		parentNft: nft,
 		name: 'node.' + uniqueName,
 		allowChildCreation: true,
@@ -91,7 +93,7 @@ export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') =
 	});
 
 	// let's go 2 levels deep and edit setups!
-	const moreNestedNft = suinsTx.createSubName({
+	const moreNestedNft = iotaNamesTx.createSubName({
 		parentNft: subNft,
 		name: 'more.node.' + uniqueName,
 		allowChildCreation: true,
@@ -99,7 +101,7 @@ export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') =
 		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
 	});
 
-	suinsTx.editSetup({
+	iotaNamesTx.editSetup({
 		parentNft: subNft,
 		name: 'more.node.' + uniqueName,
 		allowChildCreation: false,

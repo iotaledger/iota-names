@@ -1,16 +1,20 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 module subdomains::config {
     use std::string::String;
 
-    use suins::{domain::{Domain, is_parent_of}, constants::sui_tld};
+    use iota_names::{
+        domain::{Domain, is_parent_of},
+        constants::iota_tld
+    };
 
     /// the minimum size a subdomain label can have.
     const MIN_LABEL_SIZE: u8 = 3;
     /// the maximum depth a subdomain can have -> 8 (+ 2 for TLD, SLD)
     const MAX_SUBDOMAIN_DEPTH: u8 = 10;
-     /// Minimum duration for a subdomain in milliseconds. (1 day)
+    /// Minimum duration for a subdomain in milliseconds. (1 day)
     const MINIMUM_SUBDOMAIN_DURATION: u64 = 24 * 60 * 60 * 1000;
 
     /// tries to register a subdomain with a depth more than the one allowed.
@@ -33,7 +37,7 @@ module subdomains::config {
 
     public fun default(): SubDomainConfig {
         SubDomainConfig {
-            allowed_tlds: vector[sui_tld()],
+            allowed_tlds: vector[iota_tld()],
             max_depth: MAX_SUBDOMAIN_DEPTH,
             min_label_size: MIN_LABEL_SIZE,
             minimum_duration: MINIMUM_SUBDOMAIN_DURATION
@@ -56,11 +60,27 @@ module subdomains::config {
     }
 
     /// Validates that the child name is a valid child for parent.
-    public fun assert_is_valid_subdomain(parent: &Domain, child: &Domain, config: &SubDomainConfig) {
-        assert!(is_valid_tld(child, config), ENotSupportedTLD);
-        assert!(is_valid_label(child, config), EInvalidLabelSize);
-        assert!(has_valid_depth(child, config), EDepthOutOfLimit);
-        assert!(is_parent_of(parent, child), EInvalidParent);
+    public fun assert_is_valid_subdomain(
+        parent: &Domain,
+        child: &Domain,
+        config: &SubDomainConfig
+    ) {
+        assert!(
+            is_valid_tld(child, config),
+            ENotSupportedTLD
+        );
+        assert!(
+            is_valid_label(child, config),
+            EInvalidLabelSize
+        );
+        assert!(
+            has_valid_depth(child, config),
+            EDepthOutOfLimit
+        );
+        assert!(
+            is_parent_of(parent, child),
+            EInvalidParent
+        );
     }
 
     public fun minimum_duration(config: &SubDomainConfig): u64 {
@@ -68,29 +88,36 @@ module subdomains::config {
     }
 
     /// Validate that the depth of the subdomain is with the allowed range.
-    public fun has_valid_depth(domain: &Domain, config: &SubDomainConfig): bool {
+    public fun has_valid_depth(
+        domain: &Domain,
+        config: &SubDomainConfig
+    ): bool {
         domain.number_of_levels() <= (config.max_depth as u64)
     }
 
     /// Validates that the TLD of the domain is supported for subdomains.
-    /// In the beggining, only .sui names will be supported but we might 
+    /// In the beggining, only .iota names will be supported but we might
     /// want to add support for others (or not allow).
     /// (E.g., with `.move` service, we might want to restrict how subdomains are created)
-    public fun is_valid_tld(domain: &Domain, config: &SubDomainConfig): bool {
-        let mut i=0;
+    public fun is_valid_tld(
+        domain: &Domain,
+        config: &SubDomainConfig
+    ): bool {
+        let mut i = 0;
         while (i < config.allowed_tlds.length()) {
-            if (domain.tld() == &config.allowed_tlds[i]) {
-                return true
-            };
+            if (domain.tld() == &config.allowed_tlds[i]) {return true};
             i = i + 1;
         };
         return false
     }
 
-    /// Validate that the subdomain label (e.g. `sub` in `sub.example.sui`) is valid.
-    /// We do not need to check for max length (64), as this is already checked 
+    /// Validate that the subdomain label (e.g. `sub` in `sub.example.iota`) is valid.
+    /// We do not need to check for max length (64), as this is already checked
     /// in the `Domain` construction.
-    public fun is_valid_label(domain: &Domain, config: &SubDomainConfig): bool {
+    public fun is_valid_label(
+        domain: &Domain,
+        config: &SubDomainConfig
+    ): bool {
         // our label is the last vector element, as labels are stored in reverse order.
         let label = domain.label(domain.number_of_levels() - 1);
         label.length() >= (config.min_label_size as u64)

@@ -27,7 +27,7 @@ for dir in "${root_dir}/packages"/*; do
         echo "Processing directory: $dir"
         cd "$dir" || { echo "Failed to change directory to $dir"; continue; }
 
-        if ! sui move build --doc; then
+        if ! iota move build --doc; then
             echo "Failed to build documentation in $dir"
             cd "$root_dir"
             continue

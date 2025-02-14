@@ -1,8 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@mysten/sui/transactions';
-import { MIST_PER_SUI } from '@mysten/sui/utils';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import dotenv from 'dotenv';
 
 import { mainPackage, Network } from '../../config/constants';
@@ -19,21 +20,21 @@ export const authorize = async (network: Network) => {
 	authorizeApp({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotaNames: config.iotaNames,
 		type: `${config.renewalsPackageId}::renew::Renew`,
-		suinsPackageIdV1: config.packageId,
+		iotaNamesPackageIdV1: config.packageId,
 	});
 
 	Packages('mainnet').Renewal.setupFunction({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotaNames: config.iotaNames,
 		packageId: config.renewalsPackageId,
-		suinsPackageIdV1: config.packageId,
+		iotaNamesPackageIdV1: config.packageId,
 		priceList: {
-			three: 50 * Number(MIST_PER_SUI),
-			four: 10 * Number(MIST_PER_SUI),
-			fivePlus: 2 * Number(MIST_PER_SUI),
+			three: 50 * Number(NANOS_PER_IOTA),
+			four: 10 * Number(NANOS_PER_IOTA),
+			fivePlus: 2 * Number(NANOS_PER_IOTA),
 		},
 	});
 

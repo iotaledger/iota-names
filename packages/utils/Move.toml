@@ -2,11 +2,11 @@
 name = "utils"
 version = "0.0.1"
 edition = "2024.beta"
-published-at="0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b"
+published-at = "0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b"
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/mainnet", override=true }
-suins = { local = "../suins" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override = true }
+IotaNames = { local = "../iota-names" }
 
 [addresses]
 utils = "0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b"

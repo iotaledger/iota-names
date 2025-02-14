@@ -1,6 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Transaction } from '@mysten/sui/transactions';
+
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
@@ -20,7 +22,7 @@ const UPGRADE_CAPS_TO_TRANSFER = [
     '0x779ed3df4bdfa55948580f1688ab1fede83f09d6d38fedb2a87b90d5c5179e58',
     // utils (direct_setup), extended with subnames.
     '0x929162c097e47cffabb57e8c1cf334ff44a84b963f0bbaacfbaf792d79993866',
-    // SuiNS (!! core package)
+    // IOTA-Names (!! core package)
     '0x9cda28244a0d0de294d2b271e772a9c33eb47d316c59913d7369b545b4af098c',
     // subnames
     '0xc70ac60c1d65da22ed5f30def1a7dfd33ff3a70eb0bf75f12ab559c5f342ea12',
@@ -49,19 +51,19 @@ const MISC_PACKAGE_OBJECTS_TO_TRANSFER = [
 
     // Publisher: Aeon
     '0x47339900499df62ac40c21d44198331119d5335c7f94777295e5a84f5ae351f7',
-    // Publisher: SuiNS
+    // Publisher: IotaNames
     '0x7339f23f06df3601167d67a31752781d307136fd18304c48c928778e752caae1',
 ];
 
 const APP_CAPS_TO_TRANSFER = [
-    // SuiNS Admin Cap (!! core package)
+    // IOTA-Names Admin Cap (!! core package)
     '0x3f8d702d90c572b60ac692fb5074f7a7ac350b80d9c59eab4f6b7692786cae0a'
 ];
 
 const profitsToTreasury = (txb: Transaction) => {
     const generalProfits = txb.moveCall({
-        target: `${config.packageId}::suins::withdraw`,
-        arguments: [txb.object(config.adminCap), txb.object(config.suins)],
+        target: `${config.packageId}::iota_names::withdraw`,
+        arguments: [txb.object(config.adminCap), txb.object(config.iotaNames)],
     });
 
     txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));

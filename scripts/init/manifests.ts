@@ -1,18 +1,20 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-export const SuiNS = (rev: string) => (packageId?: string) => `[package]
-name = "suins"
+
+export const IotaNames = (rev: string) => (packageId?: string) => `[package]
+name = "IotaNames"
 version = "0.0.1"
 edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "${rev}" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}" }
 
 [addresses]
-suins = "${packageId || '0x0'}"`;
+iota_names = "${packageId || '0x0'}"`;
 
-export const SuiNSDependentPackages =
+export const IotaNamesDependentPackages =
 	(rev: string, name: string, extraDependencies?: string) => (packageId?: string) => `[package]
 name = "${name}"
 version = "0.0.1"
@@ -20,8 +22,8 @@ edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "${rev}", override=true }
-suins = { local = "../suins" }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
+IotaNames = { local = "../iota-names" }
 ${extraDependencies || ''}
 
 [addresses]
@@ -34,7 +36,7 @@ edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "${rev}", override=true }
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
 subdomains = { local = "../subdomains" }
 utils = { local = "../utils" }
 

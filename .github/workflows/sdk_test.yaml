@@ -1,0 +1,52 @@
+name: SDK Tests CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/sdk_test.yaml'
+      - 'sdk/**'
+      - 'packages/**'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sdk_test:
+    name: SDK Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - name: Install IOTA using Homebrew
+        run: brew install iota
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Do a global PNPM install
+        run: |
+          npm install -g pnpm
+
+      - name: Install Dependencies
+        run: |
+          pnpm install
+
+      - name: Prepare local network & run SDK tests
+        env: 
+          IS_CI_JOB: true
+          NETWORK: localnet
+        run: |
+          iota start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 & cd sdk && VITE_IOTA_BIN="iota" pnpm test:e2e

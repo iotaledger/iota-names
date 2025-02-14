@@ -1,7 +1,9 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import fs from 'fs';
-import { SuiObjectResponse } from '@mysten/sui/client';
+import { IotaObjectResponse } from '@iota/iota-sdk/client';
 
 import { mainPackage } from '../config/constants';
 import { getClient } from '../utils/utils';
@@ -13,7 +15,7 @@ const getAllOwnedDomains = async () => {
 	let hasNextPage = true;
 	let cursor: string | null | undefined = undefined;
 
-	let names: SuiObjectResponse[] = [];
+	let names: IotaObjectResponse[] = [];
 
 	while (hasNextPage) {
 		const res = await client.getOwnedObjects({
@@ -21,7 +23,7 @@ const getAllOwnedDomains = async () => {
 			filter: {
 				MatchAll: [
 					{
-						StructType: `0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0::suins_registration::SuinsRegistration`,
+						StructType: `0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0::iota_names_registration::IotaNamesRegistration`,
 					},
 				],
 			},

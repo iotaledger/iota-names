@@ -3,7 +3,7 @@
 
 .idea/
 
-sui.log.*
+iota.log.*
 .trace
 .coverage_map.mvcov
 /scripts/tx/*

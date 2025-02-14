@@ -1,49 +1,51 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { TransactionArgument, type Transaction } from '@mysten/sui/transactions';
+
+import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
 
 /**
- * A helper to authorize any app in the SuiNS object.
+ * A helper to authorize any app in the IotaNames object.
  */
 export const authorizeApp = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	type,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
+	iotaNames: string;
 	type: string;
-	suinsPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }) => {
 	txb.moveCall({
-		target: `${suinsPackageIdV1}::suins::authorize_app`,
-		arguments: [txb.object(adminCap), txb.object(suins)],
+		target: `${iotaNamesPackageIdV1}::iota_names::authorize_app`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
 
 /**
- * A helper to deauthorize any app that has been authorized on the SuiNS object.
+ * A helper to deauthorize any app that has been authorized on the IotaNames object.
  */
 export const deauthorizeApp = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	type,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
+	iotaNames: string;
 	type: string;
-	suinsPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }) => {
 	txb.moveCall({
-		target: `${suinsPackageIdV1}::suins::deauthorize_app`,
-		arguments: [txb.object(adminCap), txb.object(suins)],
+		target: `${iotaNamesPackageIdV1}::iota_names::deauthorize_app`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
@@ -54,66 +56,66 @@ export const deauthorizeApp = ({
 export const setupApp = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	target,
 	args,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
+	iotaNames: string;
 	target: `${string}::${string}`;
 	args?: TransactionArgument[];
 }) => {
 	txb.moveCall({
 		target: `${target}::setup`,
-		arguments: [txb.object(suins), txb.object(adminCap), ...(args || [])],
+		arguments: [txb.object(iotaNames), txb.object(adminCap), ...(args || [])],
 	});
 };
 
 /**
- * Add a config to the SuiNS object.
+ * Add a config to the IotaNames object.
  */
 export const addConfig = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	type,
 	config,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
-	suinsPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	config: TransactionArgument;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${suinsPackageIdV1}::suins::add_config`,
-		arguments: [txb.object(adminCap), txb.object(suins), config],
+		target: `${iotaNamesPackageIdV1}::iota_names::add_config`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames), config],
 		typeArguments: [type],
 	});
 };
 
 /**
- * Remove a config from SuiNS object.
+ * Remove a config from IotaNames object.
  */
 export const removeConfig = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	type,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
-	suinsPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${suinsPackageIdV1}::suins::remove_config`,
-		arguments: [txb.object(adminCap), txb.object(suins)],
+		target: `${iotaNamesPackageIdV1}::iota_names::remove_config`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
 };
@@ -123,17 +125,17 @@ export const removeConfig = ({
  */
 export const newPriceConfig = ({
 	txb,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 	priceList,
 	publicKey = [...Array(33).keys()],
 }: {
 	txb: Transaction;
-	suinsPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 	priceList: { [key: string]: number };
 	publicKey?: number[];
 }): TransactionArgument => {
 	return txb.moveCall({
-		target: `${suinsPackageIdV1}::config::new`,
+		target: `${iotaNamesPackageIdV1}::config::new`,
 		arguments: [
 			txb.pure.vector('u8', publicKey),
 			txb.pure.u64(priceList.three),
@@ -144,45 +146,45 @@ export const newPriceConfig = ({
 };
 
 /**
- * Add a registry to the SuiNS object.
+ * Add a registry to the IotaNames object.
  */
 export const addRegistry = ({
 	txb,
 	adminCap,
-	suins,
+	iotaNames,
 	type,
 	registry,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suins: string;
-	suinsPackageIdV1: string;
+	iotaNames: string;
+	iotaNamesPackageIdV1: string;
 	registry: TransactionArgument;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${suinsPackageIdV1}::suins::add_registry`,
-		arguments: [txb.object(adminCap), txb.object(suins), registry],
+		target: `${iotaNamesPackageIdV1}::iota_names::add_registry`,
+		arguments: [txb.object(adminCap), txb.object(iotaNames), registry],
 		typeArguments: [type],
 	});
 };
 
 /**
  * Creates a default `registry` which saves direct/reverse lookups.
- * That serves as the main registry for the SuiNS object after adding it.
+ * That serves as the main registry for the IotaNames object after adding it.
  */
 export const newLookupRegistry = ({
 	txb,
 	adminCap,
-	suinsPackageIdV1,
+	iotaNamesPackageIdV1,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	suinsPackageIdV1: string;
+	iotaNamesPackageIdV1: string;
 }): TransactionArgument => {
 	return txb.moveCall({
-		target: `${suinsPackageIdV1}::registry::new`,
+		target: `${iotaNamesPackageIdV1}::registry::new`,
 		arguments: [txb.object(adminCap)],
 	});
 };
