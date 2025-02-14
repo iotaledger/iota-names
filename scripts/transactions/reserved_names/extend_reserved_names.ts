@@ -63,7 +63,7 @@ const parseReservedObjects = () => {
 // we always wanna group these.
 parseReservedObjects();
 
-// Does withdraw from iotaNames and returns the funds to be used in the PTB.
+// Does withdraw from IotaNames and returns the funds to be used in the PTB.
 const withdrawTx = (txb: Transaction, config: PackageInfo) => {
 	return txb.moveCall({
 		target: `${config.packageId}::iota_names::withdraw`,
@@ -197,7 +197,7 @@ export const prepareLastTransaction = async () => {
 		txb.gas,
 		[...Array(names.four.length).keys()].map((x) => txb.pure.u64(YEARS_TO_RENEW * PRICE_LIST.four)),
 	);
-	// now we shall handle 4 letter names (that's 50 iota / name)
+	// now we shall handle 4 letter names (that's 50 IOTA / name)
 	for (const [idx, name] of names.four.entries()) {
 		renewTx(txb, config, name, PRICE_LIST.four, { NestedResult: [0, idx] });
 	}
