@@ -47,7 +47,7 @@ on:
 
 jobs:
   iota_names_combine_and_execute:
-    name: IOTANames Combine and Execute tx
+    name: IOTA-Names Combine and Execute tx
     runs-on: ubuntu-latest
 
     steps:
