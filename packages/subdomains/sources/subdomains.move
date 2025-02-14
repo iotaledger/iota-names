@@ -21,7 +21,7 @@
 /// turn off this package completely, and retain the state on a different package's deployment. This is useful
 /// both for effort-less upgradeability and gas savings.
 /// 2. For any `registry_mut` call, we know that if this module is not authorized, we'll get an abort
-/// from the core iota_names package.
+/// from the core IotaNames package.
 /// 
 module subdomains::subdomains {
     use std::string::{String, utf8};

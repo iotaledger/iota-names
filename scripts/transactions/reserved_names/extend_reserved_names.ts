@@ -125,7 +125,7 @@ export const prepareFirstTransaction = async () => {
 		renewTx(txb, config, name, PRICE_LIST.fivePlus, splitFrom);
 	}
 
-	// now, we've spent plenty of iota renewing, but we re-withdraw it
+	// now, we've spent plenty of IOTA renewing, but we re-withdraw it
 	// to make next operations easier to work with.
 	const coin2 = withdrawTx(txb, config);
 
@@ -179,7 +179,7 @@ export const prepareInbetweenTransactions = async (run: string) => {
 		renewTx(txb, config, name, PRICE_LIST.fivePlus, splitFrom);
 	}
 
-	// now, we've spent plenty of iota renewing, but we re-withdraw it
+	// now, we've spent plenty of IOTA renewing, but we re-withdraw it
 	// to make next operations easier to work with.
 	const coin2 = withdrawTx(txb, config);
 
