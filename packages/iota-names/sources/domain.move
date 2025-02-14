@@ -216,7 +216,7 @@ fun prep_expected_labels(mut labels: vector<vector<u8>>): vector<String> {
 #[test]
 fun valid_domains() {
     test_valid_domain(b"abc.123", vector[b"abc", b"123"]);
-    test_valid_domain(b"iota_names.iota", vector[b"iota_names", b"iota"]);
+    test_valid_domain(b"iotanames.iota", vector[b"iotanames", b"iota"]);
     test_valid_domain(
         b"1.2.3.4.5.6.7.8.9.0.iota",
         vector[
@@ -233,7 +233,7 @@ fun valid_domains() {
             b"iota",
         ],
     );
-    test_valid_domain(b"pay.mysten.iota", vector[b"pay", b"mysten", b"iota"]);
+    test_valid_domain(b"pay.iota.iota", vector[b"pay", b"iota", b"iota"]);
     test_valid_domain(
         b"abcdefghijklmnopqrstuvxyz0123456789.move",
         vector[b"abcdefghijklmnopqrstuvxyz0123456789", b"move"],
@@ -270,9 +270,9 @@ fun expect_is_subdomain(
 
 #[test]
 fun test_is_subdomain() {
-    expect_is_subdomain(b"mysten.iota", b"pay.mysten.iota", true);
-    expect_is_subdomain(b"pay.mysten.iota", b"mysten.iota", false);
-    expect_is_subdomain(b"mysten.iota", b"pay.move.iota", false);
+    expect_is_subdomain(b"iota.iota", b"pay.iota.iota", true);
+    expect_is_subdomain(b"pay.iota.iota", b"iota.iota", false);
+    expect_is_subdomain(b"iota.iota", b"pay.move.iota", false);
 }
 
 #[test]

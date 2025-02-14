@@ -12,7 +12,7 @@ import { prepareMultisigTx } from '../../utils/utils';
 
 const RUN = process.env.RUN_ID || '';
 
-/// iotaledger treasury address.
+/// IOTA treasury address.
 const ADDRESS_TO_TRANSFER_FUNDS =
 	'0x638791b625c4482bc1b917847cdf8aa76fe226c0f3e0a9b1aa595625989e98a1';
 

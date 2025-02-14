@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const IotaNames = (rev: string) => (packageId?: string) => `[package]
-name = "iota_names"
+name = "IotaNames"
 version = "0.0.1"
 edition = "2024.beta"
 ${packageId ? `published-at = "${packageId}"` : ''}

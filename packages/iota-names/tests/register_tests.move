@@ -10,8 +10,6 @@ use iota::clock::{Self, Clock};
 use iota::coin;
 use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
-use iota_names::auction::{Self, App as AuctionApp};
-use iota_names::auction_tests;
 use iota_names::config;
 use iota_names::constants::{nanos_per_iota, grace_period_ms, year_ms};
 use iota_names::domain;

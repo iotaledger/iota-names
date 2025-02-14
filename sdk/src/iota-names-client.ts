@@ -16,7 +16,7 @@ import {
 import { isSubName, parsePriceListFromConfig, validateYears } from './helpers.js';
 import type { Constants, NameRecord, IotaNamesClientConfig, IotaNamesPriceList } from './types.js';
 
-/// The IotaNamesClient is the main entry point for the IotaNamesSDK.
+/// The IotaNamesClient is the main entry point for the @iota/iota-names SDK.
 /// It allows you to interact with IotaNames.
 export class IotaNamesClient {
 	#client: IotaClient;
