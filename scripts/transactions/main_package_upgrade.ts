@@ -22,10 +22,10 @@ const mainPackageUpgrade = async () => {
 	const iotaFolder = process.env.ORIGIN === 'gh_action' ? '../../iota' : 'iota';
 	const upgradeCall = `${iotaFolder} client upgrade --upgrade-capability ${mainPackage[network].upgradeCap} --gas-budget 3000000000 --gas ${gasObject} --serialize-unsigned-transaction`;
 
-	// we execute this on `setup/package.json` so we go one level back, access packages folder -> iota_names -> upgrade.
-	// we go from scripts/(base)/packages/iota_names, we run the upgrade and then we save the transaction data
-	// to iota_names/..(packages)/..(base)/scripts/tx/tx-data.txt
-	execSync(`cd $PWD/../packages/iota_names && ${upgradeCall} > $PWD/../../scripts/tx/tx-data.txt`);
+	// we execute this on `setup/package.json` so we go one level back, access packages folder -> iota-names -> upgrade.
+	// we go from scripts/(base)/packages/iota-names, we run the upgrade and then we save the transaction data
+	// to iota-names/..(packages)/..(base)/scripts/tx/tx-data.txt
+	execSync(`cd $PWD/../packages/iota-names && ${upgradeCall} > $PWD/../../scripts/tx/tx-data.txt`);
 };
 
 mainPackageUpgrade();

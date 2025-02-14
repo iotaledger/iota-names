@@ -4,7 +4,7 @@
 
 import { bcs } from '@iota/iota-sdk/bcs';
 import type { Transaction } from '@iota/iota-sdk/transactions';
-import { isValidIOTANamesName, normalizeIOTANamesName, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
+import { isValidIOTANamesName, normalizeIOTAName, IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants.js';
 import { isNestedSubName, isSubName, validateYears } from './helpers.js';
@@ -62,7 +62,7 @@ export class IotaNamesTransaction {
 			target: `${this.#iotaNamesClient.constants.registrationPackageId}::register::register`,
 			arguments: [
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 				this.transaction.pure.u8(years),
 				this.transaction.splitCoins(this.transaction.gas, [this.transaction.pure.u64(price)]),
 				this.transaction.object(IOTA_CLOCK_OBJECT_ID),
@@ -101,7 +101,7 @@ export class IotaNamesTransaction {
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(parentNft),
 				this.transaction.object(IOTA_CLOCK_OBJECT_ID),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 				this.transaction.pure.u64(expirationTimestampMs),
 				this.transaction.pure.bool(!!allowChildCreation),
 				this.transaction.pure.bool(!!allowTimeExtension),
@@ -141,7 +141,7 @@ export class IotaNamesTransaction {
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(parentNft),
 				this.transaction.object(IOTA_CLOCK_OBJECT_ID),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 				this.transaction.pure.address(targetAddress),
 			],
 		});
@@ -168,7 +168,7 @@ export class IotaNamesTransaction {
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(parentNft),
 				this.transaction.object(IOTA_CLOCK_OBJECT_ID),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 			],
 		});
 	}
@@ -211,7 +211,7 @@ export class IotaNamesTransaction {
 			target: `${this.#iotaNamesClient.constants.utilsPackageId}::direct_setup::set_reverse_lookup`,
 			arguments: [
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 			],
 		});
 	}
@@ -243,7 +243,7 @@ export class IotaNamesTransaction {
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(parentNft),
 				this.transaction.object(IOTA_CLOCK_OBJECT_ID),
-				this.transaction.pure.string(normalizeIOTANamesName(name, 'dot')),
+				this.transaction.pure.string(normalizeIOTAName(name, 'dot')),
 				this.transaction.pure.bool(!!allowChildCreation),
 				this.transaction.pure.bool(!!allowTimeExtension),
 			],

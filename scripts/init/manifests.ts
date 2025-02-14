@@ -23,7 +23,7 @@ ${packageId ? `published-at = "${packageId}"` : ''}
 
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "${rev}", override=true }
-iota_names = { local = "../iota-names" }
+IotaNames = { local = "../iota-names" }
 ${extraDependencies || ''}
 
 [addresses]

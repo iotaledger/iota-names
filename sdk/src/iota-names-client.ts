@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IotaClient } from '@iota/iota-sdk/client';
-import { isValidIOTANamesName, normalizeIOTANamesName } from '@iota/iota-sdk/utils';
+import { isValidIOTANamesName, normalizeIOTAName } from '@iota/iota-sdk/utils';
 
 import {
 	getConfigType,
@@ -107,7 +107,7 @@ export class IotaNamesClient {
 			parentId: this.constants.registryTableId,
 			name: {
 				type: getDomainType(this.constants.iotaNamesPackageId.v1),
-				value: normalizeIOTANamesName(name, 'dot').split('.').reverse(),
+				value: normalizeIOTAName(name, 'dot').split('.').reverse(),
 			},
 		});
 		const fields = nameRecord.data?.content;
@@ -159,7 +159,7 @@ export class IotaNamesClient {
 		validateYears(years);
 		if (isSubName(name)) throw new Error('Subdomains do not have a registration fee');
 
-		const length = normalizeIOTANamesName(name, 'dot').split('.')[0].length;
+		const length = normalizeIOTAName(name, 'dot').split('.')[0].length;
 		if (length === 3) return years * priceList.threeLetters;
 		if (length === 4) return years * priceList.fourLetters;
 		return years * priceList.fivePlusLetters;

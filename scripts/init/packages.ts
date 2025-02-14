@@ -43,7 +43,7 @@ export const Packages = (network: Network) => {
 	return {
 		IOTANames: {
 			order: 1,
-			folder: 'iota_names',
+			folder: 'iota-names',
 			manifest: IOTANames(rev),
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);

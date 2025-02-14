@@ -34,29 +34,29 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 	packages.Subdomains.setupFunction(
 		txb,
 		packageInfo.Subdomains.packageId,
-		packageInfo.IOTANames.adminCap,
-		packageInfo.IOTANames.iotaNames,
-		packageInfo.IOTANames.packageId,
+		packageInfo.IotaNames.adminCap,
+		packageInfo.IotaNames.iotaNames,
+		packageInfo.IotaNames.packageId,
 	);
 	packages.DenyList.setupFunction(
 		txb,
 		packageInfo.DenyList.packageId,
-		packageInfo.IOTANames.adminCap,
-		packageInfo.IOTANames.iotaNames,
+		packageInfo.IotaNames.adminCap,
+		packageInfo.IotaNames.iotaNames,
 	);
-	packages.IOTANames.setupFunction(
+	packages.IotaNames.setupFunction(
 		txb,
-		packageInfo.IOTANames.packageId,
-		packageInfo.IOTANames.adminCap,
-		packageInfo.IOTANames.iotaNames,
-		packageInfo.IOTANames.publisher,
+		packageInfo.IotaNames.packageId,
+		packageInfo.IotaNames.adminCap,
+		packageInfo.IotaNames.iotaNames,
+		packageInfo.IotaNames.publisher,
 	);
 	packages.Renewal.setupFunction({
 		txb,
-		adminCap: packageInfo.IOTANames.adminCap,
-		iotaNames: packageInfo.IOTANames.iotaNames,
+		adminCap: packageInfo.IotaNames.adminCap,
+		iotaNames: packageInfo.IotaNames.iotaNames,
 		packageId: packageInfo.Renewal.packageId,
-		iotaNamesPackageIdV1: packageInfo.IOTANames.packageId,
+		iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
 		priceList: {
 			three: 2 * Number(NANOS_PER_IOTA),
 			four: 1 * Number(NANOS_PER_IOTA),
@@ -102,8 +102,8 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 
 			constants.registryTableId = await queryRegistryTable(
 				getClient(network),
-				packageInfo.IOTANames.iotaNames,
-				packageInfo.IOTANames.packageId,
+				packageInfo.IotaNames.iotaNames,
+				packageInfo.IotaNames.packageId,
 			);
 
 			writeFileSync(

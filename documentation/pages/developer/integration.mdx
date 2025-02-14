@@ -32,7 +32,7 @@ For off-chain resolution, use the available IOTA API endpoints:
 - [GraphQL](https://docs.iota.org/references/iota-api/iota-graphql/reference/api/queries/resolve-iota-names-address)
 
 <Callout type="info">
-For GraphQL's default name resolution, there's a [`defaultIotaNamesName` field](https://docs.iota.org/references/iota-api/iota-graphql/reference/types/objects/address) you can use.
+For GraphQL's default name resolution, there's a [`defaultIotaName` field](https://docs.iota.org/references/iota-api/iota-graphql/reference/types/objects/address) you can use.
 </Callout>
 
 ## On-chain resolution
@@ -43,13 +43,13 @@ Use the IOTA-Names core package as a dependency to your own package for on-chain
     <Tabs.Tab>
       ```sh
       [dependencies]
-      IotaNames = { git = "https://github.com/iotaledger/iota-names/", subdir = "packages/iota_names", rev = "releases/mainnet/core/v3" }
+      IotaNames = { git = "https://github.com/iotaledger/iota-names/", subdir = "packages/iota-names", rev = "releases/mainnet/core/v3" }
       ```
     </Tabs.Tab>
     <Tabs.Tab>
       ```sh
       [dependencies]
-      IotaNames = { git = "https://github.com/iotaledger/iota-names/", subdir = "packages/iota_names", rev = "releases/testnet/core/v2" }
+      IotaNames = { git = "https://github.com/iotaledger/iota-names/", subdir = "packages/iota-names", rev = "releases/testnet/core/v2" }
       ```
     </Tabs.Tab>
 </Tabs>
