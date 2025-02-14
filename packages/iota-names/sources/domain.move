@@ -233,7 +233,7 @@ fun valid_domains() {
             b"iota",
         ],
     );
-    test_valid_domain(b"pay.iota.iota", vector[b"pay", b"iota", b"iota"]);
+    test_valid_domain(b"pay.foundation.iota", vector[b"pay", b"foundation", b"iota"]);
     test_valid_domain(
         b"abcdefghijklmnopqrstuvxyz0123456789.move",
         vector[b"abcdefghijklmnopqrstuvxyz0123456789", b"move"],
@@ -270,9 +270,9 @@ fun expect_is_subdomain(
 
 #[test]
 fun test_is_subdomain() {
-    expect_is_subdomain(b"iota.iota", b"pay.iota.iota", true);
-    expect_is_subdomain(b"pay.iota.iota", b"iota.iota", false);
-    expect_is_subdomain(b"iota.iota", b"pay.move.iota", false);
+    expect_is_subdomain(b"foundation.iota", b"pay.foundation.iota", true);
+    expect_is_subdomain(b"pay.foundation.iota", b"foundation.iota", false);
+    expect_is_subdomain(b"foundation.iota", b"pay.move.iota", false);
 }
 
 #[test]
