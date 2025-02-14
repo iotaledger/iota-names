@@ -125,6 +125,6 @@ dist
 # yarn v2
 .yarn/cache
 .yarn/unplugged
-.yarn/build-state.yml
+.yarn/build-state.yaml
 .yarn/install-state.gz
 .pnp.*

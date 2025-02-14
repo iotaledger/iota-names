@@ -3,7 +3,7 @@ name: SDK Tests CI
 on:
   pull_request:
     paths:
-      - '.github/workflows/sdk_test.yml'
+      - '.github/workflows/sdk_test.yaml'
       - 'sdk/**'
       - 'packages/**'
   push:
