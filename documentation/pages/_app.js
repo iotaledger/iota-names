@@ -4,8 +4,8 @@
 
 import '../public/iota-names.css';
 
-const IOTANamesApp = ({ Component, pageProps }) => {
+const IotaNamesApp = ({ Component, pageProps }) => {
     return <Component {...pageProps} />
 }
 
-export default IOTANamesApp;
+export default IotaNamesApp;

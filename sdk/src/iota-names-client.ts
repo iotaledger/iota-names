@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IotaClient } from '@iota/iota-sdk/client';
-import { isValidIOTANamesName, normalizeIOTAName } from '@iota/iota-sdk/utils';
+import { isValidIotaName, normalizeIotaName } from '@iota/iota-sdk/utils';
 
 import {
 	getConfigType,
@@ -16,8 +16,8 @@ import {
 import { isSubName, parsePriceListFromConfig, validateYears } from './helpers.js';
 import type { Constants, NameRecord, IotaNamesClientConfig, IotaNamesPriceList } from './types.js';
 
-/// The IotaNamesClient is the main entry point for the IOTANamesSDK.
-/// It allows you to interact with IOTANames.
+/// The IotaNamesClient is the main entry point for the IotaNamesSDK.
+/// It allows you to interact with IotaNames.
 export class IotaNamesClient {
 	#client: IotaClient;
 	constants: Constants = {};
@@ -43,7 +43,7 @@ export class IotaNamesClient {
 	 * Returns the price list for IOTA names.
 	 */
 	async getPriceList(): Promise<IotaNamesPriceList> {
-		if (!this.constants.iotaNamesObjectId) throw new Error('IOTANamesobject ID is not set');
+		if (!this.constants.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
 		if (!this.constants.iotaNamesPackageId) throw new Error('Price list config not found');
 
 		const priceList = await this.#client.getDynamicFieldObject({
@@ -69,7 +69,7 @@ export class IotaNamesClient {
 	}
 
 	async getRenewalPriceList(): Promise<IotaNamesPriceList> {
-		if (!this.constants.iotaNamesObjectId) throw new Error('IOTANamesobject ID is not set');
+		if (!this.constants.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
 		if (!this.constants.iotaNamesPackageId) throw new Error('Price list config not found');
 		if (!this.constants.renewalPackageId) throw new Error('Renewal package ID is not set');
 
@@ -99,7 +99,7 @@ export class IotaNamesClient {
 	}
 
 	async getNameRecord(name: string): Promise<NameRecord | null> {
-		if (!isValidIOTANamesName(name)) throw new Error('Invalid IOTA name');
+		if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
 		if (!this.constants.iotaNamesPackageId) throw new Error('IOTANamespackage ID is not set');
 		if (!this.constants.registryTableId) throw new Error('Registry table ID is not set');
 
@@ -107,7 +107,7 @@ export class IotaNamesClient {
 			parentId: this.constants.registryTableId,
 			name: {
 				type: getDomainType(this.constants.iotaNamesPackageId.v1),
-				value: normalizeIOTAName(name, 'dot').split('.').reverse(),
+				value: normalizeIotaName(name, 'dot').split('.').reverse(),
 			},
 		});
 		const fields = nameRecord.data?.content;
@@ -155,11 +155,11 @@ export class IotaNamesClient {
 		years: number;
 		priceList: IotaNamesPriceList;
 	}) {
-		if (!isValidIOTANamesName(name)) throw new Error('Invalid IOTA name');
+		if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
 		validateYears(years);
 		if (isSubName(name)) throw new Error('Subdomains do not have a registration fee');
 
-		const length = normalizeIOTAName(name, 'dot').split('.')[0].length;
+		const length = normalizeIotaName(name, 'dot').split('.')[0].length;
 		if (length === 3) return years * priceList.threeLetters;
 		if (length === 4) return years * priceList.fourLetters;
 		return years * priceList.fivePlusLetters;

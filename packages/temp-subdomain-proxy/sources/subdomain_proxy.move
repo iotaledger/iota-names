@@ -116,7 +116,8 @@ module temp_subdomain_proxy::subdomain_proxy {
     ) {
         direct_setup::set_user_data(
             iota_names,
-            subdomain.nft(), key,
+            subdomain.nft(),
+            key,
             value,
             clock
         );

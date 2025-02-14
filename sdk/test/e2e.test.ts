@@ -12,7 +12,7 @@ import { execute, publishAndSetupIotaNamesContracts } from './setup';
 import { setupIotaClient, TestToolbox } from './toolbox';
 
 /**
- * This e2e iotate needs to run sequential (state needs to be preserved on-chain across)
+ * This e2e suite needs to run sequential (state needs to be preserved on-chain across)
  * these tests, and the order they are written is important for the tests to pass.
  */
 describe('Testing IOTA-Names SDK e2e', () => {

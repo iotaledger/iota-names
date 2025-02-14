@@ -224,7 +224,7 @@ export const prepareLastTransaction = async () => {
 	}
 
 	// transfer profits to treasury in the same PTB :)
-	// We transfer 47K from the IOTANames app profits.
+	// We transfer 47K from the IotaNames app profits.
 	txb.transferObjects(
 		[txb.splitCoins(txb.gas, [txb.pure.u64(47_350n * NANOS_PER_IOTA)])],
 		txb.pure.address(ADDRESS_TO_TRANSFER_FUNDS),

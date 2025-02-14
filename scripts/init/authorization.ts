@@ -5,7 +5,7 @@
 import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
 
 /**
- * A helper to authorize any app in the IOTANames object.
+ * A helper to authorize any app in the IotaNames object.
  */
 export const authorizeApp = ({
 	txb,
@@ -28,7 +28,7 @@ export const authorizeApp = ({
 };
 
 /**
- * A helper to deauthorize any app that has been authorized on the IOTANames object.
+ * A helper to deauthorize any app that has been authorized on the IotaNames object.
  */
 export const deauthorizeApp = ({
 	txb,
@@ -73,7 +73,7 @@ export const setupApp = ({
 };
 
 /**
- * Add a config to the IOTANames object.
+ * Add a config to the IotaNames object.
  */
 export const addConfig = ({
 	txb,
@@ -98,7 +98,7 @@ export const addConfig = ({
 };
 
 /**
- * Remove a config from IOTANames object.
+ * Remove a config from IotaNames object.
  */
 export const removeConfig = ({
 	txb,
@@ -146,7 +146,7 @@ export const newPriceConfig = ({
 };
 
 /**
- * Add a registry to the IOTANames object.
+ * Add a registry to the IotaNames object.
  */
 export const addRegistry = ({
 	txb,
@@ -172,7 +172,7 @@ export const addRegistry = ({
 
 /**
  * Creates a default `registry` which saves direct/reverse lookups.
- * That serves as the main registry for the IOTANames object after adding it.
+ * That serves as the main registry for the IotaNames object after adding it.
  */
 export const newLookupRegistry = ({
 	txb,

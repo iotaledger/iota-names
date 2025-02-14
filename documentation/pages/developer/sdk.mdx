@@ -33,13 +33,13 @@ Use the IOTA-Names SDK to interact with the IOTA-Names. Query IOTA-Names data in
     You should keep only one instance of `IotaNamesClient` throughout your dApp, API, or script. For example, in React, you should use a context to provide the client.
 </Callout>
 
-## Initializing a `IotaNamesClient`
+## Initializing an `IotaNamesClient`
 
 <Callout type="warning" emoji="ℹ️">
     Always keep the dependency updated so you get the latest constants. If you don't, some of your transactions might fail to build.
 </Callout>
 
-You can initialize a `IotaNamesClient` by either providing the active network (`mainnet`/`testnet`),
+You can initialize an `IotaNamesClient` by either providing the active network (`mainnet`/`testnet`),
 or by passing in the constants (usable for any network).
 
 <Tabs items={['Network initializer', 'Constants initializer']}>

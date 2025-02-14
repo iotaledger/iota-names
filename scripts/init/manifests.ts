@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export const IOTANames = (rev: string) => (packageId?: string) => `[package]
+export const IotaNames = (rev: string) => (packageId?: string) => `[package]
 name = "iota_names"
 version = "0.0.1"
 edition = "2024.beta"
@@ -14,7 +14,7 @@ Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-f
 [addresses]
 iota_names = "${packageId || '0x0'}"`;
 
-export const IOTANamesDependentPackages =
+export const IotaNamesDependentPackages =
 	(rev: string, name: string, extraDependencies?: string) => (packageId?: string) => `[package]
 name = "${name}"
 version = "0.0.1"
