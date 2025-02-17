@@ -1,0 +1,5 @@
+[default]
+extend-ignore-identifiers-re = [
+    # Base64
+    "^[a-zA-Z0-9_]{44}$",
+]

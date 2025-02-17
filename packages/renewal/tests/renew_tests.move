@@ -68,7 +68,7 @@ module renewal::renew_tests {
 
 
     #[test, expected_failure(abort_code= ::renewal::renew::ERecordNftIDMismatch)]
-    fun failed_record_id_missmatch() {
+    fun failed_record_id_mismatch() {
         let mut ctx = tx_context::dummy();
         let (mut iota_names, _nft) = prepare_registry(&mut ctx);
         let clock = clock::create_for_testing(&mut ctx);

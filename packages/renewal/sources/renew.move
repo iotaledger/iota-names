@@ -50,7 +50,7 @@ module renewal::renew {
         config: Config
     }
 
-    /// Allows admin to initalize the custom pricing config for the renewal module.
+    /// Allows admin to initialize the custom pricing config for the renewal module.
     /// We're wrapping initial `Config` because we want to add custom pricing for renewals,
     /// and we can only have 1 config of each type in the IotaNames app.
     /// We still set this up by using the default config functionality from IotaNames package.
@@ -144,7 +144,7 @@ module renewal::renew {
             EInvalidYearsArgument
         );
 
-        // calcualate target expiration!
+        // calculate target expiration!
         let target_expiration = name_record.expiration_timestamp_ms() + (no_years as u64)
             * constants::year_ms();
 
