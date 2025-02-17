@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       rpc:
-        description: "RPC for iota client"
+        description: "RPC for the IOTA client"
         required: true
         default: "https://api.mainnet.iota.cafe:443"
         type: string
