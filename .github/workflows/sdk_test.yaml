@@ -3,9 +3,9 @@ name: SDK Tests CI
 on:
   pull_request:
     paths:
-      - '.github/workflows/sdk_test.yaml'
-      - 'sdk/**'
-      - 'packages/**'
+      - ".github/workflows/sdk_test.yaml"
+      - "sdk/**"
+      - "packages/**"
   push:
     branches:
       - main
@@ -45,7 +45,7 @@ jobs:
           pnpm install
 
       - name: Prepare local network & run SDK tests
-        env: 
+        env:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
