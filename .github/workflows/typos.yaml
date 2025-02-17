@@ -1,11 +1,11 @@
 name: Typos
 
 on:
-    push:
-      branches:
-        - "develop"
-    pull_request:
-      types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches:
+      - "develop"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 concurrency:
   group: typos-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
