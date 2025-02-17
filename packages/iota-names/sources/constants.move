@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Module to wrap all constants used across the project. A sigleton and not
+/// Module to wrap all constants used across the project. A singleton and not
 /// meant to be modified (only extended).
 ///
 /// This module is free from any non-framework dependencies and serves as a

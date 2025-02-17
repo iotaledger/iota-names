@@ -9,7 +9,7 @@
 /// - make sure that new NFTs get correct a expiration setting
 /// - IMPORTANT: test expiration timestamps and the grace period
 ///
-module iota_names::registation_nft_tests;
+module iota_names::registration_nft_tests;
 
 use std::string::{utf8, String};
 use iota::clock::{Self, Clock};
