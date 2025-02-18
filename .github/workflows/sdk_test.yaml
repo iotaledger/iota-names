@@ -25,8 +25,13 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install IOTA
-        run: cargo install --locked --git https://github.com/iotaledger/iota --rev 9e4143f5324c16a9ca0b13126da158672f5c4101 iota
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - name: Install IOTA using Homebrew
+        run: brew install iotaledger/tap/iota
 
       - uses: actions/setup-node@v4
         with:
