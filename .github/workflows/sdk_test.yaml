@@ -3,9 +3,9 @@ name: SDK Tests CI
 on:
   pull_request:
     paths:
-      - '.github/workflows/sdk_test.yaml'
-      - 'sdk/**'
-      - 'packages/**'
+      - ".github/workflows/sdk_test.yaml"
+      - "sdk/**"
+      - "packages/**"
   push:
     branches:
       - main

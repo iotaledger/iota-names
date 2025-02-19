@@ -21,7 +21,7 @@ use iota_names::registry;
 use iota_names::iota_names;
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
-fun try_unathorized_fail() {
+fun try_unauthorized_fail() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = iota_names::init_for_testing(&mut ctx);
     let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
