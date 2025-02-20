@@ -29,15 +29,15 @@ labels: c-bug
 
 <!-- Which version of Rust are you using? -->
 
-- Rust version: 
+- Rust version:
 
 ## Version
 
 <!-- Which version of the library are you using? Fill in any that apply. -->
 
-- Version number: 
-- Commit: 
-- Branch: 
+- Version number:
+- Commit:
+- Branch:
 
 ## Hardware specification
 

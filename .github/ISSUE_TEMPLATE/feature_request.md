@@ -21,5 +21,5 @@ about: Request a feature
 
 ## Are you planning to do it yourself in a pull request?
 
- - [ ] Yes
- - [ ] No
+- [ ] Yes
+- [ ] No
