@@ -46,7 +46,7 @@ jobs:
           echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
       - name: Install IOTA using Homebrew
-        run: brew install iota
+        run: brew install iotaledger/tap/iota
 
       - name: NPM BUILD TX Environment
         uses: actions/setup-node@v4
