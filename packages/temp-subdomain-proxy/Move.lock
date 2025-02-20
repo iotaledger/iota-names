@@ -2,7 +2,7 @@
 
 [move]
 version = 2
-manifest_digest = "A8AFB01E9BC37F7F8C5923D8F65FA0CD84F2082B77F853D18EF6480B2452BB91"
+manifest_digest = "6DADE361BD373702C74E827667014783E2FCDFBF7028BFB0C74E4389ADEBE455"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { name = "Iota" },
@@ -12,7 +12,7 @@ dependencies = [
 
 [[move.package]]
 name = "Iota"
-source = { git = "https://github.com/iotaledger/iota.git", rev = "64e8125", subdir = "crates/iota-framework/packages/iota-framework" }
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/iota-framework" }
 
 dependencies = [
   { name = "MoveStdlib" },
@@ -28,7 +28,7 @@ dependencies = [
 
 [[move.package]]
 name = "MoveStdlib"
-source = { git = "https://github.com/iotaledger/iota.git", rev = "64e8125", subdir = "crates/iota-framework/packages/move-stdlib" }
+source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
 name = "denylist"
@@ -46,14 +46,7 @@ source = { local = "../subdomains" }
 dependencies = [
   { name = "Iota" },
   { name = "IotaNames" },
-]
-
-[[move.package]]
-name = "IotaNames"
-source = { local = "../iota-names" }
-
-dependencies = [
-  { name = "Iota" },
+  { name = "denylist" },
 ]
 
 [[move.package]]
