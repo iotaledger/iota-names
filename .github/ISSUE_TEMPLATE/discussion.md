@@ -1,5 +1,5 @@
 ---
-name: Start a discussion or ask a question about Move on IOTA
+name: Start a discussion or ask a question about IOTA Names
 about: Start a discussion
 ---
 
