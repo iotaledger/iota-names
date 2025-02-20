@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { normalizeIotaAddress } from '@iota/iota-sdk/utils';
+import { normalizeIotaName } from './utils';
 
 export function isSubName(name: string): boolean {
-	return normalizeIotaAddress(name, 'dot').split('.').length > 2;
+	return normalizeIotaName(name, 'dot').split('.').length > 2;
 }
 
 /**
@@ -14,7 +14,7 @@ export function isSubName(name: string): boolean {
  * @param name The name to check (e.g test.example.sub.iota)
  */
 export function isNestedSubName(name: string): boolean {
-	return normalizeIotaAddress(name, 'dot').split('.').length > 3;
+	return normalizeIotaName(name, 'dot').split('.').length > 3;
 }
 
 /**

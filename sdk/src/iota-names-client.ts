@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IotaClient } from '@iota/iota-sdk/client';
-import { isValidIotaAddress, normalizeIotaAddress } from '@iota/iota-sdk/utils';
 
 import {
 	getConfigType,
@@ -15,6 +14,7 @@ import {
 } from './constants.js';
 import { isSubName, parsePriceListFromConfig, validateYears } from './helpers.js';
 import type { Constants, IotaNamesClientConfig, IotaNamesPriceList, NameRecord } from './types.js';
+import { isValidIotaName, normalizeIotaName } from './utils';
 
 /// The IotaNamesClient is the main entry point for the @iota/iota-names SDK.
 /// It allows you to interact with IotaNames.
@@ -99,7 +99,7 @@ export class IotaNamesClient {
 	}
 
 	async getNameRecord(name: string): Promise<NameRecord | null> {
-		if (!isValidIotaAddress(name)) throw new Error('Invalid IOTA name');
+		if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
 		if (!this.constants.iotaNamesPackageId) throw new Error('iotaNamesPackageId is not set');
 		if (!this.constants.registryTableId) throw new Error('Registry table ID is not set');
 
@@ -107,7 +107,7 @@ export class IotaNamesClient {
 			parentId: this.constants.registryTableId,
 			name: {
 				type: getDomainType(this.constants.iotaNamesPackageId.v1),
-				value: normalizeIotaAddress(name, 'dot').split('.').reverse(),
+				value: normalizeIotaName(name, 'dot').split('.').reverse(),
 			},
 		});
 		const fields = nameRecord.data?.content;
@@ -155,11 +155,11 @@ export class IotaNamesClient {
 		years: number;
 		priceList: IotaNamesPriceList;
 	}) {
-		if (!isValidIotaAddress(name)) throw new Error('Invalid IOTA name');
+		if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
 		validateYears(years);
 		if (isSubName(name)) throw new Error('Subdomains do not have a registration fee');
 
-		const length = normalizeIotaAddress(name, 'dot').split('.')[0].length;
+		const length = normalizeIotaName(name, 'dot').split('.')[0].length;
 		if (length === 3) return years * priceList.threeLetters;
 		if (length === 4) return years * priceList.fourLetters;
 		return years * priceList.fivePlusLetters;
