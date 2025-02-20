@@ -18,13 +18,6 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 /// The authorization witness.
 public struct Admin has drop {}
 
-/// Authorize the admin application in the IotaNames to get access
-/// to protected functions. Must be called in order to use the rest
-/// of the functions.
-public fun authorize(cap: &AdminCap, iota_names: &mut IotaNames) {
-    iota_names::authorize_app<Admin>(cap, iota_names)
-}
-
 /// Reserve a `domain` in the `IotaNames`.
 public fun reserve_domain(
     _: &AdminCap,
