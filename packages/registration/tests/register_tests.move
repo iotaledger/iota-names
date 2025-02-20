@@ -13,8 +13,8 @@ module registration::register_tests {
     use iota_names::{
         constants::{nanos_per_iota, grace_period_ms, year_ms}, 
         iota_names::{Self, IotaNames, total_balance, AdminCap}, 
-        iota_names_registration::IotaNamesRegistration, 
-        iota_names_registration, 
+        iota_names_nft::IotaNamesNft, 
+        iota_names_nft, 
         domain, 
         registry, 
         config, 
@@ -52,7 +52,7 @@ module registration::register_tests {
         no_years: u8,
         amount: u64,
         clock_tick: u64
-    ): IotaNamesRegistration {
+    ): IotaNamesNft {
         scenario.next_tx(IOTA_NAMES_ADDRESS);
         let mut iota_names = scenario.take_shared<IotaNames>();
         let payment = coin::mint_for_testing<IOTA>(amount, scenario.ctx());

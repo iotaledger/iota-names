@@ -5,7 +5,7 @@
 #[test_only]
 /// Testing strategy:
 ///
-/// - Admin can add new records to IotaNames and get the IotaNamesRegistrations
+/// - Admin can add new records to IotaNames and get the IotaNamesNfts
 /// for the registered domains.
 /// - Admin keeps the registration NFTs at their account for now.
 ///

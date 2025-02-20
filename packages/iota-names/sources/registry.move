@@ -13,13 +13,13 @@ use iota_names::domain::Domain;
 use iota_names::name_record::{Self, NameRecord};
 use iota_names::subdomain_registration::{Self, SubDomainRegistration};
 use iota_names::iota_names::AdminCap;
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::iota_names_nft::{Self as nft, IotaNamesNft};
 
-/// The `IotaNamesRegistration` has expired.
+/// The `IotaNamesNft` has expired.
 const ENftExpired: u64 = 0;
 /// Trying to override a record that is not expired.
 const ERecordNotExpired: u64 = 1;
-/// The `IotaNamesRegistration` does not match the `NameRecord`.
+/// The `IotaNamesNft` does not match the `NameRecord`.
 const EIdMismatch: u64 = 2;
 /// The `NameRecord` has expired.
 const ERecordExpired: u64 = 3;
@@ -58,19 +58,19 @@ public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
 /// Attempts to add a new record to the registry without looking at the grace
 /// period.
 /// Currently used for subdomains where there's no grace period to respect.
-/// Returns a `IotaNamesRegistration` upon success.
+/// Returns a `IotaNamesNft` upon success.
 public fun add_record_ignoring_grace_period(
     self: &mut Registry,
     domain: Domain,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     self.internal_add_record(domain, no_years, clock, false, ctx)
 }
 
 /// Attempts to add a new record to the registry and returns a
-/// `IotaNamesRegistration` upon success.
+/// `IotaNamesNft` upon success.
 /// Only use with second-level names. Enforces a `grace_period` by default.
 /// Not suitable for subdomains (unless a grace period is needed).
 public fun add_record(
@@ -79,7 +79,7 @@ public fun add_record(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     self.internal_add_record(domain, no_years, clock, true, ctx)
 }
 
@@ -87,10 +87,10 @@ public fun add_record(
 /// Only works if the NFT has expired.
 public fun burn_registration_object(
     self: &mut Registry,
-    nft: IotaNamesRegistration,
+    nft: IotaNamesNft,
     clock: &Clock,
 ) {
-    // First we make sure that the IotaNamesRegistration object has expired.
+    // First we make sure that the IotaNamesNft object has expired.
     assert!(nft.has_expired(clock), ERecordNotExpired);
 
     let domain = nft.domain();
@@ -117,7 +117,7 @@ public fun burn_registration_object(
 /// Allow creation of subdomain wrappers only to authorized modules.
 public fun wrap_subdomain(
     _: &mut Registry,
-    nft: IotaNamesRegistration,
+    nft: IotaNamesNft,
     clock: &Clock,
     ctx: &mut TxContext,
 ): SubDomainRegistration {
@@ -137,9 +137,9 @@ public fun burn_subdomain_object(
 
 /// Adds a `leaf` record to the registry.
 /// A `leaf` record is a record that is a subdomain and doesn't have
-/// an equivalent `IotaNamesRegistration` object.
+/// an equivalent `IotaNamesNft` object.
 ///
-/// Instead, the parent's `IotaNamesRegistration` object is used to manage
+/// Instead, the parent's `IotaNamesNft` object is used to manage
 /// target_address & remove it / determine expiration.
 ///
 /// 1. Leaf records can't have children. They only work as a resolving
@@ -188,14 +188,14 @@ public fun add_leaf_record(
 }
 
 /// Can be used to remove a leaf record.
-/// Leaf records do not have any symmetrical `IotaNamesRegistration` object.
+/// Leaf records do not have any symmetrical `IotaNamesNft` object.
 /// Authorization of who calls this is delegated to the authorized module that
 /// calls this.
 public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     // We can only call remove on a leaf record.
     assert!(self.is_leaf_record(domain), ENotLeafRecord);
 
-    // if it's a leaf record, there's no `IotaNamesRegistration` object.
+    // if it's a leaf record, there's no `IotaNamesNft` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
     let record = self.registry.remove(domain);
@@ -239,12 +239,12 @@ public fun set_reverse_lookup(
     };
 }
 
-/// Update the `expiration_timestamp_ms` of the given `IotaNamesRegistration` and
-/// `NameRecord`. Requires the `IotaNamesRegistration` to make sure that both
+/// Update the `expiration_timestamp_ms` of the given `IotaNamesNft` and
+/// `NameRecord`. Requires the `IotaNamesNft` to make sure that both
 /// timestamps are in sync.
 public fun set_expiration_timestamp_ms(
     self: &mut Registry,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut IotaNamesNft,
     domain: Domain,
     expiration_timestamp_ms: u64,
 ) {
@@ -255,7 +255,7 @@ public fun set_expiration_timestamp_ms(
     nft.set_expiration_timestamp_ms(expiration_timestamp_ms);
 }
 
-/// Update the `data` of the given `NameRecord` using a `IotaNamesRegistration`.
+/// Update the `data` of the given `NameRecord` using a `IotaNamesNft`.
 /// Use with caution and validate(!!) that any system fields are not removed
 /// (accidently),
 /// when building authorized packages that can write the metadata field.
@@ -299,7 +299,7 @@ public fun reverse_lookup(self: &Registry, address: address): Option<Domain> {
 /// 2. Has not expired (does not take into account the grace period)
 public fun assert_nft_is_authorized(
     self: &Registry,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     clock: &Clock,
 ) {
     let domain = nft.domain();
@@ -323,8 +323,8 @@ public fun get_data(self: &Registry, domain: Domain): &VecMap<String, String> {
 /// `leaf` record: a record whose target address can only be set by the parent,
 /// hence the nft_id points to the parent's ID. Leaf records can't create
 /// subdomains
-/// and don't have their own `IotaNamesRegistration` object Cap. The
-/// `IotaNamesRegistration` of the parent
+/// and don't have their own `IotaNamesNft` object Cap. The
+/// `IotaNamesNft` of the parent
 /// is the one that manages them.
 ///
 fun is_leaf_record(self: &Registry, domain: Domain): bool {
@@ -349,7 +349,7 @@ fun internal_add_record(
     clock: &Clock,
     with_grace_period: bool,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     self.remove_existing_record_if_exists_and_expired(
         domain,
         clock,

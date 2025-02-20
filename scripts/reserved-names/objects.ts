@@ -23,7 +23,7 @@ const getAllOwnedDomains = async () => {
 			filter: {
 				MatchAll: [
 					{
-						StructType: `0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0::iota_names_registration::IotaNamesRegistration`,
+						StructType: `0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0::iota_names_nft::IotaNamesNft`,
 					},
 				],
 			},

@@ -16,7 +16,7 @@ use iota::clock::{Self, Clock};
 use iota::test_utils::assert_eq;
 use iota_names::constants;
 use iota_names::domain;
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::iota_names_nft::{Self as nft, IotaNamesNft};
 
 #[test]
 fun test_new() {
@@ -72,7 +72,7 @@ fun new(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     nft::new_for_testing(
         domain::new(domain_name),
         no_years,
@@ -81,6 +81,6 @@ fun new(
     )
 }
 
-fun burn(nft: IotaNamesRegistration) {
+fun burn(nft: IotaNamesNft) {
     nft.burn_for_testing()
 }

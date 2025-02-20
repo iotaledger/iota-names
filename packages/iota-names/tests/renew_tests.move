@@ -16,7 +16,7 @@ use iota_names::register_sample_tests::{register_util, assert_balance};
 use iota_names::registry;
 use iota_names::renew::{Self, Renew, renew};
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const DOMAIN_NAME: vector<u8> = b"abc.iota";
@@ -47,7 +47,7 @@ public fun test_init(): Scenario {
 
 fun renew_util(
     scenario: &mut Scenario,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut IotaNamesNft,
     no_years: u8,
     amount: u64,
     clock_tick: u64,

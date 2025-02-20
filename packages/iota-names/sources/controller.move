@@ -10,7 +10,7 @@ use iota::tx_context::sender;
 use iota_names::domain;
 use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
@@ -25,7 +25,7 @@ public struct Controller has drop {}
 /// User-facing function (upgradable) - set the target address of a domain.
 entry fun set_target_address(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     new_target: Option<address>,
     clock: &Clock,
 ) {
@@ -68,7 +68,7 @@ entry fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
 /// record's data.
 entry fun set_user_data(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     key: String,
     value: String,
     clock: &Clock,
@@ -96,7 +96,7 @@ entry fun set_user_data(
 /// data.
 entry fun unset_user_data(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     key: String,
     clock: &Clock,
 ) {
@@ -121,7 +121,7 @@ entry fun unset_user_data(
 #[test_only]
 public fun set_target_address_for_testing(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     new_target: Option<address>,
     clock: &Clock,
 ) {
@@ -148,7 +148,7 @@ public fun unset_reverse_lookup_for_testing(
 #[test_only]
 public fun set_user_data_for_testing(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     key: String,
     value: String,
     clock: &Clock,
@@ -159,7 +159,7 @@ public fun set_user_data_for_testing(
 #[test_only]
 public fun unset_user_data_for_testing(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &IotaNamesNft,
     key: String,
     clock: &Clock,
 ) {

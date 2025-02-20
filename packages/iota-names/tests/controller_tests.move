@@ -27,7 +27,7 @@ use iota_names::register_sample::Register;
 use iota_names::register_sample_tests::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
@@ -79,7 +79,7 @@ public fun set_target_address_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<IotaNamesNft>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
@@ -121,7 +121,7 @@ public fun set_user_data_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<IotaNamesNft>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
@@ -140,7 +140,7 @@ public fun unset_user_data_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<IotaNamesNft>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);

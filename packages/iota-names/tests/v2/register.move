@@ -13,7 +13,7 @@ use iota_names::config::{Self, Config};
 use iota_names::domain;
 use iota_names::registry::{Self, Registry};
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 /// Number of years passed is not within [1-5] interval.
 const EInvalidYearsArgument: u64 = 0;
@@ -38,7 +38,7 @@ public fun register(
     payment: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     iota_names::assert_app_is_authorized<Register>(iota_names);
 
     let config = iota_names::get_config<Config>(iota_names);

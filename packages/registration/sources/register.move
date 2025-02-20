@@ -15,7 +15,7 @@ module registration::register {
         registry::Registry,
         iota_names::{Self, IotaNames},
         config::{Self, Config},
-        iota_names_registration::IotaNamesRegistration
+        iota_names_nft::IotaNamesNft
     };
 
     /// Number of years passed is not within [1-5] interval.
@@ -41,7 +41,7 @@ module registration::register {
         payment: Coin<IOTA>,
         clock: &Clock,
         ctx: &mut TxContext
-    ): IotaNamesRegistration {
+    ): IotaNamesNft {
         iota_names.assert_app_is_authorized<Register>();
 
         let config = iota_names.get_config<Config>();

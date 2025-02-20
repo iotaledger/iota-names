@@ -15,7 +15,7 @@ use iota_names::domain;
 use iota_names::name_record;
 use iota_names::registry::{Self, Registry};
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::iota_names_nft::{Self as nft, IotaNamesNft};
 
 /// Number of years passed is not within [1-5] interval.
 const EInvalidYearsArgument: u64 = 0;
@@ -30,12 +30,12 @@ const EGracePeriodPassed: u64 = 3;
 public struct Renew has drop {}
 
 /// Renew a registered domain name by a number of years (not exceeding 5).
-/// The domain name must be already registered and active; `IotaNamesRegistration`
+/// The domain name must be already registered and active; `IotaNamesNft`
 /// serves as the proof of that.
 ///
 /// We make sure that (in order):
 /// - the domain is already registered and active
-/// - the IotaNamesRegistration matches the NameRecord.nft_id
+/// - the IotaNamesNft matches the NameRecord.nft_id
 /// - the domain TLD is .iota
 /// - the domain is not a subdomain
 /// - number of years is within [1-5] interval
@@ -43,7 +43,7 @@ public struct Renew has drop {}
 /// - the payment matches the price for the domain
 public fun renew(
     iota_names: &mut IotaNames,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut IotaNamesNft,
     no_years: u8,
     payment: Coin<IOTA>,
     clock: &Clock,

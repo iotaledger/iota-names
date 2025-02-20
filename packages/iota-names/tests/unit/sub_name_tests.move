@@ -9,7 +9,7 @@ use std::string::utf8;
 use iota::clock;
 use iota_names::domain;
 use iota_names::subdomain_registration as subdomain;
-use iota_names::iota_names_registration;
+use iota_names::iota_names_nft;
 
 #[test]
 fun test_wrap_and_destroy() {
@@ -18,7 +18,7 @@ fun test_wrap_and_destroy() {
 
     let domain = domain::new(utf8(b"sub.example.iota"));
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = iota_names_nft::new_for_testing(
         domain,
         1,
         &clock,
@@ -50,7 +50,7 @@ fun try_wrap_non_subdomain() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = iota_names_nft::new_for_testing(
         domain::new(utf8(b"example.iota")),
         1,
         &clock,
@@ -68,7 +68,7 @@ fun try_wrap_expired_subname() {
     let mut ctx = tx_context::dummy();
     let mut clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = iota_names_nft::new_for_testing(
         domain::new(utf8(b"sub.example.iota")),
         1,
         &clock,
@@ -92,7 +92,7 @@ fun try_unwrap_non_expired_subdomain() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = iota_names_nft::new_for_testing(
         domain::new(utf8(b"sub.example.iota")),
         1,
         &clock,

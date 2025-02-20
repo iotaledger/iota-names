@@ -28,12 +28,12 @@ export const createDisplay = ({
 	network: 'mainnet' | 'testnet';
 }) => {
 	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubDomainRegistration`;
-	const iotaNamesRegistration = `${iotaNamesPackageIdV1}::iota_names_registration::IotaNamesRegistration`;
+	const IotaNamesNft = `${iotaNamesPackageIdV1}::iota_names_nft::IotaNamesNft`;
 
 	const display = txb.moveCall({
 		target: `0x2::display::new`,
 		arguments: [txb.object(publisher)],
-		typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : IotaNamesNft],
 	});
 
 	txb.moveCall({
@@ -49,13 +49,13 @@ export const createDisplay = ({
 				'https://iota-names.io',
 			]),
 		],
-		typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : IotaNamesNft],
 	});
 
 	txb.moveCall({
 		target: `0x2::display::update_version`,
 		arguments: [display],
-		typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+		typeArguments: [isSubdomain ? subnameRegistration : IotaNamesNft],
 	});
 
 	const sender = txb.moveCall({

@@ -13,7 +13,7 @@ use iota_names::config;
 use iota_names::domain;
 use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 /// The authorization witness.
 public struct Admin has drop {}
@@ -33,7 +33,7 @@ public fun reserve_domain(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     let domain = domain::new(domain_name);
     config::assert_valid_user_registerable_domain(&domain);
     let registry = iota_names::app_registry_mut<Admin, Registry>(Admin {}, iota_names);

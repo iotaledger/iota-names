@@ -16,7 +16,7 @@ use iota_names::domain;
 use iota_names::register_sample::{Self as register, Register, register};
 use iota_names::registry;
 use iota_names::iota_names::{Self, IotaNames, total_balance, AdminCap};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const DOMAIN_NAME: vector<u8> = b"abc.iota";
@@ -50,7 +50,7 @@ public fun register_util(
     no_years: u8,
     amount: u64,
     clock_tick: u64,
-): IotaNamesRegistration {
+): IotaNamesNft {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let mut iota_names = scenario.take_shared<IotaNames>();
     let payment = coin::mint_for_testing<IOTA>(amount, ctx(scenario));

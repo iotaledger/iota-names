@@ -13,7 +13,7 @@ module utils::direct_setup {
         domain,
         registry::Registry,
         iota_names::{Self, IotaNames},
-        iota_names_registration::IotaNamesRegistration,
+        iota_names_nft::IotaNamesNft,
         subdomain_registration::SubDomainRegistration
     };
 
@@ -29,7 +29,7 @@ module utils::direct_setup {
     /// Set the target address of a domain.
     public fun set_target_address(
         iota_names: &mut IotaNames,
-        nft: &IotaNamesRegistration,
+        nft: &IotaNamesNft,
         new_target: Option<address>,
         clock: &Clock,
     ) {
@@ -60,7 +60,7 @@ module utils::direct_setup {
     /// User-facing function - add a new key-value pair to the name record's data.
     public fun set_user_data(
         iota_names: &mut IotaNames,
-        nft: &IotaNamesRegistration, key: String,
+        nft: &IotaNamesNft, key: String,
         value: String,
         clock: &Clock
     ) {
@@ -86,7 +86,7 @@ module utils::direct_setup {
     /// User-facing function - remove a key from the name record's data.
     public fun unset_user_data(
         iota_names: &mut IotaNames,
-        nft: &IotaNamesRegistration, key: String,
+        nft: &IotaNamesNft, key: String,
         clock: &Clock
     ) {
         let registry = registry_mut(iota_names);
@@ -104,7 +104,7 @@ module utils::direct_setup {
 
     public fun burn_expired(
         iota_names: &mut IotaNames,
-        nft: IotaNamesRegistration,
+        nft: IotaNamesNft,
         clock: &Clock
     ) {
         registry_mut(iota_names).burn_registration_object(nft, clock);

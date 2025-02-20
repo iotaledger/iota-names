@@ -16,9 +16,9 @@ use iota_names::constants;
 
 /// A single record in the registry.
 public struct NameRecord has copy, store, drop {
-    /// The ID of the `IotaNamesRegistration` assigned to this record.
+    /// The ID of the `IotaNamesNft` assigned to this record.
     ///
-    /// The owner of the corresponding `IotaNamesRegistration` has the rights to
+    /// The owner of the corresponding `IotaNamesNft` has the rights to
     /// be able to change and adjust the `target_address` of this domain.
     ///
     /// It is possible that the ID changes if the record expires and is

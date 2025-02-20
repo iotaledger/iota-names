@@ -2,9 +2,9 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Handles creation of the `IotaNamesRegistration`s. Separates the logic of
+/// Handles creation of the `IotaNamesNft`s. Separates the logic of
 /// creating
-/// a `IotaNamesRegistration`. New `IotaNamesRegistration`s can be created only by the
+/// a `IotaNamesNft`. New `IotaNamesNft`s can be created only by the
 /// `registry` and this module is tightly coupled with it.
 ///
 /// When reviewing the module, make sure that:
@@ -12,7 +12,7 @@
 /// - mutable functions can't be called directly by the owner
 /// - all getters are public and take an immutable reference
 ///
-module iota_names::iota_names_registration;
+module iota_names::iota_names_nft;
 
 use std::string::String;
 use iota::clock::{timestamp_ms, Clock};
@@ -23,7 +23,7 @@ use iota_names::domain::Domain;
 /* friend iota_names::update_image; */
 
 /// The main access point for the user.
-public struct IotaNamesRegistration has key, store {
+public struct IotaNamesNft has key, store {
     id: UID,
     /// The parsed domain.
     domain: Domain,
@@ -37,15 +37,15 @@ public struct IotaNamesRegistration has key, store {
 
 // === Protected methods ===
 
-/// Creates a new `IotaNamesRegistration`.
+/// Creates a new `IotaNamesNft`.
 /// Can only be called by the `registry` module.
 public(package) fun new(
     domain: Domain,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
-    IotaNamesRegistration {
+): IotaNamesNft {
+    IotaNamesNft {
         id: object::new(ctx),
         domain_name: domain.to_string(),
         domain,
@@ -56,7 +56,7 @@ public(package) fun new(
 
 /// Sets the `expiration_timestamp_ms` for this NFT.
 public(package) fun set_expiration_timestamp_ms(
-    self: &mut IotaNamesRegistration,
+    self: &mut IotaNamesNft,
     expiration_timestamp_ms: u64,
 ) {
     self.expiration_timestamp_ms = expiration_timestamp_ms;
@@ -65,17 +65,17 @@ public(package) fun set_expiration_timestamp_ms(
 /// Updates the `image_url` field for this NFT. Is only called in the
 /// `update_image` for now.
 public(package) fun update_image_url(
-    self: &mut IotaNamesRegistration,
+    self: &mut IotaNamesNft,
     image_url: String,
 ) {
     self.image_url = image_url;
 }
 
-/// Destroys the `IotaNamesRegistration` by deleting it from the store, returning
+/// Destroys the `IotaNamesNft` by deleting it from the store, returning
 /// storage rebates to the caller.
 /// Can only be called by the `registry` module.
-public(package) fun burn(self: IotaNamesRegistration) {
-    let IotaNamesRegistration {
+public(package) fun burn(self: IotaNamesNft) {
+    let IotaNamesNft {
         id,
         image_url: _,
         domain: _,
@@ -88,17 +88,17 @@ public(package) fun burn(self: IotaNamesRegistration) {
 
 // === Public methods ===
 
-/// Check whether the `IotaNamesRegistration` has expired by comparing the
+/// Check whether the `IotaNamesNft` has expired by comparing the
 /// expiration timeout with the current time.
-public fun has_expired(self: &IotaNamesRegistration, clock: &Clock): bool {
+public fun has_expired(self: &IotaNamesNft, clock: &Clock): bool {
     self.expiration_timestamp_ms < timestamp_ms(clock)
 }
 
-/// Check whether the `IotaNamesRegistration` has expired by comparing the
+/// Check whether the `IotaNamesNft` has expired by comparing the
 /// expiration timeout with the current time. This function also takes into
 /// account the grace period.
 public fun has_expired_past_grace_period(
-    self: &IotaNamesRegistration,
+    self: &IotaNamesNft,
     clock: &Clock,
 ): bool {
     (self.expiration_timestamp_ms + constants::grace_period_ms()) < timestamp_ms(clock)
@@ -106,25 +106,25 @@ public fun has_expired_past_grace_period(
 
 // === Getters ===
 
-/// Get the `domain` field of the `IotaNamesRegistration`.
-public fun domain(self: &IotaNamesRegistration): Domain { self.domain }
+/// Get the `domain` field of the `IotaNamesNft`.
+public fun domain(self: &IotaNamesNft): Domain { self.domain }
 
-/// Get the `domain_name` field of the `IotaNamesRegistration`.
-public fun domain_name(self: &IotaNamesRegistration): String { self.domain_name }
+/// Get the `domain_name` field of the `IotaNamesNft`.
+public fun domain_name(self: &IotaNamesNft): String { self.domain_name }
 
-/// Get the `expiration_timestamp_ms` field of the `IotaNamesRegistration`.
-public fun expiration_timestamp_ms(self: &IotaNamesRegistration): u64 {
+/// Get the `expiration_timestamp_ms` field of the `IotaNamesNft`.
+public fun expiration_timestamp_ms(self: &IotaNamesNft): u64 {
     self.expiration_timestamp_ms
 }
 
-/// Get the `image_url` field of the `IotaNamesRegistration`.
-public fun image_url(self: &IotaNamesRegistration): String { self.image_url }
+/// Get the `image_url` field of the `IotaNamesNft`.
+public fun image_url(self: &IotaNamesNft): String { self.image_url }
 
-// get a read-only `uid` field of `IotaNamesRegistration`.
-public fun uid(self: &IotaNamesRegistration): &UID { &self.id }
+// get a read-only `uid` field of `IotaNamesNft`.
+public fun uid(self: &IotaNamesNft): &UID { &self.id }
 
-/// Get the mutable `id` field of the `IotaNamesRegistration`.
-public fun uid_mut(self: &mut IotaNamesRegistration): &mut UID { &mut self.id }
+/// Get the mutable `id` field of the `IotaNamesNft`.
+public fun uid_mut(self: &mut IotaNamesNft): &mut UID { &mut self.id }
 
 // === Testing ===
 
@@ -134,13 +134,13 @@ public fun new_for_testing(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): IotaNamesNft {
     new(domain, no_years, clock, ctx)
 }
 
 #[test_only]
 public fun set_expiration_timestamp_ms_for_testing(
-    self: &mut IotaNamesRegistration,
+    self: &mut IotaNamesNft,
     expiration_timestamp_ms: u64,
 ) {
     set_expiration_timestamp_ms(self, expiration_timestamp_ms);
@@ -148,15 +148,15 @@ public fun set_expiration_timestamp_ms_for_testing(
 
 #[test_only]
 public fun update_image_url_for_testing(
-    self: &mut IotaNamesRegistration,
+    self: &mut IotaNamesNft,
     image_url: String,
 ) {
     update_image_url(self, image_url);
 }
 
 #[test_only]
-public fun burn_for_testing(nft: IotaNamesRegistration) {
-    let IotaNamesRegistration {
+public fun burn_for_testing(nft: IotaNamesNft) {
+    let IotaNamesNft {
         id,
         image_url: _,
         domain: _,

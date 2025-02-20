@@ -11,7 +11,7 @@ use iota::ecdsa_k1;
 use iota_names::config::Config;
 use iota_names::registry::Registry;
 use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 /// Message data cannot be parsed.
 const EInvalidData: u64 = 0;
@@ -23,10 +23,10 @@ const ESignatureNotMatch: u64 = 2;
 /// Authorization token for the app.
 public struct UpdateImage has drop {}
 
-/// Updates the image attached to a `IotaNamesRegistration`.
+/// Updates the image attached to a `IotaNamesNft`.
 entry fun update_image_url(
     iota_names: &IotaNames,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut IotaNamesNft,
     raw_msg: vector<u8>,
     signature: vector<u8>,
     clock: &Clock,

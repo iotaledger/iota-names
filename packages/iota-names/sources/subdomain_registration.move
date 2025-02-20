@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A wrapper for `IotaNamesRegistration` subdomain objects.
+/// A wrapper for `IotaNamesNft` subdomain objects.
 ///
 /// With the wrapper, we are allowing easier distinction between second
 /// level names & subdomains in RPC Querying | filtering.
@@ -11,7 +11,7 @@
 module iota_names::subdomain_registration;
 
 use iota::clock::Clock;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::iota_names_nft::IotaNamesNft;
 
 /* friend iota_names::registry; */
 /* #[test_only] */
@@ -26,16 +26,16 @@ const ENotSubdomain: u64 = 2;
 /// Tries to destroy a subdomain that has not expired.
 const ENameNotExpired: u64 = 3;
 
-/// A wrapper for IotaNamesRegistration object specifically for SubNames.
+/// A wrapper for IotaNamesNft object specifically for SubNames.
 public struct SubDomainRegistration has key, store {
     id: UID,
-    nft: IotaNamesRegistration,
+    nft: IotaNamesNft,
 }
 
-/// Creates a `SubName` wrapper for IotaNamesRegistration object
+/// Creates a `SubName` wrapper for IotaNamesNft object
 /// (as long as it's used for a subdomain).
 public(package) fun new(
-    nft: IotaNamesRegistration,
+    nft: IotaNamesNft,
     clock: &Clock,
     ctx: &mut TxContext,
 ): SubDomainRegistration {
@@ -50,12 +50,12 @@ public(package) fun new(
     }
 }
 
-/// Destroys the wrapper and returns the IotaNamesRegistration object.
+/// Destroys the wrapper and returns the IotaNamesNft object.
 /// Fails if the subname is not expired.
 public(package) fun burn(
     name: SubDomainRegistration,
     clock: &Clock,
-): IotaNamesRegistration {
+): IotaNamesNft {
     // tries to unwrap a non-expired subname.
     assert!(name.nft.has_expired(clock), ENameNotExpired);
 
@@ -68,10 +68,10 @@ public(package) fun burn(
     nft
 }
 
-public fun nft(name: &SubDomainRegistration): &IotaNamesRegistration {
+public fun nft(name: &SubDomainRegistration): &IotaNamesNft {
     &name.nft
 }
 
-public fun nft_mut(name: &mut SubDomainRegistration): &mut IotaNamesRegistration {
+public fun nft_mut(name: &mut SubDomainRegistration): &mut IotaNamesNft {
     &mut name.nft
 }

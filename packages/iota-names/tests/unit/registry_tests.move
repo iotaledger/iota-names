@@ -13,7 +13,7 @@ use iota_names::constants;
 use iota_names::domain::{Self, Domain};
 use iota_names::name_record as record;
 use iota_names::registry::{Self, Registry};
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::iota_names_nft::{Self as nft, IotaNamesNft};
 
 // === Registry + Record Addition ===
 
@@ -250,7 +250,7 @@ fun test_registry_grace_period() {
 // === Burn Names ===
 
 #[test]
-/// Checks that `burn_registration_object` burns `IotaNamesRegistration` object
+/// Checks that `burn_registration_object` burns `IotaNamesNft` object
 /// but doesn't touch the NameRecord, as this name has been re-registered by a
 /// different user (after its expiration).
 fun test_registry_burn_name() {
@@ -284,7 +284,7 @@ fun test_registry_burn_name() {
 }
 
 #[test]
-/// `burn_registration_object` burns the IotaNamesRegistration object as well as
+/// `burn_registration_object` burns the IotaNamesNft object as well as
 /// removes the record,
 /// since it still points to the old owner.
 fun test_registry_burn_name_and_removes_record() {
@@ -388,7 +388,7 @@ fun burn_expired_subdomain() {
 }
 
 #[test]
-fun burn_expired_iota_names_registration() {
+fun burn_expired_iota_names_nft() {
     let mut ctx = tx_context::dummy();
     let (mut registry, mut clock, domain) = setup(&mut ctx);
     let nft = registry.add_record(domain, 1, &clock, &mut ctx);
@@ -609,7 +609,7 @@ fun wrapup_non_empty(registry: Registry, clock: Clock) {
 }
 
 #[test_only]
-public fun burn_nfts(mut nfts: vector<IotaNamesRegistration>) {
+public fun burn_nfts(mut nfts: vector<IotaNamesNft>) {
     while (vector::length(&nfts) > 0) {
         nft::burn_for_testing(vector::pop_back(&mut nfts));
     };

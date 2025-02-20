@@ -19,7 +19,7 @@ module renewal::renew {
         registry::Registry,
         iota_names::{Self, IotaNames, AdminCap},
         config::{Self, Config},
-        iota_names_registration::IotaNamesRegistration
+        iota_names_nft::IotaNamesNft
     };
 
     /// Number of years passed is not within [1-5] interval.
@@ -72,7 +72,7 @@ module renewal::renew {
     // - number of years is within [1-5] interval
     public fun renew(
         iota_names: &mut IotaNames,
-        nft: &mut IotaNamesRegistration,
+        nft: &mut IotaNamesNft,
         no_years: u8,
         payment: Coin<IOTA>,
         clock: &Clock
@@ -112,7 +112,7 @@ module renewal::renew {
     /// or abort if the domain or the expiration setup is invalid.
     fun target_expiration(
         registry: &Registry,
-        nft: &IotaNamesRegistration,
+        nft: &IotaNamesNft,
         domain: Domain,
         clock: &Clock,
         no_years: u8,
