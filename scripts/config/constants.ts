@@ -55,6 +55,6 @@ export const mainPackage: Config = {
 		renewalsPackageId: '0x54800ebb4606fd0c03b4554976264373b3374eeb3fd63e7ff69f31cac786ba8c',
 		subNamesPackageId: '0x3c272bc45f9157b7818ece4f7411bdfa8af46303b071aca4e18c03119c9ff636',
 		tempSubdomainsProxyPackageId:
-			'0x3489ab5dcd346afee8b681267bcab2583a5eba9855680ec9931355e50e21c148'
+			'0x3489ab5dcd346afee8b681267bcab2583a5eba9855680ec9931355e50e21c148',
 	},
 };
