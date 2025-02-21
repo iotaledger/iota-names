@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IotaClient } from '@iota/iota-sdk/client';
-import { isValidIotaName, normalizeIotaName } from '@iota/iota-sdk/utils';
 
 import {
 	getConfigType,
@@ -14,7 +13,8 @@ import {
 	TESTNET_CONFIG,
 } from './constants.js';
 import { isSubName, parsePriceListFromConfig, validateYears } from './helpers.js';
-import type { Constants, NameRecord, IotaNamesClientConfig, IotaNamesPriceList } from './types.js';
+import type { Constants, IotaNamesClientConfig, IotaNamesPriceList, NameRecord } from './types.js';
+import { isValidIotaName, normalizeIotaName } from './utils';
 
 /// The IotaNamesClient is the main entry point for the @iota/iota-names SDK.
 /// It allows you to interact with IotaNames.
