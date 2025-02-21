@@ -8,7 +8,7 @@
 /// - create config and make sure the values can be retrieved and updated
 /// - price calculation should be correct for each length and duration
 /// - config must save the user from making a dummy mistake and provide
-///   the basic validation for parameters (public_key, years, other settings)
+///   the basic validation for parameters (years, other settings)
 ///
 module iota_names::config_tests;
 
@@ -25,19 +25,16 @@ fun create_and_update_config() {
     let mut config = default();
 
     // check that the values are set correctly in the `new` function
-    assert!(config.public_key() == &b"000000000000000000000000000000000", 0);
     assert!(config.three_char_price() == THREE, 0);
     assert!(config.four_char_price() == FOUR, 0);
     assert!(config.five_plus_char_price() == FIVE_PLUS, 0);
 
     // update each of the values and make sure they are updated
-    config.set_public_key(b"000000000000000000000000000000001");
     config.set_three_char_price(4_000_000_000);
     config.set_four_char_price(3_000_000_000);
     config.set_five_plus_char_price(1_000_000_000);
 
     // check that the updated values match the new ones
-    assert!(config.public_key() == &b"000000000000000000000000000000001", 0);
     assert!(config.three_char_price() == 4_000_000_000, 0);
     assert!(config.four_char_price() == 3_000_000_000, 0);
     assert!(config.five_plus_char_price() == 1_000_000_000, 0);
@@ -78,40 +75,9 @@ fun calculate_price_length_max_fail() {
     default().calculate_price(255, 1);
 }
 
-#[test]
-#[expected_failure(abort_code = iota_names::config::EInvalidPublicKey)]
-fun new_invalid_public_key_fail() {
-    config::new(
-        vector[],
-        0,
-        0,
-        0,
-    );
-}
-
-#[test]
-#[expected_failure(abort_code = iota_names::config::EInvalidPublicKey)]
-fun set_public_key_invalid_fail() {
-    let mut config = default();
-    config.set_public_key(vector[]);
-}
-
-#[test]
-fun set_public_key_has_33_bytes() {
-    let pubkey =
-        x"034646ae5047316b4230d0086c8acec687f00b1cd9d1dc634f6cb358ac0a9a8fff";
-    let signature =
-        x"f2ecd870cfa290019c28f57c767e38a96b1544786126a84bdc250888e70ebee541abc8cf84c32a8d05331c42c403b6cb64e7aee9efe13eff7c7c2da60d294281";
-    assert!(
-        ecdsa_k1::secp256k1_verify(&signature, &pubkey, &b"helloworld", 1),
-        0,
-    );
-}
-
 // create a default configuration for tests
 fun default(): Config {
     config::new(
-        b"000000000000000000000000000000000",
         THREE, // 3 symbol length (9 IOTA)
         FOUR, // 4 symbol length (5 IOTA)
         FIVE_PLUS, // 5 symbol length (2 IOTA)

@@ -29,21 +29,18 @@ const ELabelTooShort: u64 = 0;
 const ELabelTooLong: u64 = 1;
 /// The price value is invalid.
 const EInvalidPrice: u64 = 2;
-/// The public key is not a Secp256k1 public key which is of length 33 bytes
-const EInvalidPublicKey: u64 = 3;
 /// Incorrect number of years passed to the function.
-const ENoYears: u64 = 4;
+const ENoYears: u64 = 3;
 /// Trying to register a subdomain (only *.iota is currently allowed).
-const EInvalidDomain: u64 = 5;
+const EInvalidDomain: u64 = 4;
 /// Trying to register a domain name in a different TLD (not .iota).
-const EInvalidTld: u64 = 6;
+const EInvalidTld: u64 = 5;
 
 /// The configuration object, holds current settings of the IotaNames
 /// application. Does not carry any business logic and can easily
 /// be replaced with any other module providing similar interface
 /// and fitting the needs of the application.
 public struct Config has store, drop {
-    public_key: vector<u8>,
     three_char_price: u64,
     four_char_price: u64,
     five_plus_char_price: u64,
@@ -52,15 +49,12 @@ public struct Config has store, drop {
 /// Create a new instance of the configuration object.
 /// Define all properties from the start.
 public fun new(
-    public_key: vector<u8>,
     three_char_price: u64,
     four_char_price: u64,
     five_plus_char_price: u64,
 ): Config {
-    assert!(public_key.length() == 33, EInvalidPublicKey);
 
     Config {
-        public_key,
         three_char_price,
         four_char_price,
         five_plus_char_price,
@@ -68,12 +62,6 @@ public fun new(
 }
 
 // === Modification: one per property ===
-
-/// Change the value of the `public_key` field.
-public fun set_public_key(self: &mut Config, value: vector<u8>) {
-    assert!(value.length() == 33, EInvalidPublicKey);
-    self.public_key = value;
-}
 
 /// Change the value of the `three_char_price` field.
 public fun set_three_char_price(self: &mut Config, value: u64) {
@@ -113,9 +101,6 @@ public fun calculate_price(self: &Config, length: u8, years: u8): u64 {
 }
 
 // === Reads: one per property ===
-
-/// Get the value of the `public_key` field.
-public fun public_key(self: &Config): &vector<u8> { &self.public_key }
 
 /// Get the value of the `three_char_price` field.
 public fun three_char_price(self: &Config): u64 { self.three_char_price }

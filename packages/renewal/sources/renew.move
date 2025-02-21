@@ -54,7 +54,6 @@ module renewal::renew {
     /// We're wrapping initial `Config` because we want to add custom pricing for renewals,
     /// and we can only have 1 config of each type in the IotaNames app.
     /// We still set this up by using the default config functionality from IotaNames package.
-    /// The `public_key` passed in the `Config` can be a random u8 array with length 33.
     public fun setup(
         iota_names: &mut IotaNames,
         cap: &AdminCap,
