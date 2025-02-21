@@ -130,10 +130,6 @@ module renewal::renew_tests {
         let cap = iota_names::create_admin_cap_for_testing(ctx);
 
         let config = config::new(
-            // We do not care about the public key of the configuration in tests.
-            // Also, for renewals, we do not care about it in production mode too.
-            // We re-use the type to be able to use the same utilities.
-            b"000000000000000000000000000000000",
             // random price, not being tested in renewal tests.
             1200 * ::iota_names::constants::nanos_per_iota(),
             // Random price, not being tested in renewal tests.
