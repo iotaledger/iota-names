@@ -111,7 +111,7 @@ public fun withdraw(
 /// An authorization Key kept in the IotaNames - allows applications access
 /// protected features of the IotaNames (such as app_add_balance, etc.)
 /// The `App` type parameter is a witness which should be defined in the
-/// original module (Controller, Registry, Registrar - whatever).
+/// original module (Registry, Registrar - whatever).
 public struct AppKey<phantom App: drop> has copy, store, drop {}
 
 /// Authorize an application to access protected features of the IotaNames.
