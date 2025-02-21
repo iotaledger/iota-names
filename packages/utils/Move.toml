@@ -7,6 +7,8 @@ published-at = "0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/mainnet", override = true }
 IotaNames = { local = "../iota-names" }
+registration = { local = "../registration" }
+renewal = { local = "../renewal" }
 
 [addresses]
 utils = "0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b"

@@ -20,7 +20,7 @@ module temp_subdomain_proxy::subdomain_proxy {
     };
 
     use subdomains::subdomains;
-    use utils::direct_setup;
+    use utils::utils;
 
     public fun new(
         iota_names: &mut IotaNames,
@@ -100,7 +100,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         new_target: Option<address>,
         clock: &Clock,
     ) {
-        direct_setup::set_target_address(
+        utils::set_target_address(
             iota_names,
             subdomain.nft(),
             new_target,
@@ -114,7 +114,7 @@ module temp_subdomain_proxy::subdomain_proxy {
         value: String,
         clock: &Clock
     ) {
-        direct_setup::set_user_data(
+        utils::set_user_data(
             iota_names,
             subdomain.nft(),
             key,
@@ -128,6 +128,6 @@ module temp_subdomain_proxy::subdomain_proxy {
         subdomain: &SubDomainRegistration, key: String,
         clock: &Clock
     ) {
-        direct_setup::unset_user_data(iota_names, subdomain.nft(), key, clock);
+        utils::unset_user_data(iota_names, subdomain.nft(), key, clock);
     }
 }

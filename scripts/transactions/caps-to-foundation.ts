@@ -19,7 +19,7 @@ const UPGRADE_CAPS_TO_TRANSFER = [
 	'0x72a3c603d0218ab59ae81363e608d6c3c0c344890df40bd6ca7de575f28feb7d',
 	// registration
 	'0x779ed3df4bdfa55948580f1688ab1fede83f09d6d38fedb2a87b90d5c5179e58',
-	// utils (direct_setup), extended with subnames.
+	// utils, extended with subnames.
 	'0x929162c097e47cffabb57e8c1cf334ff44a84b963f0bbaacfbaf792d79993866',
 	// IOTA-Names (!! core package)
 	'0x9cda28244a0d0de294d2b271e772a9c33eb47d316c59913d7369b545b4af098c',
@@ -27,7 +27,7 @@ const UPGRADE_CAPS_TO_TRANSFER = [
 	'0xc70ac60c1d65da22ed5f30def1a7dfd33ff3a70eb0bf75f12ab559c5f342ea12',
 	// AEON
 	'0xd5e3b3b8adc2358e031990f3be5c1c8999967666bb3a8ff7c35fd8bc961e06c5',
-	// another utils (direct_setup), initial
+	// another utils, initial
 	'0xe6e24cdf4824e0e14c2cfa97052df2d85ebac61bd8e6ab3d5094c477f4db2eda',
 	// renewals
 	'0xf7750345cc6c90dc40b1dd93ea761ddfb429761d98ff57d2df3a41a492ba3979',

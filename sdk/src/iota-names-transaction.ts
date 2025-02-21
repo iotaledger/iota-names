@@ -199,7 +199,7 @@ export class IotaNamesTransaction {
 		this.transaction.moveCall({
 			target: isSubname
 				? `${this.#iotaNamesClient.constants.tempSubNamesProxyPackageId}::subdomain_proxy::set_target_address`
-				: `${this.#iotaNamesClient.constants.utilsPackageId}::direct_setup::set_target_address`,
+				: `${this.#iotaNamesClient.constants.utilsPackageId}::utils::set_target_address`,
 			arguments: [
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(nft),
@@ -218,7 +218,7 @@ export class IotaNamesTransaction {
 			throw new Error('Utils package ID not found');
 
 		this.transaction.moveCall({
-			target: `${this.#iotaNamesClient.constants.utilsPackageId}::direct_setup::set_reverse_lookup`,
+			target: `${this.#iotaNamesClient.constants.utilsPackageId}::utils::set_reverse_lookup`,
 			arguments: [
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -306,7 +306,7 @@ export class IotaNamesTransaction {
 		this.transaction.moveCall({
 			target: isSubname
 				? `${this.#iotaNamesClient.constants.tempSubNamesProxyPackageId}::subdomain_proxy::set_user_data`
-				: `${this.#iotaNamesClient.constants.utilsPackageId}::direct_setup::set_user_data`,
+				: `${this.#iotaNamesClient.constants.utilsPackageId}::utils::set_user_data`,
 			arguments: [
 				this.transaction.object(this.#iotaNamesClient.constants.iotaNamesObjectId),
 				this.transaction.object(nft),
@@ -327,7 +327,7 @@ export class IotaNamesTransaction {
 			throw new Error('Utils package ID not found');
 
 		this.transaction.moveCall({
-			target: `${this.#iotaNamesClient.constants.utilsPackageId}::direct_setup::${
+			target: `${this.#iotaNamesClient.constants.utilsPackageId}::utils::${
 				isSubname ? 'burn_expired_subname' : 'burn_expired'
 			}`,
 			arguments: [

@@ -124,7 +124,7 @@ export const Packages = (network: Network) => {
 					upgradeCap,
 				};
 			},
-			authorizationType: (packageId: string) => `${packageId}::direct_setup::DirectSetup`,
+			authorizationType: (packageId: string) => `${packageId}::utils::Utilities`,
 		},
 		DenyList: {
 			order: 2,
