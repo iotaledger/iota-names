@@ -40,7 +40,7 @@ jobs:
       - name: Run pnpm lint
         run: |
           pnpm lint
-          
+
   sdk_test:
     name: SDK Tests
     runs-on: ubuntu-latest
