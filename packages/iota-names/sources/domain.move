@@ -9,6 +9,7 @@
 /// https://en.wikipedia.org/wiki/Domain_name#Domain_name_syntax
 module iota_names::domain;
 
+use std::option::{none, some};
 use std::string::{Self, String, utf8};
 
 const EInvalidDomain: u64 = 0;
@@ -100,14 +101,17 @@ public fun is_subdomain(domain: &Domain): bool {
 
 /// Derive the parent of a subdomain.
 /// e.g. `subdomain.example.iota` -> `example.iota`
-public fun parent(domain: &Domain): Domain {
-    let mut labels = domain.labels;
-    // we pop the last element and construct the parent from the remaining
-    // labels.
-    labels.pop_back();
-
-    Domain {
-        labels,
+public fun parent(domain: &Domain): Option<Domain> {
+    if is_subdomain(domain) {
+        let mut labels = domain.labels;
+        // we pop the last element and construct the parent from the remaining
+        // labels.
+        labels.pop_back();
+        some(Domain {
+            labels,
+        })
+    } else {
+        none()
     }
 }
 
