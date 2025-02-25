@@ -2,18 +2,21 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
 
-import { e2eLiveNetworkDryRunFlow } from './pre-built';
+// import { e2eLiveNetworkDryRunFlow } from './pre-built';
 
 describe('it should work on live networks', () => {
-	it('should work on mainnet', async () => {
-		const res = await e2eLiveNetworkDryRunFlow('mainnet');
-		expect(res.effects.status.status).toEqual('success');
-	});
+	// TODO: enable when it's deployed on mainnet
+	// 	it('should work on mainnet', async () => {
+	// 		const res = await e2eLiveNetworkDryRunFlow('mainnet');
+	// 		expect(res.effects.status.status).toEqual('success');
+	// 	});
 
-	it('should work on testnet', async () => {
-		const res = await e2eLiveNetworkDryRunFlow('testnet');
-		expect(res.effects.status.status).toEqual('success');
+	it('TODO: should work on testnet', async () => {
+		// TODO: enable when it's deployed on testnet
+		// Commented here as it would otherwise error with `Error: No test found in suite it should work on live networks`
+		// 		const res = await e2eLiveNetworkDryRunFlow('testnet');
+		// 		expect(res.effects.status.status).toEqual('success');
 	});
 });

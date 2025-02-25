@@ -20,7 +20,6 @@ use iota_names::constants;
 use iota_names::domain::Domain;
 
 /* friend iota_names::registry; */
-/* friend iota_names::update_image; */
 
 /// The main access point for the user.
 public struct IotaNamesRegistration has key, store {
