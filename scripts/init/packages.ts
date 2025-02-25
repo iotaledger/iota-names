@@ -36,9 +36,6 @@ const parseCreatedObject = (data: IotaTransactionBlockResponse, objectType: stri
 };
 
 export const Packages = (network: Network) => {
-	const rev = network === 'localnet' ? 'develop' : `framework/${network}`;
-	const subdomainExtraDependencies = `denylist = { local = "../denylist" }`;
-
 	return {
 		IotaNames: {
 			order: 1,
