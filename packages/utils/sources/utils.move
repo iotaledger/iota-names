@@ -65,7 +65,7 @@ module utils::utils {
         registration
     }
 
-    /// Rener an existing name for a number of years.
+    /// Renew an existing name for a number of years.
     public fun renew(
         iota_names: &mut IotaNames,
         nft: &mut IotaNamesRegistration,
@@ -100,7 +100,7 @@ module utils::utils {
         registry.set_target_address(domain, new_target);
     }
 
-    /// Set the reverse lookup address for the domain
+    /// Set the reverse lookup address for the domain.
     public fun set_reverse_lookup(
         iota_names: &mut IotaNames,
         domain_name: String,
