@@ -23,11 +23,7 @@ export const getActiveAddress = () => {
 };
 
 export const getActiveEnv = (configPath?: string) => {
-	const command = [
-		'client',
-		...(configPath ? ['--client.config', configPath] : []),
-		'active-env'
-	];
+	const command = ['client', ...(configPath ? ['--client.config', configPath] : []), 'active-env'];
 	return execFileSync(IOTA, command, {
 		encoding: 'utf-8',
 	}).trim();
@@ -37,7 +33,7 @@ export const getChainId = (configPath?: string) => {
 	const command = [
 		'client',
 		...(configPath ? ['--client.config', configPath] : []),
-		'chain-identifier'
+		'chain-identifier',
 	];
 	return execFileSync(IOTA, command, {
 		encoding: 'utf-8',
