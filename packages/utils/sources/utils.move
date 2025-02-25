@@ -112,12 +112,12 @@ module utils::utils {
         );
     }
 
-    /// User-facing function - unset the reverse lookup address for the domain.
+    /// Unset the reverse lookup address for the domain.
     public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
         registry_mut(iota_names).unset_reverse_lookup(ctx.sender());
     }
 
-    /// User-facing function - add a new key-value pair to the name record's data.
+    /// Add a new key-value pair to the name record's data.
     public fun set_user_data(
         iota_names: &mut IotaNames,
         nft: &IotaNamesRegistration, 
@@ -144,7 +144,7 @@ module utils::utils {
         registry.set_data(domain, data);
     }
 
-    /// User-facing function - remove a key from the name record's data.
+    /// Remove a key from the name record's data.
     public fun unset_user_data(
         iota_names: &mut IotaNames,
         nft: &IotaNamesRegistration, key: String,
