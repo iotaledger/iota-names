@@ -22,12 +22,26 @@ export const getActiveAddress = () => {
 	return execSync(`${IOTA} client active-address`, { encoding: 'utf8' }).trim();
 };
 
-export const getActiveEnv = () => {
-	return execSync(`${IOTA} client active-env`, { encoding: 'utf8' }).trim();
+export const getActiveEnv = (configPath?: string) => {
+	const command = [
+		'client',
+		...(configPath ? ['--client.config', configPath] : []),
+		'active-env'
+	];
+	return execFileSync(IOTA, command, {
+		encoding: 'utf-8',
+	}).trim();
 };
 
-export const getChainId = () => {
-	return execSync(`${IOTA} client chain-identifier`, { encoding: 'utf8' }).trim();
+export const getChainId = (configPath?: string) => {
+	const command = [
+		'client',
+		...(configPath ? ['--client.config', configPath] : []),
+		'chain-identifier'
+	];
+	return execFileSync(IOTA, command, {
+		encoding: 'utf-8',
+	}).trim();
 };
 
 export const publishPackage = (txb: Transaction, path: string, configPath?: string) => {
@@ -60,8 +74,8 @@ export const publishPackage = (txb: Transaction, path: string, configPath?: stri
 };
 
 export const managePackage = (package_id: string, path: string, configPath?: string) => {
-	const active_env = getActiveEnv();
-	const chain_id = getChainId();
+	const active_env = getActiveEnv(configPath);
+	const chain_id = getChainId(configPath);
 	const command = [
 		'move',
 		...(configPath ? ['--client.config', configPath] : []),
