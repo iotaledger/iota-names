@@ -226,7 +226,7 @@ export const Packages = (network: Network) => {
 		},
 		TempSubdomainProxy: {
 			order: 3,
-			folder: 'temp_subdomain_proxy',
+			folder: 'temp-subdomain-proxy',
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 				return {

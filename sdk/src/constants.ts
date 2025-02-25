@@ -15,7 +15,8 @@ export const ALLOWED_METADATA = {
 export const getConfigType = (iotaNamesPackageV1: string, innerType: string) =>
 	`${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 
-export const getDomainType = (iotaNamesPackageV1: string) => `${iotaNamesPackageV1}::domain::Domain`;
+export const getDomainType = (iotaNamesPackageV1: string) =>
+	`${iotaNamesPackageV1}::domain::Domain`;
 
 export const getPricelistConfigType = (iotaNamesPackageV1: string) =>
 	`${iotaNamesPackageV1}::config::Config`;

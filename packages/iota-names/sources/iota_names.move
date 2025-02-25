@@ -229,7 +229,6 @@ public fun init_for_testing(ctx: &mut TxContext): IotaNames {
         &admin_cap,
         &mut iota_names,
         config::new(
-            b"000000000000000000000000000000000",
             1200 * iota_names::constants::nanos_per_iota(),
             200 * iota_names::constants::nanos_per_iota(),
             50 * iota_names::constants::nanos_per_iota(),

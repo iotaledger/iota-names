@@ -11,3 +11,6 @@ dist/
 out/
 CHANGELOG.md
 documentation/
+.github/
+dprint.json
+pnpm-workspace.yaml

@@ -127,17 +127,14 @@ export const newPriceConfig = ({
 	txb,
 	iotaNamesPackageIdV1,
 	priceList,
-	publicKey = [...Array(33).keys()],
 }: {
 	txb: Transaction;
 	iotaNamesPackageIdV1: string;
 	priceList: { [key: string]: number };
-	publicKey?: number[];
 }): TransactionArgument => {
 	return txb.moveCall({
 		target: `${iotaNamesPackageIdV1}::config::new`,
 		arguments: [
-			txb.pure.vector('u8', publicKey),
 			txb.pure.u64(priceList.three),
 			txb.pure.u64(priceList.four),
 			txb.pure.u64(priceList.fivePlus),
