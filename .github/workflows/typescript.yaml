@@ -1,24 +1,49 @@
-name: SDK Tests CI
+name: Typescript
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/sdk_test.yaml"
-      - "sdk/**"
+      - ".github/workflows/typescript.yaml"
       - "packages/**"
+      - "scripts/**"
+      - "sdk/**"
+      - ".eslintrc.cjs"
+      - "prettier.config.cjs"
   push:
     branches:
-      - main
+      - develop
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: TS Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Do a global PNPM install
+        run: |
+          npm install -g pnpm
+
+      - name: Install Dependencies
+        run: |
+          pnpm install
+
+      - name: Run pnpm lint
+        run: |
+          pnpm lint
+
   sdk_test:
     name: SDK Tests
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
