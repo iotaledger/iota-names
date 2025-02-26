@@ -22,6 +22,24 @@ export const getActiveAddress = () => {
 	return execSync(`${IOTA} client active-address`, { encoding: 'utf8' }).trim();
 };
 
+export const getActiveEnv = (configPath?: string) => {
+	const command = ['client', ...(configPath ? ['--client.config', configPath] : []), 'active-env'];
+	return execFileSync(IOTA, command, {
+		encoding: 'utf-8',
+	}).trim();
+};
+
+export const getChainId = (configPath?: string) => {
+	const command = [
+		'client',
+		...(configPath ? ['--client.config', configPath] : []),
+		'chain-identifier',
+	];
+	return execFileSync(IOTA, command, {
+		encoding: 'utf-8',
+	}).trim();
+};
+
 export const publishPackage = (txb: Transaction, path: string, configPath?: string) => {
 	const command = [
 		'move',
@@ -49,6 +67,31 @@ export const publishPackage = (txb: Transaction, path: string, configPath?: stri
 
 	// Transfer the upgrade capability to the sender so they can upgrade the package later if they want.
 	txb.transferObjects([cap], sender);
+};
+
+export const managePackage = (package_id: string, path: string, configPath?: string) => {
+	const active_env = getActiveEnv(configPath);
+	const chain_id = getChainId(configPath);
+	const command = [
+		'move',
+		...(configPath ? ['--client.config', configPath] : []),
+		'manage-package',
+		'--environment',
+		active_env,
+		'--network-id',
+		chain_id,
+		'--original-id',
+		package_id,
+		'--latest-id',
+		package_id,
+		'--version-number=1',
+		'--path',
+		path,
+	];
+
+	execFileSync(IOTA, command, {
+		encoding: 'utf-8',
+	});
 };
 
 export const upgradePackage = (
