@@ -14,7 +14,7 @@ use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
 use iota_names::constants::{nanos_per_iota, year_ms};
-use iota_names::controller::{Self, ControllerV2};
+use iota_names::controller::{Self, Controller};
 use iota_names::domain::{Self, Domain};
 use iota_names::register::Register;
 use iota_names::register_utils::register_util;
@@ -50,7 +50,7 @@ fun test_init(): Scenario {
     {
         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
         iota_names.authorize_app_for_testing<Register>();
-        iota_names.authorize_app_for_testing<ControllerV2>();
+        iota_names.authorize_app_for_testing<Controller>();
         iota_names.share_for_testing();
         let clock = clock::create_for_testing(scenario.ctx());
         clock.share_for_testing();
@@ -227,7 +227,7 @@ fun deauthorize_app_util(scenario: &mut Scenario) {
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    admin_cap.deauthorize_app<ControllerV2>(&mut iota_names);
+    admin_cap.deauthorize_app<Controller>(&mut iota_names);
 
     test_scenario::return_shared(iota_names);
     scenario.return_to_sender(admin_cap);

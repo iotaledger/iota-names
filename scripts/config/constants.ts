@@ -10,7 +10,6 @@ export type Config = Record<'mainnet' | 'testnet', PackageInfo>;
 
 export type PackageInfo = {
 	packageId: string;
-	packageIdPricing: string;
 	upgradeCap?: string;
 	publisherId: string;
 	adminAddress: string;
@@ -33,7 +32,6 @@ export type PackageInfo = {
 export const mainPackage: Config = {
 	mainnet: {
 		packageId: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
-		packageIdPricing: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
 		upgradeCap: '0x9cda28244a0d0de294d2b271e772a9c33eb47d316c59913d7369b545b4af098c',
 		publisherId: '0x7339f23f06df3601167d67a31752781d307136fd18304c48c928778e752caae1',
 		adminAddress: normalizeIotaAddress(
@@ -57,7 +55,6 @@ export const mainPackage: Config = {
 	},
 	testnet: {
 		packageId: '0x40eee27b014a872f5c3330dcd5329aa55c7fe0fcc6e70c6498852e2e3727172e',
-		packageIdPricing: '0x8a4df604a449ccb9ef2efb9747046b78f78ba60fc8d88df098d0dd47619df5a4',
 		publisherId: '0xfe09cf0b3d77678b99250572624bf74fe3b12af915c5db95f0ed5d755612eb68',
 		adminAddress: '0xfe09cf0b3d77678b99250572624bf74fe3b12af915c5db95f0ed5d755612eb68',
 		adminCap: normalizeIotaAddress(

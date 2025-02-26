@@ -27,12 +27,10 @@ public struct PricingConfig has drop, store { pricing: VecMap<Range, u64> }
 /// to allow easy access to the pricing config by external packages.
 public struct RenewalConfig has drop, store { config: PricingConfig }
 
-/// Calculates the base price for a given length.
-/// - Base price type is abstracted away. We can switch to a different base.
-///  Our core base will become USDC.
-/// - The price is calculated based on the length of the domain name and the
+/// Calculates the price for a given domain length. 
+/// The price is calculated based on the length of the domain name and the
 /// available ranges.
-public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
+public fun calculate_price(config: &PricingConfig, length: u64): u64 {
     let keys = config.pricing.keys();
     let mut idx = keys.find_index!(|range| range.is_between_inclusive(length));
 

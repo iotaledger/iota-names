@@ -8,8 +8,6 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { Config, mainPackage, MAX_AGE } from '../config/constants';
 import {
 	addConfig,
-	newPriceConfig,
-	newRenewalConfig,
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';

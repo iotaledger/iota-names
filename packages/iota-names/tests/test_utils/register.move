@@ -50,7 +50,7 @@ public fun register<T>(
     assert!(0 < no_years && no_years <= 5, EInvalidYearsArgument);
 
     let label = domain.sld();
-    let price = config.calculate_base_price(label.length()) * (no_years as u64);
+    let price = config.calculate_price(label.length()) * (no_years as u64);
     assert!(payment.value() == price, EIncorrectAmount);
 
     iota_names.app_add_custom_balance<_, T>(Register {}, payment.into_balance());

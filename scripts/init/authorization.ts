@@ -12,16 +12,16 @@ export const authorizeApp = ({
 	adminCap,
 	iotaNames,
 	type,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 }: {
 	txb: Transaction;
 	adminCap: string;
 	iotaNames: string;
 	type: string;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::iota_names::authorize_app`,
+		target: `${iotaNamesPackageId}::iota_names::authorize_app`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
@@ -35,16 +35,16 @@ export const deauthorizeApp = ({
 	adminCap,
 	iotaNames,
 	type,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 }: {
 	txb: Transaction;
 	adminCap: string;
 	iotaNames: string;
 	type: string;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::iota_names::deauthorize_app`,
+		target: `${iotaNamesPackageId}::iota_names::deauthorize_app`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
@@ -105,40 +105,18 @@ export const removeConfig = ({
 	adminCap,
 	iotaNames,
 	type,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 }: {
 	txb: Transaction;
 	adminCap: string;
 	iotaNames: string;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::iota_names::remove_config`,
+		target: `${iotaNamesPackageId}::iota_names::remove_config`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
-	});
-};
-
-/**
- * Creates a default `config` which saves the price list and public key.
- */
-export const newPriceConfigV1 = ({
-	txb,
-	iotaNamesPackageIdV1,
-	priceList,
-}: {
-	txb: Transaction;
-	iotaNamesPackageIdV1: string;
-	priceList: { [key: string]: number };
-}): TransactionArgument => {
-	return txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::config::new`,
-		arguments: [
-			txb.pure.u64(priceList.three),
-			txb.pure.u64(priceList.four),
-			txb.pure.u64(priceList.fivePlus),
-		],
 	});
 };
 
@@ -169,15 +147,15 @@ export const newPriceConfig = ({
 	});
 };
 
-export const addCoreConfig = ({
+export const newCoreConfig = ({
 	txb,
-	latestPackageId,
+	packageId: iotaNamesPackageId,
 }: {
 	txb: Transaction;
-	latestPackageId: string;
+	packageId: string;
 }) => {
 	return txb.moveCall({
-		target: `${latestPackageId}::core_config::new`,
+		target: `${iotaNamesPackageId}::core_config::new`,
 		arguments: [
 			txb.pure.vector('string', []),
 			txb.pure.u8(3),
@@ -225,51 +203,6 @@ export const newRange = ({
 	});
 };
 
-export const newPaymentsConfig = ({
-	txb,
-	packageId,
-	coinTypeAndDiscount,
-	baseCurrencyType,
-	maxAge,
-}: {
-	txb: Transaction;
-	packageId: string;
-	coinTypeAndDiscount: [Record<string, string>, number][]; // Array of [{type: string, metadataId: string, feed: string}, discountPercentage] pairs
-	baseCurrencyType: string;
-	maxAge: number;
-}): TransactionArgument => {
-	const coinTypeDataList: TransactionArgument[] = [];
-
-	for (const [coin, discountPercentage] of coinTypeAndDiscount) {
-		coinTypeDataList.push(
-			newCoinTypeData({
-				txb,
-				packageId,
-				discountPercentage,
-				coinType: coin['type'],
-				coinMetadataId: coin['metadataId'],
-				priceFeed: coin['feed']
-					? new Uint8Array(
-							hexToBytes(coin['feed'].startsWith('0x') ? coin['feed'].slice(2) : coin['feed']),
-						)
-					: new Uint8Array(),
-			}),
-		);
-	}
-
-	return txb.moveCall({
-		target: `${packageId}::payments::new_payments_config`,
-		arguments: [
-			txb.makeMoveVec({
-				elements: coinTypeDataList,
-				type: `${packageId}::payments::CoinTypeData`,
-			}),
-			getTypeName({ txb, coinType: baseCurrencyType }),
-			txb.pure.u64(maxAge),
-		],
-	});
-};
-
 export const getTypeName = ({
 	txb,
 	coinType,
@@ -283,32 +216,6 @@ export const getTypeName = ({
 	});
 };
 
-export const newCoinTypeData = ({
-	txb,
-	packageId,
-	discountPercentage,
-	coinType,
-	coinMetadataId,
-	priceFeed,
-}: {
-	txb: Transaction;
-	packageId: string;
-	discountPercentage: number;
-	coinType: string;
-	coinMetadataId: string;
-	priceFeed: Uint8Array;
-}): TransactionArgument => {
-	return txb.moveCall({
-		target: `${packageId}::payments::new_coin_type_data`,
-		arguments: [
-			txb.object(coinMetadataId),
-			txb.pure.u8(discountPercentage),
-			txb.pure.vector('u8', priceFeed),
-		],
-		typeArguments: [coinType],
-	});
-};
-
 /**
  * Add a registry to the IotaNames object.
  */
@@ -318,17 +225,17 @@ export const addRegistry = ({
 	iotaNames,
 	type,
 	registry,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 }: {
 	txb: Transaction;
 	adminCap: string;
 	iotaNames: string;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 	registry: TransactionArgument;
 	type: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::iota_names::add_registry`,
+		target: `${iotaNamesPackageId}::iota_names::add_registry`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames), registry],
 		typeArguments: [type],
 	});
@@ -341,14 +248,14 @@ export const addRegistry = ({
 export const newLookupRegistry = ({
 	txb,
 	adminCap,
-	iotaNamesPackageIdV1,
+	iotaNamesPackageId,
 }: {
 	txb: Transaction;
 	adminCap: string;
-	iotaNamesPackageIdV1: string;
+	iotaNamesPackageId: string;
 }): TransactionArgument => {
 	return txb.moveCall({
-		target: `${iotaNamesPackageIdV1}::registry::new`,
+		target: `${iotaNamesPackageId}::registry::new`,
 		arguments: [txb.object(adminCap)],
 	});
 };

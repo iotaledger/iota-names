@@ -12,9 +12,6 @@
    we can keep our payment flows upgradeable, without the need to upgrade the
    packages whenever the core protocol has a change, as well as gated
    (so we can turn registrations/renewals off in case of an emergency).
-
-   Authorized apps can also apply discounts to the payment intent. This is
-   useful for system-level discounts, or user-specific discounts.
 */
 module iota_names::payment;
 
@@ -33,8 +30,6 @@ use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
 #[error]
-const ENotMultipleDiscountsAllowed: vector<u8> = b"Multiple discounts are not allowed";
-#[error]
 const ENotSupportedType: vector<u8> =
     b"Renewal is not supported in this function call. Call `renew` instead.";
 #[error]
@@ -49,12 +44,7 @@ const EReceiptDomainMissmatch: vector<u8> =
 const EVersionMismatch: vector<u8> =
     b"Version mismatch. The payment intent is not of the correct version for this package.";
 #[error]
-const EInvalidDiscountPercentage: vector<u8> = b"Discount range is [0, 100].";
-#[error]
 const ECannotRenewSubdomain: vector<u8> = b"Cannot renew a subdomain using the payment system.";
-#[error]
-const EDiscountAlreadyApplied: vector<u8> =
-    b"This discount key has already been applied to the payment intent.";
 #[error]
 const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of years.";
 
@@ -67,11 +57,8 @@ public struct RequestData has drop {
     /// The years for which the payment is being made.
     /// Defaults to 1 for registration.
     years: u8,
-    /// The amount the user has to pay in base units.
-    base_amount: u64,
-    /// The discounts (each app can add a key for its discount)
-    /// to avoid multiple additions of the same discount.
-    discounts_applied: VecMap<String, u64>,
+    /// The amount the user has to pay in IOTA.
+    amount: u64,
     /// a metadata field for future-proofness.
     /// No use-cases are enabled in the current release.
     metadata: VecMap<String, String>,
@@ -101,47 +88,12 @@ public struct TransactionEvent has copy, drop, store {
     domain: Domain,
     years: u8,
     request_data_version: u8,
-    base_amount: u64,
-    discounts_applied: VecMap<String, u64>,
+    amount: u64,
     metadata: VecMap<String, String>,
     is_renewal: bool,
     // info about the actual payment (currency and equivalent amount)
     currency: TypeName,
     currency_amount: u64,
-}
-
-/// Allow an authorized app to apply a percentage discount to
-/// the payment intent.
-/// E.g. an NS payment can apply a 10% discount on top of a user's 20%
-/// discount if allow_multiple_discounts is true
-public fun apply_percentage_discount<A: drop>(
-    intent: &mut PaymentIntent,
-    iota_names: &mut IotaNames,
-    _: A,
-    discount_key: String,
-    // discount can be in range [1, 100]
-    discount: u8,
-    // whether multiple discounts can be applied
-    allow_multiple_discounts: bool,
-) {
-    iota_names.assert_app_is_authorized<A>();
-
-    match (intent) {
-        PaymentIntent::Registration(base) => {
-            base.adjust_discount(
-                discount_key,
-                discount,
-                allow_multiple_discounts,
-            );
-        },
-        PaymentIntent::Renewal(base) => {
-            base.adjust_discount(
-                discount_key,
-                discount,
-                allow_multiple_discounts,
-            );
-        },
-    }
 }
 
 /// Allow an authorized app to finalize a payment.
@@ -184,13 +136,12 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
     let domain = domain::new(domain);
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
 
-    let price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
+    let price = iota_names.get_config<PricingConfig>().calculate_price(domain.sld().length());
 
     PaymentIntent::Registration(RequestData {
         domain,
         years: 1,
-        base_amount: price,
-        discounts_applied: vec_map::empty(),
+        amount: price,
         metadata: vec_map::empty(),
         version: constants::payments_version!(),
     })
@@ -206,13 +157,12 @@ public fun init_renewal(iota_names: &mut IotaNames, nft: &IotaNamesRegistration,
     let price = iota_names
         .get_config<RenewalConfig>()
         .config()
-        .calculate_base_price(domain.sld().length());
+        .calculate_price(domain.sld().length());
 
     PaymentIntent::Renewal(RequestData {
         domain,
         years,
-        base_amount: price * (years as u64),
-        discounts_applied: vec_map::empty(),
+        amount: price * (years as u64),
         metadata: vec_map::empty(),
         version: constants::payments_version!(),
     })
@@ -296,29 +246,9 @@ public fun request_data(intent: &PaymentIntent): &RequestData {
 
 public fun years(self: &RequestData): u8 { self.years }
 
-public fun base_amount(self: &RequestData): u64 { self.base_amount }
+public fun amount(self: &RequestData): u64 { self.amount }
 
 public fun domain(self: &RequestData): &Domain { &self.domain }
-
-/// Returns true if at least one discount has been applied to the payment
-/// intent.
-public fun discount_applied(self: &RequestData): bool {
-    self.discounts_applied.size() > 0
-}
-
-/// A list of discounts that have been applied to the payment intent.
-public fun discounts_applied(self: &RequestData): VecMap<String, u64> {
-    self.discounts_applied
-}
-
-/// Public helper to calculate price after a percentage discount has been
-/// applied.
-public fun calculate_total_after_discount(data: &RequestData, discount: u8): u64 {
-    let price = data.base_amount;
-    let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
-
-    price - discount_amount
-}
 
 /// Construct an event from a payment intent.
 fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): TransactionEvent {
@@ -333,31 +263,12 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
         domain: data.domain,
         years: data.years,
         request_data_version: data.version,
-        base_amount: data.base_amount,
-        discounts_applied: data.discounts_applied,
+        amount: data.amount,
         metadata: data.metadata,
         is_renewal,
         currency: type_name::get<T>(),
         currency_amount,
     }
-}
-
-/// Adjusts the amount based on the discount.
-fun adjust_discount(
-    data: &mut RequestData,
-    discount_key: String,
-    discount: u8,
-    allow_multiple_discounts: bool,
-) {
-    assert!(!data.discounts_applied.contains(&discount_key), EDiscountAlreadyApplied);
-    assert!(allow_multiple_discounts || !data.discount_applied(), ENotMultipleDiscountsAllowed);
-    assert!(discount <= 100, EInvalidDiscountPercentage);
-
-    let price = data.base_amount;
-    let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
-
-    data.base_amount = price - discount_amount;
-    data.discounts_applied.insert(discount_key, discount as u64);
 }
 
 /// Calculate the target expiration for a domain,

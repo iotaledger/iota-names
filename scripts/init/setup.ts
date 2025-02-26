@@ -26,7 +26,7 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 				adminCap: packageInfo.IotaNames.adminCap,
 				iotaNames: packageInfo.IotaNames.iotaNames,
 				type: data.authorizationType(pkg.packageId),
-				iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
+				iotaNamesPackageId: packageInfo.IotaNames.packageId,
 			});
 		}
 	}

@@ -21,22 +21,22 @@ fun test_e2e() {
     );
 
     // test internal values
-    assert!(pricing_config.calculate_base_price(5) == 10);
-    assert!(pricing_config.calculate_base_price(15) == 20);
-    assert!(pricing_config.calculate_base_price(25) == 30);
+    assert!(pricing_config.calculate_price(5) == 10);
+    assert!(pricing_config.calculate_price(15) == 20);
+    assert!(pricing_config.calculate_price(25) == 30);
 
     // test upper bounds
-    assert!(pricing_config.calculate_base_price(10) == 10);
-    assert!(pricing_config.calculate_base_price(20) == 20);
-    assert!(pricing_config.calculate_base_price(30) == 30);
+    assert!(pricing_config.calculate_price(10) == 10);
+    assert!(pricing_config.calculate_price(20) == 20);
+    assert!(pricing_config.calculate_price(30) == 30);
 
     // test lower bounds
-    assert!(pricing_config.calculate_base_price(1) == 10);
-    assert!(pricing_config.calculate_base_price(11) == 20);
-    assert!(pricing_config.calculate_base_price(21) == 30);
+    assert!(pricing_config.calculate_price(1) == 10);
+    assert!(pricing_config.calculate_price(11) == 20);
+    assert!(pricing_config.calculate_price(21) == 30);
 
     // single length pricing
-    assert!(pricing_config.calculate_base_price(31) == 45);
+    assert!(pricing_config.calculate_price(31) == 45);
 }
 
 #[test, expected_failure(abort_code = ::iota_names::pricing_config::EInvalidRange)]
@@ -104,5 +104,5 @@ fun test_price_not_set() {
 
     let pricing = pricing_config::new(ranges, vector[10]);
 
-    pricing.calculate_base_price(20);
+    pricing.calculate_price(20);
 }
