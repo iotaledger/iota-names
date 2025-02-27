@@ -2,12 +2,11 @@
 
 [move]
 version = 2
-manifest_digest = "6DADE361BD373702C74E827667014783E2FCDFBF7028BFB0C74E4389ADEBE455"
-deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+manifest_digest = "93692FC21970457069D908E5FB077FFB0902D320065DA58CB25E7D875EF55DD0"
+deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { name = "Iota" },
   { name = "subdomains" },
-  { name = "utils" },
 ]
 
 [[move.package]]
@@ -49,11 +48,7 @@ dependencies = [
   { name = "denylist" },
 ]
 
-[[move.package]]
-name = "utils"
-source = { local = "../utils" }
-
-dependencies = [
-  { name = "Iota" },
-  { name = "IotaNames" },
-]
+[move.toolchain-version]
+compiler-version = "0.9.2-rc"
+edition = "2024.beta"
+flavor = "iota"
