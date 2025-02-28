@@ -5,10 +5,9 @@
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { getClient, signAndExecute } from '../utils/utils';
-import { authorizeApp, deauthorizeApp } from './authorization';
+import { authorizeApp } from './authorization';
 import { Network, Packages } from './packages';
 import { queryRegistryTable } from './queries';
 import { PackageInfo } from './types';

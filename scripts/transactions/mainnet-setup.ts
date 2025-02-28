@@ -1,23 +1,23 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { mainPackage, MAX_AGE, MIST_PER_USDC } from '../config/constants';
+import { mainPackage, MAX_AGE } from '../config/constants';
 import {
 	addConfig,
 	addCoreConfig,
 	authorizeApp,
-	deauthorizeApp,
 	newPaymentsConfig,
 	newPriceConfig,
 	newRenewalConfig,
-	removeConfig,
 } from '../init/authorization';
 import { prepareMultisigTx } from '../utils/utils';
 
-// Upgrade iotaNames
-const setupiotaNames = (txb: Transaction) => {
+// Upgrade IOTA-Names
+const setupIotaNames = (txb: Transaction) => {
 	const config = mainPackage['mainnet'];
 
 	// Add new core config
@@ -45,9 +45,9 @@ const setupiotaNames = (txb: Transaction) => {
 				[5, 63],
 			],
 			prices: [
-				500 * Number(MIST_PER_USDC),
-				100 * Number(MIST_PER_USDC),
-				10 * Number(MIST_PER_USDC),
+				500 * Number(NANOS_PER_IOTA),
+				100 * Number(NANOS_PER_IOTA),
+				10 * Number(NANOS_PER_IOTA),
 			],
 		}),
 		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
@@ -65,7 +65,11 @@ const setupiotaNames = (txb: Transaction) => {
 				[4, 4],
 				[5, 63],
 			],
-			prices: [150 * Number(MIST_PER_USDC), 50 * Number(MIST_PER_USDC), 5 * Number(MIST_PER_USDC)],
+			prices: [
+				150 * Number(NANOS_PER_IOTA),
+				50 * Number(NANOS_PER_IOTA),
+				5 * Number(NANOS_PER_IOTA),
+			],
 		}),
 		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
 	});
@@ -107,9 +111,7 @@ const setupiotaNames = (txb: Transaction) => {
 	});
 };
 
-const deauthorize = (txb: Transaction) => {
-
-};
+const deauthorize = (txb: Transaction) => {};
 
 const deauthorizePackages = async () => {
 	const config = mainPackage['mainnet'];
@@ -127,11 +129,11 @@ const publishSetup = async () => {
 	const tx = new Transaction();
 
 	// Setup iotaNames
-	setupiotaNames(tx);
+	setupIotaNames(tx);
 
 	// Prepare multisig tx
 	await prepareMultisigTx(tx, 'mainnet', config.adminAddress);
 };
 
-// publishSetup();
+publishSetup();
 deauthorizePackages();

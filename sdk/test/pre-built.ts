@@ -1,0 +1,160 @@
+// Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA, normalizeIotaAddress } from '@iota/iota-sdk/utils';
+import { expect } from 'vitest';
+
+import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
+
+export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') => {
+	const client = new IotaClient({ url: getFullnodeUrl(network) });
+
+	const sender = normalizeIotaAddress('0x2');
+	const iotaNamesClient = new IotaNamesClient({
+		client,
+		network,
+	});
+
+	// Getting price lists accurately
+	const priceList = await iotaNamesClient.getPriceList();
+	const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
+
+	// Expected lists
+	const expectedPriceList = new Map([
+		[[3, 3], 500000000],
+		[[4, 4], 100000000],
+		[[5, 63], 10000000],
+	]);
+
+	const expectedRenewalPriceList = new Map([
+		[[3, 3], 150000000],
+		[[4, 4], 50000000],
+		[[5, 63], 5000000],
+	]);
+
+	expect(priceList).toEqual(expectedPriceList);
+	expect(renewalPriceList).toEqual(expectedRenewalPriceList);
+
+	const tx = new Transaction();
+
+	const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+
+	const uniqueName =
+		(Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
+
+	const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
+		10n * NANOS_PER_IOTA,
+	]);
+	// register test.iota for 2 years.
+	const nft = iotaNamesTx.register({
+		domain: uniqueName,
+		years: 2,
+		coinConfig: iotaNamesClient.config.coins.IOTA,
+		coin: coinInput,
+	});
+	// Sets the target address of the NFT.
+	iotaNamesTx.setTargetAddress({
+		nft,
+		address: sender,
+		isSubname: false,
+	});
+
+	iotaNamesTx.setDefault(uniqueName);
+
+	// Sets the avatar of the NFT.
+	iotaNamesTx.setUserData({
+		nft,
+		key: ALLOWED_METADATA.avatar,
+		value: '0x0',
+	});
+
+	iotaNamesTx.setUserData({
+		nft,
+		key: ALLOWED_METADATA.contentHash,
+		value: '0x1',
+	});
+
+	const subNft = iotaNamesTx.createSubName({
+		parentNft: nft,
+		name: 'node.' + uniqueName,
+		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
+		allowChildCreation: true,
+		allowTimeExtension: true,
+	});
+
+	// create/remove some leaf names as an NFT
+	iotaNamesTx.createLeafSubName({
+		parentNft: nft,
+		name: 'leaf.' + uniqueName,
+		targetAddress: sender,
+	});
+	iotaNamesTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
+
+	// do it for sub nft too
+	iotaNamesTx.createLeafSubName({
+		parentNft: subNft,
+		name: 'leaf.node.' + uniqueName,
+		targetAddress: sender,
+	});
+	iotaNamesTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+
+	// extend expiration a bit further for the subNft
+	iotaNamesTx.extendExpiration({
+		nft: subNft,
+		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30 * 2,
+	});
+
+	iotaNamesTx.editSetup({
+		parentNft: nft,
+		name: 'node.' + uniqueName,
+		allowChildCreation: true,
+		allowTimeExtension: false,
+	});
+
+	// let's go 2 levels deep and edit setups!
+	const moreNestedNft = iotaNamesTx.createSubName({
+		parentNft: subNft,
+		name: 'more.node.' + uniqueName,
+		allowChildCreation: true,
+		allowTimeExtension: true,
+		expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
+	});
+
+	iotaNamesTx.editSetup({
+		parentNft: subNft,
+		name: 'more.node.' + uniqueName,
+		allowChildCreation: false,
+		allowTimeExtension: false,
+	});
+
+	// do it for sub nft too
+	tx.transferObjects([moreNestedNft, subNft, nft, coinInput], tx.pure.address(sender));
+
+	tx.setSender(sender);
+
+	if (network === 'mainnet') {
+		tx.setGasPayment([
+			{
+				objectId: '0xc7fcf957faeb0cdd9809b2ab43e0a8bf7a945cfdac13e8cba527261fecefa4dd',
+				version: '86466933',
+				digest: '2F8iuFVJm55J96FnJ99Th493D254BaJkUccbwz5rHFDc',
+			},
+		]);
+	} else if (network === 'testnet') {
+		tx.setGasPayment([
+			{
+				objectId: '0xeb709b97ca3e87e385d019ccb7da4a9bd99f9405f9b0d692f21c9d2e5714f27a',
+				version: '169261602',
+				digest: 'HJehhEV1N8rqjjHbwDgjeCZJkHPRavMmihTvyTJme2rA',
+			},
+		]);
+	}
+
+	return client.dryRunTransactionBlock({
+		transactionBlock: await tx.build({
+			client,
+		}),
+	});
+};

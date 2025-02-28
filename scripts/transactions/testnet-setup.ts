@@ -1,36 +1,37 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Transaction } from '@mysten/sui/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { mainPackage, MIST_PER_USDC, PackageInfo } from '../config/constants';
-import { addConfig, newPriceConfigV2, newRenewalConfig, removeConfig } from '../init/authorization';
+import { addConfig, newPriceConfig, newRenewalConfig, removeConfig } from '../init/authorization';
 import { signAndExecute } from '../utils/utils';
 
-const setupSuins = (txb: Transaction, config: PackageInfo) => {
+const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
 	removeConfig({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotaNames: config.iotaNames,
 		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
-		suinsPackageIdV1: config.packageIdV1,
+		iotaNamesPackageId: config.packageId,
 	});
 
 	removeConfig({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
+		iotaNames: config.iotaNames,
 		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
-		suinsPackageIdV1: config.packageIdV1,
+		iotaNamesPackageId: config.packageId,
 	});
 
 	// Add new price configs
 	addConfig({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
-		suinsPackageIdV1: config.packageIdV1,
-		config: newPriceConfigV2({
+		iotaNames: config.iotaNames,
+		iotaNamesPackageId: config.packageId,
+		config: newPriceConfig({
 			txb,
 			packageId: config.packageId,
 			ranges: [
@@ -45,8 +46,8 @@ const setupSuins = (txb: Transaction, config: PackageInfo) => {
 	addConfig({
 		txb,
 		adminCap: config.adminCap,
-		suins: config.suins,
-		suinsPackageIdV1: config.packageIdV1,
+		iotaNames: config.iotaNames,
+		iotaNamesPackageId: config.packageId,
 		config: newRenewalConfig({
 			txb,
 			packageId: config.packageId,
@@ -65,7 +66,7 @@ const publishSetup = async () => {
 	const config = mainPackage['testnet'];
 	const tx = new Transaction();
 
-	setupSuins(tx, config);
+	setupIotaNames(tx, config);
 
 	console.log(await signAndExecute(tx, 'testnet'));
 };

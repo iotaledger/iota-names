@@ -8,7 +8,6 @@ on:
         description: "select transaction type to create"
         type: choice
         options:
-          - Multi Purpose Operation
           - Profits to Treasury
           - Transfer Reserved Names
           - Transfer Admin Caps
@@ -52,8 +51,8 @@ jobs:
 
       - name: YAML Setup
         run: |
-          sui client --yes new-env --rpc https://fullnode.mainnet.sui.io:443 --alias mainnet
-          sui client switch --env mainnet
+          iota client --yes new-env --rpc https://fullnode.mainnet.iota.io:443 --alias mainnet
+          iota client switch --env mainnet
 
       - name: NPM BUILD TX Environment
         uses: actions/setup-node@v4
@@ -108,17 +107,6 @@ jobs:
           RPC_URL: ${{ inputs.rpc }}
         run: |
           cd scripts && pnpm ts-node transactions/main_package_upgrade.ts
-
-      - name: Upgrade Coupons
-        if: ${{ inputs.transaction_type == 'Upgrade Coupons' }}
-        env:
-          NODE_ENV: production
-          GAS_OBJECT: ${{ inputs.gas_object_id }}
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/coupons_upgrade.ts
 
       - name: Authorize Packages
         if: ${{ inputs.transaction_type == 'Authorize Packages' }}

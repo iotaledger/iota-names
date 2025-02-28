@@ -1,0 +1,80 @@
+// Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+import type { IotaClient } from '@iota/iota-sdk/client';
+import type {
+	TransactionObjectArgument,
+	TransactionObjectInput,
+} from '@iota/iota-sdk/transactions';
+
+// Interfaces
+// -----------------
+
+export interface CoinConfig {
+	type: string;
+}
+
+export interface PackageInfo {
+	packageId: string;
+	packageIdPricing: string;
+	iotaNames: string;
+	subNamesPackageId: string;
+	tempSubdomainsProxyPackageId: string;
+	payments: {
+		packageId: string;
+	};
+	registryTableId?: string;
+	coins: Record<string, CoinConfig>;
+}
+
+export interface NameRecord {
+	name: string;
+	nftId: string;
+	targetAddress: string;
+	expirationTimestampMs: number;
+	data: Record<string, string>;
+	avatar?: string;
+	contentHash?: string;
+}
+
+// Types
+// -----------------
+
+export type Network = 'mainnet' | 'testnet' | 'custom';
+
+export type VersionedPackageId = {
+	latest: string;
+	v1: string;
+	[key: string]: string;
+};
+
+export type Config = Record<'mainnet' | 'testnet', PackageInfo>;
+
+export type BaseParams = {
+	years: number;
+	coinConfig?: CoinConfig;
+	coin: TransactionObjectInput;
+};
+
+export type RegistrationParams = BaseParams & {
+	domain: string;
+};
+
+export type RenewalParams = BaseParams & {
+	nft: TransactionObjectInput;
+};
+
+export type ReceiptParams = {
+	paymentIntent: TransactionObjectArgument;
+	price: TransactionObjectArgument;
+	coinConfig: CoinConfig;
+	coin: TransactionObjectInput;
+};
+
+export type IotaNamesClientConfig = {
+	client: IotaClient;
+	network?: Network;
+	config?: Config;
+};
+
+export type IotaNamesPriceList = Map<[number, number], number>;

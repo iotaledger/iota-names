@@ -14,21 +14,14 @@ Here's a list of all the available PTB commands supported through the SDK.
 const register = async (name: string, years: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const iotaNamesTransaction = new SuinsTransaction(iotaNamesClient, transaction);
-    // Specify the coin type used for the transaction
-    const coinConfig = iotaNamesClient.config.coins.IOTA;
-
-    // priceInfoObjectId is required for IOTA/NS
-    const priceInfoObjectId = await iotaNamesClient.getPriceInfoObject(tx, coinConfig.feed)[0];
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to register the name, specifying a year from 1 to 5.
     const nft = iotaNamesTx.register({
         domain: 'myname.iota',
         years: 3,
-        coinConfig,
-        coin,
-        priceInfoObjectId, // Only required for IOTA/NS
+        coin: '0xMyCoinObject',
     });
 
     // Transfer the name's NFT
@@ -44,21 +37,14 @@ const register = async (name: string, years: number) => {
 const renew = async (nftId: string, name: string, years: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const iotaNamesTransaction = new SuinsTransaction(iotaNamesClient, transaction);
-    // Specify the coin type used for the transaction
-    const coinConfig = iotaNamesClient.config.coins.IOTA;
-
-    // priceInfoObjectId is required for IOTA/NS
-    const priceInfoObjectId = await iotaNamesClient.getPriceInfoObject(tx, coinConfig.feed)[0];
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to renew the name, specifying a year from 1 to 5.
     iotaNamesTx.renew({
         nft: '0xMyNftObject',
         years: 3,
-        coinConfig,
-        coin,
-        priceInfoObjectId, // Only required for IOTA/NS
+        coin: '0xMyCoinObject',
     });
 
     // ... sign and execute the transaction
@@ -255,13 +241,6 @@ const setUserData = async (nft: string, avatar: string, contentHash: string) => 
         value: contentHash,
         isSubname: false,
     });
-    // Set the walrusSiteId to the supplied value.
-    iotaNamesTransaction.setUserData({
-        nft,
-        key: ALLOWED_METADATA.walrusSiteId,
-        value: walrusSiteId,
-        isSubname: false,
-    });
 
     // ... sign and execute the transaction
 }
@@ -298,21 +277,14 @@ The following code snippet registers an IOTA name, sets its target address, and 
 const composedExample = async (name: string, years: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
-    // Pass in the transaction block & the app's global SuinsClient.
-    const iotaNamesTransaction = new SuinsTransaction(iotaNamesClient, transaction);
-    // Specify the coin type used for the transaction
-    const coinConfig = iotaNamesClient.config.coins.IOTA;
-
-    // priceInfoObjectId is required for IOTA/NS
-    const priceInfoObjectId = await iotaNamesClient.getPriceInfoObject(tx, coinConfig.feed)[0];
+    // Pass in the transaction block & the app's global IotaNamesClient.
+    const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to register the name, specifying a year from 1 to 5.
     const nft = iotaNamesTx.register({
         domain: 'myname.iota',
         years,
-        coinConfig,
-        coinId: '0xMyCoinObject', // Only required for NS/USDC
-        priceInfoObjectId, // Only required for IOTA/NS
+        coin: '0xMyCoinObject',
     });
 
     // You can now use this NFT, for instance to set its target address.

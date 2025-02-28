@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 /// This module is used to streamline our payment flows.
@@ -32,8 +33,6 @@ use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
 #[error]
-const ENotMultipleDiscountsAllowed: vector<u8> = b"Multiple discounts are not allowed";
-#[error]
 const ENotSupportedType: vector<u8> =
     b"Renewal is not supported in this function call. Call `renew` instead.";
 #[error]
@@ -42,18 +41,13 @@ const ERecordNotFound: vector<u8> =
 #[error]
 const ERecordExpired: vector<u8> = b"Tries to renew an expired name (post grace period).";
 #[error]
-const EReceiptDomainMissmatch: vector<u8> =
+const EReceiptDomainMismatch: vector<u8> =
     b"The receipt domain does not match the domain of the NFT.";
 #[error]
 const EVersionMismatch: vector<u8> =
     b"Version mismatch. The payment intent is not of the correct version for this package.";
 #[error]
-const EInvalidDiscountPercentage: vector<u8> = b"Discount range is [0, 100].";
-#[error]
 const ECannotRenewSubdomain: vector<u8> = b"Cannot renew a subdomain using the payment system.";
-#[error]
-const EDiscountAlreadyApplied: vector<u8> =
-    b"This discount key has already been applied to the payment intent.";
 #[error]
 const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of years.";
 
@@ -107,40 +101,6 @@ public struct TransactionEvent has copy, drop, store {
     // info about the actual payment (currency and equivalent amount)
     currency: TypeName,
     currency_amount: u64,
-}
-
-/// Allow an authorized app to apply a percentage discount to
-/// the payment intent.
-/// E.g. an NS payment can apply a 10% discount on top of a user's 20%
-/// discount if allow_multiple_discounts is true
-public fun apply_percentage_discount<A: drop>(
-    intent: &mut PaymentIntent,
-    iota_names: &mut IotaNames,
-    _: A,
-    discount_key: String,
-    // discount can be in range [1, 100]
-    discount: u8,
-    // whether multiple discounts can be applied
-    allow_multiple_discounts: bool,
-) {
-    iota_names.assert_app_is_authorized<A>();
-
-    match (intent) {
-        PaymentIntent::Registration(base) => {
-            base.adjust_discount(
-                discount_key,
-                discount,
-                allow_multiple_discounts,
-            );
-        },
-        PaymentIntent::Renewal(base) => {
-            base.adjust_discount(
-                discount_key,
-                discount,
-                allow_multiple_discounts,
-            );
-        },
-    }
 }
 
 /// Allow an authorized app to finalize a payment.
@@ -254,7 +214,7 @@ public fun renew(
             let max_years = config.max_years();
 
             assert!(version == config.payments_version(), EVersionMismatch);
-            assert!(nft.domain() == domain, EReceiptDomainMissmatch);
+            assert!(nft.domain() == domain, EReceiptDomainMismatch);
             let registry = iota_names.pkg_registry_mut<Registry>();
             // Calculate target expiration. Aborts if expiration or selected
             // years are invalid.
@@ -292,6 +252,8 @@ public fun request_data(intent: &PaymentIntent): &RequestData {
         PaymentIntent::Renewal(data) => data,
     }
 }
+
+public fun request_base_amount(self: &PaymentIntent): u64 { self.request_data().base_amount() }
 
 public fun years(self: &RequestData): u8 { self.years }
 
@@ -339,24 +301,6 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
         currency: type_name::get<T>(),
         currency_amount,
     }
-}
-
-/// Adjusts the amount based on the discount.
-fun adjust_discount(
-    data: &mut RequestData,
-    discount_key: String,
-    discount: u8,
-    allow_multiple_discounts: bool,
-) {
-    assert!(!data.discounts_applied.contains(&discount_key), EDiscountAlreadyApplied);
-    assert!(allow_multiple_discounts || !data.discount_applied(), ENotMultipleDiscountsAllowed);
-    assert!(discount <= 100, EInvalidDiscountPercentage);
-
-    let price = data.base_amount;
-    let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
-
-    data.base_amount = price - discount_amount;
-    data.discounts_applied.insert(discount_key, discount as u64);
 }
 
 /// Calculate the target expiration for a domain,

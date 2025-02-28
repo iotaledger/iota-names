@@ -1,4 +1,5 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
@@ -18,10 +19,6 @@ use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration;
 
 public struct PaymentsApp() has drop;
-public struct DiscountsApp() has drop;
-
-const BASE_DISCOUNT_KEY: vector<u8> = b"base_discount";
-const SECONDARY_DISCOUNT_KEY: vector<u8> = b"secondary_discount";
 
 #[test]
 fun test_e2e() {
@@ -48,25 +45,8 @@ fun test_e2e() {
     assert_eq(nft.domain().to_string(), domain);
 
     // now let's renew this nft for 4 years.
-    let mut intent = payment::init_renewal(&mut iota_names, &nft, 4);
+    let intent = payment::init_renewal(&mut iota_names, &nft, 4);
     assert_eq(intent.request_data().discount_applied(), false);
-
-    // our DiscountsApp is now applying a 40% discount to the renewal.
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        BASE_DISCOUNT_KEY.to_string(),
-        40,
-        false, // we shouldn't apply this discount if there have been more discounts applied.
-    );
-
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        SECONDARY_DISCOUNT_KEY.to_string(),
-        50,
-        true, // we shouldn't apply this discount if there have been more discounts applied.
-    );
 
     // Checking the price is valid.
     // It should be 10 * 4 minus 40% (from the applied discount) divided by 2 (another 50% discount added in the end.)
@@ -90,82 +70,6 @@ fun test_e2e() {
     destroy(iota_names);
     destroy(nft);
     destroy(clock);
-}
-
-#[test, expected_failure(abort_code = ::iota_names::payment::ENotMultipleDiscountsAllowed)]
-fun try_apply_two_discounts_while_both_require_single() {
-    let mut ctx = tx_context::dummy();
-    let mut iota_names = setup_iota_names(&mut ctx);
-
-    let mut intent = payment::init_registration(
-        &mut iota_names,
-        b"test.iota".to_string(),
-    );
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        BASE_DISCOUNT_KEY.to_string(),
-        40,
-        false,
-    );
-
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        SECONDARY_DISCOUNT_KEY.to_string(),
-        50,
-        false,
-    );
-
-    abort 1337
-}
-
-#[test, expected_failure(abort_code = ::iota_names::payment::EDiscountAlreadyApplied)]
-fun try_apply_second_discount_twice() {
-    let mut ctx = tx_context::dummy();
-    let mut iota_names = setup_iota_names(&mut ctx);
-
-    let mut intent = payment::init_registration(
-        &mut iota_names,
-        b"test.iota".to_string(),
-    );
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        BASE_DISCOUNT_KEY.to_string(),
-        40,
-        false,
-    );
-
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        BASE_DISCOUNT_KEY.to_string(),
-        50,
-        false,
-    );
-
-    abort 1337
-}
-
-#[test, expected_failure(abort_code = ::iota_names::payment::EInvalidDiscountPercentage)]
-fun discount_overflow() {
-    let mut ctx = tx_context::dummy();
-    let mut iota_names = setup_iota_names(&mut ctx);
-
-    let mut intent = payment::init_registration(
-        &mut iota_names,
-        b"test.iota".to_string(),
-    );
-    intent.apply_percentage_discount(
-        &mut iota_names,
-        DiscountsApp(),
-        BASE_DISCOUNT_KEY.to_string(),
-        101,
-        false,
-    );
-
-    abort 1337
 }
 
 #[test, expected_failure(abort_code = ::iota_names::payment::ENotSupportedType)]
@@ -394,8 +298,6 @@ public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
     // authorize a "payments" app that is responsible for handling payments and
     // issuing receipts.
     cap.authorize_app<PaymentsApp>(&mut iota_names);
-    // authorize a "discounts" app that is responsible for applying discounts.
-    cap.authorize_app<DiscountsApp>(&mut iota_names);
 
     registry::init_for_testing(&cap, &mut iota_names, ctx);
 

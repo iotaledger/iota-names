@@ -1,14 +1,12 @@
 // Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { create } from 'domain';
-import * as fs from 'fs';
-import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 
 import { mainPackage, Network } from '../../config/constants';
 import { authorizeApp } from '../../init/authorization';
-import { getActiveAddress, signAndExecute } from '../../utils/utils';
+import { signAndExecute } from '../../utils/utils';
 
 const network = (process.env.NETWORK as Network) || 'testnet';
 const config = mainPackage[network];
