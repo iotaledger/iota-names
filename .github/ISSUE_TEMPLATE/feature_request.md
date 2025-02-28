@@ -1,5 +1,5 @@
 ---
-name: Request a feature for IOTA Names
+name: Request a feature for IOTA-Names
 about: Request a feature
 ---
 

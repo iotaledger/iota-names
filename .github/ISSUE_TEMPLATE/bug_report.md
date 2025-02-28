@@ -1,5 +1,5 @@
 ---
-name: Report a bug in IOTA Names
+name: Report a bug in IOTA-Names
 about: Create a report to help us improve
 title: ""
 labels: c-bug
