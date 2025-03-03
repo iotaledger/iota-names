@@ -5,7 +5,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { mainPackage, MAX_AGE } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import {
 	addConfig,
 	addCoreConfig,
@@ -18,7 +18,7 @@ import { prepareMultisigTx } from '../utils/utils';
 
 // Upgrade IOTA-Names
 const setupIotaNames = (txb: Transaction) => {
-	const config = mainPackage['mainnet'];
+	const config = readPackageInfo('mainnet');
 
 	// Add new core config
 	addConfig({
@@ -87,19 +87,14 @@ const setupIotaNames = (txb: Transaction) => {
 		txb,
 		adminCap: config.adminCap,
 		iotaNames: config.iotaNames,
-		type: `${config.payments.packageId}::payments::PaymentsApp`,
+		type: `${config.paymentsPackageId}::payments::PaymentsApp`,
 		iotaNamesPackageId: config.packageId,
 	});
 	const paymentsconfig = newPaymentsConfig({
 		txb,
-		packageId: config.payments.packageId,
-		coinTypeAndDiscount: [
-			[config.coins.USDC, 0],
-			[config.coins.IOTA, 0],
-			[config.coins.NS, 25],
-		],
-		baseCurrencyType: config.coins.USDC.type,
-		maxAge: MAX_AGE,
+		packageId: config.paymentsPackageId,
+		coinType: [config.coins.IOTA],
+		baseCurrencyType: config.coins.IOTA.type,
 	});
 	addConfig({
 		txb,
@@ -107,14 +102,14 @@ const setupIotaNames = (txb: Transaction) => {
 		iotaNames: config.iotaNames,
 		iotaNamesPackageId: config.packageId,
 		config: paymentsconfig,
-		type: `${config.payments.packageId}::payments::PaymentsConfig`,
+		type: `${config.paymentsPackageId}::payments::PaymentsConfig`,
 	});
 };
 
 const deauthorize = (txb: Transaction) => {};
 
 const deauthorizePackages = async () => {
-	const config = mainPackage['mainnet'];
+	const config = readPackageInfo('mainnet');
 	const tx = new Transaction();
 
 	// Setup iotaNames
@@ -125,7 +120,7 @@ const deauthorizePackages = async () => {
 };
 
 const publishSetup = async () => {
-	const config = mainPackage['mainnet'];
+	const config = readPackageInfo('mainnet');
 	const tx = new Transaction();
 
 	// Setup iotaNames

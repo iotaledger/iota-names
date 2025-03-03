@@ -4,12 +4,12 @@
 
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 
-import { mainPackage, Network } from '../../config/constants';
+import { readPackageInfo } from '../../config/constants';
 import { authorizeApp } from '../../init/authorization';
 import { signAndExecute } from '../../utils/utils';
 
-const network = (process.env.NETWORK as Network) || 'testnet';
-const config = mainPackage[network];
+const network = process.env.NETWORK || 'testnet';
+const config = readPackageInfo(network);
 const MAX_U64 = BigInt('18446744073709551615');
 
 export const authorizeAppExample = () => {
@@ -43,7 +43,7 @@ export const calculatePrice =
 	(tx: Transaction) => {
 		// Perform the Move call
 		return tx.moveCall({
-			target: `${config.payments.packageId}::payments::calculate_price`,
+			target: `${config.paymentsPackageId}::payments::calculate_price`,
 			arguments: [
 				tx.object(config.iotaNames),
 				baseAmount,
@@ -63,7 +63,7 @@ export const handleBasePayment =
 	) =>
 	(tx: Transaction) => {
 		return tx.moveCall({
-			target: `${config.payments.packageId}::payments::handle_base_payment`,
+			target: `${config.paymentsPackageId}::payments::handle_base_payment`,
 			arguments: [tx.object(config.iotaNames), paymentIntent, payment],
 			typeArguments: [paymentType],
 		});
@@ -80,7 +80,7 @@ export const handlePayment =
 	) =>
 	(tx: Transaction) => {
 		return tx.moveCall({
-			target: `${config.payments.packageId}::payments::handle_payment`,
+			target: `${config.paymentsPackageId}::payments::handle_payment`,
 			arguments: [
 				tx.object(config.iotaNames),
 				paymentIntent,

@@ -7,10 +7,10 @@ import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { getClient, managePackage, publishPackage, signAndExecute } from '../utils/utils';
-import { Network, Packages } from './packages';
+import { Packages } from './packages';
 import { PackageInfo } from './types';
 
-export const publishPackages = async (network: Network, isCiJob = false, configPath?: string) => {
+export const publishPackages = async (network: string, isCiJob = false, configPath?: string) => {
 	const packages = Packages(isCiJob ? 'mainnet' : network);
 	const contractsPath = path.resolve(__dirname, '../../packages');
 	const results: Record<string, Record<string, string>> = {};

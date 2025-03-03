@@ -6,7 +6,7 @@ import { IotaTransactionBlockResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { Config, mainPackage, MAX_AGE } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import {
 	addConfig,
 	addRegistry,
@@ -17,8 +17,6 @@ import {
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';
-
-export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
 const parseCorePackageObjects = (data: IotaTransactionBlockResponse) => {
 	const packageId = data.objectChanges!.find((x) => x.type === 'published');
@@ -44,7 +42,7 @@ const parseCreatedObject = (data: IotaTransactionBlockResponse, objectType: stri
 // 	return obj.objectId;
 // };
 
-export const Packages = (network: Network) => {
+export const Packages = (network: string) => {
 	return {
 		IotaNames: {
 			order: 1,
@@ -184,17 +182,12 @@ export const Packages = (network: Network) => {
 				iotaNames: string;
 				iotaNamesPackageId: string;
 			}) => {
-				const config = mainPackage[network as keyof Config];
+				const config = readPackageInfo(network);
 				const paymentsconfig = newPaymentsConfig({
 					txb,
 					packageId,
-					coinTypeAndDiscount: [
-						[config.coins.USDC, 0],
-						[config.coins.IOTA, 0],
-						[config.coins.NS, 25],
-					],
-					baseCurrencyType: config.coins.USDC.type,
-					maxAge: MAX_AGE,
+					coinType: [config.coins.IOTA],
+					baseCurrencyType: config.coins.IOTA.type,
 				});
 				addConfig({
 					txb,

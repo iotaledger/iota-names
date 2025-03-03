@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
-import { hexToBytes } from '@noble/hashes/utils';
 
 /**
  * A helper to authorize any app in the IotaNames object.
@@ -207,31 +206,23 @@ export const newRange = ({
 export const newPaymentsConfig = ({
 	txb,
 	packageId,
-	coinTypeAndDiscount,
+	coinType,
 	baseCurrencyType,
-	maxAge,
 }: {
 	txb: Transaction;
 	packageId: string;
-	coinTypeAndDiscount: [Record<string, string>, number][]; // Array of [{type: string, metadataId: string, feed: string}, discountPercentage] pairs
+	coinType: Record<string, string>[];
 	baseCurrencyType: string;
-	maxAge: number;
 }): TransactionArgument => {
 	const coinTypeDataList: TransactionArgument[] = [];
 
-	for (const [coin, discountPercentage] of coinTypeAndDiscount) {
+	for (const coin of coinType) {
 		coinTypeDataList.push(
 			newCoinTypeData({
 				txb,
 				packageId,
-				discountPercentage,
 				coinType: coin['type'],
 				coinMetadataId: coin['metadataId'],
-				priceFeed: coin['feed']
-					? new Uint8Array(
-							hexToBytes(coin['feed'].startsWith('0x') ? coin['feed'].slice(2) : coin['feed']),
-						)
-					: new Uint8Array(),
 			}),
 		);
 	}
@@ -244,7 +235,6 @@ export const newPaymentsConfig = ({
 				type: `${packageId}::payments::CoinTypeData`,
 			}),
 			getTypeName({ txb, coinType: baseCurrencyType }),
-			txb.pure.u64(maxAge),
 		],
 	});
 };
@@ -265,25 +255,17 @@ export const getTypeName = ({
 export const newCoinTypeData = ({
 	txb,
 	packageId,
-	discountPercentage,
 	coinType,
 	coinMetadataId,
-	priceFeed,
 }: {
 	txb: Transaction;
 	packageId: string;
-	discountPercentage: number;
 	coinType: string;
 	coinMetadataId: string;
-	priceFeed: Uint8Array;
 }): TransactionArgument => {
 	return txb.moveCall({
 		target: `${packageId}::payments::new_coin_type_data`,
-		arguments: [
-			txb.object(coinMetadataId),
-			txb.pure.u8(discountPercentage),
-			txb.pure.vector('u8', priceFeed),
-		],
+		arguments: [txb.object(coinMetadataId)],
 		typeArguments: [coinType],
 	});
 };

@@ -112,7 +112,7 @@ fun try_to_renew_using_registration_receipt() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names::payment::EReceiptDomainMissmatch)]
+#[test, expected_failure(abort_code = ::iota_names::payment::EReceiptDomainMismatch)]
 fun try_to_renew_with_other_name_receipt() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = setup_iota_names(&mut ctx);

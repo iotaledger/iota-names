@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { mainPackage, MIST_PER_USDC, PackageInfo } from '../config/constants';
+import { PackageInfo, readPackageInfo } from '../config/constants';
 import { addConfig, newPriceConfig, newRenewalConfig, removeConfig } from '../init/authorization';
 import { signAndExecute } from '../utils/utils';
 
@@ -39,7 +40,11 @@ const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
 				[4, 4],
 				[5, 63],
 			],
-			prices: [50 * Number(MIST_PER_USDC), 10 * Number(MIST_PER_USDC), 1 * Number(MIST_PER_USDC)],
+			prices: [
+				50 * Number(NANOS_PER_IOTA),
+				10 * Number(NANOS_PER_IOTA),
+				1 * Number(NANOS_PER_IOTA),
+			],
 		}),
 		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
 	});
@@ -56,14 +61,18 @@ const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
 				[4, 4],
 				[5, 63],
 			],
-			prices: [15 * Number(MIST_PER_USDC), 5 * Number(MIST_PER_USDC), 0.5 * Number(MIST_PER_USDC)],
+			prices: [
+				15 * Number(NANOS_PER_IOTA),
+				5 * Number(NANOS_PER_IOTA),
+				0.5 * Number(NANOS_PER_IOTA),
+			],
 		}),
 		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
 	});
 };
 
 const publishSetup = async () => {
-	const config = mainPackage['testnet'];
+	const config = readPackageInfo('testnet');
 	const tx = new Transaction();
 
 	setupIotaNames(tx, config);

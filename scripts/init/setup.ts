@@ -2,17 +2,41 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { getClient, signAndExecute } from '../utils/utils';
+import {
+	PackageInfo as NetworkPackageInfo,
+	readPackageInfo,
+	writePackageInfo,
+} from '../config/constants';
+import { getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
-import { Network, Packages } from './packages';
+import { Packages } from './packages';
 import { queryRegistryTable } from './queries';
 import { PackageInfo } from './types';
 
-export const setup = async (packageInfo: PackageInfo, network: Network) => {
+export const setup = async (packageInfo: PackageInfo, network: string) => {
+	const iotaCoinType =
+		'0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA';
+	const networkPackageInfo: NetworkPackageInfo = {
+		adminAddress: packageInfo.IotaNames.publisher,
+		adminCap: packageInfo.IotaNames.adminCap,
+		iotaNames: packageInfo.IotaNames.iotaNames,
+		packageId: packageInfo.IotaNames.packageId,
+		packageIdPricing: packageInfo.IotaNames.packageId,
+		paymentsPackageId: packageInfo.Payments.packageId,
+		publisherId: packageInfo.IotaNames.publisher,
+		subNamesPackageId: packageInfo.Subdomains.packageId,
+		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+		coins: {
+			IOTA: {
+				type: iotaCoinType,
+				metadataId: await getCoinMetadataId(network, iotaCoinType),
+			},
+		},
+		registryTableId: '',
+	};
+	writePackageInfo(network, networkPackageInfo);
 	const packages = Packages(network);
 
 	const txb = new Transaction();
@@ -84,9 +108,7 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 
 		try {
 			// correct the sdk constants to also include the registryTableID
-			const constants = JSON.parse(
-				readFileSync(path.resolve(__dirname, '../constants.sdk.json'), 'utf8'),
-			);
+			const constants = readPackageInfo(network);
 
 			console.log(constants);
 
@@ -99,10 +121,7 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 				packageInfo.IotaNames.packageId,
 			);
 
-			writeFileSync(
-				path.resolve(path.resolve(__dirname, '../'), 'constants.sdk.json'),
-				JSON.stringify(constants),
-			);
+			writePackageInfo(network, constants);
 		} catch (e) {
 			console.error(
 				'Error while updating sdk constants: Most likely the file does not exist if you run `setup` without publishing through this',
