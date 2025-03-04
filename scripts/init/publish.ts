@@ -6,7 +6,7 @@ import { existsSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { getClient, publishPackage, signAndExecute } from '../utils/utils';
+import { getClient, managePackage, publishPackage, signAndExecute } from '../utils/utils';
 import { Network, Packages } from './packages';
 import { PackageInfo } from './types';
 
@@ -24,7 +24,6 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 
 		for (const [key, pkg] of list) {
 			const packageFolder = path.resolve(contractsPath, pkg.folder);
-			const manifestFile = path.resolve(packageFolder + '/Move.toml');
 			// remove the lockfile on CI to allow fresh flows.
 			if (isCiJob) {
 				console.info('Removing lock file for CI job');
@@ -34,8 +33,6 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 					console.info('Lock file removed');
 				}
 			}
-
-			writeFileSync(manifestFile, pkg.manifest()); // save the manifest as is.
 
 			const txb = new Transaction();
 			publishPackage(txb, packageFolder, configPath);
@@ -51,7 +48,9 @@ export const publishPackages = async (network: Network, isCiJob = false, configP
 
 			console.info(`Published ${key} with packageId: ${data.packageId}`);
 
-			writeFileSync(manifestFile, pkg.manifest(data.packageId)); // update the manifest with the published-at field.
+			managePackage(data.packageId, packageFolder, configPath);
+
+			console.info(`Update lock file for package: ${data.packageId}`);
 		}
 	}
 	writeFileSync(
