@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Core configuration of the iota_names application.
+/// Core configuration of the IOTA-Names application.
 ///
 /// This configuration is used to validate domains for registration and renewal.
-/// It can only be stored as a valid config in the `iota_names` object by an admin,
+/// It can only be stored as a valid config in the `IotaNames` object by an admin,
 /// hence why all the functions are public. Having just the config object cannot
 /// pose a security risk as it cannot be used.
 module iota_names::core_config;
@@ -25,8 +25,6 @@ const EInvalidTld: vector<u8> = b"Invalid TLD";
 const ESubnameNotSupported: vector<u8> = b"Subdomains are not supported for sales.";
 
 public struct CoreConfig has copy, drop, store {
-    /// Public key of the API server. Currently only used for direct setup.
-    public_key: vector<u8>,
     /// Minimum length of the label part of the domain. This is different from
     /// the base `domain` checks. This is our minimum acceptable length (for sales).
     min_label_length: u8,
@@ -43,7 +41,6 @@ public struct CoreConfig has copy, drop, store {
 }
 
 public fun new(
-    public_key: vector<u8>,
     min_label_length: u8,
     max_label_length: u8,
     payments_version: u8,
@@ -52,7 +49,6 @@ public fun new(
     extra: VecMap<String, String>,
 ): CoreConfig {
     CoreConfig {
-        public_key,
         min_label_length,
         max_label_length,
         payments_version,
@@ -60,10 +56,6 @@ public fun new(
         valid_tlds: vec_set::from_keys(valid_tlds),
         extra,
     }
-}
-
-public fun public_key(config: &CoreConfig): vector<u8> {
-    config.public_key
 }
 
 public fun min_label_length(config: &CoreConfig): u8 {
@@ -100,7 +92,6 @@ public(package) fun assert_is_valid_for_sale(config: &CoreConfig, domain: &Domai
 #[test_only]
 public fun default(): CoreConfig {
     new(
-        b"",
         3,
         63,
         iota_names::constants::payments_version!(),

@@ -6,4 +6,4 @@
 IOTA-Names SDK is a convenient wrapper for querying more detailed information and building transactions
 towards the Name Service.
 
-You can find our docs [by clicking here](https://docs.iotaNames.io).
+You can find our docs [by clicking here](https://docs.iota-names.io).

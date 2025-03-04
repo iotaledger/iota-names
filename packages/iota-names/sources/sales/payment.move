@@ -62,9 +62,6 @@ public struct RequestData has drop {
     years: u8,
     /// The amount the user has to pay in base units.
     base_amount: u64,
-    /// The discounts (each app can add a key for its discount)
-    /// to avoid multiple additions of the same discount.
-    discounts_applied: VecMap<String, u64>,
     /// a metadata field for future-proofness.
     /// No use-cases are enabled in the current release.
     metadata: VecMap<String, String>,
@@ -95,7 +92,6 @@ public struct TransactionEvent has copy, drop, store {
     years: u8,
     request_data_version: u8,
     base_amount: u64,
-    discounts_applied: VecMap<String, u64>,
     metadata: VecMap<String, String>,
     is_renewal: bool,
     // info about the actual payment (currency and equivalent amount)
@@ -149,7 +145,6 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
         domain,
         years: 1,
         base_amount: price,
-        discounts_applied: vec_map::empty(),
         metadata: vec_map::empty(),
         version: constants::payments_version!(),
     })
@@ -171,7 +166,6 @@ public fun init_renewal(iota_names: &mut IotaNames, nft: &IotaNamesRegistration,
         domain,
         years,
         base_amount: price * (years as u64),
-        discounts_applied: vec_map::empty(),
         metadata: vec_map::empty(),
         version: constants::payments_version!(),
     })
@@ -261,17 +255,6 @@ public fun base_amount(self: &RequestData): u64 { self.base_amount }
 
 public fun domain(self: &RequestData): &Domain { &self.domain }
 
-/// Returns true if at least one discount has been applied to the payment
-/// intent.
-public fun discount_applied(self: &RequestData): bool {
-    self.discounts_applied.size() > 0
-}
-
-/// A list of discounts that have been applied to the payment intent.
-public fun discounts_applied(self: &RequestData): VecMap<String, u64> {
-    self.discounts_applied
-}
-
 /// Public helper to calculate price after a percentage discount has been
 /// applied.
 public fun calculate_total_after_discount(data: &RequestData, discount: u8): u64 {
@@ -295,7 +278,6 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
         years: data.years,
         request_data_version: data.version,
         base_amount: data.base_amount,
-        discounts_applied: data.discounts_applied,
         metadata: data.metadata,
         is_renewal,
         currency: type_name::get<T>(),

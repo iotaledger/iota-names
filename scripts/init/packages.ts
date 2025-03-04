@@ -36,12 +36,6 @@ const parseCreatedObject = (data: IotaTransactionBlockResponse, objectType: stri
 	return obj.objectId;
 };
 
-// const parseMutatedObject = (data: IotaTransactionBlockResponse, objectType: string) => {
-// 	const obj = data.objectChanges!.find((x) => x.type === 'mutated' && x.objectType === objectType);
-// 	if (!obj || obj.type !== 'mutated') throw new Error(`Expected ${objectType} object`);
-// 	return obj.objectId;
-// };
-
 export const Packages = (network: string) => {
 	return {
 		IotaNames: {

@@ -13,7 +13,6 @@ use iota_names::domain;
 #[test]
 fun test_config_creation_and_field_access() {
     let config = core_config::new(
-        b"",
         3,
         63,
         constants::payments_version!(),
@@ -22,7 +21,6 @@ fun test_config_creation_and_field_access() {
         vec_map::empty(),
     );
 
-    assert_eq(config.public_key(), b"");
     assert_eq(config.min_label_length(), 3);
     assert_eq(config.max_label_length(), 63);
     assert_eq(config.payments_version(), constants::payments_version!());
@@ -32,7 +30,7 @@ fun test_config_creation_and_field_access() {
 #[test]
 fun test_valid_domains() {
     let config = core_config::default();
-    let mut domain = domain::new(b"iota_names.iota".to_string());
+    let mut domain = domain::new(b"iota-names.iota".to_string());
     config.assert_is_valid_for_sale(&domain);
 
     domain = domain::new(b"iota.iota".to_string());
@@ -42,7 +40,6 @@ fun test_valid_domains() {
 #[test]
 fun custom_config_valid_length() {
     let config = core_config::new(
-        b"",
         1,
         63,
         constants::payments_version!(),
@@ -55,7 +52,7 @@ fun custom_config_valid_length() {
 
 #[test, expected_failure(abort_code = core_config::EInvalidTld)]
 fun test_invalid_tld() {
-    core_config::default().assert_is_valid_for_sale(&domain::new(b"iota_names.move".to_string()));
+    core_config::default().assert_is_valid_for_sale(&domain::new(b"iota-names.move".to_string()));
 }
 
 #[test, expected_failure(abort_code = core_config::EInvalidLength)]
@@ -73,13 +70,12 @@ fun test_invalid_label_length_2() {
 #[test, expected_failure(abort_code = core_config::ESubnameNotSupported)]
 fun test_subname_not_supported() {
     custom_config(1, 5).assert_is_valid_for_sale(
-        &domain::new(b"inner.iota_names.iota".to_string()),
+        &domain::new(b"inner.iota-names.iota".to_string()),
     );
 }
 
 fun custom_config(min: u8, max: u8): CoreConfig {
     core_config::new(
-        b"",
         min,
         max,
         constants::payments_version!(),

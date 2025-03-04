@@ -12,31 +12,27 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 (async () => {
 	const network = 'testnet';
 	// Step 1: Create a IotaClient instance
-	const suiClient = new IotaClient({
+	const iotaClient = new IotaClient({
 		url: getFullnodeUrl(network), // Iota testnet endpoint
 	});
 
 	// Step 2: Create a IotaNamesClient instance using TESTNET_CONFIG
 	const iotaNamesClient = new IotaNamesClient({
-		client: suiClient,
+		client: iotaClient,
 		network,
 	});
 
-	/* Following can be used to fetch the coin type discount, registration price, and renewal price */
+	/* Following can be used to fetch the registration price and renewal price */
 	console.log(await iotaNamesClient.getPriceList());
 	console.log(await iotaNamesClient.getRenewalPriceList());
 
 	/* Following can be used to fetch the domain record */
 	console.log('Domain Record: ', await iotaNamesClient.getNameRecord('myname.iota'));
 
-	/* If discount NFT is used */
-	// const discountNft = '0xMyDiscountNft'; // This can be a string or a kioskTransactionArgument
-	// const discountNftType = await iotaNamesClient.getObjectType(discountNft);
-
 	/* Registration Example Using IOTA */
 	const tx = new Transaction();
 	const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-	const maxPaymentAmount = 5 * 1_000_000; // In MIST of the payment coin type
+	const maxPaymentAmount = 5 * 1_000_000_000; // In NANOS of the payment coin type
 	const [coin] = iotaNamesTx.transaction.splitCoins('0xMyCoin', [maxPaymentAmount]);
 
 	const nft = iotaNamesTx.register({
@@ -44,23 +40,6 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 		years: 2,
 		coin,
 	});
-
-	/* Registration Example Using USDC */
-	// const coinConfig = iotaNamesClient.config.coins.USDC; // Specify the coin type used for the transaction
-	// const nft = iotaNamesTx.register({
-	// 	domain: 'myname.iota',
-	// 	years: 2,
-	// 	coin,
-	// });
-
-	// /* Renew Example */
-	// const coinConfig = iotaNamesClient.config.coins.IOTA; // Specify the coin type used for the transaction
-	// const priceInfoObjectId = await iotaNamesClient.getPriceInfoObject(tx, coinConfig.feed)[0];
-	// iotaNamesTx.renew({
-	// 	nft: '0xMyNft',
-	// 	years: 2,
-	// 	coin,
-	// });
 
 	/* Optionally set target address */
 	iotaNamesTx.setTargetAddress({ nft, address: '0xMyAddress' });
@@ -80,20 +59,4 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
 	/* Optionally transfer coin */
 	iotaNamesTx.transaction.transferObjects([coin], '0xMyAddress');
-
-	/* Subname Example */
-	// const subnameNft = iotaNamesTx.createSubName({
-	// 	parentNft: '0xMyParentNft',
-	// 	name: 'name.myname.iota',
-	// 	expirationTimestampMs: 1862491339394,
-	// 	allowChildCreation: true,
-	// 	allowTimeExtension: true,
-	// });
-	// iotaNamesTx.transaction.transferObjects([subnameNft], 'YOUR_ADDRESS');
-
-	/* Extend Subname Expiration */
-	// iotaNamesTx.extendExpiration({
-	// 	nft: '0xMySubnameNft',
-	// 	expirationTimestampMs: 1862511339394,
-	// });
 })();

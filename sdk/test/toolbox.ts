@@ -1,6 +1,7 @@
 // Copyright (c) Mysten Labs, Inc.
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -15,7 +16,7 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { retry } from 'ts-retry-promise';
 
 //@ts-ignore-next-line
-export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `sui`;
+export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
 
 //@ts-ignore-next-line
 const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localnet');

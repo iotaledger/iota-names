@@ -4,7 +4,7 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-export const getImageUrl = (isSubdomain: boolean, network: 'mainnet' | 'testnet') => {
+export const getImageUrl = (isSubdomain: boolean, network: string) => {
 	const name = `{${isSubdomain ? 'nft.' : ''}domain_name}`;
 	const expiration = `{${isSubdomain ? 'nft.' : ''}expiration_timestamp_ms}`;
 
@@ -25,7 +25,7 @@ export const createDisplay = ({
 	isSubdomain: boolean;
 	iotaNamesPackageId: string;
 	subdomainsPackageId: string;
-	network: 'mainnet' | 'testnet';
+	network: string;
 }) => {
 	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubDomainRegistration`;
 	const iotaNamesRegistration = `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;

@@ -565,7 +565,7 @@ fun test_unset_user_data() {
     );
     scenario.unset_user_data_util(FIRST_ADDRESS, utf8(CONTENT_HASH), 0);
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
-    assert_eq(data.size(), 2);
+    assert_eq(data.size(), 1);
     assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
 
     scenario_val.end();

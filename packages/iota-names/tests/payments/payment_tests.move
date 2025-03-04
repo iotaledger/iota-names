@@ -46,14 +46,11 @@ fun test_e2e() {
 
     // now let's renew this nft for 4 years.
     let intent = payment::init_renewal(&mut iota_names, &nft, 4);
-    assert_eq(intent.request_data().discount_applied(), false);
 
     // Checking the price is valid.
-    // It should be 10 * 4 minus 40% (from the applied discount) divided by 2 (another 50% discount added in the end.)
-    assert_eq(intent.request_data().base_amount(), 10 * 4 * (100-40) / 100 / 2);
+    assert_eq(intent.request_data().base_amount(), 10 * 4);
     assert_eq(intent.request_data().years(), 4);
     assert_eq(intent.request_data().domain().to_string(), domain);
-    assert_eq(intent.request_data().discount_applied(), true);
 
     // calling our "payments" package here.
     let receipt = handle_payment(intent, &mut iota_names, &mut ctx);

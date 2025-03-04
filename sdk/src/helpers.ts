@@ -34,7 +34,7 @@ export function zeroCoin(tx: Transaction, type: string) {
 }
 
 export function getConfigType(iotaNamesPackageV1: string, innerType: string): string {
-	return `${iotaNamesPackageV1}::iotaNames::ConfigKey<${innerType}>`;
+	return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 }
 
 export function getDomainType(iotaNamesPackageV1: string): string {

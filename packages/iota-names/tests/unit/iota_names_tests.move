@@ -53,7 +53,7 @@ fun registry_management() {
 public struct TestApp has drop {}
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
-/// Only authorized applications can add balance to iota_names.
+/// Only authorized applications can add balance to IotaNames.
 fun app_add_to_balance_fail() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, _cap) = iota_names::new_for_testing(&mut ctx);
@@ -72,7 +72,7 @@ fun app_registry_mut_fail() {
 
 #[test]
 /// 1. Authorize TestApp;
-/// 2. Adds balance to iota_names, access registry mut.
+/// 2. Adds balance to IotaNames, access registry mut.
 fun authorize_and_access() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
