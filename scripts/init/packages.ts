@@ -9,6 +9,7 @@ import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { readPackageInfo } from '../config/constants';
 import {
 	addConfig,
+	addCoreConfig,
 	addRegistry,
 	newLookupRegistry,
 	newPaymentsConfig,
@@ -70,6 +71,15 @@ export const Packages = (network: string) => {
 					iotaNamesPackageId: packageId,
 					registry: newLookupRegistry({ txb, iotaNamesPackageId: packageId, adminCap: adminCap }),
 					type: `${packageId}::registry::Registry`,
+				});
+				// Add new core config
+				addConfig({
+					txb,
+					adminCap,
+					iotaNames,
+					iotaNamesPackageId: packageId,
+					config: addCoreConfig({ txb, latestPackageId: packageId }),
+					type: `${packageId}::core_config::CoreConfig`,
 				});
 				// Adds the configuration file (pricelist and public key)
 				addConfig({

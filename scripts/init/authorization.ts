@@ -157,7 +157,6 @@ export const addCoreConfig = ({
 	return txb.moveCall({
 		target: `${latestPackageId}::core_config::new`,
 		arguments: [
-			txb.pure.vector('string', []),
 			txb.pure.u8(3),
 			txb.pure.u8(63),
 			txb.pure.u8(1),
