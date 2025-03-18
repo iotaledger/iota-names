@@ -6,6 +6,7 @@ import { execFileSync, execSync } from 'child_process';
 import fs, { existsSync, readFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
+import TOML, { JsonMap } from '@iarna/toml';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 import { decodeIotaPrivateKey } from '@iota/iota-sdk/cryptography';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
@@ -13,7 +14,6 @@ import { Secp256k1Keypair } from '@iota/iota-sdk/keypairs/secp256k1';
 import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
 import { toB64 } from '@iota/iota-sdk/utils';
-import TOML, { JsonMap } from '@iarna/toml'
 
 import { Network } from '../init/packages';
 
@@ -73,15 +73,15 @@ export const publishPackage = (txb: Transaction, path: string, configPath?: stri
 export const managePackage = (packageId: string, packageFolder: string, configPath?: string) => {
 	const activeEnv = getActiveEnv(configPath);
 
-	var versionNumber = "1";
-	var originalId = packageId
+	var versionNumber = '1';
+	var originalId = packageId;
 	var latestId = packageId;
 	const metadata = getManagedMetadata(packageFolder, activeEnv);
 	var chainId: string;
 	if (metadata) {
-		chainId = metadata["chain-id"] as string;
-		versionNumber = String(metadata["published-version"] as number + 1)
-		originalId = metadata["original-published-id"] as string;
+		chainId = metadata['chain-id'] as string;
+		versionNumber = String((metadata['published-version'] as number) + 1);
+		originalId = metadata['original-published-id'] as string;
 	} else {
 		chainId = getChainId(configPath);
 	}
@@ -293,7 +293,9 @@ export const getManagedMetadata = (packageFolder: string, activeEnv: string) => 
 	const lockFilePath = path.resolve(packageFolder + '/Move.lock');
 	if (existsSync(lockFilePath)) {
 		const lockFile = TOML.parse(readFileSync(lockFilePath, 'utf8'));
-		const env = lockFile["env"] as JsonMap;
-		return env[activeEnv] as JsonMap;
+		const env = lockFile['env'] as JsonMap;
+		if (env) {
+			return env[activeEnv] as JsonMap;
+		}
 	}
-}
+};
