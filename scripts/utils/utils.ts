@@ -80,9 +80,8 @@ export const managePackage = (packageId: string, packageFolder: string, configPa
 	var chainId: string;
 	if (metadata) {
 		chainId = metadata["chain-id"] as string;
-		versionNumber = String(metadata["published-version"] as number)
+		versionNumber = String(metadata["published-version"] as number + 1)
 		originalId = metadata["original-published-id"] as string;
-		latestId = metadata["latest-published-id"] as string;
 	} else {
 		chainId = getChainId(configPath);
 	}
