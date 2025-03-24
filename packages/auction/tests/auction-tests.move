@@ -29,7 +29,7 @@ use iota_names::{
     iota_names_registration::IotaNamesRegistration
 };
 
-const IOTANS_ADDRESS: address = @0xA001;
+const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
 const SECOND_ADDRESS: address = @0xB002;
 const THIRD_ADDRESS: address = @0xB003;
@@ -38,7 +38,7 @@ const SECOND_DOMAIN_NAME: vector<u8> = b"tesq.iota";
 const AUCTION_BIDDING_PERIOD_MS: u64 = 2 * 24 * 60 * 60 * 1000;
 
 public fun test_init(): Scenario {
-    let mut scenario_val = test_scenario::begin(IOTANS_ADDRESS);
+    let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(ctx(scenario));
@@ -49,7 +49,7 @@ public fun test_init(): Scenario {
         clock.share_for_testing();
     };
     {
-        scenario.next_tx(IOTANS_ADDRESS);
+        scenario.next_tx(IOTA_NAMES_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut iota_names = scenario.take_shared<IotaNames>();
 
@@ -130,7 +130,7 @@ fun withdraw_util(scenario: &mut Scenario, sender: address): Coin<IOTA> {
 }
 
 fun admin_collect_fund_util(scenario: &mut Scenario, domain_name: String, clock_tick: u64) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
 
@@ -147,7 +147,7 @@ fun admin_collect_fund_util(scenario: &mut Scenario, domain_name: String, clock_
 }
 
 fun admin_try_finalize_auction_util(scenario: &mut Scenario, domain: String, clock_tick: u64) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
@@ -165,7 +165,7 @@ fun admin_try_finalize_auctions_util(
     operation_limit: u64,
     clock_tick: u64,
 ) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
@@ -184,7 +184,7 @@ fun admin_try_finalize_auctions_util(
 }
 
 fun admin_withdraw_funds_util(scenario: &mut Scenario): Coin<IOTA> {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut auction_house = scenario.take_shared<AuctionHouse>();
 
@@ -200,7 +200,7 @@ fun admin_withdraw_funds_util(scenario: &mut Scenario): Coin<IOTA> {
 }
 
 fun deauthorize_app_util(scenario: &mut Scenario) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
@@ -211,7 +211,7 @@ fun deauthorize_app_util(scenario: &mut Scenario) {
 }
 
 fun assert_balance(scenario: &mut Scenario, amount: u64) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let auction_house = scenario.take_shared<AuctionHouse>();
     assert!(total_balance(&auction_house) == amount, 0);
     test_scenario::return_shared(auction_house);
@@ -225,7 +225,7 @@ fun assert_auction(
     expected_winner: address,
     expected_highest_amount: u64,
 ) {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let auction_house = scenario.take_shared<AuctionHouse>();
     let (
         mut start_ms,
