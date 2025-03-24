@@ -4,9 +4,10 @@
 
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { normalizeIotaAddress } from '@iota/iota-sdk/utils';
+import { NANOS_PER_IOTA, normalizeIotaAddress } from '@iota/iota-sdk/utils';
+import { expect } from 'vitest';
 
-import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src';
+import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
 
 export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') => {
 	const client = new IotaClient({ url: getFullnodeUrl(network) });
@@ -17,21 +18,42 @@ export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') =
 		network,
 	});
 
+	// Getting price lists accurately
+	const priceList = await iotaNamesClient.getPriceList();
+	const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
+
+	// Expected lists
+	const expectedPriceList = new Map([
+		[[3, 3], 500000000],
+		[[4, 4], 100000000],
+		[[5, 63], 10000000],
+	]);
+
+	const expectedRenewalPriceList = new Map([
+		[[3, 3], 150000000],
+		[[4, 4], 50000000],
+		[[5, 63], 5000000],
+	]);
+
+	expect(priceList).toEqual(expectedPriceList);
+	expect(renewalPriceList).toEqual(expectedRenewalPriceList);
+
 	const tx = new Transaction();
+
 	const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
 	const uniqueName =
 		(Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
 
-	const priceList = await iotaNamesClient.getPriceList();
-	// const _renewalPriceList = await iotaNamesClient.getRenewalPriceList();
-	const years = 1;
-
-	// register test.iota for a year.
+	const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
+		10n * NANOS_PER_IOTA,
+	]);
+	// register test.iota for 2 years.
 	const nft = iotaNamesTx.register({
-		name: uniqueName,
-		years,
-		price: iotaNamesClient.calculatePrice({ name: uniqueName, years, priceList }),
+		domain: uniqueName,
+		years: 2,
+		coinConfig: iotaNamesClient.config.coins.IOTA,
+		coin: coinInput,
 	});
 	// Sets the target address of the NFT.
 	iotaNamesTx.setTargetAddress({
@@ -109,7 +131,7 @@ export const e2eLiveNetworkDryRunFlow = async (network: 'mainnet' | 'testnet') =
 	});
 
 	// do it for sub nft too
-	tx.transferObjects([moreNestedNft, subNft, nft], tx.pure.address(sender));
+	tx.transferObjects([moreNestedNft, subNft, nft, coinInput], tx.pure.address(sender));
 
 	tx.setSender(sender);
 

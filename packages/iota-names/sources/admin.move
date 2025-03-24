@@ -9,7 +9,7 @@ module iota_names::admin;
 use std::string::String;
 use iota::clock::Clock;
 use iota::tx_context::sender;
-use iota_names::config;
+use iota_names::core_config::CoreConfig;
 use iota_names::domain;
 use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
@@ -28,7 +28,7 @@ public fun reserve_domain(
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     let domain = domain::new(domain_name);
-    config::assert_valid_user_registerable_domain(&domain);
+    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
     let registry = iota_names::app_registry_mut<Admin, Registry>(Admin {}, iota_names);
     registry.add_record(domain, no_years, clock, ctx)
 }
@@ -43,10 +43,11 @@ entry fun reserve_domains(
     ctx: &mut TxContext,
 ) {
     let sender = sender(ctx);
+    let config = *iota_names.get_config<CoreConfig>();
     let registry = iota_names::app_registry_mut<Admin, Registry>(Admin {}, iota_names);
     while (!domains.is_empty()) {
         let domain = domain::new(domains.pop_back());
-        config::assert_valid_user_registerable_domain(&domain);
+        config.assert_is_valid_for_sale(&domain);
         let nft = registry.add_record(domain, no_years, clock, ctx);
         iota::transfer::public_transfer(nft, sender);
     };

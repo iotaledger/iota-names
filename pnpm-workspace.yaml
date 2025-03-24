@@ -1,4 +1,5 @@
 packages:
   - "sdk"
+  - "toolkit"
   - "scripts/**"
   - "documentation/**"

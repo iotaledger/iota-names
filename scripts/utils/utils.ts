@@ -14,8 +14,6 @@ import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
 import { toB64 } from '@iota/iota-sdk/utils';
 
-import { Network } from '../init/packages';
-
 const IOTA = process.env.IOTA_BINARY ?? `iota`;
 
 export const getActiveAddress = () => {
@@ -105,12 +103,15 @@ export const upgradePackage = (
 			encoding: 'utf-8',
 		}),
 	);
+	console.log(digest);
+	console.log(packageId);
+	console.log(upgradeCapId);
 
 	const cap = txb.object(upgradeCapId);
 
 	const ticket = txb.moveCall({
 		target: '0x2::package::authorize_upgrade',
-		arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure(digest)],
+		arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure.vector('u8', digest)],
 	});
 
 	const receipt = txb.upgrade({
@@ -158,13 +159,13 @@ export const getSigner = () => {
 };
 
 /// Get the client for the specified network.
-export const getClient = (network: Network) => {
+export const getClient = (network: string) => {
 	const url = process.env.RPC_URL || getFullnodeUrl(network);
 	return new IotaClient({ url });
 };
 
 /// A helper to sign & execute a transaction.
-export const signAndExecute = async (txb: Transaction, network: Network) => {
+export const signAndExecute = async (txb: Transaction, network: string) => {
 	const client = getClient(network);
 	const signer = getSigner();
 
@@ -180,7 +181,7 @@ export const signAndExecute = async (txb: Transaction, network: Network) => {
 
 /// Builds a transaction (unsigned) and saves it on `setup/tx/tx-data.txt` (on production)
 /// or `setup/src/tx-data.local.txt` on mainnet.
-export const prepareMultisigTx = async (tx: Transaction, network: Network, address?: string) => {
+export const prepareMultisigTx = async (tx: Transaction, network: string, address?: string) => {
 	const adminAddress = address ?? getActiveAddress();
 	const client = getClient(network);
 	const gasObjectId = process.env.GAS_OBJECT;
@@ -267,4 +268,26 @@ export const getAllObjectsByType = async (type: string, owner: string, client: I
 	}
 
 	return objects;
+};
+
+export const getCoinMetadataId = async (network: string, type: string) => {
+	const iotaClient = new IotaClient({
+		url: getFullnodeUrl(network),
+	});
+	const metadata = await iotaClient.getCoinMetadata({ coinType: type });
+	if (!metadata || !metadata.id) {
+		throw new Error('Coin metadata or ID not found.');
+	}
+	return metadata.id;
+};
+
+export const getObjectType = async (network: string, objectId: string): Promise<string> => {
+	const iotaClient = new IotaClient({
+		url: getFullnodeUrl(network),
+	});
+	const objectResponse = await iotaClient.getObject({ id: objectId, options: { showType: true } });
+	if (objectResponse && objectResponse.data && objectResponse.data.type) {
+		return objectResponse.data.type;
+	}
+	throw new Error('Object data not found');
 };

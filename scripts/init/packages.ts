@@ -6,16 +6,18 @@ import { IotaTransactionBlockResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
+import { readPackageInfo } from '../config/constants';
 import {
 	addConfig,
+	addCoreConfig,
 	addRegistry,
 	newLookupRegistry,
+	newPaymentsConfig,
 	newPriceConfig,
+	newRenewalConfig,
 	setupApp,
 } from './authorization';
 import { createDisplay } from './display_tp';
-
-export type Network = 'mainnet' | 'testnet' | 'devnet' | 'localnet';
 
 const parseCorePackageObjects = (data: IotaTransactionBlockResponse) => {
 	const packageId = data.objectChanges!.find((x) => x.type === 'published');
@@ -35,7 +37,7 @@ const parseCreatedObject = (data: IotaTransactionBlockResponse, objectType: stri
 	return obj.objectId;
 };
 
-export const Packages = (network: Network) => {
+export const Packages = (network: string) => {
 	return {
 		IotaNames: {
 			order: 1,
@@ -66,33 +68,68 @@ export const Packages = (network: Network) => {
 					txb,
 					adminCap,
 					iotaNames,
-					iotaNamesPackageIdV1: packageId,
-					registry: newLookupRegistry({ txb, iotaNamesPackageIdV1: packageId, adminCap: adminCap }),
+					iotaNamesPackageId: packageId,
+					registry: newLookupRegistry({ txb, iotaNamesPackageId: packageId, adminCap: adminCap }),
 					type: `${packageId}::registry::Registry`,
+				});
+				// Add new core config
+				addConfig({
+					txb,
+					adminCap,
+					iotaNames,
+					iotaNamesPackageId: packageId,
+					config: addCoreConfig({ txb, latestPackageId: packageId }),
+					type: `${packageId}::core_config::CoreConfig`,
 				});
 				// Adds the configuration file (pricelist and public key)
 				addConfig({
 					txb,
 					adminCap,
 					iotaNames,
-					iotaNamesPackageIdV1: packageId,
+					iotaNamesPackageId: packageId,
 					config: newPriceConfig({
 						txb,
-						iotaNamesPackageIdV1: packageId,
-						priceList: {
-							three: 5 * Number(NANOS_PER_IOTA),
-							four: 2 * Number(NANOS_PER_IOTA),
-							fivePlus: 0.5 * Number(NANOS_PER_IOTA),
-						},
+						packageId,
+						ranges: [
+							[3, 3],
+							[4, 4],
+							[5, 63],
+						],
+						prices: [
+							500 * Number(NANOS_PER_IOTA),
+							100 * Number(NANOS_PER_IOTA),
+							10 * Number(NANOS_PER_IOTA),
+						],
 					}),
-					type: `${packageId}::config::Config`,
+					type: `${packageId}::pricing_config::PricingConfig`,
+				});
+				addConfig({
+					txb,
+					adminCap,
+					iotaNames,
+					iotaNamesPackageId: packageId,
+					config: newRenewalConfig({
+						txb,
+						packageId,
+						ranges: [
+							[3, 3],
+							[4, 4],
+							[5, 63],
+						],
+						prices: [
+							150 * Number(NANOS_PER_IOTA),
+							50 * Number(NANOS_PER_IOTA),
+							5 * Number(NANOS_PER_IOTA),
+						],
+					}),
+					type: `${packageId}::pricing_config::RenewalConfig`,
 				});
 				// create display for names
 				createDisplay({
 					txb,
 					publisher,
 					isSubdomain: false,
-					iotaNamesPackageIdV1: packageId,
+					iotaNamesPackageId: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
@@ -101,24 +138,12 @@ export const Packages = (network: Network) => {
 					txb,
 					publisher,
 					isSubdomain: true,
-					iotaNamesPackageIdV1: packageId,
+					iotaNamesPackageId: packageId,
 					network: 'testnet',
 					subdomainsPackageId: packageId,
 				});
 			},
-		},
-		Utils: {
-			order: 2,
-			folder: 'utils',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
-			authorizationType: (packageId: string) => `${packageId}::direct_setup::DirectSetup`,
+			authorizationType: (packageId: string) => `${packageId}::controller::Controller`, // Authorize the iotaNames controller
 		},
 		DenyList: {
 			order: 2,
@@ -136,9 +161,9 @@ export const Packages = (network: Network) => {
 				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::denylist` });
 			},
 		},
-		Registration: {
+		Payments: {
 			order: 2,
-			folder: 'registration',
+			folder: 'payments',
 			processPublish: (data: IotaTransactionBlockResponse) => {
 				const { packageId, upgradeCap } = parseCorePackageObjects(data);
 
@@ -147,46 +172,34 @@ export const Packages = (network: Network) => {
 					upgradeCap,
 				};
 			},
-			authorizationType: (packageId: string) => `${packageId}::register::Register`,
-		},
-		Renewal: {
-			order: 2,
-			folder: 'renewal',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
-			authorizationType: (packageId: string) => `${packageId}::renew::Renew`,
+			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsApp`,
 			setupFunction: ({
 				txb,
 				packageId,
 				adminCap,
-				iotaNamesPackageIdV1,
 				iotaNames,
-				priceList,
+				iotaNamesPackageId,
 			}: {
 				txb: Transaction;
 				packageId: string;
-				iotaNamesPackageIdV1: string;
 				adminCap: string;
 				iotaNames: string;
-				priceList: { [key: string]: number };
+				iotaNamesPackageId: string;
 			}) => {
-				const configuration = newPriceConfig({
+				const config = readPackageInfo(network);
+				const paymentsconfig = newPaymentsConfig({
 					txb,
-					iotaNamesPackageIdV1,
-					priceList,
+					packageId,
+					coinType: [config.coins.IOTA],
+					baseCurrencyType: config.coins.IOTA.type,
 				});
-				setupApp({
+				addConfig({
 					txb,
 					adminCap,
-					iotaNames: iotaNames,
-					target: `${packageId}::renew::setup`,
-					args: [configuration],
+					iotaNames,
+					iotaNamesPackageId,
+					config: paymentsconfig,
+					type: `${packageId}::payments::PaymentsConfig`,
 				});
 			},
 		},
@@ -206,13 +219,13 @@ export const Packages = (network: Network) => {
 				packageId: string,
 				adminCap: string,
 				iotaNames: string,
-				iotaNamesPackageIdV1: string,
+				iotaNamesPackageId: string,
 			) => {
 				addConfig({
 					txb,
 					adminCap,
 					iotaNames,
-					iotaNamesPackageIdV1,
+					iotaNamesPackageId,
 					config: txb.moveCall({
 						target: `${packageId}::config::default`,
 					}),

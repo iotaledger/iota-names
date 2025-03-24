@@ -4,10 +4,10 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { mainPackage } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
-const config = mainPackage.mainnet;
+const config = readPackageInfo('mainnet');
 
 // The new multisig address to transfer the caps to.
 const NEW_MULTISIG_ADDR = '0x9b388a6da9dd4f73e0b13abc6100f1141782ef105f6f5e9d986fb6e00f0b2591';

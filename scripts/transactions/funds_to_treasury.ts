@@ -4,12 +4,12 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { mainPackage } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 const craftTx = async () => {
 	const txb = new Transaction();
-	const config = mainPackage.mainnet;
+	const config = readPackageInfo('mainnet');
 
 	const adminCapObj = txb.object(config.adminCap);
 
