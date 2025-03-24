@@ -3,10 +3,43 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IotaClient } from '@iota/iota-sdk/client';
-import type { TransactionObjectArgument } from '@iota/iota-sdk/transactions';
+import type {
+	TransactionObjectArgument,
+	TransactionObjectInput,
+} from '@iota/iota-sdk/transactions';
 
-/** You can pass in a TransactionArgument OR an objectId by string. */
-export type ObjectArgument = string | TransactionObjectArgument;
+// Interfaces
+// -----------------
+
+export interface CoinConfig {
+	type: string;
+}
+
+export interface PackageInfo {
+	packageId: string;
+	packageIdPricing: string;
+	iotaNames: string;
+	subNamesPackageId: string;
+	tempSubdomainsProxyPackageId: string;
+	payments: {
+		packageId: string;
+	};
+	registryTableId?: string;
+	coins: Record<string, CoinConfig>;
+}
+
+export interface NameRecord {
+	name: string;
+	nftId: string;
+	targetAddress: string;
+	expirationTimestampMs: number;
+	data: Record<string, string>;
+	avatar?: string;
+	contentHash?: string;
+}
+
+// Types
+// -----------------
 
 export type Network = 'mainnet' | 'testnet' | 'custom';
 
@@ -16,50 +49,33 @@ export type VersionedPackageId = {
 	[key: string]: string;
 };
 
-// A list of constants
-export type Constants = {
-	iotaNamesPackageId?: VersionedPackageId;
-	iotaNamesObjectId?: string;
-	registryTableId?: string;
-	utilsPackageId?: string;
-	registrationPackageId?: string;
-	renewalPackageId?: string;
-	subNamesPackageId?: string;
-	tempSubNamesProxyPackageId?: string;
+export type Config = Record<'mainnet' | 'testnet', PackageInfo>;
+
+export type BaseParams = {
+	years: number;
+	coinConfig?: CoinConfig;
+	coin: TransactionObjectInput;
 };
 
-// The config for the IotaNamesClient.
+export type RegistrationParams = BaseParams & {
+	domain: string;
+};
+
+export type RenewalParams = BaseParams & {
+	nft: TransactionObjectInput;
+};
+
+export type ReceiptParams = {
+	paymentIntent: TransactionObjectArgument;
+	price: TransactionObjectArgument;
+	coinConfig: CoinConfig;
+	coin: TransactionObjectInput;
+};
+
 export type IotaNamesClientConfig = {
 	client: IotaClient;
-	/**
-	 * The network to use. Defaults to mainnet.
-	 */
 	network?: Network;
-	/**
-	 * We can pass in custom PackageIds if we want this to
-	 * be functional on localnet, devnet, or any other deployment.
-	 */
-	packageIds?: Constants;
+	config?: Config;
 };
 
-/**
- * The price list for IOTA names.
- */
-export type IotaNamesPriceList = {
-	threeLetters: number;
-	fourLetters: number;
-	fivePlusLetters: number;
-};
-
-/**
- * A NameRecord entry of IOTA Names.
- */
-export type NameRecord = {
-	name: string;
-	nftId: string;
-	targetAddress: string;
-	expirationTimestampMs: number;
-	data: Record<string, string>;
-	avatar?: string;
-	contentHash?: string;
-};
+export type IotaNamesPriceList = Map<[number, number], number>;
