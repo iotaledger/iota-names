@@ -146,6 +146,19 @@ export const Packages = (network: string) => {
 			},
 			authorizationType: (packageId: string) => `${packageId}::controller::Controller`, // Authorize the iotaNames controller
 		},
+		Auction: {
+			order: 2,
+			folder: 'auction',
+			processPublish: (data: IotaTransactionBlockResponse) => {
+				const { packageId, upgradeCap } = parseCorePackageObjects(data);
+
+				return {
+					packageId,
+					upgradeCap,
+				};
+			},
+			authorizationType: (packageId: string) => `${packageId}::auction::App`,
+		},
 		DenyList: {
 			order: 2,
 			folder: 'denylist',

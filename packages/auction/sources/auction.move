@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Implementation of auction module.
-module iota_names::auction;
+module auction::auction;
 
 use std::{option::{none, some, is_some}, string::String};
 use iota::{
