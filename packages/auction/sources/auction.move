@@ -25,8 +25,8 @@ use iota_names::{
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;
-/// The auction bidding period is 2 days.
-const AUCTION_BIDDING_PERIOD_MS: u64 = 2 * 24 * 60 * 60 * 1000;
+/// The auction bidding period is 1 hour.
+const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
 /// The auction quiet period is 10 minutes.
 const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
 
