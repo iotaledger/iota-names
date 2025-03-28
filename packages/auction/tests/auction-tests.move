@@ -35,7 +35,7 @@ const SECOND_ADDRESS: address = @0xB002;
 const THIRD_ADDRESS: address = @0xB003;
 const FIRST_DOMAIN_NAME: vector<u8> = b"tes-t2.iota";
 const SECOND_DOMAIN_NAME: vector<u8> = b"tesq.iota";
-const AUCTION_BIDDING_PERIOD_MS: u64 = 2 * 24 * 60 * 60 * 1000;
+const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
 
 public fun test_init(): Scenario {
     let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
