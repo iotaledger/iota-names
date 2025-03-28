@@ -27,6 +27,7 @@ export interface PackageInfo {
 	registryTableId?: string;
 	reverseRegistryTableId?: string;
 	coins: Record<string, CoinConfig>;
+	auctionPackageId: string;
 }
 
 export interface NameRecord {

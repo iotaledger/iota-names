@@ -16,6 +16,7 @@ export const ALLOWED_METADATA = {
 
 export const mainPackage: Config = {
 	mainnet: {
+		auctionPackageId: '',
 		packageId: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
 		packageIdPricing: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
 		iotaNames: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
@@ -34,6 +35,7 @@ export const mainPackage: Config = {
 		reverseRegistryTableId: '0xcafc893c3801416ffa4c262888eaa994e055d717d9b0819db3aef4ce35ab5829',
 	},
 	testnet: {
+		auctionPackageId: '',
 		packageId: '0x40eee27b014a872f5c3330dcd5329aa55c7fe0fcc6e70c6498852e2e3727172e',
 		packageIdPricing: '0x8a4df604a449ccb9ef2efb9747046b78f78ba60fc8d88df098d0dd47619df5a4',
 		iotaNames: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',

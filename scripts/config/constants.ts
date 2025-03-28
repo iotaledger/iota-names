@@ -8,6 +8,7 @@ import path from 'path';
 export type PackageInfo = {
 	adminAddress: string;
 	adminCap: string;
+	auctionPackageId: string;
 	coins: {
 		[key: string]: {
 			type: string;
