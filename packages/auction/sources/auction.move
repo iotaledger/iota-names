@@ -32,18 +32,33 @@ const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
 
 // === Abort codes ===
 
-/// The bid value is too low (compared to min_bid or previous bid).
-const EInvalidBidValue: u64 = 0;
-/// Trying to start an action but it's already started.
-const EAuctionStarted: u64 = 1;
-/// Placing a bid in a not started
-const EAuctionNotStarted: u64 = 7;
-const EAuctionNotEndedYet: u64 = 8;
-const EAuctionEnded: u64 = 9;
-const ENotWinner: u64 = 10;
-const EWinnerCannotPlaceBid: u64 = 11;
-const EBidAmountTooLow: u64 = 12;
-const ENoProfits: u64 = 13;
+#[error]
+const EInvalidBidValue: vector<u8> =
+    b"The bid value is too low (compared to min_bid or previous bid).";
+#[error]
+const EAuctionStarted: vector<u8> =
+    b"Trying to start an action but it's already started.";
+#[error]
+const EAuctionNotStarted: vector<u8> =
+    b"Placing a bid in a not started auction.";
+#[error]
+const EAuctionNotEndedYet: vector<u8> =
+    b"The auction has not ended yet.";
+#[error]
+const EAuctionEnded: vector<u8> =
+    b"The auction ended.";
+#[error]
+const ENotWinner: vector<u8> =
+    b"Not winner of the auction.";
+#[error]
+const EWinnerCannotPlaceBid: vector<u8> =
+    b"Current winner cannot place a bid.";
+#[error]
+const EBidAmountTooLow: vector<u8> =
+    b"The bid amount is too low.";
+#[error]
+const ENoProfits: vector<u8> =
+    b"There are no profits to withdraw.";
 
 /// Authorization witness to call protected functions of iota_names.
 public struct App has drop {}
