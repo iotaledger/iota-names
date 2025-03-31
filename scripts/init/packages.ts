@@ -149,14 +149,7 @@ export const Packages = (network: string) => {
 		Auction: {
 			order: 2,
 			folder: 'auction',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
+			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			authorizationType: (packageId: string) => `${packageId}::auction::App`,
 		},
 		DenyList: {
