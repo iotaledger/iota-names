@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { execFileSync, execSync } from 'child_process';
-import fs, { readFileSync } from 'fs';
+import fs, { existsSync, readFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
+import TOML, { JsonMap } from '@iarna/toml';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 import { decodeIotaPrivateKey } from '@iota/iota-sdk/cryptography';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
@@ -67,24 +68,38 @@ export const publishPackage = (txb: Transaction, path: string, configPath?: stri
 	txb.transferObjects([cap], sender);
 };
 
-export const managePackage = (package_id: string, path: string, configPath?: string) => {
-	const active_env = getActiveEnv(configPath);
-	const chain_id = getChainId(configPath);
+export const managePackage = (packageId: string, packageFolder: string, configPath?: string) => {
+	const activeEnv = getActiveEnv(configPath);
+
+	var versionNumber = '1';
+	var originalId = packageId;
+	var latestId = packageId;
+	const metadata = getManagedMetadata(packageFolder, activeEnv);
+	var chainId: string;
+	if (metadata) {
+		chainId = metadata['chain-id'] as string;
+		versionNumber = String((metadata['published-version'] as number) + 1);
+		originalId = metadata['original-published-id'] as string;
+	} else {
+		chainId = getChainId(configPath);
+	}
+
 	const command = [
 		'move',
 		...(configPath ? ['--client.config', configPath] : []),
 		'manage-package',
 		'--environment',
-		active_env,
+		activeEnv,
 		'--network-id',
-		chain_id,
+		chainId,
 		'--original-id',
-		package_id,
+		originalId,
 		'--latest-id',
-		package_id,
-		'--version-number=1',
+		latestId,
+		'--version-number',
+		versionNumber,
 		'--path',
-		path,
+		packageFolder,
 	];
 
 	execFileSync(IOTA, command, {
@@ -97,6 +112,7 @@ export const upgradePackage = (
 	path: string,
 	packageId: string,
 	upgradeCapId: string,
+	configPath?: string,
 ) => {
 	const { modules, dependencies, digest } = JSON.parse(
 		execFileSync(IOTA, ['move', 'build', '--dump-bytecode-as-base64', '--path', path], {
@@ -125,6 +141,10 @@ export const upgradePackage = (
 		target: '0x2::package::commit_upgrade',
 		arguments: [cap, receipt],
 	});
+
+	managePackage(packageId, path, configPath);
+
+	console.info(`Updated lock file for package: ${packageId}`);
 };
 
 /// Returns a signer based on the active address of system's iota.
@@ -268,6 +288,17 @@ export const getAllObjectsByType = async (type: string, owner: string, client: I
 	}
 
 	return objects;
+};
+
+export const getManagedMetadata = (packageFolder: string, activeEnv: string) => {
+	const lockFilePath = path.resolve(packageFolder + '/Move.lock');
+	if (existsSync(lockFilePath)) {
+		const lockFile = TOML.parse(readFileSync(lockFilePath, 'utf8'));
+		const env = lockFile['env'] as JsonMap;
+		if (env) {
+			return env[activeEnv] as JsonMap;
+		}
+	}
 };
 
 export const getCoinMetadataId = async (network: string, type: string) => {

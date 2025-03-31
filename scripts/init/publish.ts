@@ -52,7 +52,7 @@ export const publishPackages = async (network: string, isCiJob = false, configPa
 
 			managePackage(data.packageId, packageFolder, configPath);
 
-			console.info(`Update lock file for package: ${data.packageId}`);
+			console.info(`Updated lock file for package: ${data.packageId}`);
 		}
 	}
 	writeFileSync(
