@@ -4,6 +4,7 @@
 
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 
+import { normalizeIotaName } from '../../../sdk/src/utils';
 import { readPackageInfo } from '../../config/constants';
 import { authorizeApp } from '../../init/authorization';
 import { signAndExecute } from '../../utils/utils';
@@ -38,21 +39,13 @@ export const initRenewal = (nft: TransactionObjectArgument, years: number) => (t
 	});
 };
 
-export const calculatePrice =
-	(baseAmount: TransactionObjectArgument, paymentType: string, priceInfoObjectId: string) =>
-	(tx: Transaction) => {
-		// Perform the Move call
-		return tx.moveCall({
-			target: `${config.paymentsPackageId}::payments::calculate_price`,
-			arguments: [
-				tx.object(config.iotaNames),
-				baseAmount,
-				tx.object.clock(),
-				tx.object(priceInfoObjectId),
-			],
-			typeArguments: [paymentType],
-		});
-	};
+export const calculatePrice = (domain: string, priceInfoObjectId: string) => (tx: Transaction) => {
+	const length = normalizeIotaName(domain, 'dot').split('.')[0].length;
+	return tx.moveCall({
+		target: `${config.packageId}::pricing_config::calculate_base_price`,
+		arguments: [tx.object(priceInfoObjectId), tx.pure.u64(length)],
+	});
+};
 
 // This function is called through the authorized app
 export const handleBasePayment =
