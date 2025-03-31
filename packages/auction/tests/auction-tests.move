@@ -335,8 +335,8 @@ fun test_claim_aborts_if_winner_claims_twice() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EWinnerCannotPlaceBid)]
-fun test_winner_cannot_place_bid() {
+#[test]
+fun test_winner_can_place_bid() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     start_auction_and_place_bid_util(
@@ -349,14 +349,14 @@ fun test_winner_cannot_place_bid() {
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_DOMAIN_NAME),
-        1210 * nanos_per_iota(),
+        1201 * nanos_per_iota(),
         0,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_DOMAIN_NAME),
-        1210 * nanos_per_iota(),
+        1202 * nanos_per_iota(),
         0,
     );
 

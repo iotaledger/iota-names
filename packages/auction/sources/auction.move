@@ -51,9 +51,6 @@ const EAuctionEnded: vector<u8> =
 const ENotWinner: vector<u8> =
     b"Not winner of the auction.";
 #[error]
-const EWinnerCannotPlaceBid: vector<u8> =
-    b"Current winner cannot place a bid.";
-#[error]
 const EBidAmountTooLow: vector<u8> =
     b"The bid amount is too low.";
 #[error]
@@ -163,8 +160,6 @@ public fun place_bid(
 
     // Ensure that the auction is not over
     assert!(clock.timestamp_ms() <= end_timestamp_ms, EAuctionEnded);
-    // Ensure the bidder isn't already the winner
-    assert!(bidder != winner, EWinnerCannotPlaceBid);
 
     // get the current highest bid and ensure that the new bid is greater than
     // the current winning bid
