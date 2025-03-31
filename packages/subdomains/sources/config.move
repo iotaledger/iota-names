@@ -18,11 +18,11 @@ module subdomains::config {
     const MINIMUM_SUBDOMAIN_DURATION: u64 = 24 * 60 * 60 * 1000;
 
     #[error]
-    const EDepthOutOfLimit: vector<u8> = b"Tries to register a subdomain with a depth more than the one allowed.";
+    const EDepthExceedsLimit: vector<u8> = b"Tries to register a subdomain with a depth more than the one allowed.";
     #[error]
     const EInvalidParent: vector<u8> = b"Tries to register a subdomain with the wrong parent (based on name).";
     #[error]
-    const EInvalidLabelSize: vector<u8> = b"Tries to register a label of size less than 3.";
+    const EInvalidLabelSize: vector<u8> = b"Tries to register a subdomain containing a label of size less than 3.";
     #[error]
     const ENotSupportedTLD: vector<u8> = b"Tries to register a domain with an unsupported TLD.";
 
@@ -75,7 +75,7 @@ module subdomains::config {
         );
         assert!(
             has_valid_depth(child, config),
-            EDepthOutOfLimit
+            EDepthExceedsLimit
         );
         assert!(
             is_parent_of(parent, child),

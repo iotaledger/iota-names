@@ -19,7 +19,7 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 
 /// === Error codes ===
 #[error]
-const EExpired: vector<u8> = b"NFT is expired.";
+const ENftExpired: vector<u8> = b"NFT is expired.";
 #[error]
 const ENotSubdomain: vector<u8> = b"NFT is not a subdomain.";
 #[error]
@@ -41,7 +41,7 @@ public(package) fun new(
     // Can't wrap a non-subdomain NFT.
     assert!(nft.domain().is_subdomain(), ENotSubdomain);
     // Can't wrap an expired NFT.
-    assert!(!nft.has_expired(clock), EExpired);
+    assert!(!nft.has_expired(clock), ENftExpired);
 
     SubDomainRegistration {
         id: object::new(ctx),

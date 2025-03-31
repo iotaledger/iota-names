@@ -44,7 +44,7 @@ module subdomains::unit_tests {
         );
     }
 
-    #[test, expected_failure(abort_code = subdomains::config::EDepthOutOfLimit)]
+    #[test, expected_failure(abort_code = subdomains::config::EDepthExceedsLimit)]
     fun test_too_large_subdomain_failure() {
         assert_is_valid_subdomain(
             &new_domain(utf8(b"example.iota")),

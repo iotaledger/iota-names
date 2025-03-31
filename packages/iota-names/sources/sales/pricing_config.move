@@ -7,13 +7,13 @@ module iota_names::pricing_config;
 use iota::vec_map::{Self, VecMap};
 
 #[error]
-const EInvalidLength: vector<u8> = b"Tries to create a range with more than 2 values.";
+const EInvalidLength: vector<u8> = b"Tries to create a range with more than two values.";
 #[error]
 const EInvalidRange: vector<u8> = b"Tries to create a range with the first value greater than the second.";
 #[error]
 const ELengthMismatch: vector<u8> = b"Tries to create a pricing config with different lengths for ranges and prices.";
 #[error]
-const EPriceNotSet: vector<u8> = b"Tries to calculate the price for a given length.";
+const EPriceNotSet: vector<u8> = b"No price set for a name with the given length.";
 
 /// A range struct that holds the start and end of a range (inclusive).
 public struct Range(u64, u64) has copy, drop, store;
