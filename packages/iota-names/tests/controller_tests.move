@@ -13,7 +13,7 @@ use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
-use iota_names::constants::{ year_ms};
+use iota_names::constants::{year_ms};
 use iota_names::controller::{Self, Controller};
 use iota_names::domain::{Self, Domain};
 use iota_names::register::Register;
