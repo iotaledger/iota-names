@@ -28,7 +28,7 @@ const ERecordMismatch: vector<u8> = b"The reverse lookup record does not match t
 #[error]
 const ETargetNotSet: vector<u8> = b"Trying to add a reverse lookup record while the target is empty.";
 #[error]
-const ENotLeafRecord: vector<u8> = b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
+const ENonLeafRecord: vector<u8> = b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
 #[error]
 const EInvalidDepth: vector<u8> = b"Trying to add a leaf record for a TLD or SLD.";
 #[error]
@@ -192,7 +192,7 @@ public fun add_leaf_record(
 /// calls this.
 public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     // We can only call remove on a leaf record.
-    assert!(self.is_leaf_record(domain), ENotLeafRecord);
+    assert!(self.is_leaf_record(domain), ENonLeafRecord);
 
     // if it's a leaf record, there's no `IotaNamesRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
