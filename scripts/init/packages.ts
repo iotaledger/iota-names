@@ -81,7 +81,7 @@ export const Packages = (network: string) => {
 					config: addCoreConfig({ txb, latestPackageId: packageId }),
 					type: `${packageId}::core_config::CoreConfig`,
 				});
-				// Adds the configuration file (pricelist and public key)
+				// Adds the PricingConfig
 				addConfig({
 					txb,
 					adminCap,
@@ -103,6 +103,7 @@ export const Packages = (network: string) => {
 					}),
 					type: `${packageId}::pricing_config::PricingConfig`,
 				});
+				// Adds the RenewalConfig
 				addConfig({
 					txb,
 					adminCap,
@@ -130,7 +131,7 @@ export const Packages = (network: string) => {
 					publisher,
 					isSubdomain: false,
 					iotaNamesPackageId: packageId,
-					network: 'testnet',
+					network,
 					subdomainsPackageId: packageId,
 				});
 				// create display for subnames
@@ -139,7 +140,7 @@ export const Packages = (network: string) => {
 					publisher,
 					isSubdomain: true,
 					iotaNamesPackageId: packageId,
-					network: 'testnet',
+					network,
 					subdomainsPackageId: packageId,
 				});
 			},
@@ -148,14 +149,7 @@ export const Packages = (network: string) => {
 		DenyList: {
 			order: 2,
 			folder: 'denylist',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
+			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			authorizationType: (packageId: string) => `${packageId}::denylist::DenyListAuth`,
 			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotaNames: string) => {
 				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::denylist` });
@@ -164,14 +158,7 @@ export const Packages = (network: string) => {
 		Payments: {
 			order: 2,
 			folder: 'payments',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
+			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsApp`,
 			setupFunction: ({
 				txb,
@@ -206,14 +193,7 @@ export const Packages = (network: string) => {
 		Subdomains: {
 			order: 3,
 			folder: 'subdomains',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
+			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			setupFunction: (
 				txb: Transaction,
 				packageId: string,
@@ -237,13 +217,7 @@ export const Packages = (network: string) => {
 		TempSubdomainProxy: {
 			order: 3,
 			folder: 'temp-subdomain-proxy',
-			processPublish: (data: IotaTransactionBlockResponse) => {
-				const { packageId, upgradeCap } = parseCorePackageObjects(data);
-				return {
-					packageId,
-					upgradeCap,
-				};
-			},
+			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 		},
 	};
 };
