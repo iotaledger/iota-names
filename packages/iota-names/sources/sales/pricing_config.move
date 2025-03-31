@@ -6,15 +6,14 @@ module iota_names::pricing_config;
 
 use iota::vec_map::{Self, VecMap};
 
-/// Tries to create a range with more than 2 values
-const EInvalidLength: u64 = 1;
-/// Tries to create a range with the first value greater than the second
-const EInvalidRange: u64 = 2;
-/// Tries to create a pricing config with different lengths for ranges and
-/// prices
-const ELengthMismatch: u64 = 3;
-/// Tries to calculate the price for a given length
-const EPriceNotSet: u64 = 4;
+#[error]
+const EInvalidLength: vector<u8> = b"Tries to create a range with more than 2 values.";
+#[error]
+const EInvalidRange: vector<u8> = b"Tries to create a range with the first value greater than the second.";
+#[error]
+const ELengthMismatch: vector<u8> = b"Tries to create a pricing config with different lengths for ranges and prices.";
+#[error]
+const EPriceNotSet: vector<u8> = b"Tries to calculate the price for a given length.";
 
 /// A range struct that holds the start and end of a range (inclusive).
 public struct Range(u64, u64) has copy, drop, store;

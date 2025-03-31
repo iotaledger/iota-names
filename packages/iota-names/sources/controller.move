@@ -18,7 +18,8 @@ const CONTENT_HASH: vector<u8> = b"content_hash";
 
 use fun registry_mut as IotaNames.registry_mut;
 
-const EUnsupportedKey: u64 = 0;
+#[error]
+const EUnsupportedKey: vector<u8> = b"Unsupported key.";
 
 /// Authorization token for the controller which
 /// is used to call protected functions.

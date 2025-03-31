@@ -18,13 +18,12 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 /* friend iota_names::sub_name_tests; */
 
 /// === Error codes ===
-///
-/// NFT is expired.
-const EExpired: u64 = 1;
-/// NFT is not a subdomain.
-const ENotSubdomain: u64 = 2;
-/// Tries to destroy a subdomain that has not expired.
-const ENameNotExpired: u64 = 3;
+#[error]
+const EExpired: vector<u8> = b"NFT is expired.";
+#[error]
+const ENotSubdomain: vector<u8> = b"NFT is not a subdomain.";
+#[error]
+const ENameNotExpired: vector<u8> = b"Tries to destroy a subdomain that has not expired.";
 
 /// A wrapper for IotaNamesRegistration object specifically for SubNames.
 public struct SubDomainRegistration has key, store {

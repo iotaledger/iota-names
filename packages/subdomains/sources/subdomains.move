@@ -41,18 +41,18 @@ module subdomains::subdomains {
 
     use denylist::denylist;
 
-    /// Tries to create a subdomain that expires later than the parent or below the minimum.
-    const EInvalidExpirationDate: u64 = 1;
-    /// Tries to create a subdomain with a parent that is not allowed to do so.
-    const ECreationDisabledForSubDomain: u64 = 2;
-    /// Tries to extend the expiration of a subdomain which doesn't have the permission to do so.
-    const EExtensionDisabledForSubDomain: u64 = 3;
-    /// The subdomain has been replaced by a newer NFT, so it can't be renewed.
-    const ESubdomainReplaced: u64 = 4;
-    /// Parent for a given subdomain has changed, hence time extension cannot be done.
-    const EParentChanged: u64 = 5;
-    /// Checks whether a name is allowed or not (against blocked names list)
-    const ENotAllowedName: u64 = 6;
+    #[error]
+    const EInvalidExpirationDate: vector<u8> = b"Tries to create a subdomain that expires later than the parent or below the minimum.";
+    #[error]
+    const ECreationDisabledForSubDomain: vector<u8> = b"Tries to create a subdomain with a parent that is not allowed to do so.";
+    #[error]
+    const EExtensionDisabledForSubDomain: vector<u8> = b"Tries to extend the expiration of a subdomain which doesn't have the permission to do so.";
+    #[error]
+    const ESubdomainReplaced: vector<u8> = b"The subdomain has been replaced by a newer NFT, so it can't be renewed.";
+    #[error]
+    const EParentChanged: vector<u8> = b"Parent for a given subdomain has changed, hence time extension cannot be done.";
+    #[error]
+    const ENotAllowedName: vector<u8> = b"Checks whether a name is allowed or not (against blocked names list).";
 
     /// Enabled metadata value.
     const ACTIVE_METADATA_VALUE: vector<u8> = b"1";

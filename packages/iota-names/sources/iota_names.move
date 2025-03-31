@@ -34,11 +34,12 @@ use fun df::borrow_mut as UID.borrow_mut;
 use fun df::exists_ as UID.exists_;
 use fun df::remove as UID.remove;
 
-/// Trying to withdraw from an empty balance.
-const ENoProfits: u64 = 0;
-/// An application is not authorized to access the feature.
-const EAppNotAuthorized: u64 = 1;
-const ENoProfitsInCoinType: u64 = 2;
+#[error]
+const ENoProfits: vector<u8> = b"Trying to withdraw from an empty balance.";
+#[error]
+const EAppNotAuthorized: vector<u8> = b"The application is not authorized to access the feature.";
+#[error]
+const ENoProfitsInCoinType: vector<u8> = b"No profits in coin type.";
 
 /// An admin capability. The admin has full control over the application.
 /// This object must be issued only once during module initialization.

@@ -9,8 +9,8 @@ module denylist::denylist {
 
     use iota_names::iota_names::{Self, AdminCap, IotaNames};
 
-    /// No names in the passed list
-    const ENoWordsInList: u64 = 1;
+    #[error]
+    const ENoWordsInList: vector<u8> = b"No names in the passed list.";
 
     /// A wrapper that holds the reserved and blocked names.
     public struct Denylist has store {
