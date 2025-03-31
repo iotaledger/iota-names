@@ -13,14 +13,14 @@ use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
-use iota_names::constants::{nanos_per_iota, year_ms};
+use iota_names::constants::{ year_ms};
 use iota_names::controller::{Self, Controller};
 use iota_names::domain::{Self, Domain};
 use iota_names::register::Register;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subdomain_registration;
-use iota_names::iota_names::{Self, IotaNames, AdminCap};
+use iota_names::iota_names::{Self, IotaNames, AdminCap, nanos_per_iota};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 
 use fun set_target_address_util as Scenario.set_target_address_util;

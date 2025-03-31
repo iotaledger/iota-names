@@ -226,6 +226,11 @@ use iota_names::pricing_config::{Self, new_range, PricingConfig};
 public struct Test has drop {}
 
 #[test_only]
+const NANOS_PER_IOTA: u64 = 1_000_000_000;
+#[test_only]
+public fun nanos_per_iota(): u64 { NANOS_PER_IOTA }
+
+#[test_only]
 public fun new_for_testing(ctx: &mut TxContext): (IotaNames, AdminCap) {
     (IotaNames { id: object::new(ctx), balance: balance::zero() }, AdminCap { id: object::new(ctx) })
 }
@@ -258,9 +263,9 @@ public fun new_pricing_config(): PricingConfig {
     let range2 = new_range(vector[4, 4]);
     let range3 = new_range(vector[5, 63]);
     let prices = vector[
-        1200 * iota_names::constants::nanos_per_iota(),
-        200 * iota_names::constants::nanos_per_iota(),
-        50 * iota_names::constants::nanos_per_iota(),
+        1200 * nanos_per_iota(),
+        200 * nanos_per_iota(),
+        50 * nanos_per_iota(),
     ];
 
     pricing_config::new(
