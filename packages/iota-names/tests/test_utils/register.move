@@ -15,11 +15,10 @@ use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
-/// Number of years passed is not within [1-5] interval.
-const EInvalidYearsArgument: u64 = 0;
-/// Trying to register a subdomain (only *.iota is currently allowed).
-/// The payment does not match the price for the domain.
-const EIncorrectAmount: u64 = 4;
+#[error]
+const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within allowed interval.";
+#[error]
+const EIncorrectAmount: vector<u8> = b"The payment does not match the price for the domain.";
 
 /// Authorization token for the app.
 public struct Register has drop {}
