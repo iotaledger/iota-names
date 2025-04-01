@@ -37,9 +37,9 @@ const ENotSupportedType: vector<u8> =
     b"Renewal is not supported in this function call. Call `renew` instead.";
 #[error]
 const ERecordNotFound: vector<u8> =
-    b"Tries to renew a name that does not exist in the registry (has expired + has been burned)";
+    b"Tried to renew a name that does not exist in the registry (has expired + has been burned)";
 #[error]
-const ERecordExpired: vector<u8> = b"Tries to renew an expired name (post grace period).";
+const ERecordExpired: vector<u8> = b"Tried to renew an expired name (post grace period).";
 #[error]
 const EReceiptDomainMismatch: vector<u8> =
     b"The receipt domain does not match the domain of the NFT.";

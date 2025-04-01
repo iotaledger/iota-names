@@ -23,7 +23,7 @@ const ENftExpired: vector<u8> = b"NFT is expired.";
 #[error]
 const ENotSubdomain: vector<u8> = b"NFT is not a subdomain.";
 #[error]
-const ENameNotExpired: vector<u8> = b"Tries to destroy a subdomain that has not expired.";
+const ENameNotExpired: vector<u8> = b"Tried to destroy a subdomain that has not expired.";
 
 /// A wrapper for IotaNamesRegistration object specifically for SubNames.
 public struct SubDomainRegistration has key, store {

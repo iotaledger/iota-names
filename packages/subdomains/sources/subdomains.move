@@ -42,11 +42,11 @@ module subdomains::subdomains {
     use denylist::denylist;
 
     #[error]
-    const EInvalidExpirationDate: vector<u8> = b"Tries to create a subdomain that expires later than the parent or below the minimum.";
+    const EInvalidExpirationDate: vector<u8> = b"Tried to create a subdomain that expires later than the parent or below the minimum.";
     #[error]
-    const ECreationDisabledForSubDomain: vector<u8> = b"Tries to create a subdomain with a parent that is not allowed to do so.";
+    const ECreationDisabledForSubDomain: vector<u8> = b"Tried to create a subdomain with a parent that is not allowed to do so.";
     #[error]
-    const EExtensionDisabledForSubDomain: vector<u8> = b"Tries to extend the expiration of a subdomain which doesn't have the permission to do so.";
+    const EExtensionDisabledForSubDomain: vector<u8> = b"Tried to extend the expiration of a subdomain which doesn't have the permission to do so.";
     #[error]
     const ESubdomainReplaced: vector<u8> = b"The subdomain has been replaced by a newer NFT, so it can't be renewed.";
     #[error]
