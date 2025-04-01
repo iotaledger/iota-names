@@ -12,7 +12,7 @@ import {
 import { getActiveAddress, getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
 import { Packages } from './packages';
-import { queryRegistryTable } from './queries';
+import { queryRegistryTables } from './queries';
 import { PackageInfo } from './types';
 
 export const setup = async (packageInfo: PackageInfo, network: string) => {
@@ -34,10 +34,13 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 		paymentsPackageId: packageInfo.Payments.packageId,
 		publisherId: packageInfo.IotaNames.publisher,
 		registryTableId: '',
+		reverseRegistryTableId: '',
 		subNamesPackageId: packageInfo.Subdomains.packageId,
 		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 	};
 	writePackageInfo(network, networkPackageInfo);
+
+	console.log('Setting up packages...');
 	const packages = Packages(network);
 
 	const txb = new Transaction();
@@ -87,16 +90,18 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 	try {
 		txb.setGasBudget(1_000_000_000);
 
+		const client = getClient(network);
+		let digest = '';
 		while (retries < 3) {
-			console.log('Retrying setup...');
 			const res = await signAndExecute(txb, network);
-
-			await getClient(network).waitForTransaction({
-				digest: res.digest,
+			digest = res.digest;
+			await client.waitForTransaction({
+				digest,
 			});
 
 			if (res.effects?.status.status === 'success') break;
 			console.log(res);
+			console.log('Retrying setup...');
 			retries++;
 
 			if (retries === 3) {
@@ -105,22 +110,18 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 			}
 		}
 
-		console.log('******* Packages set up successfully *******');
+		console.log(`******* Packages set up successfully in ${digest} *******`);
 
 		try {
-			// correct the sdk constants to also include the registryTableID
 			const constants = readPackageInfo(network);
 
-			console.log(constants);
-
-			// delay 3 seconds
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-
-			constants.registryTableId = await queryRegistryTable(
-				getClient(network),
+			let { registryTableId, reverseRegistryTableId } = await queryRegistryTables(
+				client,
 				packageInfo.IotaNames.iotaNames,
 				packageInfo.IotaNames.packageId,
 			);
+			constants.registryTableId = registryTableId;
+			constants.reverseRegistryTableId = reverseRegistryTableId;
 
 			writePackageInfo(network, constants);
 		} catch (e) {

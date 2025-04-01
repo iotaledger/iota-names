@@ -21,6 +21,7 @@ export type PackageInfo = {
 	paymentsPackageId: string;
 	publisherId: string;
 	registryTableId: string;
+	reverseRegistryTableId: string;
 	subNamesPackageId: string;
 	tempSubdomainsProxyPackageId: string;
 	treasuryAddress?: string;
