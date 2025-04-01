@@ -16,7 +16,7 @@ use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
 #[error]
-const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within [1-5] interval.";
+const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within allowed interval.";
 #[error]
 const EIncorrectAmount: vector<u8> = b"The payment does not match the price for the domain.";
 
