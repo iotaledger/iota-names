@@ -92,7 +92,7 @@ jobs:
 
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
         with:
           workflow: iota-names-build-tx.yaml
           workflow_conclusion: success
@@ -134,7 +134,7 @@ jobs:
           cat scripts/tx/result.txt
 
       - name: Upload Transaction Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: combine-and-execute-transaction
           path: scripts/tx
