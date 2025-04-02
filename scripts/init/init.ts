@@ -16,7 +16,7 @@ if (args.length !== 2) {
 }
 
 const network = args[0];
-const newOwner = args[1]; // Second argument should be the address of the new newOwner
+const newOwner = args[1]; // Second argument should be the address of the new owner
 
 export const init = async (
 	network: string | undefined,
@@ -30,7 +30,7 @@ export const init = async (
 
 	if (!newOwner)
 		throw new Error(
-			'`newOwner` not defined. Please provide the new newOwner address of IOTA-Names, e.g. a multisig address',
+			'`newOwner` not defined. Please provide the new owner address of IOTA-Names, e.g. a multisig address',
 		);
 
 	const published = await publishPackages(network, isCIJob, process.env.CLIENT_CONFIG_FILE);
