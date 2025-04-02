@@ -40,7 +40,7 @@ export const init = async (
 
 	const client = getClient(network);
 	const res = await client.getOwnedObjects({
-		newOwner: getActiveAddress(),
+		owner: getActiveAddress(),
 		options: { showType: true },
 	});
 	const ownedNonCoinObjects = (res.data as IotaObjectResponse[])
