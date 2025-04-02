@@ -12,11 +12,10 @@ import { setup } from './setup';
 // Extract network argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
 if (args.length !== 2) {
-	throw new Error(
-		'Invalid number of arguments. Please be sure to provide exactly TWO arguments for the network.',
-	);
+	throw new Error('Invalid number of arguments. Please provide arguments: { network, newOwner }');
 }
 
+const network = args[0];
 const newOwner = args[1]; // Second argument should be the address of the new newOwner
 
 export const init = async (
@@ -26,12 +25,12 @@ export const init = async (
 ) => {
 	if (!network)
 		throw new Error(
-			'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+			'`network` not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
 		);
 
 	if (!newOwner)
 		throw new Error(
-			'Owner not defined. Please provide the new newOwner address of IOTA-Names, e.g. a multisig address',
+			'`newOwner` not defined. Please provide the new newOwner address of IOTA-Names, e.g. a multisig address',
 		);
 
 	const published = await publishPackages(network, isCIJob, process.env.CLIENT_CONFIG_FILE);
@@ -56,4 +55,4 @@ export const init = async (
 	console.log(`Transaction digest: ${response.digest}`);
 };
 
-init(process.env.NETWORK, newOwner, !!process.env.IS_CI_JOB);
+init(network, newOwner, !!process.env.IS_CI_JOB);
