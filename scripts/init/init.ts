@@ -11,22 +11,22 @@ import { setup } from './setup';
 // Extract network argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
 if (args.length !== 2) {
-	throw new Error(
-		'Invalid number of arguments. Please be sure to provide exactly TWO arguments for the network.',
-	);
+    throw new Error(
+        'Invalid number of arguments. Please be sure to provide exactly TWO arguments for the network.',
+    );
 }
 
-const owner = args[1]; // Second argument should be the address of the new owner
+const newOwner = args[1]; // Second argument should be the address of the new newOwner
 
-export const init = async (network: string | undefined, owner: string | undefined, isCIJob: boolean) => {
+export const init = async (network: string | undefined, newOwner: string | undefined, isCIJob: boolean) => {
     if (!network)
         throw new Error(
             'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
         );
 
-    if (!owner)
+    if (!newOwner)
         throw new Error(
-            'Owner not defined. Please provide the new owner address of IOTA-Names, e.g. a multisig address',
+            'Owner not defined. Please provide the new newOwner address of IOTA-Names, e.g. a multisig address',
         );
 
     const published = await publishPackages(network, isCIJob, process.env.CLIENT_CONFIG_FILE);
@@ -35,7 +35,7 @@ export const init = async (network: string | undefined, owner: string | undefine
 
     const client = getClient(network);
     const res = await client.getOwnedObjects({
-        owner: getActiveAddress(),
+        newOwner: getActiveAddress(),
         options: { showType: true },
     });
     const ownedNonCoinObjects = (res.data as IotaObjectResponse[])
@@ -44,11 +44,11 @@ export const init = async (network: string | undefined, owner: string | undefine
         .filter((id): id is string => typeof id === "string");
 
     const tx = new Transaction();
-    tx.transferObjects(ownedNonCoinObjects, owner);
+    tx.transferObjects(ownedNonCoinObjects, newOwner);
 
     const result = await signAndExecute(tx, network);
     const response = await client.waitForTransaction({ digest: result.digest });
     console.log(`Transaction digest: ${response.digest}`);
 };
 
-init(process.env.NETWORK, owner, !!process.env.IS_CI_JOB);
+init(process.env.NETWORK, newOwner, !!process.env.IS_CI_JOB);
