@@ -21,20 +21,21 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 	const networkPackageInfo: NetworkPackageInfo = {
 		adminAddress: getActiveAddress(),
 		adminCap: packageInfo.IotaNames.adminCap,
-		iotaNames: packageInfo.IotaNames.iotaNames,
-		packageId: packageInfo.IotaNames.packageId,
-		packageIdPricing: packageInfo.IotaNames.packageId,
-		paymentsPackageId: packageInfo.Payments.packageId,
-		publisherId: packageInfo.IotaNames.publisher,
-		subNamesPackageId: packageInfo.Subdomains.packageId,
-		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 		coins: {
 			IOTA: {
 				type: iotaCoinType,
 				metadataId: await getCoinMetadataId(network, iotaCoinType),
 			},
 		},
+		denyListPackageId: packageInfo.DenyList.packageId,
+		iotaNames: packageInfo.IotaNames.iotaNames,
+		packageId: packageInfo.IotaNames.packageId,
+		packageIdPricing: packageInfo.IotaNames.packageId,
+		paymentsPackageId: packageInfo.Payments.packageId,
+		publisherId: packageInfo.IotaNames.publisher,
 		registryTableId: '',
+		subNamesPackageId: packageInfo.Subdomains.packageId,
+		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 	};
 	writePackageInfo(network, networkPackageInfo);
 	const packages = Packages(network);
