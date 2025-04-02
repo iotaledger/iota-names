@@ -10,9 +10,9 @@ const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
 const network = args[0]; // First argument should be the network
 
 export const init = async (network: string | undefined, isCIJob: boolean) => {
-	if (!network) {
+	if (!network || args.length !== 1) {
 		throw new Error(
-			'Network not defined. Please run `node init.js <network>` (e.g., mainnet, testnet, devnet, localnet)',
+			'Network not defined or too many arguments. Please run `pnpm ts-node init.js <network>` (e.g., mainnet, testnet, devnet, localnet)\n Be sure to provide exactly ONE argument for the network.',
 		);
 	}
 
