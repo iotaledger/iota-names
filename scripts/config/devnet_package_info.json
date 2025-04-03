@@ -1,0 +1,19 @@
+{
+  "adminAddress": "0x3a49e6dce72c6dbb1b95f76f687b52cfadec516dd2824043e84a2ba8f647f670",
+  "adminCap": "0x2e98697c11de0ab94b97fd3bbbaa7e28e3c684f6e56fd4a7bf5535f13b854335",
+  "coins": {
+    "IOTA": {
+      "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
+      "metadataId": "0xf7ceb0424ca93f77858c74aebda8bcd5ffe0f32b82ebcc38afb3ba643d03a5f8"
+    }
+  },
+  "denyListPackageId": "0xb9cbd429a3ef3b1d8fd5b197531bc5b71719d426131916e6d9edba657d26a9eb",
+  "iotaNames": "0x94f7d68947290d620e1115f4b3527efda89bef5775e927c16931b9956603fbac",
+  "packageId": "0x9d1f612a3a4e7fdc886cc5fd23202c3b00b49044a21caa5622ff28c98e257646",
+  "packageIdPricing": "0x9d1f612a3a4e7fdc886cc5fd23202c3b00b49044a21caa5622ff28c98e257646",
+  "paymentsPackageId": "0xcae4fdbc429c8c8f05a071d8bf5441f64d33e48e2e98c993e223458e182ac780",
+  "publisherId": "0x06f38ae7281d6e3fdac67a0d9f5c155dd2495e09ae066324a5921dcb9bc26ebd",
+  "registryTableId": "0x228f2eb8bf16e3433d410f35812dc2bd60e92652bd343a98e39c04ef7aec364c",
+  "subNamesPackageId": "0x47aba792a01ecb4e185d51780a81c03b119af78b9e669d26d50a9115487b0774",
+  "tempSubdomainsProxyPackageId": "0x304f74ed1148a419d4286052d5271309ab47c722a4e42e9fbd1a7c9e26cad822"
+}

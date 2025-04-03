@@ -7,9 +7,10 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
+// TODO provide network parameter
 const craftTx = async () => {
 	const txb = new Transaction();
-	const config = readPackageInfo('mainnet');
+	const config = readPackageInfo('devnet');
 
 	const adminCapObj = txb.object(config.adminCap);
 
@@ -19,7 +20,7 @@ const craftTx = async () => {
 	});
 
 	txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));
-	await prepareMultisigTx(txb, 'mainnet', config.adminAddress);
+	await prepareMultisigTx(txb, 'devnet', config.adminAddress);
 };
 
 craftTx();

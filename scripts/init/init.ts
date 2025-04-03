@@ -61,6 +61,7 @@ export const init = async (
 	}
 
 	const tx = new Transaction();
+	// @ts-ignore
 	tx.transferObjects(objectsToTransfer, newOwner);
 
 	const result = await signAndExecute(tx, network);
