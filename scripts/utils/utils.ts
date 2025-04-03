@@ -231,6 +231,10 @@ export const prepareMultisigTx = async (tx: Transaction, network: string, addres
 		const output_location =
 			process.env.NODE_ENV === 'development' ? './tx/tx-data-local.txt' : './tx/tx-data.txt';
 
+		const dir = path.dirname(output_location);
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir, { recursive: true });
+		}
 		fs.writeFileSync(output_location, serializedBase64);
 	});
 };
