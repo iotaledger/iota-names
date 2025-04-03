@@ -31,6 +31,7 @@ export const mainPackage: Config = {
 			},
 		},
 		registryTableId: '0xe64cd9db9f829c6cc405d9790bd71567ae07259855f4fba6f02c84f52298c106',
+		reverseRegistryTableId: '0xcafc893c3801416ffa4c262888eaa994e055d717d9b0819db3aef4ce35ab5829',
 	},
 	testnet: {
 		packageId: '0x40eee27b014a872f5c3330dcd5329aa55c7fe0fcc6e70c6498852e2e3727172e',
@@ -49,5 +50,6 @@ export const mainPackage: Config = {
 			},
 		},
 		registryTableId: '0xb120c0d55432630fce61f7854795a3463deb6e3b443cc4ae72e1282073ff56e4',
+		reverseRegistryTableId: '0xcafc893c3801416ffa4c262888eaa994e055d717d9b0819db3aef4ce35ab5829',
 	},
 };

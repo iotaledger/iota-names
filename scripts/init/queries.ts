@@ -4,17 +4,11 @@
 
 import { IotaClient } from '@iota/iota-sdk/client';
 
-export const queryRegistryTable = async (
+export const queryRegistryTables = async (
 	client: IotaClient,
 	iotaNames: string,
 	iotaNamesPackageId: string,
 ) => {
-	const allFields = await client.getDynamicFields({
-		parentId: iotaNames,
-	});
-
-	// just for testing..
-	console.log(allFields);
 	const table = await client.getDynamicFieldObject({
 		parentId: iotaNames,
 		name: {
@@ -25,12 +19,11 @@ export const queryRegistryTable = async (
 		},
 	});
 
-	console.log(table);
-	console.log(iotaNames);
-
 	if (table.data?.content?.dataType !== 'moveObject')
 		throw new Error(`Invalid data ${iotaNamesPackageId}`);
 
 	const data = table.data?.content.fields as Record<string, any>;
-	return data.value.fields.registry.fields.id.id;
+	let registryTableId = data.value.fields.registry.fields.id.id;
+	let reverseRegistryTableId = data.value.fields.reverse_registry.fields.id.id;
+	return { registryTableId, reverseRegistryTableId };
 };
