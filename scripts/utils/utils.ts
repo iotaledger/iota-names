@@ -15,6 +15,8 @@ import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
 import { toB64 } from '@iota/iota-sdk/utils';
 
+import { PackageInfo } from '../config/constants';
+
 const IOTA = process.env.IOTA_BINARY ?? `iota`;
 
 export const getActiveAddress = () => {
@@ -321,4 +323,30 @@ export const getObjectType = async (network: string, objectId: string): Promise<
 		return objectResponse.data.type;
 	}
 	throw new Error('Object data not found');
+};
+
+export const getIotaNamesRelatedObjects = async (
+	packageInfo: PackageInfo,
+	client: IotaClient,
+): Promise<string[]> => {
+	// PackageIDs, UpgradeCap IDs, Publisher and Display objects
+	const packageValues = Object.entries(packageInfo)
+		.map(([key, value]) => value)
+		.filter((v) => typeof v === 'string');
+
+	const ownedObjectsPage = await client.getOwnedObjects({
+		owner: packageInfo.adminAddress,
+		options: { showContent: true },
+	});
+
+	let objectsToTransfer = [];
+	for (const object of ownedObjectsPage.data) {
+		for (const packageValue of packageValues) {
+			if (JSON.stringify(object).includes(packageValue)) {
+				objectsToTransfer.push(object.data?.objectId!);
+				break;
+			}
+		}
+	}
+	return objectsToTransfer;
 };

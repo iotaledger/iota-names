@@ -9,7 +9,7 @@
 		"publish-and-setup": "ts-node init/init.ts",
 		"transactions::main_package::upgrade": "ts-node transactions/main-package-upgrade.ts",
 		"transfer::names": "ts-node reserved-names/transfer-names.ts",
-		"transfer::caps": "ts-node transactions/caps-to-foundation.ts",
+		"transfer::ownership": "ts-node transactions/transfer-ownership.ts",
 		"withdraw:profits": "ts-node transactions/funds-to-treasury.ts",
 		"prettier:check": "prettier -c --ignore-unknown .",
 		"prettier:fix": "prettier -w --ignore-unknown .",

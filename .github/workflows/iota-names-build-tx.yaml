@@ -10,7 +10,7 @@ on:
         options:
           - Profits to Treasury
           - Transfer Reserved Names
-          - Transfer Admin Caps
+          - Transfer IOTA-Names Ownership
           - Upgrade IOTA-Names
           - Authorize Packages
       iota_tools_image:
@@ -87,15 +87,15 @@ jobs:
         run: |
           cd scripts && pnpm transfer::names
 
-      - name: Transfer Admin Caps
-        if: ${{ inputs.transaction_type == 'Transfer Admin Caps' }}
+      - name: Transfer IOTA-Names Ownership (Admin Cap, Package UpgradeCaps, Publisher, Display)
+        if: ${{ inputs.transaction_type == 'Transfer IOTA-Names Ownership' }}
         env:
           NODE_ENV: production
           GAS_OBJECT: ${{ inputs.gas_object_id }}
           NETWORK: mainnet
           ORIGIN: gh_action
         run: |
-          cd scripts && pnpm transfer::caps
+          cd scripts && pnpm transfer::ownership
 
       - name: Upgrade IOTA-Names
         if: ${{ inputs.transaction_type == 'Upgrade IOTA-Names' }}
