@@ -6,24 +6,25 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 export type PackageInfo = {
-	packageId: string;
-	packageIdPricing: string;
-	upgradeCap?: string;
-	publisherId: string;
 	adminAddress: string;
 	adminCap: string;
-	iotaNames: string;
-	subNamesPackageId: string;
-	tempSubdomainsProxyPackageId: string;
-	treasuryAddress?: string;
-	paymentsPackageId: string;
 	coins: {
 		[key: string]: {
 			type: string;
 			metadataId: string;
 		};
 	};
+	denyListPackageId: string;
+	iotaNames: string;
+	packageId: string;
+	packageIdPricing: string;
+	paymentsPackageId: string;
+	publisherId: string;
 	registryTableId: string;
+	subNamesPackageId: string;
+	tempSubdomainsProxyPackageId: string;
+	treasuryAddress?: string;
+	upgradeCap?: string;
 };
 
 export const readPackageInfo = (network: string): PackageInfo => {
