@@ -51,8 +51,8 @@ export const init = async (
 	tx.transferObjects(ownedNonCoinObjects, newOwner);
 
 	const result = await signAndExecute(tx, network);
-	const response = await client.waitForTransaction({ digest: result.digest });
-	console.log(`Transaction digest: ${response.digest}`);
+	await client.waitForTransaction({ digest: result.digest });
+	console.log(`Transaction digest: ${result.digest}`);
 };
 
 init(network, newOwner, !!process.env.IS_CI_JOB);
