@@ -25,6 +25,7 @@ export interface PackageInfo {
 		packageId: string;
 	};
 	registryTableId?: string;
+	reverseRegistryTableId?: string;
 	coins: Record<string, CoinConfig>;
 }
 
