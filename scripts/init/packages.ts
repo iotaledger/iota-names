@@ -17,7 +17,7 @@ import {
 	newRenewalConfig,
 	setupApp,
 } from './authorization';
-import { createDisplay } from './display_tp';
+import { createDisplay } from './display-tp';
 
 const parseCorePackageObjects = (data: IotaTransactionBlockResponse) => {
 	const packageId = data.objectChanges!.find((x) => x.type === 'published');
