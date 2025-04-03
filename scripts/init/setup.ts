@@ -9,7 +9,7 @@ import {
 	readPackageInfo,
 	writePackageInfo,
 } from '../config/constants';
-import { getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
+import { getActiveAddress, getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
 import { Packages } from './packages';
 import { queryRegistryTable } from './queries';
@@ -19,22 +19,23 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 	const iotaCoinType =
 		'0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA';
 	const networkPackageInfo: NetworkPackageInfo = {
-		adminAddress: packageInfo.IotaNames.publisher,
+		adminAddress: getActiveAddress(),
 		adminCap: packageInfo.IotaNames.adminCap,
-		iotaNames: packageInfo.IotaNames.iotaNames,
-		packageId: packageInfo.IotaNames.packageId,
-		packageIdPricing: packageInfo.IotaNames.packageId,
-		paymentsPackageId: packageInfo.Payments.packageId,
-		publisherId: packageInfo.IotaNames.publisher,
-		subNamesPackageId: packageInfo.Subdomains.packageId,
-		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 		coins: {
 			IOTA: {
 				type: iotaCoinType,
 				metadataId: await getCoinMetadataId(network, iotaCoinType),
 			},
 		},
+		denyListPackageId: packageInfo.DenyList.packageId,
+		iotaNames: packageInfo.IotaNames.iotaNames,
+		packageId: packageInfo.IotaNames.packageId,
+		packageIdPricing: packageInfo.IotaNames.packageId,
+		paymentsPackageId: packageInfo.Payments.packageId,
+		publisherId: packageInfo.IotaNames.publisher,
 		registryTableId: '',
+		subNamesPackageId: packageInfo.Subdomains.packageId,
+		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 	};
 	writePackageInfo(network, networkPackageInfo);
 	const packages = Packages(network);
