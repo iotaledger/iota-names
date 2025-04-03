@@ -83,5 +83,5 @@ jobs:
           iota client faucet
           cd ../scripts
           export NETWORK=localnet
-          pnpm ts-node init/init.ts
+          pnpm ts-node init/init.ts localnet
           pnpm ts-node transactions/test-register-name.ts
