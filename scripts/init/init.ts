@@ -11,11 +11,13 @@ import { setup } from './setup';
 
 // Extract network argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
-if (args.length !== 2) {
-	throw new Error('Invalid number of arguments. Please provide arguments: { network, newOwner }');
+if (args.length !== 1) {
+	throw new Error(
+		'Invalid number of arguments. Please be sure to provide the `network` argument.',
+	);
 }
 
-const network = args[0];
+const network = args[0]; // First argument should be the network
 const newOwner = args[1]; // Second argument should be the address of the new owner
 
 export const init = async (
@@ -23,19 +25,19 @@ export const init = async (
 	newOwner: string | undefined,
 	isCIJob: boolean,
 ) => {
-	if (!network)
+	if (!network) {
 		throw new Error(
-			'`network` not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+			'`network` not defined. Please run `pnpm ts-node init.ts <network>` (e.g., mainnet, testnet, devnet, localnet)',
 		);
-
-	if (!newOwner)
-		throw new Error(
-			'`newOwner` not defined. Please provide the new owner address of IOTA-Names, e.g. a multisig address',
-		);
+	}
 
 	const published = await publishPackages(network, isCIJob, process.env.CLIENT_CONFIG_FILE);
 	console.log('Published:', published);
 	await setup(published, network);
+
+	if (!newOwner) {
+		return;
+	}
 
 	const client = getClient(network);
 	const config = readPackageInfo(network);
