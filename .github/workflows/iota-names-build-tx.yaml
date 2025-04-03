@@ -106,7 +106,7 @@ jobs:
           ORIGIN: gh_action
           RPC_URL: ${{ inputs.rpc }}
         run: |
-          cd scripts && pnpm ts-node transactions/main_package_upgrade.ts
+          cd scripts && pnpm ts-node transactions/main-package-upgrade.ts
 
       - name: Authorize Packages
         if: ${{ inputs.transaction_type == 'Authorize Packages' }}
