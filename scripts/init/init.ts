@@ -5,15 +5,26 @@
 import { publishPackages } from './publish';
 import { setup } from './setup';
 
+// Extract network argument from command-line arguments
+const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
+if (args.length !== 1) {
+	throw new Error(
+		'Invalid number of arguments. Please be sure to provide exactly ONE argument for the network.',
+	);
+}
+
+const network = args[0]; // First argument should be the network
+
 export const init = async (network: string | undefined, isCIJob: boolean) => {
-	if (!network)
+	if (!network) {
 		throw new Error(
-			'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+			'Network not defined. Please run `pnpm ts-node init.ts <network>` (e.g., mainnet, testnet, devnet, localnet)',
 		);
+	}
 
 	const published = await publishPackages(network, isCIJob, process.env.CLIENT_CONFIG_FILE);
 	console.log('Published:', published);
 	await setup(published, network);
 };
 
-init(process.env.NETWORK, !!process.env.IS_CI_JOB);
+init(network, !!process.env.IS_CI_JOB);
