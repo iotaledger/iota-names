@@ -9,7 +9,7 @@ To setup a local instance of IOTA-Names (or in any network of your choosing), al
 ```
 # network: choose from { mainnet, testnet, devnet, localnet }
 # newOwner: provide an address to transfer ownership to (optional)
-pnpm ts-node init/init.ts <network> [<newOwner>]
+pnpm ts-node init/init.ts <network> [newOwner]
 ```
 
 This will automatically publish all the packages in the correct order, collect all the variables in a `published.json`
