@@ -10,11 +10,9 @@ import { publishPackages } from './publish';
 import { setup } from './setup';
 
 // Extract network argument from command-line arguments
-const args = process.argv.slice(2); // Get arguments passed after `node init.ts`
+const args = process.argv.slice(2); // Get arguments passed to the script
 if (args.length !== 1) {
-	throw new Error(
-		'Invalid number of arguments. Please be sure to provide the `network` argument.',
-	);
+	throw new Error('Invalid number of arguments. Please be sure to provide the `network` argument.');
 }
 
 const network = args[0]; // First argument should be the network
