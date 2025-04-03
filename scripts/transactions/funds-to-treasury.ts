@@ -23,8 +23,9 @@ const craftTx = async () => {
 	const adminCapObj = txb.object(config.adminCap);
 
 	const generalProfits = txb.moveCall({
-		target: `${config.packageId}::iota_names::withdraw`,
-		arguments: [adminCapObj, txb.object(config.iotaNames)],
+		target: `${config.packageId}::iota_names::withdraw_custom`,
+		arguments: [txb.object(config.iotaNames), adminCapObj],
+		typeArguments: ['0x2::iota::IOTA'],
 	});
 
 	txb.transferObjects([generalProfits], txb.pure.address(treasuryAddress));
