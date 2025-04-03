@@ -11,8 +11,10 @@ import { setup } from './setup';
 
 // Extract `network` and `newOwner` argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed to the script
-if (args.length !== 1) {
-	throw new Error('Invalid number of arguments. Please be sure to provide the `network` argument.');
+if (args.length < 1 || args.length > 2) {
+	throw new Error(
+		'Invalid number of arguments. You must at least provide the `network` argument, `newOwner` is optional.',
+	);
 }
 
 const network = args[0]; // First argument should be the network
