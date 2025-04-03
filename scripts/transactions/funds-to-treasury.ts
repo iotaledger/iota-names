@@ -7,6 +7,14 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
+// Extract `treasuryAddress` argument from command-line arguments
+const args = process.argv.slice(2); // Get arguments passed to the script
+if (args.length !== 1) {
+	throw new Error('Invalid number of arguments. You must provide the `treasuryAddress` argument.');
+}
+
+const treasuryAddress = args[0]; // First argument should be treasury address
+
 // TODO provide network parameter
 const craftTx = async () => {
 	const txb = new Transaction();
@@ -19,7 +27,7 @@ const craftTx = async () => {
 		arguments: [adminCapObj, txb.object(config.iotaNames)],
 	});
 
-	txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));
+	txb.transferObjects([generalProfits], txb.pure.address(treasuryAddress));
 	await prepareMultisigTx(txb, 'devnet', config.adminAddress);
 };
 
