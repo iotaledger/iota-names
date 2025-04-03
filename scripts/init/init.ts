@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { IotaObjectResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { getActiveAddress, getClient, signAndExecute } from '../utils/utils';
+import { readPackageInfo } from '../config/constants';
+import { getClient, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
 
@@ -38,17 +38,28 @@ export const init = async (
 	await setup(published, network);
 
 	const client = getClient(network);
-	const res = await client.getOwnedObjects({
-		owner: getActiveAddress(),
-		options: { showType: true },
+	const config = readPackageInfo(network);
+	const configValues = Object.entries(config)
+		.map(([key, value]) => value)
+		.filter((v) => typeof v === 'string');
+
+	const ownedObjectsPage = await client.getOwnedObjects({
+		owner: config.adminAddress,
+		options: { showContent: true },
 	});
-	const ownedNonCoinObjects = (res.data as IotaObjectResponse[])
-		.filter((x) => x.data?.type !== '0x2::coin::Coin<0x2::iota::IOTA>')
-		.map((x) => x.data?.objectId)
-		.filter((id): id is string => typeof id === 'string');
+
+	let objectsToTransfer = [];
+	for (const object of ownedObjectsPage.data) {
+		for (const configValue of configValues) {
+			if (JSON.stringify(object).includes(configValue)) {
+				objectsToTransfer.push(object.data?.objectId);
+				break;
+			}
+		}
+	}
 
 	const tx = new Transaction();
-	tx.transferObjects(ownedNonCoinObjects, newOwner);
+	tx.transferObjects(objectsToTransfer, newOwner);
 
 	const result = await signAndExecute(tx, network);
 	await client.waitForTransaction({ digest: result.digest });
