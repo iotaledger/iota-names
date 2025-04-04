@@ -61,7 +61,7 @@ jobs:
           touch iota_config/iota.keystore
           cat <<EOF > iota_config/iota.keystore
           [
-            "AJJqjgjU5B9vG2xV2c5kd51eyLYJ0yuEcSYRjzCKIQhT"
+            "iotaprivkey1qrhwwskzlay56kddyanq7jcptzy5cmrp5lr2rvxvtlaxfs5cnvrlxdx89cr"
           ]
           EOF
           cat <<EOF > iota_config/client.yaml
@@ -82,8 +82,6 @@ jobs:
           docker pull docker.io/${{ inputs.iota_tools_image }}
           docker create --name tmp_cont docker.io/${{ inputs.iota_tools_image }}
           docker cp tmp_cont:/usr/local/bin/iota iota
-          ./iota client addresses
-          ./iota client switch --address 0x2ffe93910ae4bc68eccc5418b748abcfc417d6a94c4e3e8414cdea92b20e8768
 
       - name: Install JQ
         working-directory: .
