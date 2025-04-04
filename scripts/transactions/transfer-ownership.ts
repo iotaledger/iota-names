@@ -9,11 +9,15 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { readPackageInfo } from '../config/constants';
 import { getClient, getIotaNamesAdminObjects, prepareMultisigTx } from '../utils/utils';
 
+// Extract `treasuryAddress` argument from command-line arguments
+const args = process.argv.slice(2); // Get arguments passed to the script
+if (args.length !== 1) {
+	throw new Error('Invalid number of arguments. You must provide the `newAddress` argument.');
+}
+const newAddress = args[0]; // First argument should be new address
+
 const network = 'localnet';
 const config = readPackageInfo(network);
-
-// The new multisig address to transfer the objects to.
-const NEW_MULTISIG_ADDR = '0x1ca3c38e888493f869ac35346a2041d6cf87b0b935ebba14b35a08811d8a76e4';
 
 const profitsToTreasury = (txb: Transaction) => {
 	const generalProfits = txb.moveCall({
@@ -36,7 +40,7 @@ const treasuryClaimAndMoveCapsToFoundation = async () => {
 	// transfer profits to treasury
 	profitsToTreasury(txb);
 
-	txb.transferObjects(objectsToTransfer, txb.pure.address(NEW_MULTISIG_ADDR));
+	txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));
 
 	await prepareMultisigTx(txb, network, config.adminAddress);
 };
