@@ -16,6 +16,7 @@ export interface CoinConfig {
 }
 
 export interface PackageInfo {
+	auctionPackageId: string;
 	packageId: string;
 	packageIdPricing: string;
 	iotaNames: string;
@@ -27,7 +28,6 @@ export interface PackageInfo {
 	registryTableId?: string;
 	reverseRegistryTableId?: string;
 	coins: Record<string, CoinConfig>;
-	auctionPackageId: string;
 }
 
 export interface NameRecord {
