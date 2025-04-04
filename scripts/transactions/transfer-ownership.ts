@@ -8,8 +8,9 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo } from '../config/constants';
 import { getClient, getIotaNamesAdminObjects, prepareMultisigTx } from '../utils/utils';
+import { profitsToTreasury } from './funds-to-treasury';
 
-// Extract `treasuryAddress` argument from command-line arguments
+// Extract `newAddress` argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed to the script
 if (args.length !== 1) {
 	throw new Error('Invalid number of arguments. You must provide the `newAddress` argument.');
@@ -18,15 +19,6 @@ const newAddress = args[0]; // First argument should be new address
 
 const network = 'localnet';
 const config = readPackageInfo(network);
-
-const profitsToTreasury = (txb: Transaction) => {
-	const generalProfits = txb.moveCall({
-		target: `${config.packageId}::iota_names::withdraw`,
-		arguments: [txb.object(config.adminCap), txb.object(config.iotaNames)],
-	});
-
-	txb.transferObjects([generalProfits], txb.pure.address(config.treasuryAddress!));
-};
 
 const treasuryClaimAndMoveCapsToFoundation = async () => {
 	const client = getClient(network);
@@ -37,8 +29,7 @@ const treasuryClaimAndMoveCapsToFoundation = async () => {
 
 	const txb = new Transaction();
 
-	// transfer profits to treasury
-	profitsToTreasury(txb);
+	profitsToTreasury(txb, config, newAddress);
 
 	txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));
 

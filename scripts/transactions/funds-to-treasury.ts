@@ -4,7 +4,7 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { readPackageInfo } from '../config/constants';
+import { PackageInfo, readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 // Extract `treasuryAddress` argument from command-line arguments
@@ -20,16 +20,22 @@ const craftTx = async () => {
 	const txb = new Transaction();
 	const config = readPackageInfo('devnet');
 
-	const adminCapObj = txb.object(config.adminCap);
+	profitsToTreasury(txb, config, treasuryAddress);
 
-	const generalProfits = txb.moveCall({
-		target: `${config.packageId}::iota_names::withdraw_custom`,
-		arguments: [txb.object(config.iotaNames), adminCapObj],
-		typeArguments: ['0x2::iota::IOTA'],
-	});
-
-	txb.transferObjects([generalProfits], txb.pure.address(treasuryAddress));
 	await prepareMultisigTx(txb, 'devnet', config.adminAddress);
 };
 
 craftTx();
+
+export async function profitsToTreasury(
+	txb: Transaction,
+	packageInfo: PackageInfo,
+	treasuryAddress: string,
+) {
+	const generalProfits = txb.moveCall({
+		target: `${packageInfo.packageId}::iota_names::withdraw_custom`,
+		arguments: [txb.object(packageInfo.iotaNames), txb.object(packageInfo.adminCap)],
+		typeArguments: ['0x2::iota::IOTA'],
+	});
+	txb.transferObjects([generalProfits], txb.pure.address(treasuryAddress));
+}
