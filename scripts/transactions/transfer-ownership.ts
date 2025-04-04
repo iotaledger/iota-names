@@ -7,7 +7,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo } from '../config/constants';
-import { getClient, getIotaNamesRelatedObjects, prepareMultisigTx } from '../utils/utils';
+import { getClient, getIotaNamesAdminObjects, prepareMultisigTx } from '../utils/utils';
 
 const network = 'localnet';
 const config = readPackageInfo(network);
@@ -27,7 +27,7 @@ const profitsToTreasury = (txb: Transaction) => {
 const treasuryClaimAndMoveCapsToFoundation = async () => {
 	const client = getClient(network);
 
-	const objectsToTransfer = await getIotaNamesRelatedObjects(config, client);
+	const objectsToTransfer = await getIotaNamesAdminObjects(config, client);
 	console.log('Objects to transfer:', objectsToTransfer.length);
 	console.log(objectsToTransfer);
 

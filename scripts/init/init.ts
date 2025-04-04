@@ -5,7 +5,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo } from '../config/constants';
-import { getClient, getIotaNamesRelatedObjects, signAndExecute } from '../utils/utils';
+import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
 
@@ -41,7 +41,7 @@ export const init = async (
 
 	const client = getClient(network);
 	const config = readPackageInfo(network);
-	const objectsToTransfer = await getIotaNamesRelatedObjects(config, client);
+	const objectsToTransfer = await getIotaNamesAdminObjects(config, client);
 
 	const tx = new Transaction();
 	tx.transferObjects(objectsToTransfer, newOwner);

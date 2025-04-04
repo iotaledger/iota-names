@@ -325,7 +325,7 @@ export const getObjectType = async (network: string, objectId: string): Promise<
 	throw new Error('Object data not found');
 };
 
-export const getIotaNamesRelatedObjects = async (
+export const getIotaNamesAdminObjects = async (
 	packageInfo: PackageInfo,
 	client: IotaClient,
 ): Promise<string[]> => {
