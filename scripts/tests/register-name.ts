@@ -47,7 +47,7 @@ const registerName = async () => {
 	const res = await signAndExecute(tx, network);
 	if (res.errors) {
 		console.error('Transaction failed:', res.errors);
-		return;
+		throw new Error(JSON.stringify(res.errors));
 	} else {
 		console.log('Transaction result:', res);
 	}
