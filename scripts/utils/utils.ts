@@ -343,14 +343,14 @@ export const getIotaNamesAdminObjects = async (
 		options: { showContent: true },
 	});
 
-	let objectsToTransfer = [];
+	let objectIds = [];
 	for (const object of ownedObjectsPage.data) {
 		for (const packageValue of packageValues) {
 			if (JSON.stringify(object).includes(packageValue)) {
-				objectsToTransfer.push(object.data?.objectId!);
+				objectIds.push(object.data?.objectId!);
 				break;
 			}
 		}
 	}
-	return objectsToTransfer;
+	return objectIds;
 };
