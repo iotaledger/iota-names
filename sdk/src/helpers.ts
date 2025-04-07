@@ -2,6 +2,8 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Transaction } from '@iota/iota-sdk/transactions';
+
 import { normalizeIotaName } from './utils';
 
 export function isSubName(name: string): boolean {
@@ -24,13 +26,25 @@ export function validateYears(years: number) {
 	if (!(years > 0 && years < 6)) throw new Error('Years must be between 1 and 5');
 }
 
-/**
- * A helper to parse the price list from the config object.
- */
-export function parsePriceListFromConfig(contents: Record<string, any>) {
-	return {
-		threeLetters: Number(contents?.fields?.three_char_price),
-		fourLetters: Number(contents?.fields?.four_char_price),
-		fivePlusLetters: Number(contents?.fields?.five_plus_char_price),
-	};
+export function zeroCoin(tx: Transaction, type: string) {
+	return tx.moveCall({
+		target: '0x2::coin::zero',
+		typeArguments: [type],
+	});
+}
+
+export function getConfigType(iotaNamesPackageV1: string, innerType: string): string {
+	return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
+}
+
+export function getDomainType(iotaNamesPackageV1: string): string {
+	return `${iotaNamesPackageV1}::domain::Domain`;
+}
+
+export function getPricelistConfigType(iotaNamesPackageId: string): string {
+	return `${iotaNamesPackageId}::pricing_config::PricingConfig`;
+}
+
+export function getRenewalPricelistConfigType(iotaNamesPackageId: string): string {
+	return `${iotaNamesPackageId}::pricing_config::RenewalConfig`;
 }

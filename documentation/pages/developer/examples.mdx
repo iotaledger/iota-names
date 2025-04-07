@@ -19,9 +19,12 @@ module demo::demo {
     };
 
     /// Different custom error messages.
-    const ENameNotFound: u64 = 0;
-    const ENameNotPointingToAddress: u64 = 1;
-    const ENameExpired: u64 = 2;
+    #[error]
+    const ENameNotFound: vector<u8> = b"Name not found.";
+    #[error]
+    const ENameNotPointingToAddress: vector<u8> = b"Name not pointing to an address.";
+    #[error]
+    const ENameExpired: vector<u8> = b"Name expired.";
 
     /// A function to transfer an object of any type T to a name (for instance `example.iota`)
     public fun send_to_name<T: key + store>(iota_names: &IotaNames, obj: T, name: String, clock: &Clock) {

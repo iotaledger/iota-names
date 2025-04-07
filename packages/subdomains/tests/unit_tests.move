@@ -44,7 +44,7 @@ module subdomains::unit_tests {
         );
     }
 
-    #[test, expected_failure(abort_code = subdomains::config::EDepthOutOfLimit)]
+    #[test, expected_failure(abort_code = subdomains::config::EDepthExceedsLimit)]
     fun test_too_large_subdomain_failure() {
         assert_is_valid_subdomain(
             &new_domain(utf8(b"example.iota")),
@@ -96,7 +96,7 @@ module subdomains::unit_tests {
     #[test, expected_failure(abort_code = subdomains::config::EInvalidParent)]
     fun test_invalid_parent_sld_failure() {
         assert_is_valid_subdomain(
-            &new_domain(utf8(b"sub.exampl.iota")),
+            &new_domain(utf8(b"sub.test.iota")),
             &new_domain(utf8(b"sub.sub.example.iota")),
             &default()
         );
@@ -105,7 +105,7 @@ module subdomains::unit_tests {
     #[test, expected_failure(abort_code = subdomains::config::EInvalidLabelSize)]
     fun test_invalid_child_label_size_failure() {
         assert_is_valid_subdomain(
-            &new_domain(utf8(b"sub.exampl.iota")),
+            &new_domain(utf8(b"sub.test.iota")),
             &new_domain(utf8(b"ob.example.iota")),
             &default()
         );

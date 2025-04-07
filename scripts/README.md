@@ -7,9 +7,9 @@ This directory contains different scripts used to build transactions (for multi-
 To setup a local instance of IOTA-Names (or in any network of your choosing), all you need to do is call:
 
 ```
-# choose from mainnet, testnet, devnet, localnet
-export NETWORK=localnet
-pnpm ts-node init/init.ts
+# network: choose from { mainnet, testnet, devnet, localnet }
+# newOwner: provide an address to transfer ownership to (optional)
+pnpm ts-node init/init.ts <network> [newOwner]
 ```
 
 This will automatically publish all the packages in the correct order, collect all the variables in a `published.json`

@@ -5,12 +5,11 @@
 import fs from 'fs';
 import { IotaObjectResponse } from '@iota/iota-sdk/client';
 
-import { mainPackage } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import { getClient } from '../utils/utils';
 
-const config = mainPackage.mainnet;
-
 const getAllOwnedDomains = async () => {
+	const config = readPackageInfo('mainnet');
 	let client = getClient('mainnet');
 	let hasNextPage = true;
 	let cursor: string | null | undefined = undefined;

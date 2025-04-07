@@ -2,7 +2,9 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Constants } from './types.js';
+import type { Config } from './types.js';
+
+export const MAX_U64 = BigInt('18446744073709551615');
 
 /**
  * Allowed keys for metadata.
@@ -12,42 +14,42 @@ export const ALLOWED_METADATA = {
 	avatar: 'avatar',
 };
 
-export const getConfigType = (iotaNamesPackageV1: string, innerType: string) =>
-	`${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
-
-export const getDomainType = (iotaNamesPackageV1: string) =>
-	`${iotaNamesPackageV1}::domain::Domain`;
-
-export const getPricelistConfigType = (iotaNamesPackageV1: string) =>
-	`${iotaNamesPackageV1}::config::Config`;
-
-export const getRenewalPricelistConfigType = (renewalsPackageId: string) =>
-	`${renewalsPackageId}::renew::RenewalConfig`;
-
-export const MAINNET_CONFIG: Constants = {
-	iotaNamesPackageId: {
-		latest: '0xb7004c7914308557f7afbaf0dca8dd258e18e306cb7a45b28019f3d0a693f162',
-		v1: '0xd22b24490e0bae52676651b4f56660a5ff8022a2576e0089f79b3c88d44e08f0',
+export const mainPackage: Config = {
+	mainnet: {
+		packageId: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
+		packageIdPricing: '0x71af035413ed499710980ed8adb010bbf2cc5cacf4ab37c7710a4bb87eb58ba5',
+		iotaNames: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
+		subNamesPackageId: '0xe177697e191327901637f8d2c5ffbbde8b1aaac27ec1024c4b62d1ebd1cd7430',
+		tempSubdomainsProxyPackageId:
+			'0xf335dfbcb2020fc996250c0d6fd4655c5e2036b0606cac7408aa163f51340886',
+		payments: {
+			packageId: '0x863d5f9760f302495398c8e4c6e9784bc17c44b079c826a1813715ef08cbe41a',
+		},
+		coins: {
+			IOTA: {
+				type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
+			},
+		},
+		registryTableId: '0xe64cd9db9f829c6cc405d9790bd71567ae07259855f4fba6f02c84f52298c106',
+		reverseRegistryTableId: '0xcafc893c3801416ffa4c262888eaa994e055d717d9b0819db3aef4ce35ab5829',
 	},
-	iotaNamesObjectId: '0x6e0ddefc0ad98889c04bab9639e512c21766c5e6366f89e696956d9be6952871',
-	utilsPackageId: '0xf7854c81cf500d60a4437f4599f7ff3b89abd13f645ae08f62345c7a25317bee',
-	registrationPackageId: '0x9d451fa0139fef8f7c1f0bd5d7e45b7fa9dbb84c2e63c2819c7abd0a7f7d749d',
-	renewalPackageId: '0xd5e5f74126e7934e35991643b0111c3361827fc0564c83fa810668837c6f0b0f',
-	subNamesPackageId: '0xe177697e191327901637f8d2c5ffbbde8b1aaac27ec1024c4b62d1ebd1cd7430',
-	tempSubNamesProxyPackageId: '0xdacfd7c1176a68137b38a875d76a2f65d277596d2c632881931d926b16de2698',
-	registryTableId: '0xe64cd9db9f829c6cc405d9790bd71567ae07259855f4fba6f02c84f52298c106',
-};
-
-export const TESTNET_CONFIG: Constants = {
-	iotaNamesPackageId: {
-		latest: '0x67072134f0867b886c9541873d1cb327feb7e161cd56dd76cb6aa9e464410db1',
-		v1: '0x22fa05f21b1ad71442491220bb9338f7b7095fe35000ef88d5400d28523bdd93',
+	testnet: {
+		packageId: '0x40eee27b014a872f5c3330dcd5329aa55c7fe0fcc6e70c6498852e2e3727172e',
+		packageIdPricing: '0x8a4df604a449ccb9ef2efb9747046b78f78ba60fc8d88df098d0dd47619df5a4',
+		iotaNames: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
+		subNamesPackageId: '0x3c272bc45f9157b7818ece4f7411bdfa8af46303b071aca4e18c03119c9ff636',
+		tempSubdomainsProxyPackageId:
+			'0x295a0749dae0e76126757c305f218f929df0656df66a6361f8b6c6480a943f12',
+		payments: {
+			packageId: '0x9e8b85270cf5e7ec0ae44c745abe000b6dd7d8b54ca2d367e044d8baccefc10c',
+		},
+		/// Testnet coins will be different here for testing purposes, we can publish our own
+		coins: {
+			IOTA: {
+				type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
+			},
+		},
+		registryTableId: '0xb120c0d55432630fce61f7854795a3463deb6e3b443cc4ae72e1282073ff56e4',
+		reverseRegistryTableId: '0xcafc893c3801416ffa4c262888eaa994e055d717d9b0819db3aef4ce35ab5829',
 	},
-	iotaNamesObjectId: '0x300369e8909b9a6464da265b9a5a9ab6fe2158a040e84e808628cde7a07ee5a3',
-	utilsPackageId: '0x7954ae683314ec7e156acbf0c0fc964ce035fd7f456fe7576848226502cfde1b',
-	registrationPackageId: '0x4255184a0143c0ce4394a3f16a6f5aa5d64507269e54e51ea396d569fe8f1ba5',
-	renewalPackageId: '0x54800ebb4606fd0c03b4554976264373b3374eeb3fd63e7ff69f31cac786ba8c',
-	subNamesPackageId: '0x3c272bc45f9157b7818ece4f7411bdfa8af46303b071aca4e18c03119c9ff636',
-	tempSubNamesProxyPackageId: '0xfd5ad004acbd5e3dd4fc0de4f1f1d465f8db5bb2ec1de63694ce6dc887fe1c89',
-	registryTableId: '0xb120c0d55432630fce61f7854795a3463deb6e3b443cc4ae72e1282073ff56e4',
 };

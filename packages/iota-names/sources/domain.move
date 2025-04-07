@@ -12,7 +12,8 @@ module iota_names::domain;
 use std::option::{none, some};
 use std::string::{Self, String, utf8};
 
-const EInvalidDomain: u64 = 0;
+#[error]
+const EInvalidDomain: vector<u8> = b"Invalid domain.";
 
 /// The maximum length of a full domain
 const MAX_DOMAIN_LENGTH: u64 = 235;

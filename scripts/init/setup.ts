@@ -2,18 +2,45 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { getClient, signAndExecute } from '../utils/utils';
+import {
+	PackageInfo as NetworkPackageInfo,
+	readPackageInfo,
+	writePackageInfo,
+} from '../config/constants';
+import { getActiveAddress, getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
-import { Network, Packages } from './packages';
-import { queryRegistryTable } from './queries';
+import { Packages } from './packages';
+import { queryRegistryTables } from './queries';
 import { PackageInfo } from './types';
 
-export const setup = async (packageInfo: PackageInfo, network: Network) => {
+export const setup = async (packageInfo: PackageInfo, network: string) => {
+	const iotaCoinType =
+		'0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA';
+	const networkPackageInfo: NetworkPackageInfo = {
+		adminAddress: getActiveAddress(),
+		adminCap: packageInfo.IotaNames.adminCap,
+		coins: {
+			IOTA: {
+				type: iotaCoinType,
+				metadataId: await getCoinMetadataId(network, iotaCoinType),
+			},
+		},
+		denyListPackageId: packageInfo.DenyList.packageId,
+		iotaNames: packageInfo.IotaNames.iotaNames,
+		packageId: packageInfo.IotaNames.packageId,
+		packageIdPricing: packageInfo.IotaNames.packageId,
+		paymentsPackageId: packageInfo.Payments.packageId,
+		publisherId: packageInfo.IotaNames.publisher,
+		registryTableId: '',
+		reverseRegistryTableId: '',
+		subNamesPackageId: packageInfo.Subdomains.packageId,
+		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+	};
+	writePackageInfo(network, networkPackageInfo);
+
+	console.log('Setting up packages...');
 	const packages = Packages(network);
 
 	const txb = new Transaction();
@@ -26,7 +53,7 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 				adminCap: packageInfo.IotaNames.adminCap,
 				iotaNames: packageInfo.IotaNames.iotaNames,
 				type: data.authorizationType(pkg.packageId),
-				iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
+				iotaNamesPackageId: packageInfo.IotaNames.packageId,
 			});
 		}
 	}
@@ -51,34 +78,30 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 		packageInfo.IotaNames.iotaNames,
 		packageInfo.IotaNames.publisher,
 	);
-	packages.Renewal.setupFunction({
+	packages.Payments.setupFunction({
 		txb,
+		packageId: packageInfo.Payments.packageId,
 		adminCap: packageInfo.IotaNames.adminCap,
 		iotaNames: packageInfo.IotaNames.iotaNames,
-		packageId: packageInfo.Renewal.packageId,
-		iotaNamesPackageIdV1: packageInfo.IotaNames.packageId,
-		priceList: {
-			three: 2 * Number(NANOS_PER_IOTA),
-			four: 1 * Number(NANOS_PER_IOTA),
-			fivePlus: 0.2 * Number(NANOS_PER_IOTA),
-		},
+		iotaNamesPackageId: packageInfo.IotaNames.packageId,
 	});
-
 	let retries = 0;
 
 	try {
 		txb.setGasBudget(1_000_000_000);
 
+		const client = getClient(network);
+		let digest = '';
 		while (retries < 3) {
-			console.log('Retrying setup...');
 			const res = await signAndExecute(txb, network);
-
-			await getClient(network).waitForTransaction({
-				digest: res.digest,
+			digest = res.digest;
+			await client.waitForTransaction({
+				digest,
 			});
 
 			if (res.effects?.status.status === 'success') break;
 			console.log(res);
+			console.log('Retrying setup...');
 			retries++;
 
 			if (retries === 3) {
@@ -87,29 +110,20 @@ export const setup = async (packageInfo: PackageInfo, network: Network) => {
 			}
 		}
 
-		console.log('******* Packages set up successfully *******');
+		console.log(`******* Packages set up successfully in ${digest} *******`);
 
 		try {
-			// correct the sdk constants to also include the registryTableID
-			const constants = JSON.parse(
-				readFileSync(path.resolve(__dirname, '../constants.sdk.json'), 'utf8'),
-			);
+			const constants = readPackageInfo(network);
 
-			console.log(constants);
-
-			// delay 3 seconds
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-
-			constants.registryTableId = await queryRegistryTable(
-				getClient(network),
+			let { registryTableId, reverseRegistryTableId } = await queryRegistryTables(
+				client,
 				packageInfo.IotaNames.iotaNames,
 				packageInfo.IotaNames.packageId,
 			);
+			constants.registryTableId = registryTableId;
+			constants.reverseRegistryTableId = reverseRegistryTableId;
 
-			writeFileSync(
-				path.resolve(path.resolve(__dirname, '../'), 'constants.sdk.json'),
-				JSON.stringify(constants),
-			);
+			writePackageInfo(network, constants);
 		} catch (e) {
 			console.error(
 				'Error while updating sdk constants: Most likely the file does not exist if you run `setup` without publishing through this',

@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 1
 
@@ -32,11 +32,11 @@ jobs:
 
       - name: Run move tests in all package subdirectories, with exclusions
         run: |
-          exclude_dirs=(governance) # Add excluded directories to this array
+          excluded_dirs=(day_one governance) # Define excluded directories as an array
           for dir in packages/*; do
             dir_name=$(basename "$dir")
-            if [[ ! " ${exclude_dirs[@]} " =~ " ${dir_name} " ]] && [ -d "$dir" ]; then
+            if [[ ! " ${excluded_dirs[*]} " =~ (^|[[:space:]])${dir_name}($|[[:space:]]) ]] && [ -d "$dir" ]; then
               echo "Running iota move test in $dir"
-              (cd "$dir" && iota move test)
+              iota move test --path "$dir"
             fi
           done

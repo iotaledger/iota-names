@@ -63,7 +63,7 @@ fun try_wrap_non_subdomain() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = iota_names::subdomain_registration::EExpired)]
+#[test, expected_failure(abort_code = iota_names::subdomain_registration::ENftExpired)]
 fun try_wrap_expired_subname() {
     let mut ctx = tx_context::dummy();
     let mut clock = clock::create_for_testing(&mut ctx);

@@ -15,25 +15,24 @@ use iota_names::subdomain_registration::{Self, SubDomainRegistration};
 use iota_names::iota_names::AdminCap;
 use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 
-/// The `IotaNamesRegistration` has expired.
-const ENftExpired: u64 = 0;
-/// Trying to override a record that is not expired.
-const ERecordNotExpired: u64 = 1;
-/// The `IotaNamesRegistration` does not match the `NameRecord`.
-const EIdMismatch: u64 = 2;
-/// The `NameRecord` has expired.
-const ERecordExpired: u64 = 3;
-/// The reverse lookup record does not match the `NameRecord`.
-const ERecordMismatch: u64 = 4;
-/// Trying to add a reverse lookup record while the target is empty.
-const ETargetNotSet: u64 = 5;
-/// Trying to remove or operate on a non-leaf record as if it were a leaf
-/// record.
-const ENotLeafRecord: u64 = 6;
-/// Trying to add a leaf record for a TLD or SLD.
-const EInvalidDepth: u64 = 7;
-/// Trying to lookup a record that doesn't exist.
-const ERecordNotFound: u64 = 8;
+#[error]
+const ENftExpired: vector<u8> = b"The `IotaNamesRegistration` has expired.";
+#[error]
+const ERecordNotExpired: vector<u8> = b"Record has not yet expired.";
+#[error]
+const EIdMismatch: vector<u8> = b"The `IotaNamesRegistration` does not match the `NameRecord`.";
+#[error]
+const ERecordExpired: vector<u8> = b"The `NameRecord` has expired.";
+#[error]
+const ERecordMismatch: vector<u8> = b"The reverse lookup record does not match the `NameRecord`.";
+#[error]
+const ETargetNotSet: vector<u8> = b"Trying to add a reverse lookup record while the target is empty.";
+#[error]
+const ENonLeafRecord: vector<u8> = b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
+#[error]
+const EInvalidDepth: vector<u8> = b"Trying to add a leaf record for a TLD or SLD.";
+#[error]
+const ERecordNotFound: vector<u8> = b"Trying to lookup a record that doesn't exist.";
 
 /// The `Registry` object. Attached as a dynamic field to the `IotaNames` object,
 /// and the `iota_names` module controls the access to the `Registry`.
@@ -193,7 +192,7 @@ public fun add_leaf_record(
 /// calls this.
 public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     // We can only call remove on a leaf record.
-    assert!(self.is_leaf_record(domain), ENotLeafRecord);
+    assert!(self.is_leaf_record(domain), ENonLeafRecord);
 
     // if it's a leaf record, there's no `IotaNamesRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the

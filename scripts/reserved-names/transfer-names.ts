@@ -7,7 +7,7 @@ import { IotaObjectResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
-import { mainPackage } from '../config/constants';
+import { readPackageInfo } from '../config/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 // A {name: address} map
@@ -85,7 +85,7 @@ const parseCsvFile = () => {
 
 const prepareTx = () => {
 	const txb = new Transaction();
-	const pkg = mainPackage.mainnet;
+	const pkg = readPackageInfo('mainnet');
 
 	for (let recipient of Object.keys(recipients)) {
 		const objects = [...recipients[recipient]].filter((x) => !!x);

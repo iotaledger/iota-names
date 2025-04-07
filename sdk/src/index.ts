@@ -2,16 +2,16 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export { IotaNamesClient } from './iota-names-client.js';
-export { IotaNamesTransaction } from './iota-names-transaction.js';
-export type { Constants, Network, IotaNamesClientConfig } from './types.js';
+export { IotaNamesClient } from './iota-names-client';
+export { IotaNamesTransaction } from './iota-names-transaction';
+export type { Network, IotaNamesClientConfig, Config } from './types';
+export { ALLOWED_METADATA, mainPackage } from './constants';
 export {
+	isSubName,
+	isNestedSubName,
+	validateYears,
 	getConfigType,
 	getDomainType,
 	getPricelistConfigType,
 	getRenewalPricelistConfigType,
-	ALLOWED_METADATA,
-	TESTNET_CONFIG,
-	MAINNET_CONFIG,
-} from './constants.js';
-export { isSubName, isNestedSubName } from './helpers.js';
+} from './helpers';

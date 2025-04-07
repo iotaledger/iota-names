@@ -497,7 +497,7 @@ fun add_leaf_record_without_valid_parent_failure() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = iota_names::registry::ENotLeafRecord)]
+#[test, expected_failure(abort_code = iota_names::registry::ENonLeafRecord)]
 /// Attempts to remove a non leaf record.
 fun remove_non_leaf_record_failure() {
     let mut ctx = tx_context::dummy();

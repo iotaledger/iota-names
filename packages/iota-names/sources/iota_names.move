@@ -28,10 +28,18 @@ use iota::coin::{Self, Coin};
 use iota::dynamic_field as df;
 use iota::iota::IOTA;
 
-/// Trying to withdraw from an empty balance.
-const ENoProfits: u64 = 0;
-/// An application is not authorized to access the feature.
-const EAppNotAuthorized: u64 = 1;
+use fun df::add as UID.add;
+use fun df::borrow as UID.borrow;
+use fun df::borrow_mut as UID.borrow_mut;
+use fun df::exists_ as UID.exists_;
+use fun df::remove as UID.remove;
+
+#[error]
+const ENoProfits: vector<u8> = b"Trying to withdraw from an empty balance.";
+#[error]
+const EAppNotAuthorized: vector<u8> = b"The application is not authorized to access the feature.";
+#[error]
+const ENoProfitsInCoinType: vector<u8> = b"No profits in coin type.";
 
 /// An admin capability. The admin has full control over the application.
 /// This object must be issued only once during module initialization.
@@ -58,14 +66,15 @@ public struct IOTA_NAMES has drop {}
 /// Key under which a configuration is stored. It is type dependent, so
 /// that different configurations can be stored at the same time. Eg
 /// currently we store application `Config` (and `Promotion` configuration).
-public struct ConfigKey<phantom Config> has copy, store, drop {}
+public struct ConfigKey<phantom Config> has copy, drop, store {}
 
 /// Key under which the Registry object is stored.
 ///
 /// In the V1, the object stored under this key is `Registry`, however, for
 /// future migration purposes (if we ever need to change the Registry), we
 /// keep the phantom parameter so two different Registries can co-exist.
-public struct RegistryKey<phantom Config> has copy, store, drop {}
+public struct RegistryKey<phantom Config> has copy, drop, store {}
+public struct BalanceKey<phantom T> has copy, drop, store {}
 
 /// Module initializer:
 /// - create IotaNames object
@@ -79,7 +88,7 @@ fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
         AdminCap {
             id: object::new(ctx),
         },
-        tx_context::sender(ctx),
+        ctx.sender(),
     );
 
     let iota_names = IotaNames {
@@ -96,14 +105,18 @@ fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
 /// same
 /// transaction. This is useful for the admin to withdraw funds from the IotaNames
 /// and then send them somewhere specific or keep at the address.
-public fun withdraw(
-    _: &AdminCap,
-    self: &mut IotaNames,
-    ctx: &mut TxContext,
-): Coin<IOTA> {
+public fun withdraw(_: &AdminCap, self: &mut IotaNames, ctx: &mut TxContext): Coin<IOTA> {
     let amount = self.balance.value();
     assert!(amount > 0, ENoProfits);
     coin::take(&mut self.balance, amount, ctx)
+}
+
+/// Withdraw from the IotaNames balance of a custom coin type.
+public fun withdraw_custom<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext): Coin<T> {
+    let balance_key = BalanceKey<T> {};
+    assert!(self.id.exists_(balance_key), ENoProfitsInCoinType);
+
+    self.id.borrow_mut<_, Balance<T>>(balance_key).withdraw_all().into_coin(ctx)
 }
 
 // === App Auth ===
@@ -112,67 +125,68 @@ public fun withdraw(
 /// protected features of the IotaNames (such as app_add_balance, etc.)
 /// The `App` type parameter is a witness which should be defined in the
 /// original module (Controller, Registry, Registrar - whatever).
-public struct AppKey<phantom App: drop> has copy, store, drop {}
+public struct AppKey<phantom App: drop> has copy, drop, store {}
 
-/// Authorize an application to access protected features of the IotaNames.
+/// Authorize an application to access protected features of the iota_names.
 public fun authorize_app<App: drop>(_: &AdminCap, self: &mut IotaNames) {
-    df::add(&mut self.id, AppKey<App> {}, true);
+    self.id.add(AppKey<App> {}, true);
 }
 
 /// Deauthorize an application by removing its authorization key.
 public fun deauthorize_app<App: drop>(_: &AdminCap, self: &mut IotaNames): bool {
-    df::remove(&mut self.id, AppKey<App> {})
+    self.id.remove(AppKey<App> {})
 }
 
 /// Check if an application is authorized to access protected features of
 /// the IotaNames.
 public fun is_app_authorized<App: drop>(self: &IotaNames): bool {
-    df::exists_(&self.id, AppKey<App> {})
+    self.id.exists_(AppKey<App> {})
 }
 
 /// Assert that an application is authorized to access protected features of
 /// the IotaNames. Aborts with `EAppNotAuthorized` if not.
 public fun assert_app_is_authorized<App: drop>(self: &IotaNames) {
-    assert!(is_app_authorized<App>(self), EAppNotAuthorized);
+    assert!(self.is_app_authorized<App>(), EAppNotAuthorized);
 }
 
 // === Protected features ===
 
 /// Adds balance to the IotaNames.
-public fun app_add_balance<App: drop>(
-    _: App,
-    self: &mut IotaNames,
-    balance: Balance<IOTA>,
-) {
-    assert_app_is_authorized<App>(self);
+public fun app_add_balance<App: drop>(_: App, self: &mut IotaNames, balance: Balance<IOTA>) {
+    self.assert_app_is_authorized<App>();
     self.balance.join(balance);
+}
+
+/// Adds a balance of type `T` to the IotaNames protocol as an authorized app.
+public fun app_add_custom_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: Balance<T>) {
+    self.assert_app_is_authorized<App>();
+    let key = BalanceKey<T> {};
+    if (self.id.exists_(key)) {
+        let balances: &mut Balance<T> = self.id.borrow_mut(key);
+        balances.join(balance);
+    } else {
+        self.id.add(key, balance);
+    }
 }
 
 /// Get a mutable access to the `Registry` object. Can only be performed by
 /// authorized
 /// applications.
-public fun app_registry_mut<App: drop, R: store>(
-    _: App,
-    self: &mut IotaNames,
-): &mut R {
-    assert_app_is_authorized<App>(self);
-    df::borrow_mut(&mut self.id, RegistryKey<R> {})
+public fun app_registry_mut<App: drop, R: store>(_: App, self: &mut IotaNames): &mut R {
+    self.assert_app_is_authorized<App>();
+    self.pkg_registry_mut<R>()
 }
 
 // === Config management ===
 
 /// Attach dynamic configuration object to the application.
-public fun add_config<Config: store + drop>(
-    _: &AdminCap,
-    self: &mut IotaNames,
-    config: Config,
-) {
-    df::add(&mut self.id, ConfigKey<Config> {}, config);
+public fun add_config<Config: store + drop>(_: &AdminCap, self: &mut IotaNames, config: Config) {
+    self.id.add(ConfigKey<Config> {}, config);
 }
 
 /// Borrow configuration object. Read-only mode for applications.
 public fun get_config<Config: store + drop>(self: &IotaNames): &Config {
-    df::borrow(&self.id, ConfigKey<Config> {})
+    self.id.borrow(ConfigKey<Config> {})
 }
 
 /// Get the configuration object for editing. The admin should put it back
@@ -181,38 +195,40 @@ public fun get_config<Config: store + drop>(self: &IotaNames): &Config {
 /// from removing the configuration object and adding a new one.
 ///
 /// Fully taking the config also allows for edits within a transaction.
-public fun remove_config<Config: store + drop>(
-    _: &AdminCap,
-    self: &mut IotaNames,
-): Config {
-    df::remove(&mut self.id, ConfigKey<Config> {})
+public fun remove_config<Config: store + drop>(_: &AdminCap, self: &mut IotaNames): Config {
+    self.id.remove(ConfigKey<Config> {})
 }
 
 // === Registry ===
 
 /// Get a read-only access to the `Registry` object.
 public fun registry<R: store>(self: &IotaNames): &R {
-    df::borrow(&self.id, RegistryKey<R> {})
+    self.id.borrow(RegistryKey<R> {})
 }
 
 /// Add a registry to the IotaNames. Can only be performed by the admin.
 public fun add_registry<R: store>(_: &AdminCap, self: &mut IotaNames, registry: R) {
-    df::add(&mut self.id, RegistryKey<R> {}, registry);
+    self.id.add(RegistryKey<R> {}, registry);
+}
+
+/// Get a mutable access to the `Registry` object. Can only be called
+/// internally by IotaNames.
+public(package) fun pkg_registry_mut<R: store>(self: &mut IotaNames): &mut R {
+    self.id.borrow_mut(RegistryKey<R> {})
 }
 
 // === Testing ===
 
 #[test_only]
-use iota_names::config;
+use iota_names::core_config;
+#[test_only]
+use iota_names::pricing_config::{Self, new_range, PricingConfig};
 #[test_only]
 public struct Test has drop {}
 
 #[test_only]
 public fun new_for_testing(ctx: &mut TxContext): (IotaNames, AdminCap) {
-    (
-        IotaNames { id: object::new(ctx), balance: balance::zero() },
-        AdminCap { id: object::new(ctx) },
-    )
+    (IotaNames { id: object::new(ctx), balance: balance::zero() }, AdminCap { id: object::new(ctx) })
 }
 
 #[test_only]
@@ -224,18 +240,34 @@ public fun init_for_testing(ctx: &mut TxContext): IotaNames {
         balance: balance::zero(),
     };
 
-    authorize_app<Test>(&admin_cap, &mut iota_names);
-    add_config(
-        &admin_cap,
+    admin_cap.add_config(&mut iota_names, core_config::default());
+
+    admin_cap.authorize_app<Test>(&mut iota_names);
+    admin_cap.add_config(&mut iota_names, new_pricing_config());
+    admin_cap.add_config(
         &mut iota_names,
-        config::new(
-            1200 * iota_names::constants::nanos_per_iota(),
-            200 * iota_names::constants::nanos_per_iota(),
-            50 * iota_names::constants::nanos_per_iota(),
-        ),
+        pricing_config::new_renewal_config(new_pricing_config()),
     );
-    transfer::transfer(admin_cap, tx_context::sender(ctx));
+    transfer::transfer(admin_cap, ctx.sender());
+
     iota_names
+}
+
+#[test_only]
+public fun new_pricing_config(): PricingConfig {
+    let range1 = new_range(vector[3, 3]);
+    let range2 = new_range(vector[4, 4]);
+    let range3 = new_range(vector[5, 63]);
+    let prices = vector[
+        1200 * iota_names::constants::nanos_per_iota(),
+        200 * iota_names::constants::nanos_per_iota(),
+        50 * iota_names::constants::nanos_per_iota(),
+    ];
+
+    pricing_config::new(
+        vector[range1, range2, range3],
+        prices,
+    )
 }
 
 #[test_only]
