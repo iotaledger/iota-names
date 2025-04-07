@@ -11,12 +11,6 @@ module iota_names::constants;
 
 use std::string::String;
 
-/// The amount of NANOS in 1 IOTA.
-const NANOS_PER_IOTA: u64 = 1_000_000_000;
-/// The minimum length of a domain name.
-const MIN_DOMAIN_LENGTH: u8 = 3;
-/// The maximum length of a domain name.
-const MAX_DOMAIN_LENGTH: u8 = 63;
 /// Top level domain for IOTA.
 const IOTA_TLD: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
@@ -49,15 +43,6 @@ public fun iota_tld(): String { IOTA_TLD.to_string() }
 
 /// Default value for the image_url.
 public fun default_image(): String { DEFAULT_IMAGE.to_string() }
-
-/// The amount of NANOS in 1 IOTA.
-public fun nanos_per_iota(): u64 { NANOS_PER_IOTA }
-
-/// The minimum length of a domain name.
-public fun min_domain_length(): u8 { MIN_DOMAIN_LENGTH }
-
-/// The maximum length of a domain name.
-public fun max_domain_length(): u8 { MAX_DOMAIN_LENGTH }
 
 /// The amount of milliseconds in a year.
 public fun year_ms(): u64 { YEAR_MS }
