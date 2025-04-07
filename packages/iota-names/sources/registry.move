@@ -160,7 +160,7 @@ public fun add_leaf_record(
     assert!(domain.is_subdomain(), EInvalidDepth);
 
     // get the parent of the domain
-    let parent = domain.parent();
+    let parent = domain.parent().extract();
     let option_parent_name_record = self.lookup(parent);
 
     assert!(option_parent_name_record.is_some(), ERecordNotFound);
@@ -383,7 +383,7 @@ fun remove_existing_record_if_exists_and_expired(
     // changed or has expired.
     if (record.is_leaf_record()) {
         // find the parent of the leaf record.
-        let option_parent_name_record = self.lookup(domain.parent());
+        let option_parent_name_record = self.lookup(domain.parent().extract());
 
         // if there's a parent (if not, we can just remove it), we need to check
         // if the parent is valid.
