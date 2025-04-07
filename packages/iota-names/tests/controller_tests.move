@@ -20,7 +20,7 @@ use iota_names::register::Register;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subdomain_registration;
-use iota_names::iota_names::{Self, IotaNames, AdminCap, NANOS_PER_IOTA};
+use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 
 use fun set_target_address_util as Scenario.set_target_address_util;
@@ -42,6 +42,7 @@ const SECOND_ADDRESS: address = @0xB002;
 const DOMAIN_NAME: vector<u8> = b"abc.iota";
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
+const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 fun test_init(): Scenario {
     let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
