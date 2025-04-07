@@ -84,4 +84,4 @@ jobs:
           cd ../scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
-          pnpm ts-node transactions/test-register-name.ts
+          pnpm ts-node tests/test-register-name.ts
