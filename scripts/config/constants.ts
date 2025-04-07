@@ -24,7 +24,6 @@ export type PackageInfo = {
 	reverseRegistryTableId: string;
 	subNamesPackageId: string;
 	tempSubdomainsProxyPackageId: string;
-	treasuryAddress?: string;
 	upgradeCap?: string;
 };
 
