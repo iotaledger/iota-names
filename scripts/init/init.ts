@@ -5,7 +5,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo } from '../config/constants';
-import { getClient, signAndExecute } from '../utils/utils';
+import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
 
@@ -41,27 +41,9 @@ export const init = async (
 
 	const client = getClient(network);
 	const config = readPackageInfo(network);
-	const configValues = Object.entries(config)
-		.map(([key, value]) => value)
-		.filter((v) => typeof v === 'string');
-
-	const ownedObjectsPage = await client.getOwnedObjects({
-		owner: config.adminAddress,
-		options: { showContent: true },
-	});
-
-	let objectsToTransfer = [];
-	for (const object of ownedObjectsPage.data) {
-		for (const configValue of configValues) {
-			if (JSON.stringify(object).includes(configValue)) {
-				objectsToTransfer.push(object.data?.objectId);
-				break;
-			}
-		}
-	}
+	const objectsToTransfer = await getIotaNamesAdminObjects(config, client);
 
 	const tx = new Transaction();
-	// @ts-ignore
 	tx.transferObjects(objectsToTransfer, newOwner);
 
 	const result = await signAndExecute(tx, network);
