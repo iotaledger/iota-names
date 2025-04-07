@@ -13,7 +13,7 @@ use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
-use iota_names::constants::{nanos_per_iota, year_ms};
+use iota_names::constants::year_ms;
 use iota_names::controller::{Self, Controller};
 use iota_names::domain::{Self, Domain};
 use iota_names::register::Register;
@@ -42,6 +42,7 @@ const SECOND_ADDRESS: address = @0xB002;
 const DOMAIN_NAME: vector<u8> = b"abc.iota";
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
+const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 fun test_init(): Scenario {
     let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
@@ -72,7 +73,7 @@ fun setup(scenario: &mut Scenario, sender: address, clock_tick: u64) {
         scenario,
         DOMAIN_NAME.to_string(),
         1,
-        1200 * nanos_per_iota(),
+        1200 * NANOS_PER_IOTA,
         clock_tick,
     );
     transfer::public_transfer(nft, sender);
