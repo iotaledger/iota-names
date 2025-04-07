@@ -20,7 +20,7 @@ use iota_names::register::Register;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subdomain_registration;
-use iota_names::iota_names::{Self, IotaNames, AdminCap, nanos_per_iota};
+use iota_names::iota_names::{Self, IotaNames, AdminCap, NANOS_PER_IOTA};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 
 use fun set_target_address_util as Scenario.set_target_address_util;
@@ -72,7 +72,7 @@ fun setup(scenario: &mut Scenario, sender: address, clock_tick: u64) {
         scenario,
         DOMAIN_NAME.to_string(),
         1,
-        1200 * nanos_per_iota(),
+        1200 * NANOS_PER_IOTA,
         clock_tick,
     );
     transfer::public_transfer(nft, sender);
