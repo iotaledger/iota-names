@@ -97,7 +97,7 @@ fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
 // === Admin actions ===
 
 /// Withdraw from the IotaNames balance of a custom coin type.
-public fun withdraw_custom<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext): Coin<T> {
+public fun withdraw<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext): Coin<T> {
     let balance_key = BalanceKey<T> {};
     assert!(self.id.exists_(balance_key), ENoProfitsInCoinType);
 
@@ -137,7 +137,7 @@ public fun assert_app_is_authorized<App: drop>(self: &IotaNames) {
 // === Protected features ===
 
 /// Adds a balance of type `T` to the IotaNames protocol as an authorized app.
-public fun app_add_custom_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: Balance<T>) {
+public fun app_add_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: Balance<T>) {
     self.assert_app_is_authorized<App>();
     let key = BalanceKey<T> {};
     if (self.id.exists_(key)) {

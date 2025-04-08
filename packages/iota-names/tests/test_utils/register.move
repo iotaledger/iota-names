@@ -52,7 +52,7 @@ public fun register<T>(
     let price = config.calculate_base_price(label.length()) * (no_years as u64);
     assert!(payment.value() == price, EIncorrectAmount);
 
-    iota_names.app_add_custom_balance<_, T>(Register {}, payment.into_balance());
+    iota_names.app_add_balance<_, T>(Register {}, payment.into_balance());
     let registry = iota_names::app_registry_mut<Register, Registry>(
         Register {},
         iota_names,
