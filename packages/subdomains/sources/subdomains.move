@@ -163,7 +163,7 @@ module subdomains::subdomains {
 
         let nft = sub_nft.nft_mut();
         let subdomain = nft.domain();
-        let parent_domain = subdomain.parent();
+        let parent_domain = subdomain.parent().extract();
 
         // Check if time extension is allowed for this subdomain.
         assert!(is_extension_allowed(&record_metadata(iota_names, subdomain)), EExtensionDisabledForSubDomain);

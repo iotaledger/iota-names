@@ -101,21 +101,33 @@ public fun is_subdomain(domain: &Domain): bool {
 
 /// Derive the parent of a subdomain.
 /// e.g. `subdomain.example.iota` -> `example.iota`
-public fun parent(domain: &Domain): Domain {
-    let mut labels = domain.labels;
-    // we pop the last element and construct the parent from the remaining
-    // labels.
-    labels.pop_back();
-
-    Domain {
-        labels,
+public fun parent(domain: &Domain): Option<Domain> {
+    if (is_subdomain(domain)) {
+        let mut labels = domain.labels;
+        // we pop the last element and construct the parent from the remaining
+        // labels.
+        labels.pop_back();
+        option::some(Domain {
+            labels,
+        })
+    } else {
+        option::none()
     }
 }
 
 /// Checks if `parent` domain is a valid parent for `child`.
 public fun is_parent_of(parent: &Domain, child: &Domain): bool {
-    number_of_levels(parent) < number_of_levels(child) &&
-        &parent(child).labels == &parent.labels
+    if (number_of_levels(parent) < number_of_levels(child)) {
+        let mut maybe_parent = parent(child);
+        if (maybe_parent.is_some()) {
+            let parent_domain = maybe_parent.extract();
+            parent_domain.labels == &parent.labels
+        } else {
+            false
+        }
+    } else {
+        false
+    }
 }
 
 fun validate_labels(labels: &vector<String>) {
@@ -349,5 +361,5 @@ fun derive_parent() {
     let parent = new(utf8(b"parent.iota"));
     let child = new(utf8(b"child.parent.iota"));
 
-    assert!(parent(&child) == parent, 0);
+    assert!(parent(&child).extract() == parent, 0);
 }

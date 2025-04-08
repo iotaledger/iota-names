@@ -124,7 +124,7 @@ module subdomains::unit_tests {
     fun derive_parent_from_child() {
         let parent = parent(
             &new_domain(utf8(b"sub.example.iota"))
-        );
+        ).extract();
         assert!(
             domain::to_string(&parent) == utf8(b"example.iota"),
             0
@@ -136,7 +136,7 @@ module subdomains::unit_tests {
                     b"sub.sub.sub.sub.sub.sub.example.iota"
                 )
             )
-        );
+        ).extract();
         assert!(
             domain::to_string(&parent) == utf8(
                 b"sub.sub.sub.sub.sub.example.iota"
