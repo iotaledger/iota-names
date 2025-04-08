@@ -21,6 +21,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 	const networkPackageInfo: NetworkPackageInfo = {
 		adminAddress: getActiveAddress(),
 		adminCap: packageInfo.IotaNames.adminCap,
+		auctionPackageId: packageInfo.Auction.packageId,
 		coins: {
 			IOTA: {
 				type: iotaCoinType,

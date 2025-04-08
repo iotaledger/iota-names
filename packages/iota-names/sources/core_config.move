@@ -78,7 +78,7 @@ public fun max_years(config: &CoreConfig): u8 {
     config.max_years
 }
 
-public(package) fun assert_is_valid_for_sale(config: &CoreConfig, domain: &Domain) {
+public fun assert_is_valid_for_sale(config: &CoreConfig, domain: &Domain) {
     assert!(!domain.is_subdomain(), ESubnameNotSupported);
     assert!(config.is_valid_tld(domain.tld()), EInvalidTld);
 
