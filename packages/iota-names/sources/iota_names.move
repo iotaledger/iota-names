@@ -23,10 +23,9 @@
 /// the registry and the balance.
 module iota_names::iota_names;
 
-use iota::balance::{Self, Balance};
-use iota::coin::{Self, Coin};
+use iota::balance::Balance;
+use iota::coin::Coin;
 use iota::dynamic_field as df;
-use iota::iota::IOTA;
 
 use fun df::add as UID.add;
 use fun df::borrow as UID.borrow;
@@ -34,8 +33,6 @@ use fun df::borrow_mut as UID.borrow_mut;
 use fun df::exists_ as UID.exists_;
 use fun df::remove as UID.remove;
 
-#[error]
-const ENoProfits: vector<u8> = b"Trying to withdraw from an empty balance.";
 #[error]
 const EAppNotAuthorized: vector<u8> = b"The application is not authorized to access the feature.";
 #[error]
@@ -51,11 +48,10 @@ public struct AdminCap has key, store { id: UID }
 /// Dynamic fields:
 /// - `registry: RegistryKey<R> -> R`
 /// - `config: ConfigKey<C> -> C`
+/// - `balance: BalanceKey<T> -> Balance<T>`
+/// - `authorized_app: AppKey<App> -> bool`
 public struct IotaNames has key {
     id: UID,
-    /// The total balance of the IotaNames. Can be added to by authorized apps.
-    /// Can be withdrawn only by the application Admin.
-    balance: Balance<IOTA>,
 }
 
 /// The one-time-witness used to claim Publisher object.
@@ -93,23 +89,12 @@ fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
 
     let iota_names = IotaNames {
         id: object::new(ctx),
-        balance: balance::zero(),
     };
 
     transfer::share_object(iota_names);
 }
 
 // === Admin actions ===
-
-/// Withdraw from the IotaNames balance directly and access the Coins within the
-/// same
-/// transaction. This is useful for the admin to withdraw funds from the IotaNames
-/// and then send them somewhere specific or keep at the address.
-public fun withdraw(_: &AdminCap, self: &mut IotaNames, ctx: &mut TxContext): Coin<IOTA> {
-    let amount = self.balance.value();
-    assert!(amount > 0, ENoProfits);
-    coin::take(&mut self.balance, amount, ctx)
-}
 
 /// Withdraw from the IotaNames balance of a custom coin type.
 public fun withdraw_custom<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext): Coin<T> {
@@ -150,12 +135,6 @@ public fun assert_app_is_authorized<App: drop>(self: &IotaNames) {
 }
 
 // === Protected features ===
-
-/// Adds balance to the IotaNames.
-public fun app_add_balance<App: drop>(_: App, self: &mut IotaNames, balance: Balance<IOTA>) {
-    self.assert_app_is_authorized<App>();
-    self.balance.join(balance);
-}
 
 /// Adds a balance of type `T` to the IotaNames protocol as an authorized app.
 public fun app_add_custom_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: Balance<T>) {
@@ -231,7 +210,7 @@ const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 #[test_only]
 public fun new_for_testing(ctx: &mut TxContext): (IotaNames, AdminCap) {
-    (IotaNames { id: object::new(ctx), balance: balance::zero() }, AdminCap { id: object::new(ctx) })
+    (IotaNames { id: object::new(ctx) }, AdminCap { id: object::new(ctx) })
 }
 
 #[test_only]
@@ -240,7 +219,6 @@ public fun init_for_testing(ctx: &mut TxContext): IotaNames {
     let admin_cap = AdminCap { id: object::new(ctx) };
     let mut iota_names = IotaNames {
         id: object::new(ctx),
-        balance: balance::zero(),
     };
 
     admin_cap.add_config(&mut iota_names, core_config::default());
@@ -296,7 +274,3 @@ public fun authorize_app_for_testing<App: drop>(self: &mut IotaNames) {
     df::add(&mut self.id, AppKey<App> {}, true)
 }
 
-#[test_only]
-public fun total_balance(self: &IotaNames): u64 {
-    self.balance.value()
-}
