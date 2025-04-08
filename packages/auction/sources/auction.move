@@ -247,7 +247,7 @@ public fun claim(
     });
 
     // Extract the NFT and their bid, returning the NFT to the user
-    // and sending the proceeds of the auction to iota_names
+    // and add the bid amount to the AuctionHouse
     self.balance.join(current_bid.into_balance());
     nft
 }
@@ -281,6 +281,7 @@ public fun get_auction_metadata(
     (none(), none(), none(), none())
 }
 
+/// Collect the bid amount into the auction house balance without moving the NFT out of the auction.
 public fun collect_winning_auction_fund(
     self: &mut AuctionHouse,
     domain_name: String,
@@ -319,7 +320,6 @@ public fun admin_withdraw_funds(
 /// based on the provided `operation_limit`:
 /// - claim the winning bid and place in `AuctionHouse.balance`
 /// - push the `IotaNamesRegistration` to the winner
-/// - push loosing bids back to their respective account owners
 ///
 /// Once all of the above has been done the auction is destroyed,
 /// freeing on-chain storage.
