@@ -7,7 +7,7 @@ import { IotaObjectResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
-import { readPackageInfo } from '../config/constants';
+import { readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 // A {name: address} map

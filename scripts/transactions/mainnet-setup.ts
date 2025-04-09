@@ -5,7 +5,6 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { readPackageInfo } from '../config/constants';
 import {
 	addConfig,
 	addCoreConfig,
@@ -14,31 +13,32 @@ import {
 	newPriceConfig,
 	newRenewalConfig,
 } from '../init/authorization';
+import { readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 // Upgrade IOTA-Names
 const setupIotaNames = (txb: Transaction) => {
-	const config = readPackageInfo('mainnet');
+	const packageInfo = readPackageInfo('mainnet');
 
 	// Add new core config
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
-		config: addCoreConfig({ txb, latestPackageId: config.packageId }),
-		type: `${config.packageId}::core_config::CoreConfig`,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
+		config: addCoreConfig({ txb, latestPackageId: packageInfo.packageId }),
+		type: `${packageInfo.packageId}::core_config::CoreConfig`,
 	});
 
 	// Add new price configs
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
 		config: newPriceConfig({
 			txb,
-			packageId: config.packageId,
+			packageId: packageInfo.packageId,
 			ranges: [
 				[3, 3],
 				[4, 4],
@@ -50,16 +50,16 @@ const setupIotaNames = (txb: Transaction) => {
 				10 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
+		type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
 	});
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
 		config: newRenewalConfig({
 			txb,
-			packageId: config.packageId,
+			packageId: packageInfo.packageId,
 			ranges: [
 				[3, 3],
 				[4, 4],
@@ -71,63 +71,63 @@ const setupIotaNames = (txb: Transaction) => {
 				5 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
+		type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
 	});
 
 	authorizeApp({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		type: `${config.packageIdPricing}::controller::Controller`,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		type: `${packageInfo.packageIdPricing}::controller::Controller`,
+		iotaNamesPackageId: packageInfo.packageId,
 	});
 
 	// authorize and add payments configs
 	authorizeApp({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		type: `${config.paymentsPackageId}::payments::PaymentsApp`,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		type: `${packageInfo.paymentsPackageId}::payments::PaymentsApp`,
+		iotaNamesPackageId: packageInfo.packageId,
 	});
-	const paymentsconfig = newPaymentsConfig({
+	const paymentsConfig = newPaymentsConfig({
 		txb,
-		packageId: config.paymentsPackageId,
-		coinType: [config.coins.IOTA],
-		baseCurrencyType: config.coins.IOTA.type,
+		packageId: packageInfo.paymentsPackageId,
+		coinType: [packageInfo.coins.IOTA],
+		baseCurrencyType: packageInfo.coins.IOTA.type,
 	});
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
-		config: paymentsconfig,
-		type: `${config.paymentsPackageId}::payments::PaymentsConfig`,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
+		config: paymentsConfig,
+		type: `${packageInfo.paymentsPackageId}::payments::PaymentsConfig`,
 	});
 };
 
 const deauthorize = (txb: Transaction) => {};
 
 const deauthorizePackages = async () => {
-	const config = readPackageInfo('mainnet');
+	const packageInfo = readPackageInfo('mainnet');
 	const tx = new Transaction();
 
 	// Setup iotaNames
 	deauthorize(tx);
 
 	// Prepare multisig tx
-	await prepareMultisigTx(tx, 'mainnet', config.adminAddress);
+	await prepareMultisigTx(tx, 'mainnet', packageInfo.adminAddress);
 };
 
 const publishSetup = async () => {
-	const config = readPackageInfo('mainnet');
+	const packageInfo = readPackageInfo('mainnet');
 	const tx = new Transaction();
 
 	// Setup iotaNames
 	setupIotaNames(tx);
 
 	// Prepare multisig tx
-	await prepareMultisigTx(tx, 'mainnet', config.adminAddress);
+	await prepareMultisigTx(tx, 'mainnet', packageInfo.adminAddress);
 };
 
 publishSetup();
