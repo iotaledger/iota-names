@@ -29,7 +29,8 @@ const DEFAULT_DURATION: u8 = 1;
 const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
 /// The auction quiet period is 10 minutes.
 const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
-
+/// The overbid must be at least of 1 IOTA, which is 10^9 NANOs
+const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 1_000_000_000;
 // === Abort codes ===
 
 #[error]
@@ -52,7 +53,7 @@ const ENotWinner: vector<u8> =
     b"Not winner of the auction.";
 #[error]
 const EBidAmountTooLow: vector<u8> =
-    b"The bid amount is too low.";
+    b"The bid amount is too low. Minimum overbid should be at least 1 IOTA.";
 #[error]
 const ENoProfits: vector<u8> =
     b"There are no profits to withdraw.";
@@ -165,7 +166,7 @@ public fun place_bid(
     // the current winning bid
     let current_winning_bid = current_bid.value();
     let bid_amount = bid.value();
-    assert!(bid_amount > current_winning_bid, EBidAmountTooLow);
+    assert!(bid_amount >= current_winning_bid + AUCTION_MIN_OVERBID_VALUE_IOTA, EBidAmountTooLow);
 
     // Return the previous winner their bid
     iota::transfer::public_transfer(current_bid, winner);
