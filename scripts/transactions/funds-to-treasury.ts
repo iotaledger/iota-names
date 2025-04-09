@@ -4,7 +4,7 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { PackageInfo, readPackageInfo } from '../config/constants';
+import { PackageInfo, readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
 
 // Extract `treasuryAddress` argument from command-line arguments
@@ -18,11 +18,11 @@ const treasuryAddress = args[0]; // First argument should be treasury address
 // TODO provide network parameter
 const craftTx = async () => {
 	const txb = new Transaction();
-	const config = readPackageInfo('devnet');
+	const packageInfo = readPackageInfo('devnet');
 
-	profitsToTreasury(txb, config, treasuryAddress);
+	profitsToTreasury(txb, packageInfo, treasuryAddress);
 
-	await prepareMultisigTx(txb, 'devnet', config.adminAddress);
+	await prepareMultisigTx(txb, 'devnet', packageInfo.adminAddress);
 };
 
 craftTx();

@@ -8,7 +8,7 @@ import {
 	PackageInfo as NetworkPackageInfo,
 	readPackageInfo,
 	writePackageInfo,
-} from '../config/constants';
+} from '../package-info/constants';
 import { getActiveAddress, getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
 import { authorizeApp } from './authorization';
 import { Packages } from './packages';

@@ -5,7 +5,7 @@
 import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 
-import { readPackageInfo } from '../config/constants';
+import { readPackageInfo } from '../package-info/constants';
 
 const network = process.env.NETWORK || 'mainnet';
 
@@ -13,7 +13,7 @@ const network = process.env.NETWORK || 'mainnet';
 // if upgradeCap & gasObject is on mainnet, it has to be on mainnet.
 // Github actions are always on mainnet.
 const mainPackageUpgrade = async () => {
-	const config = readPackageInfo(network);
+	const packageInfo = readPackageInfo(network);
 	const gasObjectId = process.env.GAS_OBJECT;
 
 	// Enabling the gas Object check only on mainnet, to allow testnet multisig tests.
@@ -22,7 +22,7 @@ const mainPackageUpgrade = async () => {
 	const currentDir = process.cwd();
 	const iotaNamesDir = `${currentDir}/../packages/iota-names`;
 	const txFilePath = `${currentDir}/tx/tx-data.txt`;
-	const upgradeCall = `iota client upgrade --upgrade-capability ${config.upgradeCap} --gas-budget 2000000000 --gas ${gasObjectId} --skip-dependency-verification --serialize-unsigned-transaction`;
+	const upgradeCall = `iota client upgrade --upgrade-capability ${packageInfo.upgradeCap} --gas-budget 2000000000 --gas ${gasObjectId} --skip-dependency-verification --serialize-unsigned-transaction`;
 
 	try {
 		// Execute the command with the specified working directory and capture the output

@@ -6,7 +6,7 @@ import { IotaTransactionBlockResponse } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { readPackageInfo } from '../config/constants';
+import { readPackageInfo } from '../package-info/constants';
 import {
 	addConfig,
 	addCoreConfig,
@@ -179,12 +179,12 @@ export const Packages = (network: string) => {
 				iotaNames: string;
 				iotaNamesPackageId: string;
 			}) => {
-				const config = readPackageInfo(network);
+				const packageInfo = readPackageInfo(network);
 				const paymentsconfig = newPaymentsConfig({
 					txb,
 					packageId,
-					coinType: [config.coins.IOTA],
-					baseCurrencyType: config.coins.IOTA.type,
+					coinType: [packageInfo.coins.IOTA],
+					baseCurrencyType: packageInfo.coins.IOTA.type,
 				});
 				addConfig({
 					txb,

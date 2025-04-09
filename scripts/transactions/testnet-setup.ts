@@ -5,36 +5,36 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { PackageInfo, readPackageInfo } from '../config/constants';
 import { addConfig, newPriceConfig, newRenewalConfig, removeConfig } from '../init/authorization';
+import { PackageInfo, readPackageInfo } from '../package-info/constants';
 import { signAndExecute } from '../utils/utils';
 
-const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
+const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
 	removeConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
+		iotaNamesPackageId: packageInfo.packageId,
 	});
 
 	removeConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
+		iotaNamesPackageId: packageInfo.packageId,
 	});
 
 	// Add new price configs
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
 		config: newPriceConfig({
 			txb,
-			packageId: config.packageId,
+			packageId: packageInfo.packageId,
 			ranges: [
 				[3, 3],
 				[4, 4],
@@ -46,16 +46,16 @@ const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
 				1 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${config.packageIdPricing}::pricing_config::PricingConfig`,
+		type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
 	});
 	addConfig({
 		txb,
-		adminCap: config.adminCap,
-		iotaNames: config.iotaNames,
-		iotaNamesPackageId: config.packageId,
+		adminCap: packageInfo.adminCap,
+		iotaNames: packageInfo.iotaNames,
+		iotaNamesPackageId: packageInfo.packageId,
 		config: newRenewalConfig({
 			txb,
-			packageId: config.packageId,
+			packageId: packageInfo.packageId,
 			ranges: [
 				[3, 3],
 				[4, 4],
@@ -67,15 +67,15 @@ const setupIotaNames = (txb: Transaction, config: PackageInfo) => {
 				0.5 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${config.packageIdPricing}::pricing_config::RenewalConfig`,
+		type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
 	});
 };
 
 const publishSetup = async () => {
-	const config = readPackageInfo('testnet');
+	const packageInfo = readPackageInfo('testnet');
 	const tx = new Transaction();
 
-	setupIotaNames(tx, config);
+	setupIotaNames(tx, packageInfo);
 
 	console.log(await signAndExecute(tx, 'testnet'));
 };

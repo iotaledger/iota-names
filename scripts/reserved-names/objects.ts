@@ -5,11 +5,11 @@
 import fs from 'fs';
 import { IotaObjectResponse } from '@iota/iota-sdk/client';
 
-import { readPackageInfo } from '../config/constants';
+import { readPackageInfo } from '../package-info/constants';
 import { getClient } from '../utils/utils';
 
 const getAllOwnedDomains = async () => {
-	const config = readPackageInfo('mainnet');
+	const packageInfo = readPackageInfo('mainnet');
 	let client = getClient('mainnet');
 	let hasNextPage = true;
 	let cursor: string | null | undefined = undefined;
@@ -18,7 +18,7 @@ const getAllOwnedDomains = async () => {
 
 	while (hasNextPage) {
 		const res = await client.getOwnedObjects({
-			owner: config.adminAddress,
+			owner: packageInfo.adminAddress,
 			filter: {
 				MatchAll: [
 					{
