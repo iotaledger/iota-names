@@ -101,7 +101,9 @@ public fun withdraw<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext):
     let balance_key = BalanceKey<T> {};
     assert!(self.id.exists_(balance_key), ENoProfitsInCoinType);
 
-    self.id.borrow_mut<_, Balance<T>>(balance_key).withdraw_all().into_coin(ctx)
+    let balance = self.id.borrow_mut<_, Balance<T>>(balance_key);
+    assert!(balance.value() > 0, ENoProfitsInCoinType);
+    balance.withdraw_all().into_coin(ctx)
 }
 
 // === App Auth ===

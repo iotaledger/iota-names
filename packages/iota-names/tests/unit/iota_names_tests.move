@@ -78,7 +78,7 @@ fun balance_and_withdraw() {
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
 /// 1. Authorize TestApp and add to balance;
-/// 2. Admin tries to withdraw an empty balance.
+/// 2. Admin tries to withdraw an empty balance (other coin).
 fun balance_and_withdraw_fail_no_profits_in_type() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
@@ -92,11 +92,28 @@ fun balance_and_withdraw_fail_no_profits_in_type() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
-/// 1. Authorize TestApp and add to balance;
-/// 2. Admin tries to withdraw an empty balance.
+/// Admin tries to withdraw an empty balance.
 fun balance_and_withdraw_fail_no_profits() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
+    let _withdrawn = iota_names.withdraw<IOTA>(&cap, &mut ctx);
+
+    abort 1337
+}
+
+
+#[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
+/// 1. Authorize TestApp and add 0 balance;
+/// 2. Admin tries to withdraw from 0 balance.
+fun balance_and_withdraw_fail_no_profits2() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
+    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+
+    // Add 0 balance
+    let paid = balance::create_for_testing<IOTA>(0);
+    iota_names.app_add_balance<TestApp, IOTA>(TestApp {}, paid);
+
     let _withdrawn = iota_names.withdraw<IOTA>(&cap, &mut ctx);
 
     abort 1337
