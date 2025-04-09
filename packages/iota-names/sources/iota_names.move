@@ -96,7 +96,7 @@ fun init(otw: IOTA_NAMES, ctx: &mut TxContext) {
 
 // === Admin actions ===
 
-/// Withdraw from the IotaNames balance of a custom coin type.
+/// Withdraw from the IotaNames balance of a provided coin type.
 public fun withdraw<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext): Coin<T> {
     let balance_key = BalanceKey<T> {};
     assert!(self.id.exists_(balance_key), ENoProfitsInCoinType);
