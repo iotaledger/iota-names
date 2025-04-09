@@ -33,7 +33,7 @@ export async function profitsToTreasury(
 	treasuryAddress: string,
 ) {
 	const generalProfits = txb.moveCall({
-		target: `${packageInfo.packageId}::iota_names::withdraw_custom`,
+		target: `${packageInfo.packageId}::iota_names::withdraw`,
 		arguments: [txb.object(packageInfo.iotaNames), txb.object(packageInfo.adminCap)],
 		typeArguments: ['0x2::iota::IOTA'],
 	});
