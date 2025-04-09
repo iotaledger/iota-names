@@ -29,12 +29,12 @@ export type PackageInfo = {
 };
 
 export const readPackageInfo = (network: string): PackageInfo => {
-	return JSON.parse(readFileSync(path.resolve(__dirname, `${network}-package-info.json`), 'utf8'));
+	return JSON.parse(readFileSync(path.resolve(__dirname, `${network}.json`), 'utf8'));
 };
 
 export const writePackageInfo = (network: string, packageInfo: PackageInfo) => {
 	writeFileSync(
-		path.resolve(__dirname, `${network}-package-info.json`),
+		path.resolve(__dirname, `${network}.json`),
 		JSON.stringify(packageInfo, null, 2),
 		'utf8',
 	);
