@@ -40,12 +40,12 @@ public fun set_target_address(
 }
 
 /// Set the reverse lookup address for the domain
-public fun set_reverse_lookup(iota_names: &mut IotaNames, domain_name: String, ctx: &TxContext) {
+public fun set_reverse_lookup(iota_names: &mut IotaNames, domain_name: String, ctx: &mut TxContext) {
     iota_names.registry_mut().set_reverse_lookup(ctx.sender(), domain::new(domain_name));
 }
 
 /// User-facing function - unset the reverse lookup address for the domain.
-public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &TxContext) {
+public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &mut TxContext) {
     iota_names.registry_mut().unset_reverse_lookup(ctx.sender());
 }
 

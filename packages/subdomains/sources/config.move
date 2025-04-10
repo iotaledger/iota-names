@@ -108,7 +108,7 @@ module subdomains::config {
             if (domain.tld() == &config.allowed_tlds[i]) {return true};
             i = i + 1;
         };
-        return false
+        false
     }
 
     /// Validate that the subdomain label (e.g. `sub` in `sub.example.iota`) is valid.
