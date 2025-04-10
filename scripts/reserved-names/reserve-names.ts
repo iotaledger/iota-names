@@ -7,16 +7,7 @@ import { IOTA_CLOCK_OBJECT_ID, isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { isValidIotaName, normalizeIotaName } from '../../sdk/src/utils';
 
-// import { readPackageInfo } from '../config/constants';
-
 const YEARS_TO_RESERVE = 1;
-
-// // Extract `network` argument from command-line arguments
-// const args = process.argv.slice(2); // Get arguments passed to the script
-// if (args.length !== 1) {
-//     throw new Error('Invalid number of arguments. You must provide the `network` argument.');
-// }
-// const network = args[0]; // First argument should be the network
 
 // Parses a CSV file with name,address pairs
 export const parseCsvFile = (filePath: string): Record<string, string> => {
@@ -58,18 +49,3 @@ export const reserveDomains = (
 		],
 	});
 };
-
-// const prepareTx = (nameAddressPairs: Record<string, string>) => {
-//     const packageInfo = readPackageInfo(network);
-
-//     const txb = new Transaction();
-//     reserveDomains(txb, nameAddressPairs, packageInfo.packageId, packageInfo.adminCap, packageInfo.iotaNames);
-
-//     return prepareMultisigTx(txb, network, packageInfo.adminAddress);
-// };
-
-// const nameAddressPairs = parseCsvFile('./reserved-names/sample/sample.csv');
-// console.log(`Registering ${Object.keys(nameAddressPairs).length} names:`, nameAddressPairs)
-
-// Prepares the transaction and save it in tx-data.
-// prepareTx(nameAddressPairs);
