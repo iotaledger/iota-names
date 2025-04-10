@@ -37,6 +37,6 @@ jobs:
             dir_name=$(basename "$dir")
             if [[ ! " ${excluded_dirs[*]} " =~ (^|[[:space:]])${dir_name}($|[[:space:]]) ]] && [ -d "$dir" ]; then
               echo "Running iota move test in $dir"
-              iota move test --path "$dir"
+              iota move test --path "$dir" --lint
             fi
           done
