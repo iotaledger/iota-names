@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module denylist::denylist {
+module deny_list::deny_list {
     use std::string::String;
 
     use iota::table::{Self, Table};
@@ -13,7 +13,7 @@ module denylist::denylist {
     const ENoWordsInList: vector<u8> = b"No names in the passed list.";
 
     /// A wrapper that holds the reserved and blocked names.
-    public struct Denylist has store {
+    public struct DenyList has store {  // Changed from Denylist to DenyList
         // The list of reserved names.
         // Our public SLD registrations will be checking against it.
         reserved: Table<String, bool>,
@@ -33,7 +33,7 @@ module denylist::denylist {
         iota_names::add_registry(
             cap,
             iota_names,
-            Denylist {
+            DenyList {  // Changed from Denylist to DenyList
                 reserved: table::new(ctx),
                 blocked: table::new(ctx)
             }
@@ -42,12 +42,12 @@ module denylist::denylist {
 
     /// Check for a reserved name
     public fun is_reserved_name(iota_names: &IotaNames, name: String): bool {
-        denylist(iota_names).reserved.contains(name)
+        deny_list(iota_names).reserved.contains(name)  // Changed function name from denylist to deny_list
     }
 
     /// Checks for a blocked name.
     public fun is_blocked_name(iota_names: &IotaNames, name: String): bool {
-        denylist(iota_names).blocked.contains(name)
+        deny_list(iota_names).blocked.contains(name)  // Changed function name from denylist to deny_list
     }
 
     /// Add a list of reserved names to the list as admin.
@@ -57,7 +57,7 @@ module denylist::denylist {
         words: vector<String>
     ) {
         internal_add_names_to_list(
-            &mut denylist_mut(iota_names).reserved,
+            &mut deny_list_mut(iota_names).reserved,  // Changed function name from denylist_mut to deny_list_mut
             words
         );
     }
@@ -69,7 +69,7 @@ module denylist::denylist {
         words: vector<String>
     ) {
         internal_add_names_to_list(
-            &mut denylist_mut(iota_names).blocked,
+            &mut deny_list_mut(iota_names).blocked,  // Changed function name
             words
         );
     }
@@ -81,7 +81,7 @@ module denylist::denylist {
         words: vector<String>
     ) {
         internal_remove_names_from_list(
-            &mut denylist_mut(iota_names).reserved,
+            &mut deny_list_mut(iota_names).reserved,  // Changed function name
             words
         );
     }
@@ -93,19 +93,19 @@ module denylist::denylist {
         words: vector<String>
     ) {
         internal_remove_names_from_list(
-            &mut denylist_mut(iota_names).blocked,
+            &mut deny_list_mut(iota_names).blocked,  // Changed function name
             words
         );
     }
 
     /// Get immutable access to the registry.
-    fun denylist(iota_names: &IotaNames): &Denylist {
+    fun deny_list(iota_names: &IotaNames): &DenyList {  // Changed function name and return type
         iota_names.registry()
     }
 
     /// Internal helper to get access to the BlockedNames object
-    fun denylist_mut(iota_names: &mut IotaNames): &mut Denylist {
-        iota_names::app_registry_mut<DenyListAuth, Denylist>(DenyListAuth {}, iota_names)
+    fun deny_list_mut(iota_names: &mut IotaNames): &mut DenyList {  // Changed function name and return type
+        iota_names::app_registry_mut<DenyListAuth, DenyList>(DenyListAuth {}, iota_names)  // Changed type
     }
 
     /// Internal helper to batch add words to a table.
@@ -141,8 +141,8 @@ module denylist::denylist {
     }
 
     #[test_only]
-    public fun new_for_testing(ctx: &mut TxContext): Denylist {
-        Denylist {
+    public fun new_for_testing(ctx: &mut TxContext): DenyList {  // Changed return type
+        DenyList {  // Changed from Denylist to DenyList
             reserved: table::new(ctx),
             blocked: table::new(ctx)
         }

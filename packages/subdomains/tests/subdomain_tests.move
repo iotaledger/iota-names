@@ -18,7 +18,7 @@ module subdomains::subdomain_tests {
         registry_tests::{burn_nfts}
     };
     
-    use denylist::denylist;
+    use deny_list::deny_list;
 
     use subdomains::{
         config,
@@ -192,7 +192,7 @@ module subdomains::subdomain_tests {
             iota_names::add_config(&admin_cap, &mut iota_names, config::default());
 
             registry::init_for_testing(&admin_cap, &mut iota_names, ctx(scenario));
-            denylist::setup(&mut iota_names, &admin_cap, ctx(scenario));
+            deny_list::setup(&mut iota_names, &admin_cap, ctx(scenario));
 
             ts::return_shared(iota_names);
             ts::return_to_sender(scenario, admin_cap);

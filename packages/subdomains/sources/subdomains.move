@@ -39,7 +39,7 @@ module subdomains::subdomains {
 
     use subdomains::config::{Self, SubDomainConfig};
 
-    use denylist::denylist;
+    use deny_list::deny_list;
 
     #[error]
     const EInvalidExpirationDate: vector<u8> = b"Tried to create a subdomain that expires later than the parent or below the minimum.";
@@ -73,7 +73,7 @@ module subdomains::subdomains {
         target: address,
         ctx: &mut TxContext
     ) {
-        assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
+        assert!(!deny_list::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
         let subdomain = domain::new(subdomain_name);
         // all validation logic for subdomain creation / management.
@@ -125,7 +125,7 @@ module subdomains::subdomains {
         allow_time_extension: bool,
         ctx: &mut TxContext
     ): SubDomainRegistration {
-        assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
+        assert!(!deny_list::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
         let subdomain = domain::new(subdomain_name);
         // all validation logic for subdomain creation / management.
