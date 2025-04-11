@@ -917,47 +917,6 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
 }
 
 #[test, expected_failure(abort_code = auction::EBidAmountTooLow)] 
-fun test_overbid_lower_than_one_iota_1_NANO() {
-    let mut scenario_val = test_init();
-    let scenario = &mut scenario_val;
-    start_auction_and_place_bid_util(
-        scenario,
-        FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
-        100* NANOS_PER_IOTA,
-    );
-    place_bid_util(
-        scenario,
-        SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
-        1,
-        0,
-    );
-    scenario_val.end();
-}
-
-
-#[test, expected_failure(abort_code = auction::EBidAmountTooLow)] 
-fun test_overbid_lower_than_one_iota_10000000_NANO() {
-    let mut scenario_val = test_init();
-    let scenario = &mut scenario_val;
-    start_auction_and_place_bid_util(
-        scenario,
-        FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
-        100* NANOS_PER_IOTA,
-    );
-    place_bid_util(
-        scenario,
-        SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
-        10000000,
-        0,
-    );
-    scenario_val.end();
-}
-
-#[test, expected_failure(abort_code = auction::EBidAmountTooLow)] 
 fun test_overbid_lower_than_one_iota_100_NANOS() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -965,7 +924,7 @@ fun test_overbid_lower_than_one_iota_100_NANOS() {
         scenario,
         FIRST_ADDRESS,
         utf8(FIRST_DOMAIN_NAME),
-        100* NANOS_PER_IOTA,
+        100 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,

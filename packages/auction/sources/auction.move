@@ -35,7 +35,7 @@ const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 1_000_000_000;
 
 #[error]
 const EInvalidBidValue: vector<u8> =
-    b"The bid value is too low (compared to min_bid or previous bid).";
+    b"The bid value is too low (compared to min_bid).";
 #[error]
 const EAuctionStarted: vector<u8> =
     b"Trying to start an action but it's already started.";
