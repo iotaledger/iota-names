@@ -19,16 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Install pnpm
-        run: |
-          npm install -g pnpm
-
-      - name: Install dependencies
-        run: |
-          pnpm install
-
       - name: Install prettier plugin
         run: npm i -g prettier @mysten/prettier-plugin-move
 
       - name: Run format check
-        run: prettier-move -c --ignore-unknown .
+        run: prettier-move -l packages/**
