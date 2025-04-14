@@ -4,7 +4,7 @@
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
-const NAME_REGEX = new RegExp(`^${PATH_REGEX.source}@${LABEL_REGEX.source}$`);
+const NAME_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
 const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
 const MAX_LENGTH = 235;
 
@@ -22,15 +22,15 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
 
 	if (NAME_REGEX.test(lowerCase)) {
 		let [path, domain] = lowerCase.split('@');
-		parts = [...path.split('.'), domain];
+		parts = [...(path ? path.split('.') : []), domain];
 	} else if (DOMAIN_REGEX.test(lowerCase)) {
-		parts = lowerCase.split('.');
+		parts = lowerCase.split('.').slice(0, -1);
 	} else {
 		throw new Error(`Invalid IOTA name "${name}"`);
 	}
 
 	if (format === 'dot') {
-		return parts.join('.');
+		return `${parts.join('.')}.iota`;
 	} else {
 		return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
 	}
