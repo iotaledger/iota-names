@@ -2,12 +2,12 @@
 
 [move]
 version = 3
-manifest_digest = "606DC1271E2D5F5C03507E6EF91C3B6B3F19D21699CD659A7426BEF5843378B6"
+manifest_digest = "8795F1BA4FB2307ABFF571746336D37C87AC2452550125034E152BDB00942AC1"
 deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
 dependencies = [
   { id = "Iota", name = "Iota" },
   { id = "IotaNames", name = "IotaNames" },
-  { id = "denylist", name = "denylist" },
+  { id = "deny_list", name = "deny_list" },
 ]
 
 [[move.package]]
@@ -31,8 +31,8 @@ id = "MoveStdlib"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-id = "denylist"
-source = { local = "../denylist" }
+id = "deny_list"
+source = { local = "../deny-list" }
 
 dependencies = [
   { id = "Iota", name = "Iota" },
@@ -40,6 +40,6 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "0.10.0-alpha"
+compiler-version = "0.11.0-alpha"
 edition = "2024.beta"
 flavor = "iota"
