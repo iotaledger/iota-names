@@ -5,23 +5,23 @@
 /// Implementation of auction module.
 module auction::auction;
 
-use std::{option::{none, some, is_some}, string::String};
 use iota::{
     balance::{Self, Balance},
     clock::Clock,
     coin::{Self, Coin},
     event,
-    linked_table::{Self, LinkedTable},
-    iota::IOTA
+    iota::IOTA,
+    linked_table::{Self, LinkedTable}
 };
 use iota_names::{
     core_config::CoreConfig,
     domain::{Self, Domain},
-    pricing_config::PricingConfig,
-    registry::Registry,
     iota_names::{Self, AdminCap, IotaNames},
-    iota_names_registration::IotaNamesRegistration
+    iota_names_registration::IotaNamesRegistration,
+    pricing_config::PricingConfig,
+    registry::Registry
 };
+use std::{option::{none, some, is_some}, string::String};
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;
@@ -36,26 +36,19 @@ const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
 const EInvalidBidValue: vector<u8> =
     b"The bid value is too low (compared to min_bid or previous bid).";
 #[error]
-const EAuctionStarted: vector<u8> =
-    b"Trying to start an action but it's already started.";
+const EAuctionStarted: vector<u8> = b"Trying to start an action but it's already started.";
 #[error]
-const EAuctionNotStarted: vector<u8> =
-    b"Placing a bid in a not started auction.";
+const EAuctionNotStarted: vector<u8> = b"Placing a bid in a not started auction.";
 #[error]
-const EAuctionNotEndedYet: vector<u8> =
-    b"The auction has not ended yet.";
+const EAuctionNotEndedYet: vector<u8> = b"The auction has not ended yet.";
 #[error]
-const EAuctionEnded: vector<u8> =
-    b"The auction ended.";
+const EAuctionEnded: vector<u8> = b"The auction ended.";
 #[error]
-const ENotWinner: vector<u8> =
-    b"Not winner of the auction.";
+const ENotWinner: vector<u8> = b"Not winner of the auction.";
 #[error]
-const EBidAmountTooLow: vector<u8> =
-    b"The bid amount is too low.";
+const EBidAmountTooLow: vector<u8> = b"The bid amount is too low.";
 #[error]
-const ENoProfits: vector<u8> =
-    b"There are no profits to withdraw.";
+const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 
 /// Authorization witness to call protected functions of iota_names.
 public struct App has drop {}
@@ -103,7 +96,9 @@ public fun start_auction_and_place_bid(
 
     assert!(!self.auctions.contains(domain), EAuctionStarted);
 
-    let min_price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
+    let min_price = iota_names
+        .get_config<PricingConfig>()
+        .calculate_base_price(domain.sld().length());
     assert!(bid.value() >= min_price, EInvalidBidValue);
 
     let registry = iota_names::app_registry_mut<App, Registry>(App {}, iota_names);

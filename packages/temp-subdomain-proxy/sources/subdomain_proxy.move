@@ -11,12 +11,10 @@
 /// This package will stop being used when we've implemented references in PTBs.
 module temp_subdomain_proxy::subdomain_proxy;
 
+use iota::clock::Clock;
+use iota_names::{controller, iota_names::IotaNames, subdomain_registration::SubDomainRegistration};
 use std::string::String;
 use subdomains::subdomains;
-use iota::clock::Clock;
-use iota_names::controller;
-use iota_names::subdomain_registration::SubDomainRegistration;
-use iota_names::iota_names::IotaNames;
 
 public fun new(
     iota_names: &mut IotaNames,

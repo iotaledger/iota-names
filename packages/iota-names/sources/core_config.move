@@ -10,10 +10,9 @@
 /// pose a security risk as it cannot be used.
 module iota_names::core_config;
 
-use std::string::String;
-use iota::vec_map::VecMap;
-use iota::vec_set::{Self, VecSet};
+use iota::{vec_map::VecMap, vec_set::{Self, VecSet}};
 use iota_names::domain::Domain;
+use std::string::String;
 
 #[error]
 const EInvalidLength: vector<u8> = b"Invalid length for the label part of the domain.";

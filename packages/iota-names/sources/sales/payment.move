@@ -18,19 +18,17 @@
 */
 module iota_names::payment;
 
-use std::string::String;
-use std::type_name::{Self, TypeName};
-use iota::clock::Clock;
-use iota::coin::Coin;
-use iota::event;
-use iota::vec_map::{Self, VecMap};
-use iota_names::constants;
-use iota_names::core_config::CoreConfig;
-use iota_names::domain::{Self, Domain};
-use iota_names::pricing_config::{PricingConfig, RenewalConfig};
-use iota_names::registry::Registry;
-use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota::{clock::Clock, coin::Coin, event, vec_map::{Self, VecMap}};
+use iota_names::{
+    constants,
+    core_config::CoreConfig,
+    domain::{Self, Domain},
+    iota_names::IotaNames,
+    iota_names_registration::IotaNamesRegistration,
+    pricing_config::{PricingConfig, RenewalConfig},
+    registry::Registry
+};
+use std::{string::String, type_name::{Self, TypeName}};
 
 #[error]
 const ENotSupportedType: vector<u8> =
@@ -152,7 +150,11 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
 
 /// Creates a `PaymentIntent` for renewing an existing domain.
 /// This is a hot-potato and can only be consumed in a single transaction.
-public fun init_renewal(iota_names: &mut IotaNames, nft: &IotaNamesRegistration, years: u8): PaymentIntent {
+public fun init_renewal(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    years: u8,
+): PaymentIntent {
     let domain = nft.domain();
     assert!(!domain.is_subdomain(), ECannotRenewSubdomain);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);

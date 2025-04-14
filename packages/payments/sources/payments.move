@@ -4,33 +4,29 @@
 
 module payments::payments;
 
+use iota::{coin::{Coin, CoinMetadata}, vec_map::{Self, VecMap}};
+use iota_names::{iota_names::IotaNames, payment::{Receipt, PaymentIntent}};
 use std::type_name::{Self, TypeName};
-use iota::coin::{Coin, CoinMetadata};
-use iota::vec_map::{Self, VecMap};
-use iota_names::payment::{Receipt, PaymentIntent};
-use iota_names::iota_names::IotaNames;
 
 public struct PaymentsApp() has drop;
 
 #[error]
-const EBaseCurrencySetupMissing: vector<u8> =
-    b"Setup for the base currency is missing.";
+const EBaseCurrencySetupMissing: vector<u8> = b"Setup for the base currency is missing.";
 #[error]
 const EInsufficientPayment: vector<u8> = b"Insufficient coin balance.";
 #[error]
-const EInvalidPaymentType: vector<u8> =
-    b"The supplied payment coin type is not supported.";
+const EInvalidPaymentType: vector<u8> = b"The supplied payment coin type is not supported.";
 
 /// Configuration for the payments module.
 /// Holds a VecMap that determines the configuration for each currency.
-public struct PaymentsConfig has store, drop {
+public struct PaymentsConfig has drop, store {
     // the configuration for each currency.
     currencies: VecMap<TypeName, CoinTypeData>,
     // the type of our base currency (which determines the base price unit).
     base_currency: TypeName,
 }
 
-public struct CoinTypeData has copy, store, drop {
+public struct CoinTypeData has copy, drop, store {
     /// The coin's decimals.
     decimals: u8,
     // type
@@ -58,9 +54,7 @@ public fun handle_base_payment<T>(
 
 /// Creates a new CoinTypeData struct.
 /// Leave price_feed_id empty for base currency.
-public fun new_coin_type_data<T>(
-    coin_metadata: &CoinMetadata<T>,
-): CoinTypeData {
+public fun new_coin_type_data<T>(coin_metadata: &CoinMetadata<T>): CoinTypeData {
     let type_name = type_name::get<T>();
     CoinTypeData {
         decimals: coin_metadata.get_decimals(),

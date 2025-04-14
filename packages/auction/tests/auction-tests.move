@@ -5,8 +5,12 @@
 #[test_only]
 module iota_names::auction_tests;
 
-use std::string::{String, utf8};
-use iota::{clock::{Self, Clock}, coin::{Self, Coin}, iota::IOTA, test_scenario::{Self, Scenario, ctx}};
+use iota::{
+    clock::{Self, Clock},
+    coin::{Self, Coin},
+    iota::IOTA,
+    test_scenario::{Self, Scenario, ctx}
+};
 use iota_names::{
     auction::{
         Self,
@@ -21,13 +25,14 @@ use iota_names::{
         admin_withdraw_funds,
         collect_winning_auction_fund
     },
-    constants::{Self},
+    constants,
     core_config,
     domain,
-    registry,
     iota_names::{Self, IotaNames, AdminCap},
-    iota_names_registration::IotaNamesRegistration
+    iota_names_registration::IotaNamesRegistration,
+    registry
 };
+use std::string::{String, utf8};
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;

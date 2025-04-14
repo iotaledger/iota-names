@@ -5,11 +5,9 @@
 #[test_only]
 module iota_names::sub_name_tests;
 
-use std::string::utf8;
 use iota::clock;
-use iota_names::domain;
-use iota_names::subdomain_registration as subdomain;
-use iota_names::iota_names_registration;
+use iota_names::{domain, iota_names_registration, subdomain_registration as subdomain};
+use std::string::utf8;
 
 #[test]
 fun test_wrap_and_destroy() {
@@ -40,12 +38,7 @@ fun test_wrap_and_destroy() {
     clock.destroy_for_testing();
 }
 
-#[
-    test,
-    expected_failure(
-        abort_code = iota_names::subdomain_registration::ENotSubdomain,
-    ),
-]
+#[test, expected_failure(abort_code = iota_names::subdomain_registration::ENotSubdomain)]
 fun try_wrap_non_subdomain() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);
@@ -82,12 +75,7 @@ fun try_wrap_expired_subname() {
     abort 1337
 }
 
-#[
-    test,
-    expected_failure(
-        abort_code = iota_names::subdomain_registration::ENameNotExpired,
-    ),
-]
+#[test, expected_failure(abort_code = iota_names::subdomain_registration::ENameNotExpired)]
 fun try_unwrap_non_expired_subdomain() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);

@@ -5,15 +5,15 @@
 #[test_only]
 module iota_names::registry_tests;
 
-use std::option::some;
-use std::string::utf8;
-use iota::clock::{Self, Clock};
-use iota::test_utils::assert_eq;
-use iota_names::constants;
-use iota_names::domain::{Self, Domain};
-use iota_names::name_record as record;
-use iota_names::registry::{Self, Registry};
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota::{clock::{Self, Clock}, test_utils::assert_eq};
+use iota_names::{
+    constants,
+    domain::{Self, Domain},
+    iota_names_registration::{Self as nft, IotaNamesRegistration},
+    name_record as record,
+    registry::{Self, Registry}
+};
+use std::{option::some, string::utf8};
 
 // === Registry + Record Addition ===
 

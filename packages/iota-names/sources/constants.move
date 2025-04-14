@@ -16,8 +16,7 @@ const IOTA_TLD: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
 const YEAR_MS: u64 = 365 * 24 * 60 * 60 * 1000;
 /// Default value for the image_url; IPFS hash.
-const DEFAULT_IMAGE: vector<u8> =
-    b"QmaLFg4tQYansFpyRqmDfABdkUVy66dHtpnkH15v1LPzcY";
+const DEFAULT_IMAGE: vector<u8> = b"QmaLFg4tQYansFpyRqmDfABdkUVy66dHtpnkH15v1LPzcY";
 /// 30 day Grace period in milliseconds.
 const GRACE_PERIOD_MS: u64 = 30 * 24 * 60 * 60 * 1000;
 
@@ -56,7 +55,7 @@ public fun subdomain_allow_creation_key(): String { ALLOW_CREATION.to_string() }
 
 /// The NameRecord key that a subdomain can self-renew.
 public fun subdomain_allow_extension_key(): String {
-   ALLOW_TIME_EXTENSION.to_string()
+    ALLOW_TIME_EXTENSION.to_string()
 }
 
 /// A getter for a leaf name record's expiration timestamp.
