@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "93692FC21970457069D908E5FB077FFB0902D320065DA58CB25E7D875EF55DD0"
+manifest_digest = "F2A153006FB401ECB7FC260E8EBA50203344F7EB96960F8F409E002F09F22B2E"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { id = "Iota", name = "Iota" },
@@ -49,6 +49,6 @@ dependencies = [
 ]
 
 [move.toolchain-version]
-compiler-version = "0.10.0-alpha"
-edition = "2024.beta"
+compiler-version = "0.11.6-rc"
+edition = "2024"
 flavor = "iota"
