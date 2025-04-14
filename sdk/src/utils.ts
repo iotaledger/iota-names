@@ -26,7 +26,7 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
 	} else if (DOMAIN_REGEX.test(lowerCase)) {
 		parts = lowerCase.split('.');
 	} else {
-		throw new Error(`Invalid IOTA name ${name}`);
+		throw new Error(`Invalid IOTA name "${name}"`);
 	}
 
 	if (format === 'dot') {
