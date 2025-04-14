@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/i;
-const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`, 'i');
-const NAME_REGEX = new RegExp(`^${PATH_REGEX.source}@${LABEL_REGEX.source}$`, 'i');
-const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`, 'i');
+const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
+const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
+const NAME_REGEX = new RegExp(`^${PATH_REGEX.source}@${LABEL_REGEX.source}$`);
+const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
 const MAX_LENGTH = 235;
 
 export function isValidIotaName(name: string): boolean {
