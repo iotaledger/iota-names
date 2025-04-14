@@ -2,43 +2,31 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const IOTA_NAME_REGEX =
-	/^(?!.*(^(?!@)|[-.@])($|[-.@]))(?:[a-z0-9-]{0,63}(?:\.[a-z0-9-]{0,63})*)?@[a-z0-9-]{0,63}$/i;
-const IOTA_NAMES_DOMAIN_REGEX = /^(?!.*(^|[-.])($|[-.]))(?:[a-z0-9-]{0,63}\.)+iota$/i;
-const MAX_IOTA_NAME_LENGTH = 235;
+const LABEL_REGEX = /[a-z0-9-]{0,63}/i;
+const PATH_REGEX = new RegExp(`(?:(${LABEL_REGEX.source})(?:\.(${LABEL_REGEX.source}))*)`, 'i');
+const NAME_REGEX = new RegExp(`^${PATH_REGEX.source}@(${LABEL_REGEX.source})$`, 'i');
+const DOMAIN_REGEX = new RegExp(`^(?![-.])(?:(${LABEL_REGEX.source})\.)+iota$`, 'i');
+const MAX_LENGTH = 235;
 
 export function isValidIotaName(name: string): boolean {
-	if (name.length > MAX_IOTA_NAME_LENGTH) {
+	if (name.length > MAX_LENGTH) {
 		return false;
 	}
 
-	if (name.includes('@')) {
-		return IOTA_NAME_REGEX.test(name);
-	}
-
-	return IOTA_NAMES_DOMAIN_REGEX.test(name);
+	return NAME_REGEX.test(name) || DOMAIN_REGEX.test(name);
 }
 
 export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): string {
 	const lowerCase = name.toLowerCase();
-	let parts;
+	let parts = NAME_REGEX.exec(lowerCase) ?? DOMAIN_REGEX.exec(lowerCase);
 
-	if (lowerCase.includes('@')) {
-		if (!IOTA_NAME_REGEX.test(lowerCase)) {
-			throw new Error(`Invalid IOTA name ${name}`);
-		}
-		const [labels, domain] = lowerCase.split('@');
-		parts = [...(labels ? labels.split('.') : []), domain];
-	} else {
-		if (!IOTA_NAMES_DOMAIN_REGEX.test(lowerCase)) {
-			throw new Error(`Invalid IOTA name ${name}`);
-		}
-		parts = lowerCase.split('.').slice(0, -1);
+	if (parts == null) {
+		throw new Error(`Invalid IOTA name ${name}`);
 	}
 
 	if (format === 'dot') {
-		return `${parts.join('.')}.iota`;
+		return parts.join('.');
+	} else {
+		return `${parts.slice(0, -1).join('.')}@${parts[-1]}`;
 	}
-
-	return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
 }
