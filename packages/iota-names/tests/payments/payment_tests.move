@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
+#[allow(lint(abort_without_constant))]
 module iota_names::payment_tests;
 
 use iota::{clock, coin, iota::IOTA, test_utils::{assert_eq, destroy}};
