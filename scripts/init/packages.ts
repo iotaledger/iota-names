@@ -215,10 +215,10 @@ export const Packages = (network: string) => {
 					config: txb.moveCall({
 						target: `${packageId}::config::default`,
 					}),
-					type: `${packageId}::config::SubDomainConfig`,
+					type: `${packageId}::config::SubdomainConfig`,
 				});
 			},
-			authorizationType: (packageId: string) => `${packageId}::subdomains::SubDomains`,
+			authorizationType: (packageId: string) => `${packageId}::subdomains::Subdomains`,
 		},
 		TempSubdomainProxy: {
 			order: 3,
