@@ -1,0 +1,4 @@
+# Names to register during the init process
+# Format (name without ".iota"): <name>,[address]
+000,0x0000000000000000000000000000000000000000000000000000000000000000
+bitcoin

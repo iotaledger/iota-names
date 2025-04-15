@@ -40,7 +40,7 @@ export const init = async (
 	const client = getClient(network);
 	const packageInfo = readPackageInfo(network);
 
-	let namesToReserveFile = './init/namesToRegister.csv';
+	let namesToReserveFile = './init/names-to-register.csv';
 	if (fs.existsSync(namesToReserveFile)) {
 		const nameAddressPairs = parseCsvFile(namesToReserveFile);
 		console.log(`Registering ${Object.keys(nameAddressPairs).length} names:`, nameAddressPairs);
