@@ -9,7 +9,7 @@ import { isValidIotaName, normalizeIotaName } from '../../sdk/src/utils';
 
 const YEARS_TO_RESERVE = 1;
 
-// Parses a CSV file with <name>,[address] pairs, names without ".iota"
+// Parses a CSV file with <name>[,address] pairs, names without ".iota"
 export const parseCsvFile = (filePath: string): Record<string, string | undefined> => {
 	const fileContent = fs.readFileSync(filePath).toString();
 
