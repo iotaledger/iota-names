@@ -43,18 +43,23 @@ export const init = async (
 	let namesToReserveFile = './init/names-to-register.csv';
 	if (fs.existsSync(namesToReserveFile)) {
 		const nameAddressPairs = parseCsvFile(namesToReserveFile);
-		console.log(`Registering ${Object.keys(nameAddressPairs).length} names:`, nameAddressPairs);
-		const tx = new Transaction();
-		reserveDomains(
-			tx,
-			nameAddressPairs,
-			packageInfo.packageId,
-			packageInfo.adminCap,
-			packageInfo.iotaNames,
-		);
-		const result = await signAndExecute(tx, network);
-		await client.waitForTransaction({ digest: result.digest });
-		console.log(`Transaction digest: ${result.digest}`);
+		const nameCount = Object.keys(nameAddressPairs).length;
+		if (nameCount === 0) {
+			console.log('No names to register');
+		} else {
+			console.log(`Registering ${nameCount} names:`, nameAddressPairs);
+			const tx = new Transaction();
+			reserveDomains(
+				tx,
+				nameAddressPairs,
+				packageInfo.packageId,
+				packageInfo.adminCap,
+				packageInfo.iotaNames,
+			);
+			const result = await signAndExecute(tx, network);
+			await client.waitForTransaction({ digest: result.digest });
+			console.log(`Transaction digest: ${result.digest}`);
+		}
 	}
 
 	if (!newOwner) {
