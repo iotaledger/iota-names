@@ -41,7 +41,11 @@ public fun set_target_address(
 }
 
 /// Set the reverse lookup address for the domain
-public fun set_reverse_lookup(iota_names: &mut IotaNames, domain_name: String, ctx: &mut TxContext) {
+public fun set_reverse_lookup(
+    iota_names: &mut IotaNames,
+    domain_name: String,
+    ctx: &mut TxContext,
+) {
     iota_names.registry_mut().set_reverse_lookup(ctx.sender(), domain::new(domain_name));
 }
 

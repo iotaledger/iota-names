@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
+#[allow(lint(abort_without_constant))]
 module subdomains::unit_tests;
 
 use iota_names::domain::{Self, new as new_domain, parent};
