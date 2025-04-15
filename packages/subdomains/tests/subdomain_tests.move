@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
+#[allow(lint(abort_without_constant))]
 module subdomains::subdomain_tests {
     use std::string::{String, utf8};
 
@@ -17,7 +18,6 @@ module subdomains::subdomain_tests {
         subdomain_registration::{Self, SubDomainRegistration}, 
         registry_tests::{burn_nfts}
     };
-    
     use denylist::denylist;
 
     use subdomains::{
@@ -135,7 +135,7 @@ module subdomains::subdomain_tests {
 
         abort 1337  
     }
-    
+
     #[test, expected_failure(abort_code=::iota_names::registry::ERecordExpired)]
     fun tries_to_use_expired_subdomain_to_create_new() {
         let mut scenario_val = test_init();
@@ -207,7 +207,7 @@ module subdomains::subdomain_tests {
 
         registry_mut
     }
-    
+
     /// Create a regular name to help with our tests.
     public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegistration {
         ts::next_tx(scenario, USER_ADDRESS);
@@ -303,5 +303,4 @@ module subdomains::subdomain_tests {
         clock::increment_for_testing(&mut clock, to);
         ts::return_shared(clock);
     }
-
 }
