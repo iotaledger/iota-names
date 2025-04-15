@@ -357,6 +357,7 @@ fun split_three_dots() {
 }
 
 #[test]
+#[allow(lint(abort_without_constant))]
 fun derive_parent() {
     let parent = new(utf8(b"parent.iota"));
     let child = new(utf8(b"child.parent.iota"));

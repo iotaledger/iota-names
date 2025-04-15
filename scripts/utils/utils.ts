@@ -15,7 +15,7 @@ import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
 import { toB64 } from '@iota/iota-sdk/utils';
 
-import { PackageInfo } from '../config/constants';
+import { PackageInfo } from '../package-info/constants';
 
 const IOTA = process.env.IOTA_BINARY ?? `iota`;
 

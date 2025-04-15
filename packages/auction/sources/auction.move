@@ -312,15 +312,9 @@ public fun admin_withdraw_funds(
 
 /// Admin functionality used to finalize a single auction.
 ///
-/// An `operation_limit` limit must be provided which controls how many
-/// individual operations to perform. This allows the admin to be able to
-/// make forward progress in finalizing auctions even in the presence of
-/// thousands of bids.
-///
-/// This will attempt to do as much as possible of the following
-/// based on the provided `operation_limit`:
-/// - claim the winning bid and place in `AuctionHouse.balance`
-/// - push the `IotaNamesRegistration` to the winner
+/// This will:
+/// - claim the winning bid and place in the `AuctionHouse` balance
+/// - transfer the `IotaNamesRegistration` to the winner
 ///
 /// Once all of the above has been done the auction is destroyed,
 /// freeing on-chain storage.

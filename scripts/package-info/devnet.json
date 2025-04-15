@@ -1,0 +1,21 @@
+{
+	"adminAddress": "0xdf2f0a373e65c48b0c4ac636e03183a573bb36af88216511bbede6704f877b6e",
+	"adminCap": "0x7aef1ed31a153f20c70b4d4f5f935902128467bc3fd56bc7bfcfde854603933c",
+	"auctionPackageId": "0xbd7e5f5f0272aa93472ebd6dabcff16433db3816bb54c0fdcda30c450f181900",
+	"coins": {
+		"IOTA": {
+			"type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
+			"metadataId": "0xf7ceb0424ca93f77858c74aebda8bcd5ffe0f32b82ebcc38afb3ba643d03a5f8"
+		}
+	},
+	"denyListPackageId": "0x3525137488ce0534f83956079314b79f68b8439176b207a3af78faa67c7032d3",
+	"iotaNames": "0xdad5289ef0d64f8f3b4d72522907f3f67109fa00bfbcba2dd03c68084f1dfc89",
+	"packageId": "0xe27899d691184f66821f8fed5e7c26f3c65b26921947956435a655c8d7efc573",
+	"packageIdPricing": "0xe27899d691184f66821f8fed5e7c26f3c65b26921947956435a655c8d7efc573",
+	"paymentsPackageId": "0x8e1d3fafb70764eccc2e6b61812daf0a4db40db3c5cea515bf4d390f11016030",
+	"publisherId": "0x205afb5bb6bb68790e99a99d2628cc5020ca7655f063edcca7a366de510536d1",
+	"registryTableId": "0xff608b2b0d500b4d0cb25ff165bc3e01fce9bf3ef7fb002840b814d304a08b2a",
+	"reverseRegistryTableId": "0x1c2eddd6c4f7510b35a9de575d9ccb1ad640de6aa3a5626937c21c9c62beaeed",
+	"subNamesPackageId": "0x45573a8859b9e26e73a42b9c31cec9a41080d1c9b61738ee89c2d58f7c11ece6",
+	"tempSubdomainsProxyPackageId": "0xf43e05a098dd8a339d478907418f42b30eddf661b029a48f313edee1420e22fe"
+}

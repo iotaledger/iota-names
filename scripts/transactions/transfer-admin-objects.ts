@@ -6,7 +6,7 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { readPackageInfo } from '../config/constants';
+import { readPackageInfo } from '../package-info/constants';
 import { getClient, getIotaNamesAdminObjects, prepareMultisigTx } from '../utils/utils';
 import { profitsToTreasury } from './funds-to-treasury';
 
@@ -18,22 +18,22 @@ if (args.length !== 1) {
 const newAddress = args[0]; // First argument should be new address
 
 const network = 'localnet';
-const config = readPackageInfo(network);
+const packageInfo = readPackageInfo(network);
 
 const treasuryClaimAndMoveCapsToFoundation = async () => {
 	const client = getClient(network);
 
-	const objectsToTransfer = await getIotaNamesAdminObjects(config, client);
+	const objectsToTransfer = await getIotaNamesAdminObjects(packageInfo, client);
 	console.log('Objects to transfer:', objectsToTransfer.length);
 	console.log(objectsToTransfer);
 
 	const txb = new Transaction();
 
-	profitsToTreasury(txb, config, newAddress);
+	profitsToTreasury(txb, packageInfo, newAddress);
 
 	txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));
 
-	await prepareMultisigTx(txb, network, config.adminAddress);
+	await prepareMultisigTx(txb, network, packageInfo.adminAddress);
 };
 
 treasuryClaimAndMoveCapsToFoundation();

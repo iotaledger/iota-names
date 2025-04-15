@@ -15,19 +15,19 @@ use std::string::String;
 use subdomains::subdomains;
 use iota::clock::Clock;
 use iota_names::controller;
-use iota_names::subdomain_registration::SubDomainRegistration;
+use iota_names::subdomain_registration::SubdomainRegistration;
 use iota_names::iota_names::IotaNames;
 
 public fun new(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     clock: &Clock,
     subdomain_name: String,
     expiration_timestamp_ms: u64,
     allow_creation: bool,
     allow_time_extension: bool,
     ctx: &mut TxContext,
-): SubDomainRegistration {
+): SubdomainRegistration {
     subdomains::new(
         iota_names,
         subdomain.nft(),
@@ -42,7 +42,7 @@ public fun new(
 
 public fun new_leaf(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     clock: &Clock,
     subdomain_name: String,
     target: address,
@@ -60,7 +60,7 @@ public fun new_leaf(
 
 public fun remove_leaf(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     clock: &Clock,
     subdomain_name: String,
 ) {
@@ -74,7 +74,7 @@ public fun remove_leaf(
 
 public fun edit_setup(
     iota_names: &mut IotaNames,
-    parent: &SubDomainRegistration,
+    parent: &SubdomainRegistration,
     clock: &Clock,
     subdomain_name: String,
     allow_creation: bool,
@@ -92,7 +92,7 @@ public fun edit_setup(
 
 public fun set_target_address(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
@@ -106,7 +106,7 @@ public fun set_target_address(
 
 public fun set_user_data(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     key: String,
     value: String,
     clock: &Clock,
@@ -122,7 +122,7 @@ public fun set_user_data(
 
 public fun unset_user_data(
     iota_names: &mut IotaNames,
-    subdomain: &SubDomainRegistration,
+    subdomain: &SubdomainRegistration,
     key: String,
     clock: &Clock,
 ) {

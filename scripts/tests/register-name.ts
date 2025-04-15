@@ -7,7 +7,7 @@
 import { IotaClient } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { PackageInfo, readPackageInfo } from '../config/constants';
+import { PackageInfo, readPackageInfo } from '../package-info/constants';
 import { getClient, getSigner, signAndExecute } from '../utils/utils';
 
 const registerName = async () => {
@@ -19,27 +19,27 @@ const registerName = async () => {
 			'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
 		);
 	}
-	const config = readPackageInfo(network);
+	const packageInfo = readPackageInfo(network);
 
 	const client = getClient(network);
-	const price = await getPrice(client, config, name);
+	const price = await getPrice(client, packageInfo, name);
 	console.log(`Price for ${name} is ${price}`);
 
 	let tx = new Transaction();
 	const paymentIntent = tx.moveCall({
-		target: `${config.packageId}::payment::init_registration`,
-		arguments: [tx.object(config.iotaNames), tx.pure.string(name)],
+		target: `${packageInfo.packageId}::payment::init_registration`,
+		arguments: [tx.object(packageInfo.iotaNames), tx.pure.string(name)],
 	});
 
 	const payment = tx.splitCoins(tx.gas, [price]);
 	const receipt = tx.moveCall({
-		target: `${config.paymentsPackageId}::payments::handle_base_payment`,
-		arguments: [tx.object(config.iotaNames), paymentIntent, payment],
+		target: `${packageInfo.paymentsPackageId}::payments::handle_base_payment`,
+		arguments: [tx.object(packageInfo.iotaNames), paymentIntent, payment],
 		typeArguments: ['0x2::iota::IOTA'],
 	});
 	const nft = tx.moveCall({
-		target: `${config.packageId}::payment::register`,
-		arguments: [receipt, tx.object(config.iotaNames), tx.object('0x6')],
+		target: `${packageInfo.packageId}::payment::register`,
+		arguments: [receipt, tx.object(packageInfo.iotaNames), tx.object('0x6')],
 	});
 	const signer = getSigner();
 	tx.transferObjects([nft], tx.pure.address(signer.getPublicKey().toIotaAddress()));
@@ -54,13 +54,13 @@ const registerName = async () => {
 };
 registerName();
 
-async function getPrice(client: IotaClient, config: PackageInfo, name: string) {
+async function getPrice(client: IotaClient, packageInfo: PackageInfo, name: string) {
 	const allFields = await client.getDynamicFields({
-		parentId: config.iotaNames,
+		parentId: packageInfo.iotaNames,
 	});
 	let pricingConfigId = '';
 	for (const field of allFields.data) {
-		if (field.objectType === `${config.packageId}::pricing_config::PricingConfig`) {
+		if (field.objectType === `${packageInfo.packageId}::pricing_config::PricingConfig`) {
 			pricingConfigId = field.objectId;
 			break;
 		}
