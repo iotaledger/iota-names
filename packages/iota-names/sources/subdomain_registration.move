@@ -26,7 +26,7 @@ const ENotSubdomain: vector<u8> = b"NFT is not a subdomain.";
 const ENameNotExpired: vector<u8> = b"Tried to destroy a subdomain that has not expired.";
 
 /// A wrapper for IotaNamesRegistration object specifically for SubNames.
-public struct SubDomainRegistration has key, store {
+public struct SubdomainRegistration has key, store {
     id: UID,
     nft: IotaNamesRegistration,
 }
@@ -37,13 +37,13 @@ public(package) fun new(
     nft: IotaNamesRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
-): SubDomainRegistration {
+): SubdomainRegistration {
     // Can't wrap a non-subdomain NFT.
     assert!(nft.domain().is_subdomain(), ENotSubdomain);
     // Can't wrap an expired NFT.
     assert!(!nft.has_expired(clock), ENftExpired);
 
-    SubDomainRegistration {
+    SubdomainRegistration {
         id: object::new(ctx),
         nft: nft,
     }
@@ -51,11 +51,11 @@ public(package) fun new(
 
 /// Destroys the wrapper and returns the IotaNamesRegistration object.
 /// Fails if the subname is not expired.
-public(package) fun burn(name: SubDomainRegistration, clock: &Clock): IotaNamesRegistration {
+public(package) fun burn(name: SubdomainRegistration, clock: &Clock): IotaNamesRegistration {
     // tries to unwrap a non-expired subname.
     assert!(name.nft.has_expired(clock), ENameNotExpired);
 
-    let SubDomainRegistration {
+    let SubdomainRegistration {
         id,
         nft,
     } = name;
@@ -64,10 +64,10 @@ public(package) fun burn(name: SubDomainRegistration, clock: &Clock): IotaNamesR
     nft
 }
 
-public fun nft(name: &SubDomainRegistration): &IotaNamesRegistration {
+public fun nft(name: &SubdomainRegistration): &IotaNamesRegistration {
     &name.nft
 }
 
-public fun nft_mut(name: &mut SubDomainRegistration): &mut IotaNamesRegistration {
+public fun nft_mut(name: &mut SubdomainRegistration): &mut IotaNamesRegistration {
     &mut name.nft
 }

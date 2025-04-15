@@ -10,7 +10,7 @@ use iota_names::{
     iota_names::{Self, IotaNames},
     iota_names_registration::IotaNamesRegistration,
     registry::Registry,
-    subdomain_registration::SubDomainRegistration
+    subdomain_registration::SubdomainRegistration
 };
 use std::string::String;
 
@@ -120,7 +120,7 @@ public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, 
 
 public fun burn_expired_subname(
     iota_names: &mut IotaNames,
-    nft: SubDomainRegistration,
+    nft: SubdomainRegistration,
     clock: &Clock,
 ) {
     iota_names.registry_mut().burn_subdomain_object(nft, clock);

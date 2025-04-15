@@ -15,10 +15,10 @@ use iota_names::{
     iota_names_registration::{Self, IotaNamesRegistration},
     registry::{Self, Registry},
     registry_tests::burn_nfts,
-    subdomain_registration::{Self, SubDomainRegistration}
+    subdomain_registration::{Self, SubdomainRegistration}
 };
 use std::string::{String, utf8};
-use subdomains::{config, subdomains::{Self, SubDomains}};
+use subdomains::{config, subdomains::{Self, Subdomains}};
 
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;
@@ -121,7 +121,7 @@ fun invalid_parent_failure() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::ECreationDisabledForSubDomain)]
+#[test, expected_failure(abort_code = ::subdomains::subdomains::ECreationDisabledForSubdomain)]
 fun tries_to_create_subdomain_with_disallowed_node_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -149,7 +149,7 @@ fun tries_to_create_subdomain_with_disallowed_node_parent() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::EExtensionDisabledForSubDomain)]
+#[test, expected_failure(abort_code = ::subdomains::subdomains::EExtensionDisabledForSubdomain)]
 fun tries_to_extend_without_permissions() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -252,7 +252,7 @@ public fun test_init(): Scenario {
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(ctx(scenario));
-        iota_names::authorize_app_for_testing<SubDomains>(&mut iota_names);
+        iota_names::authorize_app_for_testing<Subdomains>(&mut iota_names);
         iota_names::share_for_testing(iota_names);
         let clock = clock::create_for_testing(ctx(scenario));
         clock::share_for_testing(clock);
@@ -274,7 +274,7 @@ public fun test_init(): Scenario {
 
 /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
 public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    let registry_mut = iota_names::app_registry_mut<SubDomains, Registry>(
+    let registry_mut = iota_names::app_registry_mut<Subdomains, Registry>(
         subdomains::auth_for_testing(),
         iota_names,
     );
@@ -337,7 +337,7 @@ public fun create_node_subdomain(
     allow_creation: bool,
     allow_extension: bool,
     scenario: &mut Scenario,
-): SubDomainRegistration {
+): SubdomainRegistration {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
@@ -361,7 +361,7 @@ public fun create_node_subdomain(
 
 /// Extend a node subdomain's expiration.
 public fun extend_node_subdomain(
-    nft: &mut SubDomainRegistration,
+    nft: &mut SubdomainRegistration,
     expiration: u64,
     scenario: &mut Scenario,
 ) {
@@ -399,7 +399,7 @@ public fun update_subdomain_setup(
     ts::return_shared(clock);
 }
 
-public fun burn_subdomain(nft: SubDomainRegistration, scenario: &mut Scenario) {
+public fun burn_subdomain(nft: SubdomainRegistration, scenario: &mut Scenario) {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);

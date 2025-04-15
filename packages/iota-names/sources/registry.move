@@ -10,7 +10,7 @@ use iota_names::{
     iota_names::AdminCap,
     iota_names_registration::{Self as nft, IotaNamesRegistration},
     name_record::{Self, NameRecord},
-    subdomain_registration::{Self, SubDomainRegistration}
+    subdomain_registration::{Self, SubdomainRegistration}
 };
 use std::{option::{none, some}, string::String};
 
@@ -120,13 +120,13 @@ public fun wrap_subdomain(
     nft: IotaNamesRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
-): SubDomainRegistration {
+): SubdomainRegistration {
     subdomain_registration::new(nft, clock, ctx)
 }
 
 /// Attempts to burn a subdomain registration object,
 /// and also invalidates any records in the registry / reverse registry.
-public fun burn_subdomain_object(self: &mut Registry, nft: SubDomainRegistration, clock: &Clock) {
+public fun burn_subdomain_object(self: &mut Registry, nft: SubdomainRegistration, clock: &Clock) {
     let nft = nft.burn(clock);
     self.burn_registration_object(nft, clock);
 }
