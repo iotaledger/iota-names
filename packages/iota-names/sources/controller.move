@@ -9,7 +9,7 @@ use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::domain;
 use iota_names::registry::Registry;
-use iota_names::subdomain_registration::SubDomainRegistration;
+use iota_names::subdomain_registration::SubdomainRegistration;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 
@@ -104,7 +104,7 @@ public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, 
     iota_names.registry_mut().burn_registration_object(nft, clock);
 }
 
-public fun burn_expired_subname(iota_names: &mut IotaNames, nft: SubDomainRegistration, clock: &Clock) {
+public fun burn_expired_subname(iota_names: &mut IotaNames, nft: SubdomainRegistration, clock: &Clock) {
     iota_names.registry_mut().burn_subdomain_object(nft, clock);
 }
 
