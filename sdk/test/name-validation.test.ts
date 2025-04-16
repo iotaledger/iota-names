@@ -58,13 +58,17 @@ describe('Name validation', () => {
 	test('should be valid with only domain at-style', () => {
 		expect(isValidIotaName('@test')).toBe(true);
 	});
+
+	test('should be invalid', () => {
+		expect(isValidIotaName('Name.iota')).toBe(false);
+	});
 });
 
 describe('Name normalization', () => {
 	test('should normalize as the same value dot-style', () => {
-		expect(normalizeIotaName('test.iota')).toEqual('test.iota');
-		expect(normalizeIotaName('sub.test.iota')).toEqual('sub.test.iota');
-		expect(normalizeIotaName('more.sub.test.iota')).toEqual('more.sub.test.iota');
+		expect(normalizeIotaName('test.iota', 'dot')).toEqual('test.iota');
+		expect(normalizeIotaName('sub.test.iota', 'dot')).toEqual('sub.test.iota');
+		expect(normalizeIotaName('more.sub.test.iota', 'dot')).toEqual('more.sub.test.iota');
 	});
 
 	test('should normalize as the same value at-style', () => {
@@ -76,28 +80,32 @@ describe('Name normalization', () => {
 	test('should normalize as dot-style', () => {
 		expect(normalizeIotaName('@test', 'dot')).toEqual('test.iota');
 		expect(normalizeIotaName('test.iota', 'dot')).toEqual('test.iota');
-		expect(normalizeIotaName('sub.test@test', 'dot')).toEqual('sub.test.iota');
-		expect(normalizeIotaName('more.sub.test@test', 'dot')).toEqual('more.sub.test.iota');
+		expect(normalizeIotaName('sub.test@test', 'dot')).toEqual('sub.test.test.iota');
+		expect(normalizeIotaName('more.sub.test@test', 'dot')).toEqual('more.sub.test.test.iota');
 	});
 
 	test('should normalize as at-style', () => {
 		expect(normalizeIotaName('@test', 'dot')).toEqual('test.iota');
 		expect(normalizeIotaName('test@test', 'at')).toEqual('test@test');
-		expect(normalizeIotaName('sub.test.iota', 'at')).toEqual('sub.test@test');
-		expect(normalizeIotaName('more.sub.test.iota', 'at')).toEqual('more.sub.test@test');
+		expect(normalizeIotaName('sub.test.iota', 'at')).toEqual('sub@test');
+		expect(normalizeIotaName('more.sub.test.iota', 'at')).toEqual('more.sub@test');
+	});
+
+	test('should normalize as lowercase', () => {
+		expect(normalizeIotaName('NaMe.ioTa', 'dot')).toEqual('name.iota');
+		expect(normalizeIotaName('NaMe.ioTa')).toEqual('@name');
 	});
 
 	test('should be invalid', () => {
-		expect(normalizeIotaName('-test.iota')).toThrow('Invalid IOTA name "-test.iota"');
-		expect(normalizeIotaName('test-.iota')).toThrow('Invalid IOTA name "test-.iota"');
-		expect(normalizeIotaName('sub-.test@test')).toThrow('Invalid IOTA name "sub-.test@test"');
-		expect(normalizeIotaName('-sub-test.test@test')).toThrow(
+		expect(() => normalizeIotaName('-test.iota')).toThrow('Invalid IOTA name "-test.iota"');
+		expect(() => normalizeIotaName('test-.iota')).toThrow('Invalid IOTA name "test-.iota"');
+		expect(() => normalizeIotaName('sub-.test@test')).toThrow('Invalid IOTA name "sub-.test@test"');
+		expect(() => normalizeIotaName('-sub-test.test@test')).toThrow(
 			'Invalid IOTA name "-sub-test.test@test"',
 		);
-		expect(normalizeIotaName('awudi')).toThrow('Invalid IOTA name "awudi"');
-		expect(normalizeIotaName('Name.iota')).toThrow('Invalid IOTA name "Name.iota"');
-		expect(normalizeIotaName('.iota')).toThrow('Invalid IOTA name ".iota"');
-		expect(normalizeIotaName('space .iota')).toThrow('Invalid IOTA name "space .iota"');
-		expect(normalizeIotaName('empty. .iota')).toThrow('Invalid IOTA name "empty. .iota"');
+		expect(() => normalizeIotaName('awudi')).toThrow('Invalid IOTA name "awudi"');
+		expect(() => normalizeIotaName('.iota')).toThrow('Invalid IOTA name ".iota"');
+		expect(() => normalizeIotaName('space .iota')).toThrow('Invalid IOTA name "space .iota"');
+		expect(() => normalizeIotaName('empty. .iota')).toThrow('Invalid IOTA name "empty. .iota"');
 	});
 });
