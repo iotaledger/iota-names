@@ -43,19 +43,14 @@ export const init = async (
 	let namesToReserveFile = './init/names-to-register.csv';
 	if (fs.existsSync(namesToReserveFile)) {
 		const nameAddressPairs = parseCsvFile(namesToReserveFile);
-		const nameCount = Object.keys(nameAddressPairs).length;
+		const names = Object.keys(nameAddressPairs);
+		const nameCount = names.length;
 		if (nameCount === 0) {
 			console.log('No names to register');
 		} else {
-			console.log(`Registering ${nameCount} names:`, nameAddressPairs);
+			console.log(`Registering ${nameCount} names:`, names);
 			const tx = new Transaction();
-			reserveDomains(
-				tx,
-				nameAddressPairs,
-				packageInfo.packageId,
-				packageInfo.adminCap,
-				packageInfo.iotaNames,
-			);
+			reserveDomains(tx, names, packageInfo.packageId, packageInfo.adminCap, packageInfo.iotaNames);
 			const result = await signAndExecute(tx, network);
 			await client.waitForTransaction({ digest: result.digest });
 			console.log(`Transaction digest: ${result.digest}`);

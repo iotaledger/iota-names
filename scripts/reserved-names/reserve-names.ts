@@ -37,7 +37,7 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
 
 export const reserveDomains = (
 	txb: Transaction,
-	nameAddressPairs: Record<string, string | undefined>,
+	names: string[],
 	iotaNamesPackageId: string,
 	adminCap: string,
 	iotaNamesObjectId: string,
@@ -47,7 +47,7 @@ export const reserveDomains = (
 		arguments: [
 			txb.object(adminCap),
 			txb.object(iotaNamesObjectId),
-			txb.pure.vector('string', Object.keys(nameAddressPairs)),
+			txb.pure.vector('string', names),
 			txb.pure.u8(YEARS_TO_RESERVE),
 			txb.object(IOTA_CLOCK_OBJECT_ID),
 		],
