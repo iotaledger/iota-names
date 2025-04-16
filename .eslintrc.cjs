@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module.exports = {
-	plugins: ['unused-imports', 'prettier', 'header', 'require-extensions'],
+	plugins: ['unused-imports', 'prettier', 'require-extensions'],
 	extends: [
 		'react-app',
 		'eslint:recommended',
@@ -53,15 +53,6 @@ module.exports = {
 				name: 'Buffer',
 				message: 'Buffer usage increases bundle size and is not consistently implemented on web.',
 			},
-		],
-		'header/header': [
-			2,
-			'line',
-			[
-				' Copyright (c) Mysten Labs, Inc.',
-				' Modifications Copyright (c) 2025 IOTA Stiftung',
-				' SPDX-License-Identifier: Apache-2.0',
-			],
 		],
 		'unused-imports/no-unused-imports': [
 			'error',

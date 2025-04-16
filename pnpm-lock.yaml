@@ -31,9 +31,6 @@ importers:
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1)
-      eslint-plugin-header:
-        specifier: ^3.1.1
-        version: 3.1.1(eslint@8.57.1)
       eslint-plugin-import:
         specifier: ^2.29.1
         version: 2.31.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
@@ -4411,14 +4408,6 @@ packages:
       '@babel/plugin-syntax-flow': ^7.14.5
       '@babel/plugin-transform-react-jsx': ^7.14.9
       eslint: ^8.1.0
-
-  eslint-plugin-header@3.1.1:
-    resolution:
-      {
-        integrity: sha512-9vlKxuJ4qf793CmeeSrZUvVClw6amtpghq3CuWcB5cUNnWHQhgcqy5eF8oVKFk1G3Y/CbchGfEaw3wiIJaNmVg==,
-      }
-    peerDependencies:
-      eslint: '>=7.7.0'
 
   eslint-plugin-import@2.31.0:
     resolution:
@@ -11350,10 +11339,6 @@ snapshots:
       eslint: 8.57.1
       lodash: 4.17.21
       string-natural-compare: 3.0.1
-
-  eslint-plugin-header@3.1.1(eslint@8.57.1):
-    dependencies:
-      eslint: 8.57.1
 
   eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1):
     dependencies:
