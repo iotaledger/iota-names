@@ -55,7 +55,7 @@ module deny_list::deny_list_tests {
         abort 1337
     }
 
-    // coverage.. :) 
+
     #[test, expected_failure(abort_code = ::deny_list::deny_list::ENoWordsInList)]
     fun test_empty_addition_blocked_failure(){
         let mut scenario_val = test_init();
