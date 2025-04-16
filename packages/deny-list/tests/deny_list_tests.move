@@ -9,7 +9,7 @@ module deny_list::deny_list_tests {
 
     use iota_names::iota_names::{Self, IotaNames};
 
-    use deny_list::deny_list::{Self, DenyListAuth};  // This is correct
+    use deny_list::deny_list::{Self, DenyListAuth};
 
     const ADDR: address = @0x0;
 
