@@ -81,7 +81,7 @@ describe('Name normalization', () => {
 	});
 
 	test('should normalize as at-style', () => {
-		expect(normalizeIotaName('@test', 'dot')).toEqual('@test');
+		expect(normalizeIotaName('@test', 'dot')).toEqual('test.iota');
 		expect(normalizeIotaName('test@test', 'at')).toEqual('test@test');
 		expect(normalizeIotaName('sub.test.iota', 'at')).toEqual('sub.test@test');
 		expect(normalizeIotaName('more.sub.test.iota', 'at')).toEqual('more.sub.test@test');
@@ -95,5 +95,9 @@ describe('Name normalization', () => {
 			'Invalid IOTA name "-sub-test.test@test"',
 		);
 		expect(normalizeIotaName('awudi')).toThrow('Invalid IOTA name "awudi"');
+		expect(normalizeIotaName('Name.iota')).toThrow('Invalid IOTA name "Name.iota"');
+		expect(normalizeIotaName('.iota')).toThrow('Invalid IOTA name ".iota"');
+		expect(normalizeIotaName('space .iota')).toThrow('Invalid IOTA name "space .iota"');
+		expect(normalizeIotaName('empty. .iota')).toThrow('Invalid IOTA name "empty. .iota"');
 	});
 });
