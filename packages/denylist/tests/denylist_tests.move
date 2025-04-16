@@ -2,6 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[allow(lint(abort_without_constant))]
 module denylist::denylist_tests {
     use std::string::{utf8, String};
 
@@ -28,7 +29,6 @@ module denylist::denylist_tests {
 
         assert!(denylist::is_reserved_name(&iota_names, utf8(b"test")), 0);
         assert!(denylist::is_reserved_name(&iota_names, utf8(b"test2")), 0);
-    
         assert!(denylist::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
 
         assert!(!denylist::is_blocked_name(&iota_names, utf8(b"example")), 0);

@@ -28,15 +28,15 @@ module subdomains::config {
 
     /// A Subdomain configuration object.
     /// Holds the allow-listed tlds, the max depth and the minimum label size.
-    public struct SubDomainConfig has copy, store, drop {
+    public struct SubdomainConfig has copy, store, drop {
         allowed_tlds: vector<String>,
         max_depth: u8,
         min_label_size: u8,
         minimum_duration: u64
     }
 
-    public fun default(): SubDomainConfig {
-        SubDomainConfig {
+    public fun default(): SubdomainConfig {
+        SubdomainConfig {
             allowed_tlds: vector[iota_tld()],
             max_depth: MAX_SUBDOMAIN_DEPTH,
             min_label_size: MIN_LABEL_SIZE,
@@ -50,8 +50,8 @@ module subdomains::config {
         max_depth: u8,
         min_label_size: u8,
         minimum_duration: u64
-    ): SubDomainConfig {
-        SubDomainConfig {
+    ): SubdomainConfig {
+        SubdomainConfig {
             allowed_tlds,
             max_depth,
             min_label_size,
@@ -63,7 +63,7 @@ module subdomains::config {
     public fun assert_is_valid_subdomain(
         parent: &Domain,
         child: &Domain,
-        config: &SubDomainConfig
+        config: &SubdomainConfig
     ) {
         assert!(
             is_valid_tld(child, config),
@@ -83,14 +83,14 @@ module subdomains::config {
         );
     }
 
-    public fun minimum_duration(config: &SubDomainConfig): u64 {
+    public fun minimum_duration(config: &SubdomainConfig): u64 {
         config.minimum_duration
     }
 
     /// Validate that the depth of the subdomain is with the allowed range.
     public fun has_valid_depth(
         domain: &Domain,
-        config: &SubDomainConfig
+        config: &SubdomainConfig
     ): bool {
         domain.number_of_levels() <= (config.max_depth as u64)
     }
@@ -101,14 +101,14 @@ module subdomains::config {
     /// (E.g., with `.move` service, we might want to restrict how subdomains are created)
     public fun is_valid_tld(
         domain: &Domain,
-        config: &SubDomainConfig
+        config: &SubdomainConfig
     ): bool {
         let mut i = 0;
         while (i < config.allowed_tlds.length()) {
             if (domain.tld() == &config.allowed_tlds[i]) {return true};
             i = i + 1;
         };
-        return false
+        false
     }
 
     /// Validate that the subdomain label (e.g. `sub` in `sub.example.iota`) is valid.
@@ -116,7 +116,7 @@ module subdomains::config {
     /// in the `Domain` construction.
     public fun is_valid_label(
         domain: &Domain,
-        config: &SubDomainConfig
+        config: &SubdomainConfig
     ): bool {
         // our label is the last vector element, as labels are stored in reverse order.
         let label = domain.label(domain.number_of_levels() - 1);

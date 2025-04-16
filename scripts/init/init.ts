@@ -2,9 +2,11 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo } from '../package-info/constants';
+import { parseCsvFile, reserveDomains } from '../reserved-names/reserve-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
@@ -35,12 +37,30 @@ export const init = async (
 	console.log('Published:', published);
 	await setup(published, network);
 
+	const client = getClient(network);
+	const packageInfo = readPackageInfo(network);
+
+	let namesToReserveFile = './init/names-to-register.csv';
+	if (fs.existsSync(namesToReserveFile)) {
+		const nameAddressPairs = parseCsvFile(namesToReserveFile);
+		const names = Object.keys(nameAddressPairs);
+		const nameCount = names.length;
+		if (nameCount === 0) {
+			console.log('No names to register');
+		} else {
+			console.log(`Registering ${nameCount} names:`, names);
+			const tx = new Transaction();
+			reserveDomains(tx, names, packageInfo.packageId, packageInfo.adminCap, packageInfo.iotaNames);
+			const result = await signAndExecute(tx, network);
+			await client.waitForTransaction({ digest: result.digest });
+			console.log(`Transaction digest: ${result.digest}`);
+		}
+	}
+
 	if (!newOwner) {
 		return;
 	}
 
-	const client = getClient(network);
-	const packageInfo = readPackageInfo(network);
 	const objectsToTransfer = await getIotaNamesAdminObjects(packageInfo, client);
 
 	const tx = new Transaction();

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
+#[allow(lint(abort_without_constant))]
 /// Testing strategy:
 ///
 /// - Admin can add new records to IotaNames and get the IotaNamesRegistrations

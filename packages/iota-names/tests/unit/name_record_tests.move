@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[test_only]
+#[allow(lint(abort_without_constant))]
 /// Testing strategy:
 ///
 /// - check that default values are set correctly and that updates are correct
@@ -38,7 +39,7 @@ fun create_and_update() {
     data.insert(utf8(b"age"), utf8(b"forever young"));
 
     // update values
-    record.set_data(*&data);
+    record.set_data(copy data);
     record.set_target_address(some(@iota_names));
     record.set_expiration_timestamp_ms(123456789); // 123456789 ms = 3.9 years
 
