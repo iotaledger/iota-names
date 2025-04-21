@@ -366,7 +366,7 @@ fun test_winner_can_place_bid() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EBidAmountTooLow)]
+#[test, expected_failure(abort_code = auction::EBidTooLow)]
 fun test_place_bid_aborts_if_value_is_too_low() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -670,7 +670,7 @@ fun test_place_bid_aborts_if_auction_not_started() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EInvalidBidValue)]
+#[test, expected_failure(abort_code = auction::EInitialBidTooLow)]
 fun test_start_auction_aborts_if_not_enough_fee() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -917,7 +917,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EBidAmountTooLow)]
+#[test, expected_failure(abort_code = auction::EBidTooLow)]
 fun test_overbid_less_than_1_IOTA() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
