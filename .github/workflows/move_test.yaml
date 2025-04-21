@@ -34,10 +34,9 @@ jobs:
         run: |
           for dir in packages/*; do
             dir_name=$(basename "$dir")
-              echo "Running iota move build in $dir"
-              iota move build --path "$dir" --lint --warnings-are-errors --dev
+            echo "Running iota move build in $dir"
+            iota move build --path "$dir" --lint --warnings-are-errors --dev
 
-              echo "Running iota move test in $dir"
-              iota move test --path "$dir"
-            fi
+            echo "Running iota move test in $dir"
+            iota move test --path "$dir"
           done
