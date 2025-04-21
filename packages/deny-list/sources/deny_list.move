@@ -22,7 +22,7 @@ module deny_list::deny_list {
         blocked: Table<String, bool>,
     }
 
-    /// The authorization for the denylist registry.
+    /// The authorization for the deny list registry.
     public struct DenyListAuth has drop {}
 
     public fun setup(
