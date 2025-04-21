@@ -223,23 +223,23 @@ fun assert_balance(scenario: &mut Scenario, amount: u64) {
 fun assert_auction(
     scenario: &mut Scenario,
     domain_name: String,
-    expected_start_ms: u64,
-    expected_end_ms: u64,
-    expected_winner: address,
-    expected_highest_amount: u64,
+    expected_start_ms: Option<u64>,
+    expected_end_ms: Option<u64>,
+    expected_winner: Option<address>,
+    expected_highest_amount: Option<u64>,
 ) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let auction_house = scenario.take_shared<AuctionHouse>();
     let (
-        mut start_ms,
-        mut end_ms,
-        mut winner,
-        mut highest_amount,
+        start_ms,
+        end_ms,
+        winner,
+        highest_amount,
     ) = auction_house.get_auction_metadata(domain_name);
-    assert!(option::extract(&mut start_ms) == expected_start_ms, 0);
-    assert!(option::extract(&mut end_ms) == expected_end_ms, 0);
-    assert!(option::extract(&mut winner) == expected_winner, 0);
-    assert!(option::extract(&mut highest_amount) == expected_highest_amount, 0);
+    assert!(start_ms == expected_start_ms, 0);
+    assert!(end_ms == expected_end_ms, 0);
+    assert!(winner == expected_winner, 0);
+    assert!(highest_amount == expected_highest_amount, 0);
     test_scenario::return_shared(auction_house);
 }
 
@@ -253,10 +253,10 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
     assert_auction(
         scenario,
         utf8(FIRST_DOMAIN_NAME),
-        0,
-        AUCTION_BIDDING_PERIOD_MS,
-        FIRST_ADDRESS,
-        1200 * NANOS_PER_IOTA,
+        option::some(0),
+        option::some(AUCTION_BIDDING_PERIOD_MS),
+        option::some(FIRST_ADDRESS),
+        option::some(1200 * NANOS_PER_IOTA),
     );
     place_bid_util(
         scenario,
@@ -268,10 +268,10 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
     assert_auction(
         scenario,
         utf8(FIRST_DOMAIN_NAME),
-        0,
-        AUCTION_BIDDING_PERIOD_MS,
-        SECOND_ADDRESS,
-        1210 * NANOS_PER_IOTA,
+        option::some(0),
+        option::some(AUCTION_BIDDING_PERIOD_MS),
+        option::some(SECOND_ADDRESS),
+        option::some(1210 * NANOS_PER_IOTA),
     );
 
     let nft = claim_util(
@@ -819,10 +819,10 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
     assert_auction(
         scenario,
         utf8(FIRST_DOMAIN_NAME),
-        0,
-        AUCTION_BIDDING_PERIOD_MS,
-        SECOND_ADDRESS,
-        1210 * NANOS_PER_IOTA,
+        option::some(0),
+        option::some(AUCTION_BIDDING_PERIOD_MS),
+        option::some(SECOND_ADDRESS),
+        option::some(1210 * NANOS_PER_IOTA),
     );
 
     let nft = claim_util(
@@ -1064,6 +1064,29 @@ fun test_auction_not_ended() {
     );
 
     nft.burn_for_testing();
+
+    scenario_val.end();
+}
+
+#[test]
+fun test_auction_metadata_none() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        1200 * NANOS_PER_IOTA,
+    );
+    assert_auction(
+        scenario,
+        utf8(SECOND_DOMAIN_NAME),
+        option::none(),
+        option::none(),
+        option::none(),
+        option::none()
+    );
 
     scenario_val.end();
 }
