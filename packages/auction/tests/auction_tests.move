@@ -1092,7 +1092,7 @@ fun test_auction_metadata_none() {
 }
 
 #[test]
-fun test_admin_zero_operations() {
+fun test_admin_try_finalize_auctions_zero_operations() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     
