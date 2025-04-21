@@ -2,6 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[test_only]
 module iota_names::pricing_config_tests;
 
 use iota_names::pricing_config;
