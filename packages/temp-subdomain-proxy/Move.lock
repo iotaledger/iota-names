@@ -30,8 +30,8 @@ id = "MoveStdlib"
 source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/testnet", subdir = "crates/iota-framework/packages/move-stdlib" }
 
 [[move.package]]
-id = "denylist"
-source = { local = "../denylist" }
+id = "deny_list"
+source = { local = "../deny-list" }
 
 dependencies = [
   { id = "Iota", name = "Iota" },
@@ -45,10 +45,10 @@ source = { local = "../subdomains" }
 dependencies = [
   { id = "Iota", name = "Iota" },
   { id = "IotaNames", name = "IotaNames" },
-  { id = "denylist", name = "denylist" },
+  { id = "deny_list", name = "deny_list" },
 ]
 
 [move.toolchain-version]
-compiler-version = "0.11.6-rc"
+compiler-version = "0.12.0-rc"
 edition = "2024"
 flavor = "iota"

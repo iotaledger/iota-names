@@ -154,11 +154,11 @@ export const Packages = (network: string) => {
 		},
 		DenyList: {
 			order: 2,
-			folder: 'denylist',
+			folder: 'deny-list',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-			authorizationType: (packageId: string) => `${packageId}::denylist::DenyListAuth`,
+			authorizationType: (packageId: string) => `${packageId}::deny_list::DenyListAuth`,
 			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotaNames: string) => {
-				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::denylist` });
+				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
 			},
 		},
 		Payments: {

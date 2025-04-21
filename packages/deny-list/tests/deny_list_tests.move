@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[allow(lint(abort_without_constant))]
-module denylist::denylist_tests;
+module deny_list::deny_list_tests;
 
-use denylist::denylist::{Self, DenyListAuth};
+use deny_list::deny_list::{Self, DenyListAuth};
 use iota::test_scenario::{Self as ts, Scenario};
 use iota_names::iota_names::{Self, IotaNames};
 use std::string::{utf8, String};
@@ -21,17 +21,17 @@ fun test() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    denylist::add_reserved_names(&mut iota_names, &cap, some_reserved_names());
-    denylist::add_blocked_names(&mut iota_names, &cap, some_offensive_names());
+    deny_list::add_reserved_names(&mut iota_names, &cap, some_reserved_names());
+    deny_list::add_blocked_names(&mut iota_names, &cap, some_offensive_names());
 
-    assert!(denylist::is_reserved_name(&iota_names, utf8(b"test")), 0);
-    assert!(denylist::is_reserved_name(&iota_names, utf8(b"test2")), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, utf8(b"test")), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, utf8(b"test2")), 0);
 
-    assert!(denylist::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
+    assert!(deny_list::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
 
-    assert!(!denylist::is_blocked_name(&iota_names, utf8(b"example")), 0);
+    assert!(!deny_list::is_blocked_name(&iota_names, utf8(b"example")), 0);
 
-    assert!(!denylist::is_reserved_name(&iota_names, utf8(b"example")), 0);
+    assert!(!deny_list::is_reserved_name(&iota_names, utf8(b"example")), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -39,7 +39,7 @@ fun test() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::denylist::denylist::ENoWordsInList)]
+#[test, expected_failure(abort_code = ::deny_list::deny_list::ENoWordsInList)]
 fun test_empty_addition_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -48,13 +48,13 @@ fun test_empty_addition_failure() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    denylist::add_reserved_names(&mut iota_names, &cap, vector[]);
+    deny_list::add_reserved_names(&mut iota_names, &cap, vector[]);
 
     abort 1337
 }
 
 // coverage.. :)
-#[test, expected_failure(abort_code = ::denylist::denylist::ENoWordsInList)]
+#[test, expected_failure(abort_code = ::deny_list::deny_list::ENoWordsInList)]
 fun test_empty_addition_blocked_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -63,7 +63,7 @@ fun test_empty_addition_blocked_failure() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    denylist::add_blocked_names(&mut iota_names, &cap, vector[]);
+    deny_list::add_blocked_names(&mut iota_names, &cap, vector[]);
 
     abort 1337
 }
@@ -77,13 +77,13 @@ fun remove_blocked_word() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    denylist::add_blocked_names(&mut iota_names, &cap, some_offensive_names());
+    deny_list::add_blocked_names(&mut iota_names, &cap, some_offensive_names());
 
-    assert!(denylist::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
+    assert!(deny_list::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
 
-    denylist::remove_blocked_names(&mut iota_names, &cap, vector[utf8(b"bad_test")]);
+    deny_list::remove_blocked_names(&mut iota_names, &cap, vector[utf8(b"bad_test")]);
 
-    assert!(!denylist::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
+    assert!(!deny_list::is_blocked_name(&iota_names, utf8(b"bad_test")), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -100,15 +100,15 @@ fun remove_reserved_word() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    denylist::add_reserved_names(&mut iota_names, &cap, some_reserved_names());
+    deny_list::add_reserved_names(&mut iota_names, &cap, some_reserved_names());
 
     let name = utf8(b"test");
 
-    assert!(denylist::is_reserved_name(&iota_names, name), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, name), 0);
 
-    denylist::remove_reserved_names(&mut iota_names, &cap, vector[name]);
+    deny_list::remove_reserved_names(&mut iota_names, &cap, vector[name]);
 
-    assert!(!denylist::is_reserved_name(&iota_names, name), 0);
+    assert!(!deny_list::is_reserved_name(&iota_names, name), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -127,7 +127,7 @@ public fun test_init(): (Scenario) {
 
         iota_names.authorize_app_for_testing<DenyListAuth>();
 
-        denylist::setup(&mut iota_names, &cap, scenario.ctx());
+        deny_list::setup(&mut iota_names, &cap, scenario.ctx());
 
         iota_names.share_for_testing();
 

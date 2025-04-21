@@ -25,7 +25,7 @@
 ///
 module subdomains::subdomains;
 
-use denylist::denylist;
+use deny_list::deny_list;
 use iota::{clock::Clock, dynamic_field as df, vec_map::VecMap};
 use iota_names::{
     constants::{subdomain_allow_extension_key, subdomain_allow_creation_key},
@@ -76,7 +76,7 @@ public fun new_leaf(
     target: address,
     ctx: &mut TxContext,
 ) {
-    assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
+    assert!(!deny_list::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
     let subdomain = domain::new(subdomain_name);
     // all validation logic for subdomain creation / management.
@@ -128,7 +128,7 @@ public fun new(
     allow_time_extension: bool,
     ctx: &mut TxContext,
 ): SubdomainRegistration {
-    assert!(!denylist::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
+    assert!(!deny_list::is_blocked_name(iota_names, subdomain_name), ENotAllowedName);
 
     let subdomain = domain::new(subdomain_name);
     // all validation logic for subdomain creation / management.

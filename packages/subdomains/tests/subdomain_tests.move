@@ -6,7 +6,7 @@
 #[allow(lint(abort_without_constant))]
 module subdomains::subdomain_tests;
 
-use denylist::denylist;
+use deny_list::deny_list;
 use iota::{clock::{Self, Clock}, test_scenario::{Self as ts, Scenario, ctx}};
 use iota_names::{
     constants::{grace_period_ms, year_ms},
@@ -264,7 +264,7 @@ public fun test_init(): Scenario {
         iota_names::add_config(&admin_cap, &mut iota_names, config::default());
 
         registry::init_for_testing(&admin_cap, &mut iota_names, ctx(scenario));
-        denylist::setup(&mut iota_names, &admin_cap, ctx(scenario));
+        deny_list::setup(&mut iota_names, &admin_cap, ctx(scenario));
 
         ts::return_shared(iota_names);
         ts::return_to_sender(scenario, admin_cap);

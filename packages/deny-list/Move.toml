@@ -1,5 +1,5 @@
 [package]
-name = "denylist"
+name = "deny_list"
 edition = "2024"
 
 [dependencies]
@@ -7,4 +7,4 @@ Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-f
 IotaNames = { local = "../iota-names" }
 
 [addresses]
-denylist = "0x0"
+deny_list = "0x0"

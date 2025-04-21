@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module denylist::denylist;
+module deny_list::deny_list;
 
 use iota::table::{Self, Table};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
@@ -12,7 +12,7 @@ use std::string::String;
 const ENoWordsInList: vector<u8> = b"No names in the passed list.";
 
 /// A wrapper that holds the reserved and blocked names.
-public struct Denylist has store {
+public struct DenyList has store {
     // The list of reserved names.
     // Our public SLD registrations will be checking against it.
     reserved: Table<String, bool>,
@@ -21,14 +21,14 @@ public struct Denylist has store {
     blocked: Table<String, bool>,
 }
 
-/// The authorization for the denylist registry.
+/// The authorization for the deny_list registry.
 public struct DenyListAuth has drop {}
 
 public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext) {
     iota_names::add_registry(
         cap,
         iota_names,
-        Denylist {
+        DenyList {
             reserved: table::new(ctx),
             blocked: table::new(ctx),
         },
@@ -37,18 +37,18 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
 
 /// Check for a reserved name
 public fun is_reserved_name(iota_names: &IotaNames, name: String): bool {
-    denylist(iota_names).reserved.contains(name)
+    deny_list(iota_names).reserved.contains(name)
 }
 
 /// Checks for a blocked name.
 public fun is_blocked_name(iota_names: &IotaNames, name: String): bool {
-    denylist(iota_names).blocked.contains(name)
+    deny_list(iota_names).blocked.contains(name)
 }
 
 /// Add a list of reserved names to the list as admin.
 public fun add_reserved_names(iota_names: &mut IotaNames, _: &AdminCap, words: vector<String>) {
     internal_add_names_to_list(
-        &mut denylist_mut(iota_names).reserved,
+        &mut deny_list_mut(iota_names).reserved,
         words,
     );
 }
@@ -56,7 +56,7 @@ public fun add_reserved_names(iota_names: &mut IotaNames, _: &AdminCap, words: v
 /// Add a list of offensive names to the list as admin.
 public fun add_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, words: vector<String>) {
     internal_add_names_to_list(
-        &mut denylist_mut(iota_names).blocked,
+        &mut deny_list_mut(iota_names).blocked,
         words,
     );
 }
@@ -64,7 +64,7 @@ public fun add_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, words: ve
 /// Remove a list of words from the reserved names list.
 public fun remove_reserved_names(iota_names: &mut IotaNames, _: &AdminCap, words: vector<String>) {
     internal_remove_names_from_list(
-        &mut denylist_mut(iota_names).reserved,
+        &mut deny_list_mut(iota_names).reserved,
         words,
     );
 }
@@ -72,19 +72,19 @@ public fun remove_reserved_names(iota_names: &mut IotaNames, _: &AdminCap, words
 /// Remove a list of words from the list as admin.
 public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, words: vector<String>) {
     internal_remove_names_from_list(
-        &mut denylist_mut(iota_names).blocked,
+        &mut deny_list_mut(iota_names).blocked,
         words,
     );
 }
 
 /// Get immutable access to the registry.
-fun denylist(iota_names: &IotaNames): &Denylist {
+fun deny_list(iota_names: &IotaNames): &DenyList {
     iota_names.registry()
 }
 
 /// Internal helper to get access to the BlockedNames object
-fun denylist_mut(iota_names: &mut IotaNames): &mut Denylist {
-    iota_names::app_registry_mut<DenyListAuth, Denylist>(DenyListAuth {}, iota_names)
+fun deny_list_mut(iota_names: &mut IotaNames): &mut DenyList {
+    iota_names::app_registry_mut<DenyListAuth, DenyList>(DenyListAuth {}, iota_names)
 }
 
 /// Internal helper to batch add words to a table.
@@ -114,8 +114,8 @@ fun internal_remove_names_from_list(table: &mut Table<String, bool>, words: vect
 }
 
 #[test_only]
-public fun new_for_testing(ctx: &mut TxContext): Denylist {
-    Denylist {
+public fun new_for_testing(ctx: &mut TxContext): DenyList {
+    DenyList {
         reserved: table::new(ctx),
         blocked: table::new(ctx),
     }
