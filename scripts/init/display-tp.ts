@@ -27,7 +27,7 @@ export const createDisplay = ({
 	subdomainsPackageId: string;
 	network: string;
 }) => {
-	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubDomainRegistration`;
+	const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubdomainRegistration`;
 	const iotaNamesRegistration = `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
 
 	const display = txb.moveCall({
