@@ -57,8 +57,8 @@ const EBidAmountTooLow: vector<u8> =
 const ENoProfits: vector<u8> =
     b"There are no profits to withdraw.";
 
-/// Authorization witness to call protected functions of iota_names.
-public struct App has drop {}
+/// Authorization witness to call protected functions of `iota_names`.
+public struct AuctionApp has drop {}
 
 /// The AuctionHouse application.
 public struct AuctionHouse has key, store {
@@ -95,7 +95,7 @@ public fun start_auction_and_place_bid(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    iota_names.assert_app_is_authorized<App>();
+    iota_names.assert_app_is_authorized<AuctionApp>();
 
     let domain = domain::new(domain_name);
 
@@ -106,7 +106,7 @@ public fun start_auction_and_place_bid(
     let min_price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
     assert!(bid.value() >= min_price, EInvalidBidValue);
 
-    let registry = iota_names::app_registry_mut<App, Registry>(App {}, iota_names);
+    let registry = iota_names::app_registry_mut<AuctionApp, Registry>(AuctionApp {}, iota_names);
     let nft = registry.add_record(domain, DEFAULT_DURATION, clock, ctx);
     let starting_bid = bid.value();
 

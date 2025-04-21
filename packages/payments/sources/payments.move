@@ -10,6 +10,7 @@ use iota::vec_map::{Self, VecMap};
 use iota_names::payment::{Receipt, PaymentIntent};
 use iota_names::iota_names::IotaNames;
 
+/// Authorization witness to call protected functions of `iota_names`.
 public struct PaymentsApp() has drop;
 
 #[error]

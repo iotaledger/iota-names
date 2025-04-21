@@ -10,7 +10,7 @@ module deny_list::deny_list_tests {
 
     use iota_names::iota_names::{Self, IotaNames};
 
-    use deny_list::deny_list::{Self, DenyListAuth};
+    use deny_list::deny_list::{Self, DenyListApp};
 
     const ADDR: address = @0x0;
 
@@ -127,7 +127,7 @@ module deny_list::deny_list_tests {
 
             let (mut iota_names, cap) = iota_names::new_for_testing(scenario.ctx());
 
-            iota_names.authorize_app_for_testing<DenyListAuth>();
+            iota_names.authorize_app_for_testing<DenyListApp>();
 
             deny_list::setup(&mut iota_names, &cap, scenario.ctx());
 

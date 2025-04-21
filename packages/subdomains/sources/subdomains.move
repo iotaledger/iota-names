@@ -57,8 +57,8 @@ module subdomains::subdomains {
     /// Enabled metadata value.
     const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
 
-    /// The authentication scheme for IotaNames.
-    public struct Subdomains has drop {}
+    /// Authorization witness to call protected functions of `iota_names`.
+    public struct SubdomainsApp has drop {}
 
     /// The key to store the parent's ID in the subdomain object.
     public struct ParentKey has copy, store, drop {}
@@ -342,7 +342,7 @@ module subdomains::subdomains {
     }
 
     fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-        iota_names::app_registry_mut<Subdomains, Registry>(Subdomains {}, iota_names)
+        iota_names::app_registry_mut<SubdomainsApp, Registry>(SubdomainsApp {}, iota_names)
     }
 
     fun app_config(iota_names: &IotaNames): &SubdomainConfig {
@@ -350,7 +350,7 @@ module subdomains::subdomains {
     }
 
     #[test_only]
-    public fun auth_for_testing(): Subdomains {
-        Subdomains {}
+    public fun auth_for_testing(): SubdomainsApp {
+        SubdomainsApp {}
     }
 }

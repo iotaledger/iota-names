@@ -11,7 +11,7 @@ use iota::{clock::{Self, Clock}, coin::{Self, Coin}, iota::IOTA, test_scenario::
 use iota_names::{
     auction::{
         Self,
-        App as AuctionApp,
+        AuctionApp,
         place_bid,
         claim,
         AuctionHouse,
