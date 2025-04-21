@@ -43,8 +43,8 @@ const EAuctionStarted: vector<u8> =
 const EAuctionNotStarted: vector<u8> =
     b"Placing a bid in a not started auction.";
 #[error]
-const EAuctionNotEndedYet: vector<u8> =
-    b"The auction has not ended yet.";
+const EAuctionNotEnded: vector<u8> =
+    b"The auction has not ended.";
 #[error]
 const EAuctionEnded: vector<u8> =
     b"The auction ended.";
@@ -234,7 +234,7 @@ public fun claim(
     } = self.auctions.remove(domain);
 
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     // Ensure the sender is the winner
     assert!(ctx.sender() == winner, ENotWinner);
@@ -292,7 +292,7 @@ public fun collect_winning_auction_fund(
     let domain = domain::new(domain_name);
     let auction = &mut self.auctions[domain];
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEnded);
 
     let amount = auction.current_bid.value();
     self.balance.join(auction.current_bid.split(amount, ctx).into_balance());
@@ -344,7 +344,7 @@ fun admin_finalize_auction_internal(
     } = self.auctions.remove(domain);
 
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     event::emit(AuctionFinalizedEvent {
         domain,

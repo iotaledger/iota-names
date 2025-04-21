@@ -299,7 +299,9 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
 fun test_normal_auction_flow() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     normal_auction_flow(scenario);
+    
     scenario_val.end();
 }
 
@@ -307,6 +309,7 @@ fun test_normal_auction_flow() {
 fun test_claim_aborts_if_winner_claims_twice() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -335,6 +338,7 @@ fun test_claim_aborts_if_winner_claims_twice() {
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     nft.burn_for_testing();
+    
     scenario_val.end();
 }
 
@@ -342,6 +346,7 @@ fun test_claim_aborts_if_winner_claims_twice() {
 fun test_winner_can_place_bid() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -370,6 +375,7 @@ fun test_winner_can_place_bid() {
 fun test_place_bid_aborts_if_value_is_too_low() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -391,6 +397,7 @@ fun test_place_bid_aborts_if_value_is_too_low() {
 fun test_non_winner_cannot_claim() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -412,6 +419,7 @@ fun test_non_winner_cannot_claim() {
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     nft.burn_for_testing();
+    
     scenario_val.end();
 }
 
@@ -419,6 +427,7 @@ fun test_non_winner_cannot_claim() {
 fun test_admin_try_finalize_auction() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -477,6 +486,7 @@ fun test_admin_try_finalize_auction() {
 fun test_admin_try_finalize_auction_2_auctions() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -516,10 +526,11 @@ fun test_admin_try_finalize_auction_2_auctions() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EAuctionNotEndedYet)]
+#[test, expected_failure(abort_code = auction::EAuctionNotEnded)]
 fun test_admin_try_finalize_auction_too_early() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -528,6 +539,7 @@ fun test_admin_try_finalize_auction_too_early() {
     );
 
     admin_try_finalize_auction_util(scenario, utf8(FIRST_DOMAIN_NAME), 0);
+    
     scenario_val.end();
 }
 
@@ -535,6 +547,7 @@ fun test_admin_try_finalize_auction_too_early() {
 fun test_admin_try_finalize_auctions_too_early() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -551,6 +564,7 @@ fun test_admin_try_finalize_auctions_too_early() {
 fun test_place_bid_aborts_if_too_late() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -564,6 +578,7 @@ fun test_place_bid_aborts_if_too_late() {
         1210 * NANOS_PER_IOTA,
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
+    
     scenario_val.end();
 }
 
@@ -572,7 +587,9 @@ fun test_admin_withdraw_funds_aborts_if_no_profits() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let funds = admin_withdraw_funds_util(scenario);
+    
     coin::burn_for_testing(funds);
+    
     scenario_val.end();
 }
 
@@ -580,12 +597,14 @@ fun test_admin_withdraw_funds_aborts_if_no_profits() {
 fun test_start_auction_aborts_with_wrong_tld() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"test.move"),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -593,12 +612,14 @@ fun test_start_auction_aborts_with_wrong_tld() {
 fun test_start_auction_aborts_if_domain_name_too_short() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"tt.iota"),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -606,6 +627,7 @@ fun test_start_auction_aborts_if_domain_name_too_short() {
 fun test_start_auction_aborts_if_domain_name_too_long() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -614,6 +636,7 @@ fun test_start_auction_aborts_if_domain_name_too_long() {
         ),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -621,12 +644,14 @@ fun test_start_auction_aborts_if_domain_name_too_long() {
 fun test_start_auction_aborts_if_domain_name_starts_with_dash() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"-test.iota"),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -634,12 +659,14 @@ fun test_start_auction_aborts_if_domain_name_starts_with_dash() {
 fun test_start_auction_aborts_if_domain_name_ends_with_dash() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"test-.iota"),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -647,12 +674,14 @@ fun test_start_auction_aborts_if_domain_name_ends_with_dash() {
 fun test_start_auction_aborts_if_domain_name_contains_uppercase_characters() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"ttABC.iota"),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -660,6 +689,7 @@ fun test_start_auction_aborts_if_domain_name_contains_uppercase_characters() {
 fun test_place_bid_aborts_if_auction_not_started() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
@@ -667,6 +697,7 @@ fun test_place_bid_aborts_if_auction_not_started() {
         1210 * NANOS_PER_IOTA,
         0,
     );
+    
     scenario_val.end();
 }
 
@@ -674,12 +705,14 @@ fun test_place_bid_aborts_if_auction_not_started() {
 fun test_start_auction_aborts_if_not_enough_fee() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
         utf8(b"test.iota"),
         10 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -687,6 +720,7 @@ fun test_start_auction_aborts_if_not_enough_fee() {
 fun test_admin_collect_fund() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -731,10 +765,11 @@ fun test_admin_collect_fund() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EAuctionNotEndedYet)]
+#[test, expected_failure(abort_code = auction::EAuctionNotEnded)]
 fun test_admin_collect_fund_aborts_if_too_early() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -742,6 +777,7 @@ fun test_admin_collect_fund_aborts_if_too_early() {
         1200 * NANOS_PER_IOTA,
     );
     admin_collect_fund_util(scenario, utf8(FIRST_DOMAIN_NAME), 0);
+    
     scenario_val.end();
 }
 
@@ -749,6 +785,7 @@ fun test_admin_collect_fund_aborts_if_too_early() {
 fun test_start_auction_and_place_bid_aborts_if_auction_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     deauthorize_app_util(scenario);
     start_auction_and_place_bid_util(
         scenario,
@@ -756,6 +793,7 @@ fun test_start_auction_and_place_bid_aborts_if_auction_is_deauthorized() {
         utf8(FIRST_DOMAIN_NAME),
         1200 * NANOS_PER_IOTA,
     );
+    
     scenario_val.end();
 }
 
@@ -763,6 +801,7 @@ fun test_start_auction_and_place_bid_aborts_if_auction_is_deauthorized() {
 fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -813,6 +852,7 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
 fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -872,6 +912,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
 fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -921,6 +962,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
 fun test_overbid_less_than_1_IOTA() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -934,6 +976,7 @@ fun test_overbid_less_than_1_IOTA() {
         100 * NANOS_PER_IOTA + 100,
         0,
     );
+    
     scenario_val.end();
 }
 
@@ -941,6 +984,7 @@ fun test_overbid_less_than_1_IOTA() {
 fun test_overbid_of_1_IOTA() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -954,6 +998,7 @@ fun test_overbid_of_1_IOTA() {
         101 * NANOS_PER_IOTA,
         0,
     );
+    
     scenario_val.end();
 }
 
@@ -961,6 +1006,7 @@ fun test_overbid_of_1_IOTA() {
 fun test_overbid_of_1_IOTA_and_1_NANO() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
+    
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -974,5 +1020,50 @@ fun test_overbid_of_1_IOTA_and_1_NANO() {
         101 * NANOS_PER_IOTA + 1,
         0,
     );
+    
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = auction::EAuctionStarted)]
+fun test_auction_started() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = auction::EAuctionNotEnded)]
+fun test_auction_not_ended() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+    let nft = claim_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        AUCTION_BIDDING_PERIOD_MS,
+    );
+
+    nft.burn_for_testing();
+
     scenario_val.end();
 }
