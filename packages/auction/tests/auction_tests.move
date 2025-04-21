@@ -1090,3 +1090,26 @@ fun test_auction_metadata_none() {
 
     scenario_val.end();
 }
+
+#[test]
+fun test_admin_zero_operations() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        1200 * NANOS_PER_IOTA,
+    );
+
+    admin_try_finalize_auctions_util(
+        scenario,
+        0,
+        AUCTION_BIDDING_PERIOD_MS + 1,
+    );
+    
+    assert_balance(scenario, 0);
+
+    scenario_val.end();
+}
