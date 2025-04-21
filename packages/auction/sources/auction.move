@@ -428,11 +428,7 @@ public struct AuctionExtendedEvent has copy, drop {
 
 #[test_only]
 public fun init_for_testing(ctx: &mut TxContext) {
-    iota::transfer::share_object(AuctionHouse {
-        id: object::new(ctx),
-        balance: balance::zero(),
-        auctions: linked_table::new(ctx),
-    });
+    init(ctx)
 }
 
 #[test_only]
