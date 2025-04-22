@@ -204,7 +204,7 @@ use iota_names::core_config;
 #[test_only]
 use iota_names::pricing_config::{Self, new_range, PricingConfig};
 #[test_only]
-public struct Test has drop {}
+public struct TestAuth has drop {}
 
 #[test_only]
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
@@ -224,7 +224,7 @@ public fun init_for_testing(ctx: &mut TxContext): IotaNames {
 
     admin_cap.add_config(&mut iota_names, core_config::default());
 
-    admin_cap.authorize<Test>(&mut iota_names);
+    admin_cap.authorize<TestAuth>(&mut iota_names);
     admin_cap.add_config(&mut iota_names, new_pricing_config());
     admin_cap.add_config(
         &mut iota_names,
