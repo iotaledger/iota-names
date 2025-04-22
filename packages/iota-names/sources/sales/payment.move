@@ -3,19 +3,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// This module is used to streamline our payment flows.
-/*
-   Whenever a registration or renewal request comes in, we issue a
-   `PaymentIntent` that holds the data required to complete the payment,
-   nominated in the base price units (will be USDC in our case).
-
-   Authorized apps are required to finalize any payment, so we can ensure that
-   we can keep our payment flows upgradeable, without the need to upgrade the
-   packages whenever the core protocol has a change, as well as gated
-   (so we can turn registrations/renewals off in case of an emergency).
-
-   Authorized apps can also apply discounts to the payment intent. This is
-   useful for system-level discounts, or user-specific discounts.
-*/
+///
+/// Whenever a registration or renewal request comes in, we issue a
+/// `PaymentIntent` that holds the data required to complete the payment,
+/// nominated in the base price units (will be USDC in our case).
+///
+/// Authorized apps are required to finalize any payment, so we can ensure that
+/// we can keep our payment flows upgradeable, without the need to upgrade the
+/// packages whenever the core protocol has a change, as well as gated
+/// (so we can turn registrations/renewals off in case of an emergency).
+///
+/// Authorized apps can also apply discounts to the payment intent. This is
+/// useful for system-level discounts, or user-specific discounts.
 module iota_names::payment;
 
 use std::string::String;
