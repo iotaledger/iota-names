@@ -20,7 +20,7 @@ public struct TestApp has drop {}
 
 public struct UnauthorizedTestApp has drop {}
 
-const MIST_PER_IOTA: u64 = 1_000_000_000;
+const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 const ADMIN_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
@@ -68,8 +68,8 @@ public fun user_two(): address {
     USER_2_ADDRESS
 }
 
-public fun mist_per_iota(): u64 {
-    MIST_PER_IOTA
+public fun nanos_per_iota(): u64 {
+    NANOS_PER_IOTA
 }
 
 // global getters.

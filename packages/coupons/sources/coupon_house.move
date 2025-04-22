@@ -22,13 +22,14 @@ use iota_names_coupons::{coupon::{Self, Coupon}, data::{Self, Data}, rules::Coup
 use std::string::String;
 
 /// An app that's not authorized tries to access private data.
-const EAppNotAuthorized: u64 = 1;
+#[error]
+const EAppNotAuthorized: vector<u8> = b"App is not authorized.";
 /// Tries to use app on an invalid version.
-const EInvalidVersion: u64 = 2;
-
-/// These errors are claim errors.
+#[error]
+const EInvalidVersion: vector<u8> = b"Invalid version.";
 /// Coupon doesn't exist.
-const ECouponNotExists: u64 = 3;
+#[error]
+const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
 /// Our versioning of the coupons package.
 const VERSION: u8 = 1;
@@ -73,7 +74,7 @@ public fun apply_coupon(
     let coupon_house = coupon_house_mut(iota_names);
 
     // Validate that specified coupon is valid.
-    assert!(coupon_house.data.coupons().contains(coupon_code), ECouponNotExists);
+    assert!(coupon_house.data.coupons().contains(coupon_code), ECouponDoesNotExist);
 
     // Borrow coupon from the table.
     let coupon: &mut Coupon = &mut coupon_house.data.coupons_mut()[coupon_code];

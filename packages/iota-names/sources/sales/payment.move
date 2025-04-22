@@ -253,7 +253,7 @@ public fun renew(
 
 /// Allow an authorized app to apply a percentage discount to
 /// the payment intent.
-/// E.g. an NS payment can apply a 10% discount on top of a user's 20%
+/// E.g. a payment can apply a 10% discount on top of a user's 20%  
 /// discount if allow_multiple_discounts is true
 public fun apply_percentage_discount<A: drop>(
     intent: &mut PaymentIntent,

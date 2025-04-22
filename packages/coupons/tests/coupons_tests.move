@@ -17,7 +17,7 @@ use iota_names_coupons::{
     data,
     range,
     rules,
-    setup::{Self, TestApp, user, user_two, test_app, admin_add_coupon, test_init, mist_per_iota}
+    setup::{Self, TestApp, user, user_two, test_app, admin_add_coupon, test_init, nanos_per_iota}
 };
 use std::string::String;
 
@@ -51,7 +51,7 @@ fun test_e2e() {
         2,
         b"25_PERCENT_DISCOUNT_MAX_2_YEARS".to_string(),
         user(),
-        option::some(300 * mist_per_iota()),
+        option::some(300 * nanos_per_iota()),
     );
 
     // Test that this user-specific coupon works as expected
@@ -61,7 +61,7 @@ fun test_e2e() {
         2,
         b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
         user(),
-        option::some(300 * mist_per_iota()),
+        option::some(300 * nanos_per_iota()),
     );
 
     // 50% discount only on names 5+ digits
@@ -70,7 +70,7 @@ fun test_e2e() {
         b"testo.iota".to_string(),
         b"50_PERCENT_5_PLUS_NAMES".to_string(),
         user(),
-        option::some(25 * mist_per_iota()),
+        option::some(25 * nanos_per_iota()),
     );
 
     // 50% discount only on names 3 digit names.
@@ -79,7 +79,7 @@ fun test_e2e() {
         b"tes.iota".to_string(),
         b"50_PERCENT_3_DIGITS".to_string(),
         user(),
-        option::some(600 * mist_per_iota()),
+        option::some(600 * nanos_per_iota()),
     );
 
     // 50% DISCOUNT, with all possible rules involved.
@@ -88,7 +88,7 @@ fun test_e2e() {
         b"teso.iota".to_string(),
         b"50_DISCOUNT_SALAD".to_string(),
         user(),
-        option::some(100 * mist_per_iota()),
+        option::some(100 * nanos_per_iota()),
     );
 
     scenario_val.end();
@@ -137,7 +137,7 @@ fun twenty_percent_off_3() {
         b"20%_OFF".to_string(),
         user(),
         option::some(
-            960 * mist_per_iota(),
+            960 * nanos_per_iota(),
         ), // 3 character in test is 1200 IOTA, 20% discount
     );
 
@@ -163,7 +163,7 @@ fun fifty_percent_off_4() {
         b"50%_OFF".to_string(),
         user(),
         option::some(
-            100 * mist_per_iota(),
+            100 * nanos_per_iota(),
         ), // 4 character in test is 200 IOTA, 50% discount
     );
 
@@ -189,7 +189,7 @@ fun seventy_percent_off_5() {
         b"70%_OFF".to_string(),
         user(),
         option::some(
-            15 * mist_per_iota(),
+            15 * nanos_per_iota(),
         ), // 5 character in test is 50 IOTA, 70% discount
     );
 

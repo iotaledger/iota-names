@@ -6,7 +6,8 @@ module iota_names_coupons::coupon;
 
 use iota_names_coupons::rules::{Self, CouponRules};
 
-const EInvalidDiscountPercentage: u64 = 1;
+#[error]
+const EInvalidDiscountPercentage: vector<u8> = b"Invalid discount percentage.";
 
 /// A Coupon has a type, a value and a ruleset.
 /// - `Rules` are defined on the module `rules`, and covers a variety of

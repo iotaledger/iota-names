@@ -11,22 +11,30 @@ use iota_names_coupons::{coupon_constants, range::Range};
 
 // Errors
 /// Error when you try to use a coupon that isn't valid for these years.
-const ENotValidYears: u64 = 1;
+#[error]
+const EInvalidYears: vector<u8> = b"Coupon is not valid for the given number of years.";
 /// Error when you try to use a coupon which doesn't match to the domain's size.
-const EInvalidForDomainLength: u64 = 2;
+#[error]
+const EInvalidForDomainLength: vector<u8> = b"Coupon is not valid for the given domain length.";
 /// Error when you try to use a domain that has used all it's available claims.
-const ENoMoreAvailableClaims: u64 = 3;
+#[error]
+const ENoMoreAvailableClaims: vector<u8> = b"Domain has been claimed the maximum number of times.";
 /// Error when you try to create a percentage discount coupon with invalid
 /// percentage amount.
-const EInvalidAmount: u64 = 4;
+#[error]
+const EInvalidAmount: vector<u8> = b"Invalid percentage amount for coupon.";
 /// Error when you try to create a coupon with invalid type.
-const EInvalidType: u64 = 5;
+#[error]
+const EInvalidType: vector<u8> = b"Invalid type for coupon.";
 /// Error when you try to use a coupon without the matching address
-const EInvalidUser: u64 = 6;
+#[error]
+const EInvalidUser: vector<u8> = b"Coupon address does not match.";
 /// Error when coupon has expired
-const ECouponExpired: u64 = 7;
+#[error]
+const ECouponExpired: vector<u8> = b"Coupon has expired.";
 /// Available claims can't be 0.
-const EInvalidAvailableClaims: u64 = 8;
+#[error]
+const EInvalidAvailableClaims: vector<u8> = b"Number of claims cannot be zero.";
 
 /// The Struct that holds the coupon's rules.
 /// All rules are combined in `AND` fashion.
@@ -104,7 +112,7 @@ public fun has_available_claims(rules: &CouponRules): bool {
 
 // Assertion helper for the validity of years.
 public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, target: u8) {
-    assert!(is_coupon_valid_for_domain_years(rules, target), ENotValidYears);
+    assert!(is_coupon_valid_for_domain_years(rules, target), EInvalidYears);
 }
 
 // Checks if a target amount of years is valid for claim.

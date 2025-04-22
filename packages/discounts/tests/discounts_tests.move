@@ -23,12 +23,12 @@ public struct AnotherAuthorized has copy, drop, store {}
 // an unauthorized type to test.
 public struct TestUnauthorized has copy, drop, store {}
 
-const IOTANS_ADDRESS: address = @0xA001;
+const IOTA_NAMES_ADDRESS: address = @0xA001;
 const USER_ADDRESS: address = @0xA002;
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 fun test_init(): Scenario {
-    let mut scenario_val = ts::begin(IOTANS_ADDRESS);
+    let mut scenario_val = ts::begin(IOTA_NAMES_ADDRESS);
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
@@ -39,7 +39,7 @@ fun test_init(): Scenario {
         clock.share_for_testing();
     };
     {
-        scenario.next_tx(IOTANS_ADDRESS);
+        scenario.next_tx(IOTA_NAMES_ADDRESS);
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut iota_names = scenario.take_shared<IotaNames>();
         let mut discount_house = scenario.take_shared<DiscountHouse>();

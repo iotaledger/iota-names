@@ -7,7 +7,8 @@ module iota_names_coupons::range;
 
 /// Invalid [from, to] setup in the range!
 /// `to` parameter has to be >= `from`
-const EInvalidRange: u64 = 0;
+#[error]
+const EInvalidRange: vector<u8> = b"Invalid range.";
 
 /// A Range for u8 helper
 public struct Range has copy, drop, store {

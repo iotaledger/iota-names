@@ -8,8 +8,10 @@ use iota::bag::{Self, Bag};
 use iota_names_coupons::coupon::Coupon;
 use std::string::String;
 
-const ECouponAlreadyExists: u64 = 1;
-const ECouponDoesNotExist: u64 = 2;
+#[error]
+const ECouponAlreadyExists: vector<u8> = b"Coupon already exists.";
+#[error]
+const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
 /// Create a `Data` struct that only authorized apps can get mutable access to.
 /// We don't save the coupon's table directly on the shared object, because we
