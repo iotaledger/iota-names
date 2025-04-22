@@ -23,7 +23,7 @@ module deny_list::deny_list {
     }
 
     /// Authorization witness to call protected functions of `iota_names`.
-    public struct DenyListApp has drop {}
+    public struct DenyListAuth has drop {}
 
     public fun setup(
         iota_names: &mut IotaNames,
@@ -105,7 +105,7 @@ module deny_list::deny_list {
 
     /// Internal helper to get access to the BlockedNames object
     fun deny_list_mut(iota_names: &mut IotaNames): &mut DenyList {
-        iota_names::app_registry_mut<DenyListApp, DenyList>(DenyListApp {}, iota_names)
+        iota_names::auth_registry_mut<DenyListAuth, DenyList>(DenyListAuth {}, iota_names)
     }
 
     /// Internal helper to batch add words to a table.

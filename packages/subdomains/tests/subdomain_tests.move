@@ -22,7 +22,7 @@ module subdomains::subdomain_tests {
 
     use subdomains::{
         config,
-        subdomains::{Self, SubdomainsApp}
+        subdomains::{Self, SubdomainsAuth}
     };
 
     const USER_ADDRESS: address = @0x01;
@@ -180,7 +180,7 @@ module subdomains::subdomain_tests {
         let scenario = &mut scenario_val;
         {
             let mut iota_names = iota_names::init_for_testing(ctx(scenario));
-            iota_names::authorize_app_for_testing<SubdomainsApp>(&mut iota_names);
+            iota_names::authorize_for_testing<SubdomainsAuth>(&mut iota_names);
             iota_names::share_for_testing(iota_names);
             let clock = clock::create_for_testing(ctx(scenario));
             clock::share_for_testing(clock);
@@ -203,7 +203,7 @@ module subdomains::subdomain_tests {
     /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
     public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
 
-        let registry_mut = iota_names::app_registry_mut<SubdomainsApp, Registry>(subdomains::auth_for_testing(), iota_names);
+        let registry_mut = iota_names::auth_registry_mut<SubdomainsAuth, Registry>(subdomains::auth_for_testing(), iota_names);
 
         registry_mut
     }

@@ -11,7 +11,7 @@ use iota::{clock::{Self, Clock}, coin::{Self, Coin}, iota::IOTA, test_scenario::
 use iota_names::{
     auction::{
         Self,
-        AuctionApp,
+        AuctionAuth,
         place_bid,
         claim,
         AuctionHouse,
@@ -45,7 +45,7 @@ public fun test_init(): Scenario {
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(ctx(scenario));
-        iota_names.authorize_app_for_testing<AuctionApp>();
+        iota_names.authorize_for_testing<AuctionAuth>();
         iota_names.share_for_testing();
         auction::init_for_testing(ctx(scenario));
         let clock = clock::create_for_testing(ctx(scenario));
@@ -202,12 +202,12 @@ fun admin_withdraw_funds_util(scenario: &mut Scenario): Coin<IOTA> {
     funds
 }
 
-fun deauthorize_app_util(scenario: &mut Scenario) {
+fun deauthorize_util(scenario: &mut Scenario) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    iota_names::deauthorize_app<AuctionApp>(&admin_cap, &mut iota_names);
+    iota_names::deauthorize<AuctionAuth>(&admin_cap, &mut iota_names);
 
     test_scenario::return_shared(iota_names);
     test_scenario::return_to_sender(scenario, admin_cap);
@@ -749,7 +749,7 @@ fun test_admin_collect_fund_aborts_if_too_early() {
 fun test_start_auction_and_place_bid_aborts_if_auction_is_deauthorized() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    deauthorize_app_util(scenario);
+    deauthorize_util(scenario);
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
@@ -769,7 +769,7 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
         utf8(FIRST_DOMAIN_NAME),
         1200 * NANOS_PER_IOTA,
     );
-    deauthorize_app_util(scenario);
+    deauthorize_util(scenario);
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
@@ -834,7 +834,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
         1,
     );
 
-    deauthorize_app_util(scenario);
+    deauthorize_util(scenario);
     admin_try_finalize_auction_util(
         scenario,
         utf8(FIRST_DOMAIN_NAME),
@@ -886,7 +886,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
         AUCTION_BIDDING_PERIOD_MS,
     );
     assert_balance(scenario, 0);
-    deauthorize_app_util(scenario);
+    deauthorize_util(scenario);
     admin_collect_fund_util(
         scenario,
         utf8(FIRST_DOMAIN_NAME),

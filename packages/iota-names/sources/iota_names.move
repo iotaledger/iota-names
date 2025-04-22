@@ -7,7 +7,7 @@
 ///
 /// Authorization mechanic:
 /// The Admin can authorize applications to access protected features of the
-/// IotaNames, they're named with a prefix `app_*`. Once authorized, application can
+/// IotaNames, they're named with a prefix `auth_*`. Once authorized, application can
 /// get mutable access to the `Registry` and add to the application `Balance`.
 ///
 /// At any moment any of the applications can be deathorized by the Admin
@@ -49,7 +49,7 @@ public struct AdminCap has key, store { id: UID }
 /// - `registry: RegistryKey<R> -> R`
 /// - `config: ConfigKey<C> -> C`
 /// - `balance: BalanceKey<T> -> Balance<T>`
-/// - `authorized_app: AppKey<App> -> bool`
+/// - `authorized_app: AuthKey<Auth> -> bool`
 public struct IotaNames has key {
     id: UID,
 }
@@ -109,38 +109,38 @@ public fun withdraw<T>(self: &mut IotaNames, _: &AdminCap, ctx: &mut TxContext):
 // === App Auth ===
 
 /// An authorization Key kept in the IotaNames - allows applications access
-/// protected features of the IotaNames (such as app_add_balance, etc.)
+/// protected features of the IotaNames (such as auth_add_balance, etc.)
 /// The `App` type parameter is a witness which should be defined in the
 /// original module (Controller, Registry, Registrar - whatever).
-public struct AppKey<phantom App: drop> has copy, drop, store {}
+public struct AuthKey<phantom Auth: drop> has copy, drop, store {}
 
 /// Authorize an application to access protected features of the iota_names.
-public fun authorize_app<App: drop>(_: &AdminCap, self: &mut IotaNames) {
-    self.id.add(AppKey<App> {}, true);
+public fun authorize<Auth: drop>(_: &AdminCap, self: &mut IotaNames) {
+    self.id.add(AuthKey<Auth> {}, true);
 }
 
 /// Deauthorize an application by removing its authorization key.
-public fun deauthorize_app<App: drop>(_: &AdminCap, self: &mut IotaNames): bool {
-    self.id.remove(AppKey<App> {})
+public fun deauthorize<Auth: drop>(_: &AdminCap, self: &mut IotaNames): bool {
+    self.id.remove(AuthKey<Auth> {})
 }
 
 /// Check if an application is authorized to access protected features of
 /// the IotaNames.
-public fun is_app_authorized<App: drop>(self: &IotaNames): bool {
-    self.id.exists_(AppKey<App> {})
+public fun is_authorized<Auth: drop>(self: &IotaNames): bool {
+    self.id.exists_(AuthKey<Auth> {})
 }
 
 /// Assert that an application is authorized to access protected features of
 /// the IotaNames. Aborts with `EAppNotAuthorized` if not.
-public fun assert_app_is_authorized<App: drop>(self: &IotaNames) {
-    assert!(self.is_app_authorized<App>(), EAppNotAuthorized);
+public fun assert_is_authorized<Auth: drop>(self: &IotaNames) {
+    assert!(self.is_authorized<Auth>(), EAppNotAuthorized);
 }
 
 // === Protected features ===
 
 /// Adds a balance of type `T` to the IotaNames protocol as an authorized app.
-public fun app_add_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: Balance<T>) {
-    self.assert_app_is_authorized<App>();
+public fun auth_add_balance<Auth: drop, T>(self: &mut IotaNames, _: Auth, balance: Balance<T>) {
+    self.assert_is_authorized<Auth>();
     let key = BalanceKey<T> {};
     if (self.id.exists_(key)) {
         let balances: &mut Balance<T> = self.id.borrow_mut(key);
@@ -151,10 +151,9 @@ public fun app_add_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: 
 }
 
 /// Get a mutable access to the `Registry` object. Can only be performed by
-/// authorized
-/// applications.
-public fun app_registry_mut<App: drop, R: store>(_: App, self: &mut IotaNames): &mut R {
-    self.assert_app_is_authorized<App>();
+/// authorized applications.
+public fun auth_registry_mut<Auth: drop, R: store>(_: Auth, self: &mut IotaNames): &mut R {
+    self.assert_is_authorized<Auth>();
     self.pkg_registry_mut<R>()
 }
 
@@ -225,7 +224,7 @@ public fun init_for_testing(ctx: &mut TxContext): IotaNames {
 
     admin_cap.add_config(&mut iota_names, core_config::default());
 
-    admin_cap.authorize_app<Test>(&mut iota_names);
+    admin_cap.authorize<Test>(&mut iota_names);
     admin_cap.add_config(&mut iota_names, new_pricing_config());
     admin_cap.add_config(
         &mut iota_names,
@@ -272,7 +271,7 @@ public fun burn_admin_cap_for_testing(admin_cap: AdminCap) {
 }
 
 #[test_only]
-public fun authorize_app_for_testing<App: drop>(self: &mut IotaNames) {
-    df::add(&mut self.id, AppKey<App> {}, true)
+public fun authorize_for_testing<App: drop>(self: &mut IotaNames) {
+    df::add(&mut self.id, AuthKey<App> {}, true)
 }
 

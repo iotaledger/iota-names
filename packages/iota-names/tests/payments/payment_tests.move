@@ -19,7 +19,7 @@ use iota_names::registry::{Self, Registry};
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration;
 
-public struct PaymentsApp() has drop;
+public struct PaymentsAuth() has drop;
 
 #[test]
 fun test_e2e() {
@@ -295,7 +295,7 @@ public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
 
     // authorize a "payments" app that is responsible for handling payments and
     // issuing receipts.
-    cap.authorize_app<PaymentsApp>(&mut iota_names);
+    cap.authorize<PaymentsAuth>(&mut iota_names);
 
     registry::init_for_testing(&cap, &mut iota_names, ctx);
 
@@ -309,7 +309,7 @@ fun handle_payment(intent: PaymentIntent, iota_names: &mut IotaNames, ctx: &mut 
     let amount = intent.request_data().base_amount();
     let coin = coin::mint_for_testing<IOTA>(amount, ctx);
 
-    intent.finalize_payment(iota_names, PaymentsApp(), coin)
+    intent.finalize_payment(iota_names, PaymentsAuth(), coin)
 }
 
 fun test_pricing_config(renewal: bool): PricingConfig {

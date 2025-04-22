@@ -15,7 +15,7 @@ module iota_names::admin_tests;
 use std::string::utf8;
 use iota::clock;
 use iota::test_utils::assert_eq;
-use iota_names::admin::{Self, Admin};
+use iota_names::admin::{Self, AdminAuth};
 use iota_names::constants;
 use iota_names::domain;
 use iota_names::registry;
@@ -48,7 +48,7 @@ fun authorized() {
     let clock = clock::create_for_testing(&mut ctx);
     registry::init_for_testing(&cap, &mut iota_names, &mut ctx);
 
-    iota_names::authorize_app_for_testing<Admin>(&mut iota_names);
+    iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
     let nft = admin::reserve_domain(
         &cap,
