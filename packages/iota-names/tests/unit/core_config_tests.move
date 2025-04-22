@@ -2,6 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[test_only]
 module iota_names::core_config_tests;
 
 use iota::{test_utils::assert_eq, vec_map};

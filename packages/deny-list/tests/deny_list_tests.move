@@ -2,6 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[test_only]
 #[allow(lint(abort_without_constant))]
 module deny_list::deny_list_tests;
 

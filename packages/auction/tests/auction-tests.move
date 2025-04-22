@@ -371,7 +371,7 @@ fun test_winner_can_place_bid() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EBidAmountTooLow)]
+#[test, expected_failure(abort_code = auction::EBidTooLow)]
 fun test_place_bid_aborts_if_value_is_too_low() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -675,7 +675,7 @@ fun test_place_bid_aborts_if_auction_not_started() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = auction::EInvalidBidValue)]
+#[test, expected_failure(abort_code = auction::EInitialBidTooLow)]
 fun test_start_auction_aborts_if_not_enough_fee() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -919,5 +919,65 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     assert_balance(scenario, 0);
     funds.burn_for_testing();
 
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = auction::EBidTooLow)]
+fun test_overbid_less_than_1_IOTA() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+    place_bid_util(
+        scenario,
+        SECOND_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA + 100,
+        0,
+    );
+    scenario_val.end();
+}
+
+#[test]
+fun test_overbid_of_1_IOTA() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+    place_bid_util(
+        scenario,
+        SECOND_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        101 * NANOS_PER_IOTA,
+        0,
+    );
+    scenario_val.end();
+}
+
+#[test]
+fun test_overbid_of_1_IOTA_and_1_NANO() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    start_auction_and_place_bid_util(
+        scenario,
+        FIRST_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        100 * NANOS_PER_IOTA,
+    );
+    place_bid_util(
+        scenario,
+        SECOND_ADDRESS,
+        utf8(FIRST_DOMAIN_NAME),
+        101 * NANOS_PER_IOTA + 1,
+        0,
+    );
     scenario_val.end();
 }
