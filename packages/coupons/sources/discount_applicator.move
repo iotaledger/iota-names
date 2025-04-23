@@ -1,4 +1,4 @@
-module iota_names_coupons::coupon_applicator;
+module iota_names_coupons::discount_applicator;
 
 use iota::{clock::Clock, coin::Coin};
 use iota_names::{iota_names::IotaNames, payment::{PaymentIntent, Receipt}};

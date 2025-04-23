@@ -14,7 +14,7 @@ use iota_names::{
 use iota_names_coupons::{
     coupon_constants,
     coupon_house,
-    coupon_applicator,
+    discount_applicator,
     data,
     range,
     rules,
@@ -254,7 +254,7 @@ fun max_years_two_failure() {
 
 // Tests the e2e experience for coupons (a list of different coupons with
 // different rules)
-#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_applicator::ECouponDoesNotExist)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::discount_applicator::ECouponDoesNotExist)]
 fun no_more_available_claims_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -472,7 +472,7 @@ fun test_coupon_register(
     scenario.next_tx(user);
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
-        let mut applicator = coupon_applicator::new(init_registration(
+        let mut applicator = discount_applicator::new(init_registration(
             &mut iota_names,
             domain,
         ));
@@ -503,7 +503,7 @@ fun test_multi_coupon_register(
     scenario.next_tx(user);
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
-        let mut applicator = coupon_applicator::new(init_registration(
+        let mut applicator = discount_applicator::new(init_registration(
             &mut iota_names,
             domain,
         ));
@@ -546,7 +546,7 @@ fun test_coupon_renewal(
             scenario.ctx(),
         );
 
-        let mut applicator = coupon_applicator::new(init_renewal(
+        let mut applicator = discount_applicator::new(init_renewal(
             &mut iota_names,
             &nft,
             renewal_years,
