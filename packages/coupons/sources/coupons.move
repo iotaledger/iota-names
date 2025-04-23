@@ -2,47 +2,49 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module iota_names_coupons::coupon;
+module iota_names_coupons::coupons;
 
-use iota_names_coupons::rules::{Self, CouponRules};
+use iota::bag::{Self, Bag};
+use iota_names_coupons::coupon::Coupon;
+use std::string::String;
 
 #[error]
-const EInvalidDiscountPercentage: vector<u8> = b"Invalid discount percentage.";
+const ECouponAlreadyExists: vector<u8> = b"Coupon already exists.";
+#[error]
+const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
-/// A Coupon has a type, a value and a ruleset.
-/// - `Rules` are defined on the module `rules`, and covers a variety of
-/// everything we needed for the service.
-/// - `kind` is a u8 constant, defined on `constants` which makes a coupon fixed
-/// price or discount percentage
-/// - `value` is a u64 constant, which can be in the range of (0,100] for
-/// discount percentage, or any value > 0 for fixed price.
-public struct Coupon has copy, drop, store {
-    kind: u8, // 0 -> Percentage Discount | 1 -> Fixed Discount
-    amount: u64, // if type == 0, we need it to be between 0, 100. We only allow int style (not 0.5% discount).
-    rules: CouponRules, // A list of base Rules for the coupon.
+/// Create a `Coupons` struct that only authorized apps can get mutable access to.
+/// We don't save the coupon's table directly on the shared object, because we
+/// want authorized apps to only perform
+/// certain actions with the table (and not give full `mut` access to it).
+public struct Coupons has store {
+    // hold a list of all coupons in the system.
+    coupons: Bag,
 }
 
-/// An internal function to create a coupon object.
-public(package) fun new(kind: u8, amount: u64, rules: CouponRules, _ctx: &mut TxContext): Coupon {
-    rules::assert_is_valid_amount(kind, amount);
-    rules::assert_is_valid_discount_type(kind);
-    Coupon {
-        kind,
-        amount,
-        rules,
+public(package) fun new(ctx: &mut TxContext): Coupons {
+    Coupons {
+        coupons: bag::new(ctx),
     }
 }
 
-public(package) fun rules(coupon: &Coupon): &CouponRules {
-    &coupon.rules
+/// Private internal functions
+/// An internal function to save the coupon in the shared object's config.
+public(package) fun save_coupon(self: &mut Coupons, code: String, coupon: Coupon) {
+    assert!(!self.coupons.contains(code), ECouponAlreadyExists);
+    self.coupons.add(code, coupon);
 }
 
-public(package) fun rules_mut(coupon: &mut Coupon): &mut CouponRules {
-    &mut coupon.rules
+// A function to remove a coupon from the system.
+public(package) fun remove_coupon(self: &mut Coupons, code: String) {
+    assert!(self.coupons.contains(code), ECouponDoesNotExist);
+    let _: Coupon = self.coupons.remove(code);
 }
 
-public(package) fun discount_percentage(coupon: &Coupon): u64 {
-    assert!(coupon.amount > 0 && coupon.amount <= 100, EInvalidDiscountPercentage);
+public(package) fun coupons(data: &Coupons): &Bag {
+    &data.coupons
+}
 
-    coupon.amount
+public(package) fun coupons_mut(data: &mut Coupons): &mut Bag {
+    &mut data.coupons
 }

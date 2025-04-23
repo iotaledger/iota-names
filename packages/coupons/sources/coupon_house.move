@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A module to support coupons for Iota-Names.
+/// A module to support coupons for IOTA-Names.
 /// This module allows secondary modules (e.g. Discord) to add or remove coupons
 /// too.
 /// This allows for separation of logic & ease of de-authorization in case we
@@ -18,7 +18,7 @@ module iota_names_coupons::coupon_house;
 
 use iota::dynamic_field as df;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names_coupons::{coupon, data::{Self, Data}, rules::CouponRules};
+use iota_names_coupons::{coupon, coupons::{Self, Coupons}, rules::CouponRules};
 use std::string::String;
 use iota_names::payment::{PaymentIntent, RequestData};
 
@@ -29,8 +29,8 @@ const EAppNotAuthorized: vector<u8> = b"App is not authorized.";
 #[error]
 const EInvalidVersion: vector<u8> = b"Invalid version.";
 
-/// Our versioning of the coupons package.
-const VERSION: u8 = 1;
+/// The coupons package versioning
+public macro fun coupons_version(): u8 { 1 }  
 
 // Authorization for the Coupons on Iota-Names, to be able to register names on the
 // app.
@@ -43,7 +43,7 @@ public struct AppKey<phantom A: drop> has copy, drop, store {}
 /// The CouponHouse Shared Object which holds a table of coupon codes available
 /// for claim.
 public struct CouponHouse has store {
-    data: Data,
+    coupons: Coupons,
     version: u8,
     storage: UID,
 }
@@ -54,19 +54,18 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
         iota_names,
         CouponHouse {
             storage: object::new(ctx),
-            data: data::new(ctx),
-            version: VERSION,
+            coupons: coupons::new(ctx),
+            version: coupons_version!(),
         },
     );
 }
 
-// Get `Data` as an authorized app.
-public fun app_data_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Data {
+// Get `Coupons` as an authorized app.
+public fun app_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Coupons {
     let coupon_house_mut = coupon_house_mut(iota_names);
-    coupon_house_mut.assert_version_is_valid();
     // verify app is authorized to get a mutable reference.
     coupon_house_mut.assert_app_is_authorized<A>();
-    &mut coupon_house_mut.data
+    &mut coupon_house_mut.coupons
 }
 
 /// Authorize an app on the coupon house. This allows to a secondary module to
@@ -88,7 +87,7 @@ public fun set_version(_: &AdminCap, iota_names: &mut IotaNames, version: u8) {
 
 /// Validate that the version of the app is the latest.
 public fun assert_version_is_valid(self: &CouponHouse) {
-    assert!(self.version == VERSION, EInvalidVersion);
+    assert!(self.version == coupons_version!(), EInvalidVersion);
 }
 
 // Add a coupon as an admin.
@@ -107,19 +106,19 @@ public fun admin_add_coupon(
 ) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
-    coupon_house.data.save_coupon(code, coupon::new(kind, amount, rules, ctx));
+    coupon_house.coupons.save_coupon(code, coupon::new(kind, amount, rules, ctx));
 }
 
 // Remove a coupon as a system's admin.
 public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, code: String) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
-    coupon_house.data.remove_coupon(code);
+    coupon_house.coupons.remove_coupon(code);
 }
 
 // Add coupon as a registered app.
 public fun app_add_coupon(
-    data: &mut Data,
+    data: &mut Coupons,
     code: String,
     kind: u8,
     amount: u64,
@@ -130,7 +129,7 @@ public fun app_add_coupon(
 }
 
 // Remove a coupon as a registered app.
-public fun app_remove_coupon(data: &mut Data, code: String) {
+public fun app_remove_coupon(data: &mut Coupons, code: String) {
     data.remove_coupon(code);
 }
 
@@ -147,12 +146,12 @@ fun assert_app_is_authorized<A: drop>(coupon_house: &CouponHouse) {
     assert!(coupon_house.is_app_authorized<A>(), EAppNotAuthorized);
 }
 
-public(package) fun data(coupon_house: &CouponHouse): &Data {
-    &coupon_house.data
+public(package) fun coupons(coupon_house: &CouponHouse): &Coupons {
+    &coupon_house.coupons
 }
 
-public(package) fun data_mut(coupon_house: &mut CouponHouse): &mut Data {
-    &mut coupon_house.data
+public(package) fun coupons_mut(coupon_house: &mut CouponHouse): &mut Coupons {
+    &mut coupon_house.coupons
 }
 
 /// Gets a mutable reference to the coupon's house

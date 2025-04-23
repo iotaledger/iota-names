@@ -15,7 +15,7 @@ use iota_names_coupons::{
     coupon_constants,
     coupon_house,
     discount_applicator,
-    data,
+    coupons,
     range,
     rules,
     setup::{Self, TestApp, user, user_two, test_app, admin_add_coupon, test_init, nanos_per_iota}
@@ -28,7 +28,7 @@ fun populate_coupons(scenario: &mut Scenario) {
     scenario.next_tx(user());
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    let data_mut = coupon_house::app_data_mut<TestApp>(&mut iota_names, test_app());
+    let data_mut = coupon_house::app_coupons_mut<TestApp>(&mut iota_names, test_app());
     setup::populate_coupons(data_mut, scenario.ctx());
     return_shared(iota_names);
 }
@@ -457,7 +457,7 @@ fun add_coupon_twice_failure() {
 #[test, expected_failure(abort_code = ::iota_names_coupons::data::ECouponDoesNotExist)]
 fun remove_non_existing_coupon() {
     let mut ctx = tx_context::dummy();
-    let mut data = data::new(&mut ctx);
+    let mut data = coupons::new(&mut ctx);
     data.remove_coupon(b"TEST_SUCCESS_ADDITION".to_string());
     test_utils::destroy(data);
 }

@@ -10,7 +10,7 @@ use iota_names::{iota_names::{Self, AdminCap, IotaNames}, registry};
 use iota_names_coupons::{
     coupon_constants,
     coupon_house::{Self, CouponsApp},
-    data::Data,
+    coupons::Coupons,
     range,
     rules
 };
@@ -84,7 +84,7 @@ public fun unauthorized_test_app(): UnauthorizedTestApp {
 
 /// A helper to add a bunch of coupons (with different setups) that we can use
 /// on the coupon tests.
-public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
+public fun populate_coupons(data_mut: &mut Coupons, ctx: &mut TxContext) {
     // 25% DISCOUNT, ONLY FOR 2 YEARS OR LESS REGISTRATIONS
     coupon_house::app_add_coupon(
         data_mut,

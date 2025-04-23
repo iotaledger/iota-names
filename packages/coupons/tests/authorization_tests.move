@@ -21,7 +21,7 @@ fun admin_get_app_success() {
     {
         scenario.next_tx(user());
         let mut iota_names = scenario.take_shared<IotaNames>();
-        coupon_house::app_data_mut<TestApp>(&mut iota_names, setup::test_app());
+        coupon_house::app_coupons_mut<TestApp>(&mut iota_names, setup::test_app());
         return_shared(iota_names);
     };
 
@@ -57,7 +57,7 @@ fun unauthorized_app_failure() {
     {
         scenario.next_tx(user());
         let mut iota_names = scenario.take_shared<IotaNames>();
-        coupon_house::app_data_mut(&mut iota_names, setup::unauthorized_test_app());
+        coupon_house::app_coupons_mut(&mut iota_names, setup::unauthorized_test_app());
         return_shared(iota_names);
     };
     end(scenario_val);

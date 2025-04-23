@@ -33,10 +33,10 @@ public fun apply_coupon(
     let coupon_house = coupon_house_mut(iota_names);
 
     // Validate that specified coupon is valid.
-    assert!(coupon_house.data().coupons().contains(coupon_code), ECouponDoesNotExist);
+    assert!(coupon_house.coupons().coupons().contains(coupon_code), ECouponDoesNotExist);
 
     // Borrow coupon from the table.
-    let coupon: &mut Coupon = &mut coupon_house.data_mut().coupons_mut()[coupon_code];
+    let coupon: &mut Coupon = &mut coupon_house.coupons_mut().coupons_mut()[coupon_code];
     coupon.rules().assert_coupon_can_stack(applicator.used_non_stacking);
     applicator.used_non_stacking = applicator.used_non_stacking || !coupon.rules().can_coupon_stack();
     let percentage = coupon.discount_percentage();
@@ -63,7 +63,7 @@ public fun apply_coupon(
     // Clean up our registry by removing the coupon if no more available claims!
     if (!coupon.rules().has_available_claims()) {
         // remove the coupon, since it's no longer usable.
-        coupon_house.data_mut().remove_coupon(coupon_code);
+        coupon_house.coupons_mut().remove_coupon(coupon_code);
     };
 
     applicator.apply_percentage_discount(
