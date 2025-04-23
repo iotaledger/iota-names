@@ -1,6 +1,6 @@
 module iota_names_coupons::coupon_applicator;
 
-use iota::{clock::Clock, coin::Coin, vec_map::VecMap};
+use iota::{clock::Clock, coin::Coin};
 use iota_names::{iota_names::IotaNames, payment::{PaymentIntent, Receipt}};
 use iota_names_coupons::{coupon::Coupon, coupon_house::{coupon_house_mut, request_data_mut}};
 use std::string::String;
@@ -8,26 +8,17 @@ use std::string::String;
 #[error]
 const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 #[error]
-const EMultipleDiscounts: vector<u8> = b"Multiple discounts are not allowed";
-#[error]
 const EInvalidDiscountPercentage: vector<u8> = b"Discount range is [0, 100].";
-#[error]
-const EDiscountAlreadyApplied: vector<u8> =
-    b"This discount key has already been applied to the payment intent.";
-
-const COUPON_DISCOUNT_KEY: vector<u8> = b"coupon";
 
 public struct DiscountApplicator {
     intent: PaymentIntent,
-    /// The discounts (each app can add a key for its discount)
-    /// to avoid multiple additions of the same discount.
-    discounts_applied: VecMap<String, u64>,
+    used_non_stacking: bool,
 }
 
 public fun new(intent: PaymentIntent): DiscountApplicator {
     DiscountApplicator {
         intent,
-        discounts_applied: iota::vec_map::empty(),
+        used_non_stacking: false,
     }
 }
 
@@ -46,6 +37,8 @@ public fun apply_coupon(
 
     // Borrow coupon from the table.
     let coupon: &mut Coupon = &mut coupon_house.data_mut().coupons_mut()[coupon_code];
+    coupon.rules().assert_coupon_can_stack(applicator.used_non_stacking);
+    applicator.used_non_stacking = applicator.used_non_stacking || !coupon.rules().can_coupon_stack();
     let percentage = coupon.discount_percentage();
 
     // We need to do a total of 5 checks, based on `CouponRules`
@@ -75,23 +68,19 @@ public fun apply_coupon(
 
     applicator.apply_percentage_discount(
         iota_names,
-        COUPON_DISCOUNT_KEY.to_string(),
         percentage as u8,
     );
 }
 
 /// Apply a percentage discount to the payment intent.
 /// E.g. a payment can apply a 10% discount on top of a user's 20%
-/// discount if allow_multiple_discounts is true
+/// discount if the coupon allows it
 fun apply_percentage_discount(
     applicator: &mut DiscountApplicator,
     iota_names: &IotaNames,
-    discount_key: String,
     // discount can be in range [1, 100]
     discount: u8,
 ) {
-    assert!(!applicator.discounts_applied.contains(&discount_key), EDiscountAlreadyApplied);
-    assert!(!applicator.any_discount_applied(), EMultipleDiscounts);
     assert!(discount <= 100, EInvalidDiscountPercentage);
 
     let price = applicator.intent.request_data().base_amount();
@@ -99,7 +88,6 @@ fun apply_percentage_discount(
 
     *request_data_mut(&mut applicator.intent, iota_names).base_amount_mut() =
         price - discount_amount;
-    applicator.discounts_applied.insert(discount_key, discount as u64);
 }
 
 /// This has to be called with our base payment currency.
@@ -117,17 +105,12 @@ public fun handle_base_payment<T>(
     )
 }
 
-/// Returns true if at least one discount has been applied.
-fun any_discount_applied(self: &DiscountApplicator): bool {
-    self.discounts_applied.size() > 0
-}
-
 /// Returns the inner intent reference
 public fun intent(self: &DiscountApplicator): &PaymentIntent {
     &self.intent
 }
 
 fun into_intent(self: DiscountApplicator): PaymentIntent {
-    let DiscountApplicator { intent, discounts_applied: _ } = self;
+    let DiscountApplicator { intent, used_non_stacking: _ } = self;
     intent
 }

@@ -125,7 +125,7 @@ fun twenty_percent_off_3() {
     let scenario = &mut scenario_val;
     // populate all coupons.
     populate_coupons(scenario);
-    // 100% discount coupon.
+    // 20% discount coupon.
     admin_add_coupon(
         b"20%_OFF".to_string(),
         coupon_constants::percentage_discount_type(),
@@ -151,7 +151,7 @@ fun fifty_percent_off_4() {
     let scenario = &mut scenario_val;
     // populate all coupons.
     populate_coupons(scenario);
-    // 100% discount coupon.
+    // 50% discount coupon.
     admin_add_coupon(
         b"50%_OFF".to_string(),
         coupon_constants::percentage_discount_type(),
@@ -177,7 +177,7 @@ fun seventy_percent_off_5() {
     let scenario = &mut scenario_val;
     // populate all coupons.
     populate_coupons(scenario);
-    // 100% discount coupon.
+    // 70% discount coupon.
     admin_add_coupon(
         b"70%_OFF".to_string(),
         coupon_constants::percentage_discount_type(),
@@ -198,6 +198,37 @@ fun seventy_percent_off_5() {
 }
 
 #[test]
+fun twenty_percent_off_stack() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 20% discount coupon.
+    admin_add_coupon(
+        b"20%_OFF".to_string(),
+        coupon_constants::percentage_discount_type(),
+        20,
+        scenario,
+    );
+    test_multi_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        vector[b"20%_OFF".to_string(), b"5_DISCOUNT_STACKABLE".to_string()],
+        user(),
+        option::none(),
+    );
+    test_multi_coupon_register(
+        scenario,
+        b"teso.iota".to_string(),
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"20%_OFF".to_string()],
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
 fun specific_max_years() {
     rules::new_coupon_rules(
         option::none(),
@@ -205,6 +236,7 @@ fun specific_max_years() {
         option::none(),
         option::none(),
         option::some(range::new(1, 1)),
+        false,
     );
 }
 
@@ -216,12 +248,13 @@ fun max_years_two_failure() {
         option::none(),
         option::none(),
         option::some(range::new(5, 4)),
+        false,
     );
 }
 
 // Tests the e2e experience for coupons (a list of different coupons with
 // different rules)
-#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_house::ECouponNotExists)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_applicator::ECouponDoesNotExist)]
 fun no_more_available_claims_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -277,7 +310,7 @@ fun coupon_expired_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENotValidYears)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidYears)]
 fun coupon_not_valid_for_years_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -450,6 +483,40 @@ fun test_coupon_register(
             &clock,
             scenario.ctx(),
         );
+        if (amount.is_some()) {
+            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(applicator);
+    };
+}
+
+fun test_multi_coupon_register(
+    scenario: &mut Scenario,
+    domain: String,
+    mut coupon_codes: vector<String>,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let mut applicator = coupon_applicator::new(init_registration(
+            &mut iota_names,
+            domain,
+        ));
+        let clock = scenario.take_shared<Clock>();
+        while (!coupon_codes.is_empty()) {
+            let coupon_code = coupon_codes.pop_back();
+            applicator.apply_coupon(
+                &mut iota_names,
+                coupon_code,
+                &clock,
+                scenario.ctx(),
+            );
+        };
         if (amount.is_some()) {
             assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
         };

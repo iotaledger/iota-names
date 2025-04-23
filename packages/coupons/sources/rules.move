@@ -35,6 +35,8 @@ const ECouponExpired: vector<u8> = b"Coupon has expired.";
 /// Available claims can't be 0.
 #[error]
 const EInvalidAvailableClaims: vector<u8> = b"Number of claims cannot be zero.";
+#[error]
+const ENonStackingCoupon: vector<u8> = b"Coupon cannot be used with other coupons.";
 
 /// The Struct that holds the coupon's rules.
 /// All rules are combined in `AND` fashion.
@@ -45,6 +47,7 @@ public struct CouponRules has copy, drop, store {
     user: Option<address>,
     expiration: Option<u64>,
     years: Option<Range>,
+    can_stack: bool,
 }
 
 /// This is used in a PTB when creating a coupon.
@@ -61,6 +64,7 @@ public fun new_coupon_rules(
     user: Option<address>,
     expiration: Option<u64>,
     years: Option<Range>,
+    can_stack: bool,
 ): CouponRules {
     assert!(
         available_claims.is_none() || (*available_claims.borrow() > 0),
@@ -72,6 +76,7 @@ public fun new_coupon_rules(
         user,
         expiration,
         years,
+        can_stack
     }
 }
 
@@ -85,6 +90,7 @@ public fun new_empty_rules(): CouponRules {
         user: option::none(),
         expiration: option::none(),
         years: option::none(),
+        can_stack: true,
     }
 }
 
@@ -104,7 +110,7 @@ public fun decrease_available_claims(rules: &mut CouponRules) {
 }
 
 // Checks whether a coupon has available claims.
-// Returns true if the rule is not set OR it has used all the available claims.
+// Returns true if the rule is not set OR it has not used all the available claims.
 public fun has_available_claims(rules: &CouponRules): bool {
     if (rules.available_claims.is_none()) return true;
     *rules.available_claims.borrow() > 0
@@ -176,4 +182,15 @@ public fun is_coupon_expired(rules: &CouponRules, clock: &Clock): bool {
     };
 
     clock.timestamp_ms() > *rules.expiration.borrow()
+}
+
+/// Assertion for testing if a coupon can be stacked.
+/// Throws `ENonStackingCoupon` error if it cannot stack.
+public fun assert_coupon_can_stack(rules: &CouponRules, used_non_stacking: bool) {
+    assert!(!(used_non_stacking && rules.can_coupon_stack()), ENonStackingCoupon);
+}
+
+/// Check whether a coupon can stack with other coupons
+public fun can_coupon_stack(rules: &CouponRules): bool {
+    rules.can_stack
 }

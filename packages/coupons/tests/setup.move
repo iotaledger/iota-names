@@ -97,6 +97,7 @@ public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
             option::none(),
             option::none(),
             option::some(range::new(1, 2)),
+            false,
         ),
         ctx,
     );
@@ -113,6 +114,7 @@ public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
             option::some(user()),
             option::none(),
             option::none(),
+            false,
         ),
         ctx,
     );
@@ -129,6 +131,7 @@ public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
             option::none(),
             option::none(),
             option::none(),
+            false,
         ),
         ctx,
     );
@@ -145,6 +148,7 @@ public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
             option::none(),
             option::some(1),
             option::none(),
+            false,
         ),
         ctx,
     );
@@ -161,6 +165,24 @@ public fun populate_coupons(data_mut: &mut Data, ctx: &mut TxContext) {
             option::some(user()),
             option::some(1),
             option::some(range::new(1, 2)),
+            false,
+        ),
+        ctx,
+    );
+
+    // 5% DISCOUNT, can be stacked
+    coupon_house::app_add_coupon(
+        data_mut,
+        utf8(b"5_DISCOUNT_STACKABLE"),
+        coupon_constants::percentage_discount_type(),
+        5, // 5%
+        rules::new_coupon_rules(
+            option::none(),
+            option::none(),
+            option::none(),
+            option::none(),
+            option::none(),
+            true,
         ),
         ctx,
     );
