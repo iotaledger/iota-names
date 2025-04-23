@@ -16,10 +16,11 @@
 /// to the registry.
 module iota_names_coupons::coupon_house;
 
-use iota::{clock::Clock, dynamic_field as df};
-use iota_names::{iota_names::{Self, AdminCap, IotaNames}, payment::PaymentIntent};
-use iota_names_coupons::{coupon::{Self, Coupon}, data::{Self, Data}, rules::CouponRules};
+use iota::dynamic_field as df;
+use iota_names::iota_names::{Self, AdminCap, IotaNames};
+use iota_names_coupons::{coupon, data::{Self, Data}, rules::CouponRules};
 use std::string::String;
+use iota_names::payment::{PaymentIntent, RequestData};
 
 /// An app that's not authorized tries to access private data.
 #[error]
@@ -27,13 +28,9 @@ const EAppNotAuthorized: vector<u8> = b"App is not authorized.";
 /// Tries to use app on an invalid version.
 #[error]
 const EInvalidVersion: vector<u8> = b"Invalid version.";
-/// Coupon doesn't exist.
-#[error]
-const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
 /// Our versioning of the coupons package.
 const VERSION: u8 = 1;
-const COUPON_DISCOUNT_KEY: vector<u8> = b"coupon";
 
 // Authorization for the Coupons on Iota-Names, to be able to register names on the
 // app.
@@ -60,57 +57,6 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
             data: data::new(ctx),
             version: VERSION,
         },
-    );
-}
-
-public fun apply_coupon(
-    iota_names: &mut IotaNames,
-    intent: &mut PaymentIntent,
-    coupon_code: String,
-    clock: &Clock,
-    ctx: &mut TxContext,
-) {
-    // Verify coupon house is authorized to get the registry / register names.
-    let coupon_house = coupon_house_mut(iota_names);
-
-    // Validate that specified coupon is valid.
-    assert!(coupon_house.data.coupons().contains(coupon_code), ECouponDoesNotExist);
-
-    // Borrow coupon from the table.
-    let coupon: &mut Coupon = &mut coupon_house.data.coupons_mut()[coupon_code];
-    let percentage = coupon.discount_percentage();
-
-    // We need to do a total of 5 checks, based on `CouponRules`
-    // Our checks work with `AND`, all of the conditions must pass for a coupon
-    // to be used.
-    // 1. Validate domain size.
-    coupon
-        .rules()
-        .assert_coupon_valid_for_domain_size(
-            intent.request_data().domain().sld().length() as u8,
-        );
-    // 2. Decrease available claims. Will ABORT if the coupon doesn't have
-    // enough available claims.
-    coupon.rules_mut().decrease_available_claims();
-    // 3. Validate the coupon is valid for the specified user.
-    coupon.rules().assert_coupon_valid_for_address(ctx.sender());
-    // 4. Validate the coupon hasn't expired (Based on clock)
-    coupon.rules().assert_coupon_is_not_expired(clock);
-    // 5. Validate years are valid for the coupon.
-    coupon.rules().assert_coupon_valid_for_domain_years(intent.request_data().years());
-
-    // Clean up our registry by removing the coupon if no more available claims!
-    if (!coupon.rules().has_available_claims()) {
-        // remove the coupon, since it's no longer usable.
-        coupon_house.data.remove_coupon(coupon_code);
-    };
-
-    intent.apply_percentage_discount(
-        iota_names,
-        CouponsApp {},
-        COUPON_DISCOUNT_KEY.to_string(),
-        percentage as u8,
-        false,
     );
 }
 
@@ -201,8 +147,16 @@ fun assert_app_is_authorized<A: drop>(coupon_house: &CouponHouse) {
     assert!(coupon_house.is_app_authorized<A>(), EAppNotAuthorized);
 }
 
+public(package) fun data(coupon_house: &CouponHouse): &Data {
+    &coupon_house.data
+}
+
+public(package) fun data_mut(coupon_house: &mut CouponHouse): &mut Data {
+    &mut coupon_house.data
+}
+
 /// Gets a mutable reference to the coupon's house
-fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
+public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
     iota_names.assert_app_is_authorized<CouponsApp>();
     let coupons = iota_names::app_registry_mut<CouponsApp, CouponHouse>(
@@ -211,4 +165,8 @@ fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     );
     coupons.assert_version_is_valid();
     coupons
+}
+
+public(package) fun request_data_mut(intent: &mut PaymentIntent, iota_names: &IotaNames): &mut RequestData {
+    intent.request_data_mut(iota_names, CouponsApp{})
 }

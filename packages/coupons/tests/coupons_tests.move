@@ -14,6 +14,7 @@ use iota_names::{
 use iota_names_coupons::{
     coupon_constants,
     coupon_house,
+    coupon_applicator,
     data,
     range,
     rules,
@@ -438,25 +439,24 @@ fun test_coupon_register(
     scenario.next_tx(user);
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
-        let mut intent = init_registration(
+        let mut applicator = coupon_applicator::new(init_registration(
             &mut iota_names,
             domain,
-        );
+        ));
         let clock = scenario.take_shared<Clock>();
-        coupon_house::apply_coupon(
+        applicator.apply_coupon(
             &mut iota_names,
-            &mut intent,
             coupon_code,
             &clock,
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
         };
 
         return_shared(iota_names);
         return_shared(clock);
-        destroy(intent);
+        destroy(applicator);
     };
 }
 
@@ -479,25 +479,24 @@ fun test_coupon_renewal(
             scenario.ctx(),
         );
 
-        let mut intent = init_renewal(
+        let mut applicator = coupon_applicator::new(init_renewal(
             &mut iota_names,
             &nft,
             renewal_years,
-        );
-        coupon_house::apply_coupon(
+        ));
+        applicator.apply_coupon(
             &mut iota_names,
-            &mut intent,
             coupon_code,
             &clock,
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
         };
 
         return_shared(iota_names);
         return_shared(clock);
-        destroy(intent);
+        destroy(applicator);
         destroy(nft);
     };
 }
