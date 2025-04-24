@@ -15,7 +15,7 @@ import {
 	newPaymentsConfig,
 	newPriceConfig,
 	newRenewalConfig,
-	setupApp,
+	setup,
 } from './authorization';
 import { createDisplay } from './display-tp';
 
@@ -158,7 +158,7 @@ export const Packages = (network: string) => {
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			authorizationType: (packageId: string) => `${packageId}::deny_list::DenyListAuth`,
 			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotaNames: string) => {
-				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
+				setup({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
 			},
 		},
 		Payments: {

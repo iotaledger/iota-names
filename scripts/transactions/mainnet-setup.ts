@@ -8,7 +8,7 @@ import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import {
 	addConfig,
 	addCoreConfig,
-	authorizeApp,
+	authorize,
 	newPaymentsConfig,
 	newPriceConfig,
 	newRenewalConfig,
@@ -74,7 +74,7 @@ const setupIotaNames = (txb: Transaction) => {
 		type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
 	});
 
-	authorizeApp({
+	authorize({
 		txb,
 		adminCap: packageInfo.adminCap,
 		iotaNames: packageInfo.iotaNames,
@@ -83,7 +83,7 @@ const setupIotaNames = (txb: Transaction) => {
 	});
 
 	// authorize and add payments configs
-	authorizeApp({
+	authorize({
 		txb,
 		adminCap: packageInfo.adminCap,
 		iotaNames: packageInfo.iotaNames,
