@@ -230,7 +230,14 @@ fun tries_to_create_too_short_subdomain() {
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let _child = create_node_subdomain(&parent, utf8(b"node.test.iota"), 1, true, true, scenario);
+    let _child = create_node_subdomain(
+        &parent,
+        utf8(b"node.test.iota"),
+        1,
+        true,
+        true,
+        scenario,
+    );
 
     abort 1337
 }
@@ -289,7 +296,13 @@ public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegi
     let clock = ts::take_shared<Clock>(scenario);
     let registry_mut = registry_mut(&mut iota_names);
 
-    let parent = registry::add_record(registry_mut, domain::new(name), 1, &clock, ctx(scenario));
+    let parent = registry::add_record(
+        registry_mut,
+        domain::new(name),
+        1,
+        &clock,
+        ctx(scenario),
+    );
 
     ts::return_shared(clock);
     ts::return_shared(iota_names);

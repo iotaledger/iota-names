@@ -156,7 +156,12 @@ public fun new(
     // We create the `setup` for the particular SubdomainRegistration.
     // We save a setting like: `subdomain.example.iota` -> { allow_creation: true/false, allow_time_extension: true/false }
     if (allow_creation) {
-        internal_set_flag(iota_names, subdomain, subdomain_allow_creation_key(), allow_creation);
+        internal_set_flag(
+            iota_names,
+            subdomain,
+            subdomain_allow_creation_key(),
+            allow_creation,
+        );
     };
 
     if (allow_time_extension) {
@@ -210,7 +215,11 @@ public fun extend_expiration(
         EInvalidExpirationDate,
     );
 
-    registry_mut(iota_names).set_expiration_timestamp_ms(nft, subdomain, expiration_timestamp_ms);
+    registry_mut(iota_names).set_expiration_timestamp_ms(
+        nft,
+        subdomain,
+        expiration_timestamp_ms,
+    );
 }
 
 /// Called by the parent domain to edit a subdomain's settings.
@@ -238,7 +247,12 @@ public fun edit_setup(
     // We create the `setup` for the particular SubdomainRegistration.
     // We save a setting like: `subdomain.example.iota` -> { allow_creation: true/false, allow_time_extension: true/false }
     internal_set_flag(iota_names, subdomain, subdomain_allow_creation_key(), allow_creation);
-    internal_set_flag(iota_names, subdomain, subdomain_allow_extension_key(), allow_time_extension);
+    internal_set_flag(
+        iota_names,
+        subdomain,
+        subdomain_allow_extension_key(),
+        allow_time_extension,
+    );
 }
 
 /// Burns a `SubdomainRegistration` object if it is expired.
