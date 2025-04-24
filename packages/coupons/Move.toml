@@ -5,7 +5,6 @@ edition = "2024"
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet", override = true }
 IotaNames = { local = "../iota-names" }
-payments = { local = "../payments" }
 
 [addresses]
 iota_names_coupons = "0x0"
