@@ -37,6 +37,8 @@ export class IotaNamesClient {
 			this.config = mainPackage.mainnet;
 		} else if (this.network === 'testnet') {
 			this.config = mainPackage.testnet;
+		} else if (this.network === 'devnet') {
+			this.config = mainPackage.devnet;
 		} else {
 			throw new Error('Invalid network');
 		}

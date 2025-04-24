@@ -11,8 +11,7 @@
 	"types": "./dist/cjs/index.d.ts",
 	"keywords": [
 		"IOTA",
-		"IOTA-Names",
-		"mysten"
+		"IOTA-Names"
 	],
 	"exports": {
 		".": {

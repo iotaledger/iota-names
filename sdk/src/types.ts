@@ -43,7 +43,7 @@ export interface NameRecord {
 // Types
 // -----------------
 
-export type Network = 'mainnet' | 'testnet' | 'custom';
+export type Network = 'mainnet' | 'testnet' | 'devnet' | 'custom';
 
 export type VersionedPackageId = {
 	latest: string;
@@ -51,7 +51,7 @@ export type VersionedPackageId = {
 	[key: string]: string;
 };
 
-export type Config = Record<'mainnet' | 'testnet', PackageInfo>;
+export type Config = Record<'mainnet' | 'testnet' | 'devnet', PackageInfo>;
 
 export type BaseParams = {
 	years: number;
