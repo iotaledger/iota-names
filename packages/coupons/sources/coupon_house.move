@@ -210,19 +210,19 @@ public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, code: S
 
 // Add coupon as a registered app.
 public fun app_add_coupon(
-    data: &mut Coupons,
+    coupons: &mut Coupons,
     code: String,
     kind: u8,
     amount: u64,
     rules: CouponRules,
     ctx: &mut TxContext,
 ) {
-    data.save_coupon(code, coupon::new(kind, amount, rules, ctx));
+    coupons.save_coupon(code, coupon::new(kind, amount, rules, ctx));
 }
 
 // Remove a coupon as a registered app.
-public fun app_remove_coupon(data: &mut Coupons, code: String) {
-    data.remove_coupon(code);
+public fun app_remove_coupon(coupons: &mut Coupons, code: String) {
+    coupons.remove_coupon(code);
 }
 
 /// Check if an application is authorized to access protected features of the
