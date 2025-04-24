@@ -7,7 +7,7 @@ import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactio
 /**
  * A helper to authorize any app in the IotaNames object.
  */
-export const authorizeApp = ({
+export const authorize = ({
 	txb,
 	adminCap,
 	iotaNames,
@@ -21,7 +21,7 @@ export const authorizeApp = ({
 	iotaNamesPackageId: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageId}::iota_names::authorize_app`,
+		target: `${iotaNamesPackageId}::iota_names::authorize`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
@@ -30,7 +30,7 @@ export const authorizeApp = ({
 /**
  * A helper to deauthorize any app that has been authorized on the IotaNames object.
  */
-export const deauthorizeApp = ({
+export const deauthorize = ({
 	txb,
 	adminCap,
 	iotaNames,
@@ -44,7 +44,7 @@ export const deauthorizeApp = ({
 	iotaNamesPackageId: string;
 }) => {
 	txb.moveCall({
-		target: `${iotaNamesPackageId}::iota_names::deauthorize_app`,
+		target: `${iotaNamesPackageId}::iota_names::deauthorize`,
 		arguments: [txb.object(adminCap), txb.object(iotaNames)],
 		typeArguments: [type],
 	});
@@ -53,7 +53,7 @@ export const deauthorizeApp = ({
 /**
  * A helper to call `setup` function for many apps that create a "registry" to hold state.
  */
-export const setupApp = ({
+export const setup = ({
 	txb,
 	adminCap,
 	iotaNames,
