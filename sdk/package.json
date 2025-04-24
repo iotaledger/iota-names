@@ -46,6 +46,7 @@
 		"axios-retry": "^3.9.1"
 	},
 	"devDependencies": {
+		"@iota/build-scripts": "workspace:^",
 		"@types/tmp": "^0.2.6",
 		"ts-retry-promise": "^0.8.1",
 		"typescript": "^5.7.2",
