@@ -59,8 +59,7 @@ public struct RequestData has drop {
     years: u8,
     /// The amount the user has to pay in base units.
     base_amount: u64,
-    /// a metadata field for future-proofness.
-    /// No use-cases are enabled in the current release.
+    /// A metadata field for future-proofness.
     metadata: VecMap<String, String>,
 }
 
@@ -254,6 +253,14 @@ public fun request_data_mut<A: drop>(intent: &mut PaymentIntent, iota_names: &Io
         PaymentIntent::Registration(data) => data,
         PaymentIntent::Renewal(data) => data,
     }
+}
+
+public fun metadata(data: &RequestData): &VecMap<String, String> {
+   &data.metadata
+}
+
+public fun metadata_mut(data: &mut RequestData): &mut VecMap<String, String> {
+    &mut data.metadata
 }
 
 public fun request_base_amount(self: &PaymentIntent): u64 { self.request_data().base_amount() }

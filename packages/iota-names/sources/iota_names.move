@@ -151,8 +151,7 @@ public fun app_add_balance<App: drop, T>(self: &mut IotaNames, _: App, balance: 
 }
 
 /// Get a mutable access to the `Registry` object. Can only be performed by
-/// authorized
-/// applications.
+/// authorized applications.
 public fun app_registry_mut<App: drop, R: store>(_: App, self: &mut IotaNames): &mut R {
     self.assert_app_is_authorized<App>();
     self.pkg_registry_mut<R>()
@@ -275,4 +274,3 @@ public fun burn_admin_cap_for_testing(admin_cap: AdminCap) {
 public fun authorize_app_for_testing<App: drop>(self: &mut IotaNames) {
     df::add(&mut self.id, AppKey<App> {}, true)
 }
-

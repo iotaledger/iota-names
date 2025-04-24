@@ -20,7 +20,10 @@ use iota::dynamic_field as df;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names_coupons::{coupon, coupons::{Self, Coupons}, rules::CouponRules};
 use std::string::String;
-use iota_names::payment::{PaymentIntent, RequestData};
+use iota::clock::Clock;
+use iota::bag::Bag;
+use iota_names::payment::{PaymentIntent};
+use iota_names_coupons::coupon::Coupon;
 
 /// An app that's not authorized tries to access private data.
 #[error]
@@ -28,6 +31,13 @@ const EAppNotAuthorized: vector<u8> = b"App is not authorized.";
 /// Tries to use app on an invalid version.
 #[error]
 const EInvalidVersion: vector<u8> = b"Invalid version.";
+#[error]
+const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
+#[error]
+const EInvalidDiscountPercentage: vector<u8> = b"Discount range is [0, 100].";
+
+const USED_NON_STACKING_KEY: vector<u8> = b"coupon_used_non_stacking";
+const USED_NON_STACKING_VAL: vector<u8> = b"true";
 
 /// The coupons package versioning
 public macro fun coupons_version(): u8 { 1 }  
@@ -58,6 +68,88 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
             version: coupons_version!(),
         },
     );
+}
+
+#[allow(implicit_const_copy)]
+public fun apply_coupon(
+    intent: &mut PaymentIntent,
+    iota_names: &mut IotaNames,
+    coupon_code: String,
+    clock: &Clock,
+    ctx: &mut TxContext,
+) {
+    let coupon_house = coupon_house(iota_names);
+
+    // Validate that specified coupon is valid.
+    assert!(coupon_house.coupons_bag().contains(coupon_code), ECouponDoesNotExist);
+
+    // Borrow coupon from the table.
+    let coupon: &Coupon = &coupon_house.coupons_bag()[coupon_code];
+    let metadata = intent.request_data_mut(iota_names, CouponsApp {}).metadata_mut();
+    let mut idx_opt = metadata.get_idx_opt(&USED_NON_STACKING_KEY.to_string());
+    if (idx_opt.is_some()) {
+        let (_, used_non_stacking_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
+        let used_non_stacking = used_non_stacking_str.as_bytes() == USED_NON_STACKING_VAL;
+        coupon.rules().assert_coupon_can_stack(used_non_stacking);
+        if (!coupon.rules().can_coupon_stack()) {
+            *used_non_stacking_str = USED_NON_STACKING_VAL.to_string();
+        };
+    };
+    let percentage = coupon.discount_percentage();
+
+    // Verify coupon house is authorized to get the registry / register names.
+    let coupon_house = coupon_house_mut(iota_names);
+    // Mutably borrow coupon from the table.
+    let coupon: &mut Coupon = &mut coupon_house.coupons_bag_mut()[coupon_code];
+
+    // We need to do a total of 5 checks, based on `CouponRules`
+    // Our checks work with `AND`, all of the conditions must pass for a coupon
+    // to be used.
+    // 1. Validate domain size.
+    coupon
+        .rules()
+        .assert_coupon_valid_for_domain_size(
+            intent.request_data().domain().sld().length() as u8,
+        );
+    // 2. Decrease available claims. Will ABORT if the coupon doesn't have
+    // enough available claims.
+    coupon.rules_mut().decrease_available_claims();
+    // 3. Validate the coupon is valid for the specified user.
+    coupon.rules().assert_coupon_valid_for_address(ctx.sender());
+    // 4. Validate the coupon hasn't expired (Based on clock)
+    coupon.rules().assert_coupon_is_not_expired(clock);
+    // 5. Validate years are valid for the coupon.
+    coupon.rules().assert_coupon_valid_for_domain_years(intent.request_data().years());
+
+    // Clean up our registry by removing the coupon if no more available claims!
+    if (!coupon.rules().has_available_claims()) {
+        // remove the coupon, since it's no longer usable.
+        coupon_house.coupons_mut().remove_coupon(coupon_code);
+    };
+
+    apply_percentage_discount(
+        intent,
+        iota_names,
+        percentage as u8,
+    );
+}
+
+/// Apply a percentage discount to the payment intent.
+/// E.g. a payment can apply a 10% discount on top of a user's 20%
+/// discount if the coupon allows it
+fun apply_percentage_discount(
+    intent: &mut PaymentIntent,
+    iota_names: &IotaNames,
+    // discount can be in range [1, 100]
+    discount: u8,
+) {
+    assert!(discount <= 100, EInvalidDiscountPercentage);
+
+    let price = intent.request_data().base_amount();
+    let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
+
+    *intent.request_data_mut(iota_names, CouponsApp {}).base_amount_mut() =
+        price - discount_amount;
 }
 
 // Get `Coupons` as an authorized app.
@@ -154,6 +246,21 @@ public(package) fun coupons_mut(coupon_house: &mut CouponHouse): &mut Coupons {
     &mut coupon_house.coupons
 }
 
+public(package) fun coupons_bag(coupon_house: &CouponHouse): &Bag {
+    coupon_house.coupons.coupons()
+}
+
+public(package) fun coupons_bag_mut(coupon_house: &mut CouponHouse): &mut Bag {
+    coupon_house.coupons.coupons_mut()
+}
+
+/// Gets a reference to the coupon's house
+fun coupon_house(iota_names: &IotaNames): &CouponHouse {
+    let coupons = iota_names.registry<CouponHouse>();
+    coupons.assert_version_is_valid();
+    coupons
+}
+
 /// Gets a mutable reference to the coupon's house
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
@@ -164,8 +271,4 @@ public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHou
     );
     coupons.assert_version_is_valid();
     coupons
-}
-
-public(package) fun request_data_mut(intent: &mut PaymentIntent, iota_names: &IotaNames): &mut RequestData {
-    intent.request_data_mut(iota_names, CouponsApp{})
 }

@@ -14,7 +14,6 @@ use iota_names::{
 use iota_names_coupons::{
     coupon_constants,
     coupon_house,
-    discount_applicator,
     coupons,
     range,
     rules,
@@ -254,7 +253,7 @@ fun max_years_two_failure() {
 
 // Tests the e2e experience for coupons (a list of different coupons with
 // different rules)
-#[test, expected_failure(abort_code = ::iota_names_coupons::discount_applicator::ECouponDoesNotExist)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_house::ECouponDoesNotExist)]
 fun no_more_available_claims_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -472,24 +471,25 @@ fun test_coupon_register(
     scenario.next_tx(user);
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
-        let mut applicator = discount_applicator::new(init_registration(
+        let mut intent = init_registration(
             &mut iota_names,
             domain,
-        ));
+        );
         let clock = scenario.take_shared<Clock>();
-        applicator.apply_coupon(
+        coupon_house::apply_coupon(
+            &mut intent,
             &mut iota_names,
             coupon_code,
             &clock,
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
         };
 
         return_shared(iota_names);
         return_shared(clock);
-        destroy(applicator);
+        destroy(intent);
     };
 }
 
@@ -503,14 +503,15 @@ fun test_multi_coupon_register(
     scenario.next_tx(user);
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
-        let mut applicator = discount_applicator::new(init_registration(
+        let mut intent = init_registration(
             &mut iota_names,
             domain,
-        ));
+        );
         let clock = scenario.take_shared<Clock>();
         while (!coupon_codes.is_empty()) {
             let coupon_code = coupon_codes.pop_back();
-            applicator.apply_coupon(
+            coupon_house::apply_coupon(
+                &mut intent,
                 &mut iota_names,
                 coupon_code,
                 &clock,
@@ -518,12 +519,12 @@ fun test_multi_coupon_register(
             );
         };
         if (amount.is_some()) {
-            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
         };
 
         return_shared(iota_names);
         return_shared(clock);
-        destroy(applicator);
+        destroy(intent);
     };
 }
 
@@ -546,24 +547,25 @@ fun test_coupon_renewal(
             scenario.ctx(),
         );
 
-        let mut applicator = discount_applicator::new(init_renewal(
+        let mut intent = init_renewal(
             &mut iota_names,
             &nft,
             renewal_years,
-        ));
-        applicator.apply_coupon(
+        );
+        coupon_house::apply_coupon(
+            &mut intent,
             &mut iota_names,
             coupon_code,
             &clock,
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(applicator.intent().request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
         };
 
         return_shared(iota_names);
         return_shared(clock);
-        destroy(applicator);
+        destroy(intent);
         destroy(nft);
     };
 }
