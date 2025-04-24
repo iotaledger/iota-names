@@ -1,6 +1,8 @@
 # Default fallback, if no other path below this matches
 * @iotaledger/dev-tools
 
+/.github/workflows/ @iotaledger/dev-tools @iotaledger/tooling
+
 /documentation/ @iotaledger/devx
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
