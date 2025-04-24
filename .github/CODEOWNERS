@@ -5,3 +5,10 @@
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
 /sdk/ @iotaledger/tooling
+
+/.eslintrc.cjs @iotaledger/tooling
+/.prettierignore @iotaledger/tooling
+/package.json @iotaledger/dev-tools @iotaledger/tooling
+/pnpm-lock.yaml @iotaledger/dev-tools @iotaledger/tooling
+/pnpm-workspace.yaml @iotaledger/dev-tools @iotaledger/tooling
+/prettier.config.cjs @iotaledger/tooling
