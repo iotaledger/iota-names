@@ -1,0 +1,7 @@
+# Default fallback, if no other path below this matches
+* @iotaledger/dev-tools
+
+/documentation/ @iotaledger/devx
+/packages/ @iotaledger/dev-tools
+/scripts/ @iotaledger/dev-tools
+/sdk/ @iotaledger/tooling
