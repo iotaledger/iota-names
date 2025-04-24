@@ -23,6 +23,7 @@ export type PackageInfo = {
 	publisherId: string;
 	registryTableId: string;
 	reverseRegistryTableId: string;
+	couponsPackageId: string;
 	subNamesPackageId: string;
 	tempSubdomainsProxyPackageId: string;
 	upgradeCap?: string;

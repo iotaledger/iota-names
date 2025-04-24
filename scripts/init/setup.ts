@@ -36,6 +36,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 		publisherId: packageInfo.IotaNames.publisher,
 		registryTableId: '',
 		reverseRegistryTableId: '',
+		couponsPackageId: packageInfo.Coupons.packageId,
 		subNamesPackageId: packageInfo.Subdomains.packageId,
 		tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
 	};
@@ -94,6 +95,12 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 		iotaNames: packageInfo.IotaNames.iotaNames,
 		iotaNamesPackageId: packageInfo.IotaNames.packageId,
 	});
+	packages.Coupons.setupFunction(
+		txb,
+		packageInfo.Coupons.packageId,
+		packageInfo.IotaNames.adminCap,
+		packageInfo.IotaNames.iotaNames,
+	);
 	let retries = 0;
 
 	try {

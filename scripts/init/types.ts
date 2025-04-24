@@ -6,6 +6,7 @@ export type PackageInfo = {
 	IotaNames: IotaNames;
 	DenyList: Package;
 	Auction: Package;
+	Coupons: Package;
 	Subdomains: Package;
 	Payments: Package;
 	TempSubdomainProxy: Package;
