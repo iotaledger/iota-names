@@ -4,6 +4,7 @@
 
 // A set of tests for the authorization of different apps in the CouponHouse.
 #[test_only]
+#[allow(lint(abort_without_constant))]
 module iota_names_coupons::app_authorization_tests;
 
 use iota::test_scenario::{return_shared, return_to_sender, end};

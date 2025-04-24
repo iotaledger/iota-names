@@ -434,7 +434,7 @@ fun add_coupon_invalid_amount_2_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::data::ECouponAlreadyExists)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupons::ECouponAlreadyExists)]
 fun add_coupon_twice_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -454,7 +454,7 @@ fun add_coupon_twice_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::data::ECouponDoesNotExist)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupons::ECouponDoesNotExist)]
 fun remove_non_existing_coupon() {
     let mut ctx = tx_context::dummy();
     let mut data = coupons::new(&mut ctx);
