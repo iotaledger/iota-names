@@ -5,7 +5,8 @@
 /// Provides the records which are stored for each domain in the `Registry`.
 module iota_names::name_record;
 
-use iota::{clock::{timestamp_ms, Clock}, vec_map::{Self, VecMap}};
+use iota::clock::{timestamp_ms, Clock};
+use iota::vec_map::{Self, VecMap};
 use iota_names::constants;
 use std::string::String;
 

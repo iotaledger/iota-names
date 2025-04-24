@@ -5,8 +5,11 @@
 #[test_only]
 module iota_names::core_config_tests;
 
-use iota::{test_utils::assert_eq, vec_map};
-use iota_names::{constants, core_config::{Self, CoreConfig}, domain};
+use iota::test_utils::assert_eq;
+use iota::vec_map;
+use iota_names::constants;
+use iota_names::core_config::{Self, CoreConfig};
+use iota_names::domain;
 
 #[test]
 fun test_config_creation_and_field_access() {

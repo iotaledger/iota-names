@@ -26,15 +26,15 @@
 module subdomains::subdomains;
 
 use deny_list::deny_list;
-use iota::{clock::Clock, dynamic_field as df, vec_map::VecMap};
-use iota_names::{
-    constants::{subdomain_allow_extension_key, subdomain_allow_creation_key},
-    domain::{Self, Domain, is_subdomain},
-    iota_names::{Self, IotaNames},
-    iota_names_registration::IotaNamesRegistration,
-    registry::Registry,
-    subdomain_registration::SubdomainRegistration
-};
+use iota::clock::Clock;
+use iota::dynamic_field as df;
+use iota::vec_map::VecMap;
+use iota_names::constants::{subdomain_allow_extension_key, subdomain_allow_creation_key};
+use iota_names::domain::{Self, Domain, is_subdomain};
+use iota_names::iota_names::{Self, IotaNames};
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::registry::Registry;
+use iota_names::subdomain_registration::SubdomainRegistration;
 use std::string::{String, utf8};
 use subdomains::config::{Self, SubdomainConfig};
 

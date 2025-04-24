@@ -4,14 +4,13 @@
 
 module iota_names::controller;
 
-use iota::{clock::Clock, tx_context::sender};
-use iota_names::{
-    domain,
-    iota_names::{Self, IotaNames},
-    iota_names_registration::IotaNamesRegistration,
-    registry::Registry,
-    subdomain_registration::SubdomainRegistration
-};
+use iota::clock::Clock;
+use iota::tx_context::sender;
+use iota_names::domain;
+use iota_names::iota_names::{Self, IotaNames};
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::registry::Registry;
+use iota_names::subdomain_registration::SubdomainRegistration;
 use std::string::String;
 
 const AVATAR: vector<u8> = b"avatar";

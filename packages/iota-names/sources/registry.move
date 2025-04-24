@@ -4,15 +4,16 @@
 
 module iota_names::registry;
 
-use iota::{clock::Clock, table::{Self, Table}, vec_map::VecMap};
-use iota_names::{
-    domain::Domain,
-    iota_names::AdminCap,
-    iota_names_registration::{Self as nft, IotaNamesRegistration},
-    name_record::{Self, NameRecord},
-    subdomain_registration::{Self, SubdomainRegistration}
-};
-use std::{option::{none, some}, string::String};
+use iota::clock::Clock;
+use iota::table::{Self, Table};
+use iota::vec_map::VecMap;
+use iota_names::domain::Domain;
+use iota_names::iota_names::AdminCap;
+use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::name_record::{Self, NameRecord};
+use iota_names::subdomain_registration::{Self, SubdomainRegistration};
+use std::option::{none, some};
+use std::string::String;
 
 #[error]
 const ENftExpired: vector<u8> = b"The `IotaNamesRegistration` has expired.";

@@ -7,7 +7,10 @@
 ///
 module iota_names::iota_names_tests;
 
-use iota::{balance, coin, iota::IOTA, test_utils::assert_eq};
+use iota::balance;
+use iota::coin;
+use iota::iota::IOTA;
+use iota::test_utils::assert_eq;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 
 // === Config management ===

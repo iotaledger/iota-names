@@ -15,7 +15,8 @@
 module iota_names::iota_names_registration;
 
 use iota::clock::{timestamp_ms, Clock};
-use iota_names::{constants, domain::Domain};
+use iota_names::constants;
+use iota_names::domain::Domain;
 use std::string::String;
 
 /* friend iota_names::registry; */

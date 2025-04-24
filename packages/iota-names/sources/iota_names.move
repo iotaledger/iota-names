@@ -23,7 +23,9 @@
 /// the registry and the balance.
 module iota_names::iota_names;
 
-use iota::{balance::Balance, coin::Coin, dynamic_field as df};
+use iota::balance::Balance;
+use iota::coin::Coin;
+use iota::dynamic_field as df;
 
 use fun df::add as UID.add;
 use fun df::borrow as UID.borrow;

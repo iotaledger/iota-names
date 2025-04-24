@@ -5,23 +5,20 @@
 /// Implementation of auction module.
 module auction::auction;
 
-use iota::{
-    balance::{Self, Balance},
-    clock::Clock,
-    coin::{Self, Coin},
-    event,
-    iota::IOTA,
-    linked_table::{Self, LinkedTable}
-};
-use iota_names::{
-    core_config::CoreConfig,
-    domain::{Self, Domain},
-    iota_names::{Self, AdminCap, IotaNames},
-    iota_names_registration::IotaNamesRegistration,
-    pricing_config::PricingConfig,
-    registry::Registry
-};
-use std::{option::{none, some, is_some}, string::String};
+use iota::balance::{Self, Balance};
+use iota::clock::Clock;
+use iota::coin::{Self, Coin};
+use iota::event;
+use iota::iota::IOTA;
+use iota::linked_table::{Self, LinkedTable};
+use iota_names::core_config::CoreConfig;
+use iota_names::domain::{Self, Domain};
+use iota_names::iota_names::{Self, AdminCap, IotaNames};
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::PricingConfig;
+use iota_names::registry::Registry;
+use std::option::{none, some, is_some};
+use std::string::String;
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;

@@ -17,17 +17,19 @@
 /// useful for system-level discounts, or user-specific discounts.
 module iota_names::payment;
 
-use iota::{clock::Clock, coin::Coin, event, vec_map::{Self, VecMap}};
-use iota_names::{
-    constants,
-    core_config::CoreConfig,
-    domain::{Self, Domain},
-    iota_names::IotaNames,
-    iota_names_registration::IotaNamesRegistration,
-    pricing_config::{PricingConfig, RenewalConfig},
-    registry::Registry
-};
-use std::{string::String, type_name::{Self, TypeName}};
+use iota::clock::Clock;
+use iota::coin::Coin;
+use iota::event;
+use iota::vec_map::{Self, VecMap};
+use iota_names::constants;
+use iota_names::core_config::CoreConfig;
+use iota_names::domain::{Self, Domain};
+use iota_names::iota_names::IotaNames;
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::{PricingConfig, RenewalConfig};
+use iota_names::registry::Registry;
+use std::string::String;
+use std::type_name::{Self, TypeName};
 
 #[error]
 const ENotSupportedType: vector<u8> =

@@ -7,7 +7,9 @@
 module iota_names::sub_name_tests;
 
 use iota::clock;
-use iota_names::{domain, iota_names_registration, subdomain_registration as subdomain};
+use iota_names::domain;
+use iota_names::iota_names_registration;
+use iota_names::subdomain_registration as subdomain;
 use std::string::utf8;
 
 #[test]

@@ -12,7 +12,9 @@
 module temp_subdomain_proxy::subdomain_proxy;
 
 use iota::clock::Clock;
-use iota_names::{controller, iota_names::IotaNames, subdomain_registration::SubdomainRegistration};
+use iota_names::controller;
+use iota_names::iota_names::IotaNames;
+use iota_names::subdomain_registration::SubdomainRegistration;
 use std::string::String;
 use subdomains::subdomains;
 

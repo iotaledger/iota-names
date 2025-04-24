@@ -4,8 +4,10 @@
 
 module payments::payments;
 
-use iota::{coin::{Coin, CoinMetadata}, vec_map::{Self, VecMap}};
-use iota_names::{iota_names::IotaNames, payment::{Receipt, PaymentIntent}};
+use iota::coin::{Coin, CoinMetadata};
+use iota::vec_map::{Self, VecMap};
+use iota_names::iota_names::IotaNames;
+use iota_names::payment::{Receipt, PaymentIntent};
 use std::type_name::{Self, TypeName};
 
 public struct PaymentsApp() has drop;

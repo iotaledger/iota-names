@@ -11,8 +11,11 @@
 ///
 module iota_names::registration_nft_tests;
 
-use iota::{clock::{Self, Clock}, test_utils::assert_eq};
-use iota_names::{constants, domain, iota_names_registration::{Self as nft, IotaNamesRegistration}};
+use iota::clock::{Self, Clock};
+use iota::test_utils::assert_eq;
+use iota_names::constants;
+use iota_names::domain;
+use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 use std::string::{utf8, String};
 
 #[test]

@@ -7,18 +7,18 @@
 module subdomains::subdomain_tests;
 
 use deny_list::deny_list;
-use iota::{clock::{Self, Clock}, test_scenario::{Self as ts, Scenario, ctx}};
-use iota_names::{
-    constants::{grace_period_ms, year_ms},
-    domain,
-    iota_names::{Self, IotaNames, AdminCap},
-    iota_names_registration::{Self, IotaNamesRegistration},
-    registry::{Self, Registry},
-    registry_tests::burn_nfts,
-    subdomain_registration::{Self, SubdomainRegistration}
-};
+use iota::clock::{Self, Clock};
+use iota::test_scenario::{Self as ts, Scenario, ctx};
+use iota_names::constants::{grace_period_ms, year_ms};
+use iota_names::domain;
+use iota_names::iota_names::{Self, IotaNames, AdminCap};
+use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
+use iota_names::registry::{Self, Registry};
+use iota_names::registry_tests::burn_nfts;
+use iota_names::subdomain_registration::{Self, SubdomainRegistration};
 use std::string::{String, utf8};
-use subdomains::{config, subdomains::{Self, Subdomains}};
+use subdomains::config;
+use subdomains::subdomains::{Self, Subdomains};
 
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;

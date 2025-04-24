@@ -6,17 +6,18 @@
 #[allow(lint(abort_without_constant))]
 module iota_names::payment_tests;
 
-use iota::{clock, coin, iota::IOTA, test_utils::{assert_eq, destroy}};
-use iota_names::{
-    constants,
-    core_config,
-    domain,
-    iota_names::{Self, IotaNames},
-    iota_names_registration,
-    payment::{Self, PaymentIntent, Receipt},
-    pricing_config::{Self, PricingConfig},
-    registry::{Self, Registry}
-};
+use iota::clock;
+use iota::coin;
+use iota::iota::IOTA;
+use iota::test_utils::{assert_eq, destroy};
+use iota_names::constants;
+use iota_names::core_config;
+use iota_names::domain;
+use iota_names::iota_names::{Self, IotaNames};
+use iota_names::iota_names_registration;
+use iota_names::payment::{Self, PaymentIntent, Receipt};
+use iota_names::pricing_config::{Self, PricingConfig};
+use iota_names::registry::{Self, Registry};
 
 public struct PaymentsApp() has drop;
 

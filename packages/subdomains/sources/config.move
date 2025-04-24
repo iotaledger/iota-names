@@ -4,7 +4,8 @@
 
 module subdomains::config;
 
-use iota_names::{constants::iota_tld, domain::{Domain, is_parent_of}};
+use iota_names::constants::iota_tld;
+use iota_names::domain::{Domain, is_parent_of};
 use std::string::String;
 
 /// the minimum size a subdomain label can have.
