@@ -13,7 +13,7 @@ import { profitsToTreasury } from './funds-to-treasury';
 // Extract `newAddress` argument from command-line arguments
 const args = process.argv.slice(2); // Get arguments passed to the script
 if (args.length !== 1) {
-	throw new Error('Invalid number of arguments. You must provide the `newAddress` argument.');
+    throw new Error('Invalid number of arguments. You must provide the `newAddress` argument.');
 }
 const newAddress = args[0]; // First argument should be new address
 
@@ -21,19 +21,19 @@ const network = 'localnet';
 const packageInfo = readPackageInfo(network);
 
 const treasuryClaimAndMoveCapsToFoundation = async () => {
-	const client = getClient(network);
+    const client = getClient(network);
 
-	const objectsToTransfer = await getIotaNamesAdminObjects(packageInfo, client);
-	console.log('Objects to transfer:', objectsToTransfer.length);
-	console.log(objectsToTransfer);
+    const objectsToTransfer = await getIotaNamesAdminObjects(packageInfo, client);
+    console.log('Objects to transfer:', objectsToTransfer.length);
+    console.log(objectsToTransfer);
 
-	const txb = new Transaction();
+    const txb = new Transaction();
 
-	profitsToTreasury(txb, packageInfo, newAddress);
+    profitsToTreasury(txb, packageInfo, newAddress);
 
-	txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));
+    txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));
 
-	await prepareMultisigTx(txb, network, packageInfo.adminAddress);
+    await prepareMultisigTx(txb, network, packageInfo.adminAddress);
 };
 
 treasuryClaimAndMoveCapsToFoundation();

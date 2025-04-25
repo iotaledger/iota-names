@@ -9,39 +9,39 @@ import { readPackageInfo } from '../package-info/constants';
 import { getClient } from '../utils/utils';
 
 const getAllOwnedDomains = async () => {
-	const packageInfo = readPackageInfo('mainnet');
-	let client = getClient('mainnet');
-	let hasNextPage = true;
-	let cursor: string | null | undefined = undefined;
+    const packageInfo = readPackageInfo('mainnet');
+    let client = getClient('mainnet');
+    let hasNextPage = true;
+    let cursor: string | null | undefined = undefined;
 
-	let names: IotaObjectResponse[] = [];
+    let names: IotaObjectResponse[] = [];
 
-	while (hasNextPage) {
-		const res = await client.getOwnedObjects({
-			owner: packageInfo.adminAddress,
-			filter: {
-				MatchAll: [
-					{
-						StructType: `${packageInfo.packageId}::iota_names_registration::IotaNamesRegistration`,
-					},
-				],
-			},
-			options: {
-				showContent: true,
-				showType: true,
-			},
-			cursor,
-		});
-		names.push(...res.data);
-		hasNextPage = res.hasNextPage;
+    while (hasNextPage) {
+        const res = await client.getOwnedObjects({
+            owner: packageInfo.adminAddress,
+            filter: {
+                MatchAll: [
+                    {
+                        StructType: `${packageInfo.packageId}::iota_names_registration::IotaNamesRegistration`,
+                    },
+                ],
+            },
+            options: {
+                showContent: true,
+                showType: true,
+            },
+            cursor,
+        });
+        names.push(...res.data);
+        hasNextPage = res.hasNextPage;
 
-		cursor = res.nextCursor;
+        cursor = res.nextCursor;
 
-		console.log('Total names after batch: ' + names.length);
-	}
+        console.log('Total names after batch: ' + names.length);
+    }
 
-	// Save to file.
-	fs.writeFileSync('./owned-objects.json', JSON.stringify(names));
+    // Save to file.
+    fs.writeFileSync('./owned-objects.json', JSON.stringify(names));
 };
 
 getAllOwnedDomains();

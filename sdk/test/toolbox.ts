@@ -8,9 +8,9 @@ import { tmpdir } from 'os';
 import path from 'path';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 import {
-	FaucetRateLimitError,
-	getFaucetHost,
-	requestIotaFromFaucetV0,
+    FaucetRateLimitError,
+    getFaucetHost,
+    requestIotaFromFaucetV0,
 } from '@iota/iota-sdk/faucet';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { retry } from 'ts-retry-promise';
@@ -24,48 +24,48 @@ const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localne
 const DEFAULT_FULLNODE_URL = process.env.VITE_FULLNODE_URL ?? getFullnodeUrl('localnet');
 
 export class TestToolbox {
-	keypair: Ed25519Keypair;
-	client: IotaClient;
-	configPath: string;
+    keypair: Ed25519Keypair;
+    client: IotaClient;
+    configPath: string;
 
-	constructor(keypair: Ed25519Keypair, client: IotaClient, configPath: string) {
-		this.keypair = keypair;
-		this.client = client;
-		this.configPath = configPath;
-	}
+    constructor(keypair: Ed25519Keypair, client: IotaClient, configPath: string) {
+        this.keypair = keypair;
+        this.client = client;
+        this.configPath = configPath;
+    }
 
-	address() {
-		return this.keypair.getPublicKey().toIotaAddress();
-	}
+    address() {
+        return this.keypair.getPublicKey().toIotaAddress();
+    }
 
-	public async getActiveValidators() {
-		return (await this.client.getLatestIotaSystemState()).activeValidators;
-	}
+    public async getActiveValidators() {
+        return (await this.client.getLatestIotaSystemState()).activeValidators;
+    }
 }
 
 export function getClient(): IotaClient {
-	return new IotaClient({
-		url: DEFAULT_FULLNODE_URL,
-	});
+    return new IotaClient({
+        url: DEFAULT_FULLNODE_URL,
+    });
 }
 
 // TODO: expose these testing utils from @iota/iota-sdk
 export async function setupIotaClient() {
-	const keypair = Ed25519Keypair.generate();
-	const address = keypair.getPublicKey().toIotaAddress();
-	const client = getClient();
-	await retry(() => requestIotaFromFaucetV0({ host: DEFAULT_FAUCET_URL, recipient: address }), {
-		backoff: 'EXPONENTIAL',
-		// overall timeout in 60 seconds
-		timeout: 1000 * 60,
-		// skip retry if we hit the rate-limit error
-		retryIf: (error: any) => !(error instanceof FaucetRateLimitError),
-		logger: (msg) => console.warn('Retrying requesting from faucet: ' + msg),
-	});
+    const keypair = Ed25519Keypair.generate();
+    const address = keypair.getPublicKey().toIotaAddress();
+    const client = getClient();
+    await retry(() => requestIotaFromFaucetV0({ host: DEFAULT_FAUCET_URL, recipient: address }), {
+        backoff: 'EXPONENTIAL',
+        // overall timeout in 60 seconds
+        timeout: 1000 * 60,
+        // skip retry if we hit the rate-limit error
+        retryIf: (error: any) => !(error instanceof FaucetRateLimitError),
+        logger: (msg) => console.warn('Retrying requesting from faucet: ' + msg),
+    });
 
-	const tmpDirPath = path.join(tmpdir(), 'config-');
-	const tmpDir = await mkdtemp(tmpDirPath);
-	const configPath = path.join(tmpDir, 'client.yaml');
-	execSync(`${IOTA_BIN} client --yes --client.config ${configPath}`, { encoding: 'utf-8' });
-	return new TestToolbox(keypair, client, configPath);
+    const tmpDirPath = path.join(tmpdir(), 'config-');
+    const tmpDir = await mkdtemp(tmpDirPath);
+    const configPath = path.join(tmpDir, 'client.yaml');
+    execSync(`${IOTA_BIN} client --yes --client.config ${configPath}`, { encoding: 'utf-8' });
+    return new TestToolbox(keypair, client, configPath);
 }
