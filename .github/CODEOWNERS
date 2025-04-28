@@ -8,9 +8,12 @@
 /scripts/ @iotaledger/dev-tools
 /sdk/ @iotaledger/tooling
 /dapp/ @iotaledger/tooling
+/build-scripts/ @iotaledger/tooling
+/linting/ @iotaledger/tooling
 
 /.eslintrc.cjs @iotaledger/tooling
 /.prettierignore @iotaledger/tooling
+/.lintstagedrc.json @iotaledger/tooling
 /package.json @iotaledger/dev-tools @iotaledger/tooling
 /pnpm-lock.yaml @iotaledger/dev-tools @iotaledger/tooling
 /pnpm-workspace.yaml @iotaledger/dev-tools @iotaledger/tooling
