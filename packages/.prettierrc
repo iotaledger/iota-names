@@ -1,6 +1,26 @@
 {
+	"arrowParens": "always",
+	"autoGroupImports": "module",
+	"bracketSameLine": false,
+	"bracketSpacing": true,
+	"embeddedLanguageFormatting": "auto",
+	"enableErrorDebug": false,
+	"endOfLine": "lf",
+	"experimentalOperatorPosition": "end",
+	"experimentalTernaries": false,
+	"htmlWhitespaceSensitivity": "css",
+	"jsxSingleQuote": false,
+	"objectWrap": "preserve",
 	"printWidth": 100,
+	"proseWrap": "preserve",
+	"quoteProps": "as-needed",
+	"semi": true,
+	"singleAttributePerLine": false,
+	"singleQuote": false,
 	"tabWidth": 4,
+	"trailingComma": "all",
 	"useModuleLabel": true,
-	"autoGroupImports": "module"
+	"useTabs": false,
+	"vueIndentScriptAndStyle": false,
+	"wrapComments": false
 }
