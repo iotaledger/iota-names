@@ -23,4 +23,4 @@ jobs:
         run: npm i -g prettier @mysten/prettier-plugin-move
 
       - name: Run format check
-        run: prettier-move -c packages/**
+        run: prettier-move -c packages/**/*.move
