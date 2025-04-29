@@ -12,14 +12,14 @@
 ///
 module iota_names::admin_tests;
 
-use std::string::utf8;
 use iota::clock;
 use iota::test_utils::assert_eq;
 use iota_names::admin::{Self, Admin};
 use iota_names::constants;
 use iota_names::domain;
-use iota_names::registry;
 use iota_names::iota_names;
+use iota_names::registry;
+use std::string::utf8;
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
 fun try_unauthorized_fail() {

@@ -13,11 +13,11 @@ use iota::test_utils::{assert_eq, destroy};
 use iota_names::constants;
 use iota_names::core_config;
 use iota_names::domain;
+use iota_names::iota_names::{Self, IotaNames};
+use iota_names::iota_names_registration;
 use iota_names::payment::{Self, PaymentIntent, Receipt};
 use iota_names::pricing_config::{Self, PricingConfig};
 use iota_names::registry::{Self, Registry};
-use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration;
 
 public struct PaymentsApp() has drop;
 
@@ -304,7 +304,11 @@ public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
 }
 
 // handles the payment, and if successful (always in this e2e test), issues the receipt.
-fun handle_payment(intent: PaymentIntent, iota_names: &mut IotaNames, ctx: &mut TxContext): Receipt {
+fun handle_payment(
+    intent: PaymentIntent,
+    iota_names: &mut IotaNames,
+    ctx: &mut TxContext,
+): Receipt {
     // the amount the user needs to pay.
     let amount = intent.request_data().base_amount();
     let coin = coin::mint_for_testing<IOTA>(amount, ctx);

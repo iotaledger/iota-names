@@ -4,14 +4,14 @@
 
 module iota_names::controller;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::domain;
-use iota_names::registry::Registry;
-use iota_names::subdomain_registration::SubdomainRegistration;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::registry::Registry;
+use iota_names::subdomain_registration::SubdomainRegistration;
+use std::string::String;
 
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
@@ -40,7 +40,11 @@ public fun set_target_address(
 }
 
 /// Set the reverse lookup address for the domain
-public fun set_reverse_lookup(iota_names: &mut IotaNames, domain_name: String, ctx: &mut TxContext) {
+public fun set_reverse_lookup(
+    iota_names: &mut IotaNames,
+    domain_name: String,
+    ctx: &mut TxContext,
+) {
     iota_names.registry_mut().set_reverse_lookup(ctx.sender(), domain::new(domain_name));
 }
 
@@ -51,7 +55,11 @@ public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &mut TxContext)
 
 /// Allows setting the reverse lookup address for an object.
 /// Expects a mutable reference of the object.
-public fun set_object_reverse_lookup(iota_names: &mut IotaNames, obj: &mut UID, domain_name: String) {
+public fun set_object_reverse_lookup(
+    iota_names: &mut IotaNames,
+    obj: &mut UID,
+    domain_name: String,
+) {
     iota_names.registry_mut().set_reverse_lookup(obj.to_address(), domain::new(domain_name));
 }
 
@@ -86,7 +94,12 @@ public fun set_user_data(
 }
 
 /// User-facing function - remove a key from the name record's data.
-public fun unset_user_data(iota_names: &mut IotaNames, nft: &IotaNamesRegistration, key: String, clock: &Clock) {
+public fun unset_user_data(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    key: String,
+    clock: &Clock,
+) {
     let registry = iota_names.registry_mut();
     let mut data = *registry.get_data(nft.domain());
     let domain = nft.domain();
@@ -104,7 +117,11 @@ public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, 
     iota_names.registry_mut().burn_registration_object(nft, clock);
 }
 
-public fun burn_expired_subname(iota_names: &mut IotaNames, nft: SubdomainRegistration, clock: &Clock) {
+public fun burn_expired_subname(
+    iota_names: &mut IotaNames,
+    nft: SubdomainRegistration,
+    clock: &Clock,
+) {
     iota_names.registry_mut().burn_subdomain_object(nft, clock);
 }
 

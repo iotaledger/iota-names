@@ -5,15 +5,15 @@
 #[test_only]
 module iota_names::register;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::coin::Coin;
 use iota_names::core_config::CoreConfig;
 use iota_names::domain;
-use iota_names::pricing_config::PricingConfig;
-use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::PricingConfig;
+use iota_names::registry::Registry;
+use std::string::String;
 
 #[error]
 const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within allowed interval.";

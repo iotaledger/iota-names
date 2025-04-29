@@ -5,23 +5,20 @@
 /// Implementation of auction module.
 module auction::auction;
 
-use std::{option::{none, some, is_some}, string::String};
-use iota::{
-    balance::{Self, Balance},
-    clock::Clock,
-    coin::{Self, Coin},
-    event,
-    linked_table::{Self, LinkedTable},
-    iota::IOTA
-};
-use iota_names::{
-    core_config::CoreConfig,
-    domain::{Self, Domain},
-    pricing_config::PricingConfig,
-    registry::Registry,
-    iota_names::{Self, AdminCap, IotaNames},
-    iota_names_registration::IotaNamesRegistration
-};
+use iota::balance::{Self, Balance};
+use iota::clock::Clock;
+use iota::coin::{Self, Coin};
+use iota::event;
+use iota::iota::IOTA;
+use iota::linked_table::{Self, LinkedTable};
+use iota_names::core_config::CoreConfig;
+use iota_names::domain::{Self, Domain};
+use iota_names::iota_names::{Self, AdminCap, IotaNames};
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::PricingConfig;
+use iota_names::registry::Registry;
+use std::option::{none, some, is_some};
+use std::string::String;
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;
@@ -34,29 +31,21 @@ const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 1_000_000_000;
 // === Abort codes ===
 
 #[error]
-const EInitialBidTooLow: vector<u8> =
-    b"The initial bid is too low.";
+const EInitialBidTooLow: vector<u8> = b"The initial bid is too low.";
 #[error]
-const EAuctionStarted: vector<u8> =
-    b"Trying to start an action but it's already started.";
+const EAuctionStarted: vector<u8> = b"Trying to start an action but it's already started.";
 #[error]
-const EAuctionNotStarted: vector<u8> =
-    b"Placing a bid in a not started auction.";
+const EAuctionNotStarted: vector<u8> = b"Placing a bid in a not started auction.";
 #[error]
-const EAuctionNotEndedYet: vector<u8> =
-    b"The auction has not ended yet.";
+const EAuctionNotEnded: vector<u8> = b"The auction has not ended.";
 #[error]
-const EAuctionEnded: vector<u8> =
-    b"The auction ended.";
+const EAuctionEnded: vector<u8> = b"The auction ended.";
 #[error]
-const ENotWinner: vector<u8> =
-    b"Not winner of the auction.";
+const ENotWinner: vector<u8> = b"Not winner of the auction.";
 #[error]
-const EBidTooLow: vector<u8> =
-    b"The bid is too low, minimum overbid should be at least 1 IOTA.";
+const EBidTooLow: vector<u8> = b"The bid is too low, minimum overbid should be at least 1 IOTA.";
 #[error]
-const ENoProfits: vector<u8> =
-    b"There are no profits to withdraw.";
+const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 
 /// Authorization witness to call protected functions of iota_names.
 public struct App has drop {}
@@ -104,7 +93,9 @@ public fun start_auction_and_place_bid(
 
     assert!(!self.auctions.contains(domain), EAuctionStarted);
 
-    let min_price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
+    let min_price = iota_names
+        .get_config<PricingConfig>()
+        .calculate_base_price(domain.sld().length());
     assert!(bid.value() >= min_price, EInitialBidTooLow);
 
     let registry = iota_names::app_registry_mut<App, Registry>(App {}, iota_names);
@@ -234,7 +225,7 @@ public fun claim(
     } = self.auctions.remove(domain);
 
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     // Ensure the sender is the winner
     assert!(ctx.sender() == winner, ENotWinner);
@@ -292,7 +283,7 @@ public fun collect_winning_auction_fund(
     let domain = domain::new(domain_name);
     let auction = &mut self.auctions[domain];
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEnded);
 
     let amount = auction.current_bid.value();
     self.balance.join(auction.current_bid.split(amount, ctx).into_balance());
@@ -344,7 +335,7 @@ fun admin_finalize_auction_internal(
     } = self.auctions.remove(domain);
 
     // Ensure that the auction is over
-    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEndedYet);
+    assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     event::emit(AuctionFinalizedEvent {
         domain,
@@ -428,11 +419,7 @@ public struct AuctionExtendedEvent has copy, drop {
 
 #[test_only]
 public fun init_for_testing(ctx: &mut TxContext) {
-    iota::transfer::share_object(AuctionHouse {
-        id: object::new(ctx),
-        balance: balance::zero(),
-        auctions: linked_table::new(ctx),
-    });
+    init(ctx)
 }
 
 #[test_only]

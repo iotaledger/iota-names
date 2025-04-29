@@ -5,15 +5,15 @@
 #[test_only]
 module iota_names::register_utils;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::coin;
 use iota::test_scenario::{Self, Scenario, ctx};
-use iota_names::register::register;
 use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::register::register;
+use std::string::String;
 
-const IOTANS_ADDRESS: address = @0xA001;
+const IOTA_NAMES_ADDRESS: address = @0xA001;
 
 public fun register_util<T>(
     scenario: &mut Scenario,
@@ -22,7 +22,7 @@ public fun register_util<T>(
     amount: u64,
     clock_tick: u64,
 ): IotaNamesRegistration {
-    scenario.next_tx(IOTANS_ADDRESS);
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
     let mut iota_names = scenario.take_shared<IotaNames>();
     let payment = coin::mint_for_testing<T>(amount, scenario.ctx());
     let mut clock = scenario.take_shared<Clock>();
