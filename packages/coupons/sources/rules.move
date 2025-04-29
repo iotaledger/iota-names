@@ -7,7 +7,8 @@
 module iota_names_coupons::rules;
 
 use iota::clock::Clock;
-use iota_names_coupons::{coupon_constants, range::Range};
+use iota_names_coupons::coupon_constants;
+use iota_names_coupons::range::Range;
 
 // Errors
 /// Error when you try to use a coupon that isn't valid for these years.
@@ -76,7 +77,7 @@ public fun new_coupon_rules(
         user,
         expiration,
         years,
-        can_stack
+        can_stack,
     }
 }
 

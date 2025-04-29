@@ -5,19 +5,26 @@
 #[test_only]
 module iota_names_coupons::coupon_tests;
 
-use iota::{clock::Clock, test_scenario::{Scenario, return_shared}, test_utils::{Self, destroy}};
-use iota_names::{
-    iota_names::IotaNames,
-    iota_names_registration::IotaNamesRegistration,
-    payment::PaymentIntent
-};
-use iota_names_coupons::{
-    coupon_constants,
-    coupon_house,
-    coupons,
-    range,
-    rules,
-    setup::{Self, TestApp, user, user_two, test_app, admin_add_coupon, test_init, nanos_per_iota}
+use iota::clock::Clock;
+use iota::test_scenario::{Scenario, return_shared};
+use iota::test_utils::{Self, destroy};
+use iota_names::iota_names::IotaNames;
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::payment::PaymentIntent;
+use iota_names_coupons::coupon_constants;
+use iota_names_coupons::coupon_house;
+use iota_names_coupons::coupons;
+use iota_names_coupons::range;
+use iota_names_coupons::rules;
+use iota_names_coupons::setup::{
+    Self,
+    TestApp,
+    user,
+    user_two,
+    test_app,
+    admin_add_coupon,
+    test_init,
+    nanos_per_iota
 };
 use std::string::String;
 

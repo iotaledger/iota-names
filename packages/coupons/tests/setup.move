@@ -5,15 +5,15 @@
 #[test_only]
 module iota_names_coupons::setup;
 
-use iota::{clock, test_scenario::{Self, Scenario, ctx}};
-use iota_names::{iota_names::{Self, AdminCap, IotaNames}, registry};
-use iota_names_coupons::{
-    coupon_constants,
-    coupon_house::{Self, CouponsApp},
-    coupons::Coupons,
-    range,
-    rules
-};
+use iota::clock;
+use iota::test_scenario::{Self, Scenario, ctx};
+use iota_names::iota_names::{Self, AdminCap, IotaNames};
+use iota_names::registry;
+use iota_names_coupons::coupon_constants;
+use iota_names_coupons::coupon_house::{Self, CouponsApp};
+use iota_names_coupons::coupons::Coupons;
+use iota_names_coupons::range;
+use iota_names_coupons::rules;
 use std::string::{utf8, String};
 
 public struct TestApp has drop {}

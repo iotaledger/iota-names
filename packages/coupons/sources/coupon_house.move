@@ -16,14 +16,15 @@
 /// to the registry.
 module iota_names_coupons::coupon_house;
 
+use iota::bag::Bag;
+use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names_coupons::{coupon, coupons::{Self, Coupons}, rules::CouponRules};
+use iota_names::payment::PaymentIntent;
+use iota_names_coupons::coupon::{Self, Coupon};
+use iota_names_coupons::coupons::{Self, Coupons};
+use iota_names_coupons::rules::CouponRules;
 use std::string::String;
-use iota::clock::Clock;
-use iota::bag::Bag;
-use iota_names::payment::{PaymentIntent};
-use iota_names_coupons::coupon::Coupon;
 
 /// An app that's not authorized tries to access private data.
 #[error]
@@ -40,7 +41,7 @@ const USED_NON_STACKING_KEY: vector<u8> = b"coupon_used_non_stacking";
 const USED_NON_STACKING_VAL: vector<u8> = b"true";
 
 /// The coupons package versioning
-public macro fun coupons_version(): u8 { 1 }  
+public macro fun coupons_version(): u8 { 1 }
 
 // Authorization for the Coupons on Iota-Names, to be able to register names on the
 // app.
@@ -148,8 +149,7 @@ fun apply_percentage_discount(
     let price = intent.request_data().base_amount();
     let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
 
-    *intent.request_data_mut(iota_names, CouponsApp {}).base_amount_mut() =
-        price - discount_amount;
+    *intent.request_data_mut(iota_names, CouponsApp {}).base_amount_mut() = price - discount_amount;
 }
 
 // Get `Coupons` as an authorized app.

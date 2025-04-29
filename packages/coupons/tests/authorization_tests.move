@@ -9,10 +9,8 @@ module iota_names_coupons::app_authorization_tests;
 
 use iota::test_scenario::{return_shared, return_to_sender, end};
 use iota_names::iota_names::IotaNames;
-use iota_names_coupons::{
-    coupon_house::{Self, deauthorize_app},
-    setup::{Self, TestApp, admin, user, test_init}
-};
+use iota_names_coupons::coupon_house::{Self, deauthorize_app};
+use iota_names_coupons::setup::{Self, TestApp, admin, user, test_init};
 
 #[test]
 fun admin_get_app_success() {
