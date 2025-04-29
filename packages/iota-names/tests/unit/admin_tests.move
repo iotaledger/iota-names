@@ -12,7 +12,6 @@
 ///
 module iota_names::admin_tests;
 
-use std::string::utf8;
 use iota::clock;
 use iota::test_utils::assert_eq;
 use iota_names::admin::{Self, Admin};

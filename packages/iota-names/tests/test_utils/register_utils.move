@@ -5,13 +5,13 @@
 #[test_only]
 module iota_names::register_utils;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::coin;
 use iota::test_scenario::{Self, Scenario, ctx};
-use iota_names::register::register;
 use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::register::register;
+use std::string::String;
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 

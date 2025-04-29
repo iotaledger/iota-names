@@ -6,15 +6,15 @@
 #[allow(lint(abort_without_constant))]
 module iota_names::registry_tests;
 
-use std::option::some;
-use std::string::utf8;
 use iota::clock::{Self, Clock};
 use iota::test_utils::assert_eq;
 use iota_names::constants;
 use iota_names::domain::{Self, Domain};
+use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 use iota_names::name_record as record;
 use iota_names::registry::{Self, Registry};
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use std::option::some;
+use std::string::utf8;
 
 // === Registry + Record Addition ===
 

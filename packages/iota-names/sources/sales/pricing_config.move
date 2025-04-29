@@ -9,9 +9,11 @@ use iota::vec_map::{Self, VecMap};
 #[error]
 const EInvalidLength: vector<u8> = b"Tried to create a range with more than two values.";
 #[error]
-const EInvalidRange: vector<u8> = b"Tried to create a range with the first value greater than the second.";
+const EInvalidRange: vector<u8> =
+    b"Tried to create a range with the first value greater than the second.";
 #[error]
-const ELengthMismatch: vector<u8> = b"Tried to create a pricing config with different lengths for ranges and prices.";
+const ELengthMismatch: vector<u8> =
+    b"Tried to create a pricing config with different lengths for ranges and prices.";
 #[error]
 const EPriceNotSet: vector<u8> = b"No price set for a name with the given length.";
 
