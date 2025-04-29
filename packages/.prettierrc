@@ -7,7 +7,7 @@
 	"enableErrorDebug": false,
 	"endOfLine": "lf",
 	"experimentalOperatorPosition": "end",
-	"experimentalTernaries": false,
+	"experimentalTernaries": true,
 	"htmlWhitespaceSensitivity": "css",
 	"jsxSingleQuote": false,
 	"objectWrap": "preserve",
