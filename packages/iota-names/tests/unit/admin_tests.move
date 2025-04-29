@@ -20,6 +20,7 @@ use iota_names::domain;
 use iota_names::registry;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use std::string::utf8;
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
 fun try_unauthorized_fail() {
