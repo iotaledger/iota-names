@@ -3,7 +3,7 @@ name: Lint move files
 on:
   pull_request:
     paths:
-      - ".github/workflows/move_test.yaml"
+      - ".github/workflows/move_lint.yaml"
       - "packages/**"
   push:
     branches:
