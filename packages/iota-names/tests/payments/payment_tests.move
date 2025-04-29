@@ -43,7 +43,7 @@ fun test_e2e() {
     let mut nft = receipt.register(&mut iota_names, &clock, &mut ctx);
 
     // let's validate our nft is the same name we expected for sanity check.
-    assert_eq(nft.domain().to_string(), domain);
+    assert_eq(nft.domain_name(), domain);
 
     // now let's renew this nft for 4 years.
     let intent = payment::init_renewal(&mut iota_names, &nft, 4);
