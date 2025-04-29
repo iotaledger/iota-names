@@ -4,16 +4,16 @@
 
 module iota_names::registry;
 
-use std::option::{none, some};
-use std::string::String;
 use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
 use iota_names::domain::Domain;
-use iota_names::name_record::{Self, NameRecord};
-use iota_names::subdomain_registration::{Self, SubdomainRegistration};
 use iota_names::iota_names::AdminCap;
 use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::name_record::{Self, NameRecord};
+use iota_names::subdomain_registration::{Self, SubdomainRegistration};
+use std::option::{none, some};
+use std::string::String;
 
 #[error]
 const ENftExpired: vector<u8> = b"The `IotaNamesRegistration` has expired.";
@@ -26,9 +26,11 @@ const ERecordExpired: vector<u8> = b"The `NameRecord` has expired.";
 #[error]
 const ERecordMismatch: vector<u8> = b"The reverse lookup record does not match the `NameRecord`.";
 #[error]
-const ETargetNotSet: vector<u8> = b"Trying to add a reverse lookup record while the target is empty.";
+const ETargetNotSet: vector<u8> =
+    b"Trying to add a reverse lookup record while the target is empty.";
 #[error]
-const ENonLeafRecord: vector<u8> = b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
+const ENonLeafRecord: vector<u8> =
+    b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
 #[error]
 const EInvalidDepth: vector<u8> = b"Trying to add a leaf record for a TLD or SLD.";
 #[error]
@@ -125,11 +127,7 @@ public fun wrap_subdomain(
 
 /// Attempts to burn a subdomain registration object,
 /// and also invalidates any records in the registry / reverse registry.
-public fun burn_subdomain_object(
-    self: &mut Registry,
-    nft: SubdomainRegistration,
-    clock: &Clock,
-) {
+public fun burn_subdomain_object(self: &mut Registry, nft: SubdomainRegistration, clock: &Clock) {
     let nft = nft.burn(clock);
     self.burn_registration_object(nft, clock);
 }
@@ -203,11 +201,7 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     self.handle_invalidate_reverse_record(&domain, old_target_address, none());
 }
 
-public fun set_target_address(
-    self: &mut Registry,
-    domain: Domain,
-    new_target: Option<address>,
-) {
+public fun set_target_address(self: &mut Registry, domain: Domain, new_target: Option<address>) {
     let record = &mut self.registry[domain];
     let old_target = record.target_address();
 
@@ -220,11 +214,7 @@ public fun unset_reverse_lookup(self: &mut Registry, address: address) {
 }
 
 /// Reverse lookup can only be set for the record that has the target address.
-public fun set_reverse_lookup(
-    self: &mut Registry,
-    address: address,
-    domain: Domain,
-) {
+public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Domain) {
     let record = &self.registry[domain];
     let target = record.target_address();
 
@@ -258,11 +248,7 @@ public fun set_expiration_timestamp_ms(
 /// Use with caution and validate(!!) that any system fields are not removed
 /// (accidently),
 /// when building authorized packages that can write the metadata field.
-public fun set_data(
-    self: &mut Registry,
-    domain: Domain,
-    data: VecMap<String, String>,
-) {
+public fun set_data(self: &mut Registry, domain: Domain, data: VecMap<String, String>) {
     let record = &mut self.registry[domain];
     record.set_data(data);
 }
@@ -296,11 +282,7 @@ public fun reverse_lookup(self: &Registry, address: address): Option<Domain> {
 /// Asserts that the provided NFT:
 /// 1. Matches the ID in the corresponding `Record`
 /// 2. Has not expired (does not take into account the grace period)
-public fun assert_nft_is_authorized(
-    self: &Registry,
-    nft: &IotaNamesRegistration,
-    clock: &Clock,
-) {
+public fun assert_nft_is_authorized(self: &Registry, nft: &IotaNamesRegistration, clock: &Clock) {
     let domain = nft.domain();
     let record = &self.registry[domain];
 
@@ -399,10 +381,7 @@ fun remove_existing_record_if_exists_and_expired(
             // We need to first remove + then call create (to protect accidental
             // overrides).
             if (parent_name_record.nft_id() == record.nft_id()) {
-                assert!(
-                    parent_name_record.has_expired(clock),
-                    ERecordNotExpired,
-                );
+                assert!(parent_name_record.has_expired(clock), ERecordNotExpired);
             };
         }
     } else if (with_grace_period) {
@@ -445,11 +424,7 @@ fun handle_invalidate_reverse_record(
 use iota_names::iota_names::{add_registry, IotaNames};
 
 #[test_only]
-public fun init_for_testing(
-    cap: &AdminCap,
-    iota_names: &mut IotaNames,
-    ctx: &mut TxContext,
-) {
+public fun init_for_testing(cap: &AdminCap, iota_names: &mut IotaNames, ctx: &mut TxContext) {
     add_registry(cap, iota_names, new(cap, ctx));
 }
 
@@ -463,10 +438,7 @@ public fun new_for_testing(ctx: &mut TxContext): Registry {
 }
 
 #[test_only]
-public fun remove_record_for_testing(
-    self: &mut Registry,
-    domain: Domain,
-): NameRecord {
+public fun remove_record_for_testing(self: &mut Registry, domain: Domain): NameRecord {
     self.registry.remove(domain)
 }
 

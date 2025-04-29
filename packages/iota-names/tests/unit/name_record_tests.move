@@ -12,13 +12,13 @@
 ///
 module iota_names::name_record_tests;
 
-use std::option::{none, some};
-use std::string::utf8;
 use iota::clock;
 use iota::test_utils::assert_eq;
 use iota::vec_map;
 use iota_names::constants;
 use iota_names::name_record as record;
+use std::option::{none, some};
+use std::string::utf8;
 
 #[test]
 /// Make sure that the fields are empty by default. That they are updated

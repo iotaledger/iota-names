@@ -53,7 +53,9 @@ fun custom_config_valid_length() {
 
 #[test, expected_failure(abort_code = core_config::EInvalidTld)]
 fun test_invalid_tld() {
-    core_config::default().assert_is_valid_for_sale(&domain::new(b"iota-names.move".to_string()));
+    core_config::default().assert_is_valid_for_sale(
+        &domain::new(b"iota-names.move".to_string()),
+    );
 }
 
 #[test, expected_failure(abort_code = core_config::EInvalidLength)]

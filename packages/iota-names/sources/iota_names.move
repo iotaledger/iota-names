@@ -241,11 +241,7 @@ public fun new_pricing_config(): PricingConfig {
     let range1 = new_range(vector[3, 3]);
     let range2 = new_range(vector[4, 4]);
     let range3 = new_range(vector[5, 63]);
-    let prices = vector[
-        1200 * NANOS_PER_IOTA,
-        200 * NANOS_PER_IOTA,
-        50 * NANOS_PER_IOTA,
-    ];
+    let prices = vector[1200 * NANOS_PER_IOTA, 200 * NANOS_PER_IOTA, 50 * NANOS_PER_IOTA];
 
     pricing_config::new(
         vector[range1, range2, range3],
@@ -275,4 +271,3 @@ public fun burn_admin_cap_for_testing(admin_cap: AdminCap) {
 public fun authorize_app_for_testing<App: drop>(self: &mut IotaNames) {
     df::add(&mut self.id, AppKey<App> {}, true)
 }
-
