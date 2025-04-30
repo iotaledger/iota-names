@@ -5,8 +5,6 @@
 #[test_only]
 module iota_names::controller_tests;
 
-use std::option::{extract, some, none};
-use std::string::{utf8, String};
 use iota::clock::{Self, Clock};
 use iota::dynamic_field;
 use iota::iota::IOTA;
@@ -16,12 +14,14 @@ use iota::vec_map::VecMap;
 use iota_names::constants::year_ms;
 use iota_names::controller::{Self, ControllerAuth};
 use iota_names::domain::{Self, Domain};
+use iota_names::iota_names::{Self, IotaNames, AdminCap};
+use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 use iota_names::register::RegisterAuth;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subdomain_registration;
-use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
+use std::option::{extract, some, none};
+use std::string::{utf8, String};
 
 use fun set_target_address_util as Scenario.set_target_address_util;
 use fun set_reverse_lookup_util as Scenario.set_reverse_lookup_util;
@@ -695,7 +695,6 @@ fun test_reverse_reset_when_target_address_changes() {
     scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, DOMAIN_NAME.to_string());
     scenario.lookup_util(DOMAIN_NAME.to_string(), some(uid.to_address()));
     scenario.reverse_lookup_util(uid.to_address(), some(domain::new(DOMAIN_NAME.to_string())));
-
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(uid.to_address(), none());

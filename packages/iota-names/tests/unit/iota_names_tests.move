@@ -15,7 +15,7 @@ use iota_names::iota_names::{Self, AdminCap, IotaNames};
 
 // === Config management ===
 
-public struct TestConfig has store, drop { a: u8 }
+public struct TestConfig has drop, store { a: u8 }
 public struct USDC has drop {}
 
 #[test]
@@ -110,7 +110,6 @@ fun balance_and_withdraw_fail_no_profits() {
 
     abort 1337
 }
-
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
 /// 1. Authorize TestAuth and add 0 balance;

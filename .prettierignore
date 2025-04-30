@@ -14,3 +14,5 @@ documentation/
 .github/
 dprint.json
 pnpm-workspace.yaml
+.prettierrc
+packages

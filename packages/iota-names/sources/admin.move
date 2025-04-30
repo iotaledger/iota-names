@@ -6,14 +6,14 @@
 /// by the iota_names admin.
 module iota_names::admin;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::core_config::CoreConfig;
 use iota_names::domain;
-use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::registry::Registry;
+use std::string::String;
 
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AdminAuth has drop {}
