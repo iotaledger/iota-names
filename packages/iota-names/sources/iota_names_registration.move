@@ -31,7 +31,7 @@ public struct IotaNamesRegistration has key, store {
     /// Timestamp in milliseconds when this NFT expires.
     expiration_timestamp_ms: u64,
     /// Short IPFS hash of the image to be displayed for the NFT.
-    image_url: String,
+    image_url: Option<String>,
 }
 
 // === Protected methods ===
@@ -49,7 +49,7 @@ public(package) fun new(
         domain_name: domain.to_string(),
         domain,
         expiration_timestamp_ms: timestamp_ms(clock) + ((no_years as u64) * constants::year_ms()),
-        image_url: constants::default_image(),
+        image_url: option::none()
     }
 }
 
@@ -64,7 +64,7 @@ public(package) fun set_expiration_timestamp_ms(
 /// Updates the `image_url` field for this NFT. Is only called in the
 /// `update_image` for now.
 public(package) fun update_image_url(self: &mut IotaNamesRegistration, image_url: String) {
-    self.image_url = image_url;
+    self.image_url = option::some(image_url)
 }
 
 /// Destroys the `IotaNamesRegistration` by deleting it from the store, returning
@@ -111,7 +111,7 @@ public fun expiration_timestamp_ms(self: &IotaNamesRegistration): u64 {
 }
 
 /// Get the `image_url` field of the `IotaNamesRegistration`.
-public fun image_url(self: &IotaNamesRegistration): String { self.image_url }
+public fun image_url(self: &IotaNamesRegistration): Option<String> { self.image_url }
 
 // get a read-only `uid` field of `IotaNamesRegistration`.
 public fun uid(self: &IotaNamesRegistration): &UID { &self.id }

@@ -26,7 +26,7 @@ fun test_new() {
 
     // expiration date for 1 year should be 365 days from now
     assert_eq(nft.expiration_timestamp_ms(), 365 * 24 * 60 * 60 * 1000);
-    assert_eq(nft.image_url(), constants::default_image());
+    assert_eq(nft.image_url(), option::none());
     assert_eq(nft.domain(), domain::new(utf8(b"test.iota")));
 
     // bump the clock value to 1 year from now
@@ -59,7 +59,7 @@ fun test_update_values() {
     assert_eq(nft.expiration_timestamp_ms(), 0);
 
     nft.update_image_url_for_testing(utf8(b"test_image_url"));
-    assert_eq(nft.image_url(), utf8(b"test_image_url"));
+    assert_eq(nft.image_url(), option::some(utf8(b"test_image_url")));
 
     clock.destroy_for_testing();
     burn(nft);
