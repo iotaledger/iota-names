@@ -60,7 +60,7 @@ const ENotAllowedName: vector<u8> =
 /// Enabled metadata value.
 const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
 
-/// The authentication scheme for IotaNames.
+/// Authorization witness to call protected functions of `iota_names`.
 public struct SubdomainsAuth has drop {}
 
 /// The key to store the parent's ID in the subdomain object.

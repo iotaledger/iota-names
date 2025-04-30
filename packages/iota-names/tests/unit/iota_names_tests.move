@@ -51,6 +51,7 @@ fun registry_management() {
 
 // === Application Auth ===
 
+/// Authorization witness to call protected functions of `iota_names`.
 public struct TestAuth has drop {}
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]

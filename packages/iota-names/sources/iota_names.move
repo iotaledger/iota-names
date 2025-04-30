@@ -203,6 +203,7 @@ public(package) fun pkg_registry_mut<R: store>(self: &mut IotaNames): &mut R {
 use iota_names::core_config;
 #[test_only]
 use iota_names::pricing_config::{Self, new_range, PricingConfig};
+/// Authorization witness to call protected functions of `iota_names`.
 #[test_only]
 public struct TestAuth has drop {}
 
