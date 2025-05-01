@@ -150,15 +150,15 @@ fun is_valid_label(label: &String): bool {
     let label_bytes = label.as_bytes();
     let mut index = 0;
 
-    if (!(len >= MIN_LABEL_LENGTH && len <= MAX_LABEL_LENGTH)) {
+    if (len < MIN_LABEL_LENGTH || len > MAX_LABEL_LENGTH) {
         return false
     };
 
     while (index < len) {
         let character = label_bytes[index];
         let is_valid_character =
-            (0x61 <= character && character <= 0x7A)                   // a-z
-                || (0x30 <= character && character <= 0x39)                // 0-9
+            (0x61 <= character && character <= 0x7A)                      // a-z
+                || (0x30 <= character && character <= 0x39)               // 0-9
                 || (character == 0x2D && index != 0 && index != len - 1); // '-' not at beginning or end
 
         if (!is_valid_character) {
@@ -253,11 +253,13 @@ fun expect_valid_label(label: vector<u8>, is_valid: bool) {
 #[test]
 fun test_valid_labels() {
     expect_valid_label(b"", false);
-    expect_valid_label(b"-", false);
+    expect_valid_label(b"0000000000000000000000000000000000000000000000000000000000000000", false);
+    
+    expect_valid_label(b"abcdefghijklmnopqrstuvxyz-0123456789", true);
+
     expect_valid_label(b"-aaa", false);
     expect_valid_label(b"aaa-", false);
-    expect_valid_label(b"a-a", true);
-    expect_valid_label(b"abcdefghijklmnopqrstuvxyz-0123456789", true);
+    expect_valid_label(b"a&a", false);
 }
 
 #[test_only]
