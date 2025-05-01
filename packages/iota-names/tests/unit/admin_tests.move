@@ -95,7 +95,7 @@ fun register_multiple() {
         
         registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
 
-        iota_names::authorize_app_for_testing<Admin>(&mut iota_names);
+        iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         admin::reserve_domains(
             &admin_cap,
