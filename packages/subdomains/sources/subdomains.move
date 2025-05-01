@@ -367,7 +367,7 @@ fun registry(iota_names: &IotaNames): &Registry {
 }
 
 fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    iota_names::auth_registry_mut<Subdomains, Registry>(Subdomains {}, iota_names)
+    iota_names::auth_registry_mut<SubdomainsAuth, Registry>(SubdomainsAuth {}, iota_names)
 }
 
 fun app_config(iota_names: &IotaNames): &SubdomainConfig {
@@ -375,6 +375,6 @@ fun app_config(iota_names: &IotaNames): &SubdomainConfig {
 }
 
 #[test_only]
-public fun auth_for_testing(): Subdomains {
-    Subdomains {}
+public fun auth_for_testing(): SubdomainsAuth {
+    SubdomainsAuth {}
 }
