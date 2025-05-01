@@ -12,6 +12,8 @@ module iota_names::domain;
 use std::string::{Self, String, utf8};
 
 #[error]
+const EMaximumDomainLengthExceeded: vector<u8> = b"Maximum domain length exceeded.";
+#[error]
 const EInvalidDomain: vector<u8> = b"Invalid domain.";
 
 /// The maximum length of a full domain
@@ -34,7 +36,7 @@ public struct Domain has copy, drop, store {
 
 // Construct a `Domain` by parsing and validating the provided string
 public fun new(domain: String): Domain {
-    assert!(domain.length() <= MAX_DOMAIN_LENGTH, EInvalidDomain);
+    assert!(domain.length() <= MAX_DOMAIN_LENGTH, EMaximumDomainLengthExceeded);
 
     let mut labels = split_by_dot(domain);
     validate_labels(&labels);
@@ -343,4 +345,10 @@ fun derive_parent() {
     let child = new(utf8(b"child.parent.iota"));
 
     assert!(parent(&child).extract() == parent, 0);
+}
+
+#[test, expected_failure(abort_code = EMaximumDomainLengthExceeded)]
+fun maximum_domain_length_exceeded() {
+    let name = utf8(b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.iota");
+    let _domain = new(name);
 }
