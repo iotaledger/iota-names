@@ -346,7 +346,8 @@ fun derive_parent() {
     let parent = new(utf8(b"parent.iota"));
     let child = new(utf8(b"child.parent.iota"));
 
-    assert!(parent(&child).extract() == parent, 0);
+    assert_eq(parent(&parent), option::none());
+    assert_eq(parent(&child), option::some(parent));
 }
 
 #[test, expected_failure(abort_code = EMaximumDomainLengthExceeded)]
