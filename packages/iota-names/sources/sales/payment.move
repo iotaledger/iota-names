@@ -61,7 +61,7 @@ public struct RequestData has drop {
     years: u8,
     /// The amount the user has to pay in base units.
     base_amount: u64,
-    /// a metadata field for future-proofness.
+    /// A metadata field for future-proofness.
     /// No use-cases are enabled in the current release.
     metadata: VecMap<String, String>,
 }

@@ -19,6 +19,7 @@ use iota_names::payment::{Self, PaymentIntent, Receipt};
 use iota_names::pricing_config::{Self, PricingConfig};
 use iota_names::registry::{Self, Registry};
 
+/// Authorization witness to call protected functions of `iota_names`.
 public struct PaymentsAuth() has drop;
 
 #[test]
