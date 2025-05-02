@@ -18,7 +18,7 @@ use iota_names::registry_tests::burn_nfts;
 use iota_names::subdomain_registration::{Self, SubdomainRegistration};
 use std::string::{String, utf8};
 use subdomains::config;
-use subdomains::subdomains::{Self, Subdomains};
+use subdomains::subdomains::{Self, SubdomainsAuth};
 
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;
@@ -259,7 +259,7 @@ public fun test_init(): Scenario {
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(ctx(scenario));
-        iota_names::authorize_app_for_testing<Subdomains>(&mut iota_names);
+        iota_names::authorize_for_testing<SubdomainsAuth>(&mut iota_names);
         iota_names::share_for_testing(iota_names);
         let clock = clock::create_for_testing(ctx(scenario));
         clock::share_for_testing(clock);
@@ -281,7 +281,7 @@ public fun test_init(): Scenario {
 
 /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
 public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    let registry_mut = iota_names::app_registry_mut<Subdomains, Registry>(
+    let registry_mut = iota_names::auth_registry_mut<SubdomainsAuth, Registry>(
         subdomains::auth_for_testing(),
         iota_names,
     );

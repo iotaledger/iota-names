@@ -51,23 +51,24 @@ fun registry_management() {
 
 // === Application Auth ===
 
-public struct TestApp has drop {}
+/// Authorization witness to call protected functions of `iota_names`.
+public struct TestAuth has drop {}
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
 /// Only authorized applications can add balance to IotaNames.
-fun app_add_to_balance_fail() {
+fun auth_add_to_balance_fail() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, _cap) = iota_names::new_for_testing(&mut ctx);
-    iota_names.app_add_balance<TestApp, IOTA>(TestApp {}, balance::zero());
+    iota_names.auth_add_balance<TestAuth, IOTA>(TestAuth {}, balance::zero());
     abort 1337
 }
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
 /// Only authorized applications can access the registry mut.
-fun app_registry_mut_fail() {
+fun auth_registry_mut_fail() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, _cap) = iota_names::new_for_testing(&mut ctx);
-    iota_names::app_registry_mut<TestApp, TestRegistry>(TestApp {}, &mut iota_names);
+    iota_names::auth_registry_mut<TestAuth, TestRegistry>(TestAuth {}, &mut iota_names);
     abort 1337
 }
 
@@ -75,10 +76,10 @@ fun app_registry_mut_fail() {
 fun balance_and_withdraw() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
-    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+    iota_names::authorize<TestAuth>(&cap, &mut iota_names);
 
     let paid = balance::create_for_testing<IOTA>(1000);
-    iota_names.app_add_balance<TestApp, IOTA>(TestApp {}, paid);
+    iota_names.auth_add_balance<TestAuth, IOTA>(TestAuth {}, paid);
 
     let withdrawn = iota_names.withdraw<IOTA>(&cap, &mut ctx);
     assert_eq(coin::burn_for_testing(withdrawn), 1000);
@@ -87,15 +88,15 @@ fun balance_and_withdraw() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
-/// 1. Authorize TestApp and add to balance;
+/// 1. Authorize TestAuth and add to balance;
 /// 2. Admin tries to withdraw an empty balance (other coin).
 fun balance_and_withdraw_fail_no_profits_in_type() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
-    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+    iota_names::authorize<TestAuth>(&cap, &mut iota_names);
 
     let paid = balance::create_for_testing<IOTA>(1000);
-    iota_names.app_add_balance<TestApp, IOTA>(TestApp {}, paid);
+    iota_names.auth_add_balance<TestAuth, IOTA>(TestAuth {}, paid);
     let _withdrawn = iota_names.withdraw<USDC>(&cap, &mut ctx);
 
     abort 1337
@@ -112,16 +113,16 @@ fun balance_and_withdraw_fail_no_profits() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::ENoProfitsInCoinType)]
-/// 1. Authorize TestApp and add 0 balance;
+/// 1. Authorize TestAuth and add 0 balance;
 /// 2. Admin tries to withdraw from 0 balance.
 fun balance_and_withdraw_fail_no_profits2() {
     let mut ctx = tx_context::dummy();
     let (mut iota_names, cap) = iota_names::new_for_testing(&mut ctx);
-    iota_names::authorize_app<TestApp>(&cap, &mut iota_names);
+    iota_names::authorize<TestAuth>(&cap, &mut iota_names);
 
     // Add 0 balance
     let paid = balance::create_for_testing<IOTA>(0);
-    iota_names.app_add_balance<TestApp, IOTA>(TestApp {}, paid);
+    iota_names.auth_add_balance<TestAuth, IOTA>(TestAuth {}, paid);
 
     let _withdrawn = iota_names.withdraw<IOTA>(&cap, &mut ctx);
 

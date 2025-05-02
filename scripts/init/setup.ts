@@ -10,7 +10,7 @@ import {
 	writePackageInfo,
 } from '../package-info/constants';
 import { getActiveAddress, getClient, getCoinMetadataId, signAndExecute } from '../utils/utils';
-import { authorizeApp } from './authorization';
+import { authorize } from './authorization';
 import { Packages } from './packages';
 import { queryRegistryTables } from './queries';
 import { PackageInfo } from './types';
@@ -47,17 +47,17 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 	const txb = new Transaction();
 
 	// authorize admin module
-	authorizeApp({
+	authorize({
 		txb,
 		adminCap: packageInfo.IotaNames.adminCap,
 		iotaNames: packageInfo.IotaNames.iotaNames,
-		type: `${packageInfo.IotaNames.packageId}::admin::Admin`,
+		type: `${packageInfo.IotaNames.packageId}::admin::AdminAuth`,
 		iotaNamesPackageId: packageInfo.IotaNames.packageId,
 	});
 	for (const [key, pkg] of Object.entries(packageInfo)) {
 		const data = packages[key as keyof typeof packages];
 		if (data && 'authorizationType' in data) {
-			authorizeApp({
+			authorize({
 				txb,
 				adminCap: packageInfo.IotaNames.adminCap,
 				iotaNames: packageInfo.IotaNames.iotaNames,

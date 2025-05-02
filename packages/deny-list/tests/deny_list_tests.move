@@ -126,7 +126,7 @@ public fun test_init(): (Scenario) {
 
         let (mut iota_names, cap) = iota_names::new_for_testing(scenario.ctx());
 
-        iota_names.authorize_app_for_testing<DenyListAuth>();
+        iota_names.authorize_for_testing<DenyListAuth>();
 
         deny_list::setup(&mut iota_names, &cap, scenario.ctx());
 

@@ -61,7 +61,7 @@ public struct RequestData has drop {
     years: u8,
     /// The amount the user has to pay in base units.
     base_amount: u64,
-    /// a metadata field for future-proofness.
+    /// A metadata field for future-proofness.
     /// No use-cases are enabled in the current release.
     metadata: VecMap<String, String>,
 }
@@ -110,9 +110,9 @@ public fun finalize_payment<A: drop, T>(
     app: A,
     coin: Coin<T>,
 ): Receipt {
-    iota_names.assert_app_is_authorized<A>();
+    iota_names.assert_is_authorized<A>();
     event::emit(intent.to_event<A, T>(coin.value()));
-    iota_names.app_add_balance(app, coin.into_balance());
+    iota_names.auth_add_balance(app, coin.into_balance());
 
     match (intent) {
         PaymentIntent::Registration(data) => {
