@@ -6,6 +6,7 @@ import { execSync } from 'child_process';
 import { writeFileSync } from 'fs';
 
 import { readPackageInfo } from '../package-info/constants';
+import { getClient } from '../utils/utils';
 
 const network = process.env.NETWORK || 'mainnet';
 
@@ -14,10 +15,15 @@ const network = process.env.NETWORK || 'mainnet';
 // Github actions are always on mainnet.
 const mainPackageUpgrade = async () => {
     const packageInfo = readPackageInfo(network);
-    const gasObjectId = process.env.GAS_OBJECT;
+    let client = getClient(network);
+    let gasCoinsPage = await client.getCoins({ owner: packageInfo.adminAddress });
+    const gasObjectId = gasCoinsPage.data.find(
+        (coin) => BigInt(coin.balance) >= 2000000000,
+    )?.coinObjectId;
 
     // Enabling the gas Object check only on mainnet, to allow testnet multisig tests.
-    if (!gasObjectId) throw new Error('No gas object supplied for a mainnet transaction');
+    if (!gasObjectId)
+        throw new Error('No gas object with sufficient balance found for a mainnet transaction');
 
     const currentDir = process.cwd();
     const iotaNamesDir = `${currentDir}/../packages/iota-names`;
