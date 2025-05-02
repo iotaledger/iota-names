@@ -8,4 +8,4 @@ IotaNames = { local = "../iota-names" }
 deny_list = { local = "../deny-list" }
 
 [addresses]
-subdomains = "0x0"
+iota_names_subdomains = "0x0"

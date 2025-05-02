@@ -7,4 +7,4 @@ Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-f
 IotaNames = { local = "../iota-names" }
 
 [addresses]
-deny_list = "0x0"
+iota_names_deny_list = "0x0"

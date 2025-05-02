@@ -9,14 +9,14 @@
 /// All validation happens on those functions.
 ///
 /// This package will stop being used when we've implemented references in PTBs.
-module temp_subdomain_proxy::subdomain_proxy;
+module iota_names_temp_subdomain_proxy::subdomain_proxy;
 
 use iota::clock::Clock;
 use iota_names::controller;
 use iota_names::iota_names::IotaNames;
 use iota_names::subdomain_registration::SubdomainRegistration;
 use std::string::String;
-use subdomains::subdomains;
+use iota_names_subdomains::subdomains;
 
 /// Struct to authenticate this module in the IOTA-Names object, so it can be fetched dynamically by the CLI.
 /// It's not required for the functionality of this module.

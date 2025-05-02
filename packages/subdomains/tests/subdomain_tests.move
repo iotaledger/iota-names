@@ -4,9 +4,9 @@
 
 #[test_only]
 #[allow(lint(abort_without_constant))]
-module subdomains::subdomain_tests;
+module iota_names_subdomains::subdomain_tests;
 
-use deny_list::deny_list;
+use iota_names_deny_list::deny_list;
 use iota::clock::{Self, Clock};
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iota_names::constants::{grace_period_ms, year_ms};
@@ -17,8 +17,8 @@ use iota_names::registry::{Self, Registry};
 use iota_names::registry_tests::burn_nfts;
 use iota_names::subdomain_registration::{Self, SubdomainRegistration};
 use std::string::{String, utf8};
-use subdomains::config;
-use subdomains::subdomains::{Self, SubdomainsAuth};
+use iota_names_subdomains::config;
+use iota_names_subdomains::subdomains::{Self, SubdomainsAuth};
 
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;
@@ -84,7 +84,7 @@ fun test_multiple_operation_cases() {
     ts::end(scenario_val);
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::EInvalidExpirationDate)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
 fun expiration_past_parents_expiration() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -102,7 +102,7 @@ fun expiration_past_parents_expiration() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::config::EInvalidParent)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::config::EInvalidParent)]
 /// tries to create a child node using an invalid parent.
 fun invalid_parent_failure() {
     let mut scenario_val = test_init();
@@ -121,7 +121,7 @@ fun invalid_parent_failure() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::ECreationDisabledForSubdomain)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::ECreationDisabledForSubdomain)]
 fun tries_to_create_subdomain_with_disallowed_node_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -149,7 +149,7 @@ fun tries_to_create_subdomain_with_disallowed_node_parent() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::EExtensionDisabledForSubdomain)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EExtensionDisabledForSubdomain)]
 fun tries_to_extend_without_permissions() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -169,7 +169,7 @@ fun tries_to_extend_without_permissions() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::EParentChanged)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EParentChanged)]
 fun tries_to_extend_while_parent_changed() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -224,7 +224,7 @@ fun tries_to_use_expired_subdomain_to_create_new() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::subdomains::EInvalidExpirationDate)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
 fun tries_to_create_too_short_subdomain() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -242,7 +242,7 @@ fun tries_to_create_too_short_subdomain() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::subdomains::config::EInvalidParent)]
+#[test, expected_failure(abort_code = ::iota_names_subdomains::config::EInvalidParent)]
 fun tries_to_created_nested_leaf_subdomain() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;

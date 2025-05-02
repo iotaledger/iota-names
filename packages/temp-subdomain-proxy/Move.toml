@@ -8,4 +8,4 @@ Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-f
 subdomains = { local = "../subdomains" }
 
 [addresses]
-temp_subdomain_proxy = "0x0"
+iota_names_temp_subdomain_proxy = "0x0"

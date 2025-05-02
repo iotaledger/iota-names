@@ -23,9 +23,9 @@
 /// 2. For any `registry_mut` call, we know that if this module is not authorized, we'll get an abort
 /// from the core IotaNames package.
 ///
-module subdomains::subdomains;
+module iota_names_subdomains::subdomains;
 
-use deny_list::deny_list;
+use iota_names_deny_list::deny_list;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::vec_map::VecMap;
@@ -36,7 +36,7 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
 use iota_names::subdomain_registration::SubdomainRegistration;
 use std::string::{String, utf8};
-use subdomains::config::{Self, SubdomainConfig};
+use iota_names_subdomains::config::{Self, SubdomainConfig};
 
 #[error]
 const EInvalidExpirationDate: vector<u8> =

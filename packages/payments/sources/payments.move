@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module payments::payments;
+module iota_names_payments::payments;
 
 use iota::coin::{Coin, CoinMetadata};
 use iota::vec_map::{Self, VecMap};

@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module deny_list::deny_list;
+module iota_names_deny_list::deny_list;
 
 use iota::table::{Self, Table};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};

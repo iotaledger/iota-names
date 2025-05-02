@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Implementation of auction module.
-module auction::auction;
+module iota_names_auction::auction;
 
 use iota::balance::{Self, Balance};
 use iota::clock::Clock;
