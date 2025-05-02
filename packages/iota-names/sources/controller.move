@@ -22,7 +22,7 @@ use fun registry_mut as IotaNames.registry_mut;
 const EUnsupportedKey: vector<u8> = b"Unsupported key.";
 
 /// Authorization witness to call protected functions of `iota_names`.
-public struct ControllerAuth() has drop;
+public struct ControllerAuth has drop {}
 
 /// Set the target address of a domain.
 public fun set_target_address(
@@ -126,5 +126,5 @@ public fun burn_expired_subname(
 
 /// Get a mutable reference to the registry, if the app is authorized.
 fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    iota_names::auth_registry_mut<_, Registry>(ControllerAuth(), iota_names)
+    iota_names::auth_registry_mut<_, Registry>(ControllerAuth {}, iota_names)
 }

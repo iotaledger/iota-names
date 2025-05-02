@@ -11,7 +11,7 @@ use iota_names::payment::{Receipt, PaymentIntent};
 use std::type_name::{Self, TypeName};
 
 /// Authorization witness to call protected functions of `iota_names`.
-public struct PaymentsAuth() has drop;
+public struct PaymentsAuth has drop {}
 
 #[error]
 const EBaseCurrencySetupMissing: vector<u8> = b"Setup for the base currency is missing.";
@@ -52,7 +52,7 @@ public fun handle_base_payment<T>(
     let price = intent.request_data().base_amount();
     assert!(payment.value() == price, EInsufficientPayment);
 
-    intent.finalize_payment(iota_names, PaymentsAuth(), payment)
+    intent.finalize_payment(iota_names, PaymentsAuth {}, payment)
 }
 
 /// Creates a new CoinTypeData struct.

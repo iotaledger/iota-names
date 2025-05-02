@@ -20,7 +20,7 @@ use subdomains::subdomains;
 
 /// Struct to authenticate this module in the IOTA-Names object, so it can be fetched dynamically by the CLI.
 /// It's not required for the functionality of this module.
-public struct SubdomainProxyAuth() has drop;
+public struct SubdomainProxyAuth has drop {}
 
 public fun new(
     iota_names: &mut IotaNames,

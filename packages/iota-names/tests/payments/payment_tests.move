@@ -20,7 +20,7 @@ use iota_names::pricing_config::{Self, PricingConfig};
 use iota_names::registry::{Self, Registry};
 
 /// Authorization witness to call protected functions of `iota_names`.
-public struct PaymentsAuth() has drop;
+public struct PaymentsAuth has drop {}
 
 #[test]
 fun test_e2e() {
@@ -314,7 +314,7 @@ fun handle_payment(
     let amount = intent.request_data().base_amount();
     let coin = coin::mint_for_testing<IOTA>(amount, ctx);
 
-    intent.finalize_payment(iota_names, PaymentsAuth(), coin)
+    intent.finalize_payment(iota_names, PaymentsAuth {}, coin)
 }
 
 fun test_pricing_config(renewal: bool): PricingConfig {
