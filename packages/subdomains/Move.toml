@@ -1,11 +1,11 @@
 [package]
-name = "subdomains"
+name = "iota_names_subdomains"
 edition = "2024"
 
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet", override = true }
-IotaNames = { local = "../iota-names" }
-deny_list = { local = "../deny-list" }
+iota_names = { local = "../iota-names" }
+iota_names_deny_list = { local = "../deny-list" }
 
 [addresses]
 iota_names_subdomains = "0x0"
