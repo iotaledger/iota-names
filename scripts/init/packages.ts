@@ -144,13 +144,13 @@ export const Packages = (network: string) => {
 					subdomainsPackageId: packageId,
 				});
 			},
-			authorizationType: (packageId: string) => `${packageId}::controller::Controller`, // Authorize the iotaNames controller
+			authorizationType: (packageId: string) => `${packageId}::controller::ControllerAuth`, // Authorize the iotaNames controller
 		},
 		Auction: {
 			order: 2,
 			folder: 'auction',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-			authorizationType: (packageId: string) => `${packageId}::auction::App`,
+			authorizationType: (packageId: string) => `${packageId}::auction::AuctionAuth`,
 		},
 		DenyList: {
 			order: 2,
@@ -165,7 +165,7 @@ export const Packages = (network: string) => {
 			order: 2,
 			folder: 'payments',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsApp`,
+			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsAuth`,
 			setupFunction: ({
 				txb,
 				packageId,
@@ -218,7 +218,7 @@ export const Packages = (network: string) => {
 					type: `${packageId}::config::SubdomainConfig`,
 				});
 			},
-			authorizationType: (packageId: string) => `${packageId}::subdomains::Subdomains`,
+			authorizationType: (packageId: string) => `${packageId}::subdomains::SubdomainsAuth`,
 		},
 		TempSubdomainProxy: {
 			order: 3,
