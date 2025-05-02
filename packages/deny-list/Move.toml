@@ -1,10 +1,10 @@
 [package]
-name = "deny_list"
+name = "iota_names_deny_list"
 edition = "2024"
 
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet", override = true }
-IotaNames = { local = "../iota-names" }
+iota_names = { local = "../iota-names" }
 
 [addresses]
-deny_list = "0x0"
+iota_names_deny_list = "0x0"
