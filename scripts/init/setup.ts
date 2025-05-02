@@ -51,7 +51,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 		txb,
 		adminCap: packageInfo.IotaNames.adminCap,
 		iotaNames: packageInfo.IotaNames.iotaNames,
-		type: `${packageInfo.IotaNames.packageId}::admin::Admin`,
+		type: `${packageInfo.IotaNames.packageId}::admin::AdminAuth`,
 		iotaNamesPackageId: packageInfo.IotaNames.packageId,
 	});
 	for (const [key, pkg] of Object.entries(packageInfo)) {
