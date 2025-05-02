@@ -224,6 +224,7 @@ export const Packages = (network: string) => {
 			order: 3,
 			folder: 'temp-subdomain-proxy',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
+			authorizationType: (packageId: string) => `${packageId}::subdomain_proxy::SubdomainProxyAuth`,
 		},
 	};
 };
