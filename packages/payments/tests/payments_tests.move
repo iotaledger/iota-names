@@ -139,13 +139,13 @@ fun test_add_payment_config() {
     let usdc_type_data = new_coin_type_data<TESTUSDC>(
         &usdc_metadata,
     );
-    let ns_metadata = test.take_from_sender<CoinMetadata<TESTCOIN>>();
-    let ns_type_data = new_coin_type_data<TESTCOIN>(
-        &ns_metadata,
+    let test_coin_metadata = test.take_from_sender<CoinMetadata<TESTCOIN>>();
+    let test_coin_type_data = new_coin_type_data<TESTCOIN>(
+        &test_coin_metadata,
     );
     let mut setups = vector[];
     setups.push_back(usdc_type_data);
-    setups.push_back(ns_type_data);
+    setups.push_back(test_coin_type_data);
 
     let config = new_payments_config(
         setups,
@@ -168,7 +168,7 @@ fun test_add_payment_config() {
     );
 
     test.return_to_sender(usdc_metadata);
-    test.return_to_sender(ns_metadata);
+    test.return_to_sender(test_coin_metadata);
 
     destroy(receipt);
     destroy(admin_cap);
