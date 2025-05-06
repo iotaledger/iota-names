@@ -10,7 +10,7 @@ module.exports = {
 	],
 	settings: {
 		react: {
-			version: '19',
+			version: '18',
 		},
 		'import/resolver': {
 			typescript: true,
