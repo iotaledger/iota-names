@@ -1,15 +1,12 @@
-// Copyright (c) Mysten Labs, Inc.
-// Modifications Copyright (c) 2025 IOTA Stiftung
-// SPDX-License-Identifier: Apache-2.0
-
 module.exports = {
-	plugins: ['unused-imports', 'prettier', 'require-extensions'],
+	plugins: ['@tanstack/query', 'unused-imports', 'prettier', 'header', 'require-extensions'],
 	extends: [
-		'react-app',
 		'eslint:recommended',
+		'plugin:@tanstack/eslint-plugin-query/recommended',
 		'prettier',
 		'plugin:prettier/recommended',
 		'plugin:import/typescript',
+		'plugin:@typescript-eslint/recommended',
 	],
 	settings: {
 		react: {
@@ -22,20 +19,28 @@ module.exports = {
 	env: {
 		es2020: true,
 	},
-	root: false,
+	root: true,
 	ignorePatterns: [
-		'node_modules',
-		'build',
-		'dist',
 		'coverage',
 		'apps/icons/src',
 		'next-env.d.ts',
 		'doc/book',
 		'external-crates',
 		'storybook-static',
-		'.next',
-		'documentation',
-		'packages',
+		'**/*.config.js',
+		'**/*.config.ts',
+		'**/preprocess.mjs',
+		'**/storybook-static',
+		'**/node_modules',
+		'**/build',
+		'**/dist/',
+		'**/.next/',
+		'**/.swc/',
+		'**/out/',
+		'**/*.md',
+		'**/*.mdx',
+		'**/*.yml',
+		'**/*.yaml',
 	],
 	rules: {
 		'no-case-declarations': 'off',
@@ -57,7 +62,7 @@ module.exports = {
 				message: 'Buffer usage increases bundle size and is not consistently implemented on web.',
 			},
 		],
-		'unused-imports/no-unused-imports': [
+		'@typescript-eslint/no-unused-vars': [
 			'error',
 			{
 				argsIgnorePattern: '^_',
@@ -67,9 +72,5 @@ module.exports = {
 				ignoreRestSiblings: true,
 			},
 		],
-	},
-	parserOptions: {
-		ecmaVersion: 2020,
-		sourceType: 'module',
 	},
 };
