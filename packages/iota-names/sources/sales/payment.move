@@ -17,8 +17,6 @@
 /// useful for system-level discounts, or user-specific discounts.
 module iota_names::payment;
 
-use std::string::String;
-use std::type_name::{Self, TypeName};
 use iota::clock::Clock;
 use iota::coin::Coin;
 use iota::event;
@@ -26,10 +24,12 @@ use iota::vec_map::{Self, VecMap};
 use iota_names::constants;
 use iota_names::core_config::CoreConfig;
 use iota_names::domain::{Self, Domain};
-use iota_names::pricing_config::{PricingConfig, RenewalConfig};
-use iota_names::registry::Registry;
 use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::{PricingConfig, RenewalConfig};
+use iota_names::registry::Registry;
+use std::string::String;
+use std::type_name::{Self, TypeName};
 
 #[error]
 const ENotSupportedType: vector<u8> =
@@ -61,7 +61,7 @@ public struct RequestData has drop {
     years: u8,
     /// The amount the user has to pay in base units.
     base_amount: u64,
-    /// a metadata field for future-proofness.
+    /// A metadata field for future-proofness.
     /// No use-cases are enabled in the current release.
     metadata: VecMap<String, String>,
 }
@@ -110,9 +110,9 @@ public fun finalize_payment<A: drop, T>(
     app: A,
     coin: Coin<T>,
 ): Receipt {
-    iota_names.assert_app_is_authorized<A>();
+    iota_names.assert_is_authorized<A>();
     event::emit(intent.to_event<A, T>(coin.value()));
-    iota_names.app_add_balance(app, coin.into_balance());
+    iota_names.auth_add_balance(app, coin.into_balance());
 
     match (intent) {
         PaymentIntent::Registration(data) => {
@@ -151,7 +151,11 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
 
 /// Creates a `PaymentIntent` for renewing an existing domain.
 /// This is a hot-potato and can only be consumed in a single transaction.
-public fun init_renewal(iota_names: &mut IotaNames, nft: &IotaNamesRegistration, years: u8): PaymentIntent {
+public fun init_renewal(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    years: u8,
+): PaymentIntent {
     let domain = nft.domain();
     assert!(!domain.is_subdomain(), ECannotRenewSubdomain);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);

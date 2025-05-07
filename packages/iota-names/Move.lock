@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "F6927105E396D64DAFE307467E5AD986C0A4845480A9E6E8B9834D69A04DF47A"
+manifest_digest = "98F190D163DFBC1CB48617BE0A3E63B5AD2FB21CEF19870B712C228F8ECBE984"
 deps_digest = "F8BBB0CCB2491CA29A3DF03D6F92277A4F3574266507ACD77214D37ECA3F3082"
 dependencies = [
   { id = "Iota", name = "Iota" },
@@ -24,3 +24,11 @@ source = { git = "https://github.com/iotaledger/iota.git", rev = "framework/test
 compiler-version = "0.12.0-rc"
 edition = "2024"
 flavor = "iota"
+
+[env]
+
+[env.devnet]
+chain-id = "e678123a"
+original-published-id = "0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f"
+latest-published-id = "0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f"
+published-version = "1"

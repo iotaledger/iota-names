@@ -15,7 +15,7 @@ import {
 	newPaymentsConfig,
 	newPriceConfig,
 	newRenewalConfig,
-	setupApp,
+	setup,
 } from './authorization';
 import { createDisplay } from './display-tp';
 
@@ -144,13 +144,13 @@ export const Packages = (network: string) => {
 					subdomainsPackageId: packageId,
 				});
 			},
-			authorizationType: (packageId: string) => `${packageId}::controller::Controller`, // Authorize the iotaNames controller
+			authorizationType: (packageId: string) => `${packageId}::controller::ControllerAuth`, // Authorize the iotaNames controller
 		},
 		Auction: {
 			order: 2,
 			folder: 'auction',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-			authorizationType: (packageId: string) => `${packageId}::auction::App`,
+			authorizationType: (packageId: string) => `${packageId}::auction::AuctionAuth`,
 		},
 		DenyList: {
 			order: 2,
@@ -158,14 +158,14 @@ export const Packages = (network: string) => {
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
 			authorizationType: (packageId: string) => `${packageId}::deny_list::DenyListAuth`,
 			setupFunction: (txb: Transaction, packageId: string, adminCap: string, iotaNames: string) => {
-				setupApp({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
+				setup({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
 			},
 		},
 		Payments: {
 			order: 2,
 			folder: 'payments',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsApp`,
+			authorizationType: (packageId: string) => `${packageId}::payments::PaymentsAuth`,
 			setupFunction: ({
 				txb,
 				packageId,
@@ -218,12 +218,13 @@ export const Packages = (network: string) => {
 					type: `${packageId}::config::SubdomainConfig`,
 				});
 			},
-			authorizationType: (packageId: string) => `${packageId}::subdomains::Subdomains`,
+			authorizationType: (packageId: string) => `${packageId}::subdomains::SubdomainsAuth`,
 		},
 		TempSubdomainProxy: {
 			order: 3,
 			folder: 'temp-subdomain-proxy',
 			processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
+			authorizationType: (packageId: string) => `${packageId}::subdomain_proxy::SubdomainProxyAuth`,
 		},
 	};
 };

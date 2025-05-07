@@ -6,17 +6,17 @@
 /// by the iota_names admin.
 module iota_names::admin;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::core_config::CoreConfig;
 use iota_names::domain;
-use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::registry::Registry;
+use std::string::String;
 
-/// The authorization witness.
-public struct Admin has drop {}
+/// Authorization witness to call protected functions of `iota_names`.
+public struct AdminAuth has drop {}
 
 /// Reserve a `domain` in the `IotaNames`.
 public fun reserve_domain(
@@ -29,7 +29,7 @@ public fun reserve_domain(
 ): IotaNamesRegistration {
     let domain = domain::new(domain_name);
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
-    let registry = iota_names::app_registry_mut<Admin, Registry>(Admin {}, iota_names);
+    let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     registry.add_record(domain, no_years, clock, ctx)
 }
 
@@ -44,7 +44,7 @@ entry fun reserve_domains(
 ) {
     let sender = sender(ctx);
     let config = *iota_names.get_config<CoreConfig>();
-    let registry = iota_names::app_registry_mut<Admin, Registry>(Admin {}, iota_names);
+    let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     while (!domains.is_empty()) {
         let domain = domain::new(domains.pop_back());
         config.assert_is_valid_for_sale(&domain);

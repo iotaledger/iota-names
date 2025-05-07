@@ -5,23 +5,23 @@
 #[test_only]
 module iota_names::register;
 
-use std::string::String;
 use iota::clock::Clock;
 use iota::coin::Coin;
 use iota_names::core_config::CoreConfig;
 use iota_names::domain;
-use iota_names::pricing_config::PricingConfig;
-use iota_names::registry::Registry;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::pricing_config::PricingConfig;
+use iota_names::registry::Registry;
+use std::string::String;
 
 #[error]
 const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within allowed interval.";
 #[error]
 const EIncorrectAmount: vector<u8> = b"The payment does not match the price for the domain.";
 
-/// Authorization token for the app.
-public struct Register has drop {}
+/// Authorization witness to call protected functions of `iota_names`.
+public struct RegisterAuth has drop {}
 
 // Allows direct purchases of domains
 //
@@ -38,7 +38,7 @@ public fun register<T>(
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
-    iota_names.assert_app_is_authorized<Register>();
+    iota_names.assert_is_authorized<RegisterAuth>();
 
     let config = iota_names.get_config<PricingConfig>();
     // If no PricingConfig of type T, add an error code
@@ -52,9 +52,9 @@ public fun register<T>(
     let price = config.calculate_base_price(label.length()) * (no_years as u64);
     assert!(payment.value() == price, EIncorrectAmount);
 
-    iota_names.app_add_balance<_, T>(Register {}, payment.into_balance());
-    let registry = iota_names::app_registry_mut<Register, Registry>(
-        Register {},
+    iota_names.auth_add_balance<_, T>(RegisterAuth {}, payment.into_balance());
+    let registry = iota_names::auth_registry_mut<RegisterAuth, Registry>(
+        RegisterAuth {},
         iota_names,
     );
     registry.add_record(domain, no_years, clock, ctx)

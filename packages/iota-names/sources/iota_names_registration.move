@@ -14,10 +14,10 @@
 ///
 module iota_names::iota_names_registration;
 
-use std::string::String;
 use iota::clock::{timestamp_ms, Clock};
 use iota_names::constants;
 use iota_names::domain::Domain;
+use std::string::String;
 
 /* friend iota_names::registry; */
 
@@ -30,8 +30,6 @@ public struct IotaNamesRegistration has key, store {
     domain_name: String,
     /// Timestamp in milliseconds when this NFT expires.
     expiration_timestamp_ms: u64,
-    /// Short IPFS hash of the image to be displayed for the NFT.
-    image_url: String,
 }
 
 // === Protected methods ===
@@ -49,7 +47,6 @@ public(package) fun new(
         domain_name: domain.to_string(),
         domain,
         expiration_timestamp_ms: timestamp_ms(clock) + ((no_years as u64) * constants::year_ms()),
-        image_url: constants::default_image(),
     }
 }
 
@@ -61,22 +58,12 @@ public(package) fun set_expiration_timestamp_ms(
     self.expiration_timestamp_ms = expiration_timestamp_ms;
 }
 
-/// Updates the `image_url` field for this NFT. Is only called in the
-/// `update_image` for now.
-public(package) fun update_image_url(
-    self: &mut IotaNamesRegistration,
-    image_url: String,
-) {
-    self.image_url = image_url;
-}
-
 /// Destroys the `IotaNamesRegistration` by deleting it from the store, returning
 /// storage rebates to the caller.
 /// Can only be called by the `registry` module.
 public(package) fun burn(self: IotaNamesRegistration) {
     let IotaNamesRegistration {
         id,
-        image_url: _,
         domain: _,
         domain_name: _,
         expiration_timestamp_ms: _,
@@ -96,10 +83,7 @@ public fun has_expired(self: &IotaNamesRegistration, clock: &Clock): bool {
 /// Check whether the `IotaNamesRegistration` has expired by comparing the
 /// expiration timeout with the current time. This function also takes into
 /// account the grace period.
-public fun has_expired_past_grace_period(
-    self: &IotaNamesRegistration,
-    clock: &Clock,
-): bool {
+public fun has_expired_past_grace_period(self: &IotaNamesRegistration, clock: &Clock): bool {
     (self.expiration_timestamp_ms + constants::grace_period_ms()) < timestamp_ms(clock)
 }
 
@@ -115,9 +99,6 @@ public fun domain_name(self: &IotaNamesRegistration): String { self.domain_name 
 public fun expiration_timestamp_ms(self: &IotaNamesRegistration): u64 {
     self.expiration_timestamp_ms
 }
-
-/// Get the `image_url` field of the `IotaNamesRegistration`.
-public fun image_url(self: &IotaNamesRegistration): String { self.image_url }
 
 // get a read-only `uid` field of `IotaNamesRegistration`.
 public fun uid(self: &IotaNamesRegistration): &UID { &self.id }
@@ -146,18 +127,9 @@ public fun set_expiration_timestamp_ms_for_testing(
 }
 
 #[test_only]
-public fun update_image_url_for_testing(
-    self: &mut IotaNamesRegistration,
-    image_url: String,
-) {
-    update_image_url(self, image_url);
-}
-
-#[test_only]
 public fun burn_for_testing(nft: IotaNamesRegistration) {
     let IotaNamesRegistration {
         id,
-        image_url: _,
         domain: _,
         domain_name: _,
         expiration_timestamp_ms: _,
