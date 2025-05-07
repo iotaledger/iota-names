@@ -87,7 +87,7 @@ const setupIotaNames = (txb: Transaction) => {
 		txb,
 		adminCap: packageInfo.adminCap,
 		iotaNames: packageInfo.iotaNames,
-		type: `${packageInfo.paymentsPackageId}::payments::PaymentsApp`,
+		type: `${packageInfo.paymentsPackageId}::payments::PaymentsAuth`,
 		iotaNamesPackageId: packageInfo.packageId,
 	});
 	const paymentsConfig = newPaymentsConfig({
