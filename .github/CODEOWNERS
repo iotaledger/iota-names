@@ -7,6 +7,7 @@
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
 /sdk/ @iotaledger/tooling
+/dapp/ @iotaledger/tooling
 
 /.eslintrc.cjs @iotaledger/tooling
 /.prettierignore @iotaledger/tooling
