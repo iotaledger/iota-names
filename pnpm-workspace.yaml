@@ -2,3 +2,4 @@ packages:
   - "sdk"
   - "scripts/**"
   - "documentation/**"
+  - "dapp/**"
