@@ -50,7 +50,7 @@ const setupIotaNames = (txb: Transaction) => {
 				10 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
+		type: `${packageInfo.packageId}::pricing_config::PricingConfig`,
 	});
 	addConfig({
 		txb,
@@ -71,14 +71,14 @@ const setupIotaNames = (txb: Transaction) => {
 				5 * Number(NANOS_PER_IOTA),
 			],
 		}),
-		type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
+		type: `${packageInfo.packageId}::pricing_config::RenewalConfig`,
 	});
 
 	authorize({
 		txb,
 		adminCap: packageInfo.adminCap,
 		iotaNames: packageInfo.iotaNames,
-		type: `${packageInfo.packageIdPricing}::controller::Controller`,
+		type: `${packageInfo.packageId}::controller::Controller`,
 		iotaNamesPackageId: packageInfo.packageId,
 	});
 
