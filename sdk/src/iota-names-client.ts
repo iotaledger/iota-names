@@ -61,10 +61,7 @@ export class IotaNamesClient {
 		const priceList = await this.client.getDynamicFieldObject({
 			parentId: this.config.iotaNames,
 			name: {
-				type: getConfigType(
-					this.config.packageId,
-					getPricelistConfigType(this.config.packageId),
-				),
+				type: getConfigType(this.config.packageId, getPricelistConfigType(this.config.packageId)),
 				value: { dummy_field: false },
 			},
 		});
