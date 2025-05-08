@@ -2,5 +2,5 @@ packages:
   - "sdk"
   - "build-scripts"
   - "scripts/**"
-  - "documentatron/**"
+  - "documentation/**"
   - "dapp/**"
