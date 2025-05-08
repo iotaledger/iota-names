@@ -5,25 +5,25 @@
 import { IotaClient } from '@iota/iota-sdk/client';
 
 export const queryRegistryTables = async (
-	client: IotaClient,
-	iotaNames: string,
-	iotaNamesPackageId: string,
+    client: IotaClient,
+    iotaNames: string,
+    iotaNamesPackageId: string,
 ) => {
-	const table = await client.getDynamicFieldObject({
-		parentId: iotaNames,
-		name: {
-			type: `${iotaNamesPackageId}::iota_names::RegistryKey<${iotaNamesPackageId}::registry::Registry>`,
-			value: {
-				dummy_field: false,
-			},
-		},
-	});
+    const table = await client.getDynamicFieldObject({
+        parentId: iotaNames,
+        name: {
+            type: `${iotaNamesPackageId}::iota_names::RegistryKey<${iotaNamesPackageId}::registry::Registry>`,
+            value: {
+                dummy_field: false,
+            },
+        },
+    });
 
-	if (table.data?.content?.dataType !== 'moveObject')
-		throw new Error(`Invalid data ${iotaNamesPackageId}`);
+    if (table.data?.content?.dataType !== 'moveObject')
+        throw new Error(`Invalid data ${iotaNamesPackageId}`);
 
-	const data = table.data?.content.fields as Record<string, any>;
-	let registryTableId = data.value.fields.registry.fields.id.id;
-	let reverseRegistryTableId = data.value.fields.reverse_registry.fields.id.id;
-	return { registryTableId, reverseRegistryTableId };
+    const data = table.data?.content.fields as Record<string, any>;
+    let registryTableId = data.value.fields.registry.fields.id.id;
+    let reverseRegistryTableId = data.value.fields.reverse_registry.fields.id.id;
+    return { registryTableId, reverseRegistryTableId };
 };

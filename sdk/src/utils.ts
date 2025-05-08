@@ -9,29 +9,29 @@ const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
 const MAX_LENGTH = 235;
 
 export function isValidIotaName(name: string): boolean {
-	if (name.length > MAX_LENGTH) {
-		return false;
-	}
+    if (name.length > MAX_LENGTH) {
+        return false;
+    }
 
-	return NAME_REGEX.test(name) || DOMAIN_REGEX.test(name);
+    return NAME_REGEX.test(name) || DOMAIN_REGEX.test(name);
 }
 
 export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): string {
-	const lowerCase = name.toLowerCase();
-	let parts;
+    const lowerCase = name.toLowerCase();
+    let parts;
 
-	if (NAME_REGEX.test(lowerCase)) {
-		let [path, domain] = lowerCase.split('@');
-		parts = [...(path ? path.split('.') : []), domain];
-	} else if (DOMAIN_REGEX.test(lowerCase)) {
-		parts = lowerCase.split('.').slice(0, -1);
-	} else {
-		throw new Error(`Invalid IOTA name "${name}"`);
-	}
+    if (NAME_REGEX.test(lowerCase)) {
+        let [path, domain] = lowerCase.split('@');
+        parts = [...(path ? path.split('.') : []), domain];
+    } else if (DOMAIN_REGEX.test(lowerCase)) {
+        parts = lowerCase.split('.').slice(0, -1);
+    } else {
+        throw new Error(`Invalid IOTA name "${name}"`);
+    }
 
-	if (format === 'dot') {
-		return `${parts.join('.')}.iota`;
-	} else {
-		return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
-	}
+    if (format === 'dot') {
+        return `${parts.join('.')}.iota`;
+    } else {
+        return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
+    }
 }
