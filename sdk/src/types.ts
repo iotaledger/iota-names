@@ -4,39 +4,39 @@
 
 import type { IotaClient } from '@iota/iota-sdk/client';
 import type {
-	TransactionObjectArgument,
-	TransactionObjectInput,
+    TransactionObjectArgument,
+    TransactionObjectInput,
 } from '@iota/iota-sdk/transactions';
 
 // Interfaces
 // -----------------
 
 export interface CoinConfig {
-	type: string;
+    type: string;
 }
 
 export interface PackageInfo {
-	auctionPackageId: string;
-	packageId: string;
-	iotaNames: string;
-	subNamesPackageId: string;
-	tempSubdomainsProxyPackageId: string;
-	payments: {
-		packageId: string;
-	};
-	registryTableId?: string;
-	reverseRegistryTableId?: string;
-	coins: Record<string, CoinConfig>;
+    auctionPackageId: string;
+    packageId: string;
+    iotaNames: string;
+    subNamesPackageId: string;
+    tempSubdomainsProxyPackageId: string;
+    payments: {
+        packageId: string;
+    };
+    registryTableId?: string;
+    reverseRegistryTableId?: string;
+    coins: Record<string, CoinConfig>;
 }
 
 export interface NameRecord {
-	name: string;
-	nftId: string;
-	targetAddress: string;
-	expirationTimestampMs: number;
-	data: Record<string, string>;
-	avatar?: string;
-	contentHash?: string;
+    name: string;
+    nftId: string;
+    targetAddress: string;
+    expirationTimestampMs: number;
+    data: Record<string, string>;
+    avatar?: string;
+    contentHash?: string;
 }
 
 // Types
@@ -45,38 +45,38 @@ export interface NameRecord {
 export type Network = 'mainnet' | 'testnet' | 'devnet' | 'custom';
 
 export type VersionedPackageId = {
-	latest: string;
-	v1: string;
-	[key: string]: string;
+    latest: string;
+    v1: string;
+    [key: string]: string;
 };
 
 export type Config = Record<'mainnet' | 'testnet' | 'devnet', PackageInfo>;
 
 export type BaseParams = {
-	years: number;
-	coinConfig?: CoinConfig;
-	coin: TransactionObjectInput;
+    years: number;
+    coinConfig?: CoinConfig;
+    coin: TransactionObjectInput;
 };
 
 export type RegistrationParams = BaseParams & {
-	domain: string;
+    domain: string;
 };
 
 export type RenewalParams = BaseParams & {
-	nft: TransactionObjectInput;
+    nft: TransactionObjectInput;
 };
 
 export type ReceiptParams = {
-	paymentIntent: TransactionObjectArgument;
-	price: TransactionObjectArgument;
-	coinConfig: CoinConfig;
-	coin: TransactionObjectInput;
+    paymentIntent: TransactionObjectArgument;
+    price: TransactionObjectArgument;
+    coinConfig: CoinConfig;
+    coin: TransactionObjectInput;
 };
 
 export type IotaNamesClientConfig = {
-	client: IotaClient;
-	network?: Network;
-	config?: Config;
+    client: IotaClient;
+    network?: Network;
+    config?: Config;
 };
 
 export type IotaNamesPriceList = Map<[number, number], number>;

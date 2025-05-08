@@ -7,7 +7,7 @@ import type { Transaction } from '@iota/iota-sdk/transactions';
 import { normalizeIotaName } from './utils';
 
 export function isSubName(name: string): boolean {
-	return normalizeIotaName(name, 'dot').split('.').length > 2;
+    return normalizeIotaName(name, 'dot').split('.').length > 2;
 }
 
 /**
@@ -16,35 +16,35 @@ export function isSubName(name: string): boolean {
  * @param name The name to check (e.g test.example.sub.iota)
  */
 export function isNestedSubName(name: string): boolean {
-	return normalizeIotaName(name, 'dot').split('.').length > 3;
+    return normalizeIotaName(name, 'dot').split('.').length > 3;
 }
 
 /**
  * The years must be between 1 and 5.
  */
 export function validateYears(years: number) {
-	if (!(years > 0 && years < 6)) throw new Error('Years must be between 1 and 5');
+    if (!(years > 0 && years < 6)) throw new Error('Years must be between 1 and 5');
 }
 
 export function zeroCoin(tx: Transaction, type: string) {
-	return tx.moveCall({
-		target: '0x2::coin::zero',
-		typeArguments: [type],
-	});
+    return tx.moveCall({
+        target: '0x2::coin::zero',
+        typeArguments: [type],
+    });
 }
 
 export function getConfigType(iotaNamesPackageV1: string, innerType: string): string {
-	return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
+    return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 }
 
 export function getDomainType(iotaNamesPackageV1: string): string {
-	return `${iotaNamesPackageV1}::domain::Domain`;
+    return `${iotaNamesPackageV1}::domain::Domain`;
 }
 
 export function getPricelistConfigType(iotaNamesPackageId: string): string {
-	return `${iotaNamesPackageId}::pricing_config::PricingConfig`;
+    return `${iotaNamesPackageId}::pricing_config::PricingConfig`;
 }
 
 export function getRenewalPricelistConfigType(iotaNamesPackageId: string): string {
-	return `${iotaNamesPackageId}::pricing_config::RenewalConfig`;
+    return `${iotaNamesPackageId}::pricing_config::RenewalConfig`;
 }

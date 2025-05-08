@@ -20,337 +20,344 @@ import { PackageInfo } from '../package-info/constants';
 const IOTA = process.env.IOTA_BINARY ?? `iota`;
 
 export const getActiveAddress = () => {
-	return execSync(`${IOTA} client active-address`, { encoding: 'utf8' }).trim();
+    return execSync(`${IOTA} client active-address`, { encoding: 'utf8' }).trim();
 };
 
 export const getActiveEnv = (configPath?: string) => {
-	const command = ['client', ...(configPath ? ['--client.config', configPath] : []), 'active-env'];
-	return execFileSync(IOTA, command, {
-		encoding: 'utf-8',
-	}).trim();
+    const command = [
+        'client',
+        ...(configPath ? ['--client.config', configPath] : []),
+        'active-env',
+    ];
+    return execFileSync(IOTA, command, {
+        encoding: 'utf-8',
+    }).trim();
 };
 
 export const getChainId = (configPath?: string) => {
-	const command = [
-		'client',
-		...(configPath ? ['--client.config', configPath] : []),
-		'chain-identifier',
-	];
-	return execFileSync(IOTA, command, {
-		encoding: 'utf-8',
-	}).trim();
+    const command = [
+        'client',
+        ...(configPath ? ['--client.config', configPath] : []),
+        'chain-identifier',
+    ];
+    return execFileSync(IOTA, command, {
+        encoding: 'utf-8',
+    }).trim();
 };
 
 export const publishPackage = (txb: Transaction, path: string, configPath?: string) => {
-	const command = [
-		'move',
-		...(configPath ? ['--client.config', configPath] : []),
-		'build',
-		'--dump-bytecode-as-base64',
-		'--path',
-		path,
-	];
+    const command = [
+        'move',
+        ...(configPath ? ['--client.config', configPath] : []),
+        'build',
+        '--dump-bytecode-as-base64',
+        '--path',
+        path,
+    ];
 
-	const { modules, dependencies } = JSON.parse(
-		execFileSync(IOTA, command, {
-			encoding: 'utf-8',
-		}),
-	);
+    const { modules, dependencies } = JSON.parse(
+        execFileSync(IOTA, command, {
+            encoding: 'utf-8',
+        }),
+    );
 
-	const cap = txb.publish({
-		modules,
-		dependencies,
-	});
+    const cap = txb.publish({
+        modules,
+        dependencies,
+    });
 
-	const sender = txb.moveCall({
-		target: `0x2::tx_context::sender`,
-	});
+    const sender = txb.moveCall({
+        target: `0x2::tx_context::sender`,
+    });
 
-	// Transfer the upgrade capability to the sender so they can upgrade the package later if they want.
-	txb.transferObjects([cap], sender);
+    // Transfer the upgrade capability to the sender so they can upgrade the package later if they want.
+    txb.transferObjects([cap], sender);
 };
 
 export const managePackage = (packageId: string, packageFolder: string, configPath?: string) => {
-	const activeEnv = getActiveEnv(configPath);
+    const activeEnv = getActiveEnv(configPath);
 
-	var versionNumber = '1';
-	var originalId = packageId;
-	var latestId = packageId;
-	const metadata = getManagedMetadata(packageFolder, activeEnv);
-	var chainId: string;
-	if (metadata) {
-		chainId = metadata['chain-id'] as string;
-		versionNumber = String((metadata['published-version'] as number) + 1);
-		originalId = metadata['original-published-id'] as string;
-	} else {
-		chainId = getChainId(configPath);
-	}
+    var versionNumber = '1';
+    var originalId = packageId;
+    var latestId = packageId;
+    const metadata = getManagedMetadata(packageFolder, activeEnv);
+    var chainId: string;
+    if (metadata) {
+        chainId = metadata['chain-id'] as string;
+        versionNumber = String((metadata['published-version'] as number) + 1);
+        originalId = metadata['original-published-id'] as string;
+    } else {
+        chainId = getChainId(configPath);
+    }
 
-	const command = [
-		'move',
-		...(configPath ? ['--client.config', configPath] : []),
-		'manage-package',
-		'--environment',
-		activeEnv,
-		'--network-id',
-		chainId,
-		'--original-id',
-		originalId,
-		'--latest-id',
-		latestId,
-		'--version-number',
-		versionNumber,
-		'--path',
-		packageFolder,
-	];
+    const command = [
+        'move',
+        ...(configPath ? ['--client.config', configPath] : []),
+        'manage-package',
+        '--environment',
+        activeEnv,
+        '--network-id',
+        chainId,
+        '--original-id',
+        originalId,
+        '--latest-id',
+        latestId,
+        '--version-number',
+        versionNumber,
+        '--path',
+        packageFolder,
+    ];
 
-	execFileSync(IOTA, command, {
-		encoding: 'utf-8',
-	});
+    execFileSync(IOTA, command, {
+        encoding: 'utf-8',
+    });
 };
 
 export const upgradePackage = (
-	txb: Transaction,
-	path: string,
-	packageId: string,
-	upgradeCapId: string,
-	configPath?: string,
+    txb: Transaction,
+    path: string,
+    packageId: string,
+    upgradeCapId: string,
+    configPath?: string,
 ) => {
-	const { modules, dependencies, digest } = JSON.parse(
-		execFileSync(IOTA, ['move', 'build', '--dump-bytecode-as-base64', '--path', path], {
-			encoding: 'utf-8',
-		}),
-	);
-	console.log(digest);
-	console.log(packageId);
-	console.log(upgradeCapId);
+    const { modules, dependencies, digest } = JSON.parse(
+        execFileSync(IOTA, ['move', 'build', '--dump-bytecode-as-base64', '--path', path], {
+            encoding: 'utf-8',
+        }),
+    );
+    console.log(digest);
+    console.log(packageId);
+    console.log(upgradeCapId);
 
-	const cap = txb.object(upgradeCapId);
+    const cap = txb.object(upgradeCapId);
 
-	const ticket = txb.moveCall({
-		target: '0x2::package::authorize_upgrade',
-		arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure.vector('u8', digest)],
-	});
+    const ticket = txb.moveCall({
+        target: '0x2::package::authorize_upgrade',
+        arguments: [cap, txb.pure.u8(UpgradePolicy.COMPATIBLE), txb.pure.vector('u8', digest)],
+    });
 
-	const receipt = txb.upgrade({
-		modules,
-		dependencies,
-		package: packageId,
-		ticket,
-	});
+    const receipt = txb.upgrade({
+        modules,
+        dependencies,
+        package: packageId,
+        ticket,
+    });
 
-	txb.moveCall({
-		target: '0x2::package::commit_upgrade',
-		arguments: [cap, receipt],
-	});
+    txb.moveCall({
+        target: '0x2::package::commit_upgrade',
+        arguments: [cap, receipt],
+    });
 
-	managePackage(packageId, path, configPath);
+    managePackage(packageId, path, configPath);
 
-	console.info(`Updated lock file for package: ${packageId}`);
+    console.info(`Updated lock file for package: ${packageId}`);
 };
 
 /// Returns a signer based on the active address of system's iota.
 export const getSigner = () => {
-	if (process.env.PRIVATE_KEY) {
-		console.log('Using supplied private key.');
-		const { schema, secretKey } = decodeIotaPrivateKey(process.env.PRIVATE_KEY);
+    if (process.env.PRIVATE_KEY) {
+        console.log('Using supplied private key.');
+        const { schema, secretKey } = decodeIotaPrivateKey(process.env.PRIVATE_KEY);
 
-		if (schema === 'ED25519') return Ed25519Keypair.fromSecretKey(secretKey);
-		if (schema === 'Secp256k1') return Secp256k1Keypair.fromSecretKey(secretKey);
-		if (schema === 'Secp256r1') return Secp256r1Keypair.fromSecretKey(secretKey);
+        if (schema === 'ED25519') return Ed25519Keypair.fromSecretKey(secretKey);
+        if (schema === 'Secp256k1') return Secp256k1Keypair.fromSecretKey(secretKey);
+        if (schema === 'Secp256r1') return Secp256r1Keypair.fromSecretKey(secretKey);
 
-		throw new Error('Keypair not supported.');
-	}
+        throw new Error('Keypair not supported.');
+    }
 
-	const sender = getActiveAddress();
+    const sender = getActiveAddress();
 
-	const keystore = JSON.parse(
-		readFileSync(path.join(homedir(), '.iota', 'iota_config', 'iota.keystore'), 'utf8'),
-	);
+    const keystore = JSON.parse(
+        readFileSync(path.join(homedir(), '.iota', 'iota_config', 'iota.keystore'), 'utf8'),
+    );
 
-	for (const priv of keystore) {
-		const keypair = decodeIotaPrivateKey(priv);
+    for (const priv of keystore) {
+        const keypair = decodeIotaPrivateKey(priv);
 
-		const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
-		if (pair.getPublicKey().toIotaAddress() === sender) {
-			return pair;
-		}
-	}
+        const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
+        if (pair.getPublicKey().toIotaAddress() === sender) {
+            return pair;
+        }
+    }
 
-	throw new Error(`keypair not found for sender: ${sender}`);
+    throw new Error(`keypair not found for sender: ${sender}`);
 };
 
 /// Get the client for the specified network.
 export const getClient = (network: string) => {
-	const url = process.env.RPC_URL || getFullnodeUrl(network);
-	return new IotaClient({ url });
+    const url = process.env.RPC_URL || getFullnodeUrl(network);
+    return new IotaClient({ url });
 };
 
 /// A helper to sign & execute a transaction.
 export const signAndExecute = async (txb: Transaction, network: string) => {
-	const client = getClient(network);
-	const signer = getSigner();
+    const client = getClient(network);
+    const signer = getSigner();
 
-	return client.signAndExecuteTransaction({
-		transaction: txb,
-		signer,
-		options: {
-			showEffects: true,
-			showObjectChanges: true,
-		},
-	});
+    return client.signAndExecuteTransaction({
+        transaction: txb,
+        signer,
+        options: {
+            showEffects: true,
+            showObjectChanges: true,
+        },
+    });
 };
 
 /// Builds a transaction (unsigned) and saves it on `setup/tx/tx-data.txt` (on production)
 /// or `setup/src/tx-data.local.txt` on mainnet.
 export const prepareMultisigTx = async (tx: Transaction, network: string, address?: string) => {
-	const adminAddress = address ?? getActiveAddress();
-	const client = getClient(network);
-	const gasObjectId = process.env.GAS_OBJECT;
+    const adminAddress = address ?? getActiveAddress();
+    const client = getClient(network);
+    const gasObjectId = process.env.GAS_OBJECT;
 
-	// enabling the gas Object check only on mainnet, to allow testnet multisig tests.
-	if (!gasObjectId) throw new Error('No gas object supplied for a mainnet transaction');
+    // enabling the gas Object check only on mainnet, to allow testnet multisig tests.
+    if (!gasObjectId) throw new Error('No gas object supplied for a mainnet transaction');
 
-	// Prevent any possible RGP changes across epoch change, which would invalidate the transaction.
-	tx.setGasPrice(1_000);
+    // Prevent any possible RGP changes across epoch change, which would invalidate the transaction.
+    tx.setGasPrice(1_000);
 
-	// set the sender to be the admin address from config.
-	tx.setSenderIfNotSet(adminAddress as string);
+    // set the sender to be the admin address from config.
+    tx.setSenderIfNotSet(adminAddress as string);
 
-	// setting up gas object for the multi-sig transaction
-	if (gasObjectId) await setupGasPayment(tx, gasObjectId, client);
+    // setting up gas object for the multi-sig transaction
+    if (gasObjectId) await setupGasPayment(tx, gasObjectId, client);
 
-	// first do a dryRun, to make sure we are getting a success.
-	const dryRun = await inspectTransaction(tx, client);
+    // first do a dryRun, to make sure we are getting a success.
+    const dryRun = await inspectTransaction(tx, client);
 
-	if (!dryRun) throw new Error('This transaction failed.');
+    if (!dryRun) throw new Error('This transaction failed.');
 
-	tx.build({
-		client,
-	}).then((bytes) => {
-		let serializedBase64 = toB64(bytes);
+    tx.build({
+        client,
+    }).then((bytes) => {
+        let serializedBase64 = toB64(bytes);
 
-		const output_location =
-			process.env.NODE_ENV === 'development' ? './tx/tx-data-local.txt' : './tx/tx-data.txt';
+        const output_location =
+            process.env.NODE_ENV === 'development' ? './tx/tx-data-local.txt' : './tx/tx-data.txt';
 
-		const dir = path.dirname(output_location);
-		if (!fs.existsSync(dir)) {
-			fs.mkdirSync(dir, { recursive: true });
-		}
-		fs.writeFileSync(output_location, serializedBase64);
-	});
+        const dir = path.dirname(output_location);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        fs.writeFileSync(output_location, serializedBase64);
+    });
 };
 
 /// Fetch the gas Object and setup the payment for the tx.
 async function setupGasPayment(tx: Transaction, gasObjectId: string, client: IotaClient) {
-	const gasObject = await client.getObject({
-		id: gasObjectId,
-	});
+    const gasObject = await client.getObject({
+        id: gasObjectId,
+    });
 
-	if (!gasObject.data) throw new Error('Invalid Gas Object supplied.');
+    if (!gasObject.data) throw new Error('Invalid Gas Object supplied.');
 
-	// set the gas payment.
-	tx.setGasPayment([
-		{
-			objectId: gasObject.data.objectId,
-			version: gasObject.data.version,
-			digest: gasObject.data.digest,
-		},
-	]);
+    // set the gas payment.
+    tx.setGasPayment([
+        {
+            objectId: gasObject.data.objectId,
+            version: gasObject.data.version,
+            digest: gasObject.data.digest,
+        },
+    ]);
 }
 
 /// A helper to dev inspect a transaction.
 async function inspectTransaction(tx: Transaction, client: IotaClient) {
-	const result = await client.dryRunTransactionBlock({
-		transactionBlock: await tx.build({ client: client }),
-	});
-	// log the result.
-	console.dir(result, { depth: null });
+    const result = await client.dryRunTransactionBlock({
+        transactionBlock: await tx.build({ client: client }),
+    });
+    // log the result.
+    console.dir(result, { depth: null });
 
-	return result.effects.status.status === 'success';
+    return result.effects.status.status === 'success';
 }
 
 export const getAllObjectsByType = async (type: string, owner: string, client: IotaClient) => {
-	let objects = [];
-	let hasNextPage = true;
-	let cursor = null;
+    let objects = [];
+    let hasNextPage = true;
+    let cursor = null;
 
-	while (hasNextPage) {
-		const data = await client.getOwnedObjects({
-			owner,
-			filter: {
-				StructType: type,
-			},
-			options: {
-				showContent: true,
-				showType: true,
-			},
-			cursor,
-		});
+    while (hasNextPage) {
+        const data = await client.getOwnedObjects({
+            owner,
+            filter: {
+                StructType: type,
+            },
+            options: {
+                showContent: true,
+                showType: true,
+            },
+            cursor,
+        });
 
-		hasNextPage = data.hasNextPage;
-		cursor = data.nextCursor;
-		objects.push(...data.data.map((x) => x.data!));
-	}
+        hasNextPage = data.hasNextPage;
+        cursor = data.nextCursor;
+        objects.push(...data.data.map((x) => x.data!));
+    }
 
-	return objects;
+    return objects;
 };
 
 export const getManagedMetadata = (packageFolder: string, activeEnv: string) => {
-	const lockFilePath = path.resolve(packageFolder + '/Move.lock');
-	if (existsSync(lockFilePath)) {
-		const lockFile = TOML.parse(readFileSync(lockFilePath, 'utf8'));
-		const env = lockFile['env'] as JsonMap;
-		if (env) {
-			return env[activeEnv] as JsonMap;
-		}
-	}
+    const lockFilePath = path.resolve(packageFolder + '/Move.lock');
+    if (existsSync(lockFilePath)) {
+        const lockFile = TOML.parse(readFileSync(lockFilePath, 'utf8'));
+        const env = lockFile['env'] as JsonMap;
+        if (env) {
+            return env[activeEnv] as JsonMap;
+        }
+    }
 };
 
 export const getCoinMetadataId = async (network: string, type: string) => {
-	const iotaClient = new IotaClient({
-		url: getFullnodeUrl(network),
-	});
-	const metadata = await iotaClient.getCoinMetadata({ coinType: type });
-	if (!metadata || !metadata.id) {
-		throw new Error('Coin metadata or ID not found.');
-	}
-	return metadata.id;
+    const iotaClient = new IotaClient({
+        url: getFullnodeUrl(network),
+    });
+    const metadata = await iotaClient.getCoinMetadata({ coinType: type });
+    if (!metadata || !metadata.id) {
+        throw new Error('Coin metadata or ID not found.');
+    }
+    return metadata.id;
 };
 
 export const getObjectType = async (network: string, objectId: string): Promise<string> => {
-	const iotaClient = new IotaClient({
-		url: getFullnodeUrl(network),
-	});
-	const objectResponse = await iotaClient.getObject({ id: objectId, options: { showType: true } });
-	if (objectResponse && objectResponse.data && objectResponse.data.type) {
-		return objectResponse.data.type;
-	}
-	throw new Error('Object data not found');
+    const iotaClient = new IotaClient({
+        url: getFullnodeUrl(network),
+    });
+    const objectResponse = await iotaClient.getObject({
+        id: objectId,
+        options: { showType: true },
+    });
+    if (objectResponse && objectResponse.data && objectResponse.data.type) {
+        return objectResponse.data.type;
+    }
+    throw new Error('Object data not found');
 };
 
 export const getIotaNamesAdminObjects = async (
-	packageInfo: PackageInfo,
-	client: IotaClient,
+    packageInfo: PackageInfo,
+    client: IotaClient,
 ): Promise<string[]> => {
-	// PackageIDs, UpgradeCap IDs, Publisher and Display objects
-	const packageValues = Object.entries(packageInfo)
-		.map(([key, value]) => value)
-		.filter((v) => typeof v === 'string');
+    // PackageIDs, UpgradeCap IDs, Publisher and Display objects
+    const packageValues = Object.entries(packageInfo)
+        .map(([key, value]) => value)
+        .filter((v) => typeof v === 'string');
 
-	const ownedObjectsPage = await client.getOwnedObjects({
-		owner: packageInfo.adminAddress,
-		options: { showContent: true },
-	});
+    const ownedObjectsPage = await client.getOwnedObjects({
+        owner: packageInfo.adminAddress,
+        options: { showContent: true },
+    });
 
-	let objectIds = [];
-	for (const object of ownedObjectsPage.data) {
-		for (const packageValue of packageValues) {
-			if (JSON.stringify(object).includes(packageValue)) {
-				objectIds.push(object.data?.objectId!);
-				break;
-			}
-		}
-	}
-	return objectIds;
+    let objectIds = [];
+    for (const object of ownedObjectsPage.data) {
+        for (const packageValue of packageValues) {
+            if (JSON.stringify(object).includes(packageValue)) {
+                objectIds.push(object.data?.objectId!);
+                break;
+            }
+        }
+    }
+    return objectIds;
 };

@@ -7,11 +7,11 @@ export { IotaNamesTransaction } from './iota-names-transaction';
 export type { Network, IotaNamesClientConfig, Config } from './types';
 export { ALLOWED_METADATA, mainPackage } from './constants';
 export {
-	isSubName,
-	isNestedSubName,
-	validateYears,
-	getConfigType,
-	getDomainType,
-	getPricelistConfigType,
-	getRenewalPricelistConfigType,
+    isSubName,
+    isNestedSubName,
+    validateYears,
+    getConfigType,
+    getDomainType,
+    getPricelistConfigType,
+    getRenewalPricelistConfigType,
 } from './helpers';

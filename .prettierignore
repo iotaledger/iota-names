@@ -2,6 +2,7 @@
 /apps/icons/src
 npm-debug.log*
 package-lock.json
+pnpm-lock.yaml
 yarn-debug.log*
 .next/
 .swc/

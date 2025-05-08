@@ -6,6 +6,7 @@ on:
       - ".github/workflows/typescript.yaml"
       - "packages/**"
       - "scripts/**"
+      - "build-scripts/**"
       - "sdk/**"
       - ".eslintrc.cjs"
       - "prettier.config.cjs"
