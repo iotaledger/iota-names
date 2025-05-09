@@ -162,12 +162,12 @@ public fun app_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Coup
 
 /// Authorize an app on the coupon house. This allows to a secondary module to
 /// add/remove coupons.
-public fun authorize_app<A: drop>(_: &AdminCap, iota_names: &mut IotaNames) {
+public fun authorize<A: drop>(_: &AdminCap, iota_names: &mut IotaNames) {
     df::add(&mut coupon_house_mut(iota_names).storage, AppKey<A> {}, true);
 }
 
 /// De-authorize an app. The app can no longer add or remove
-public fun deauthorize_app<A: drop>(_: &AdminCap, iota_names: &mut IotaNames): bool {
+public fun deauthorize<A: drop>(_: &AdminCap, iota_names: &mut IotaNames): bool {
     df::remove(&mut coupon_house_mut(iota_names).storage, AppKey<A> {})
 }
 
@@ -227,7 +227,7 @@ public fun app_remove_coupon(coupons: &mut Coupons, code: String) {
 
 /// Check if an application is authorized to access protected features of the
 /// Coupon House.
-fun is_app_authorized<A: drop>(coupon_house: &CouponHouse): bool {
+fun is_authorized<A: drop>(coupon_house: &CouponHouse): bool {
     df::exists_(&coupon_house.storage, AppKey<A> {})
 }
 
@@ -235,7 +235,7 @@ fun is_app_authorized<A: drop>(coupon_house: &CouponHouse): bool {
 /// Coupon House.
 /// Aborts with `EAppNotAuthorized` if not.
 fun assert_is_authorized<A: drop>(coupon_house: &CouponHouse) {
-    assert!(coupon_house.is_app_authorized<A>(), EAppNotAuthorized);
+    assert!(coupon_house.is_authorized<A>(), EAppNotAuthorized);
 }
 
 public(package) fun coupons(coupon_house: &CouponHouse): &Coupons {
@@ -265,7 +265,7 @@ fun coupon_house(iota_names: &IotaNames): &CouponHouse {
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
     iota_names.assert_is_authorized<CouponsAuth>();
-    let coupons = iota_names::app_registry_mut<CouponsAuth, CouponHouse>(
+    let coupons = iota_names::auth_registry_mut<CouponsAuth, CouponHouse>(
         CouponsAuth {},
         iota_names,
     );

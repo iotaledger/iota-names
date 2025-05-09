@@ -36,7 +36,7 @@ public fun test_init(): Scenario {
 public fun initialize_coupon_house(scenario: &mut Scenario) {
     {
         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
-        iota_names::authorize_app_for_testing<CouponsAuth>(&mut iota_names);
+        iota_names::authorize_for_testing<CouponsAuth>(&mut iota_names);
         iota_names::share_for_testing(iota_names);
         let clock = clock::create_for_testing(scenario.ctx());
         clock::share_for_testing(clock);
@@ -50,7 +50,7 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         coupon_house::setup(&mut iota_names, &admin_cap, scenario.ctx());
         registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
         // authorize TestApp to CouponHouse.
-        coupon_house::authorize_app<TestApp>(&admin_cap, &mut iota_names);
+        coupon_house::authorize<TestApp>(&admin_cap, &mut iota_names);
         test_scenario::return_to_sender(scenario, admin_cap);
         test_scenario::return_shared(iota_names);
     };
