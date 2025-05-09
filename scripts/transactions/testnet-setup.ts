@@ -14,7 +14,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
         txb,
         adminCap: packageInfo.adminCap,
         iotaNames: packageInfo.iotaNames,
-        type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
+        type: `${packageInfo.packageId}::pricing_config::PricingConfig`,
         iotaNamesPackageId: packageInfo.packageId,
     });
 
@@ -22,7 +22,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
         txb,
         adminCap: packageInfo.adminCap,
         iotaNames: packageInfo.iotaNames,
-        type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
+        type: `${packageInfo.packageId}::pricing_config::RenewalConfig`,
         iotaNamesPackageId: packageInfo.packageId,
     });
 
@@ -46,7 +46,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
                 1 * Number(NANOS_PER_IOTA),
             ],
         }),
-        type: `${packageInfo.packageIdPricing}::pricing_config::PricingConfig`,
+        type: `${packageInfo.packageId}::pricing_config::PricingConfig`,
     });
     addConfig({
         txb,
@@ -67,7 +67,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
                 0.5 * Number(NANOS_PER_IOTA),
             ],
         }),
-        type: `${packageInfo.packageIdPricing}::pricing_config::RenewalConfig`,
+        type: `${packageInfo.packageId}::pricing_config::RenewalConfig`,
     });
 };
 

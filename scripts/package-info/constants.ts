@@ -18,7 +18,6 @@ export type PackageInfo = {
     denyListPackageId: string;
     iotaNames: string;
     packageId: string;
-    packageIdPricing: string;
     paymentsPackageId: string;
     publisherId: string;
     registryTableId: string;
