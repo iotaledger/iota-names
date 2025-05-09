@@ -156,7 +156,7 @@ fun apply_percentage_discount(
 public fun app_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Coupons {
     let coupon_house_mut = coupon_house_mut(iota_names);
     // verify app is authorized to get a mutable reference.
-    coupon_house_mut.assert_app_is_authorized<A>();
+    coupon_house_mut.assert_is_authorized<A>();
     &mut coupon_house_mut.coupons
 }
 
@@ -234,7 +234,7 @@ fun is_app_authorized<A: drop>(coupon_house: &CouponHouse): bool {
 /// Assert that an application is authorized to access protected features of
 /// Coupon House.
 /// Aborts with `EAppNotAuthorized` if not.
-fun assert_app_is_authorized<A: drop>(coupon_house: &CouponHouse) {
+fun assert_is_authorized<A: drop>(coupon_house: &CouponHouse) {
     assert!(coupon_house.is_app_authorized<A>(), EAppNotAuthorized);
 }
 
@@ -264,7 +264,7 @@ fun coupon_house(iota_names: &IotaNames): &CouponHouse {
 /// Gets a mutable reference to the coupon's house
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
-    iota_names.assert_app_is_authorized<CouponsAuth>();
+    iota_names.assert_is_authorized<CouponsAuth>();
     let coupons = iota_names::app_registry_mut<CouponsAuth, CouponHouse>(
         CouponsAuth {},
         iota_names,

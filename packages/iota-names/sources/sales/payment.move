@@ -254,7 +254,7 @@ public fun request_data_mut<A: drop>(
     iota_names: &IotaNames,
     _: A,
 ): &mut RequestData {
-    iota_names.assert_app_is_authorized<A>();
+    iota_names.assert_is_authorized<A>();
     match (intent) {
         PaymentIntent::Registration(data) => data,
         PaymentIntent::Renewal(data) => data,
