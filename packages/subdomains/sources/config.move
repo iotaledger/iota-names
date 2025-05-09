@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-module subdomains::config;
+module iota_names_subdomains::config;
 
 use iota_names::constants::iota_tld;
 use iota_names::domain::{Domain, is_parent_of};

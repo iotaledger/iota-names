@@ -4,9 +4,9 @@
 
 #[test_only]
 #[allow(lint(abort_without_constant))]
-module deny_list::deny_list_tests;
+module iota_names_deny_list::deny_list_tests;
 
-use deny_list::deny_list::{Self, DenyListAuth};
+use iota_names_deny_list::deny_list::{Self, DenyListAuth};
 use iota::test_scenario::{Self as ts, Scenario};
 use iota_names::iota_names::{Self, IotaNames};
 use std::string::{utf8, String};
@@ -40,7 +40,7 @@ fun test() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::deny_list::deny_list::ENoWordsInList)]
+#[test, expected_failure(abort_code = ::iota_names_deny_list::deny_list::ENoWordsInList)]
 fun test_empty_addition_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -55,7 +55,7 @@ fun test_empty_addition_failure() {
 }
 
 // coverage.. :)
-#[test, expected_failure(abort_code = ::deny_list::deny_list::ENoWordsInList)]
+#[test, expected_failure(abort_code = ::iota_names_deny_list::deny_list::ENoWordsInList)]
 fun test_empty_addition_blocked_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -126,7 +126,7 @@ public fun test_init(): (Scenario) {
 
         let (mut iota_names, cap) = iota_names::new_for_testing(scenario.ctx());
 
-        iota_names.authorize_app_for_testing<DenyListAuth>();
+        iota_names.authorize_for_testing<DenyListAuth>();
 
         deny_list::setup(&mut iota_names, &cap, scenario.ctx());
 

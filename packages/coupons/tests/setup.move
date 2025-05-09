@@ -10,7 +10,7 @@ use iota::test_scenario::{Self, Scenario, ctx};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::registry;
 use iota_names_coupons::coupon_constants;
-use iota_names_coupons::coupon_house::{Self, CouponsApp};
+use iota_names_coupons::coupon_house::{Self, CouponsAuth};
 use iota_names_coupons::coupons::Coupons;
 use iota_names_coupons::range;
 use iota_names_coupons::rules;
@@ -36,7 +36,7 @@ public fun test_init(): Scenario {
 public fun initialize_coupon_house(scenario: &mut Scenario) {
     {
         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
-        iota_names::authorize_app_for_testing<CouponsApp>(&mut iota_names);
+        iota_names::authorize_app_for_testing<CouponsAuth>(&mut iota_names);
         iota_names::share_for_testing(iota_names);
         let clock = clock::create_for_testing(scenario.ctx());
         clock::share_for_testing(clock);

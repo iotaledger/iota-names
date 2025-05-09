@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Implementation of auction module.
-module auction::auction;
+module iota_names_auction::auction;
 
 use iota::balance::{Self, Balance};
 use iota::clock::Clock;
@@ -47,8 +47,8 @@ const EBidTooLow: vector<u8> = b"The bid is too low, minimum overbid should be a
 #[error]
 const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 
-/// Authorization witness to call protected functions of iota_names.
-public struct App has drop {}
+/// Authorization witness to call protected functions of `iota_names`.
+public struct AuctionAuth has drop {}
 
 /// The AuctionHouse application.
 public struct AuctionHouse has key, store {
@@ -85,7 +85,7 @@ public fun start_auction_and_place_bid(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    iota_names.assert_app_is_authorized<App>();
+    iota_names.assert_is_authorized<AuctionAuth>();
 
     let domain = domain::new(domain_name);
 
@@ -98,7 +98,7 @@ public fun start_auction_and_place_bid(
         .calculate_base_price(domain.sld().length());
     assert!(bid.value() >= min_price, EInitialBidTooLow);
 
-    let registry = iota_names::app_registry_mut<App, Registry>(App {}, iota_names);
+    let registry = iota_names::auth_registry_mut<AuctionAuth, Registry>(AuctionAuth {}, iota_names);
     let nft = registry.add_record(domain, DEFAULT_DURATION, clock, ctx);
     let starting_bid = bid.value();
 

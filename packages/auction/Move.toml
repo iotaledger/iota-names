@@ -1,10 +1,10 @@
 [package]
-name = "auction"
+name = "iota_names_auction"
 edition = "2024"
 
 [dependencies]
 Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet", override = true }
-IotaNames = { local = "../iota-names" }
+iota_names = { local = "../iota-names" }
 
 [addresses]
-auction = "0x0"
+iota_names_auction = "0x0"

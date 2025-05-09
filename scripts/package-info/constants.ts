@@ -6,37 +6,37 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 export type PackageInfo = {
-	adminAddress: string;
-	adminCap: string;
-	auctionPackageId: string;
-	coins: {
-		[key: string]: {
-			type: string;
-			metadataId: string;
-		};
-	};
-	denyListPackageId: string;
-	iotaNames: string;
-	packageId: string;
-	packageIdPricing: string;
-	paymentsPackageId: string;
-	publisherId: string;
-	registryTableId: string;
-	reverseRegistryTableId: string;
-	couponsPackageId: string;
-	subNamesPackageId: string;
-	tempSubdomainsProxyPackageId: string;
-	upgradeCap?: string;
+    adminAddress: string;
+    adminCap: string;
+    auctionPackageId: string;
+    coins: {
+        [key: string]: {
+            type: string;
+            metadataId: string;
+        };
+    };
+    denyListPackageId: string;
+    iotaNames: string;
+    packageId: string;
+    packageIdPricing: string;
+    paymentsPackageId: string;
+    publisherId: string;
+    registryTableId: string;
+    reverseRegistryTableId: string;
+    subNamesPackageId: string;
+    couponsPackageId: string;
+    tempSubdomainsProxyPackageId: string;
+    upgradeCap?: string;
 };
 
 export const readPackageInfo = (network: string): PackageInfo => {
-	return JSON.parse(readFileSync(path.resolve(__dirname, `${network}.json`), 'utf8'));
+    return JSON.parse(readFileSync(path.resolve(__dirname, `${network}.json`), 'utf8'));
 };
 
 export const writePackageInfo = (network: string, packageInfo: PackageInfo) => {
-	writeFileSync(
-		path.resolve(__dirname, `${network}.json`),
-		JSON.stringify(packageInfo, null, 2),
-		'utf8',
-	);
+    writeFileSync(
+        path.resolve(__dirname, `${network}.json`),
+        JSON.stringify(packageInfo, null, 2),
+        'utf8',
+    );
 };

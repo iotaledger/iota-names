@@ -19,7 +19,8 @@ use iota_names::payment::{Self, PaymentIntent, Receipt};
 use iota_names::pricing_config::{Self, PricingConfig};
 use iota_names::registry::{Self, Registry};
 
-public struct PaymentsApp() has drop;
+/// Authorization witness to call protected functions of `iota_names`.
+public struct PaymentsAuth has drop {}
 
 #[test]
 fun test_e2e() {
@@ -43,7 +44,7 @@ fun test_e2e() {
     let mut nft = receipt.register(&mut iota_names, &clock, &mut ctx);
 
     // let's validate our nft is the same name we expected for sanity check.
-    assert_eq(nft.domain().to_string(), domain);
+    assert_eq(nft.domain_name(), domain);
 
     // now let's renew this nft for 4 years.
     let intent = payment::init_renewal(&mut iota_names, &nft, 4);
@@ -295,7 +296,7 @@ public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
 
     // authorize a "payments" app that is responsible for handling payments and
     // issuing receipts.
-    cap.authorize_app<PaymentsApp>(&mut iota_names);
+    cap.authorize<PaymentsAuth>(&mut iota_names);
 
     registry::init_for_testing(&cap, &mut iota_names, ctx);
 
@@ -313,7 +314,7 @@ fun handle_payment(
     let amount = intent.request_data().base_amount();
     let coin = coin::mint_for_testing<IOTA>(amount, ctx);
 
-    intent.finalize_payment(iota_names, PaymentsApp(), coin)
+    intent.finalize_payment(iota_names, PaymentsAuth {}, coin)
 }
 
 fun test_pricing_config(renewal: bool): PricingConfig {

@@ -15,8 +15,6 @@ use std::string::String;
 const IOTA_TLD: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
 const YEAR_MS: u64 = 365 * 24 * 60 * 60 * 1000;
-/// Default value for the image_url; IPFS hash.
-const DEFAULT_IMAGE: vector<u8> = b"QmaLFg4tQYansFpyRqmDfABdkUVy66dHtpnkH15v1LPzcY";
 /// 30 day Grace period in milliseconds.
 const GRACE_PERIOD_MS: u64 = 30 * 24 * 60 * 60 * 1000;
 
@@ -39,9 +37,6 @@ const ALLOW_TIME_EXTENSION: vector<u8> = b"S_ATE";
 
 /// Top level domain for IOTA as a String.
 public fun iota_tld(): String { IOTA_TLD.to_string() }
-
-/// Default value for the image_url.
-public fun default_image(): String { DEFAULT_IMAGE.to_string() }
 
 /// The amount of milliseconds in a year.
 public fun year_ms(): u64 { YEAR_MS }

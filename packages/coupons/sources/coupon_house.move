@@ -45,7 +45,7 @@ public macro fun coupons_version(): u8 { 1 }
 
 // Authorization for the Coupons on Iota-Names, to be able to register names on the
 // app.
-public struct CouponsApp has drop {}
+public struct CouponsAuth has drop {}
 
 /// Authorization Key for secondary apps (e.g. Discord) connected to this
 /// module.
@@ -86,7 +86,7 @@ public fun apply_coupon(
 
     // Borrow coupon from the table.
     let coupon: &Coupon = &coupon_house.coupons_bag()[coupon_code];
-    let metadata = intent.request_data_mut(iota_names, CouponsApp {}).metadata_mut();
+    let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
     let mut idx_opt = metadata.get_idx_opt(&USED_NON_STACKING_KEY.to_string());
     if (idx_opt.is_some()) {
         let (_, used_non_stacking_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
@@ -149,7 +149,7 @@ fun apply_percentage_discount(
     let price = intent.request_data().base_amount();
     let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
 
-    *intent.request_data_mut(iota_names, CouponsApp {}).base_amount_mut() = price - discount_amount;
+    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
 }
 
 // Get `Coupons` as an authorized app.
@@ -264,9 +264,9 @@ fun coupon_house(iota_names: &IotaNames): &CouponHouse {
 /// Gets a mutable reference to the coupon's house
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
-    iota_names.assert_app_is_authorized<CouponsApp>();
-    let coupons = iota_names::app_registry_mut<CouponsApp, CouponHouse>(
-        CouponsApp {},
+    iota_names.assert_app_is_authorized<CouponsAuth>();
+    let coupons = iota_names::app_registry_mut<CouponsAuth, CouponHouse>(
+        CouponsAuth {},
         iota_names,
     );
     coupons.assert_version_is_valid();

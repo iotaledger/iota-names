@@ -12,11 +12,11 @@ use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
 use iota_names::constants::year_ms;
-use iota_names::controller::{Self, Controller};
+use iota_names::controller::{Self, ControllerAuth};
 use iota_names::domain::{Self, Domain};
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
-use iota_names::register::Register;
+use iota_names::register::RegisterAuth;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subdomain_registration;
@@ -31,7 +31,7 @@ use fun unset_user_data_util as Scenario.unset_user_data_util;
 use fun lookup_util as Scenario.lookup_util;
 use fun get_user_data as Scenario.get_user_data;
 use fun setup as Scenario.setup;
-use fun deauthorize_app_util as Scenario.deauthorize_app_util;
+use fun deauthorize_util as Scenario.deauthorize_util;
 use fun reverse_lookup_util as Scenario.reverse_lookup_util;
 use fun set_object_reverse_lookup_util as Scenario.set_object_reverse_lookup_util;
 use fun unset_object_reverse_lookup_util as Scenario.unset_object_reverse_lookup_util;
@@ -49,8 +49,8 @@ fun test_init(): Scenario {
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
-        iota_names.authorize_app_for_testing<Register>();
-        iota_names.authorize_app_for_testing<Controller>();
+        iota_names.authorize_for_testing<RegisterAuth>();
+        iota_names.authorize_for_testing<ControllerAuth>();
         iota_names.share_for_testing();
         let clock = clock::create_for_testing(scenario.ctx());
         clock.share_for_testing();
@@ -222,12 +222,12 @@ fun reverse_lookup_util(
     test_scenario::return_shared(iota_names);
 }
 
-fun deauthorize_app_util(scenario: &mut Scenario) {
+fun deauthorize_util(scenario: &mut Scenario) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    admin_cap.deauthorize_app<Controller>(&mut iota_names);
+    admin_cap.deauthorize<ControllerAuth>(&mut iota_names);
 
     test_scenario::return_shared(iota_names);
     scenario.return_to_sender(admin_cap);
@@ -295,7 +295,7 @@ fun test_set_target_address_aborts_if_controller_is_deauthorized() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    scenario.deauthorize_app_util();
+    scenario.deauthorize_util();
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
 
     scenario_val.end();
@@ -362,7 +362,7 @@ fun test_set_reverse_lookup_aborts_if_controller_is_deauthorized() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.deauthorize_app_util();
+    scenario.deauthorize_util();
     scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
 
     scenario_val.end();
@@ -395,7 +395,7 @@ fun test_unset_reverse_lookup_if_controller_is_deauthorized() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
     scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
-    scenario.deauthorize_app_util();
+    scenario.deauthorize_util();
     scenario.unset_reverse_lookup_util(SECOND_ADDRESS);
 
     scenario_val.end();
@@ -525,7 +525,7 @@ fun test_set_user_data_aborts_if_controller_is_deauthorized() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    scenario.deauthorize_app_util();
+    scenario.deauthorize_util();
     scenario.set_user_data_util(
         FIRST_ADDRESS,
         AVATAR.to_string(),
@@ -600,7 +600,7 @@ fun test_unset_user_data_works_if_controller_is_deauthorized() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    scenario.deauthorize_app_util();
+    scenario.deauthorize_util();
     scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 0);
 
     scenario_val.end();
