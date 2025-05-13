@@ -133,7 +133,7 @@ export class IotaNamesTransaction {
     getBasePrice(paymentIntent: TransactionObjectArgument): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
-            target: `${config.packageId}::payments::request_base_amount`,
+            target: `${config.packageId}::payment::request_base_amount`,
             arguments: [paymentIntent],
         });
     }

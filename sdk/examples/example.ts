@@ -2,61 +2,86 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
+import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
-// Initialize and execute the IotaNamesClient to fetch the renewal price list
 (async () => {
-    const network = 'testnet';
-    // Step 1: Create a IotaClient instance
-    const iotaClient = new IotaClient({
-        url: getFullnodeUrl(network), // Iota testnet endpoint
+    const domain = `cool-domain-${(Math.random() * 10000000).toString().split('.').join('')}.iota`;
+
+    const network = 'devnet';
+
+    const { url, faucet } = getNetwork(network);
+
+    const keypair = new Ed25519Keypair();
+    const address = keypair.toIotaAddress();
+
+    console.log('[Secret key]:', keypair.getSecretKey());
+    console.log('[Address]:', address);
+
+    await requestIotaFromFaucetV0({
+        host: faucet!,
+        recipient: address,
     });
 
-    // Step 2: Create a IotaNamesClient instance using TESTNET_CONFIG
+    console.log('[Faucet]: Received funds');
+
+    const iotaClient = new IotaClient({
+        url,
+    });
+
     const iotaNamesClient = new IotaNamesClient({
         client: iotaClient,
         network,
     });
 
-    /* Following can be used to fetch the registration price and renewal price */
-    console.log(await iotaNamesClient.getPriceList());
-    console.log(await iotaNamesClient.getRenewalPriceList());
+    console.log(
+        '[Domain Record (null if available)]: ',
+        await iotaNamesClient.getNameRecord(domain),
+    );
 
-    /* Following can be used to fetch the domain record */
-    console.log('Domain Record: ', await iotaNamesClient.getNameRecord('myname.iota'));
-
-    /* Registration Example Using IOTA */
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-    const maxPaymentAmount = 5 * 1_000_000_000; // In NANOS of the payment coin type
-    const [coin] = iotaNamesTx.transaction.splitCoins('0xMyCoin', [maxPaymentAmount]);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
 
     const nft = iotaNamesTx.register({
-        domain: 'myname.iota',
-        years: 2,
+        domain,
+        years: 1,
         coin,
     });
 
-    /* Optionally set target address */
-    iotaNamesTx.setTargetAddress({ nft, address: '0xMyAddress' });
+    iotaNamesTx.transaction.transferObjects([nft], address);
 
-    /* Optionally set default */
-    iotaNamesTx.setDefault('myname.iota');
+    iotaNamesTx.transaction.transferObjects([coin], address);
 
-    /* Optionally set user data */
-    iotaNamesTx.setUserData({
-        nft,
-        value: 'hello',
-        key: 'content_hash',
+    iotaNamesTx.transaction.setSender(address);
+
+    const transaction = await iotaNamesTx.transaction.build({
+        client: iotaClient,
     });
 
-    /* Optionally transfer the NFT */
-    iotaNamesTx.transaction.transferObjects([nft], '0xMyAddress');
+    const executedTransactionResponse = await iotaClient.signAndExecuteTransaction({
+        transaction,
+        signer: keypair,
+    });
 
-    /* Optionally transfer coin */
-    iotaNamesTx.transaction.transferObjects([coin], '0xMyAddress');
+    console.log('[Transaction digest]: ', executedTransactionResponse.digest);
+
+    await iotaClient.waitForTransaction({
+        digest: executedTransactionResponse.digest,
+    });
+
+    const transactionBlockResponse = await iotaClient.getTransactionBlock({
+        digest: executedTransactionResponse.digest,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log('[Transaction response]:', transactionBlockResponse);
+    console.log(`[IotaNames]: You own '${domain}'`);
 })();
