@@ -11,7 +11,7 @@ import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
 (async () => {
-    const domain = `cool-domain-${(Math.random() * 10000000).toString().split('.').join('')}.iota`;
+    const domain = `cool-domain-${Math.floor(Math.random() * 10000000)}.iota`;
 
     const network = 'devnet';
 
