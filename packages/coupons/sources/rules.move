@@ -19,7 +19,7 @@ const EInvalidYears: vector<u8> = b"Coupon is not valid for the given number of 
 const EInvalidForDomainLength: vector<u8> = b"Coupon is not valid for the given domain length.";
 /// Error when you try to use a domain that has used all it's available claims.
 #[error]
-const ENoMoreAvailableClaims: vector<u8> = b"Domain has been claimed the maximum number of times.";
+const ENoMoreAvailableClaims: vector<u8> = b"Coupon has been claimed the maximum number of times.";
 /// Error when you try to create a percentage discount coupon with invalid
 /// percentage amount.
 #[error]

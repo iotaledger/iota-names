@@ -15,7 +15,7 @@ public struct Range has copy, drop, store {
     vec: vector<u8>,
 }
 
-/// a new Range constructor[from, to]
+/// A new Range constructor[from, to]
 public fun new(from: u8, to: u8): Range {
     assert!(to >= from, EInvalidRange);
 
