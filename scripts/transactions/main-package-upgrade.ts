@@ -17,9 +17,9 @@ const mainPackageUpgrade = async () => {
     const packageInfo = readPackageInfo(network);
     let client = getClient(network);
     let gasCoinsPage = await client.getCoins({ owner: packageInfo.adminAddress });
-    const gasObjectId = gasCoinsPage.data.find(
-        (coin) => BigInt(coin.balance) >= 2000000000,
-    )?.coinObjectId;
+    const gasObjectId = gasCoinsPage.data.sort((a, b) =>
+        Number(BigInt(b.balance) - BigInt(a.balance)),
+    )[0]?.coinObjectId;
 
     // Enabling the gas Object check only on mainnet, to allow testnet multisig tests.
     if (!gasObjectId)
