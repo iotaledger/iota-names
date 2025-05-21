@@ -17,7 +17,9 @@ async function main() {
     parseOwnedNamesObjects();
 
     // Parses the `transfers.csv` file, and creates the list of object transfers
-    parseCsvFile('./reserved-names/sample/sample.csv');
+    // This file needs to be prepared before running the script, to contain the names and addresses.
+    parseCsvFile('./reserved-names/transfers.csv');
+    // parseCsvFile('./reserved-names/sample/sample.csv');
 
     // Prepares the TXB for that and saves it in tx-data.
     prepareTx();
