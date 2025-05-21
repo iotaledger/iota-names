@@ -279,7 +279,7 @@ fun internal_set_flag(self: &mut IotaNames, subdomain: Domain, key: String, enab
         config.remove(&key);
     };
 
-    registry_mut(self).set_data(subdomain, config);
+    registry_mut(self).set_metadata(subdomain, config);
 }
 
 /// Check if subdomain creation is allowed.
