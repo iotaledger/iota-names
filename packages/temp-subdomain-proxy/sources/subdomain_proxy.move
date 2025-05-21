@@ -137,3 +137,55 @@ public fun unset_user_data(
         clock,
     );
 }
+
+public fun set_avatar(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    value: String,
+    clock: &Clock,
+) {
+    controller::set_avatar(
+        iota_names,
+        subdomain.nft(),
+        value,
+        clock,
+    );
+}
+
+public fun set_content_hash(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    value: String,
+    clock: &Clock,
+) {
+    controller::set_content_hash(
+        iota_names,
+        subdomain.nft(),
+        value,
+        clock,
+    );
+}
+
+public fun unset_avatar(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    clock: &Clock,
+) {
+    controller::unset_avatar(
+        iota_names,
+        subdomain.nft(),
+        clock,
+    );
+}
+
+public fun unset_content_hash(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    clock: &Clock,
+) {
+    controller::unset_content_hash(
+        iota_names,
+        subdomain.nft(),
+        clock,
+    );
+}
