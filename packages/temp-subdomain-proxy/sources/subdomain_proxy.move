@@ -140,7 +140,7 @@ public fun unset_user_data(
 
 public fun set_avatar(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    subdomain: &SubdomainRegistration,
     value: String,
     clock: &Clock,
 ) {
@@ -154,7 +154,7 @@ public fun set_avatar(
 
 public fun set_content_hash(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    subdomain: &SubdomainRegistration,
     value: String,
     clock: &Clock,
 ) {
@@ -168,7 +168,7 @@ public fun set_content_hash(
 
 public fun unset_avatar(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    subdomain: &SubdomainRegistration,
     clock: &Clock,
 ) {
     controller::unset_avatar(
@@ -180,7 +180,7 @@ public fun unset_avatar(
 
 public fun unset_content_hash(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    subdomain: &SubdomainRegistration,
     clock: &Clock,
 ) {
     controller::unset_content_hash(
