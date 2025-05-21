@@ -210,19 +210,13 @@ export const signAndExecute = async (txb: Transaction, network: string) => {
 export const prepareMultisigTx = async (tx: Transaction, network: string, address?: string) => {
     const adminAddress = address ?? getActiveAddress();
     const client = getClient(network);
-    const gasObjectId = process.env.GAS_OBJECT;
 
-    // enabling the gas Object check only on mainnet, to allow testnet multisig tests.
-    if (!gasObjectId) throw new Error('No gas object supplied for a mainnet transaction');
-
+    let gasPrice = await client.getReferenceGasPrice();
     // Prevent any possible RGP changes across epoch change, which would invalidate the transaction.
-    tx.setGasPrice(1_000);
+    tx.setGasPrice(gasPrice);
 
     // set the sender to be the admin address from config.
     tx.setSenderIfNotSet(adminAddress as string);
-
-    // setting up gas object for the multi-sig transaction
-    if (gasObjectId) await setupGasPayment(tx, gasObjectId, client);
 
     // first do a dryRun, to make sure we are getting a success.
     const dryRun = await inspectTransaction(tx, client);
@@ -244,24 +238,6 @@ export const prepareMultisigTx = async (tx: Transaction, network: string, addres
         fs.writeFileSync(output_location, serializedBase64);
     });
 };
-
-/// Fetch the gas Object and setup the payment for the tx.
-async function setupGasPayment(tx: Transaction, gasObjectId: string, client: IotaClient) {
-    const gasObject = await client.getObject({
-        id: gasObjectId,
-    });
-
-    if (!gasObject.data) throw new Error('Invalid Gas Object supplied.');
-
-    // set the gas payment.
-    tx.setGasPayment([
-        {
-            objectId: gasObject.data.objectId,
-            version: gasObject.data.version,
-            digest: gasObject.data.digest,
-        },
-    ]);
-}
 
 /// A helper to dev inspect a transaction.
 async function inspectTransaction(tx: Transaction, client: IotaClient) {
