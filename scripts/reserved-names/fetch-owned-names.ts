@@ -8,7 +8,7 @@ import { IotaObjectResponse } from '@iota/iota-sdk/client';
 import { readPackageInfo } from '../package-info/constants';
 import { getClient } from '../utils/utils';
 
-export const getAllOwnedDomains = async () => {
+export const fetchOwnedNames = async () => {
     const network = process.env.NETWORK;
     if (!network) {
         throw new Error(
@@ -40,7 +40,6 @@ export const getAllOwnedDomains = async () => {
         });
         names.push(...res.data);
         hasNextPage = res.hasNextPage;
-
         cursor = res.nextCursor;
 
         console.log('Total names after batch: ' + names.length);

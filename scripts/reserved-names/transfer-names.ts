@@ -9,10 +9,10 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
-import { getAllOwnedDomains } from './fetch-owned-names';
+import { fetchOwnedNames } from './fetch-owned-names';
 
 async function main() {
-    await getAllOwnedDomains();
+    await fetchOwnedNames();
 
     parseOwnedNamesObjects();
 
