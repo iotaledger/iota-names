@@ -137,7 +137,6 @@ export const Packages = (network: string) => {
                     publisher,
                     isSubdomain: false,
                     iotaNamesPackageId: packageId,
-                    network,
                     subdomainsPackageId: packageId,
                 });
                 // create display for subnames
@@ -146,7 +145,6 @@ export const Packages = (network: string) => {
                     publisher,
                     isSubdomain: true,
                     iotaNamesPackageId: packageId,
-                    network,
                     subdomainsPackageId: packageId,
                 });
             },
