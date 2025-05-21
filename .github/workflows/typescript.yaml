@@ -10,6 +10,7 @@ on:
       - "sdk/**"
       - ".eslintrc.cjs"
       - "prettier.config.cjs"
+      - "dapp/**"
   push:
     branches:
       - develop
