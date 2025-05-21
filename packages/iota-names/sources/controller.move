@@ -18,9 +18,6 @@ const CONTENT_HASH: vector<u8> = b"content_hash";
 
 use fun registry_mut as IotaNames.registry_mut;
 
-#[error]
-const EUnsupportedKey: vector<u8> = b"Unsupported key.";
-
 /// Authorization witness to call protected functions of `iota_names`.
 public struct ControllerAuth has drop {}
 
@@ -77,19 +74,17 @@ public fun set_user_data(
     clock: &Clock,
 ) {
     let registry = iota_names.registry_mut();
-    let mut data = *registry.get_data(nft.domain());
+    let mut data = *registry.get_user_data(nft.domain());
     let domain = nft.domain();
 
     registry.assert_nft_is_authorized(nft, clock);
-    let key_bytes = *key.as_bytes();
-    assert!(key_bytes == AVATAR || key_bytes == CONTENT_HASH, EUnsupportedKey);
 
     if (data.contains(&key)) {
         data.remove(&key);
     };
 
     data.insert(key, value);
-    registry.set_data(domain, data);
+    registry.set_user_data(domain, data);
 }
 
 /// User-facing function - remove a key from the name record's data.
@@ -100,7 +95,7 @@ public fun unset_user_data(
     clock: &Clock,
 ) {
     let registry = iota_names.registry_mut();
-    let mut data = *registry.get_data(nft.domain());
+    let mut data = *registry.get_user_data(nft.domain());
     let domain = nft.domain();
 
     registry.assert_nft_is_authorized(nft, clock);
@@ -109,7 +104,93 @@ public fun unset_user_data(
         data.remove(&key);
     };
 
-    registry.set_data(domain, data);
+    registry.set_user_data(domain, data);
+}
+
+/// Set the avatar metadata for the record
+public fun set_avatar(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    value: String,
+    clock: &Clock,
+) {
+    let registry = iota_names.registry_mut();
+    let mut data = *registry.get_metadata(nft.domain());
+    let domain = nft.domain();
+
+    registry.assert_nft_is_authorized(nft, clock);
+    let key = AVATAR.to_string();
+
+    if (data.contains(&key)) {
+        data.remove(&key);
+    };
+
+    data.insert(key, value);
+    registry.set_metadata(domain, data);
+}
+
+/// Set the content hash metadata for the record
+public fun set_content_hash(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    value: String,
+    clock: &Clock,
+) {
+    let registry = iota_names.registry_mut();
+    let mut data = *registry.get_metadata(nft.domain());
+    let domain = nft.domain();
+
+    registry.assert_nft_is_authorized(nft, clock);
+    let key = CONTENT_HASH.to_string();
+
+    if (data.contains(&key)) {
+        data.remove(&key);
+    };
+
+    data.insert(key, value);
+    registry.set_metadata(domain, data);
+}
+
+/// Remove the currently set avatar metadata
+public fun unset_avatar(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    clock: &Clock,
+) {
+    let registry = iota_names.registry_mut();
+    let mut data = *registry.get_metadata(nft.domain());
+    let domain = nft.domain();
+
+    registry.assert_nft_is_authorized(nft, clock);
+
+    let key = AVATAR.to_string();
+
+    if (data.contains(&key)) {
+        data.remove(&key);
+    };
+
+    registry.set_metadata(domain, data);
+}
+
+/// Remove the currently set content hash metadata
+public fun unset_content_hash(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    clock: &Clock,
+) {
+    let registry = iota_names.registry_mut();
+    let mut data = *registry.get_metadata(nft.domain());
+    let domain = nft.domain();
+
+    registry.assert_nft_is_authorized(nft, clock);
+
+    let key = CONTENT_HASH.to_string();
+
+    if (data.contains(&key)) {
+        data.remove(&key);
+    };
+
+    registry.set_metadata(domain, data);
 }
 
 public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, clock: &Clock) {

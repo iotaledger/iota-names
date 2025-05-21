@@ -30,7 +30,7 @@ fun create_and_update() {
 
     // check default values
     assert_eq(record.nft_id(), nft_id);
-    assert_eq(*record.data(), vec_map::empty());
+    assert_eq(*record.user_data(), vec_map::empty());
     assert_eq(record.target_address(), none());
     assert_eq(record.expiration_timestamp_ms(), 0);
 
@@ -39,13 +39,13 @@ fun create_and_update() {
     data.insert(utf8(b"age"), utf8(b"forever young"));
 
     // update values
-    record.set_data(copy data);
+    record.set_user_data(copy data);
     record.set_target_address(some(@iota_names));
     record.set_expiration_timestamp_ms(123456789); // 123456789 ms = 3.9 years
 
     // check updated values
     assert_eq(record.nft_id(), nft_id);
-    assert_eq(*record.data(), data);
+    assert_eq(*record.user_data(), data);
     assert_eq(record.target_address(), some(@iota_names));
     assert_eq(record.expiration_timestamp_ms(), 123456789);
 }

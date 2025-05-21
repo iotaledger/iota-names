@@ -244,13 +244,18 @@ public fun set_expiration_timestamp_ms(
     nft.set_expiration_timestamp_ms(expiration_timestamp_ms);
 }
 
-/// Update the `data` of the given `NameRecord` using a `IotaNamesRegistration`.
-/// Use with caution and validate(!!) that any system fields are not removed
-/// (accidently),
-/// when building authorized packages that can write the metadata field.
-public fun set_data(self: &mut Registry, domain: Domain, data: VecMap<String, String>) {
+/// Update the user data of the given `NameRecord` using a `IotaNamesRegistration`.
+public fun set_user_data(self: &mut Registry, domain: Domain, user_data: VecMap<String, String>) {
     let record = &mut self.registry[domain];
-    record.set_data(data);
+    record.set_user_data(user_data);
+}
+
+/// Update the metadata of the given `NameRecord` using a `IotaNamesRegistration`.
+/// Use with caution and validate(!!) that any system fields are not removed
+/// when building authorized packages that can write the metadata field.
+public fun set_metadata(self: &mut Registry, domain: Domain, metadata: VecMap<String, String>) {
+    let record = &mut self.registry[domain];
+    record.set_metadata(metadata);
 }
 
 // === Reads ===
@@ -292,10 +297,16 @@ public fun assert_nft_is_authorized(self: &Registry, nft: &IotaNamesRegistration
     assert!(!nft.has_expired(clock), ENftExpired);
 }
 
-/// Returns the `data` associated with the given `Domain`.
-public fun get_data(self: &Registry, domain: Domain): &VecMap<String, String> {
+/// Returns the user data associated with the given `Domain`.
+public fun get_user_data(self: &Registry, domain: Domain): &VecMap<String, String> {
     let record = &self.registry[domain];
-    record.data()
+    record.user_data()
+}
+
+/// Returns the metadata associated with the given `Domain`.
+public fun get_metadata(self: &Registry, domain: Domain): &VecMap<String, String> {
+    let record = &self.registry[domain];
+    record.metadata()
 }
 
 // === Private Functions ===

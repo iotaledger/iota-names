@@ -294,7 +294,7 @@ fun is_extension_allowed(metadata: &VecMap<String, String>): bool {
 
 /// Get the name record's metadata for a subdomain.
 fun record_metadata(self: &IotaNames, subdomain: Domain): VecMap<String, String> {
-    *registry(self).get_data(subdomain)
+    *registry(self).get_metadata(subdomain)
 }
 
 /// Does all the regular checks for validating that a parent `IotaNamesRegistration` object

@@ -24,8 +24,10 @@ public struct NameRecord has copy, drop, store {
     expiration_timestamp_ms: u64,
     /// The target address that this domain points to
     target_address: Option<address>,
-    /// Additional data which may be stored in a record
-    data: VecMap<String, String>,
+    /// Additional user data which may be stored in a record
+    user_data: VecMap<String, String>,
+    /// Predefined metadata for use by external services
+    metadata: VecMap<String, String>,
 }
 
 /// Create a new NameRecord.
@@ -34,7 +36,8 @@ public fun new(nft_id: ID, expiration_timestamp_ms: u64): NameRecord {
         nft_id,
         expiration_timestamp_ms,
         target_address: option::none(),
-        data: vec_map::empty(),
+        user_data: vec_map::empty(),
+        metadata: vec_map::empty(),
     }
 }
 
@@ -44,25 +47,23 @@ public fun new_leaf(parent_id: ID, target_address: Option<address>): NameRecord 
         nft_id: parent_id,
         expiration_timestamp_ms: constants::leaf_expiration_timestamp(),
         target_address,
-        data: vec_map::empty(),
+        user_data: vec_map::empty(),
+        metadata: vec_map::empty(),
     }
 }
 
 // === Setters ===
 
-/// Set data as a vec_map directly overriding the data set in the
-/// registration self. This simplifies the editing flow and gives
-/// the user and clients a fine-grained control over custom data.
-///
-/// Here's a meta example of how a PTB would look like:
-/// ```
-/// let record = moveCall('data', [domain_name]);
-/// moveCall('vec_map::insert', [record.data, key, value]);
-/// moveCall('vec_map::remove', [record.data, other_key]);
-/// moveCall('set_data', [domain_name, record.data]);
-/// ```
-public fun set_data(self: &mut NameRecord, data: VecMap<String, String>) {
-    self.data = data;
+/// Set user data as a vec_map directly overriding the data set in the
+/// registration.
+public fun set_user_data(self: &mut NameRecord, user_data: VecMap<String, String>) {
+    self.user_data = user_data;
+}
+
+/// Set metadata as a vec_map directly overriding the data set in the
+/// registration.
+public fun set_metadata(self: &mut NameRecord, metadata: VecMap<String, String>) {
+    self.metadata = metadata;
 }
 
 /// Set the `target_address` field of the `NameRecord`.
@@ -91,8 +92,11 @@ public fun is_leaf_record(self: &NameRecord): bool {
     self.expiration_timestamp_ms == constants::leaf_expiration_timestamp()
 }
 
-/// Read the `data` field from the `NameRecord`.
-public fun data(self: &NameRecord): &VecMap<String, String> { &self.data }
+/// Read the `user_data` field from the `NameRecord`.
+public fun user_data(self: &NameRecord): &VecMap<String, String> { &self.user_data }
+
+/// Read the `metadata` field from the `NameRecord`.
+public fun metadata(self: &NameRecord): &VecMap<String, String> { &self.metadata }
 
 /// Read the `target_address` field from the `NameRecord`.
 public fun target_address(self: &NameRecord): Option<address> {
