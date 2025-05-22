@@ -41,7 +41,7 @@ const EAuctionNotEnded: vector<u8> = b"The auction has not ended.";
 #[error]
 const EAuctionEnded: vector<u8> = b"The auction ended.";
 #[error]
-const ENotWinner: vector<u8> = b"Not winner of the auction.";
+const ENotWinner: vector<u8> = b"Sender address is not the winner of the auction.";
 #[error]
 const EBidTooLow: vector<u8> = b"The bid is too low, minimum overbid should be at least 1 IOTA.";
 #[error]
@@ -63,7 +63,7 @@ public struct Auction has store {
     domain: Domain,
     start_timestamp_ms: u64,
     end_timestamp_ms: u64,
-    winner: address,
+    current_bidder: address,
     current_bid: Coin<IOTA>,
     nft: IotaNamesRegistration,
 }
@@ -106,7 +106,7 @@ public fun start_auction_and_place_bid(
         domain,
         start_timestamp_ms: clock.timestamp_ms(),
         end_timestamp_ms: clock.timestamp_ms() + AUCTION_BIDDING_PERIOD_MS,
-        winner: ctx.sender(),
+        current_bidder: ctx.sender(),
         current_bid: bid,
         nft,
     };
@@ -116,7 +116,7 @@ public fun start_auction_and_place_bid(
         start_timestamp_ms: auction.start_timestamp_ms,
         end_timestamp_ms: auction.end_timestamp_ms,
         starting_bid,
-        bidder: auction.winner,
+        bidder: auction.current_bidder,
     });
 
     self.auctions.push_front(domain, auction)
@@ -145,7 +145,7 @@ public fun place_bid(
         domain,
         start_timestamp_ms,
         mut end_timestamp_ms,
-        winner,
+        current_bidder,
         current_bid,
         nft,
     } = self.auctions.remove(domain);
@@ -159,8 +159,8 @@ public fun place_bid(
     let bid_amount = bid.value();
     assert!(bid_amount >= current_winning_bid + AUCTION_MIN_OVERBID_VALUE_IOTA, EBidTooLow);
 
-    // Return the previous winner their bid
-    iota::transfer::public_transfer(current_bid, winner);
+    // Return the previous bidder their bid
+    iota::transfer::public_transfer(current_bid, current_bidder);
 
     event::emit(BidEvent {
         domain,
@@ -194,7 +194,7 @@ public fun place_bid(
         domain,
         start_timestamp_ms,
         end_timestamp_ms,
-        winner: tx_context::sender(ctx),
+        current_bidder: tx_context::sender(ctx),
         current_bid: bid,
         nft,
     };
@@ -219,7 +219,7 @@ public fun claim(
         domain: _,
         start_timestamp_ms,
         end_timestamp_ms,
-        winner,
+        current_bidder,
         current_bid,
         nft,
     } = self.auctions.remove(domain);
@@ -228,14 +228,14 @@ public fun claim(
     assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     // Ensure the sender is the winner
-    assert!(ctx.sender() == winner, ENotWinner);
+    assert!(ctx.sender() == current_bidder, ENotWinner);
 
     event::emit(AuctionFinalizedEvent {
         domain,
         start_timestamp_ms,
         end_timestamp_ms,
         winning_bid: coin::value(&current_bid),
-        winner,
+        winner: current_bidder,
     });
 
     // Extract the NFT and their bid, returning the NFT to the user
@@ -253,7 +253,7 @@ public fun claim(
 /// The domain name being auctioned.
 ///
 /// #### Return
-/// (`start_timestamp_ms`, `end_timestamp_ms`, `winner`, `highest_amount`)
+/// (`start_timestamp_ms`, `end_timestamp_ms`, `current_bidder`, `highest_amount`)
 public fun get_auction_metadata(
     self: &AuctionHouse,
     domain_name: String,
@@ -266,7 +266,7 @@ public fun get_auction_metadata(
         return (
             some(auction.start_timestamp_ms),
             some(auction.end_timestamp_ms),
-            some(auction.winner),
+            some(auction.current_bidder),
             some(highest_amount),
         )
     };
@@ -329,7 +329,7 @@ fun admin_finalize_auction_internal(
         domain: _,
         start_timestamp_ms,
         end_timestamp_ms,
-        winner,
+        current_bidder,
         current_bid,
         nft,
     } = self.auctions.remove(domain);
@@ -342,11 +342,11 @@ fun admin_finalize_auction_internal(
         start_timestamp_ms,
         end_timestamp_ms,
         winning_bid: coin::value(&current_bid),
-        winner,
+        winner: current_bidder,
     });
 
     self.balance.join(current_bid.into_balance());
-    transfer::public_transfer(nft, winner);
+    transfer::public_transfer(nft, current_bidder);
 }
 
 /// Admin functionality used to finalize an arbitrary number of auctions.
