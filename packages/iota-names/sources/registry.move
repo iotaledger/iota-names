@@ -4,6 +4,7 @@
 
 module iota_names::registry;
 
+use iota::event;
 use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
@@ -47,6 +48,16 @@ public struct Registry has store {
     /// The `reverse_registry` table maps `address` to `domain_name`.
     /// Updated in the `set_reverse_lookup` function.
     reverse_registry: Table<address, Domain>,
+}
+
+public struct IotaNamesRegistryEvent has copy, drop {
+    key: String,
+    value: NameRecord
+}
+
+public struct IotaNamesReverseRegistryEvent has copy, drop {
+    key: address,
+    value: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -221,7 +232,13 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     assert!(target.is_some(), ETargetNotSet);
     assert!(some(address) == target, ERecordMismatch);
 
+    event::emit(IotaNamesReverseRegistryEvent {
+        key: address,
+        value: domain
+    });
+
     if (self.reverse_registry.contains(address)) {
+        // TODO different event for update and add?
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
         self.reverse_registry.add(address, domain);
@@ -344,6 +361,12 @@ fun internal_add_record(
         object::id(&nft),
         nft.expiration_timestamp_ms(),
     );
+    
+    event::emit(IotaNamesRegistryEvent {
+        key: domain.to_string(),
+        value: name_record
+    });
+
     self.registry.add(domain, name_record);
     nft
 }
