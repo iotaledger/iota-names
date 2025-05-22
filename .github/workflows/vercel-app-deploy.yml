@@ -1,4 +1,4 @@
-name: Monorepo App Vercel Deploy
+name: Reusable Vercel Deploy
 
 on:
   workflow_call:
