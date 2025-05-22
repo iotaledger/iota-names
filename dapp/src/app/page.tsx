@@ -5,6 +5,8 @@
 
 import { ConnectButton } from '@iota/dapp-kit';
 
+import { AvailabilityCheck } from '@/components/AvailabilityCheck';
+
 export default function Home() {
     return (
         <main className="flex flex-col h-screen">
@@ -17,7 +19,7 @@ export default function Home() {
                 </div>
             </div>
             <div className="flex w-full items-center justify-center h-full p-8 pb-20 gap-16 sm:p-20">
-                <h1>dApp</h1>
+                <AvailabilityCheck />
             </div>
         </main>
     );

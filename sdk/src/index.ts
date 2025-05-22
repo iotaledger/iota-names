@@ -15,3 +15,4 @@ export {
     getPricelistConfigType,
     getRenewalPricelistConfigType,
 } from './helpers';
+export { isValidIotaName } from './utils';
