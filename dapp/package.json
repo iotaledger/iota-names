@@ -9,6 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@iota/apps-ui-icons": "^0.3.0",
         "@iota/apps-ui-kit": "^0.5.0",
         "@iota/core": "1.0.0-beta.30",
         "@iota/dapp-kit": "^0.4.4",

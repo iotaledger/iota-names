@@ -6,6 +6,7 @@
 import { ConnectButton } from '@iota/dapp-kit';
 
 import { AvailabilityCheck } from '@/components/AvailabilityCheck';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
 export default function Home() {
     return (
@@ -13,8 +14,9 @@ export default function Home() {
             <div className="flex relative justify-center m-4">
                 <h1 className="flex items-center h-14 text-headline-sm">IOTA NAMES</h1>
                 <div className="absolute right-0 h-full">
-                    <div className="flex items-center h-full">
+                    <div className="flex items-center h-full space-y-4">
                         <ConnectButton connectText="Connect" />
+                        <ThemeSwitcher />
                     </div>
                 </div>
             </div>

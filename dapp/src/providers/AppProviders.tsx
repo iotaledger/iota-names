@@ -10,6 +10,7 @@ import { useState } from 'react';
 
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
+import { ThemeProvider } from './';
 import { IotaNamesClientProvider } from './contexts';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
@@ -44,7 +45,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                             },
                         ]}
                     >
-                        {children}
+                        <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
                     </WalletProvider>
                 </IotaNamesClientProvider>
             </IotaClientProvider>
