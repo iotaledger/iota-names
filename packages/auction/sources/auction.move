@@ -116,7 +116,7 @@ public fun start_auction_and_place_bid(
         start_timestamp_ms: auction.start_timestamp_ms,
         end_timestamp_ms: auction.end_timestamp_ms,
         starting_bid,
-        current_bidder: auction.current_bidder,
+        bidder: auction.current_bidder,
     });
 
     self.auctions.push_front(domain, auction)
