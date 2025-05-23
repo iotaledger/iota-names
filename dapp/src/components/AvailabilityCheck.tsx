@@ -39,40 +39,36 @@ export function AvailabilityCheck() {
     };
 
     return (
-        <div className="flex flex-col items-center w-160 h-120">
-            <div className="flex items-center justify-evenly w-full">
-                <div className="flex w-90 h-20">
-                    <Input
-                        type={InputType.Text}
-                        placeholder="Check name availability"
-                        value={searchValue ?? ''}
-                        onChange={({ target: { value } }) => handleOnSearchInputChange(value)}
-                        errorMessage={errorMessage ?? undefined}
-                        onKeyDown={(event) => {
-                            if (event.key === 'Enter' && isEnabled) {
-                                checkNameAvailability();
-                            }
-                        }}
-                    />
-                </div>
-                <div className="pb-7">
-                    <Button
-                        size={ButtonSize.Medium}
-                        text="Search"
-                        disabled={!isEnabled}
-                        onClick={checkNameAvailability}
-                    />
-                </div>
+        <div className="flex flex-col items-center w-full space-y-4">
+            <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
+                <Input
+                    type={InputType.Text}
+                    placeholder="Check name availability"
+                    value={searchValue ?? ''}
+                    onChange={({ target: { value } }) => handleOnSearchInputChange(value)}
+                    errorMessage={errorMessage ?? undefined}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' && isEnabled) {
+                            checkNameAvailability();
+                        }
+                    }}
+                />
+                <Button
+                    size={ButtonSize.Medium}
+                    text="Search"
+                    disabled={!isEnabled}
+                    onClick={checkNameAvailability}
+                />
             </div>
-            <div className="w-120 h-40 rounded-lg p-2 text-display-lg">
-                {isAvailable !== null ? (
-                    isAvailable ? (
-                        <div className="text-green-200">Available</div>
+            {isAvailable !== null && (
+                <div className="text-headline-sm">
+                    {isAvailable ? (
+                        <span className="text-green-700 dark:text-green-200">Available</span>
                     ) : (
-                        <span className="text-red-200">Unavailable</span>
-                    )
-                ) : null}
-            </div>
+                        <span className="text-red-700 dark:text-red-200">Unavailable</span>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
