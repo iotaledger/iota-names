@@ -186,12 +186,19 @@ public fun add_leaf_record(
     // Removes an existing record if it exists and is expired.
     self.remove_existing_record_if_exists_and_expired(domain, clock, false);
 
+    let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
+
+    event::emit(IotaNamesRegistryEvent {
+        key: domain.to_string(),
+        value: name_record
+    });
+
     // adds the `leaf` record to the registry.
     self
         .registry
         .add(
             domain,
-            name_record::new_leaf(parent_name_record.nft_id(), some(target)),
+            name_record
         );
 }
 
