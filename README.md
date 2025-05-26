@@ -73,7 +73,7 @@ All in one:
 
 ```bash
 # Run network in the background without logs
-iota start --force-regenesis --with-faucet > /dev/null 2>&1 &
+iota start --force-regenesis --with-faucet --committee-size 2 > /dev/null 2>&1 &
 iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:8000
 iota client switch --env localnet
 # wait for the network to start
