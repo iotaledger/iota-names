@@ -5,6 +5,7 @@
 module iota_names_coupons::coupons;
 
 use iota::bag::{Self, Bag};
+use iota::hash::blake2b256;
 use iota_names_coupons::coupon::Coupon;
 use std::string::String;
 
@@ -31,14 +32,16 @@ public(package) fun new(ctx: &mut TxContext): Coupons {
 /// Private internal functions
 /// An internal function to save the coupon in the shared object's config.
 public(package) fun save_coupon(self: &mut Coupons, code: String, coupon: Coupon) {
-    assert!(!self.coupons.contains(code), ECouponAlreadyExists);
-    self.coupons.add(code, coupon);
+    let hash = blake2b256(code.as_bytes());
+    assert!(!self.coupons.contains(hash), ECouponAlreadyExists);
+    self.coupons.add(hash, coupon);
 }
 
 // A function to remove a coupon from the system.
 public(package) fun remove_coupon(self: &mut Coupons, code: String) {
-    assert!(self.coupons.contains(code), ECouponDoesNotExist);
-    let _: Coupon = self.coupons.remove(code);
+    let hash = blake2b256(code.as_bytes());
+    assert!(self.coupons.contains(hash), ECouponDoesNotExist);
+    let _: Coupon = self.coupons.remove(hash);
 }
 
 public(package) fun coupons(data: &Coupons): &Bag {

@@ -19,6 +19,7 @@ module iota_names_coupons::coupon_house;
 use iota::bag::Bag;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
+use iota::hash::blake2b256;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::payment::PaymentIntent;
 use iota_names_coupons::coupon::{Self, Coupon};
@@ -82,10 +83,11 @@ public fun apply_coupon(
     let coupon_house = coupon_house(iota_names);
 
     // Validate that specified coupon is valid.
-    assert!(coupon_house.coupons_bag().contains(coupon_code), ECouponDoesNotExist);
+    let hash = blake2b256(coupon_code.as_bytes());
+    assert!(coupon_house.coupons_bag().contains(hash), ECouponDoesNotExist);
 
     // Borrow coupon from the table.
-    let coupon: &Coupon = &coupon_house.coupons_bag()[coupon_code];
+    let coupon: &Coupon = &coupon_house.coupons_bag()[hash];
     let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
     let mut idx_opt = metadata.get_idx_opt(&USED_NON_STACKING_KEY.to_string());
     if (idx_opt.is_some()) {
@@ -101,7 +103,7 @@ public fun apply_coupon(
     // Verify coupon house is authorized to get the registry / register names.
     let coupon_house = coupon_house_mut(iota_names);
     // Mutably borrow coupon from the table.
-    let coupon: &mut Coupon = &mut coupon_house.coupons_bag_mut()[coupon_code];
+    let coupon: &mut Coupon = &mut coupon_house.coupons_bag_mut()[hash];
 
     // We need to do a total of 5 checks, based on `CouponRules`
     // Our checks work with `AND`, all of the conditions must pass for a coupon
@@ -125,7 +127,7 @@ public fun apply_coupon(
     // Clean up our registry by removing the coupon if no more available claims!
     if (!coupon.rules().has_available_claims()) {
         // remove the coupon, since it's no longer usable.
-        coupon_house.coupons_mut().remove_coupon(coupon_code);
+        let _: Coupon = coupon_house.coupons_bag_mut().remove(hash);
     };
 
     apply_percentage_discount(
