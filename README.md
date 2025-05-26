@@ -19,7 +19,7 @@ For combining signatures in order to execute a multi-sig operation, [you can fol
 
 Prerequisites:
 
-- IOTA binary https://docs.iota.org/developer/getting-started/install-iota
+- IOTA binary with the "iota-names" feature: `cargo install --locked --bin iota --features=iota-names --path crates/iota` in https://github.com/iotaledger/iota
 - pnpm https://pnpm.io
 
 1. Start a local IOTA network in one terminal:
@@ -53,6 +53,39 @@ pnpm i
 cd scripts && pnpm ts-node init/init.ts localnet
 ```
 
+6. Get environment variables for the IOTA CLI:
+
+```bash
+pnpm run envs localnet
+```
+
+Set the resulting environment variables in your terminal.
+
 Done, IOTA-Names is now ready for use 🚀
 
-TODO: show how to setup the ENV variables so it can be used in the IOTA CLI without recompiling it, dependent on https://github.com/iotaledger/iota/pull/6650.
+Register your first name with:
+
+```bash
+iota name register first.iota
+```
+
+All in one:
+
+```bash
+# Run network in the background without logs
+iota start --force-regenesis --with-faucet > /dev/null 2>&1 &
+iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:8000
+iota client switch --env localnet
+# wait for the network to start
+sleep 5
+iota client faucet
+# wait for the faucet tx
+sleep 2
+pnpm i
+cd scripts && pnpm ts-node init/init.ts localnet
+# get more funds, can be removed when register works with a single gas coin
+iota client faucet
+pnpm run envs localnet
+```
+
+To stop the local network in the background, run: `kill %1` or `kill <job-number>` that was printed when it was started.
