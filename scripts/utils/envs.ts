@@ -1,5 +1,5 @@
 // Get environment variables from a config to set for the IOTA CLI.
-// pnpm run utils/envs.ts <network> [shell]
+// pnpm run envs <network> [shell]
 
 import * as fs from 'fs';
 
