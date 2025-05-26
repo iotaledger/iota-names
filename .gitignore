@@ -17,3 +17,4 @@ published.json
 constants.sdk.json
 dist
 migration.patch
+.vercel

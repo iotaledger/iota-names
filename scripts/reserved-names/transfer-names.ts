@@ -9,6 +9,23 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
+import { fetchOwnedNames } from './fetch-owned-names';
+
+async function main() {
+    await fetchOwnedNames();
+
+    parseOwnedNamesObjects();
+
+    // Parses the `transfers.csv` file, and creates the list of object transfers
+    // This file needs to be prepared before running the script, to contain the names and addresses.
+    parseCsvFile('./reserved-names/transfers.csv');
+    // parseCsvFile('./reserved-names/sample/sample.csv');
+
+    // Prepares the TXB for that and saves it in tx-data.
+    prepareTx();
+}
+
+main();
 
 // A {name: address} map
 const domains: Record<string, string> = {};
@@ -27,13 +44,13 @@ type DomainData = {
     name: string;
 };
 
-// Reads the owned objects + formats them in a `name: objectId` format.
-const parseOwnedObjects = () => {
-    const ownedObjects = JSON.parse(
-        fs.readFileSync('./reserved-names/owned-objects.json').toString(),
+// Reads the owned names + formats them in a `name: objectId` format.
+const parseOwnedNamesObjects = () => {
+    const ownedNamesObjects = JSON.parse(
+        fs.readFileSync('./reserved-names/owned-names.json').toString(),
     ) as IotaObjectResponse[];
 
-    const names: DomainData[] = ownedObjects.map(({ data }) => ({
+    const names: DomainData[] = ownedNamesObjects.map(({ data }) => ({
         objectId: data?.objectId || '',
         //@ts-ignore-next-line
         name: data?.content!.fields!.domain_name || '',
@@ -46,8 +63,8 @@ const parseOwnedObjects = () => {
 };
 
 // Parses the combined CSV
-const parseCsvFile = () => {
-    fs.readFileSync('./reserved-names/sample/sample.csv')
+const parseCsvFile = (fileName: string) => {
+    fs.readFileSync(fileName)
         .toString()
         .split('\n')
         .map((x) => x.split(','))
@@ -61,7 +78,7 @@ const parseCsvFile = () => {
         )
         .filter((x) => {
             const isValid = isValidIotaAddress(x.address);
-            if (!isValid) console.info(`Invalid address: ${x.address} | ${x.name} | ${x.domain}`);
+            if (!isValid) console.warn(`Invalid address: ${x.address} | ${x.name} | ${x.domain}`);
             return isValid;
         })
         .map((x) => {
@@ -69,14 +86,16 @@ const parseCsvFile = () => {
             return x;
         })
         .map((x) => {
-            if (!domains[x.domain]) console.info(`Couldn't find objectId for name ${x.domain}`);
+            if (!domains[x.domain]) console.warn(`Couldn't find objectId for name ${x.domain}`);
             x.domainObjectId = domains[x.domain];
             return x;
             // lets find the objectId for that domain.
         })
         .forEach((recipient) => {
-            if (!recipients[recipient.address]) recipients[recipient.address] = new Set();
-            recipients[recipient.address].add(recipient.domainObjectId!);
+            if (!recipients[recipient.address] && recipient.domainObjectId) {
+                recipients[recipient.address] = new Set();
+                recipients[recipient.address].add(recipient.domainObjectId);
+            }
         });
 
     // recipients -> address -> [] objects it receives
@@ -84,22 +103,20 @@ const parseCsvFile = () => {
 };
 
 const prepareTx = () => {
+    const network = process.env.NETWORK;
+    if (!network) {
+        throw new Error(
+            'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+        );
+    }
+
     const txb = new Transaction();
-    const pkg = readPackageInfo('mainnet');
+    const pkg = readPackageInfo(network);
 
     for (let recipient of Object.keys(recipients)) {
         const objects = [...recipients[recipient]].filter((x) => !!x);
         txb.transferObjects([...objects.map((x) => txb.object(x))], txb.pure.address(recipient));
     }
 
-    return prepareMultisigTx(txb, 'mainnet', pkg.adminAddress);
+    return prepareMultisigTx(txb, network, pkg.adminAddress);
 };
-
-// parses all owned Objects from `json` file.
-// If you want to refresh the owned data for the IOTA-Names admin, re-run `ts-node objects.ts`.
-parseOwnedObjects();
-// Parses the `transfers.csv` file, and creates the list of object transfers
-parseCsvFile();
-
-// Prepares the TXB for that and saves it in tx-data.
-prepareTx();

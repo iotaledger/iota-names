@@ -226,17 +226,17 @@ fun assert_auction(
     domain_name: String,
     expected_start_ms: Option<u64>,
     expected_end_ms: Option<u64>,
-    expected_winner: Option<address>,
+    expected_bidder: Option<address>,
     expected_highest_amount: Option<u64>,
 ) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let auction_house = scenario.take_shared<AuctionHouse>();
-    let (start_ms, end_ms, winner, highest_amount) = auction_house.get_auction_metadata(
+    let (start_ms, end_ms, current_bidder, highest_amount) = auction_house.get_auction_metadata(
         domain_name,
     );
     assert!(start_ms == expected_start_ms, 0);
     assert!(end_ms == expected_end_ms, 0);
-    assert!(winner == expected_winner, 0);
+    assert!(current_bidder == expected_bidder, 0);
     assert!(highest_amount == expected_highest_amount, 0);
     test_scenario::return_shared(auction_house);
 }
@@ -341,7 +341,7 @@ fun test_claim_aborts_if_winner_claims_twice() {
 }
 
 #[test]
-fun test_winner_can_place_bid() {
+fun test_current_bidder_can_place_bid() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
