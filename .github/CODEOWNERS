@@ -9,6 +9,7 @@
 /sdk/ @iotaledger/tooling
 /dapp/ @iotaledger/tooling
 /build-scripts/ @iotaledger/tooling
+/crates/iota-names-indexer/ @iotaledger/dev-tools
 /linting/ @iotaledger/tooling
 
 /.eslintrc.cjs @iotaledger/tooling
