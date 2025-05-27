@@ -73,8 +73,8 @@ export function useNameRecord(
                 } as NameRecordData;
             } else {
                 return {
-                    type: 'not-priced'
-                } as NameRecordData
+                    type: 'not-priced',
+                } as NameRecordData;
             }
         },
         enabled: !!iotaNamesClient && name.length > 0,
