@@ -37,6 +37,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # pin@v4.0.0
 
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@canary
+
       - name: Deploy to Vercel
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
         with:
