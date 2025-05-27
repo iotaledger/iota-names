@@ -31,7 +31,6 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         denyListPackageId: packageInfo.DenyList.packageId,
         iotaNames: packageInfo.IotaNames.iotaNames,
         packageId: packageInfo.IotaNames.packageId,
-        packageIdPricing: packageInfo.IotaNames.packageId,
         paymentsPackageId: packageInfo.Payments.packageId,
         publisherId: packageInfo.IotaNames.publisher,
         registryTableId: '',

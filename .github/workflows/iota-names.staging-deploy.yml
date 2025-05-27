@@ -1,0 +1,22 @@
+name: Staging Deploy for IOTA Names
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - "dapp/**"
+      - ".github/workflows/iota-names.staging-deploy.yml"
+      - ".github/workflows/vercel-app-deploy.yml"
+
+jobs:
+  deploy-staging:
+    uses: ./.github/workflows/vercel-app-deploy.yml
+    with:
+      PRODUCTION: false
+      APP_NAME: IOTA_NAMES
+    secrets:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
+      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}

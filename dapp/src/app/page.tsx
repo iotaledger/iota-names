@@ -1,7 +1,26 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+'use client';
+
+import { ConnectButton } from '@iota/dapp-kit';
+
+import { AvailabilityCheck } from '@/components/AvailabilityCheck';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+
 export default function Home() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-            <h1>dApp</h1>
-        </div>
+        <main className="flex flex-col h-screen">
+            <div className="flex relative justify-between p-4">
+                <h1 className="flex items-center text-headline-sm">IOTA NAMES</h1>
+                <div className="flex items-center space-x-2">
+                    <ThemeSwitcher />
+                    <ConnectButton connectText="Connect" />
+                </div>
+            </div>
+            <div className="container w-full h-full py-12 flex">
+                <AvailabilityCheck />
+            </div>
+        </main>
     );
 }

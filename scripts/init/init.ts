@@ -5,7 +5,7 @@
 import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { readPackageInfo } from '../package-info/constants';
+import { readPackageInfo, writePackageInfo } from '../package-info/constants';
 import { parseCsvFile, reserveDomains } from '../reserved-names/reserve-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
@@ -75,6 +75,9 @@ export const init = async (
     const result = await signAndExecute(tx, network);
     await client.waitForTransaction({ digest: result.digest });
     console.log(`Transaction digest: ${result.digest}`);
+    // Update config with new owner
+    packageInfo.adminAddress = newOwner;
+    writePackageInfo(network, packageInfo);
 };
 
 init(network, newOwner, !!process.env.IS_CI_JOB);

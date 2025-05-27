@@ -63,7 +63,7 @@ export class IotaNamesClient {
             name: {
                 type: getConfigType(
                     this.config.packageId,
-                    getPricelistConfigType(this.config.packageIdPricing),
+                    getPricelistConfigType(this.config.packageId),
                 ),
                 value: { dummy_field: false },
             },
@@ -117,7 +117,7 @@ export class IotaNamesClient {
             name: {
                 type: getConfigType(
                     this.config.packageId,
-                    getRenewalPricelistConfigType(this.config.packageIdPricing),
+                    getRenewalPricelistConfigType(this.config.packageId),
                 ),
                 value: { dummy_field: false },
             },
