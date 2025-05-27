@@ -8,53 +8,28 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { isValidIotaName } from '@iota/iota-names-sdk';
 import { useState } from 'react';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useNameRecord } from '@/hooks/useNameRecord';
 
 export function AvailabilityCheck() {
-    const { iotaNamesClient } = useIotaNamesClient();
     const { isConnected } = useCurrentWallet();
-    const [searchValue, setSearchValue] = useState<string | null>(null);
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [searchValue, setSearchValue] = useState<string>('');
+    const [name, setName] = useState<string>('');
     const [isEnabled, setIsEnabled] = useState<boolean>(false);
-    const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-    const [price, setPrice] = useState<number | null>(null);
 
-    const handleOnSearchInputChange = (value: string) => {
-        setSearchValue(value ?? null);
-        setIsAvailable(null);
-        setPrice(null);
+    const { data, error } = useNameRecord(name);
 
-        const isValidSearch = isValidIotaName(value);
-        setIsEnabled(isValidSearch);
-        setErrorMessage(value && !isValidSearch ? 'Invalid name' : null);
+    console.log(data, error);
+
+    const handleOnSearchChange = (value: string) => {
+        if (name.length > 0) {
+            setName('');
+        }
+        setSearchValue(value);
+        setIsEnabled(isValidIotaName(value));
     };
 
-    const checkNameAvailability = async () => {
-        if (!searchValue) return;
-
-        try {
-            const nameRecordResponse = await iotaNamesClient.getNameRecord(searchValue);
-            const nameIsAvailable = nameRecordResponse === null;
-            setIsAvailable(nameIsAvailable);
-
-            if (nameIsAvailable) {
-                const price = await iotaNamesClient.calculatePrice({
-                    name: searchValue,
-                    years: 1,
-                    isRegistration: true,
-                });
-                setPrice(price);
-            } else {
-                setPrice(null);
-            }
-
-            setErrorMessage(null);
-        } catch (err) {
-            console.error(err);
-            setErrorMessage('Error fetching name record');
-            setIsAvailable(null);
-            setPrice(null);
-        }
+    const handleOnSearch = async () => {
+        setName(searchValue);
     };
 
     const handlePurchase = () => {
@@ -68,11 +43,11 @@ export function AvailabilityCheck() {
                     type={InputType.Text}
                     placeholder="Check name availability"
                     value={searchValue ?? ''}
-                    onChange={({ target: { value } }) => handleOnSearchInputChange(value)}
-                    errorMessage={errorMessage ?? undefined}
+                    onChange={({ target: { value } }) => handleOnSearchChange(value)}
+                    errorMessage={error?.message}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter' && isEnabled) {
-                            checkNameAvailability();
+                            handleOnSearch();
                         }
                     }}
                 />
@@ -80,13 +55,13 @@ export function AvailabilityCheck() {
                     size={ButtonSize.Medium}
                     text="Search"
                     disabled={!isEnabled}
-                    onClick={checkNameAvailability}
+                    onClick={handleOnSearch}
                 />
             </div>
 
-            {isAvailable !== null && (
+            {data !== null && (
                 <div className="text-headline-sm">
-                    {isAvailable ? (
+                    {data?.type == 'available' ? (
                         <span className="text-green-700 dark:text-green-200">Available</span>
                     ) : (
                         <span className="text-red-700 dark:text-red-200">Unavailable</span>
@@ -94,9 +69,9 @@ export function AvailabilityCheck() {
                 </div>
             )}
 
-            {isAvailable && price !== null && (
+            {data?.type == 'available' && (
                 <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {price}</div>
+                    <div className="text-body-md">Price: {data?.price}</div>
                     {isConnected ? (
                         <Button type={ButtonType.Secondary} text="Buy" onClick={handlePurchase} />
                     ) : (
