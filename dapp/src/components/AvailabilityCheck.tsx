@@ -81,17 +81,6 @@ export function AvailabilityCheck() {
                     )}
                 </div>
             )}
-
-            {isAvailable && price !== null && (
-                <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {price}</div>
-                    {isConnected ? (
-                        <Button type={ButtonType.Secondary} text="Buy" onClick={handlePurchase} />
-                    ) : (
-                        <ConnectButton connectText="Connect" />
-                    )}
-                </div>
-            )}
         </div>
     );
 }
