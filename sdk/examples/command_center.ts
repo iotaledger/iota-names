@@ -118,9 +118,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
                 coin,
             });
 
-            iotaNamesTx.transaction.transferObjects([nft], address);
-
-            iotaNamesTx.transaction.transferObjects([coin], address);
+            iotaNamesTx.transaction.transferObjects([coin, nft], address);
 
             iotaNamesTx.transaction.setSender(address);
 
