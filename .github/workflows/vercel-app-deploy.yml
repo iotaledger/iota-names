@@ -61,8 +61,8 @@ jobs:
       - name: Install Project Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build iota-names SDK
-        run: pnpm --filter @iota/iota-names-sdk build
+      - name: Build dapp
+        run: pnpm dapp build
 
       - name: Pull Vercel Environment Information
         run: vercel pull ${{ steps.setup_vercel_flags.outputs.VERCEL_FLAGS }} --yes --environment=${{ env.VERCEL_ENVIRONMENT }}
