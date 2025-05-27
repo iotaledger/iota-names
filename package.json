@@ -24,6 +24,7 @@
         "prettier": "^3.2.5",
         "ts-node": "^10.9.1",
         "tsx": "^4.19.3",
+        "turbo": "^2.5.3",
         "typescript": "^5.4.5"
     },
     "scripts": {
@@ -36,7 +37,8 @@
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
-        "dapp": "pnpm --filter dapp",
+        "sdk": "turbo --filter ./sdk",
+        "dapp": "turbo --filter ./dapp",
         "prepare": "husky"
     },
     "author": "",
