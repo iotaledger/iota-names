@@ -12,7 +12,8 @@ const EInvalidRange: vector<u8> = b"Invalid range.";
 
 /// A Range for u8 helper
 public struct Range has copy, drop, store {
-    vec: vector<u8>,
+    from: u8,
+    to: u8,
 }
 
 /// A new Range constructor[from, to]
@@ -20,7 +21,8 @@ public fun new(from: u8, to: u8): Range {
     assert!(to >= from, EInvalidRange);
 
     Range {
-        vec: vector[from, to],
+        from,
+        to,
     }
 }
 
@@ -31,10 +33,10 @@ public fun is_in_range(range: &Range, number: u8): bool {
 
 /// Get floor limit for the range.
 public fun from(range: &Range): u8 {
-    range.vec[0]
+    range.from
 }
 
 /// Get upper limit for the range.
 public fun to(range: &Range): u8 {
-    range.vec[1]
+    range.to
 }
