@@ -184,7 +184,7 @@ public fun assert_version_is_valid(self: &CouponHouse) {
     assert!(self.version == coupons_version!(), EInvalidVersion);
 }
 
-// Add a coupon as an admin.
+/// Add a coupon as an admin.
 /// To create a coupon, you have to call the PTB in the specific order
 /// 1. (Optional) Call rules::new_domain_length_rule(type, length) // generate a
 /// length specific rule (e.g. only domains of size 5)
@@ -192,7 +192,7 @@ public fun assert_version_is_valid(self: &CouponHouse) {
 public fun admin_add_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
-    code: String,
+    hash: vector<u8>,
     kind: u8,
     amount: u64,
     rules: CouponRules,
@@ -200,31 +200,31 @@ public fun admin_add_coupon(
 ) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
-    coupon_house.coupons.save_coupon(code, coupon::new(kind, amount, rules, ctx));
+    coupon_house.coupons.save_coupon(hash, coupon::new(kind, amount, rules, ctx));
 }
 
 // Remove a coupon as a system's admin.
-public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, code: String) {
+public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: vector<u8>) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
-    coupon_house.coupons.remove_coupon(code);
+    coupon_house.coupons.remove_coupon(hash);
 }
 
 // Add coupon as a registered app.
 public fun app_add_coupon(
     coupons: &mut Coupons,
-    code: String,
+    hash: vector<u8>,
     kind: u8,
     amount: u64,
     rules: CouponRules,
     ctx: &mut TxContext,
 ) {
-    coupons.save_coupon(code, coupon::new(kind, amount, rules, ctx));
+    coupons.save_coupon(hash, coupon::new(kind, amount, rules, ctx));
 }
 
 // Remove a coupon as a registered app.
-public fun app_remove_coupon(coupons: &mut Coupons, code: String) {
-    coupons.remove_coupon(code);
+public fun app_remove_coupon(coupons: &mut Coupons, hash: vector<u8>) {
+    coupons.remove_coupon(hash);
 }
 
 /// Check if an application is authorized to access protected features of the
