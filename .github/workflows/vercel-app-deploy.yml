@@ -3,15 +3,10 @@ name: Reusable Vercel Deploy
 on:
   workflow_call:
     inputs:
-      ENVIRONMENT:
-        type: choice
+      VERCEL_ENVIRONMENT:
+        type: string
         required: true
-        default: preview
-        description: "The Vercel environment to deploy to."
-        options:
-          - production
-          - preview
-          - staging
+        description: "The Vercel environment to deploy to. Can be 'production', 'preview', or 'staging'."
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -25,11 +20,11 @@ on:
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_ENVIRONMENT: ${{ inputs.ENVIRONMENT }}
+  VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ inputs.ENVIRONMENT != 'production' }}
+  cancel-in-progress: ${{ inputs.VERCEL_ENVIRONMENT != 'production' }}
 
 jobs:
   vercel-deploy:
@@ -51,5 +46,5 @@ jobs:
           VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           DELETE_EXISTING_COMMENT: true
-          VERCEL_TARGET: ${{ inputs.ENVIRONMENT }}
-          CREATE_COMMENT: ${{ inputs.ENVIRONMENT == 'preview' }}
+          VERCEL_TARGET: ${{ inputs.VERCEL_ENVIRONMENT }}
+          CREATE_COMMENT: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
