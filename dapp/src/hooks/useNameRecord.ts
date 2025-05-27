@@ -20,6 +20,10 @@ type NameRecordData =
     | {
           type: 'available';
           price: number;
+      }
+    | {
+          // Not priced because of being too short
+          type: 'not-priced';
       };
 
 const DEFAULT_PRICE_OPTION = {
@@ -67,6 +71,10 @@ export function useNameRecord(
                     type: 'available',
                     ...data,
                 } as NameRecordData;
+            } else {
+                return {
+                    type: 'not-priced'
+                } as NameRecordData
             }
         },
         enabled: !!iotaNamesClient && name.length > 0,

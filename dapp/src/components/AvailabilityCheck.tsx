@@ -65,6 +65,8 @@ export function AvailabilityCheck() {
                         <span className="text-green-700 dark:text-green-200">Available</span>
                     ) : data?.type == 'unavailable' ? (
                         <span className="text-red-700 dark:text-red-200">Unavailable</span>
+                    ) : data?.type == 'not-priced' ? (
+                        <span className="text-red-700 dark:text-red-200">Not priced</span>
                     ) : null}
                 </div>
             )}
