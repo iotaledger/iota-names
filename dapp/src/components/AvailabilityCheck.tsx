@@ -10,6 +10,8 @@ import { useState } from 'react';
 
 import { useIotaNamesClient } from '@/providers/contexts';
 
+import { PurchaseName } from './PurchaseName';
+
 export function AvailabilityCheck() {
     const { iotaNamesClient } = useIotaNamesClient();
     const { isConnected } = useCurrentWallet();
@@ -18,6 +20,7 @@ export function AvailabilityCheck() {
     const [isEnabled, setIsEnabled] = useState<boolean>(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [price, setPrice] = useState<number | null>(null);
+    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
     const handleOnSearchInputChange = (value: string) => {
         setSearchValue(value ?? null);
@@ -57,12 +60,14 @@ export function AvailabilityCheck() {
         }
     };
 
-    const handlePurchase = () => {
-        console.log('Purchase initiated for:', searchValue);
-    };
-
     return (
         <div className="flex flex-col items-center w-full space-y-4">
+            {showPurchaseModal && searchValue && (
+                <PurchaseName
+                    domainName={searchValue}
+                    onClose={() => setShowPurchaseModal(false)}
+                />
+            )}
             <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
                 <Input
                     type={InputType.Text}
@@ -98,7 +103,11 @@ export function AvailabilityCheck() {
                 <div className="flex items-center space-x-4">
                     <div className="text-body-md">Price: {price}</div>
                     {isConnected ? (
-                        <Button type={ButtonType.Secondary} text="Buy" onClick={handlePurchase} />
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setShowPurchaseModal(true)}
+                        />
                     ) : (
                         <ConnectButton connectText="Connect" />
                     )}
