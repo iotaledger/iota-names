@@ -41,15 +41,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # pin@v4.0.0
-      
+
       - name: Deploy to Vercel
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
         with:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-            VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
-            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-            DELETE_EXISTING_COMMENT: true
-            VERCEL_TARGET: ${{ inputs.ENVIRONMENT }}
-            CREATE_COMMENT: ${{ inputs.ENVIRONMENT == 'preview' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          DELETE_EXISTING_COMMENT: true
+          VERCEL_TARGET: ${{ inputs.ENVIRONMENT }}
+          CREATE_COMMENT: ${{ inputs.ENVIRONMENT == 'preview' }}
