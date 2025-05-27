@@ -28,7 +28,7 @@ fun admin_get_app_success() {
 }
 
 #[test]
-fun authorized_app_get_app_success() {
+fun deauthorize_app_success() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     {
