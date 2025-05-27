@@ -10,7 +10,7 @@ module iota_names_coupons::app_authorization_tests;
 use iota::test_scenario::{return_shared, return_to_sender, end};
 use iota_names::iota_names::IotaNames;
 use iota_names_coupons::coupon_house::{Self, deauthorize};
-use iota_names_coupons::setup::{Self, TestApp, admin, user, test_init};
+use iota_names_coupons::setup::{Self, TestAuth, admin, user, test_init};
 
 #[test]
 fun admin_get_app_success() {
@@ -20,7 +20,7 @@ fun admin_get_app_success() {
     {
         scenario.next_tx(user());
         let mut iota_names = scenario.take_shared<IotaNames>();
-        coupon_house::app_coupons_mut<TestApp>(&mut iota_names, setup::test_app());
+        coupon_house::app_coupons_mut<TestAuth>(&mut iota_names, setup::test_app());
         return_shared(iota_names);
     };
 
@@ -38,10 +38,10 @@ fun authorized_app_get_app_success() {
         let admin_cap = scenario.take_from_sender();
 
         // test app deauthorization.
-        deauthorize<TestApp>(&admin_cap, &mut coupon_house);
+        deauthorize<TestAuth>(&admin_cap, &mut coupon_house);
 
         // test that the app is indeed non authorized
-        assert!(!coupon_house.is_authorized<TestApp>(), 0);
+        assert!(!coupon_house.is_authorized<TestAuth>(), 0);
 
         return_to_sender(scenario, admin_cap);
         return_shared(coupon_house);

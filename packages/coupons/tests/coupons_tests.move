@@ -18,7 +18,7 @@ use iota_names_coupons::range;
 use iota_names_coupons::rules;
 use iota_names_coupons::setup::{
     Self,
-    TestApp,
+    TestAuth,
     user,
     user_two,
     test_app,
@@ -34,7 +34,7 @@ fun populate_coupons(scenario: &mut Scenario) {
     scenario.next_tx(user());
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    let data_mut = coupon_house::app_coupons_mut<TestApp>(&mut iota_names, test_app());
+    let data_mut = coupon_house::app_coupons_mut<TestAuth>(&mut iota_names, test_app());
     setup::populate_coupons(data_mut, scenario.ctx());
     return_shared(iota_names);
 }

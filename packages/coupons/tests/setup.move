@@ -16,9 +16,9 @@ use iota_names_coupons::range;
 use iota_names_coupons::rules;
 use std::string::{utf8, String};
 
-public struct TestApp has drop {}
+public struct TestAuth has drop {}
 
-public struct UnauthorizedTestApp has drop {}
+public struct UnauthorizedTestAuth has drop {}
 
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
@@ -49,8 +49,8 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         // initialize coupon data.
         coupon_house::setup(&mut iota_names, &admin_cap, scenario.ctx());
         registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
-        // authorize TestApp to CouponHouse.
-        coupon_house::authorize<TestApp>(&admin_cap, &mut iota_names);
+        // authorize TestAuth to CouponHouse.
+        coupon_house::authorize<TestAuth>(&admin_cap, &mut iota_names);
         test_scenario::return_to_sender(scenario, admin_cap);
         test_scenario::return_shared(iota_names);
     };
@@ -74,12 +74,12 @@ public fun nanos_per_iota(): u64 {
 
 // global getters.
 
-public fun test_app(): TestApp {
-    TestApp {}
+public fun test_app(): TestAuth {
+    TestAuth {}
 }
 
-public fun unauthorized_test_app(): UnauthorizedTestApp {
-    UnauthorizedTestApp {}
+public fun unauthorized_test_app(): UnauthorizedTestAuth {
+    UnauthorizedTestAuth {}
 }
 
 /// A helper to add a bunch of coupons (with different setups) that we can use
