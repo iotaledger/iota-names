@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 // Get environment variables from a config to set for the IOTA CLI.
 // pnpm run envs <network> [shell]
 
