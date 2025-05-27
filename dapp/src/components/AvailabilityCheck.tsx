@@ -6,7 +6,7 @@
 import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { isValidIotaName } from '@iota/iota-names-sdk';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useNameRecord } from '@/hooks/useNameRecord';
 
@@ -14,18 +14,16 @@ export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
-    const [isEnabled, setIsEnabled] = useState<boolean>(false);
 
     const { data, error } = useNameRecord(name);
 
-    console.log(data, error);
+    const isValid = useMemo(() => isValidIotaName(searchValue), [searchValue]);
 
     const handleOnSearchChange = (value: string) => {
         if (name.length > 0) {
             setName('');
         }
         setSearchValue(value);
-        setIsEnabled(isValidIotaName(value));
     };
 
     const handleOnSearch = async () => {
@@ -35,6 +33,8 @@ export function AvailabilityCheck() {
     const handlePurchase = () => {
         console.log('Purchase initiated for:', searchValue);
     };
+
+    const enableSearch = isValid;
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -46,7 +46,7 @@ export function AvailabilityCheck() {
                     onChange={({ target: { value } }) => handleOnSearchChange(value)}
                     errorMessage={error?.message}
                     onKeyDown={(event) => {
-                        if (event.key === 'Enter' && isEnabled) {
+                        if (event.key === 'Enter' && enableSearch) {
                             handleOnSearch();
                         }
                     }}
@@ -54,7 +54,7 @@ export function AvailabilityCheck() {
                 <Button
                     size={ButtonSize.Medium}
                     text="Search"
-                    disabled={!isEnabled}
+                    disabled={!enableSearch}
                     onClick={handleOnSearch}
                 />
             </div>
@@ -63,9 +63,9 @@ export function AvailabilityCheck() {
                 <div className="text-headline-sm">
                     {data?.type == 'available' ? (
                         <span className="text-green-700 dark:text-green-200">Available</span>
-                    ) : (
+                    ) : data?.type == 'unavailable' ? (
                         <span className="text-red-700 dark:text-red-200">Unavailable</span>
-                    )}
+                    ) : null}
                 </div>
             )}
 

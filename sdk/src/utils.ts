@@ -6,9 +6,13 @@ const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
 const NAME_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
 const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
+const MIN_LENGTH = 3 + 1 + 4; // 3 + . + iota
 const MAX_LENGTH = 235;
 
 export function isValidIotaName(name: string): boolean {
+    if (name.length < MIN_LENGTH) {
+        return false;
+    }
     if (name.length > MAX_LENGTH) {
         return false;
     }
