@@ -9,12 +9,6 @@ on:
       - ".github/workflows/iota-names.staging-deploy.yml"
       - ".github/workflows/vercel-app-deploy.yml"
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  deployments: write
-
 jobs:
   deploy-staging:
     uses: ./.github/workflows/vercel-app-deploy.yml

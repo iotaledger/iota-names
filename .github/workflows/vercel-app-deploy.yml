@@ -17,12 +17,6 @@ on:
       VERCEL_SCOPE:
         required: true
 
-permissions:
-  contents: write
-  pull-requests: write
-  deployments: write
-  issues: write
-
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

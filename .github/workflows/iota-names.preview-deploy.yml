@@ -7,19 +7,8 @@ on:
       - ".github/workflows/iota-names.preview-deploy.yml"
       - ".github/workflows/vercel-app-deploy.yml"
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  deployments: write
-
 jobs:
   deploy-preview:
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      deployments: write
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
