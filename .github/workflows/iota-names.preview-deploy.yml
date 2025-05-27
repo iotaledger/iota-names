@@ -15,6 +15,11 @@ permissions:
 
 jobs:
   deploy-preview:
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      deployments: write
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
