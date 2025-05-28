@@ -239,14 +239,13 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     assert!(target.is_some(), ETargetNotSet);
     assert!(some(address) == target, ERecordMismatch);
 
-    event::emit(IotaNamesReverseRegistryEvent {
-        default_address: address,
-        domain
-    });
-
     if (self.reverse_registry.contains(address)) {
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
+        event::emit(IotaNamesReverseRegistryEvent {
+            default_address: address,
+            domain
+        });
         self.reverse_registry.add(address, domain);
     };
 }
