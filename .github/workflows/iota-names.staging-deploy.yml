@@ -13,8 +13,7 @@ jobs:
   deploy-staging:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
-      PRODUCTION: false
-      APP_NAME: IOTA_NAMES
+      VERCEL_ENVIRONMENT: staging
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

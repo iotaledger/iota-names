@@ -5,19 +5,21 @@
 
 import { ConnectButton } from '@iota/dapp-kit';
 
+import { AvailabilityCheck } from '@/components/AvailabilityCheck';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+
 export default function Home() {
     return (
         <main className="flex flex-col h-screen">
-            <div className="flex relative justify-center m-4">
-                <h1 className="flex items-center h-14 text-headline-sm">IOTA NAMES</h1>
-                <div className="absolute right-0 h-full">
-                    <div className="flex items-center h-full">
-                        <ConnectButton connectText="Connect" />
-                    </div>
+            <div className="flex relative justify-between p-4">
+                <h1 className="flex items-center text-headline-sm">IOTA NAMES</h1>
+                <div className="flex items-center space-x-2">
+                    <ThemeSwitcher />
+                    <ConnectButton connectText="Connect" />
                 </div>
             </div>
-            <div className="flex w-full items-center justify-center h-full p-8 pb-20 gap-16 sm:p-20">
-                <h1>dApp</h1>
+            <div className="container w-full h-full py-12 flex">
+                <AvailabilityCheck />
             </div>
         </main>
     );
