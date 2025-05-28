@@ -35,8 +35,6 @@ const EAppNotAuthorized: vector<u8> = b"App is not authorized.";
 const EInvalidVersion: vector<u8> = b"Invalid version.";
 #[error]
 const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
-#[error]
-const EInvalidDiscountPercentage: vector<u8> = b"Discount range is [0, 100].";
 
 const USED_NON_STACKING_KEY: vector<u8> = b"coupon_used_non_stacking";
 const USED_NON_STACKING_VAL: vector<u8> = b"true";
@@ -98,7 +96,8 @@ public fun apply_coupon(
             *used_non_stacking_str = USED_NON_STACKING_VAL.to_string();
         };
     };
-    let percentage = coupon.discount_percentage();
+    let is_percentage = coupon.is_percentage();
+    let discount = coupon.discount();
 
     // Verify coupon house is authorized to get the registry / register names.
     let coupon_house = coupon_house_mut(iota_names);
@@ -130,26 +129,45 @@ public fun apply_coupon(
         let _: Coupon = coupon_house.coupons_bag_mut().remove(hash);
     };
 
-    apply_percentage_discount(
-        intent,
-        iota_names,
-        percentage as u8,
-    );
+    if (is_percentage) {
+        apply_percentage_discount(
+            intent,
+            iota_names,
+            discount,
+        );
+    } else {
+        apply_fixed_discount(
+            intent,
+            iota_names,
+            discount,
+        );
+    };
+}
+
+/// Apply a fixed discount to the payment intent.
+fun apply_fixed_discount(
+    intent: &mut PaymentIntent,
+    iota_names: &IotaNames,
+    discount: u64,
+) {
+    let mut price = intent.request_data().base_amount();
+    price = if (price >= discount) {
+        price - discount
+    } else {
+        0
+    };
+
+    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price;
 }
 
 /// Apply a percentage discount to the payment intent.
-/// E.g. a payment can apply a 10% discount on top of a user's 20%
-/// discount if the coupon allows it
 fun apply_percentage_discount(
     intent: &mut PaymentIntent,
     iota_names: &IotaNames,
-    // discount can be in range [1, 100]
-    discount: u8,
+    percentage: u64,
 ) {
-    assert!(discount <= 100, EInvalidDiscountPercentage);
-
     let price = intent.request_data().base_amount();
-    let discount_amount = (((price as u128) * (discount as u128) / 100) as u64);
+    let discount_amount = (((price as u128) * (percentage as u128) / 100) as u64);
 
     *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
 }
@@ -184,23 +202,38 @@ public fun assert_version_is_valid(self: &CouponHouse) {
     assert!(self.version == coupons_version!(), EInvalidVersion);
 }
 
-/// Add a coupon as an admin.
+/// Add a percentage based coupon as an admin.
 /// To create a coupon, you have to call the PTB in the specific order
 /// 1. (Optional) Call rules::new_domain_length_rule(type, length) // generate a
 /// length specific rule (e.g. only domains of size 5)
 /// 2. Call rules::coupon_rules(...) to create the coupon's ruleset.
-public fun admin_add_coupon(
+public fun admin_add_percentage_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
     hash: vector<u8>,
-    kind: u8,
     amount: u64,
     rules: CouponRules,
-    ctx: &mut TxContext,
 ) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
-    coupon_house.coupons.save_coupon(hash, coupon::new(kind, amount, rules, ctx));
+    coupon_house.coupons.save_coupon(hash, coupon::new_percentage(amount, rules));
+}
+
+/// Add a fixed amount coupon as an admin.
+/// To create a coupon, you have to call the PTB in the specific order
+/// 1. (Optional) Call rules::new_domain_length_rule(type, length) // generate a
+/// length specific rule (e.g. only domains of size 5)
+/// 2. Call rules::coupon_rules(...) to create the coupon's ruleset.
+public fun admin_add_fixed_coupon(
+    _: &AdminCap,
+    iota_names: &mut IotaNames,
+    hash: vector<u8>,
+    amount: u64,
+    rules: CouponRules,
+) {
+    let coupon_house = coupon_house_mut(iota_names);
+    coupon_house.assert_version_is_valid();
+    coupon_house.coupons.save_coupon(hash, coupon::new_fixed(amount, rules));
 }
 
 // Remove a coupon as a system's admin.
@@ -210,16 +243,24 @@ public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: v
     coupon_house.coupons.remove_coupon(hash);
 }
 
-// Add coupon as a registered app.
-public fun app_add_coupon(
+// Add percentaged based coupon as a registered app.
+public fun app_add_percentage_coupon(
     coupons: &mut Coupons,
     hash: vector<u8>,
-    kind: u8,
+    percentage: u64,
+    rules: CouponRules,
+) {
+    coupons.save_coupon(hash, coupon::new_percentage(percentage, rules));
+}
+
+// Add fixed amount coupon as a registered app.
+public fun app_add_fixed_coupon(
+    coupons: &mut Coupons,
+    hash: vector<u8>,
     amount: u64,
     rules: CouponRules,
-    ctx: &mut TxContext,
 ) {
-    coupons.save_coupon(hash, coupon::new(kind, amount, rules, ctx));
+    coupons.save_coupon(hash, coupon::new_fixed(amount, rules));
 }
 
 // Remove a coupon as a registered app.

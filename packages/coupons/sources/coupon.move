@@ -6,9 +6,6 @@ module iota_names_coupons::coupon;
 
 use iota_names_coupons::rules::{Self, CouponRules};
 
-#[error]
-const EInvalidDiscountPercentage: vector<u8> = b"Invalid discount percentage.";
-
 /// A Coupon has a type, a value and a ruleset.
 /// - `Rules` are defined on the module `rules`, and covers a variety of
 /// everything we needed for the service.
@@ -22,12 +19,20 @@ public struct Coupon has copy, drop, store {
     rules: CouponRules, // A list of base Rules for the coupon.
 }
 
-/// An internal function to create a coupon object.
-public(package) fun new(kind: u8, amount: u64, rules: CouponRules, _ctx: &mut TxContext): Coupon {
-    rules::assert_is_valid_amount(kind, amount);
-    rules::assert_is_valid_discount_type(kind);
+/// Create a coupon object with a percentage discount.
+public(package) fun new_percentage(percentage: u64, rules: CouponRules): Coupon {
+    rules::assert_is_valid_percentage(percentage);
     Coupon {
-        kind,
+        kind: 0,
+        amount: percentage,
+        rules,
+    }
+}
+
+/// Create a coupon object with a fixed discount.
+public(package) fun new_fixed(amount: u64, rules: CouponRules): Coupon {
+    Coupon {
+        kind: 1,
         amount,
         rules,
     }
@@ -41,8 +46,14 @@ public(package) fun rules_mut(coupon: &mut Coupon): &mut CouponRules {
     &mut coupon.rules
 }
 
-public(package) fun discount_percentage(coupon: &Coupon): u64 {
-    assert!(coupon.amount > 0 && coupon.amount <= 100, EInvalidDiscountPercentage);
+public(package) fun is_percentage(coupon: &Coupon): bool {
+    coupon.kind == 0
+}
 
+public(package) fun is_fixed(coupon: &Coupon): bool {
+    coupon.kind == 1
+}
+
+public(package) fun discount(coupon: &Coupon): u64 {
     coupon.amount
 }

@@ -12,7 +12,6 @@ use iota::test_utils::{Self, destroy};
 use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::payment::PaymentIntent;
-use iota_names_coupons::coupon_constants;
 use iota_names_coupons::coupon_house;
 use iota_names_coupons::coupons;
 use iota_names_coupons::range;
@@ -23,7 +22,7 @@ use iota_names_coupons::setup::{
     user,
     user_two,
     test_app,
-    admin_add_coupon,
+    admin_add_percentage_coupon,
     test_init,
     nanos_per_iota
 };
@@ -36,7 +35,7 @@ fun populate_coupons(scenario: &mut Scenario) {
     let mut iota_names = scenario.take_shared<IotaNames>();
 
     let data_mut = coupon_house::app_coupons_mut<TestAuth>(&mut iota_names, test_app());
-    setup::populate_coupons(data_mut, scenario.ctx());
+    setup::populate_coupons(data_mut);
     return_shared(iota_names);
 }
 
@@ -109,9 +108,8 @@ fun zero_fee_purchase() {
     // populate all coupons.
     populate_coupons(scenario);
     // 100% discount coupon.
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"100%_OFF".to_string(),
-        coupon_constants::percentage_discount_type(),
         100,
         scenario,
     );
@@ -133,9 +131,8 @@ fun twenty_percent_off_3() {
     // populate all coupons.
     populate_coupons(scenario);
     // 20% discount coupon.
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"20%_OFF".to_string(),
-        coupon_constants::percentage_discount_type(),
         20,
         scenario,
     );
@@ -159,9 +156,8 @@ fun fifty_percent_off_4() {
     // populate all coupons.
     populate_coupons(scenario);
     // 50% discount coupon.
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"50%_OFF".to_string(),
-        coupon_constants::percentage_discount_type(),
         50,
         scenario,
     );
@@ -185,9 +181,8 @@ fun seventy_percent_off_5() {
     // populate all coupons.
     populate_coupons(scenario);
     // 70% discount coupon.
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"70%_OFF".to_string(),
-        coupon_constants::percentage_discount_type(),
         70,
         scenario,
     );
@@ -211,9 +206,8 @@ fun twenty_percent_off_stack() {
     // populate all coupons.
     populate_coupons(scenario);
     // 20% discount coupon.
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"20%_OFF".to_string(),
-        coupon_constants::percentage_discount_type(),
         20,
         scenario,
     );
@@ -389,9 +383,8 @@ fun add_coupon_as_admin() {
     let scenario = &mut scenario_val;
     populate_coupons(scenario);
     // add a no rule coupon as an admin
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
-        coupon_constants::percentage_discount_type(),
         50,
         scenario,
     );
@@ -400,41 +393,26 @@ fun add_coupon_as_admin() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidType)]
-fun add_coupon_invalid_type_failure() {
-    let mut scenario_val = test_init();
-    let scenario = &mut scenario_val;
-    populate_coupons(scenario);
-    admin_add_coupon(
-        b"TEST_SUCCESS_ADDITION".to_string(),
-        5,
-        50,
-        scenario,
-    );
-    scenario_val.end();
-}
-
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidAmount)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidPercentage)]
 fun add_coupon_invalid_amount_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     populate_coupons(scenario);
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
-        coupon_constants::percentage_discount_type(),
         101,
         scenario,
     );
     scenario_val.end();
 }
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidAmount)]
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidPercentage)]
 fun add_coupon_invalid_amount_2_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     populate_coupons(scenario);
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
-        coupon_constants::percentage_discount_type(),
         0,
         scenario,
     );
@@ -446,15 +424,13 @@ fun add_coupon_twice_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     populate_coupons(scenario);
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
-        coupon_constants::percentage_discount_type(),
         100,
         scenario,
     );
-    admin_add_coupon(
+    admin_add_percentage_coupon(
         b"TEST_SUCCESS_ADDITION".to_string(),
-        coupon_constants::percentage_discount_type(),
         100,
         scenario,
     );

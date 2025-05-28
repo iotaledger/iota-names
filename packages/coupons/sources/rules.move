@@ -7,7 +7,6 @@
 module iota_names_coupons::rules;
 
 use iota::clock::Clock;
-use iota_names_coupons::coupon_constants;
 use iota_names_coupons::range::Range;
 
 // Errors
@@ -23,10 +22,7 @@ const ENoMoreAvailableClaims: vector<u8> = b"Coupon has been claimed the maximum
 /// Error when you try to create a percentage discount coupon with invalid
 /// percentage amount.
 #[error]
-const EInvalidAmount: vector<u8> = b"Invalid percentage amount for coupon.";
-/// Error when you try to create a coupon with invalid type.
-#[error]
-const EInvalidType: vector<u8> = b"Invalid type for coupon.";
+const EInvalidPercentage: vector<u8> = b"Invalid percentage amount for coupon.";
 /// Error when you try to use a coupon without the matching address
 #[error]
 const EInvalidUser: vector<u8> = b"Coupon address does not match.";
@@ -133,15 +129,11 @@ public fun is_coupon_valid_for_domain_years(rules: &CouponRules, target: u8): bo
     rules.years.borrow().is_in_range(target)
 }
 
-public fun assert_is_valid_discount_type(`type`: u8) {
-    assert!(coupon_constants::discount_rule_types().contains(&`type`), EInvalidType);
-}
-
 // verify that we are creating the coupons correctly (based on amount & type).
-// for amounts, if we have a percentage discount, our max num is 100.
-public fun assert_is_valid_amount(_: u8, amount: u64) {
-    assert!(amount > 0, EInvalidAmount); // protect from division by 0. 0 doesn't make sense in any scenario.
-    assert!(amount <= 100, EInvalidAmount);
+// for amounts, if we have a percentage discount, our max is 100.
+public fun assert_is_valid_percentage(amount: u64) {
+    assert!(amount > 0, EInvalidPercentage); // protect from division by 0. 0 doesn't make sense in any scenario.
+    assert!(amount <= 100, EInvalidPercentage);
 }
 
 // We check a DomainSize Rule against the length of a domain.
