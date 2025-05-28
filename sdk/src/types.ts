@@ -75,8 +75,14 @@ export type ReceiptParams = {
 
 export type IotaNamesClientConfig = {
     client: IotaClient;
-    network?: Network;
-    config?: Config;
-};
+} & IotaNamesClientNetworkConfig;
+
+export type IotaNamesClientNetworkConfig =
+    | {
+          network: Network;
+      }
+    | {
+          packageInfo: PackageInfo;
+      };
 
 export type IotaNamesPriceList = Map<[number, number], number>;

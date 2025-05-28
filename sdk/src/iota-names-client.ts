@@ -17,7 +17,6 @@ import type {
     IotaNamesClientConfig,
     IotaNamesPriceList,
     NameRecord,
-    Network,
     PackageInfo,
 } from './types.js';
 import { isValidIotaName, normalizeIotaName } from './utils';
@@ -26,21 +25,23 @@ import { isValidIotaName, normalizeIotaName } from './utils';
 /// It allows you to interact with IOTA-Names.
 export class IotaNamesClient {
     client: IotaClient;
-    network: Network;
     config: PackageInfo;
 
     constructor(config: IotaNamesClientConfig) {
         this.client = config.client;
-        this.network = config.network || 'mainnet';
 
-        if (this.network === 'mainnet') {
-            this.config = mainPackage.mainnet;
-        } else if (this.network === 'testnet') {
-            this.config = mainPackage.testnet;
-        } else if (this.network === 'devnet') {
-            this.config = mainPackage.devnet;
+        if ('network' in config) {
+            if (config.network === 'mainnet') {
+                this.config = mainPackage.mainnet;
+            } else if (config.network === 'testnet') {
+                this.config = mainPackage.testnet;
+            } else if (config.network === 'devnet') {
+                this.config = mainPackage.devnet;
+            } else {
+                throw new Error('Invalid network');
+            }
         } else {
-            throw new Error('Invalid network');
+            this.config = config.packageInfo;
         }
     }
 
