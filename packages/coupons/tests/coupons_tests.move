@@ -210,7 +210,7 @@ fun seventy_percent_off_5() {
 }
 
 #[test]
-fun one_iota_fixed_off_5() {
+fun ten_iota_fixed_off_50() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     // populate all coupons.
@@ -229,6 +229,29 @@ fun one_iota_fixed_off_5() {
         option::some(
             40 * nanos_per_iota(),
         ),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun hundred_iota_fixed_off_50() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 10 IOTA discount
+    admin_add_fixed_coupon(
+        b"HUNDRED_IOTA_OFF".to_string(),
+        100 * nanos_per_iota(),
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"HUNDRED_IOTA_OFF".to_string(),
+        user(),
+        option::some(0),
     );
 
     scenario_val.end();
