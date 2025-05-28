@@ -245,7 +245,6 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     });
 
     if (self.reverse_registry.contains(address)) {
-        // TODO different event for update and add?
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
         self.reverse_registry.add(address, domain);
