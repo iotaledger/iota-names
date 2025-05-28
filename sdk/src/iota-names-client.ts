@@ -4,7 +4,7 @@
 
 import type { IotaClient } from '@iota/iota-sdk/client';
 
-import { mainPackage } from './constants.js';
+import { packages } from './constants.js';
 import {
     getConfigType,
     getDomainType,
@@ -31,15 +31,7 @@ export class IotaNamesClient {
         this.client = config.client;
 
         if ('network' in config) {
-            if (config.network === 'mainnet') {
-                this.config = mainPackage.mainnet;
-            } else if (config.network === 'testnet') {
-                this.config = mainPackage.testnet;
-            } else if (config.network === 'devnet') {
-                this.config = mainPackage.devnet;
-            } else {
-                throw new Error('Invalid network');
-            }
+            this.config = packages[config.network];
         } else {
             this.config = config.packageInfo;
         }
