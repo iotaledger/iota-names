@@ -51,13 +51,13 @@ public struct Registry has store {
 }
 
 public struct IotaNamesRegistryEvent has copy, drop {
-    key: String,
-    value: NameRecord
+    domain: String,
+    name_record: NameRecord
 }
 
 public struct IotaNamesReverseRegistryEvent has copy, drop {
-    key: address,
-    value: Domain
+    default_address: address,
+    domain: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -189,8 +189,8 @@ public fun add_leaf_record(
     let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
 
     event::emit(IotaNamesRegistryEvent {
-        key: domain.to_string(),
-        value: name_record
+        domain: domain.to_string(),
+        name_record
     });
 
     // adds the `leaf` record to the registry.
@@ -240,8 +240,8 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     assert!(some(address) == target, ERecordMismatch);
 
     event::emit(IotaNamesReverseRegistryEvent {
-        key: address,
-        value: domain
+        default_address: address,
+        domain
     });
 
     if (self.reverse_registry.contains(address)) {
@@ -370,8 +370,8 @@ fun internal_add_record(
     );
     
     event::emit(IotaNamesRegistryEvent {
-        key: domain.to_string(),
-        value: name_record
+        domain: domain.to_string(),
+        name_record
     });
 
     self.registry.add(domain, name_record);
