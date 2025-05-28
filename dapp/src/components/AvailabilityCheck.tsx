@@ -8,6 +8,7 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { isValidIotaName } from '@iota/iota-names-sdk';
 import { useState } from 'react';
 
+import { formatIotaBalance } from '@/lib/utils';
 import { useIotaNamesClient } from '@/providers/contexts';
 
 export function AvailabilityCheck() {
@@ -17,7 +18,7 @@ export function AvailabilityCheck() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isEnabled, setIsEnabled] = useState<boolean>(false);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-    const [price, setPrice] = useState<number | null>(null);
+    const [price, setPrice] = useState<string | null>(null);
 
     const handleOnSearchInputChange = (value: string) => {
         setSearchValue(value ?? null);
@@ -43,7 +44,9 @@ export function AvailabilityCheck() {
                     years: 1,
                     isRegistration: true,
                 });
-                setPrice(price);
+
+                const formattedPrice = formatIotaBalance(BigInt(price));
+                setPrice(formattedPrice);
             } else {
                 setPrice(null);
             }
