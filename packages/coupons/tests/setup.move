@@ -175,6 +175,21 @@ public fun populate_coupons(data_mut: &mut Coupons) {
         ),
     );
 
+    // 1 IOTA DISCOUNT
+    coupon_house::app_add_fixed_coupon(
+        data_mut,
+        blake2b256(&b"ONE_IOTA_OFF"),
+        nanos_per_iota(),
+        rules::new_coupon_rules(
+            option::none(),
+            option::none(),
+            option::none(),
+            option::none(),
+            option::none(),
+            false,
+        ),
+    );
+
     // THESE last two are just for easy coverage.
     // We just add + remove the coupon immediately.
     coupon_house::app_add_percentage_coupon(
@@ -186,13 +201,30 @@ public fun populate_coupons(data_mut: &mut Coupons) {
     coupon_house::app_remove_coupon(data_mut, blake2b256(&b"REMOVE_FOR_COVERAGE"));
 }
 
-// Adds a 0 rule coupon that gives 15% discount to test admin additions.
+// Adds a percentage based coupon that gives a discount to test admin additions.
 public fun admin_add_percentage_coupon(code_name: String, value: u64, scenario: &mut Scenario) {
     scenario.next_tx(admin());
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = scenario.take_from_sender<AdminCap>();
     let hash = blake2b256(code_name.as_bytes());
     coupon_house::admin_add_percentage_coupon(
+        &cap,
+        &mut iota_names,
+        hash,
+        value,
+        rules::new_empty_rules(),
+    );
+    scenario.return_to_sender(cap);
+    test_scenario::return_shared(iota_names);
+}
+
+// Adds a fixed discount coupon that gives a discount to test admin additions.
+public fun admin_add_fixed_coupon(code_name: String, value: u64, scenario: &mut Scenario) {
+    scenario.next_tx(admin());
+    let mut iota_names = scenario.take_shared<IotaNames>();
+    let cap = scenario.take_from_sender<AdminCap>();
+    let hash = blake2b256(code_name.as_bytes());
+    coupon_house::admin_add_fixed_coupon(
         &cap,
         &mut iota_names,
         hash,

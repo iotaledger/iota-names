@@ -23,6 +23,7 @@ use iota_names_coupons::setup::{
     user_two,
     test_app,
     admin_add_percentage_coupon,
+    admin_add_fixed_coupon,
     test_init,
     nanos_per_iota
 };
@@ -96,6 +97,15 @@ fun test_e2e() {
         b"50_DISCOUNT_SALAD".to_string(),
         user(),
         option::some(100 * nanos_per_iota()),
+    );
+
+    // One IOTA discount
+    test_coupon_register(
+        scenario,
+        b"best.iota".to_string(),
+        b"ONE_IOTA_OFF".to_string(),
+        user(),
+        option::some(199 * nanos_per_iota()),
     );
 
     scenario_val.end();
@@ -194,6 +204,31 @@ fun seventy_percent_off_5() {
         option::some(
             15 * nanos_per_iota(),
         ), // 5 character in test is 50 IOTA, 70% discount
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun one_iota_fixed_off_5() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 10 IOTA discount
+    admin_add_fixed_coupon(
+        b"TEN_IOTA_OFF".to_string(),
+        10 * nanos_per_iota(),
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"TEN_IOTA_OFF".to_string(),
+        user(),
+        option::some(
+            40 * nanos_per_iota(),
+        ),
     );
 
     scenario_val.end();
