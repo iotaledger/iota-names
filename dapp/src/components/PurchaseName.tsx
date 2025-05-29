@@ -17,7 +17,7 @@ type PurchaseNameProps = {
 
 export function PurchaseName({ name, onClose }: PurchaseNameProps) {
     const { iotaNamesClient } = useIotaNamesClient();
-    const [errorAvailable, setErrorAvailable] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
     const [price, setPrice] = useState<number | null>(null);
 
@@ -40,7 +40,6 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
         !isRegisterNamePending;
 
     useEffect(() => {
-        // Calculate price
         iotaNamesClient
             .calculatePrice({
                 name,
@@ -58,54 +57,43 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                 setPrice(null);
             });
 
-        // Check availability
         iotaNamesClient
             .getNameRecord(name)
             .then((isAvailable) => {
                 if (isAvailable !== null) {
-                    setErrorAvailable('Name unavailable');
+                    setError('Name unavailable');
                     setIsAvailable(false);
                 } else {
-                    setErrorAvailable(null);
+                    setError(null);
                     setIsAvailable(true);
                 }
             })
             .catch((error) => {
                 console.error('Error fetching name:', error);
-                setErrorAvailable('Error fetching name: ' + error);
+                setError('Error fetching name: ' + error);
                 setIsAvailable(false);
             });
     }, [name, iotaNamesClient]);
 
     async function handlePurchase() {
-        if (!registerNameData) return;
-        if (!isAvailable) return;
-        signAndExecuteTransaction(
-            {
+        if (!registerNameData || !isAvailable) return;
+        try {
+            await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
-            },
-            {
-                onSuccess: (tx) => {
-                    console.log('[Transaction sent]: ', tx);
-                },
-            },
-        )
-            .then(() => {
-                console.log('Register name transaction has been sent');
-
-                onClose();
-            })
-            .catch(() => {
-                console.error('Register name transaction was not sent');
             });
+            onClose();
+        } catch (e) {
+            setError('Register name transaction was not sent');
+        }
     }
+
+    if (!account?.address || !name) return null;
+
     return (
         <Dialog
             open
             onOpenChange={(open) => {
-                if (!open) {
-                    onClose();
-                }
+                if (!open) onClose();
             }}
         >
             <DialogContent containerId="overlay-portal-container">
@@ -122,7 +110,7 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                             <span className="text-body-md text-neutral-40 dark:text-neutral-60">
                                 Registration time:
                             </span>
-                            <span className="text-body-md font-mono">{'1 year'}</span>
+                            <span className="text-body-md font-mono">1 year</span>
                         </div>
                         <div className="flex items-baseline justify-center gap-x-1">
                             <span className="text-body-md text-neutral-40 dark:text-neutral-60">
@@ -145,10 +133,8 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                                 fullWidth
                             />
                         </div>
-                        {!isAvailable && (
-                            <div className="text-red-600 dark:text-red-400 text-sm">
-                                {errorAvailable}
-                            </div>
+                        {error && (
+                            <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
                         )}
                         {errorRegisterName && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
