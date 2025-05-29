@@ -25,17 +25,18 @@ type PurchaseNameProps = {
 
 export function PurchaseName({ name, onClose }: PurchaseNameProps) {
     const { iotaNamesClient } = useIotaNamesClient();
+    const [errorAvailable, setErrorAvailable] = useState<string | null>(null);
+    const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+    const [price, setPrice] = useState<number | null>(null);
 
     const account = useCurrentAccount();
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const [price, setPrice] = useState<number | null>(null);
-
     const {
         data: registerNameData,
         isPending: isRegisterNamePending,
-        error,
+        error: errorRegisterName,
     } = useRegisterNameTransaction(account?.address || '', name, price ?? 0, 1);
 
     const canRegister =
@@ -43,7 +44,7 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
         !!name &&
         price &&
         !isSendingTransaction &&
-        !error &&
+        !errorRegisterName &&
         !isRegisterNamePending;
 
     useEffect(() => {
@@ -67,9 +68,29 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
             });
     }, [name, iotaNamesClient]);
 
+    useEffect(() => {
+        iotaNamesClient
+            .getNameRecord(name)
+            .then((isAvailable) => {
+                if (isAvailable !== null) {
+                    setErrorAvailable('Name unavailable');
+                    setIsAvailable(false);
+                } else {
+                    setErrorAvailable(null);
+                    setIsAvailable(true);
+                }
+            })
+            .catch((error) => {
+                //toast.error('Error calculating price:', error);
+                console.error('Error fetching name:', error);
+                setErrorAvailable('Error fetching name: ' + error);
+                setIsAvailable(false);
+            });
+    }, [isAvailable, iotaNamesClient]);
+
     async function handlePurchase() {
         if (!registerNameData) return;
-        // TODO: we should probably re-verify again that the name is still available
+        if (isAvailable !== null) return;
         signAndExecuteTransaction(
             {
                 transaction: registerNameData.transaction,
@@ -139,9 +160,16 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                                 disabled={!canRegister}
                             />
                         </div>
-                        {error && (
+                        {!isAvailable && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
-                                {error instanceof Error ? error.message : 'An error occurred'}
+                                {errorAvailable}
+                            </div>
+                        )}
+                        {errorRegisterName && (
+                            <div className="text-red-600 dark:text-red-400 text-sm">
+                                {errorRegisterName instanceof Error
+                                    ? errorRegisterName.message
+                                    : 'An error occurred'}
                             </div>
                         )}
                     </div>
