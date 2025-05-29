@@ -83,7 +83,9 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                             <span className="text-body-md text-neutral-40 dark:text-neutral-60">
                                 Price:
                             </span>
-                            <span className="text-body-md font-mono">{data?.price ?? '-'}</span>
+                            <span className="text-body-md font-mono">
+                                {data?.type == 'available' ? data?.price : '-'}
+                            </span>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
