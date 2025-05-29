@@ -59,10 +59,8 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                     throw new Error('Price calculation returned null');
                 }
                 setPrice(price);
-                console.log('Price for name:', price); // REMOVE
             })
             .catch((error) => {
-                //toast.error('Error calculating price:', error);
                 console.error('Error calculating price:', error);
                 setPrice(null);
             });
@@ -81,7 +79,6 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                 }
             })
             .catch((error) => {
-                //toast.error('Error calculating price:', error);
                 console.error('Error fetching name:', error);
                 setErrorAvailable('Error fetching name: ' + error);
                 setIsAvailable(false);
@@ -97,19 +94,16 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
             },
             {
                 onSuccess: (tx) => {
-                    //toast.success('[Transaction sent]: ', tx);
                     console.log('[Transaction sent]: ', tx);
                 },
             },
         )
             .then(() => {
-                // toast.success('Register name transaction has been sent');
                 console.log('Register name transaction has been sent');
 
                 onClose();
             })
             .catch(() => {
-                // toast.error('Register name transaction was not sent');
                 console.error('Register name transaction was not sent');
             });
     }
@@ -150,7 +144,6 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                                 size={ButtonSize.Medium}
                                 text="Cancel"
                                 onClick={onClose}
-                                fullWidth
                             />
                             <Button
                                 type={ButtonType.Primary}
