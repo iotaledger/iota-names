@@ -15,7 +15,7 @@ type PurchaseNameProps = {
     onClose: () => void;
 };
 
-export function PurchaseName({ name, onClose }: PurchaseNameProps) {
+export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
     const account = useCurrentAccount();
     const { data, error } = useNameRecord(name);
     const [purchaseError, setPurchaseError] = useState<string>('');
@@ -57,12 +57,7 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
     if (!account?.address || !name) return null;
 
     return (
-        <Dialog
-            open
-            onOpenChange={(open) => {
-                if (!open) onClose();
-            }}
-        >
+        <Dialog open>
             <DialogContent containerId="overlay-portal-container">
                 <Header title="Buy name" onClose={onClose} titleCentered />
                 <DialogBody>

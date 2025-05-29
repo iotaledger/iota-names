@@ -17,33 +17,29 @@ export function getGasSummary(
     const { effects } = transaction;
     if (!effects) return null;
     const totalGas = getTotalGasUsed(effects);
-    let sender = undefined;
-    let owner = '';
-    let gasData = {} as IotaGasData;
+    let sender: string | undefined;
+    let gasData: IotaGasData | undefined;
     if ('transaction' in transaction && transaction.transaction?.data) {
-        sender = transaction.transaction?.data.sender;
+        sender = transaction.transaction.data.sender;
         gasData = transaction.transaction.data.gasData;
     } else if ('input' in transaction) {
         sender = transaction.input.sender;
         gasData = transaction.input.gasData;
     }
-    owner = gasData?.owner ?? '';
-
+    const owner = gasData?.owner ?? '';
+    const isSponsored = !!owner && !!sender && owner !== sender;
     return {
         ...effects.gasUsed,
         ...gasData,
         owner,
         totalGas: totalGas?.toString(),
-        isSponsored: !!owner && !!sender && owner !== sender,
-        gasUsed: transaction?.effects!.gasUsed,
+        isSponsored,
+        gasUsed: effects.gasUsed,
     };
 }
-
 export function getTotalGasUsed(effects: TransactionEffects): bigint | undefined {
-    const gasSummary = effects?.gasUsed;
-    return gasSummary
-        ? BigInt(gasSummary.computationCost) +
-              BigInt(gasSummary.storageCost) -
-              BigInt(gasSummary.storageRebate)
-        : undefined;
+    const gas = effects?.gasUsed;
+    if (!gas) return undefined;
+    const { computationCost, storageCost, storageRebate } = gas;
+    return BigInt(computationCost) + BigInt(storageCost) - BigInt(storageRebate);
 }

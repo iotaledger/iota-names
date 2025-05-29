@@ -10,7 +10,7 @@ import { useMemo, useState } from 'react';
 
 import { useNameRecord } from '@/hooks/useNameRecord';
 
-import { PurchaseName } from './PurchaseName';
+import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 
 export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
@@ -35,15 +35,19 @@ export function AvailabilityCheck() {
 
     const enableSearch = isValid;
 
+    function onClosePurchaseDialog() {
+        setShowPurchaseModal(false);
+        setSearchValue('');
+        setName('');
+    }
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {showPurchaseModal && searchValue && (
-                <PurchaseName
+                <PurchaseNameDialog
                     name={searchValue}
                     onClose={() => {
-                        setShowPurchaseModal(false);
-                        setSearchValue('');
-                        setName('');
+                        onClosePurchaseDialog;
                     }}
                 />
             )}
