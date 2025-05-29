@@ -4,6 +4,7 @@
 
 module iota_names::registry;
 
+use iota::event;
 use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
@@ -47,6 +48,16 @@ public struct Registry has store {
     /// The `reverse_registry` table maps `address` to `domain_name`.
     /// Updated in the `set_reverse_lookup` function.
     reverse_registry: Table<address, Domain>,
+}
+
+public struct IotaNamesRegistryEvent has copy, drop {
+    domain: String,
+    name_record: NameRecord
+}
+
+public struct IotaNamesReverseRegistryEvent has copy, drop {
+    default_address: address,
+    domain: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -175,12 +186,19 @@ public fun add_leaf_record(
     // Removes an existing record if it exists and is expired.
     self.remove_existing_record_if_exists_and_expired(domain, clock, false);
 
+    let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
+
+    event::emit(IotaNamesRegistryEvent {
+        domain: domain.to_string(),
+        name_record
+    });
+
     // adds the `leaf` record to the registry.
     self
         .registry
         .add(
             domain,
-            name_record::new_leaf(parent_name_record.nft_id(), some(target)),
+            name_record
         );
 }
 
@@ -224,6 +242,10 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     if (self.reverse_registry.contains(address)) {
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
+        event::emit(IotaNamesReverseRegistryEvent {
+            default_address: address,
+            domain
+        });
         self.reverse_registry.add(address, domain);
     };
 }
@@ -344,6 +366,12 @@ fun internal_add_record(
         object::id(&nft),
         nft.expiration_timestamp_ms(),
     );
+    
+    event::emit(IotaNamesRegistryEvent {
+        domain: domain.to_string(),
+        name_record
+    });
+
     self.registry.add(domain, name_record);
     nft
 }
