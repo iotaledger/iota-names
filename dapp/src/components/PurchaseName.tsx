@@ -3,15 +3,7 @@
 
 'use client';
 
-import {
-    Button,
-    ButtonSize,
-    ButtonType,
-    Dialog,
-    DialogBody,
-    DialogContent,
-    Header,
-} from '@iota/apps-ui-kit';
+import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useEffect, useState } from 'react';
 
@@ -48,6 +40,7 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
         !isRegisterNamePending;
 
     useEffect(() => {
+        // Calculate price
         iotaNamesClient
             .calculatePrice({
                 name,
@@ -64,9 +57,8 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                 console.error('Error calculating price:', error);
                 setPrice(null);
             });
-    }, [name, iotaNamesClient]);
 
-    useEffect(() => {
+        // Check availability
         iotaNamesClient
             .getNameRecord(name)
             .then((isAvailable) => {
@@ -83,11 +75,11 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                 setErrorAvailable('Error fetching name: ' + error);
                 setIsAvailable(false);
             });
-    }, [isAvailable, iotaNamesClient]);
+    }, [name, iotaNamesClient]);
 
     async function handlePurchase() {
         if (!registerNameData) return;
-        if (isAvailable !== null) return;
+        if (!isAvailable) return;
         signAndExecuteTransaction(
             {
                 transaction: registerNameData.transaction,
@@ -141,16 +133,16 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
                                 type={ButtonType.Secondary}
-                                size={ButtonSize.Medium}
                                 text="Cancel"
                                 onClick={onClose}
+                                fullWidth
                             />
                             <Button
                                 type={ButtonType.Primary}
-                                size={ButtonSize.Medium}
                                 text="Buy"
                                 onClick={handlePurchase}
                                 disabled={!canRegister}
+                                fullWidth
                             />
                         </div>
                         {!isAvailable && (
