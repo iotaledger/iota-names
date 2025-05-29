@@ -3,7 +3,15 @@
 
 'use client';
 
-import { Button, ButtonType } from '@iota/apps-ui-kit';
+import {
+    Button,
+    ButtonSize,
+    ButtonType,
+    Dialog,
+    DialogBody,
+    DialogContent,
+    Header,
+} from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useEffect, useState } from 'react';
 
@@ -50,9 +58,10 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                     throw new Error('Price calculation returned null');
                 }
                 setPrice(price);
-                console.log('Price for name:', price);
+                console.log('Price for name:', price); // REMOVE
             })
             .catch((error) => {
+                //toast.error('Error calculating price:', error);
                 console.error('Error calculating price:', error);
                 setPrice(null);
             });
@@ -67,69 +76,77 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
             },
             {
                 onSuccess: (tx) => {
+                    //toast.success('[Transaction sent]: ', tx);
                     console.log('[Transaction sent]: ', tx);
                 },
             },
         )
             .then(() => {
+                // toast.success('Register name transaction has been sent');
                 console.log('Register name transaction has been sent');
+
                 onClose();
             })
             .catch(() => {
+                // toast.error('Register name transaction was not sent');
                 console.error('Register name transaction was not sent');
             });
     }
     return (
-        <div className="flex flex-col items-center w-full space-y-4">
-            <div
-                className="fixed inset-0 flex items-center justify-center z-50"
-                style={{
-                    background: 'rgba(0,0,0,0.3)',
-                }}
-            >
-                <div className="relative bg-white/90 dark:bg-gray-800/90 p-8 rounded shadow-lg min-w-[350px] max-w-[90vw]">
-                    <button
-                        className="absolute top-4 right-4 text-xl font-bold text-gray-500 hover:text-gray-800 dark:hover:text-white"
-                        onClick={onClose}
-                        aria-label="Close"
-                        type="button"
-                    >
-                        ×
-                    </button>{' '}
-                    <div className="text-center font-bold text-lg mb-8">BUY NAME</div>
-                    <div className="flex flex-col gap-6">
-                        <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                NAME
-                            </div>
-                            <div className="font-mono">{name}</div>
+        <Dialog
+            open
+            onOpenChange={(open) => {
+                if (!open) {
+                    onClose();
+                }
+            }}
+        >
+            <DialogContent containerId="overlay-portal-container">
+                <Header title="Buy name" onClose={onClose} titleCentered />
+                <DialogBody>
+                    <div className="flex flex-col items-center gap-y-md">
+                        <div className="flex items-baseline justify-center gap-x-1">
+                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                Name:
+                            </span>
+                            <span className="text-body-md font-mono">{name}</span>
                         </div>
-                        <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                REGISTRATION TIME:
-                            </div>
-                            <div className="font-mono">{'1 YEAR'}</div>
+                        <div className="flex items-baseline justify-center gap-x-1">
+                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                Registration time:
+                            </span>
+                            <span className="text-body-md font-mono">{'1 year'}</span>
                         </div>
-                        <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                PRICE
-                            </div>
-                            <div className="font-mono">{price ?? '-'}</div>
+                        <div className="flex items-baseline justify-center gap-x-1">
+                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                Price:
+                            </span>
+                            <span className="text-body-md font-mono">{price ?? '-'}</span>
                         </div>
-                        <Button
-                            type={ButtonType.Primary}
-                            text="BUY"
-                            onClick={handlePurchase}
-                            disabled={!canRegister}
-                        />
+                        <div className="flex w-full flex-row gap-x-xs">
+                            <Button
+                                type={ButtonType.Secondary}
+                                size={ButtonSize.Medium}
+                                text="Cancel"
+                                onClick={onClose}
+                                fullWidth
+                            />
+                            <Button
+                                type={ButtonType.Primary}
+                                size={ButtonSize.Medium}
+                                text="Buy"
+                                onClick={handlePurchase}
+                                disabled={!canRegister}
+                            />
+                        </div>
                         {error && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
                                 {error instanceof Error ? error.message : 'An error occurred'}
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
-        </div>
+                </DialogBody>
+            </DialogContent>
+        </Dialog>
     );
 }
