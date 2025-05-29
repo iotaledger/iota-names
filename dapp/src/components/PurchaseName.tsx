@@ -5,10 +5,10 @@
 
 import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
+import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
-import { useIotaNamesClient } from '@/providers/contexts';
 
 type PurchaseNameProps = {
     name: string;
@@ -16,12 +16,9 @@ type PurchaseNameProps = {
 };
 
 export function PurchaseName({ name, onClose }: PurchaseNameProps) {
-    const { iotaNamesClient } = useIotaNamesClient();
-    const [error, setError] = useState<string | null>(null);
-    const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-    const [price, setPrice] = useState<number | null>(null);
-
     const account = useCurrentAccount();
+    const { data, error } = useNameRecord(name);
+    const [purchaseError, setPurchaseError] = useState<string>('');
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -29,61 +26,31 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
         data: registerNameData,
         isPending: isRegisterNamePending,
         error: errorRegisterName,
-    } = useRegisterNameTransaction(account?.address || '', name, price ?? 0, 1);
+    } = useRegisterNameTransaction(
+        account?.address || '',
+        name,
+        data?.type == 'available' ? data?.price : 0,
+        1,
+    );
 
     const canRegister =
         !!account?.address &&
         !!name &&
-        price &&
+        data?.type === 'available' &&
+        data?.price &&
         !isSendingTransaction &&
         !errorRegisterName &&
         !isRegisterNamePending;
 
-    useEffect(() => {
-        iotaNamesClient
-            .calculatePrice({
-                name,
-                years: 1,
-                isRegistration: true,
-            })
-            .then((price) => {
-                if (price === null) {
-                    throw new Error('Price calculation returned null');
-                }
-                setPrice(price);
-            })
-            .catch((error) => {
-                console.error('Error calculating price:', error);
-                setPrice(null);
-            });
-
-        iotaNamesClient
-            .getNameRecord(name)
-            .then((isAvailable) => {
-                if (isAvailable !== null) {
-                    setError('Name unavailable');
-                    setIsAvailable(false);
-                } else {
-                    setError(null);
-                    setIsAvailable(true);
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching name:', error);
-                setError('Error fetching name: ' + error);
-                setIsAvailable(false);
-            });
-    }, [name, iotaNamesClient]);
-
     async function handlePurchase() {
-        if (!registerNameData || !isAvailable) return;
+        if (!registerNameData || data?.type !== 'available') return;
         try {
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
             });
             onClose();
         } catch (e) {
-            setError('Register name transaction was not sent');
+            setPurchaseError('Register name transaction was not sent');
         }
     }
 
@@ -116,7 +83,7 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                             <span className="text-body-md text-neutral-40 dark:text-neutral-60">
                                 Price:
                             </span>
-                            <span className="text-body-md font-mono">{price ?? '-'}</span>
+                            <span className="text-body-md font-mono">{data?.price ?? '-'}</span>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
@@ -133,8 +100,15 @@ export function PurchaseName({ name, onClose }: PurchaseNameProps) {
                                 fullWidth
                             />
                         </div>
-                        {error && (
-                            <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
+                        {purchaseError && typeof purchaseError === 'string' && (
+                            <div className="text-red-600 dark:text-red-400 text-sm">
+                                {purchaseError}
+                            </div>
+                        )}
+                        {(error instanceof Error || typeof error === 'string') && (
+                            <div className="text-red-600 dark:text-red-400 text-sm">
+                                {error instanceof Error ? error.message : error}
+                            </div>
                         )}
                         {errorRegisterName && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
