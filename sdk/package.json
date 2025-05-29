@@ -42,7 +42,7 @@
         "node": ">=16"
     },
     "dependencies": {
-        "@iota/iota-sdk": "^1.0.1",
+        "@iota/iota-sdk": "^1.1.0",
         "axios": "^0.24.0",
         "axios-retry": "^3.9.1"
     },
