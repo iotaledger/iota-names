@@ -43,24 +43,6 @@ export function useRegisterNameTransaction(
                 transaction: tx,
                 txDryRun,
             };
-            // const transaction = new Transaction();
-            // transaction.setSender(address);
-            // const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
-            // const [coin] = iotaNamesTransaction.transaction.splitCoins(transaction.gas, [price]);
-            // const nft = iotaNamesTransaction.register({
-            //     domain: name,
-            //     years,
-            //     coin,
-            // });
-            // transaction.transferObjects([nft], transaction.pure.address(address));
-            // const txBytes = await transaction.build({ client });
-            // const txDryRun = await client.dryRunTransactionBlock({
-            //     transactionBlock: txBytes,
-            // });
-            // return {
-            //     transaction,
-            //     txDryRun,
-            // };
         },
         enabled: !!address && !!price && !!name && name.length > 0,
         gcTime: 0,
