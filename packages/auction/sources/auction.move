@@ -162,7 +162,7 @@ public fun place_bid(
     // Return the previous bidder their bid
     iota::transfer::public_transfer(current_bid, current_bidder);
 
-    event::emit(BidEvent {
+    event::emit(AuctionBidEvent {
         domain,
         bid: bid_amount,
         bidder,
@@ -404,7 +404,7 @@ public struct AuctionFinalizedEvent has copy, drop {
     winner: address,
 }
 
-public struct BidEvent has copy, drop {
+public struct AuctionBidEvent has copy, drop {
     domain: Domain,
     bid: u64,
     bidder: address,
