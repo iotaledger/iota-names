@@ -63,10 +63,7 @@ export function AvailabilityCheck() {
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {showPurchaseModal && searchValue && (
-                <PurchaseName
-                    domainName={searchValue}
-                    onClose={() => setShowPurchaseModal(false)}
-                />
+                <PurchaseName name={searchValue} onClose={() => setShowPurchaseModal(false)} />
             )}
             <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
                 <Input

@@ -4,183 +4,132 @@
 'use client';
 
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { useCurrentWallet, useIotaClient } from '@iota/dapp-kit';
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { Transaction } from '@iota/iota-sdk/transactions';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useEffect, useState } from 'react';
 
+import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 import { useIotaNamesClient } from '@/providers/contexts';
 
 type PurchaseNameProps = {
-    domainName: string;
+    name: string;
     onClose: () => void;
 };
 
-export function PurchaseName({ domainName, onClose }: PurchaseNameProps) {
-    const iotaClient = useIotaClient();
+export function PurchaseName({ name, onClose }: PurchaseNameProps) {
     const { iotaNamesClient } = useIotaNamesClient();
-    const { isConnected, currentWallet } = useCurrentWallet();
+
+    const account = useCurrentAccount();
+    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
+        useSignAndExecuteTransaction();
+
     const [price, setPrice] = useState<number | null>(null);
-    const [isExecuted, setIsExecuted] = useState(false);
-    const [digest, setDigest] = useState<string>();
+
+    const {
+        data: registerNameData,
+        isPending: isRegisterNamePending,
+        error,
+    } = useRegisterNameTransaction(account?.address || '', name, price ?? 0, 1);
+
+    const canRegister =
+        !!account?.address &&
+        !!name &&
+        price &&
+        !isSendingTransaction &&
+        !error &&
+        !isRegisterNamePending;
 
     useEffect(() => {
-        async function fetchPrice() {
-            const length = domainName.split('.')[0].length;
-            const total = await iotaNamesClient.getPriceList();
-            for (const [[min, max], value] of total.entries()) {
-                if (length >= min && length <= max) {
-                    setPrice(value);
-                    break;
-                }
-            }
-        }
-        fetchPrice().catch(console.error);
-    }, [domainName, iotaNamesClient]);
-
-    async function handlePurchase(domainName: string) {
-        try {
-            if (!currentWallet) {
-                throw new Error('Wallet is not connected');
-            }
-            console.log('[Current wallet]: ', currentWallet);
-            const address = currentWallet.accounts[0].address;
-            if (!address) {
-                throw new Error('Wallet address is undefined');
-            }
-
-            const domainLabels = domainName.split('.');
-            if (domainName.split('.').length !== 2) {
-                throw new Error('Subdomains not supported yet');
-            }
-
-            const length = domainLabels[0].length;
-            if (length < 3) {
-                throw new Error('Name too short (minimum 3 characters)');
-            }
-
-            const domainRegistered = await iotaNamesClient.getNameRecord(domainName);
-            if (domainRegistered) {
-                throw new Error('Domain name already registered');
-            }
-
-            // Build transaction
-            const tx = new Transaction();
-            const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-            if (price === null) {
-                throw new Error('Price is not available');
-            }
-            const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [price]);
-            const nft = iotaNamesTx.register({
-                domain: domainName!,
+        iotaNamesClient
+            .calculatePrice({
+                name,
                 years: 1,
-                coin,
+                isRegistration: true,
+            })
+            .then((price) => {
+                if (price === null) {
+                    throw new Error('Price calculation returned null');
+                }
+                setPrice(price);
+                console.log('Price for name:', price);
+            })
+            .catch((error) => {
+                console.error('Error calculating price:', error);
+                setPrice(null);
             });
-            iotaNamesTx.transaction.transferObjects([nft], address);
-            iotaNamesTx.transaction.transferObjects([coin], address);
-            iotaNamesTx.transaction.setSender(address);
-            const transaction = await iotaNamesTx.transaction.build({
-                client: iotaClient,
-            });
+    }, [name, iotaNamesClient]);
 
-            //const signer = getSigner();
-            // const executedTransactionResponse = await iotaClient.signAndExecuteTransaction({
-            //     transaction,
-            //     signer: signer,
-            //     options: {
-            //         showEffects: true,
-            //         showObjectChanges: true,
-            //     },
-            // });
-
-            const signAndExecuteTransaction =
-                currentWallet.features['iota:signAndExecuteTransaction']?.signAndExecuteTransaction;
-
-            if (!signAndExecuteTransaction) {
-                throw new Error(
-                    'signAndExecuteTransaction feature is not available in the current wallet',
-                );
-            }
-            const executedTransactionResponse = await signAndExecuteTransaction({
-                transaction: {
-                    toJSON: async () => JSON.stringify(transaction),
+    async function handlePurchase() {
+        if (!registerNameData) return;
+        // TODO: we should probably re-verify again that the name is still available
+        signAndExecuteTransaction(
+            {
+                transaction: registerNameData.transaction,
+            },
+            {
+                onSuccess: (tx) => {
+                    console.log('[Transaction sent]: ', tx);
                 },
-                account: currentWallet.accounts[0],
-                chain: 'devnet:iota',
+            },
+        )
+            .then(() => {
+                console.log('Register name transaction has been sent');
+                onClose();
+            })
+            .catch(() => {
+                console.error('Register name transaction was not sent');
             });
-            console.log('[Transaction digest]: ', executedTransactionResponse.digest);
-
-            await iotaClient.waitForTransaction({
-                digest: executedTransactionResponse.digest,
-            });
-            const transactionBlockResponse = await iotaClient.getTransactionBlock({
-                digest: executedTransactionResponse.digest,
-                options: {
-                    showEffects: true,
-                },
-            });
-            setDigest(executedTransactionResponse.digest);
-            setIsExecuted(true);
-            console.log('[Transaction block response]: ', transactionBlockResponse);
-        } catch (error: unknown) {
-            throw Error('Error purchasing domain name: ', error as Error);
-        }
     }
     return (
         <div className="flex flex-col items-center w-full space-y-4">
-            {isConnected && (
-                <div
-                    className="fixed inset-0 flex items-center justify-center z-50"
-                    style={{
-                        background: 'rgba(0,0,0,0.3)',
-                    }}
-                >
-                    <div className="relative bg-white/90 dark:bg-gray-800/90 p-8 rounded shadow-lg min-w-[350px] max-w-[90vw]">
-                        <button
-                            className="absolute top-4 right-4 text-xl font-bold text-gray-500 hover:text-gray-800 dark:hover:text-white"
-                            onClick={onClose}
-                            aria-label="Close"
-                            type="button"
-                        >
-                            ×
-                        </button>{' '}
-                        <div className="text-center font-bold text-lg mb-8">BUY NAME</div>
-                        <div className="flex flex-col gap-6">
-                            <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                                <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                    NAME
-                                </div>
-                                <div className="font-mono">{domainName}</div>
-                            </div>
-                            <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                                <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                    REGISTRATION TIME:
-                                </div>
-                                <div className="font-mono">{'1 YEAR'}</div>
-                            </div>
-                            <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
-                                <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                    PRICE
-                                </div>
-                                <div className="font-mono">{price ?? '-'}</div>
-                            </div>
-                            <Button
-                                type={ButtonType.Primary}
-                                text="BUY"
-                                onClick={() => handlePurchase(domainName)}
-                            />
-                        </div>
-                    </div>
-                    {isExecuted && (
+            <div
+                className="fixed inset-0 flex items-center justify-center z-50"
+                style={{
+                    background: 'rgba(0,0,0,0.3)',
+                }}
+            >
+                <div className="relative bg-white/90 dark:bg-gray-800/90 p-8 rounded shadow-lg min-w-[350px] max-w-[90vw]">
+                    <button
+                        className="absolute top-4 right-4 text-xl font-bold text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                        onClick={onClose}
+                        aria-label="Close"
+                        type="button"
+                    >
+                        ×
+                    </button>{' '}
+                    <div className="text-center font-bold text-lg mb-8">BUY NAME</div>
+                    <div className="flex flex-col gap-6">
                         <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
                             <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
-                                TX DIGEST
+                                NAME
                             </div>
-                            <div className="font-mono">{digest}</div>
+                            <div className="font-mono">{name}</div>
                         </div>
-                    )}
+                        <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                REGISTRATION TIME:
+                            </div>
+                            <div className="font-mono">{'1 YEAR'}</div>
+                        </div>
+                        <div className="bg-gray-200/80 dark:bg-gray-700/80 p-4 rounded text-left">
+                            <div className="text-xs text-gray-600 dark:text-gray-300 mb-1">
+                                PRICE
+                            </div>
+                            <div className="font-mono">{price ?? '-'}</div>
+                        </div>
+                        <Button
+                            type={ButtonType.Primary}
+                            text="BUY"
+                            onClick={handlePurchase}
+                            disabled={!canRegister}
+                        />
+                        {error && (
+                            <div className="text-red-600 dark:text-red-400 text-sm">
+                                {error instanceof Error ? error.message : 'An error occurred'}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 }
