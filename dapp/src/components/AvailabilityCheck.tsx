@@ -35,7 +35,7 @@ export function AvailabilityCheck() {
 
     const enableSearch = isValid;
 
-    function onClosePurchaseDialog() {
+    function handlePurchase() {
         setPurchaseDialogOpen(false);
         setSearchValue('');
         setName('');
@@ -48,7 +48,7 @@ export function AvailabilityCheck() {
                     name={searchValue}
                     open={isPurchaseDialogOpen}
                     setOpen={setPurchaseDialogOpen}
-                    onPurchase={() => onClosePurchaseDialog()}
+                    onPurchase={handlePurchase}
                 />
             )}
             <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
