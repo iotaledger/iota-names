@@ -14,7 +14,6 @@ use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
     effects::{TransactionEffects, TransactionEffectsAPI},
-    event::Event,
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
     transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
@@ -25,9 +24,9 @@ use move_core_types::{
 };
 use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, info};
+use tracing::{debug, info, warn};
 
-use crate::IotaNamesMetrics;
+use crate::{IotaNamesMetrics, events::IotaNamesEvent};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -76,19 +75,16 @@ impl IotaNamesWorker {
         Self { config, metrics }
     }
 
-    fn process_event(&self, event: &Event) -> anyhow::Result<()> {
-        if event.type_.address == self.config.package_address.into() {
-            // TODO temporarily allowed until there are more even types
-            #[allow(clippy::collapsible_if)]
-            if event.type_.name == Identifier::new("IotaNamesRegistryEvent")? {
-                // TODO: init from prometheus storage to not always start from 0
+    fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
+        match event {
+            IotaNamesEvent::IotaNamesRegistry(_event) => {
                 self.metrics.total_name_records.add(1);
-                // TODO: deserialize to get the name lengths
-                // let register_event =
-                //     bcs::from_bytes::<IotaNamesRegistryEvent>(&
-                // event_bcs_bytes)?;
-                // println!("Register event: {register_event:#?}");
             }
+            IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::AuctionStarted(_event) => (),
+            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => (),
         }
 
         Ok(())
@@ -161,7 +157,11 @@ impl Worker for IotaNamesWorker {
 
             if let Some(events) = &transaction.events {
                 for event in events.data.iter() {
-                    self.process_event(event)?;
+                    match IotaNamesEvent::try_from_event(event, &self.config) {
+                        Ok(Some(event)) => self.process_event(event)?,
+                        Err(e) => warn!("parsing event failed: {e}"),
+                        _ => {}
+                    }
                 }
             }
 
