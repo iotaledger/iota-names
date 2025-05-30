@@ -8,7 +8,7 @@ ARG CARGO_BUILD_FEATURES
 ARG GIT_REVISION
 ENV GIT_REVISION=$GIT_REVISION
 
-WORKDIR "/iota"
+WORKDIR "/iota-names"
 
 # Install build dependencies, including clang and lld for faster linking
 RUN apt update && apt install -y cmake clang lld
@@ -20,14 +20,11 @@ RUN mkdir -p ~/.cargo && \
 # Install additional dependencies
 RUN apt install -y libpq5 libpq-dev ca-certificates
 
-# Copy in all crates, Cargo.toml, and Cargo.lock
-COPY consensus consensus
-COPY crates crates
-COPY external-crates external-crates
-COPY iota-execution iota-execution
-COPY Cargo.toml Cargo.lock ./
+COPY indexer indexer
 
-RUN cargo build --profile ${PROFILE} --bin iota-names-indexer --features ${CARGO_BUILD_FEATURES:=default}
+WORKDIR "/iota-names/indexer"
+
+RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
 
 # Copy the built binary to the working directory depending on the output folder of the profile,
 # so we can copy it to the runtime image
@@ -44,13 +41,10 @@ mv $TARGET_DIR/iota-names-indexer ./;
 # Production image
 FROM debian:bookworm-slim AS runtime
 
-ARG WORKDIR="/iota"
-WORKDIR "$WORKDIR"
-
 # Install runtime dependencies and tools
 RUN apt update && apt install -y libpq5 ca-certificates curl
 
-COPY --from=builder /iota/iota-names-indexer /usr/local/bin
+COPY --from=builder /iota-names/indexer/iota-names-indexer /usr/local/bin
 
 ARG BUILD_DATE
 ARG GIT_REVISION

@@ -6,7 +6,7 @@ services:
         condition: service_started
     build:
       context: ../..
-      dockerfile: docker/iota-names-indexer/Dockerfile
+      dockerfile: indexer/docker/Dockerfile
       args:
         - GIT_REVISION
         - BUILD_DATE
