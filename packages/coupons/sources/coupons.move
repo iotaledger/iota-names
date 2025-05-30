@@ -12,10 +12,10 @@ const ECouponAlreadyExists: vector<u8> = b"Coupon already exists.";
 #[error]
 const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
-/// Create a `Coupons` struct that only authorized apps can get mutable access to.
-/// We don't save the coupon's table directly on the shared object, because we
-/// want authorized apps to only perform
-/// certain actions with the table (and not give full `mut` access to it).
+// This is an indirection structure for holding coupons which allows access mediation
+// via the authorization mechanism. Only authorized apps should have mutable 
+// access to this struct, whereas anyone can access the containing shared object.
+/// A list of coupons keyed by their hashed code.
 public struct Coupons has store {
     // hold a list of all coupons in the system.
     coupons: Bag,

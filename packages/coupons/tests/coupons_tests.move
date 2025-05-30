@@ -35,7 +35,7 @@ fun populate_coupons(scenario: &mut Scenario) {
     scenario.next_tx(user());
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    let data_mut = coupon_house::app_coupons_mut<TestAuth>(&mut iota_names, test_app());
+    let data_mut = coupon_house::auth_coupons_mut<TestAuth>(&mut iota_names, test_app());
     setup::populate_coupons(data_mut);
     return_shared(iota_names);
 }

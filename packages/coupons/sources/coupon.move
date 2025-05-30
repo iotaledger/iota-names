@@ -7,16 +7,15 @@ module iota_names_coupons::coupon;
 use iota_names_coupons::rules::{Self, CouponRules};
 
 /// A Coupon has a type, a value and a ruleset.
-/// - `Rules` are defined on the module `rules`, and covers a variety of
-/// everything we needed for the service.
-/// - `kind` is a u8 constant, defined on `constants` which makes a coupon fixed
-/// price or discount percentage
-/// - `value` is a u64 constant, which can be in the range of (0,100] for
+/// - `kind` is a u8 constant which makes a coupon fixed price or discount percentage.
+/// 0 -> Percentage Discount | 1 -> Fixed Discount
+/// - `amount` is a u64 constant, which can be in the range of (0,100] for
 /// discount percentage, or any value > 0 for fixed price.
+/// - `rules` are defined per coupon and determine which actions can be taken with them.
 public struct Coupon has copy, drop, store {
-    kind: u8, // 0 -> Percentage Discount | 1 -> Fixed Discount
-    amount: u64, // if type == 0, we need it to be between 0, 100. We only allow int style (not 0.5% discount).
-    rules: CouponRules, // A list of base Rules for the coupon.
+    kind: u8,
+    amount: u64,
+    rules: CouponRules,
 }
 
 /// Create a coupon object with a percentage discount.

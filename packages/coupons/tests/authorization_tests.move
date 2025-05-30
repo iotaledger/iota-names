@@ -5,7 +5,7 @@
 // A set of tests for the authorization of different apps in the CouponHouse.
 #[test_only]
 #[allow(lint(abort_without_constant))]
-module iota_names_coupons::app_authorization_tests;
+module iota_names_coupons::authorization_tests;
 
 use iota::test_scenario::{return_shared, return_to_sender, end};
 use iota_names::iota_names::IotaNames;
@@ -13,14 +13,14 @@ use iota_names_coupons::coupon_house::{Self, deauthorize};
 use iota_names_coupons::setup::{Self, TestAuth, admin, user, test_init};
 
 #[test]
-fun admin_get_app_success() {
+fun admin_get_auth_success() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     // auth style as authorized app
     {
         scenario.next_tx(user());
         let mut iota_names = scenario.take_shared<IotaNames>();
-        coupon_house::app_coupons_mut<TestAuth>(&mut iota_names, setup::test_app());
+        coupon_house::auth_coupons_mut<TestAuth>(&mut iota_names, setup::test_app());
         return_shared(iota_names);
     };
 
@@ -28,7 +28,7 @@ fun admin_get_app_success() {
 }
 
 #[test]
-fun deauthorize_app_success() {
+fun deauthorize_success() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     {
@@ -50,13 +50,13 @@ fun deauthorize_app_success() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names_coupons::coupon_house::EAppNotAuthorized)]
-fun unauthorized_app_failure() {
+fun unauthorized_auth_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     {
         scenario.next_tx(user());
         let mut iota_names = scenario.take_shared<IotaNames>();
-        coupon_house::app_coupons_mut(&mut iota_names, setup::unauthorized_test_app());
+        coupon_house::auth_coupons_mut(&mut iota_names, setup::unauthorized_test_app());
         return_shared(iota_names);
     };
     end(scenario_val);

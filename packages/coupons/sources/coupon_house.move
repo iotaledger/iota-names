@@ -46,8 +46,7 @@ public macro fun coupons_version(): u8 { 1 }
 // app.
 public struct CouponsAuth has drop {}
 
-/// Authorization Key for secondary apps (e.g. Discord) connected to this
-/// module.
+/// Authorization Key for secondary apps connected to this module.
 public struct AppKey<phantom A: drop> has copy, drop, store {}
 
 /// The CouponHouse Shared Object which holds a table of coupon codes available
@@ -173,7 +172,7 @@ fun apply_percentage_discount(
 }
 
 // Get `Coupons` as an authorized app.
-public fun app_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Coupons {
+public fun auth_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Coupons {
     let coupon_house_mut = coupon_house_mut(iota_names);
     // verify app is authorized to get a mutable reference.
     coupon_house_mut.assert_is_authorized<A>();
@@ -244,7 +243,7 @@ public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: v
 }
 
 // Add percentaged based coupon as a registered app.
-public fun app_add_percentage_coupon(
+public fun auth_add_percentage_coupon(
     coupons: &mut Coupons,
     hash: vector<u8>,
     percentage: u64,
@@ -254,7 +253,7 @@ public fun app_add_percentage_coupon(
 }
 
 // Add fixed amount coupon as a registered app.
-public fun app_add_fixed_coupon(
+public fun auth_add_fixed_coupon(
     coupons: &mut Coupons,
     hash: vector<u8>,
     amount: u64,
@@ -264,7 +263,7 @@ public fun app_add_fixed_coupon(
 }
 
 // Remove a coupon as a registered app.
-public fun app_remove_coupon(coupons: &mut Coupons, hash: vector<u8>) {
+public fun auth_remove_coupon(coupons: &mut Coupons, hash: vector<u8>) {
     coupons.remove_coupon(hash);
 }
 
