@@ -1,6 +1,6 @@
 [package]
-version = "0.0.0"
 name = "iota-names-indexer"
+version = "0.0.0"
 authors = ["IOTA Foundation <info@iota.org>"]
 edition = "2021"
 license = "Apache-2.0"
@@ -10,18 +10,7 @@ description = "IOTA-Names Indexer"
 [dependencies]
 anyhow = "1.0"
 async-trait = "0.1"
-axum = { version = "0.8", default-features = false, features = [
-    "tokio",
-    "http1",
-    "http2",
-    "json",
-    "matched-path",
-    "original-uri",
-    "form",
-    "query",
-    "ws",
-    "macros",
-] }
+axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
 bcs = "0.1"
 clap = { version = "4.4", features = ["derive", "wrap_help"] }
 dotenvy = "0.15"
@@ -31,15 +20,7 @@ serde_json = { version = "1.0", features = ["preserve_order"] }
 tokio = "=1.44.2"
 tokio-util = "0.7"
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", default-features = false, features = [
-    "std",
-    "fmt",
-    "ansi",
-    "smallvec",
-    "tracing-log",
-    "local-time",
-    "env-filter",
-] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["std", "fmt", "ansi", "smallvec", "tracing-log", "local-time", "env-filter"] }
 
 bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version" }
 iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core" }
