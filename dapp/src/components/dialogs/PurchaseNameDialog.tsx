@@ -12,10 +12,11 @@ import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 
 type PurchaseNameProps = {
     name: string;
-    onClose: () => void;
+    open: boolean;
+    setOpen: (bool: boolean) => void;
 };
 
-export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
+export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
     const account = useCurrentAccount();
     const { data, error } = useNameRecord(name);
     const [purchaseError, setPurchaseError] = useState<string>('');
@@ -24,8 +25,8 @@ export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
 
     const {
         data: registerNameData,
-        isPending: isRegisterNamePending,
-        error: errorRegisterName,
+        isLoading: isRegisterNameLoading,
+        error: registerNameError,
     } = useRegisterNameTransaction(
         account?.address || '',
         name,
@@ -33,33 +34,33 @@ export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
         1,
     );
 
-    const canRegister =
-        !!account?.address &&
-        !!name &&
-        data?.type === 'available' &&
-        data?.price &&
-        !isSendingTransaction &&
-        !errorRegisterName &&
-        !isRegisterNamePending;
-
     async function handlePurchase() {
         if (!registerNameData || data?.type !== 'available') return;
         try {
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
             });
-            onClose();
+            setOpen(false);
         } catch (e) {
             setPurchaseError('Register name transaction was not sent');
         }
     }
 
-    if (!account?.address || !name) return null;
+    const isConnected = !!account?.address;
+    const isAvailable = data?.type === 'available';
+    const canRegister =
+        isConnected &&
+        isAvailable &&
+        !registerNameError &&
+        !isSendingTransaction &&
+        !isRegisterNameLoading;
+
+    if (!isConnected) return null;
 
     return (
-        <Dialog open>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
-                <Header title="Buy name" onClose={onClose} titleCentered />
+                <Header title="Buy name" onClose={() => setOpen(false)} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
                         <div className="flex items-baseline justify-center gap-x-1">
@@ -86,7 +87,7 @@ export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
                             <Button
                                 type={ButtonType.Secondary}
                                 text="Cancel"
-                                onClick={onClose}
+                                onClick={() => setOpen(false)}
                                 fullWidth
                             />
                             <Button
@@ -97,21 +98,19 @@ export function PurchaseNameDialog({ name, onClose }: PurchaseNameProps) {
                                 fullWidth
                             />
                         </div>
-                        {purchaseError && typeof purchaseError === 'string' && (
+                        {purchaseError && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
                                 {purchaseError}
                             </div>
                         )}
-                        {(error instanceof Error || typeof error === 'string') && (
+                        {error && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
-                                {error instanceof Error ? error.message : error}
+                                {error.message}
                             </div>
                         )}
-                        {errorRegisterName && (
+                        {registerNameError && (
                             <div className="text-red-600 dark:text-red-400 text-sm">
-                                {errorRegisterName instanceof Error
-                                    ? errorRegisterName.message
-                                    : 'An error occurred'}
+                                {registerNameError.message}
                             </div>
                         )}
                     </div>

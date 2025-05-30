@@ -20,7 +20,7 @@ export function AvailabilityCheck() {
     const { data, error } = useNameRecord(name);
 
     const isValid = useMemo(() => isValidIotaName(searchValue), [searchValue]);
-    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+    const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
     const handleOnSearchChange = (value: string) => {
         if (name.length > 0) {
@@ -35,20 +35,13 @@ export function AvailabilityCheck() {
 
     const enableSearch = isValid;
 
-    function onClosePurchaseDialog() {
-        setShowPurchaseModal(false);
-        setSearchValue('');
-        setName('');
-    }
-
     return (
         <div className="flex flex-col items-center w-full space-y-4">
-            {showPurchaseModal && searchValue && (
+            {isPurchaseDialogOpen && searchValue && (
                 <PurchaseNameDialog
                     name={searchValue}
-                    onClose={() => {
-                        onClosePurchaseDialog;
-                    }}
+                    open={isPurchaseDialogOpen}
+                    setOpen={setPurchaseDialogOpen}
                 />
             )}
             <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
@@ -91,7 +84,7 @@ export function AvailabilityCheck() {
                         <Button
                             type={ButtonType.Secondary}
                             text="Buy"
-                            onClick={() => setShowPurchaseModal(true)}
+                            onClick={() => setPurchaseDialogOpen(true)}
                         />
                     ) : (
                         <ConnectButton connectText="Connect" />
