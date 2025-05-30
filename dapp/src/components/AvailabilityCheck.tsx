@@ -10,6 +10,8 @@ import { useMemo, useState } from 'react';
 
 import { useNameRecord } from '@/hooks/useNameRecord';
 
+import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
+
 export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
@@ -18,6 +20,7 @@ export function AvailabilityCheck() {
     const { data, error } = useNameRecord(name);
 
     const isValid = useMemo(() => isValidIotaName(searchValue), [searchValue]);
+    const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
     const handleOnSearchChange = (value: string) => {
         if (name.length > 0) {
@@ -30,14 +33,24 @@ export function AvailabilityCheck() {
         setName(searchValue);
     };
 
-    const handlePurchase = () => {
-        console.log('Purchase initiated for:', searchValue);
-    };
-
     const enableSearch = isValid;
+
+    function handlePurchase() {
+        setPurchaseDialogOpen(false);
+        setSearchValue('');
+        setName('');
+    }
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
+            {isPurchaseDialogOpen && searchValue && (
+                <PurchaseNameDialog
+                    name={searchValue}
+                    open={isPurchaseDialogOpen}
+                    setOpen={setPurchaseDialogOpen}
+                    onPurchase={handlePurchase}
+                />
+            )}
             <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
                 <Input
                     type={InputType.Text}
@@ -75,7 +88,11 @@ export function AvailabilityCheck() {
                 <div className="flex items-center space-x-4">
                     <div className="text-body-md">Price: {data?.price}</div>
                     {isConnected ? (
-                        <Button type={ButtonType.Secondary} text="Buy" onClick={handlePurchase} />
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setPurchaseDialogOpen(true)}
+                        />
                     ) : (
                         <ConnectButton connectText="Connect" />
                     )}
