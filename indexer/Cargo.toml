@@ -29,3 +29,6 @@ iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-met
 iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
 iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types" }
 move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types" }
+
+[features]
+default = []
