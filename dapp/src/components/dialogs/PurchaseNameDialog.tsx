@@ -19,7 +19,13 @@ type PurchaseNameProps = {
 export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
     const account = useCurrentAccount();
     const { data, error } = useNameRecord(name);
+
     const [purchaseError, setPurchaseError] = useState<string>('');
+
+    const isAvailable = data?.type === 'available';
+    const price = isAvailable ? data?.price : 0;
+    const isConnected = !!account?.address;
+
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -27,15 +33,17 @@ export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
         data: registerNameData,
         isLoading: isRegisterNameLoading,
         error: registerNameError,
-    } = useRegisterNameTransaction(
-        account?.address || '',
-        name,
-        data?.type == 'available' ? data?.price : 0,
-        1,
-    );
+    } = useRegisterNameTransaction(account?.address || '', name, price);
+
+    const canRegister =
+        isConnected &&
+        isAvailable &&
+        !registerNameError &&
+        !isSendingTransaction &&
+        !isRegisterNameLoading;
 
     async function handlePurchase() {
-        if (!registerNameData || data?.type !== 'available') return;
+        if (!registerNameData || !isAvailable) return;
         try {
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
@@ -46,21 +54,16 @@ export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
         }
     }
 
-    const isConnected = !!account?.address;
-    const isAvailable = data?.type === 'available';
-    const canRegister =
-        isConnected &&
-        isAvailable &&
-        !registerNameError &&
-        !isSendingTransaction &&
-        !isRegisterNameLoading;
+    function closeDialog() {
+        setOpen(false);
+    }
 
     if (!isConnected) return null;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
-                <Header title="Buy name" onClose={() => setOpen(false)} titleCentered />
+                <Header title="Buy name" onClose={closeDialog} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
                         <div className="flex items-baseline justify-center gap-x-1">
@@ -80,14 +83,14 @@ export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {data?.type == 'available' ? data?.price : '-'}
+                                {isAvailable ? data?.price : '-'}
                             </span>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
                                 type={ButtonType.Secondary}
                                 text="Cancel"
-                                onClick={() => setOpen(false)}
+                                onClick={closeDialog}
                                 fullWidth
                             />
                             <Button
