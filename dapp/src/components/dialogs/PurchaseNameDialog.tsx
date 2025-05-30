@@ -14,9 +14,10 @@ type PurchaseNameProps = {
     name: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
+    onPurchase?: () => void;
 };
 
-export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
+export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const account = useCurrentAccount();
     const { data, error } = useNameRecord(name);
 
@@ -49,6 +50,7 @@ export function PurchaseNameDialog({ name, open, setOpen }: PurchaseNameProps) {
                 transaction: registerNameData.transaction,
             });
             setOpen(false);
+            if (onPurchase) onPurchase();
         } catch (e) {
             setPurchaseError('Register name transaction was not sent');
         }
