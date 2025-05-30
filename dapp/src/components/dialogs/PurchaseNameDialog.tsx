@@ -4,9 +4,16 @@
 'use client';
 
 import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@iota/apps-ui-kit';
+// import {
+//     GAS_BALANCE_TOO_LOW_ID,
+//     GAS_BUDGET_ERROR_MESSAGES,
+//     NOT_ENOUGH_BALANCE_ID,
+// } from '@iota/core';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
 
+import { useGetCoins } from '@/hooks/useGetCoins';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 
@@ -19,16 +26,16 @@ type PurchaseNameProps = {
 
 export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const account = useCurrentAccount();
-    const { data, error } = useNameRecord(name);
-
+    const {
+        data: nameRecordData,
+        isLoading: isNameRecordLoading,
+        error: nameRecordError,
+    } = useNameRecord(name);
     const [purchaseError, setPurchaseError] = useState<string>('');
 
-    const isAvailable = data?.type === 'available';
-    const price = isAvailable ? data?.price : 0;
+    const isAvailable = nameRecordData?.type === 'available';
+    const price = isAvailable ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
-
-    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
-        useSignAndExecuteTransaction();
 
     const {
         data: registerNameData,
@@ -36,12 +43,33 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: registerNameError,
     } = useRegisterNameTransaction(account?.address || '', name, price);
 
+    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
+        useSignAndExecuteTransaction();
+
+    const { data: userCoins, error: errorUserBalance } = useGetCoins(
+        IOTA_TYPE_ARG,
+        account?.address ?? null,
+    );
+    console.log(userCoins);
+    const userBalance = Number(userCoins?.pages?.[0]?.data?.[0]?.balance) || 0;
+    const gas = Number(registerNameData?.gasSummary?.totalGas);
+    const priceValue = isAvailable ? nameRecordData.price : 0;
+    const totalPrice = isAvailable ? priceValue + gas : '-';
+    const hasBalance = (userBalance ?? 0) > Number(totalPrice);
+    // const isNotEnoughGas =
+    //     registerNameError &&
+    //     (registerNameError.message.includes(NOT_ENOUGH_BALANCE_ID) ||
+    //         registerNameError.message.includes(GAS_BALANCE_TOO_LOW_ID));
+
     const canRegister =
         isConnected &&
         isAvailable &&
         !registerNameError &&
         !isSendingTransaction &&
-        !isRegisterNameLoading;
+        !isRegisterNameLoading &&
+        // !isNotEnoughGas &&
+        hasBalance &&
+        !errorUserBalance;
 
     async function handlePurchase() {
         if (!registerNameData || !isAvailable) return;
@@ -85,9 +113,33 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {isAvailable ? data?.price : '-'}
+                                {isAvailable ? nameRecordData?.price : '-'}
                             </span>
                         </div>
+                        {!isRegisterNameLoading && registerNameData && (
+                            <div className="flex items-baseline justify-center gap-x-1">
+                                <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                    Gas:
+                                </span>
+                                <span className="text-body-md font-mono">
+                                    {registerNameData?.gasSummary?.totalGas}
+                                </span>
+                            </div>
+                        )}
+                        {!isRegisterNameLoading &&
+                            !isNameRecordLoading &&
+                            isAvailable &&
+                            registerNameData && (
+                                <div className="flex items-baseline justify-center gap-x-1">
+                                    <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                        Total price (Name + gas):
+                                    </span>
+                                    <span className="text-body-md font-mono">
+                                        {isAvailable && !isNameRecordLoading ? totalPrice : '-'}
+                                    </span>
+                                </div>
+                            )}
+
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
                                 type={ButtonType.Secondary}
@@ -103,18 +155,23 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 fullWidth
                             />
                         </div>
+                        {/* {isNotEnoughGas && (
+                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
+                                {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
+                            </div>
+                        )} */}
                         {purchaseError && (
-                            <div className="text-red-600 dark:text-red-400 text-sm">
+                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {purchaseError}
                             </div>
                         )}
-                        {error && (
-                            <div className="text-red-600 dark:text-red-400 text-sm">
-                                {error.message}
+                        {nameRecordError && (
+                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
+                                {nameRecordError.message}
                             </div>
                         )}
                         {registerNameError && (
-                            <div className="text-red-600 dark:text-red-400 text-sm">
+                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {registerNameError.message}
                             </div>
                         )}
