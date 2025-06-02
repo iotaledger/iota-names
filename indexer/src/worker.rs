@@ -10,7 +10,7 @@ use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
 };
 use iota_json::IotaJsonValue;
-use iota_names::config::IotaNamesConfig;
+use iota_names::{config::IotaNamesConfig, domain::Domain};
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
@@ -87,8 +87,14 @@ impl IotaNamesWorker {
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
-            IotaNamesEvent::IotaNamesRegistry(_event) => {
+            IotaNamesEvent::IotaNamesRegistry(event) => {
                 self.metrics.total_name_records.inc();
+                let domain = Domain::from_str(&event.domain)?;
+                let second_level_name_len = domain.label(1).expect("missing SDL").len();
+                self.metrics
+                    .name_length_distribution
+                    .with_label_values(&[&second_level_name_len.to_string()])
+                    .inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
             IotaNamesEvent::AuctionStarted(_event) => {
