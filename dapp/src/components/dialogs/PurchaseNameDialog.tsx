@@ -5,7 +5,6 @@
 
 import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
 
 import { useBalance } from '@/hooks/useBalance';
