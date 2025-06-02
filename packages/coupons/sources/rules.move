@@ -176,8 +176,8 @@ public fun is_coupon_expired(rules: &CouponRules, clock: &Clock): bool {
 /// there have only been other stacking coupons used. Non stacking coupons cannot be added
 /// with other coupons.
 /// Throws `ENonStackingCoupon` error if it cannot stack.
-public fun assert_coupon_can_stack(rules: &CouponRules) {
-    assert!(rules.can_coupon_stack(), ENonStackingCoupon);
+public fun assert_coupon_can_stack(rules: &CouponRules, used_non_stacking: bool) {
+    assert!(!used_non_stacking && rules.can_coupon_stack(), ENonStackingCoupon);
 }
 
 /// Check whether a coupon can stack with other coupons

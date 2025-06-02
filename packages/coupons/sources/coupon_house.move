@@ -36,8 +36,9 @@ const EInvalidVersion: vector<u8> = b"Invalid version.";
 #[error]
 const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
-const USED_COUPONS_KEY: vector<u8> = b"coupons_used";
+const USED_NON_STACKING_KEY: vector<u8> = b"used_not_stacking_coupon";
 const TRUE_VAL: vector<u8> = b"true";
+const FALSE_VAL: vector<u8> = b"false";
 
 /// The coupons package versioning
 public macro fun coupons_version(): u8 { 1 }
@@ -87,10 +88,19 @@ public fun apply_coupon(
     let coupon: &Coupon = &coupon_house.coupons_table()[hash];
     let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
 
-    if (metadata.contains(&USED_COUPONS_KEY.to_string())) {
-        coupon.rules().assert_coupon_can_stack();
+    let mut idx_opt = metadata.get_idx_opt(&USED_NON_STACKING_KEY.to_string());
+    let used_non_stacking_val = if (coupon.rules().can_coupon_stack()) {
+        FALSE_VAL
     } else {
-        metadata.insert(USED_COUPONS_KEY.to_string(), TRUE_VAL.to_string());
+        TRUE_VAL
+    }.to_string();
+    if (idx_opt.is_some()) {
+        let (_, used_non_stacking_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
+        let used_non_stacking = used_non_stacking_str.as_bytes() == TRUE_VAL;
+        coupon.rules().assert_coupon_can_stack(used_non_stacking);
+        *used_non_stacking_str = used_non_stacking_val;
+    } else {
+        metadata.insert(USED_NON_STACKING_KEY.to_string(), used_non_stacking_val);
     };
 
     let is_percentage = coupon.is_percentage();

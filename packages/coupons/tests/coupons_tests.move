@@ -265,21 +265,48 @@ fun twenty_percent_off_stack() {
     populate_coupons(scenario);
     // 20% discount coupon.
     admin_add_percentage_coupon(
-        b"20%_OFF".to_string(),
+        b"15_DISCOUNT_STACKABLE".to_string(),
         20,
         scenario,
     );
     test_multi_coupon_register(
         scenario,
-        b"test.iota".to_string(),
-        vector[b"20%_OFF".to_string(), b"5_DISCOUNT_STACKABLE".to_string()],
+        b"teso.iota".to_string(),
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"15_DISCOUNT_STACKABLE".to_string()],
         user(),
         option::none(),
     );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENonStackingCoupon)]
+fun unstackable_then_stackable_fails() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
     test_multi_coupon_register(
         scenario,
-        b"teso.iota".to_string(),
-        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"20%_OFF".to_string()],
+        b"test.iota".to_string(),
+        vector[b"ONE_IOTA_OFF".to_string(), b"5_DISCOUNT_STACKABLE".to_string()],
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENonStackingCoupon)]
+fun stackable_then_unstackable_fails() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    test_multi_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"ONE_IOTA_OFF".to_string()],
         user(),
         option::none(),
     );
