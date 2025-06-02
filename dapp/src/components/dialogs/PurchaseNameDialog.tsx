@@ -16,6 +16,11 @@ import { useState } from 'react';
 import { useGetCoins } from '@/hooks/useGetCoins';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
+import {
+    GAS_BALANCE_TOO_LOW_ID,
+    GAS_BUDGET_ERROR_MESSAGES,
+    NOT_ENOUGH_BALANCE_ID,
+} from '@/lib/constants';
 
 type PurchaseNameProps = {
     name: string;
@@ -50,16 +55,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         IOTA_TYPE_ARG,
         account?.address ?? null,
     );
-    console.log(userCoins);
     const userBalance = Number(userCoins?.pages?.[0]?.data?.[0]?.balance) || 0;
     const gas = Number(registerNameData?.gasSummary?.totalGas);
     const priceValue = isAvailable ? nameRecordData.price : 0;
     const totalPrice = isAvailable ? priceValue + gas : '-';
     const hasBalance = (userBalance ?? 0) > Number(totalPrice);
-    // const isNotEnoughGas =
-    //     registerNameError &&
-    //     (registerNameError.message.includes(NOT_ENOUGH_BALANCE_ID) ||
-    //         registerNameError.message.includes(GAS_BALANCE_TOO_LOW_ID));
+    const isNotEnoughGas =
+        registerNameError &&
+        (registerNameError.message.includes(NOT_ENOUGH_BALANCE_ID) ||
+            registerNameError.message.includes(GAS_BALANCE_TOO_LOW_ID));
 
     const canRegister =
         isConnected &&
@@ -67,7 +71,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         !registerNameError &&
         !isSendingTransaction &&
         !isRegisterNameLoading &&
-        // !isNotEnoughGas &&
+        !isNotEnoughGas &&
         hasBalance &&
         !errorUserBalance;
 
@@ -155,11 +159,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 fullWidth
                             />
                         </div>
-                        {/* {isNotEnoughGas && (
+                        {isNotEnoughGas && (
                             <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
                             </div>
-                        )} */}
+                        )}
                         {purchaseError && (
                             <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {purchaseError}
@@ -170,7 +174,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 {nameRecordError.message}
                             </div>
                         )}
-                        {registerNameError && (
+                        {!isNotEnoughGas && registerNameError && (
                             <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {registerNameError.message}
                             </div>
