@@ -4,11 +4,6 @@
 'use client';
 
 import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@iota/apps-ui-kit';
-// import {
-//     GAS_BALANCE_TOO_LOW_ID,
-//     GAS_BUDGET_ERROR_MESSAGES,
-//     NOT_ENOUGH_BALANCE_ID,
-// } from '@iota/core';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
