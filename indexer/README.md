@@ -11,7 +11,7 @@ Indexer to collect metrics about IOTA-Names.
 ### Set the environment variables
 
 ```bash
-cd scripts && pnpm ts-node utils/envs localnet > ../indexer/docker/.env && cd ..
+cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd ..
 ```
 
 ### Start the indexer

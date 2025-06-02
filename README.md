@@ -83,9 +83,8 @@ iota client faucet
 sleep 2
 pnpm i
 cd scripts && pnpm ts-node init/init.ts localnet
-# get more funds, can be removed when register works with a single gas coin
-iota client faucet
 pnpm run envs localnet
+cd ..
 ```
 
 To stop the local network in the background, run: `kill %1` or `kill <job-number>` that was printed when it was started.

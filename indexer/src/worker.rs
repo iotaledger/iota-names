@@ -13,6 +13,7 @@ use iota_names::config::IotaNamesConfig;
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
+    dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
@@ -142,7 +143,16 @@ impl Worker for IotaNamesWorker {
 
         for object in checkpoint.latest_live_output_objects() {
             if object.id() == balance_object_id {
-                let balance: Balance = object.to_rust().expect("invalid balance object");
+                let balance = bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
+                    object
+                        .as_inner()
+                        .data
+                        .try_as_move()
+                        .expect("invalid move object")
+                        .contents(),
+                )?
+                .value;
+
                 self.metrics.iota_names_balance.set(balance.value() as _);
                 break;
             }
