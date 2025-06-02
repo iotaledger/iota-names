@@ -81,10 +81,10 @@ public fun apply_coupon(
 
     // Validate that specified coupon is valid.
     let hash = blake2b256(coupon_code.as_bytes());
-    assert!(coupon_house.coupons_bag().contains(hash), ECouponDoesNotExist);
+    assert!(coupon_house.coupons_table().contains(hash), ECouponDoesNotExist);
 
     // Borrow coupon from the table.
-    let coupon: &Coupon = &coupon_house.coupons_bag()[hash];
+    let coupon: &Coupon = &coupon_house.coupons_table()[hash];
     let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
 
     let mut idx_opt = metadata.get_idx_opt(&USED_COUPONS_KEY.to_string());
@@ -101,7 +101,7 @@ public fun apply_coupon(
     // Verify coupon house is authorized to get the registry / register names.
     let coupon_house = coupon_house_mut(iota_names);
     // Mutably borrow coupon from the table.
-    let coupon: &mut Coupon = &mut coupon_house.coupons_bag_mut()[hash];
+    let coupon: &mut Coupon = &mut coupon_house.coupons_table_mut()[hash];
 
     // We need to do a total of 5 checks, based on `CouponRules`
     // Our checks work with `AND`, all of the conditions must pass for a coupon
@@ -125,7 +125,7 @@ public fun apply_coupon(
     // Clean up our registry by removing the coupon if no more available claims!
     if (!coupon.rules().has_available_claims()) {
         // remove the coupon, since it's no longer usable.
-        let _: Coupon = coupon_house.coupons_bag_mut().remove(hash);
+        let _: Coupon = coupon_house.coupons_table_mut().remove(hash);
     };
 
     if (is_percentage) {
@@ -257,11 +257,11 @@ public(package) fun coupons_mut(coupon_house: &mut CouponHouse): &mut Coupons {
     &mut coupon_house.coupons
 }
 
-public(package) fun coupons_bag(coupon_house: &CouponHouse): &Table<vector<u8>, Coupon> {
+public(package) fun coupons_table(coupon_house: &CouponHouse): &Table<vector<u8>, Coupon> {
     coupon_house.coupons.coupons()
 }
 
-public(package) fun coupons_bag_mut(coupon_house: &mut CouponHouse): &mut Table<vector<u8>, Coupon> {
+public(package) fun coupons_table_mut(coupon_house: &mut CouponHouse): &mut Table<vector<u8>, Coupon> {
     coupon_house.coupons.coupons_mut()
 }
 
