@@ -85,9 +85,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {data?.type === 'available'
-                                    ? formatNanosToIota(BigInt(data.price))
-                                    : '-'}
+                                {data?.type === 'available' ? formatNanosToIota(data.price) : '-'}
                             </span>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs">
