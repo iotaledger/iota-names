@@ -1,5 +1,11 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+/** @type {import('postcss-load-config').Config} */
 const config = {
-    plugins: ['@tailwindcss/postcss'],
+    plugins: {
+        tailwindcss: {},
+    },
 };
 
 export default config;
