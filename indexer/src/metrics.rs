@@ -5,13 +5,17 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 use axum::{Extension, Router, routing::get};
 use iota_metrics::{METRICS_ROUTE, RegistryService};
-use prometheus::{IntGauge, Registry, register_int_gauge_with_registry};
+use prometheus::{
+    IntCounterVec, IntGauge, Registry, register_int_counter_vec_with_registry,
+    register_int_gauge_with_registry,
+};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 pub(crate) struct IotaNamesMetrics {
     pub total_name_records: IntGauge,
     pub iota_names_balance: IntGauge,
+    pub renewal_years_distribution: IntCounterVec,
 }
 
 impl IotaNamesMetrics {
@@ -26,6 +30,13 @@ impl IotaNamesMetrics {
             iota_names_balance: register_int_gauge_with_registry!(
                 "iota_names_balance",
                 "The balance held in IOTA-Names",
+                registry,
+            )
+            .unwrap(),
+            renewal_years_distribution: register_int_counter_vec_with_registry!(
+                "renewal_years_distribution",
+                "The number of years of renewals",
+                &["years"],
                 registry,
             )
             .unwrap(),

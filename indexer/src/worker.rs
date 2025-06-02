@@ -86,6 +86,14 @@ impl IotaNamesWorker {
             IotaNamesEvent::AuctionBid(_event) => (),
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(_event) => (),
+            IotaNamesEvent::Transaction(event) => {
+                if let Some(years) = event.renewal {
+                    self.metrics
+                        .renewal_years_distribution
+                        .with_label_values(&[years.to_string()])
+                        .inc();
+                }
+            }
         }
 
         Ok(())
