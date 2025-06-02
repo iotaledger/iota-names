@@ -87,12 +87,10 @@ public fun apply_coupon(
     let coupon: &Coupon = &coupon_house.coupons_table()[hash];
     let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
 
-    let mut idx_opt = metadata.get_idx_opt(&USED_COUPONS_KEY.to_string());
-    if (idx_opt.is_some()) {
-        let (_, used_coupons_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
-        let used_coupons = used_coupons_str.as_bytes() == TRUE_VAL;
-        coupon.rules().assert_coupon_can_stack(used_coupons);
-        *used_coupons_str = TRUE_VAL.to_string();
+    if (metadata.contains(&USED_COUPONS_KEY.to_string())) {
+        coupon.rules().assert_coupon_can_stack();
+    } else {
+        metadata.insert(USED_COUPONS_KEY.to_string(), TRUE_VAL.to_string());
     };
 
     let is_percentage = coupon.is_percentage();
