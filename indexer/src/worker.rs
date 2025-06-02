@@ -90,7 +90,7 @@ impl IotaNamesWorker {
             IotaNamesEvent::IotaNamesRegistry(event) => {
                 self.metrics.total_name_records.inc();
                 let domain = Domain::from_str(&event.domain)?;
-                let second_level_name_len = domain.label(1).expect("missing SDL").len();
+                let second_level_name_len = domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
                     .with_label_values(&[&second_level_name_len.to_string()])
