@@ -8,7 +8,7 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit'
 import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
 
-import { useGetCoins } from '@/hooks/useGetCoins';
+import { useBalance } from '@/hooks/useBalance';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 import {
@@ -34,8 +34,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     } = useNameRecord(name);
     const [purchaseError, setPurchaseError] = useState<string>('');
 
-    const isAvailable = nameRecordData?.type === 'available';
-    const price = isAvailable ? nameRecordData?.price : 0;
+    const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
 
     const {
@@ -47,14 +46,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const { data: userCoins, error: errorUserBalance } = useGetCoins(
-        IOTA_TYPE_ARG,
-        account?.address ?? null,
-    );
-    const userBalance = Number(userCoins?.pages?.[0]?.data?.[0]?.balance) || 0;
-    const gas = Number(registerNameData?.gasSummary?.totalGas);
-    const priceValue = isAvailable ? nameRecordData.price : 0;
-    const totalPrice = isAvailable ? priceValue + gas : '-';
+    const { data: userCoins, error: errorUserBalance } = useBalance(account?.address ?? '');
+    console.log(userCoins);
+    const userBalance = Number(userCoins?.totalBalance) || 0;
+    const gas = Number(registerNameData?.gasSummary?.totalGas ?? 0);
+    const priceValue = nameRecordData?.type === 'available' ? nameRecordData.price : 0;
+    const totalPrice = nameRecordData?.type === 'available' ? priceValue + gas : '-';
     const hasBalance = (userBalance ?? 0) > Number(totalPrice);
     const isNotEnoughGas =
         registerNameError &&
@@ -63,7 +60,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister =
         isConnected &&
-        isAvailable &&
+        nameRecordData?.type === 'available' &&
         !registerNameError &&
         !isSendingTransaction &&
         !isRegisterNameLoading &&
@@ -72,7 +69,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         !errorUserBalance;
 
     async function handlePurchase() {
-        if (!registerNameData || !isAvailable) return;
+        if (!registerNameData || nameRecordData?.type !== 'available') return;
         try {
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
@@ -113,7 +110,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {isAvailable
+                                {nameRecordData?.type === 'available'
                                     ? formatNanosToIota(price, { formatRounded: false })
                                     : '-'}{' '}
                             </span>
@@ -133,14 +130,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         )}
                         {!isRegisterNameLoading &&
                             !isNameRecordLoading &&
-                            isAvailable &&
+                            nameRecordData?.type === 'available' &&
                             registerNameData && (
                                 <div className="flex items-baseline justify-center gap-x-1">
                                     <span className="text-body-md text-neutral-40 dark:text-neutral-60">
                                         Total price (Name + gas):
                                     </span>
                                     <span className="text-body-md font-mono">
-                                        {isAvailable && !isNameRecordLoading
+                                        {nameRecordData?.type === 'available' &&
+                                        !isNameRecordLoading
                                             ? formatNanosToIota(totalPrice, {
                                                   formatRounded: false,
                                               })
