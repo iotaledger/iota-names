@@ -49,7 +49,7 @@ public fun add_fixed_coupon(
 }
 
 // A function to remove a coupon from the system.
-public fun remove_coupon(self: &mut Coupons, hash: vector<u8>) {
+public(package) fun remove_coupon(self: &mut Coupons, hash: vector<u8>) {
     assert!(self.coupons.contains(hash), ECouponDoesNotExist);
     let _: Coupon = self.coupons.remove(hash);
 }
