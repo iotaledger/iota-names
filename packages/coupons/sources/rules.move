@@ -2,8 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// A module with a couple of helpers for validation of coupons
-// validation of names etc.
+// A module with a couple of helpers for validation of coupons, names etc.
 module iota_names_coupons::rules;
 
 use iota::clock::Clock;
@@ -13,10 +12,10 @@ use iota_names_coupons::range::Range;
 /// Error when you try to use a coupon that isn't valid for these years.
 #[error]
 const EInvalidYears: vector<u8> = b"Coupon is not valid for the given number of years.";
-/// Error when you try to use a coupon which doesn't match to the domain's size.
+/// Error when you try to use a coupon which doesn't match the domain's length.
 #[error]
 const EInvalidForDomainLength: vector<u8> = b"Coupon is not valid for the given domain length.";
-/// Error when you try to use a domain that has used all it's available claims.
+/// Error when you try to use a domain that has used all its available claims.
 #[error]
 const ENoMoreAvailableClaims: vector<u8> = b"Coupon has been claimed the maximum number of times.";
 /// Error when you try to create a percentage discount coupon with invalid
@@ -49,12 +48,13 @@ public struct CouponRules has copy, drop, store {
 
 /// This is used in a PTB when creating a coupon.
 /// Creates a CouponRules object to be used to create a coupon.
-/// All rules are optional, and can be chained (`AND`) format.
+/// All rules are optional, and can be used together where each
+/// constrains the coupon further.
 /// 1. Length: The name has to be in range [from, to]
 /// 2. Max available claims
 /// 3. Only for a specific address
-/// 4. Might have an expiration date.
-/// 5. Might be valid only for registrations in a range [from, to]
+/// 4. Only for a specific expiration date
+/// 5. Only for registrations or renewals for years in the range [from, to]
 public fun new_coupon_rules(
     length: Option<Range>,
     available_claims: Option<u64>,
@@ -91,12 +91,8 @@ public fun new_empty_rules(): CouponRules {
     }
 }
 
-/// If the rules count `available_claims`, we decrease it.
+/// If the rules track available claims, we decrease it.
 /// Aborts if there are no more available claims on that coupon.
-/// We shouldn't get here ever, as we're checking this on the coupon creation,
-/// but
-/// keeping it as a sanity check (e.g. created a coupon with 0 available
-/// claims).
 public fun decrease_available_claims(rules: &mut CouponRules) {
     if (rules.available_claims.is_some()) {
         assert!(has_available_claims(rules), ENoMoreAvailableClaims);
@@ -113,9 +109,9 @@ public fun has_available_claims(rules: &CouponRules): bool {
     *rules.available_claims.borrow() > 0
 }
 
-// Assertion helper for the validity of years.
-public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, target: u8) {
-    assert!(is_coupon_valid_for_domain_years(rules, target), EInvalidYears);
+/// Ensure that the coupon is valid for the given number of years.
+public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, years: u8) {
+    assert!(is_coupon_valid_for_domain_years(rules, years), EInvalidYears);
 }
 
 // Checks if a target amount of years is valid for claim.
@@ -123,26 +119,25 @@ public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, target: u8)
 // That means we can create a combination of:
 // 1. Exact years (e.g. 2 years, by passing [2,2])
 // 2. Range of years (e.g. [1,3])
-public fun is_coupon_valid_for_domain_years(rules: &CouponRules, target: u8): bool {
+public fun is_coupon_valid_for_domain_years(rules: &CouponRules, years: u8): bool {
     if (rules.years.is_none()) return true;
 
-    rules.years.borrow().is_in_range(target)
+    rules.years.borrow().is_in_range(years)
 }
 
-// verify that we are creating the coupons correctly (based on amount & type).
-// for amounts, if we have a percentage discount, our max is 100.
+// Ensure that the provided amount is a valid percentage, i.e. between 0 (exclusive) and 100
 public fun assert_is_valid_percentage(amount: u64) {
     assert!(amount > 0, EInvalidPercentage); // protect from division by 0. 0 doesn't make sense in any scenario.
     assert!(amount <= 100, EInvalidPercentage);
 }
 
-// We check a DomainSize Rule against the length of a domain.
-// We return if the length is valid based on that.
+/// Ensure that the coupons is valid for the given domain length.
+/// Throws `EInvalidForDomainLength` error if it has expired.
 public fun assert_coupon_valid_for_domain_size(rules: &CouponRules, length: u8) {
     assert!(is_coupon_valid_for_domain_size(rules, length), EInvalidForDomainLength)
 }
 
-/// We check the length of the name based on the domain length rule
+/// Returns whether the coupons is valid for the given domain length
 public fun is_coupon_valid_for_domain_size(rules: &CouponRules, length: u8): bool {
     // If the vec is not set, we pass this rule test.
     if (rules.length.is_none()) return true;
@@ -150,7 +145,7 @@ public fun is_coupon_valid_for_domain_size(rules: &CouponRules, length: u8): boo
     rules.length.borrow().is_in_range(length)
 }
 
-// We check that the coupon is valid for the specified address.
+/// Ensure that the coupon is valid for the specified address.
 /// Throws `EInvalidUser` error if it has expired.
 public fun assert_coupon_valid_for_address(rules: &CouponRules, user: address) {
     assert!(is_coupon_valid_for_address(rules, user), EInvalidUser);
@@ -162,7 +157,7 @@ public fun is_coupon_valid_for_address(rules: &CouponRules, user: address): bool
     rules.user.borrow() == user
 }
 
-/// Simple assertion for the coupon expiration.
+/// Ensure that the coupon is not expired
 /// Throws `ECouponExpired` error if it has expired.
 public fun assert_coupon_is_not_expired(rules: &CouponRules, clock: &Clock) {
     assert!(!is_coupon_expired(rules, clock), ECouponExpired);
@@ -177,10 +172,12 @@ public fun is_coupon_expired(rules: &CouponRules, clock: &Clock): bool {
     clock.timestamp_ms() > *rules.expiration.borrow()
 }
 
-/// Assertion for testing if a coupon can be stacked.
+/// Ensure that the coupon can be stacked. Stacking coupons can be added to a purchase if
+/// there have only been other stacking coupons used. Non stacking coupons cannot be added
+/// with other coupons.
 /// Throws `ENonStackingCoupon` error if it cannot stack.
-public fun assert_coupon_can_stack(rules: &CouponRules, used_non_stacking: bool) {
-    assert!(!(used_non_stacking && rules.can_coupon_stack()), ENonStackingCoupon);
+public fun assert_coupon_can_stack(rules: &CouponRules, used_coupons: bool) {
+    assert!(!used_coupons || rules.can_coupon_stack(), ENonStackingCoupon);
 }
 
 /// Check whether a coupon can stack with other coupons

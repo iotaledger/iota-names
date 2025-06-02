@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// A module to support coupons for IOTA-Names.
-/// This module allows secondary modules (e.g. Discord) to add or remove coupons
+/// This module allows secondary modules to add or remove coupons
 /// too.
 /// This allows for separation of logic & ease of de-authorization in case we
 /// don't want some functionality anymore.
@@ -16,7 +16,7 @@
 /// to the registry.
 module iota_names_coupons::coupon_house;
 
-use iota::bag::Bag;
+use iota::table::Table;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::hash::blake2b256;
@@ -36,8 +36,8 @@ const EInvalidVersion: vector<u8> = b"Invalid version.";
 #[error]
 const ECouponDoesNotExist: vector<u8> = b"Coupon does not exist.";
 
-const USED_NON_STACKING_KEY: vector<u8> = b"coupon_used_non_stacking";
-const USED_NON_STACKING_VAL: vector<u8> = b"true";
+const USED_COUPONS_KEY: vector<u8> = b"coupons_used";
+const TRUE_VAL: vector<u8> = b"true";
 
 /// The coupons package versioning
 public macro fun coupons_version(): u8 { 1 }
@@ -47,22 +47,22 @@ public macro fun coupons_version(): u8 { 1 }
 public struct CouponsAuth has drop {}
 
 /// Authorization Key for secondary apps connected to this module.
-public struct AppKey<phantom A: drop> has copy, drop, store {}
+public struct AuthKey<phantom A: drop> has copy, drop, store {}
 
 /// The CouponHouse Shared Object which holds a table of coupon codes available
 /// for claim.
 public struct CouponHouse has store {
     coupons: Coupons,
     version: u8,
-    storage: UID,
+    id: UID,
 }
 
-/// Called once to setup the CouponHouse on Iota-Names.
+/// Called once to setup the Coupon House on IOTA-Names.
 public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext) {
     cap.add_registry(
         iota_names,
         CouponHouse {
-            storage: object::new(ctx),
+            id: object::new(ctx),
             coupons: coupons::new(ctx),
             version: coupons_version!(),
         },
@@ -86,15 +86,15 @@ public fun apply_coupon(
     // Borrow coupon from the table.
     let coupon: &Coupon = &coupon_house.coupons_bag()[hash];
     let metadata = intent.request_data_mut(iota_names, CouponsAuth {}).metadata_mut();
-    let mut idx_opt = metadata.get_idx_opt(&USED_NON_STACKING_KEY.to_string());
+
+    let mut idx_opt = metadata.get_idx_opt(&USED_COUPONS_KEY.to_string());
     if (idx_opt.is_some()) {
-        let (_, used_non_stacking_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
-        let used_non_stacking = used_non_stacking_str.as_bytes() == USED_NON_STACKING_VAL;
-        coupon.rules().assert_coupon_can_stack(used_non_stacking);
-        if (!coupon.rules().can_coupon_stack()) {
-            *used_non_stacking_str = USED_NON_STACKING_VAL.to_string();
-        };
+        let (_, used_coupons_str) = metadata.get_entry_by_idx_mut(idx_opt.extract());
+        let used_coupons = used_coupons_str.as_bytes() == TRUE_VAL;
+        coupon.rules().assert_coupon_can_stack(used_coupons);
+        *used_coupons_str = TRUE_VAL.to_string();
     };
+
     let is_percentage = coupon.is_percentage();
     let discount = coupon.discount();
 
@@ -182,12 +182,12 @@ public fun auth_coupons_mut<A: drop>(iota_names: &mut IotaNames, _: A): &mut Cou
 /// Authorize an app on the coupon house. This allows to a secondary module to
 /// add/remove coupons.
 public fun authorize<A: drop>(_: &AdminCap, iota_names: &mut IotaNames) {
-    df::add(&mut coupon_house_mut(iota_names).storage, AppKey<A> {}, true);
+    df::add(&mut coupon_house_mut(iota_names).id, AuthKey<A> {}, true);
 }
 
-/// De-authorize an app. The app can no longer add or remove
+/// De-authorize an app. The app can no longer add or remove coupons.
 public fun deauthorize<A: drop>(_: &AdminCap, iota_names: &mut IotaNames): bool {
-    df::remove(&mut coupon_house_mut(iota_names).storage, AppKey<A> {})
+    df::remove(&mut coupon_house_mut(iota_names).id, AuthKey<A> {})
 }
 
 /// An admin helper to set the version of the shared object.
@@ -202,10 +202,7 @@ public fun assert_version_is_valid(self: &CouponHouse) {
 }
 
 /// Add a percentage based coupon as an admin.
-/// To create a coupon, you have to call the PTB in the specific order
-/// 1. (Optional) Call rules::new_domain_length_rule(type, length) // generate a
-/// length specific rule (e.g. only domains of size 5)
-/// 2. Call rules::coupon_rules(...) to create the coupon's ruleset.
+/// First, call rules::new_coupon_rules to create the coupon's ruleset.
 public fun admin_add_percentage_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
@@ -219,10 +216,7 @@ public fun admin_add_percentage_coupon(
 }
 
 /// Add a fixed amount coupon as an admin.
-/// To create a coupon, you have to call the PTB in the specific order
-/// 1. (Optional) Call rules::new_domain_length_rule(type, length) // generate a
-/// length specific rule (e.g. only domains of size 5)
-/// 2. Call rules::coupon_rules(...) to create the coupon's ruleset.
+/// 2. Call rules::new_coupon_rules to create the coupon's ruleset.
 public fun admin_add_fixed_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
@@ -242,35 +236,10 @@ public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: v
     coupon_house.coupons.remove_coupon(hash);
 }
 
-// Add percentaged based coupon as a registered app.
-public fun auth_add_percentage_coupon(
-    coupons: &mut Coupons,
-    hash: vector<u8>,
-    percentage: u64,
-    rules: CouponRules,
-) {
-    coupons.save_coupon(hash, coupon::new_percentage(percentage, rules));
-}
-
-// Add fixed amount coupon as a registered app.
-public fun auth_add_fixed_coupon(
-    coupons: &mut Coupons,
-    hash: vector<u8>,
-    amount: u64,
-    rules: CouponRules,
-) {
-    coupons.save_coupon(hash, coupon::new_fixed(amount, rules));
-}
-
-// Remove a coupon as a registered app.
-public fun auth_remove_coupon(coupons: &mut Coupons, hash: vector<u8>) {
-    coupons.remove_coupon(hash);
-}
-
 /// Check if an application is authorized to access protected features of the
 /// Coupon House.
 fun is_authorized<A: drop>(coupon_house: &CouponHouse): bool {
-    df::exists_(&coupon_house.storage, AppKey<A> {})
+    df::exists_(&coupon_house.id, AuthKey<A> {})
 }
 
 /// Assert that an application is authorized to access protected features of
@@ -288,11 +257,11 @@ public(package) fun coupons_mut(coupon_house: &mut CouponHouse): &mut Coupons {
     &mut coupon_house.coupons
 }
 
-public(package) fun coupons_bag(coupon_house: &CouponHouse): &Bag {
+public(package) fun coupons_bag(coupon_house: &CouponHouse): &Table<vector<u8>, Coupon> {
     coupon_house.coupons.coupons()
 }
 
-public(package) fun coupons_bag_mut(coupon_house: &mut CouponHouse): &mut Bag {
+public(package) fun coupons_bag_mut(coupon_house: &mut CouponHouse): &mut Table<vector<u8>, Coupon> {
     coupon_house.coupons.coupons_mut()
 }
 
