@@ -6,8 +6,8 @@ import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
+import { useIotaNamesClient } from '@/contexts';
 import { getGasSummary } from '@/lib/utils/getGasSummary';
-import { useIotaNamesClient } from '@/providers/contexts';
 
 export function useRegisterNameTransaction(
     address: string,

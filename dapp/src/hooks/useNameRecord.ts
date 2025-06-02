@@ -4,7 +4,7 @@
 import { isValidIotaName, NameRecord } from '@iota/iota-names-sdk';
 import { useQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
 
 type PriceOption = {
     years: number;
