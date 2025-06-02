@@ -9,6 +9,7 @@ import { isValidIotaName } from '@iota/iota-names-sdk';
 import { useMemo, useState } from 'react';
 
 import { useNameRecord } from '@/hooks/useNameRecord';
+import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 
@@ -86,7 +87,7 @@ export function AvailabilityCheck() {
 
             {data?.type == 'available' && (
                 <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {data?.price}</div>
+                    <div className="text-body-md">Price: {formatNanosToIota(data.price)}</div>
                     {isConnected ? (
                         <Button
                             type={ButtonType.Secondary}
