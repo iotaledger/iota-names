@@ -26,8 +26,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
     );
     const address = keypair.toIotaAddress();
 
-    const { url, faucet } = getNetwork('devnet');
-    const graphql = 'https://graphql.devnet.iota.cafe'; // TODO: @iota/iota-sdk does not bundle any graphql endpoint atm
+    const { url, faucet, graphql } = getNetwork('devnet');
 
     const iotaClient = new IotaClient({
         url,
