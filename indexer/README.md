@@ -8,6 +8,12 @@ Indexer to collect metrics about IOTA-Names.
 
 ../README.md#local-setup-for-testing
 
+### Set the environment variables
+
+```bash
+cd scripts && pnpm ts-node utils/envs localnet > ../indexer/docker/.env && cd ..
+```
+
 ### Start the indexer
 
 From the root of the repository, run:
