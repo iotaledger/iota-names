@@ -123,7 +123,7 @@ impl Worker for IotaNamesWorker {
         );
 
         let config_type = StructTag::from_str(&format!(
-            "{}::iota_names::BalanceKey<iota::iota::IOTA>",
+            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
             self.config.package_address,
         ))?;
         let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
