@@ -28,6 +28,7 @@ module iota_names_subdomains::subdomains;
 use iota_names_deny_list::deny_list;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
+use iota::event;
 use iota::vec_map::VecMap;
 use iota_names::constants::{subdomain_allow_extension_key, subdomain_allow_creation_key};
 use iota_names::domain::{Self, Domain, is_subdomain};
@@ -83,7 +84,12 @@ public fun new_leaf(
     internal_validate_nft_can_manage_subdomain(iota_names, parent, clock, subdomain, true);
 
     // Aborts with `iota_names::registry::ERecordExists` if the subdomain already exists.
-    registry_mut(iota_names).add_leaf_record(subdomain, clock, target, ctx)
+    registry_mut(iota_names).add_leaf_record(subdomain, clock, target, ctx);
+
+    event::emit(LeafSubdomainCreatedEvent{
+        domain: subdomain,
+        target,
+    });
 }
 
 /// Removes a `leaf` subdomain from the registry.
@@ -101,7 +107,11 @@ public fun remove_leaf(
     // we can still remove a leaf name (we just can't add a new one).
     internal_validate_nft_can_manage_subdomain(iota_names, parent, clock, subdomain, false);
 
-    registry_mut(iota_names).remove_leaf_record(subdomain)
+    registry_mut(iota_names).remove_leaf_record(subdomain);
+
+    event::emit(LeafSubdomainRemovedEvent{
+        domain: subdomain,
+    });
 }
 
 /// Creates a new `node` subdomain
@@ -172,6 +182,13 @@ public fun new(
             allow_time_extension,
         );
     };
+
+    event::emit(NodeSubdomainCreatedEvent{
+        domain: subdomain,
+        expiration_timestamp_ms,
+        allow_creation,
+        allow_time_extension,
+    });
 
     nft
 }
@@ -257,7 +274,12 @@ public fun edit_setup(
 
 /// Burns a `SubdomainRegistration` object if it is expired.
 public fun burn(iota_names: &mut IotaNames, nft: SubdomainRegistration, clock: &Clock) {
+    let domain = nft.nft().domain();
     registry_mut(iota_names).burn_subdomain_object(nft, clock);
+
+    event::emit(NodeSubdomainBurnedEvent{
+        domain,
+    });
 }
 
 /// Parent ID of a subdomain
@@ -377,4 +399,24 @@ fun app_config(iota_names: &IotaNames): &SubdomainConfig {
 #[test_only]
 public fun auth_for_testing(): SubdomainsAuth {
     SubdomainsAuth {}
+}
+
+public struct NodeSubdomainCreatedEvent has copy, drop {
+    domain: Domain,
+    expiration_timestamp_ms: u64,
+    allow_creation: bool,
+    allow_time_extension: bool,
+}
+
+public struct NodeSubdomainBurnedEvent has copy, drop {
+    domain: Domain,
+}
+
+public struct LeafSubdomainCreatedEvent has copy, drop {
+    domain: Domain,
+    target: address,
+}
+
+public struct LeafSubdomainRemovedEvent has copy, drop {
+    domain: Domain,
 }
