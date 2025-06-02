@@ -3,17 +3,14 @@
 
 /.github/workflows/ @iotaledger/dev-tools @iotaledger/tooling
 
+/build-scripts/ @iotaledger/tooling
+/dapp/ @iotaledger/tooling
 /documentation/ @iotaledger/devx
+/indexer/ @iotaledger/dev-tools
+/linting/ @iotaledger/tooling
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
 /sdk/ @iotaledger/tooling
-/dapp/ @iotaledger/tooling
-/build-scripts/ @iotaledger/tooling
-/linting/ @iotaledger/tooling
-
-/crates/iota-names-indexer/ @iotaledger/dev-tools
-/docker/iota-names-indexer/ @iotaledger/dev-tools
-/dev-tools/iota-names-indexer/ @iotaledger/dev-tools
 
 /.eslintrc.cjs @iotaledger/tooling
 /.prettierignore @iotaledger/tooling
