@@ -24,8 +24,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const [purchaseError, setPurchaseError] = useState<string>('');
 
-    const isAvailable = data?.type === 'available';
-    const price = isAvailable ? data?.price : 0;
+    const price = data?.type === 'available' ? data?.price : 0;
     const isConnected = !!account?.address;
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
@@ -39,13 +38,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister =
         isConnected &&
-        isAvailable &&
+        data?.type === 'available' &&
         !registerNameError &&
         !isSendingTransaction &&
         !isRegisterNameLoading;
 
     async function handlePurchase() {
-        if (!registerNameData || !isAvailable) return;
+        if (!registerNameData || data?.type !== 'available') return;
         try {
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
@@ -86,7 +85,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {isAvailable ? formatNanosToIota(BigInt(data?.price || 0)) : '-'}
+                                {data?.type === 'available'
+                                    ? formatNanosToIota(BigInt(data.price))
+                                    : '-'}
                             </span>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs">

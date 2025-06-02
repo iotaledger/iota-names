@@ -87,7 +87,7 @@ export function AvailabilityCheck() {
 
             {data?.type == 'available' && (
                 <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {formatNanosToIota(data?.price)}</div>
+                    <div className="text-body-md">Price: {formatNanosToIota(data.price)}</div>
                     {isConnected ? (
                         <Button
                             type={ButtonType.Secondary}
