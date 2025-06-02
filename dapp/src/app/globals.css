@@ -1,7 +1,10 @@
 @import '@iota/apps-ui-kit/styles';
 
-@import 'tailwindcss';
-@custom-variant dark (&:where(.dark, .dark *));
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @custom-variant dark (&:where(.dark, .dark *)); */
 
 :root {
     @apply bg-neutral-100 dark:bg-neutral-900;

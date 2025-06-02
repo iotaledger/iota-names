@@ -16,6 +16,7 @@ import {
     GAS_BUDGET_ERROR_MESSAGES,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
+import { formatNanosToIota } from '@/lib/utils';
 
 type PurchaseNameProps = {
     name: string;
@@ -112,7 +113,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {isAvailable ? nameRecordData?.price : '-'}
+                                {isAvailable
+                                    ? formatNanosToIota(price, { formatRounded: false })
+                                    : '-'}{' '}
                             </span>
                         </div>
                         {!isRegisterNameLoading && registerNameData && (
@@ -121,7 +124,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     Gas:
                                 </span>
                                 <span className="text-body-md font-mono">
-                                    {registerNameData?.gasSummary?.totalGas}
+                                    {formatNanosToIota(
+                                        registerNameData?.gasSummary?.totalGas ?? '0',
+                                        { formatRounded: false },
+                                    )}
                                 </span>
                             </div>
                         )}
@@ -134,7 +140,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                         Total price (Name + gas):
                                     </span>
                                     <span className="text-body-md font-mono">
-                                        {isAvailable && !isNameRecordLoading ? totalPrice : '-'}
+                                        {isAvailable && !isNameRecordLoading
+                                            ? formatNanosToIota(totalPrice, {
+                                                  formatRounded: false,
+                                              })
+                                            : '-'}
                                     </span>
                                 </div>
                             )}
