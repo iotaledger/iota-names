@@ -33,7 +33,6 @@ pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
     node_url: &str,
     registry: &Registry,
-    token: CancellationToken,
     concurrency: usize,
 ) -> anyhow::Result<()> {
     let progress_store = FileProgressStore::new("./progress_store").await?;
@@ -42,7 +41,7 @@ pub(crate) async fn run_iota_names_reader(
         progress_store,
         1,
         DataIngestionMetrics::new(registry),
-        token,
+        worker.token.clone(),
     );
     let worker_pool = WorkerPool::new(
         worker,
@@ -69,11 +68,20 @@ pub(crate) async fn run_iota_names_reader(
 pub(crate) struct IotaNamesWorker {
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
+    token: CancellationToken,
 }
 
 impl IotaNamesWorker {
-    pub(crate) fn new(config: IotaNamesConfig, metrics: Arc<IotaNamesMetrics>) -> Self {
-        Self { config, metrics }
+    pub(crate) fn new(
+        config: IotaNamesConfig,
+        metrics: Arc<IotaNamesMetrics>,
+        token: CancellationToken,
+    ) -> Self {
+        Self {
+            config,
+            metrics,
+            token,
+        }
     }
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
@@ -107,17 +115,8 @@ impl IotaNamesWorker {
 
         Ok(())
     }
-}
 
-#[async_trait]
-impl Worker for IotaNamesWorker {
-    type Message = ();
-    type Error = anyhow::Error;
-
-    async fn process_checkpoint(
-        &self,
-        checkpoint: Arc<CheckpointData>, // TODO change to &?
-    ) -> Result<Self::Message, Self::Error> {
+    async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
         debug!(
             "Processing checkpoint: {}",
             checkpoint.checkpoint_summary.sequence_number
@@ -183,5 +182,23 @@ impl Worker for IotaNamesWorker {
         }
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl Worker for IotaNamesWorker {
+    type Message = ();
+    type Error = anyhow::Error;
+
+    async fn process_checkpoint(
+        &self,
+        checkpoint: Arc<CheckpointData>,
+    ) -> Result<Self::Message, Self::Error> {
+        let res = self.process_checkpoint(&checkpoint).await;
+        if let Err(e) = &res {
+            tracing::error!("{e}");
+            self.token.cancel();
+        }
+        res
     }
 }
