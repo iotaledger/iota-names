@@ -91,7 +91,7 @@ public struct TransactionEvent has copy, drop, store {
     request_data_version: u8,
     base_amount: u64,
     metadata: VecMap<String, String>,
-    renewal: Option<u8>,
+    is_renewal: bool,
     // info about the actual payment (currency and equivalent amount)
     currency: TypeName,
     currency_amount: u64,
@@ -291,9 +291,9 @@ public fun calculate_total_after_discount(data: &RequestData, discount: u8): u64
 /// Construct an event from a payment intent.
 fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): TransactionEvent {
     let data = intent.request_data();
-    let renewal = match (intent) {
-        PaymentIntent::Registration(_) => option::none(),
-        PaymentIntent::Renewal(renewal) => option::some(renewal.years),
+    let is_renewal = match (intent) {
+        PaymentIntent::Registration(_) => false,
+        PaymentIntent::Renewal(_) => true,
     };
 
     TransactionEvent {
@@ -303,7 +303,7 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
         request_data_version: data.version,
         base_amount: data.base_amount,
         metadata: data.metadata,
-        renewal,
+        is_renewal,
         currency: type_name::get<T>(),
         currency_amount,
     }

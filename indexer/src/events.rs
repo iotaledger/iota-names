@@ -97,7 +97,7 @@ pub(crate) struct TransactionEvent {
     pub request_data_version: u8,
     pub base_amount: u64,
     pub metadata: VecMap<String, String>,
-    pub renewal: Option<u8>,
+    pub is_renewal: bool,
     pub currency: String, // TypeName,
     pub currency_amount: u64,
 }

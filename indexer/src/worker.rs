@@ -87,10 +87,10 @@ impl IotaNamesWorker {
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(_event) => (),
             IotaNamesEvent::Transaction(event) => {
-                if let Some(years) = event.renewal {
+                if event.is_renewal {
                     self.metrics
                         .renewal_years_distribution
-                        .with_label_values(&[years.to_string()])
+                        .with_label_values(&[event.years.to_string()])
                         .inc();
                 }
             }
