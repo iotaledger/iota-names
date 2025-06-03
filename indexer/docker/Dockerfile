@@ -15,7 +15,7 @@ RUN apt update && apt install -y cmake clang lld
 
 # Configure Rust to use clang and lld as the linker
 RUN mkdir -p ~/.cargo && \
-    echo -e "[target.x86_64-unknown-linux-gnu]\nlinker = \"clang\"\nrustflags = [\"-C\", \"link-arg=-fuse-ld=lld\"]" > ~/.cargo/config.toml
+  echo -e "[target.x86_64-unknown-linux-gnu]\nlinker = \"clang\"\nrustflags = [\"-C\", \"link-arg=-fuse-ld=lld\"]" > ~/.cargo/config.toml
 
 # Install additional dependencies
 RUN apt install -y libpq5 libpq-dev ca-certificates
@@ -30,13 +30,13 @@ RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
 # so we can copy it to the runtime image
 RUN if [ -d target/release ]; then \
   TARGET_DIR="target/release"; \
-elif [ -d target/debug ]; then \
+  elif [ -d target/debug ]; then \
   TARGET_DIR="target/debug"; \
-else \
+  else \
   echo "Error: No build directory found"; \
   exit 1; \
-fi && \
-mv $TARGET_DIR/iota-names-indexer ./;
+  fi && \
+  mv $TARGET_DIR/iota-names-indexer ./;
 
 # Production image
 FROM debian:bookworm-slim AS runtime
@@ -51,6 +51,6 @@ ARG GIT_REVISION
 LABEL build-date=$BUILD_DATE
 LABEL git-revision=$GIT_REVISION
 
-EXPOSE 9184/tcp
+EXPOSE 9189/tcp
 
 ENTRYPOINT ["/usr/local/bin/iota-names-indexer"]
