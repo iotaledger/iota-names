@@ -1,0 +1,12 @@
+*~
+*.swp
+**/.terraform/
+target/
+**/*Dockerfile
+*.md
+build/
+storage/
+setups/
+.pnpm-store/
+.turbo/
+node_modules/
