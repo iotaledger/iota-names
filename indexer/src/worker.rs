@@ -79,13 +79,9 @@ impl IotaNamesWorker {
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
             IotaNamesEvent::IotaNamesRegistry(_event) => {
-                self.metrics.total_name_records.add(1);
+                self.metrics.total_name_records.inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
-            IotaNamesEvent::AuctionStarted(_event) => (),
-            IotaNamesEvent::AuctionBid(_event) => (),
-            IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => (),
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
@@ -93,6 +89,23 @@ impl IotaNamesWorker {
                         .with_label_values(&[event.years.to_string()])
                         .inc();
                 }
+            }
+            IotaNamesEvent::AuctionStarted(_event) => (),
+            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => (),
+
+            IotaNamesEvent::NodeSubdomainCreated(_event) => {
+                self.metrics.total_node_subdomains.inc();
+            }
+            IotaNamesEvent::NodeSubdomainBurned(_event) => {
+                self.metrics.total_node_subdomains.dec();
+            }
+            IotaNamesEvent::LeafSubdomainCreated(_event) => {
+                self.metrics.total_leaf_subdomains.inc();
+            }
+            IotaNamesEvent::LeafSubdomainRemoved(_event) => {
+                self.metrics.total_leaf_subdomains.dec();
             }
         }
 

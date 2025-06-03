@@ -16,6 +16,8 @@ pub(crate) struct IotaNamesMetrics {
     pub total_name_records: IntGauge,
     pub iota_names_balance: IntGauge,
     pub renewal_years_distribution: IntCounterVec,
+    pub total_node_subdomains: IntGauge,
+    pub total_leaf_subdomains: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -37,6 +39,18 @@ impl IotaNamesMetrics {
                 "renewal_years_distribution",
                 "The number of years per renewal",
                 &["years"],
+                registry,
+            )
+            .unwrap(),
+            total_node_subdomains: register_int_gauge_with_registry!(
+                "total_node_subdomains",
+                "The total number of node subdomains in the registry",
+                registry,
+            )
+            .unwrap(),
+            total_leaf_subdomains: register_int_gauge_with_registry!(
+                "total_leaf_subdomains",
+                "The total number of leaf subdomains in the registry",
                 registry,
             )
             .unwrap(),
