@@ -26,7 +26,7 @@ impl IotaNamesEvent {
         event: &Event,
         _config: &IotaNamesConfig,
     ) -> anyhow::Result<Option<Self>> {
-        // TODO allow more package IDs
+        // TODO check package IDs
         Ok(Some(match event.type_.name.as_str() {
             "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
             "IotaNamesReverseRegistryEvent" => {
