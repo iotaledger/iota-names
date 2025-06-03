@@ -133,12 +133,12 @@ public fun assert_is_valid_percentage(amount: u64) {
 
 /// Ensure that the coupons is valid for the given domain length.
 /// Throws `EInvalidForDomainLength` error if it has expired.
-public fun assert_coupon_valid_for_domain_size(rules: &CouponRules, length: u8) {
-    assert!(is_coupon_valid_for_domain_size(rules, length), EInvalidForDomainLength)
+public fun assert_coupon_valid_for_domain_length(rules: &CouponRules, length: u8) {
+    assert!(is_coupon_valid_for_domain_length(rules, length), EInvalidForDomainLength)
 }
 
 /// Returns whether the coupons is valid for the given domain length
-public fun is_coupon_valid_for_domain_size(rules: &CouponRules, length: u8): bool {
+public fun is_coupon_valid_for_domain_length(rules: &CouponRules, length: u8): bool {
     // If the vec is not set, we pass this rule test.
     if (rules.length.is_none()) return true;
 

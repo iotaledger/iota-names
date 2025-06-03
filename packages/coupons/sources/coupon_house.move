@@ -53,9 +53,9 @@ public struct AuthKey<phantom A: drop> has copy, drop, store {}
 /// The CouponHouse Shared Object which holds a table of coupon codes available
 /// for claim.
 public struct CouponHouse has store {
+    id: UID,
     coupons: Coupons,
     version: u8,
-    id: UID,
 }
 
 /// Called once to setup the Coupon House on IOTA-Names.
@@ -114,10 +114,10 @@ public fun apply_coupon(
     // We need to do a total of 5 checks, based on `CouponRules`
     // Our checks work with `AND`, all of the conditions must pass for a coupon
     // to be used.
-    // 1. Validate domain size.
+    // 1. Validate domain length.
     coupon
         .rules()
-        .assert_coupon_valid_for_domain_size(
+        .assert_coupon_valid_for_domain_length(
             intent.request_data().domain().sld().length() as u8,
         );
     // 2. Decrease available claims. Will ABORT if the coupon doesn't have
@@ -273,14 +273,14 @@ public(package) fun coupons_table_mut(coupon_house: &mut CouponHouse): &mut Tabl
     coupon_house.coupons.coupons_mut()
 }
 
-/// Gets a reference to the coupon's house
+/// Gets a reference to the coupon house
 fun coupon_house(iota_names: &IotaNames): &CouponHouse {
     let coupons = iota_names.registry<CouponHouse>();
     coupons.assert_version_is_valid();
     coupons
 }
 
-/// Gets a mutable reference to the coupon's house
+/// Gets a mutable reference to the coupon house
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
     // Verify coupon house is authorized to get the registry / register names.
     iota_names.assert_is_authorized<CouponsAuth>();

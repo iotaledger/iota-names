@@ -6,6 +6,9 @@ module iota_names_coupons::coupon;
 
 use iota_names_coupons::rules::{Self, CouponRules};
 
+const PERCENTAGE_COUPON_KIND: u8 = 0;  
+const FIXED_COUPON_KIND: u8 = 1;
+
 /// A Coupon has a type, a value and a ruleset.
 /// - `kind` is a u8 constant which makes a coupon fixed price or discount percentage.
 /// 0 -> Percentage Discount | 1 -> Fixed Discount
@@ -22,7 +25,7 @@ public struct Coupon has copy, drop, store {
 public(package) fun new_percentage(percentage: u64, rules: CouponRules): Coupon {
     rules::assert_is_valid_percentage(percentage);
     Coupon {
-        kind: 0,
+        kind: PERCENTAGE_COUPON_KIND,
         amount: percentage,
         rules,
     }
@@ -31,7 +34,7 @@ public(package) fun new_percentage(percentage: u64, rules: CouponRules): Coupon 
 /// Create a coupon object with a fixed discount.
 public(package) fun new_fixed(amount: u64, rules: CouponRules): Coupon {
     Coupon {
-        kind: 1,
+        kind: FIXED_COUPON_KIND,
         amount,
         rules,
     }
@@ -46,11 +49,11 @@ public(package) fun rules_mut(coupon: &mut Coupon): &mut CouponRules {
 }
 
 public(package) fun is_percentage(coupon: &Coupon): bool {
-    coupon.kind == 0
+    coupon.kind == PERCENTAGE_COUPON_KIND
 }
 
 public(package) fun is_fixed(coupon: &Coupon): bool {
-    coupon.kind == 1
+    coupon.kind == FIXED_COUPON_KIND
 }
 
 public(package) fun discount(coupon: &Coupon): u64 {
