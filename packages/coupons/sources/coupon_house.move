@@ -53,9 +53,9 @@ public struct AuthKey<phantom A: drop> has copy, drop, store {}
 /// The CouponHouse Shared Object which holds a table of coupon codes available
 /// for claim.
 public struct CouponHouse has store {
-    id: UID,
     coupons: Coupons,
     version: u8,
+    id: UID,
 }
 
 /// Called once to setup the Coupon House on IOTA-Names.
