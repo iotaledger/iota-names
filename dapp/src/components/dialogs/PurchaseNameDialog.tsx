@@ -70,7 +70,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const totalBalance = Number(coinBalance?.totalBalance) || 0;
     const totalGas = Number(registerNameData?.gasSummary?.totalGas) || 0;
     const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
-
     const hasBalance = totalBalance > totalPrice;
 
     const hasEnoughGas =
