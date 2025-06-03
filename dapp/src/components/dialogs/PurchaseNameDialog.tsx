@@ -45,31 +45,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const { data: userCoins, error: errorUserBalance } = useBalance(account?.address ?? '');
-    console.log(userCoins);
-    const userBalance = Number(userCoins?.totalBalance) || 0;
-    const gas = Number(registerNameData?.gasSummary?.totalGas ?? 0);
-    const priceValue = nameRecordData?.type === 'available' ? nameRecordData.price : 0;
-    const totalPrice = nameRecordData?.type === 'available' ? priceValue + gas : '-';
-    const hasBalance = (userBalance ?? 0) > Number(totalPrice);
-    const isNotEnoughGas =
-        registerNameError &&
-        (registerNameError.message.includes(NOT_ENOUGH_BALANCE_ID) ||
-            registerNameError.message.includes(GAS_BALANCE_TOO_LOW_ID));
-
-    const canRegister =
-        isConnected &&
-        nameRecordData?.type === 'available' &&
-        !registerNameError &&
-        !isSendingTransaction &&
-        !isRegisterNameLoading &&
-        !isNotEnoughGas &&
-        hasBalance &&
-        !errorUserBalance;
+    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
     async function handlePurchase() {
         if (!registerNameData || nameRecordData?.type !== 'available') return;
         try {
+            setPurchaseError('');
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
             });
@@ -85,6 +66,25 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     }
 
     if (!isConnected) return null;
+
+    const totalBalance = Number(coinBalance?.totalBalance) || 0;
+    const totalGas = Number(registerNameData?.gasSummary?.totalGas) || 0;
+    const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
+
+    const hasBalance = totalBalance > totalPrice;
+
+    const hasEnoughGas =
+        !registerNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !registerNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+
+    const canPay =
+        isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
+
+    const hasErrors = registerNameError || coinBalanceError;
+
+    const isLoading = isNameRecordLoading || isRegisterNameLoading;
+
+    const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -109,43 +109,37 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Price:
                             </span>
                             <span className="text-body-md font-mono">
-                                {nameRecordData?.type === 'available'
-                                    ? formatNanosToIota(price, { formatRounded: false })
-                                    : '-'}{' '}
+                                {!isLoading && canPay
+                                    ? formatNanosToIota(nameRecordData.price, {
+                                          formatRounded: false,
+                                      })
+                                    : '-'}
                             </span>
                         </div>
-                        {!isRegisterNameLoading && registerNameData && (
-                            <div className="flex items-baseline justify-center gap-x-1">
-                                <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                    Gas:
-                                </span>
-                                <span className="text-body-md font-mono">
-                                    {formatNanosToIota(
-                                        registerNameData?.gasSummary?.totalGas ?? '0',
-                                        { formatRounded: false },
-                                    )}
-                                </span>
-                            </div>
-                        )}
-                        {!isRegisterNameLoading &&
-                            !isNameRecordLoading &&
-                            nameRecordData?.type === 'available' &&
-                            registerNameData && (
-                                <div className="flex items-baseline justify-center gap-x-1">
-                                    <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                        Total price (Name + gas):
-                                    </span>
-                                    <span className="text-body-md font-mono">
-                                        {nameRecordData?.type === 'available' &&
-                                        !isNameRecordLoading
-                                            ? formatNanosToIota(totalPrice, {
-                                                  formatRounded: false,
-                                              })
-                                            : '-'}
-                                    </span>
-                                </div>
-                            )}
 
+                        <div className="flex items-baseline justify-center gap-x-1">
+                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                Gas:
+                            </span>
+                            <span className="text-body-md font-mono">
+                                {!isLoading
+                                    ? formatNanosToIota(totalGas, { formatRounded: false })
+                                    : '-'}
+                            </span>
+                        </div>
+
+                        <div className="flex items-baseline justify-center gap-x-1">
+                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                                Total price (Name + gas):
+                            </span>
+                            <span className="text-body-md font-mono">
+                                {!isLoading
+                                    ? formatNanosToIota(totalPrice, {
+                                          formatRounded: false,
+                                      })
+                                    : '-'}
+                            </span>
+                        </div>
                         <div className="flex w-full flex-row gap-x-xs">
                             <Button
                                 type={ButtonType.Secondary}
@@ -161,7 +155,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 fullWidth
                             />
                         </div>
-                        {isNotEnoughGas && (
+                        {!hasEnoughGas && (
                             <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
                             </div>
@@ -176,7 +170,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 {nameRecordError.message}
                             </div>
                         )}
-                        {!isNotEnoughGas && registerNameError && (
+                        {hasEnoughGas && registerNameError && (
                             <div className="text-center text-red-600 dark:text-red-400 text-sm">
                                 {registerNameError.message}
                             </div>
