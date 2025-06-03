@@ -35,7 +35,7 @@ impl IotaNamesMetrics {
             .unwrap(),
             renewal_years_distribution: register_int_counter_vec_with_registry!(
                 "renewal_years_distribution",
-                "The number of years of renewals",
+                "The number of years per renewal",
                 &["years"],
                 registry,
             )
