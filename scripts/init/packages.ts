@@ -172,6 +172,20 @@ export const Packages = (network: string) => {
                 setup({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
             },
         },
+        Coupons: {
+            order: 2,
+            folder: 'coupons',
+            processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
+            authorizationType: (packageId: string) => `${packageId}::coupon_house::CouponsAuth`,
+            setupFunction: (
+                txb: Transaction,
+                packageId: string,
+                adminCap: string,
+                iotaNames: string,
+            ) => {
+                setup({ txb, adminCap, iotaNames, target: `${packageId}::coupon_house` });
+            },
+        },
         Payments: {
             order: 2,
             folder: 'payments',

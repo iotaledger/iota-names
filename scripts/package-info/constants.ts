@@ -23,6 +23,7 @@ export type PackageInfo = {
     registryTableId: string;
     reverseRegistryTableId: string;
     subNamesPackageId: string;
+    couponsPackageId: string;
     tempSubdomainsProxyPackageId: string;
     upgradeCap?: string;
 };
