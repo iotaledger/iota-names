@@ -233,7 +233,7 @@
           "useBackend": false
         }
       ],
-      "title": "Subname Records",
+      "title": "Subdomain Records",
       "type": "timeseries"
     },
     {
