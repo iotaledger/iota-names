@@ -1,0 +1,656 @@
+// Copyright (c) Mysten Labs, Inc.
+// Modifications Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+#[test_only]
+module iota_names_coupons::coupon_tests;
+
+use iota::clock::Clock;
+use iota::hash::blake2b256;
+use iota::test_scenario::{Scenario, return_shared};
+use iota::test_utils::{Self, destroy};
+use iota_names::iota_names::IotaNames;
+use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::payment::PaymentIntent;
+use iota_names_coupons::coupon_house;
+use iota_names_coupons::coupons;
+use iota_names_coupons::range;
+use iota_names_coupons::rules;
+use iota_names_coupons::setup::{
+    Self,
+    TestAuth,
+    user,
+    user_two,
+    test_app,
+    admin_add_percentage_coupon,
+    admin_add_fixed_coupon,
+    test_init,
+    nanos_per_iota
+};
+use std::string::String;
+
+// populate a lot of coupons with different cases.
+// This populates the coupon as an authorized app
+fun populate_coupons(scenario: &mut Scenario) {
+    scenario.next_tx(user());
+    let mut iota_names = scenario.take_shared<IotaNames>();
+
+    let data_mut = coupon_house::auth_coupons_mut<TestAuth>(&mut iota_names, test_app());
+    setup::populate_coupons(data_mut);
+    return_shared(iota_names);
+}
+
+// Please look up at `setup` file to see all the coupon names and their
+// respective logic.
+// Tests the e2e experience for coupons (a list of different coupons with
+// different rules)
+#[test]
+fun test_e2e() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+
+    // original price would be 400 (200*2 years). 25% discount should bring it
+    // down to 300.
+    test_coupon_renewal(
+        scenario,
+        b"jest.iota".to_string(),
+        2,
+        b"25_PERCENT_DISCOUNT_MAX_2_YEARS".to_string(),
+        user(),
+        option::some(300 * nanos_per_iota()),
+    );
+
+    // Test that this user-specific coupon works as expected
+    test_coupon_renewal(
+        scenario,
+        b"fest.iota".to_string(),
+        2,
+        b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
+        user(),
+        option::some(300 * nanos_per_iota()),
+    );
+
+    // 50% discount only on names 5+ digits
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"50_PERCENT_5_PLUS_NAMES".to_string(),
+        user(),
+        option::some(25 * nanos_per_iota()),
+    );
+
+    // 50% discount only on names 3 digit names.
+    test_coupon_register(
+        scenario,
+        b"tes.iota".to_string(),
+        b"50_PERCENT_3_DIGITS".to_string(),
+        user(),
+        option::some(600 * nanos_per_iota()),
+    );
+
+    // 50% DISCOUNT, with all possible rules involved.
+    test_coupon_register(
+        scenario,
+        b"teso.iota".to_string(),
+        b"50_DISCOUNT_SALAD".to_string(),
+        user(),
+        option::some(100 * nanos_per_iota()),
+    );
+
+    // One IOTA discount
+    test_coupon_register(
+        scenario,
+        b"best.iota".to_string(),
+        b"ONE_IOTA_OFF".to_string(),
+        user(),
+        option::some(199 * nanos_per_iota()),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun zero_fee_purchase() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 100% discount coupon.
+    admin_add_percentage_coupon(
+        b"100%_OFF".to_string(),
+        100,
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"100%_OFF".to_string(),
+        user(),
+        option::some(0), // cost goes to 0
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun twenty_percent_off_3() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 20% discount coupon.
+    admin_add_percentage_coupon(
+        b"20%_OFF".to_string(),
+        20,
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"abc.iota".to_string(),
+        b"20%_OFF".to_string(),
+        user(),
+        option::some(
+            960 * nanos_per_iota(),
+        ), // 3 character in test is 1200 IOTA, 20% discount
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun fifty_percent_off_4() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 50% discount coupon.
+    admin_add_percentage_coupon(
+        b"50%_OFF".to_string(),
+        50,
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"50%_OFF".to_string(),
+        user(),
+        option::some(
+            100 * nanos_per_iota(),
+        ), // 4 character in test is 200 IOTA, 50% discount
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun seventy_percent_off_5() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 70% discount coupon.
+    admin_add_percentage_coupon(
+        b"70%_OFF".to_string(),
+        70,
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"70%_OFF".to_string(),
+        user(),
+        option::some(
+            15 * nanos_per_iota(),
+        ), // 5 character in test is 50 IOTA, 70% discount
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun ten_iota_fixed_off_50() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 10 IOTA discount
+    admin_add_fixed_coupon(
+        b"TEN_IOTA_OFF".to_string(),
+        10 * nanos_per_iota(),
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"TEN_IOTA_OFF".to_string(),
+        user(),
+        option::some(
+            40 * nanos_per_iota(),
+        ),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun hundred_iota_fixed_off_50() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 10 IOTA discount
+    admin_add_fixed_coupon(
+        b"HUNDRED_IOTA_OFF".to_string(),
+        100 * nanos_per_iota(),
+        scenario,
+    );
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"HUNDRED_IOTA_OFF".to_string(),
+        user(),
+        option::some(0),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun twenty_percent_off_stack() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    // 20% discount coupon.
+    admin_add_percentage_coupon(
+        b"15_DISCOUNT_STACKABLE".to_string(),
+        20,
+        scenario,
+    );
+    test_multi_coupon_register(
+        scenario,
+        b"teso.iota".to_string(),
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"15_DISCOUNT_STACKABLE".to_string()],
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENonStackingCoupon)]
+fun unstackable_then_stackable_fails() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    test_multi_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        vector[b"ONE_IOTA_OFF".to_string(), b"5_DISCOUNT_STACKABLE".to_string()],
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENonStackingCoupon)]
+fun stackable_then_unstackable_fails() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // populate all coupons.
+    populate_coupons(scenario);
+    test_multi_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"ONE_IOTA_OFF".to_string()],
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun specific_max_years() {
+    rules::new_coupon_rules(
+        option::none(),
+        option::none(),
+        option::none(),
+        option::none(),
+        option::some(range::new(1, 1)),
+        false,
+    );
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::range::EInvalidRange)]
+fun max_years_two_failure() {
+    rules::new_coupon_rules(
+        option::none(),
+        option::none(),
+        option::none(),
+        option::none(),
+        option::some(range::new(5, 4)),
+        false,
+    );
+}
+
+// Tests the e2e experience for coupons (a list of different coupons with
+// different rules)
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_house::ECouponDoesNotExist)]
+fun no_more_available_claims_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
+        user(),
+        option::none(),
+    );
+    test_coupon_register(
+        scenario,
+        b"tost.iota".to_string(),
+        b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
+        user(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidUser)]
+fun invalid_user_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"25_PERCENT_DISCOUNT_USER_ONLY".to_string(),
+        user_two(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ECouponExpired)]
+fun coupon_expired_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    // set the clock to 5, coupon is expired at time 1
+    let mut clock = scenario.take_shared<Clock>();
+    clock.set_for_testing(5);
+    return_shared(clock);
+    populate_coupons(scenario);
+    test_coupon_register(
+        scenario,
+        b"tes.iota".to_string(),
+        b"50_PERCENT_3_DIGITS".to_string(),
+        user(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidYears)]
+fun coupon_not_valid_for_years_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    // Test 3 years of renewal with a coupon that only allows 1-2 years.
+    test_coupon_renewal(
+        scenario,
+        b"test.iota".to_string(),
+        3,
+        b"50_DISCOUNT_SALAD".to_string(),
+        user(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+fun coupon_invalid_length_1_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    // Tries to use 3 digit coupon on <=4 digit name
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"50_PERCENT_3_DIGITS".to_string(),
+        user(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+fun coupon_invalid_length_2_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    // Tries to use <=4 digit coupon for 5 digit name
+    test_coupon_register(
+        scenario,
+        b"testo.iota".to_string(),
+        b"50_DISCOUNT_SALAD".to_string(),
+        user(),
+        option::none(),
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+fun coupon_invalid_length_3_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    // Tries to use 5+ digit coupon on 4 digit name
+    test_coupon_register(
+        scenario,
+        b"test.iota".to_string(),
+        b"50_PERCENT_5_PLUS_NAMES".to_string(),
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun add_coupon_as_admin() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    // add a no rule coupon as an admin
+    admin_add_percentage_coupon(
+        b"TEST_SUCCESS_ADDITION".to_string(),
+        50,
+        scenario,
+    );
+    setup::admin_remove_coupon(b"TEST_SUCCESS_ADDITION".to_string(), scenario);
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidPercentage)]
+fun add_coupon_invalid_amount_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    admin_add_percentage_coupon(
+        b"TEST_SUCCESS_ADDITION".to_string(),
+        101,
+        scenario,
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidPercentage)]
+fun add_coupon_invalid_amount_2_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    admin_add_percentage_coupon(
+        b"TEST_SUCCESS_ADDITION".to_string(),
+        0,
+        scenario,
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupons::ECouponAlreadyExists)]
+fun add_coupon_twice_failure() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+    admin_add_percentage_coupon(
+        b"TEST_SUCCESS_ADDITION".to_string(),
+        100,
+        scenario,
+    );
+    admin_add_percentage_coupon(
+        b"TEST_SUCCESS_ADDITION".to_string(),
+        100,
+        scenario,
+    );
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupons::ECouponDoesNotExist)]
+fun remove_non_existing_coupon() {
+    let mut ctx = tx_context::dummy();
+    let mut data = coupons::new(&mut ctx);
+    data.remove_coupon(blake2b256(&b"TEST_SUCCESS_ADDITION"));
+    test_utils::destroy(data);
+}
+
+fun test_coupon_register(
+    scenario: &mut Scenario,
+    domain: String,
+    coupon_code: String,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let mut intent = init_registration(
+            &mut iota_names,
+            domain,
+        );
+        let clock = scenario.take_shared<Clock>();
+        coupon_house::apply_coupon(
+            &mut intent,
+            &mut iota_names,
+            coupon_code,
+            &clock,
+            scenario.ctx(),
+        );
+        if (amount.is_some()) {
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(intent);
+    };
+}
+
+fun test_multi_coupon_register(
+    scenario: &mut Scenario,
+    domain: String,
+    mut coupon_codes: vector<String>,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let mut intent = init_registration(
+            &mut iota_names,
+            domain,
+        );
+        let clock = scenario.take_shared<Clock>();
+        while (!coupon_codes.is_empty()) {
+            let coupon_code = coupon_codes.pop_back();
+            coupon_house::apply_coupon(
+                &mut intent,
+                &mut iota_names,
+                coupon_code,
+                &clock,
+                scenario.ctx(),
+            );
+        };
+        if (amount.is_some()) {
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(intent);
+    };
+}
+
+fun test_coupon_renewal(
+    scenario: &mut Scenario,
+    domain: String,
+    renewal_years: u8,
+    coupon_code: String,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let clock = scenario.take_shared<Clock>();
+        let nft = iota_names::iota_names_registration::new_for_testing(
+            iota_names::domain::new(domain),
+            1,
+            &clock,
+            scenario.ctx(),
+        );
+
+        let mut intent = init_renewal(
+            &mut iota_names,
+            &nft,
+            renewal_years,
+        );
+        coupon_house::apply_coupon(
+            &mut intent,
+            &mut iota_names,
+            coupon_code,
+            &clock,
+            scenario.ctx(),
+        );
+        if (amount.is_some()) {
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(intent);
+        destroy(nft);
+    };
+}
+
+fun init_registration(iota_names: &mut IotaNames, domain: String): PaymentIntent {
+    let intent = iota_names::payment::init_registration(iota_names, domain);
+
+    intent
+}
+
+fun init_renewal(
+    iota_names: &mut IotaNames,
+    nft: &IotaNamesRegistration,
+    years: u8,
+): PaymentIntent {
+    let intent = iota_names::payment::init_renewal(iota_names, nft, years);
+
+    intent
+}
