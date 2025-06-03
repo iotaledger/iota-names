@@ -296,7 +296,7 @@
           "mode": "single",
           "sort": "none"
         },
-        "xField": "length",
+        "xField": "years",
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
