@@ -8,14 +8,14 @@ documentation:
   - changed-files:
       - any-glob-to-any-file: documentation/**/*
 indexer:
-    - changed-files:
+  - changed-files:
       - any-glob-to-any-file: indexer/**/*
 packages:
-    - changed-files:
+  - changed-files:
       - any-glob-to-any-file: packages/**/*
 scripts:
-    - changed-files:
+  - changed-files:
       - any-glob-to-any-file: scripts/**/*
 ts-sdk:
-    - changed-files:
+  - changed-files:
       - any-glob-to-any-file: sdk/**/*
