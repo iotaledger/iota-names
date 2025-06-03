@@ -21,7 +21,9 @@ impl IotaNamesEvent {
         config: &IotaNamesConfig,
     ) -> anyhow::Result<Option<Self>> {
         // TODO allow more package IDs
-        if event.package_id == config.package_address.into() {
+        if event.package_id == config.package_address.into()
+            || event.package_id == config.payments_package_address.into()
+        {
             Ok(Some(match event.type_.name.as_str() {
                 "IotaNamesRegistryEvent" => {
                     Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?)
