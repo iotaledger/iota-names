@@ -18,6 +18,8 @@ pub(crate) struct IotaNamesMetrics {
     pub renewal_years_distribution: IntCounterVec,
     pub total_node_subdomains: IntGauge,
     pub total_leaf_subdomains: IntGauge,
+    pub total_auction_started: IntGauge,
+    pub total_auction_finalized: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -54,6 +56,18 @@ impl IotaNamesMetrics {
                 registry,
             )
             .unwrap(),
+            total_auction_started: register_int_gauge_with_registry!(
+                "total_auction_started",
+                "The total number of auction that were started",
+                registry,
+            )
+            .unwrap(),
+            total_auction_finalized: register_int_gauge_with_registry!(
+                "total_auction_finalized",
+                "The total number of auction that were finalized",
+                registry,
+            )
+            .unwrap(),
         }
     }
 }
@@ -70,7 +84,7 @@ impl PrometheusServer {
     }
 
     pub(crate) async fn start(&self, token: CancellationToken) -> anyhow::Result<()> {
-        let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 9184);
+        let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 9189);
         info!("Starting prometheus metrics at {addr}");
 
         let app = Router::new()
