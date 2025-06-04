@@ -2,13 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { useQuery } from '@tanstack/react-query';
+import { fromB64 } from '@iota/iota-sdk/utils';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
+import { AuctionHouseBcs } from '@/lib/auction';
 
 import { useIotaGraphQLClient } from '../useIotaGraphQLClient';
 
-export function useAuctionHouse() {
+interface AuctionHouseData {
+    auctionHouseId: string;
+    auctionsTableObjectId: string;
+    headAuction?: string;
+    tailAuction?: string;
+}
+
+export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error> {
     const { iotaNamesClient } = useIotaNamesClient();
     const { iotaGraphQLClient } = useIotaGraphQLClient();
 
@@ -17,12 +26,12 @@ export function useAuctionHouse() {
     return useQuery({
         queryKey: ['auctionHouse', iotaGraphQLClient, auctionPackageId],
         async queryFn() {
-            if (!iotaGraphQLClient) {
-                return null;
-            }
-
-            const response = await iotaGraphQLClient.query<{
-                objects: { edges: [{ node: { address: string } }] };
+            const auctionHouseByTypeResponse = await iotaGraphQLClient.query<{
+                objects: {
+                    edges: [
+                        { node: { address: string; asMoveObject: { contents: { bcs: string } } } },
+                    ];
+                };
             }>({
                 query: graphql(`
                     query getActionHouse($type: String!) {
@@ -30,6 +39,11 @@ export function useAuctionHouse() {
                             edges {
                                 node {
                                     address
+                                    asMoveObject {
+                                        contents {
+                                            bcs
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -40,10 +54,25 @@ export function useAuctionHouse() {
                 },
             });
 
-            return response.data;
+            return auctionHouseByTypeResponse.data;
         },
         select: (data) => {
-            return data?.objects['edges'][0]?.node?.address || null;
+            const auctionHouseData = data?.objects.edges[0]?.node ?? null;
+            const auctionHouseBcsB64 = auctionHouseData?.asMoveObject?.contents?.bcs;
+
+            if (!auctionHouseData?.address || !auctionHouseBcsB64) {
+                return null;
+            }
+
+            const auctionHouse = AuctionHouseBcs.parse(fromB64(auctionHouseBcsB64));
+
+            return {
+                auctionHouseId: auctionHouseData.address,
+                auctionsTableObjectId: auctionHouse.auctions.id,
+                headAuction: auctionHouse.auctions.head?.labels.reverse().join('.'),
+                tailAuction: auctionHouse.auctions.tail?.labels.reverse().join('.'),
+            };
         },
+        enabled: !!iotaGraphQLClient && !!auctionPackageId,
     });
 }
