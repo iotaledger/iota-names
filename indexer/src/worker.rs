@@ -1,0 +1,240 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+use std::{path::PathBuf, str::FromStr, sync::Arc};
+
+use anyhow::{Result, anyhow};
+use async_trait::async_trait;
+use futures::FutureExt;
+use iota_data_ingestion_core::{
+    DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
+};
+use iota_json::IotaJsonValue;
+use iota_names::config::IotaNamesConfig;
+use iota_types::{
+    balance::Balance,
+    dynamic_field::Field,
+    effects::{TransactionEffects, TransactionEffectsAPI},
+    execution_status::ExecutionStatus,
+    full_checkpoint_content::CheckpointData,
+    transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
+    Identifier, TypeTag,
+};
+use move_core_types::{
+    annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
+    language_storage::StructTag,
+};
+use prometheus::Registry;
+use tokio_util::sync::CancellationToken;
+use tracing::{debug, info, warn};
+
+use crate::{events::IotaNamesEvent, IotaNamesMetrics};
+
+pub(crate) async fn run_iota_names_reader(
+    worker: IotaNamesWorker,
+    node_url: &str,
+    registry: &Registry,
+    concurrency: usize,
+) -> anyhow::Result<()> {
+    let progress_store = FileProgressStore::new("./progress_store").await?;
+
+    let mut executor = IndexerExecutor::new(
+        progress_store,
+        1,
+        DataIngestionMetrics::new(registry),
+        worker.token.clone(),
+    );
+    let worker_pool = WorkerPool::new(
+        worker,
+        "iota_names_reader".to_string(),
+        concurrency,
+        Default::default(),
+    );
+    executor.register(worker_pool).await?;
+
+    info!("Connecting to node at {node_url}");
+    executor
+        .run(
+            // path to a local directory where checkpoints are stored.
+            PathBuf::from("./chk"),
+            Some(format!("{node_url}/api/v1")),
+            // optional remote store access options.
+            vec![],
+            ReaderOptions::default(),
+        )
+        .await?;
+    Ok(())
+}
+
+pub(crate) struct IotaNamesWorker {
+    config: IotaNamesConfig,
+    metrics: Arc<IotaNamesMetrics>,
+    token: CancellationToken,
+}
+
+impl IotaNamesWorker {
+    pub(crate) fn new(
+        config: IotaNamesConfig,
+        metrics: Arc<IotaNamesMetrics>,
+        token: CancellationToken,
+    ) -> Self {
+        Self {
+            config,
+            metrics,
+            token,
+        }
+    }
+
+    fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
+        match event {
+            IotaNamesEvent::IotaNamesRegistry(_event) => {
+                self.metrics.total_name_records.inc();
+            }
+            IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::AuctionStarted(_event) => (),
+            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => (),
+            IotaNamesEvent::NodeSubdomainCreated(_event) => {
+                self.metrics.total_node_subdomains.inc();
+            }
+            IotaNamesEvent::NodeSubdomainBurned(_event) => {
+                self.metrics.total_node_subdomains.dec();
+            }
+            IotaNamesEvent::LeafSubdomainCreated(_event) => {
+                self.metrics.total_leaf_subdomains.inc();
+            }
+            IotaNamesEvent::LeafSubdomainRemoved(_event) => {
+                self.metrics.total_leaf_subdomains.dec();
+            }
+        }
+
+        Ok(())
+    }
+
+    fn process_ptb(&self, _ptb: &ProgrammableTransaction) -> anyhow::Result<()> {
+        let _module = Identifier::new("payment")?; // TODO: Make const
+        let _function = Identifier::new("register")?;
+
+        // if ptb.commands.iter().any(|cmd| {
+        //     if let Command::MoveCall(call) = cmd {
+        //         call.package == ObjectID::from(self.config.package_address)
+        //             && call.module == module
+        //             && call.function == function
+        //     } else {
+        //         false
+        //     }
+        // }) {}
+
+        Ok(())
+    }
+
+    async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
+        debug!(
+            "Processing checkpoint: {}",
+            checkpoint.checkpoint_summary.sequence_number
+        );
+
+        let config_type = StructTag::from_str(&format!(
+            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
+            self.config.package_address,
+        ))?;
+        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
+            type_: config_type.clone(),
+            fields: vec![MoveFieldLayout::new(
+                Identifier::from_str("dummy_field")?,
+                MoveTypeLayout::Bool,
+            )],
+        }));
+        let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
+            self.config.object_id,
+            &TypeTag::Struct(Box::new(config_type)),
+            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
+                .to_bcs_bytes(&layout)?,
+        )?;
+
+        for object in checkpoint.latest_live_output_objects() {
+            if object.id() == balance_object_id {
+                let balance = bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
+                    object
+                        .as_inner()
+                        .data
+                        .try_as_move()
+                        .expect("invalid move object")
+                        .contents(),
+                )?
+                .value;
+
+                self.metrics.iota_names_balance.set(balance.value() as _);
+                break;
+            }
+        }
+
+        for transaction in &checkpoint.transactions {
+            let TransactionEffects::V1(effects) = &transaction.effects;
+
+            if *effects.status() != ExecutionStatus::Success {
+                continue;
+            }
+
+            if let Some(events) = &transaction.events {
+                for event in events.data.iter() {
+                    match IotaNamesEvent::try_from_event(event, &self.config) {
+                        Ok(Some(event)) => self.process_event(event)?,
+                        Err(e) => warn!("parsing event failed: {e}"),
+                        _ => {}
+                    }
+                }
+            }
+
+            let TransactionData::V1(data) = &transaction.transaction.intent_message().value;
+
+            if let TransactionKind::ProgrammableTransaction(ptb) = &data.kind {
+                self.process_ptb(ptb)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Worker for IotaNamesWorker {
+    type Message = ();
+    type Error = anyhow::Error;
+
+    async fn process_checkpoint(
+        &self,
+        checkpoint: Arc<CheckpointData>,
+    ) -> Result<Self::Message, Self::Error> {
+        let res = self
+            .process_checkpoint(&checkpoint)
+            .catch_unwind()
+            .await
+            .map_err(map_panic);
+        if let Err(e) | Ok(Err(e)) = &res {
+            tracing::error!("{e}");
+            self.token.cancel();
+        }
+        res?
+    }
+}
+
+/// Maps a panic payload to an error.
+///
+/// A invocation of the panic!() macro in Rust 2021 or later will always result
+/// in a panic payload of type &'static str or String.
+///
+/// Only an invocation of panic_any (or, in Rust 2018 and earlier, panic!(x)
+/// where x is something other than a string) can result in a panic payload
+/// other than a &'static str or String.
+/// See https://doc.rust-lang.org/stable/std/panic/struct.PanicHookInfo.html for more info
+fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error {
+    if let Some(s) = payload.downcast_ref::<&str>() {
+        anyhow!("{s}")
+    } else if let Some(s) = payload.downcast_ref::<String>() {
+        anyhow!("{s}")
+    } else {
+        anyhow!("unknown panic occurred")
+    }
+}
