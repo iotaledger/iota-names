@@ -3,8 +3,9 @@
 
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
 };
@@ -194,11 +195,34 @@ impl Worker for IotaNamesWorker {
         &self,
         checkpoint: Arc<CheckpointData>,
     ) -> Result<Self::Message, Self::Error> {
-        let res = self.process_checkpoint(&checkpoint).await;
-        if let Err(e) = &res {
+        let res = self
+            .process_checkpoint(&checkpoint)
+            .catch_unwind()
+            .await
+            .map_err(map_panic);
+        if let Err(e) | Ok(Err(e)) = &res {
             tracing::error!("{e}");
             self.token.cancel();
         }
-        res
+        res?
+    }
+}
+
+/// Maps a panic payload to an error.
+///
+/// A invocation of the panic!() macro in Rust 2021 or later will always result
+/// in a panic payload of type &'static str or String.
+///
+/// Only an invocation of panic_any (or, in Rust 2018 and earlier, panic!(x)
+/// where x is something other than a string) can result in a panic payload
+/// other than a &'static str or String.
+/// See https://doc.rust-lang.org/stable/std/panic/struct.PanicHookInfo.html for more info
+fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error {
+    if let Some(s) = payload.downcast_ref::<&str>() {
+        anyhow!("{s}")
+    } else if let Some(s) = payload.downcast_ref::<String>() {
+        anyhow!("{s}")
+    } else {
+        anyhow!("unknown panic occurred")
     }
 }
