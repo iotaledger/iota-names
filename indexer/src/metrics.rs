@@ -3,15 +3,17 @@
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-use axum::{Extension, Router, routing::get};
-use iota_metrics::{METRICS_ROUTE, RegistryService};
-use prometheus::{IntGauge, Registry, register_int_gauge_with_registry};
+use axum::{routing::get, Extension, Router};
+use iota_metrics::{RegistryService, METRICS_ROUTE};
+use prometheus::{register_int_gauge_with_registry, IntGauge, Registry};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 pub(crate) struct IotaNamesMetrics {
     pub total_name_records: IntGauge,
     pub iota_names_balance: IntGauge,
+    pub total_node_subdomains: IntGauge,
+    pub total_leaf_subdomains: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -26,6 +28,18 @@ impl IotaNamesMetrics {
             iota_names_balance: register_int_gauge_with_registry!(
                 "iota_names_balance",
                 "The balance held in IOTA-Names",
+                registry,
+            )
+            .unwrap(),
+            total_node_subdomains: register_int_gauge_with_registry!(
+                "total_node_subdomains",
+                "The total number of node subdomains in the registry",
+                registry,
+            )
+            .unwrap(),
+            total_leaf_subdomains: register_int_gauge_with_registry!(
+                "total_leaf_subdomains",
+                "The total number of leaf subdomains in the registry",
                 registry,
             )
             .unwrap(),
