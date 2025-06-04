@@ -3,9 +3,9 @@
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-use axum::{routing::get, Extension, Router};
-use iota_metrics::{RegistryService, METRICS_ROUTE};
-use prometheus::{register_int_gauge_with_registry, IntGauge, Registry};
+use axum::{Extension, Router, routing::get};
+use iota_metrics::{METRICS_ROUTE, RegistryService};
+use prometheus::{IntGauge, Registry, register_int_gauge_with_registry};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 

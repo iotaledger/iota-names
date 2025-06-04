@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Check format
-        run: cargo +nightly-2025-04-01 fmt --check
+        run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
 
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
