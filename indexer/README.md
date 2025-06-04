@@ -7,6 +7,7 @@ Indexer to collect metrics about IOTA-Names.
 ### Run a local network with IOTA-Names deployed
 
 Follow the instructions from the [root README](../README.md#local-setup-for-testing)
+Run the following commands also from the root directory.
 
 ### Set the environment variables
 
@@ -14,16 +15,19 @@ Follow the instructions from the [root README](../README.md#local-setup-for-test
 cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd ..
 ```
 
-### Start the indexer
+### Build the indexer image
 
-From the root of the repository, run:
+```bash
+docker compose -f indexer/docker/docker-compose.yml build
+```
+
+Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.
+
+### Start the indexer
 
 ```bash
 docker compose -f indexer/docker/docker-compose.yml up
 ```
-
-Add `--build` to rebuild the indexer image.
-Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.
 
 The following endpoints will be available:
 

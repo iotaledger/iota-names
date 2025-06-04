@@ -23,7 +23,7 @@ RUN apt install -y libpq5 libpq-dev ca-certificates
 WORKDIR /iota-names/indexer
 
 # 1. Copy only Cargo.toml and Cargo.lock first (for dependency caching)
-COPY indexer/Cargo.toml indexer/Cargo.lock ./
+COPY Cargo.toml Cargo.lock ./
 
 # 2. Create a dummy src/main.rs so cargo build can resolve dependencies, the actual source code would create another cache
 RUN mkdir -p src && echo "fn main() {}" > src/main.rs
@@ -35,7 +35,7 @@ RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
 RUN rm -rf src
 
 # 5. Copy the rest of the source code
-COPY indexer/ .
+COPY ./ .
 
 # 6. Build the actual project
 RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
