@@ -23,6 +23,7 @@ docker compose -f indexer/docker/docker-compose.yml up
 ```
 
 Add `--build` to rebuild the indexer image.
+Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.
 
 The following endpoints will be available:
 
