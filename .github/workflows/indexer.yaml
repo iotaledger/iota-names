@@ -21,7 +21,10 @@ jobs:
       - name: Check format
         run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
 
-      - name: Run Clippy
+      - name: Check udeps
+        run: cargo udeps --manifest-path indexer/Cargo.toml
+
+      - name: Run clippy
         run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
 
   check:
