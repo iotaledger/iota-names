@@ -9,28 +9,29 @@ import { useQuery } from '@tanstack/react-query';
 import { useIotaNamesClient } from '@/providers/contexts';
 
 interface UseUpdateNameTransactionOptions {
-    address: string,
-    name: string,
-    nft: TransactionObjectArgument,
+    address: string;
+    name: string;
+    nft: TransactionObjectArgument;
 
-    updates: NameUpdate[]
+    updates: NameUpdate[];
 }
 
-type NameUpdate = {
-    type: 'set-target-address',
-    address: string,
-    isSubname: boolean
-} | {
-    type: 'set-default',
-    name: string
-};
-
+type NameUpdate =
+    | {
+          type: 'set-target-address';
+          address: string;
+          isSubname: boolean;
+      }
+    | {
+          type: 'set-default';
+          name: string;
+      };
 
 export function useUpdateNameTransaction({
     address,
     name,
     nft,
-    updates
+    updates,
 }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
@@ -42,18 +43,18 @@ export function useUpdateNameTransaction({
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
-            for(const update of updates){
-                switch(update.type){
+            for (const update of updates) {
+                switch (update.type) {
                     case 'set-target-address':
                         iotaNamesTx.setTargetAddress({
                             nft,
                             address: update.address,
                             isSubname: update.isSubname,
-                        })
-                    break;
+                        });
+                        break;
                     case 'set-default':
-                        iotaNamesTx.setDefault(update.name)
-                    break;
+                        iotaNamesTx.setDefault(update.name);
+                        break;
                 }
             }
 
@@ -61,9 +62,9 @@ export function useUpdateNameTransaction({
             const transaction = await iotaNamesTx.transaction.build({
                 client,
             });
-            return transaction
+            return transaction;
         },
         enabled: !!address && !!updates.length && !!name && name.length > 0,
-        gcTime: 0
+        gcTime: 0,
     });
 }
