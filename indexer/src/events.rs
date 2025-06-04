@@ -111,6 +111,7 @@ pub(crate) struct TransactionEvent {
     pub currency_amount: u64,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {
     pub domain: Domain,
     pub expiration_timestamp_ms: u64,
