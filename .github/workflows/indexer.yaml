@@ -6,6 +6,9 @@ on:
       - "develop"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".github/workflows/indexer.yaml"
+      - "indexer/**"
 
 concurrency:
   group: indexer-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
