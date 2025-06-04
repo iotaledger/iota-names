@@ -3778,6 +3778,7 @@ dependencies = [
  "bin-version",
  "clap",
  "dotenvy",
+ "futures",
  "iota-data-ingestion-core",
  "iota-json",
  "iota-metrics",
