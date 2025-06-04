@@ -30,6 +30,20 @@ jobs:
       - name: Run clippy
         run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
 
+  bans-licenses-sources:
+    name: Cargo deny (bans, licenses, sources)
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: cargo deny --manifest-path indexer/Cargo.toml check bans licenses sources --hide-inclusion-graph
+
+  advisories:
+    name: Cargo deny (advisories)
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - run: cargo deny --manifest-path indexer/Cargo.toml check advisories --hide-inclusion-graph
+
   check:
     name: Check indexer crate
     runs-on: self-hosted
