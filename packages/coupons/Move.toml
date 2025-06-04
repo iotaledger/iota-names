@@ -1,0 +1,10 @@
+[package]
+name = "iota_names_coupons"
+edition = "2024"
+
+[dependencies]
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet", override = true }
+iota_names = { local = "../iota-names" }
+
+[addresses]
+iota_names_coupons = "0x0"

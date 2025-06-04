@@ -31,7 +31,7 @@ iota start --force-regenesis --with-faucet
 2. In another terminal, create a new environment for the local network and switch to it:
 
 ```bash
-iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:8000
+iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
 iota client switch --env localnet
 ```
 
@@ -72,20 +72,20 @@ iota name register first.iota
 All in one:
 
 ```bash
+docker run -d --name postgres -e POSTGRES_PASSWORD=postgrespw -e POSTGRES_INITDB_ARGS="-U postgres" -p 5432:5432 postgres:15 -c max_connections=1000
 # Run network in the background without logs
-iota start --force-regenesis --with-faucet --committee-size 2 > /dev/null 2>&1 &
-iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:8000
+iota start --force-regenesis --with-faucet --committee-size 2 --with-indexer --with-graphql > /dev/null 2>&1 &
+iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
 iota client switch --env localnet
 # wait for the network to start
-sleep 5
+sleep 10
 iota client faucet
 # wait for the faucet tx
 sleep 2
 pnpm i
 cd scripts && pnpm ts-node init/init.ts localnet
-# get more funds, can be removed when register works with a single gas coin
-iota client faucet
 pnpm run envs localnet
+cd ..
 ```
 
 To stop the local network in the background, run: `kill %1` or `kill <job-number>` that was printed when it was started.

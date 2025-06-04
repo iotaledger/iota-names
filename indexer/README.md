@@ -1,0 +1,38 @@
+# IOTA-Names indexer
+
+Indexer to collect metrics about IOTA-Names.
+
+## Testing
+
+### Run a local network with IOTA-Names deployed
+
+Follow the instructions from the [root README](../README.md#local-setup-for-testing)
+
+### Set the environment variables
+
+```bash
+cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd ..
+```
+
+### Start the indexer
+
+From the root of the repository, run:
+
+```bash
+docker compose -f indexer/docker/docker-compose.yml up
+```
+
+Add `--build` to rebuild the indexer image.
+
+The following endpoints will be available:
+
+- **IOTA Names Indexer Metrics:** [http://localhost:9189/metrics](http://localhost:9189/metrics)
+- **Prometheus:** [http://localhost:9090](http://localhost:9090)
+- **Grafana:** [http://localhost:3000](http://localhost:3000)
+
+Reset the prometheus database if you want to start fresh:
+
+```bash
+docker compose -f indexer/docker/docker-compose.yml down
+docker volume rm iota-names-indexer_prometheus_data
+```

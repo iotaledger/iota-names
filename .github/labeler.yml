@@ -1,0 +1,21 @@
+ci:
+  - changed-files:
+      - any-glob-to-any-file: .github/**/*
+iota-names-dapp:
+  - changed-files:
+      - any-glob-to-any-file: dapp/**/*
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: documentation/**/*
+indexer:
+  - changed-files:
+      - any-glob-to-any-file: indexer/**/*
+packages:
+  - changed-files:
+      - any-glob-to-any-file: packages/**/*
+scripts:
+  - changed-files:
+      - any-glob-to-any-file: scripts/**/*
+ts-sdk:
+  - changed-files:
+      - any-glob-to-any-file: sdk/**/*
