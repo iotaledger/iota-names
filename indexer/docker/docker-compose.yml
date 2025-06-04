@@ -13,7 +13,7 @@ services:
         - PROFILE=dev
     image: iota-names-indexer:dev
     ports:
-      - "9184:9184/tcp" # Metrics
+      - "9189:9189/tcp" # Metrics
     tty: true
     deploy:
       restart_policy:

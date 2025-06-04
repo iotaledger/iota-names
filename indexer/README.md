@@ -6,7 +6,7 @@ Indexer to collect metrics about IOTA-Names.
 
 ### Run a local network with IOTA-Names deployed
 
-../README.md#local-setup-for-testing
+Follow the instructions from the [root README](../README.md#local-setup-for-testing)
 
 ### Set the environment variables
 
@@ -26,7 +26,7 @@ Add `--build` to rebuild the indexer image.
 
 The following endpoints will be available:
 
-- **IOTA Names Indexer Metrics:** [http://localhost:9184/metrics](http://localhost:9184/metrics)
+- **IOTA Names Indexer Metrics:** [http://localhost:9189/metrics](http://localhost:9189/metrics)
 - **Prometheus:** [http://localhost:9090](http://localhost:9090)
 - **Grafana:** [http://localhost:3000](http://localhost:3000)
 
