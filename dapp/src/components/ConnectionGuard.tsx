@@ -3,34 +3,12 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
 import { LoadingIndicator } from '@iota/apps-ui-kit';
 import { useAutoConnectWallet, useCurrentWallet } from '@iota/dapp-kit';
 import { redirect, usePathname } from 'next/navigation';
 import { PropsWithChildren, useEffect } from 'react';
 
-export interface ProtectedRoute {
-    title: string;
-    path: string;
-    icon: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element;
-    id: string;
-}
-
-export interface PublicRoute extends Pick<ProtectedRoute, 'path'> {}
-export enum ProtectedRouteTitle {
-    MyNames = 'My Names',
-}
-
-export const CONNECT_ROUTE: PublicRoute = {
-    path: '/',
-};
-
-export const MAIN_PROTECTED_ROUTE: ProtectedRoute = {
-    title: ProtectedRouteTitle.MyNames,
-    path: '/my-names',
-    icon: Info,
-    id: 'my-names',
-};
+import { CONNECT_ROUTE, MY_NAMES_ROUTE } from '@/lib/constants';
 
 export function ConnectionGuard({ children }: PropsWithChildren) {
     const { isConnected, isDisconnected } = useCurrentWallet();
@@ -42,7 +20,7 @@ export function ConnectionGuard({ children }: PropsWithChildren) {
         if (autoConnect !== 'attempted') return;
         if (isConnected && pathname === CONNECT_ROUTE.path) {
             // Redirect to home if on root ("/")
-            redirect(MAIN_PROTECTED_ROUTE.path);
+            redirect(MY_NAMES_ROUTE.path);
         } else if (isDisconnected && pathname !== CONNECT_ROUTE.path) {
             // Redirect back to "/" if disconnected and trying to access another page
             redirect(CONNECT_ROUTE.path);

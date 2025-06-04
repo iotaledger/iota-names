@@ -9,7 +9,7 @@ import { AvailabilityCheck } from '@/components';
 
 function MyNamesPage(): JSX.Element {
     return (
-        <div className="flex flex-col w-full gap-y-4 items-center">
+        <div className="flex flex-col w-full gap-y-lg items-center">
             <AvailabilityCheck />
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />

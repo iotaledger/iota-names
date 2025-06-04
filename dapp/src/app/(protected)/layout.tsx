@@ -7,20 +7,7 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import { redirect } from 'next/navigation';
 import { useEffect, type PropsWithChildren } from 'react';
 
-// import { CONNECT_ROUTE } from '@/lib/constants/routes.constants';
-
-export interface ProtectedRoute {
-    title: string;
-    path: string;
-    icon: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element;
-    id: string;
-}
-
-export interface PublicRoute extends Pick<ProtectedRoute, 'path'> {}
-
-export const CONNECT_ROUTE: PublicRoute = {
-    path: '/',
-};
+import { CONNECT_ROUTE } from '@/lib/constants';
 
 function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
     const currentAccount = useCurrentAccount();

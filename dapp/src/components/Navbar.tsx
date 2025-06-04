@@ -4,6 +4,9 @@
 'use client';
 
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import Link from 'next/link';
+
+import { PROTECTED_ROUTES } from '@/lib/constants';
 
 import { ThemeSwitcher } from './ThemeSwitcher';
 
@@ -13,14 +16,22 @@ export function Navbar() {
         <nav className="sticky top-0 ">
             <div className="container flex justify-between p-2">
                 <h1 className="flex items-center text-headline-sm">IOTA NAMES</h1>
-                {isConnected && (
+                <div className="flex flex-row gap-x-sm items-center">
+                    {isConnected &&
+                        PROTECTED_ROUTES.map((route) => (
+                            <Link
+                                key={route.path}
+                                href={route.path}
+                                className="text-label-md hover:text-primary-20 hover:dark:text-primary-80"
+                                data-testid={`${route.id}-link`}
+                            >
+                                {route.title}
+                            </Link>
+                        ))}
                     <div className="flex items-center space-x-2">
-                        <span className="text-body-sm">Connected</span>
+                        <ThemeSwitcher />
+                        <ConnectButton connectText="Connect" />
                     </div>
-                )}
-                <div className="flex items-center space-x-2">
-                    <ThemeSwitcher />
-                    <ConnectButton connectText="Connect" />
                 </div>
             </div>
         </nav>
