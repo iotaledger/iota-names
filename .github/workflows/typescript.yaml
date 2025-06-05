@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: TS Lint
+  build_and_lint:
+    name: TS Build / Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -38,6 +38,10 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
+
+      - name: Run pnpm build
+        run: |
+          pnpm turbo build
 
       - name: Run pnpm lint
         run: |
@@ -70,6 +74,10 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
+
+      - name: Build SDK
+        run: |
+          pnpm sdk build
 
       - name: Prepare local network & run SDK tests
         env:
