@@ -84,14 +84,20 @@ jobs:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
+
           iota start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
-          cd sdk
-          VITE_IOTA_BIN="iota" pnpm test:e2e
-          sleep 5 # wait some time for the network
+          sleep 10
+
           iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000
           iota client switch --env localnet
           iota client faucet
-          cd ../scripts
+          sleep 5
+
+          cd scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
           pnpm ts-node tests/register-name.ts
+          sleep 5
+
+          cd ../sdk
+          VITE_IOTA_BIN="iota" pnpm test:e2e
