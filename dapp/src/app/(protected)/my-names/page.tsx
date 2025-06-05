@@ -6,7 +6,7 @@
 import { KeyValueInfo, Title } from '@iota/apps-ui-kit';
 
 import { AvailabilityCheck } from '@/components';
-import { useRegistrationNfts } from '@/hooks/useRegistrationNfts';
+import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const registrationNfts = useRegistrationNfts();
