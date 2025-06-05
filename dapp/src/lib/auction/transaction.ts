@@ -67,7 +67,7 @@ export function buildClaimDomainTransaction(
     transaction.setSender(senderAddress);
 
     transaction.moveCall({
-        target: `${auctionPackageId}::auction::place_bid`,
+        target: `${auctionPackageId}::auction::claim`,
         arguments: [
             transaction.object(auctionHouseId),
             transaction.pure.string(targetDomain),
