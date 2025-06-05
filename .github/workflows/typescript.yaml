@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_and_lint:
+  lint:
     name: TS Lint
     runs-on: ubuntu-latest
     steps:
@@ -42,10 +42,6 @@ jobs:
       - name: Run pnpm lint
         run: |
           pnpm lint
-
-      - name: Run pnpm build
-        run: |
-          pnpm build
 
   sdk_test:
     name: SDK Tests
