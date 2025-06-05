@@ -33,7 +33,7 @@ impl IotaNamesEvent {
                 Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
             }
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
-            "BidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
+            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
             "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
             "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
             "NodeSubdomainCreatedEvent" => {

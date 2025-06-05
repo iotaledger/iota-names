@@ -3,21 +3,22 @@
 
 use std::{path::PathBuf, str::FromStr, sync::Arc};
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
 };
 use iota_json::IotaJsonValue;
 use iota_names::config::IotaNamesConfig;
 use iota_types::{
+    Identifier, TypeTag,
     balance::Balance,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
     transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
-    Identifier, TypeTag,
 };
 use move_core_types::{
     annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
@@ -27,13 +28,12 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{events::IotaNamesEvent, IotaNamesMetrics};
+use crate::{IotaNamesMetrics, events::IotaNamesEvent};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
     node_url: &str,
     registry: &Registry,
-    token: CancellationToken,
     concurrency: usize,
 ) -> anyhow::Result<()> {
     let progress_store = FileProgressStore::new("./progress_store").await?;
@@ -42,7 +42,7 @@ pub(crate) async fn run_iota_names_reader(
         progress_store,
         1,
         DataIngestionMetrics::new(registry),
-        token,
+        worker.token.clone(),
     );
     let worker_pool = WorkerPool::new(
         worker,
@@ -69,11 +69,20 @@ pub(crate) async fn run_iota_names_reader(
 pub(crate) struct IotaNamesWorker {
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
+    token: CancellationToken,
 }
 
 impl IotaNamesWorker {
-    pub(crate) fn new(config: IotaNamesConfig, metrics: Arc<IotaNamesMetrics>) -> Self {
-        Self { config, metrics }
+    pub(crate) fn new(
+        config: IotaNamesConfig,
+        metrics: Arc<IotaNamesMetrics>,
+        token: CancellationToken,
+    ) -> Self {
+        Self {
+            config,
+            metrics,
+            token,
+        }
     }
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
@@ -82,10 +91,14 @@ impl IotaNamesWorker {
                 self.metrics.total_name_records.inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
-            IotaNamesEvent::AuctionStarted(_event) => (),
+            IotaNamesEvent::AuctionStarted(_event) => {
+                self.metrics.total_auction_started.inc();
+            }
             IotaNamesEvent::AuctionBid(_event) => (),
             IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => {
+                self.metrics.total_auction_finalized.inc();
+            }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
             }
@@ -119,17 +132,8 @@ impl IotaNamesWorker {
 
         Ok(())
     }
-}
 
-#[async_trait]
-impl Worker for IotaNamesWorker {
-    type Message = ();
-    type Error = anyhow::Error;
-
-    async fn process_checkpoint(
-        &self,
-        checkpoint: Arc<CheckpointData>, // TODO change to &?
-    ) -> Result<Self::Message, Self::Error> {
+    async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
         debug!(
             "Processing checkpoint: {}",
             checkpoint.checkpoint_summary.sequence_number
@@ -195,5 +199,46 @@ impl Worker for IotaNamesWorker {
         }
 
         Ok(())
+    }
+}
+
+#[async_trait]
+impl Worker for IotaNamesWorker {
+    type Message = ();
+    type Error = anyhow::Error;
+
+    async fn process_checkpoint(
+        &self,
+        checkpoint: Arc<CheckpointData>,
+    ) -> Result<Self::Message, Self::Error> {
+        let res = self
+            .process_checkpoint(&checkpoint)
+            .catch_unwind()
+            .await
+            .map_err(map_panic);
+        if let Err(e) | Ok(Err(e)) = &res {
+            tracing::error!("{e}");
+            self.token.cancel();
+        }
+        res?
+    }
+}
+
+/// Maps a panic payload to an error.
+///
+/// A invocation of the panic!() macro in Rust 2021 or later will always result
+/// in a panic payload of type &'static str or String.
+///
+/// Only an invocation of panic_any (or, in Rust 2018 and earlier, panic!(x)
+/// where x is something other than a string) can result in a panic payload
+/// other than a &'static str or String.
+/// See https://doc.rust-lang.org/stable/std/panic/struct.PanicHookInfo.html for more info
+fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error {
+    if let Some(s) = payload.downcast_ref::<&str>() {
+        anyhow!("{s}")
+    } else if let Some(s) = payload.downcast_ref::<String>() {
+        anyhow!("{s}")
+    } else {
+        anyhow!("unknown panic occurred")
     }
 }

@@ -8,6 +8,8 @@ import type {
     TransactionObjectInput,
 } from '@iota/iota-sdk/transactions';
 
+import { packages } from './constants.js';
+
 // Interfaces
 // -----------------
 
@@ -42,15 +44,13 @@ export interface NameRecord {
 // Types
 // -----------------
 
-export type Network = 'mainnet' | 'testnet' | 'devnet' | 'custom';
+export type Network = keyof typeof packages;
 
 export type VersionedPackageId = {
     latest: string;
     v1: string;
     [key: string]: string;
 };
-
-export type Config = Record<'mainnet' | 'testnet' | 'devnet', PackageInfo>;
 
 export type BaseParams = {
     years: number;
@@ -75,8 +75,14 @@ export type ReceiptParams = {
 
 export type IotaNamesClientConfig = {
     client: IotaClient;
-    network?: Network;
-    config?: Config;
-};
+} & IotaNamesClientNetworkConfig;
+
+export type IotaNamesClientNetworkConfig =
+    | {
+          network: Network;
+      }
+    | {
+          packageInfo: PackageInfo;
+      };
 
 export type IotaNamesPriceList = Map<[number, number], number>;
