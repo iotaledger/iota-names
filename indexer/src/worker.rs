@@ -12,13 +12,13 @@ use iota_data_ingestion_core::{
 use iota_json::IotaJsonValue;
 use iota_names::config::IotaNamesConfig;
 use iota_types::{
+    Identifier, TypeTag,
     balance::Balance,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
     transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
-    Identifier, TypeTag,
 };
 use move_core_types::{
     annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
@@ -28,7 +28,7 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{events::IotaNamesEvent, IotaNamesMetrics};
+use crate::{IotaNamesMetrics, events::IotaNamesEvent};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -91,10 +91,14 @@ impl IotaNamesWorker {
                 self.metrics.total_name_records.inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
-            IotaNamesEvent::AuctionStarted(_event) => (),
+            IotaNamesEvent::AuctionStarted(_event) => {
+                self.metrics.total_auction_started.inc();
+            }
             IotaNamesEvent::AuctionBid(_event) => (),
             IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => {
+                self.metrics.total_auction_finalized.inc();
+            }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
             }

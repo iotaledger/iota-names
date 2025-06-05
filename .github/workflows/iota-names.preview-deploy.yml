@@ -3,6 +3,7 @@ name: Preview Deploy for IOTA Names
 on:
   pull_request:
     paths:
+      - "sdk/**"
       - "dapp/**"
       - ".github/workflows/iota-names.preview-deploy.yml"
       - ".github/workflows/vercel-app-deploy.yml"
