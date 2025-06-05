@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+'use client';
+
 import { createContext } from 'react';
 
 import { Theme, ThemePreference } from '../lib/enums';
