@@ -4,7 +4,7 @@
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
