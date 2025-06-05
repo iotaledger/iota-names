@@ -11,12 +11,12 @@ import { useIotaNamesClient } from '@/providers/contexts';
 interface UseUpdateNameTransactionOptions {
     address: string;
     name: string;
-    nft: TransactionObjectArgument;
+    nft: TransactionObjectArgument | string;
 
     updates: NameUpdate[];
 }
 
-type NameUpdate =
+export type NameUpdate =
     | {
           type: 'set-target-address';
           address: string;
@@ -25,6 +25,9 @@ type NameUpdate =
     | {
           type: 'set-default';
           name: string;
+      }
+    | {
+          type: 'unset-default';
       };
 
 export function useUpdateNameTransaction({
@@ -55,14 +58,17 @@ export function useUpdateNameTransaction({
                     case 'set-default':
                         iotaNamesTx.setDefault(update.name);
                         break;
+                    case 'unset-default':
+                        iotaNamesTx.unsetDefault();
+                        break;
                 }
             }
 
             iotaNamesTx.transaction.setSender(address);
-            const transaction = await iotaNamesTx.transaction.build({
+            await iotaNamesTx.transaction.build({
                 client,
             });
-            return transaction;
+            return iotaNamesTx.transaction;
         },
         enabled: !!address && !!updates.length && !!name && name.length > 0,
         gcTime: 0,
