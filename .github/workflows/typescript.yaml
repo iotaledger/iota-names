@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  build_and_lint:
     name: TS Lint
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +38,10 @@ jobs:
       - name: Install Dependencies
         run: |
           pnpm install
+
+      - name: Build
+        run: |
+          pnpm dapp build
 
       - name: Run pnpm lint
         run: |
