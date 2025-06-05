@@ -8,6 +8,7 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNameRecord } from '@/hooks/useNameRecord';
+import { usePriceList } from '@/hooks/usePriceList';
 import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
@@ -17,28 +18,40 @@ export function AvailabilityCheck() {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
     const { data, error } = useNameRecord(name);
+    const { data: priceList } = usePriceList();
+
+    const minLengthAllowed = priceList?.minLength;
+    const maxLengthAllowed = priceList?.maxLength;
 
     function normalizeNameInput(name: string) {
         return name.toLowerCase().replace(/\.iota$/i, '');
     }
 
     function getValidationError(name: string): string | null {
-        const IOTA_NAME_MIN_LENGTH = 3;
-        const IOTA_NAME_MAX_LENGTH = 64;
         const IOTA_NAME_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
-
         if (!name) return null;
-        if (name.includes('.')) return 'No subdomains allowed';
-        if (!IOTA_NAME_REGEX.test(name))
+
+        if (name.includes('.')) {
+            return 'No subdomains allowed';
+        }
+        if (!IOTA_NAME_REGEX.test(name)) {
             return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
-        if (name.length < IOTA_NAME_MIN_LENGTH || name.length > IOTA_NAME_MAX_LENGTH)
-            return `Name must be ${IOTA_NAME_MIN_LENGTH}-${IOTA_NAME_MAX_LENGTH} characters long`;
+        }
+
+        const minLength = minLengthAllowed ?? 3;
+        const maxLength = maxLengthAllowed ?? 64;
+
+        if (name.length < minLength || name.length > maxLength) {
+            return `Name must be ${minLength}-${maxLength} characters long`;
+        }
+
         return null;
     }
 
-    function handleChange(raw: string) {
-        setSearchValue(normalizeNameInput(raw));
+    function handleChange(inputValue: string) {
+        setSearchValue(normalizeNameInput(inputValue));
         if (name) {
             setName('');
         }
