@@ -48,3 +48,7 @@ export function getPricelistConfigType(iotaNamesPackageId: string): string {
 export function getRenewalPricelistConfigType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::pricing_config::RenewalConfig`;
 }
+
+export function getIotaNamesRegistrationType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
+}
