@@ -2,8 +2,6 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { Config } from './types.js';
-
 export const MAX_U64 = BigInt('18446744073709551615');
 
 /**
@@ -14,7 +12,7 @@ export const ALLOWED_METADATA = {
     avatar: 'avatar',
 };
 
-export const mainPackage: Config = {
+export const packages = {
     devnet: {
         auctionPackageId: '0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50',
         packageId: '0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f',
@@ -34,39 +32,5 @@ export const mainPackage: Config = {
         reverseRegistryTableId:
             '0x566dc13eafceaf8c3487ee2c41464553839ef4d50937c63741e359c98080c7b6',
     },
-    mainnet: {
-        auctionPackageId: '',
-        packageId: '',
-        iotaNames: '',
-        subNamesPackageId: '',
-        tempSubdomainsProxyPackageId: '',
-        payments: {
-            packageId: '',
-        },
-        coins: {
-            IOTA: {
-                type: '',
-            },
-        },
-        registryTableId: '',
-        reverseRegistryTableId: '',
-    },
-    testnet: {
-        auctionPackageId: '',
-        packageId: '',
-        iotaNames: '',
-        subNamesPackageId: '',
-        tempSubdomainsProxyPackageId: '',
-        payments: {
-            packageId: '',
-        },
-        /// Testnet coins will be different here for testing purposes, we can publish our own
-        coins: {
-            IOTA: {
-                type: '',
-            },
-        },
-        registryTableId: '',
-        reverseRegistryTableId: '',
-    },
+    // TODO: Support Mainnet and Testnet
 };

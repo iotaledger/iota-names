@@ -5,7 +5,7 @@
 export { IotaNamesClient } from './iota-names-client';
 export { IotaNamesTransaction } from './iota-names-transaction';
 export type { Network, IotaNamesClientConfig, Config, NameRecord } from './types';
-export { ALLOWED_METADATA, mainPackage } from './constants';
+export { ALLOWED_METADATA, packages } from './constants';
 export {
     isSubName,
     isNestedSubName,
