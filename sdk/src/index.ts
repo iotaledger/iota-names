@@ -14,5 +14,6 @@ export {
     getDomainType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
+    getIotaNamesRegistrationType,
 } from './helpers';
 export { isValidIotaName } from './utils';
