@@ -19,7 +19,14 @@ export function useAddSubname(address: string, subname: string, parentNftId: str
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-            const expirationTimestampMs = Date.now() + 365 * 24 * 60 * 60 * 1000; // TODO: remove
+            const parentObject = await client.getObject({
+                id: parentNftId,
+                options: {
+                    showContent: true,
+                },
+            });
+            const expirationTimestampMs =
+                parentObject.data?.content?.fields?.expiration_timestamp_ms;
             const subdomainNft = iotaNamesTx.createSubName({
                 parentNft: tx.object(parentNftId),
                 name: subname,
