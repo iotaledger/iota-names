@@ -75,6 +75,10 @@ jobs:
         run: |
           pnpm install
 
+      - name: Build SDK
+        run: |
+          pnpm sdk build
+
       - name: Prepare local network & run SDK tests
         env:
           IS_CI_JOB: true
