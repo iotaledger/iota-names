@@ -3,9 +3,9 @@
 
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-use axum::{routing::get, Extension, Router};
-use iota_metrics::{RegistryService, METRICS_ROUTE};
-use prometheus::{register_int_gauge_with_registry, IntGauge, Registry};
+use axum::{Extension, Router, routing::get};
+use iota_metrics::{METRICS_ROUTE, RegistryService};
+use prometheus::{IntGauge, Registry, register_int_gauge_with_registry};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
@@ -14,6 +14,8 @@ pub(crate) struct IotaNamesMetrics {
     pub iota_names_balance: IntGauge,
     pub total_node_subdomains: IntGauge,
     pub total_leaf_subdomains: IntGauge,
+    pub total_auction_started: IntGauge,
+    pub total_auction_finalized: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -40,6 +42,18 @@ impl IotaNamesMetrics {
             total_leaf_subdomains: register_int_gauge_with_registry!(
                 "total_leaf_subdomains",
                 "The total number of leaf subdomains in the registry",
+                registry,
+            )
+            .unwrap(),
+            total_auction_started: register_int_gauge_with_registry!(
+                "total_auction_started",
+                "The total number of auction that were started",
+                registry,
+            )
+            .unwrap(),
+            total_auction_finalized: register_int_gauge_with_registry!(
+                "total_auction_finalized",
+                "The total number of auction that were finalized",
                 registry,
             )
             .unwrap(),
