@@ -39,13 +39,13 @@ jobs:
         run: |
           pnpm install
 
-      - name: Build
-        run: |
-          pnpm dapp build
-
       - name: Run pnpm lint
         run: |
           pnpm lint
+
+      - name: Run pnpm build
+        run: |
+          pnpm build
 
   sdk_test:
     name: SDK Tests
