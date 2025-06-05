@@ -7,8 +7,7 @@ import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { useCallback, useMemo, useState } from 'react';
 
-import { useNameRecord } from '@/hooks/useNameRecord';
-import { usePriceList } from '@/hooks/usePriceList';
+import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
