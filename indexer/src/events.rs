@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
-use iota_types::{base_types::IotaAddress, event::Event};
+use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
@@ -16,6 +16,7 @@ pub(crate) enum IotaNamesEvent {
     // `iota-names`
     IotaNamesRegistry(IotaNamesRegistryEvent),
     IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
+    Transaction(TransactionEvent),
     // `subdomains`
     NodeSubdomainCreated(NodeSubdomainCreatedEvent),
     NodeSubdomainBurned(NodeSubdomainBurnedEvent),
@@ -42,6 +43,7 @@ impl IotaNamesEvent {
             "IotaNamesReverseRegistryEvent" => {
                 Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
             }
+            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             // `subdomains`
             "NodeSubdomainCreatedEvent" => {
                 Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
@@ -116,6 +118,19 @@ pub(crate) struct IotaNamesReverseRegistryEvent {
 }
 
 // `subdomains`
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TransactionEvent {
+    pub app: String,
+    pub domain: Domain,
+    pub years: u8,
+    pub request_data_version: u8,
+    pub base_amount: u64,
+    pub metadata: VecMap<String, String>,
+    pub is_renewal: bool,
+    pub currency: String,
+    pub currency_amount: u64,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {

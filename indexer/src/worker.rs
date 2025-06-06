@@ -112,6 +112,14 @@ impl IotaNamesWorker {
                     .inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::Transaction(event) => {
+                if event.is_renewal {
+                    self.metrics
+                        .renewal_years_distribution
+                        .with_label_values(&[event.years.to_string()])
+                        .inc();
+                }
+            }
             // `subdomains`
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
