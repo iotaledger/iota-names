@@ -4,17 +4,13 @@
 'use client';
 
 import { Button, Card, CardBody, CardType, Title } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
-import { getIotaNamesRegistrationType, mainPackage } from '@iota/iota-names-sdk';
 import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
-import { useGetAllOwnedObjects } from '@/hooks/useGetAllOwnedObjects';
+import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
-    const account = useCurrentAccount();
-    const address = account?.address ?? '';
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
 
     const registrationNfts = useRegistrationNfts();
@@ -33,28 +29,20 @@ function MyNamesPage(): JSX.Element {
                 <Title title="My names" testId="my-names-page" />
             </div>
             <div className="flex flex-col gap-y-sm items-center">
-                {namesRegistrationData?.map((nameRecord) => {
-                    const name = nameRecord.display?.data?.name;
-
-                    if (!name) {
-                        return null;
-                    }
-
-                    return (
-                        <Card key={name} type={CardType.Filled}>
-                            <CardBody
-                                title={name}
-                                subtitle={name}
-                                clickableAction={
-                                    <Button
-                                        text="Manage"
-                                        onClick={() => setUpdateNameDialog(name)}
-                                    />
-                                }
-                            />
-                        </Card>
-                    );
-                })}
+                {registrationNfts?.map((nft) => (
+                    <Card key={nft.name} type={CardType.Filled}>
+                        <CardBody
+                            title={nft.name}
+                            subtitle={nft.name}
+                            clickableAction={
+                                <Button
+                                    text="Manage"
+                                    onClick={() => setUpdateNameDialog(nft.name)}
+                                />
+                            }
+                        />
+                    </Card>
+                ))}
             </div>
         </div>
     );
