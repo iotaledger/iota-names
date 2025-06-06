@@ -55,7 +55,7 @@ impl IotaNamesEvent {
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct IotaNamesRegistryEvent {
-    pub domain: String,
+    pub domain: Domain,
     pub name_record: NameRecord,
 }
 
