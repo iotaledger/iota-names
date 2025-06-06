@@ -2,13 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
-import {
-    getAllNetworks,
-    getNetwork,
-    IotaClient,
-    IotaHTTPTransport,
-    type NetworkId,
-} from '@iota/iota-sdk/client';
+import { getAllNetworks, getNetwork, IotaClient, type NetworkId } from '@iota/iota-sdk/client';
 
 export const SupportedNetworks = getAllNetworks();
 
