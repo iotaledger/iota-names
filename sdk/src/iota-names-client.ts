@@ -87,8 +87,8 @@ export class IotaNamesClient {
             },
         });
 
-        const priceList = priceListResponse?.data.owner.dynamicField.value.json.pricing;
-        const contents = priceList.contents;
+        const priceList = priceListResponse?.data?.owner?.dynamicField?.value?.json?.pricing;
+        const contents = priceList?.contents;
 
         // Ensure the content exists
         if (!contents) {
@@ -154,8 +154,9 @@ export class IotaNamesClient {
             },
         });
 
-        const priceList = priceListResponse?.data.owner.dynamicField.value.json.pricing;
-        const contents = priceList.contents;
+        const priceList =
+            priceListResponse?.data?.owner?.dynamicField?.value?.json?.config?.pricing;
+        const contents = priceList?.contents;
 
         // Ensure the content exists
         if (!contents) {
