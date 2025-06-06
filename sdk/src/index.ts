@@ -4,7 +4,7 @@
 
 export { IotaNamesClient } from './iota-names-client';
 export { IotaNamesTransaction } from './iota-names-transaction';
-export type { Network, IotaNamesClientConfig, Config, NameRecord } from './types';
+export type { Network, IotaNamesClientConfig, NameRecord } from './types';
 export { ALLOWED_METADATA, packages } from './constants';
 export {
     isSubName,
@@ -14,5 +14,6 @@ export {
     getDomainType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
+    getIotaNamesRegistrationType,
 } from './helpers';
 export { isValidIotaName } from './utils';
