@@ -20,8 +20,6 @@ export function AvailabilityCheck() {
 
     const { data, error } = useNameRecord(name);
 
-    console.log(error)
-
     const isValid = useMemo(() => isValidIotaName(searchValue), [searchValue]);
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
 
