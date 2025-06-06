@@ -167,7 +167,7 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
+        "w": 8,
         "x": 0,
         "y": 4
       },
@@ -190,10 +190,10 @@
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "iota_names_balance",
+          "expr": "iota_names_balance / 1000000000",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "Balance (NANOs)",
+          "legendFormat": "Balance in IOTA",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -263,8 +263,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 6,
+        "w": 8,
+        "x": 8,
         "y": 4
       },
       "id": 1,
@@ -364,8 +364,8 @@
       },
       "gridPos": {
         "h": 6,
-        "w": 6,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 4
       },
       "id": 5,
@@ -486,8 +486,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 6,
+        "w": 8,
         "x": 0,
         "y": 11
       },
@@ -618,9 +618,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 6,
+        "w": 8,
+        "x": 8,
         "y": 11
       },
       "id": 3,
@@ -704,7 +704,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 17
       },
       "id": 8,
       "panels": [],
@@ -771,10 +771,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 7,
+        "w": 8,
         "x": 0,
-        "y": 20
+        "y": 18
       },
       "id": 4,
       "options": {
@@ -852,5 +852,5 @@
   "timezone": "browser",
   "title": "IOTA-Names",
   "uid": "1fd4a3ec-9556-42b6-8589-7eec88d04011",
-  "version": 9
+  "version": 11
 }
