@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
+import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/contexts';
+import { useIotaGraphQLClient } from './useIotaGraphQLClient';
 
-import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
+const MAX_NFTS_PER_REQUEST = 50;
 
 interface RegistrationNft {
     name: string;
@@ -16,28 +17,96 @@ interface RegistrationNft {
     project_url?: string;
 }
 
+export interface PaginatedRegistrationNftsResponse {
+    data: RegistrationNft[];
+    hasNextPage: boolean;
+    nextCursor?: string | null;
+}
+
 export function useRegistrationNfts() {
     const account = useCurrentAccount();
     const address = account?.address ?? '';
 
-    const { iotaNamesClient } = useIotaNamesClient();
-    const packageId = iotaNamesClient.config.packageId;
+    const { iotaGraphQLClient } = useIotaGraphQLClient();
 
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, {
-        StructType: getIotaNamesRegistrationType(packageId),
-    });
+    function getDisplayValue(
+        display: { key: string | null; value: string | null }[],
+        key: string,
+    ): string {
+        return display.find((d) => d.key === key)?.value ?? '';
+    }
+    return useInfiniteQuery<PaginatedRegistrationNftsResponse>({
+        queryKey: ['registration-nfts', address],
+        initialPageParam: null,
+        queryFn: async ({ pageParam }: { pageParam: unknown }) => {
+            const response = await iotaGraphQLClient.query<{
+                address: {
+                    iotaNamesRegistrations: {
+                        pageInfo: {
+                            hasNextPage: boolean;
+                            endCursor: string | null;
+                        };
+                        nodes: {
+                            domain: string;
+                            display: {
+                                key: string | null;
+                                value: string | null;
+                                error: string | null;
+                            }[];
+                        }[];
+                    };
+                };
+            }>({
+                query: graphql(`
+                    query resolveNameServiceNames(
+                        $address: IotaAddress!
+                        $limit: Int
+                        $cursor: String
+                    ) {
+                        address(address: $address) {
+                            iotaNamesRegistrations(first: $limit, after: $cursor) {
+                                pageInfo {
+                                    hasNextPage
+                                    endCursor
+                                }
+                                nodes {
+                                    domain
+                                    display {
+                                        key
+                                        value
+                                        error
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `),
+                variables: {
+                    address,
+                    limit: MAX_NFTS_PER_REQUEST,
+                    cursor: pageParam,
+                },
+            });
+            const pageInfo = response.data?.address?.iotaNamesRegistrations?.pageInfo;
+            const nodes = response.data?.address?.iotaNamesRegistrations?.nodes;
 
-    const registrationNfts: RegistrationNft[] =
-        namesRegistrationData?.map((nameRecord) => {
-            const data = nameRecord?.display?.data;
+            // Transform nodes into RegistrationNft objects
+            const registrationNfts: RegistrationNft[] =
+                nodes?.map((node) => ({
+                    name: node.domain,
+                    description: getDisplayValue(node.display, 'description'),
+                    image_url: getDisplayValue(node.display, 'image_url'),
+                    link: getDisplayValue(node.display, 'link'),
+                    project_url: getDisplayValue(node.display, 'project_url'),
+                })) ?? [];
+
             return {
-                name: data?.name ?? '',
-                description: data?.description,
-                image_url: data?.image_url,
-                link: data?.link,
-                project_url: data?.project_url,
+                data: registrationNfts,
+                hasNextPage: pageInfo?.hasNextPage ?? false,
+                nextCursor: pageInfo?.endCursor ?? null,
             };
-        }) ?? [];
-
-    return registrationNfts;
+        },
+        getNextPageParam: ({ hasNextPage, nextCursor }) => (hasNextPage ? nextCursor : null),
+        enabled: !!address,
+    });
 }
