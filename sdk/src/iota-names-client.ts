@@ -20,6 +20,7 @@ import type {
     PackageInfo,
 } from './types.js';
 import { isValidIotaName, normalizeIotaName } from './utils';
+import { bcs } from '@iota/iota-sdk/bcs';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -155,12 +156,14 @@ export class IotaNamesClient {
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
         if (!this.config.registryTableId) throw new Error('IotaNames package ID is not set');
-
+        console.log(bcs)
         const nameRecord = await this.client.getDynamicFieldObject({
             parentId: this.config.registryTableId,
             name: {
                 type: getDomainType(this.config.packageId),
-                value: normalizeIotaName(name, 'dot').split('.').reverse(),
+                value: {
+                    labels: normalizeIotaName(name, 'dot').split('.').reverse()
+                },
             },
         });
 
