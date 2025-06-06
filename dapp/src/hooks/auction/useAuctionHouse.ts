@@ -24,7 +24,7 @@ export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error
     const auctionPackageId = iotaNamesClient.config.auctionPackageId;
 
     return useQuery({
-        queryKey: ['auctionHouse', iotaGraphQLClient, auctionPackageId],
+        queryKey: ['auctionHouse', auctionPackageId],
         async queryFn() {
             const auctionHouseByTypeResponse = await iotaGraphQLClient.query<{
                 objects: {

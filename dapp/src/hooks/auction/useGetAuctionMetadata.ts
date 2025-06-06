@@ -21,7 +21,7 @@ export function useGetAuctionMetadata(domainName: string) {
     const { packageId } = iotaNamesClient.config;
 
     return useQuery({
-        queryKey: ['auctionHouse', iotaGraphQLClient, packageId, auctionsTableObjectId, domainName],
+        queryKey: ['auctionHouse', packageId, auctionsTableObjectId, domainName],
         async queryFn() {
             if (!auctionsTableObjectId || !domainName) {
                 return null;
