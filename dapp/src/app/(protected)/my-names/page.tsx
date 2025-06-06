@@ -17,14 +17,8 @@ function MyNamesPage(): JSX.Element {
     const address = account?.address ?? '';
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
 
-    const { network: networkName } = useIotaClientContext();
-    const config = mainPackage[networkName as keyof typeof mainPackage];
+    const registrationNfts = useRegistrationNfts();
 
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, {
-        StructType: getIotaNamesRegistrationType(config.packageId),
-    });
-
-    console.log('namesRegistrationData Objects:', namesRegistrationData);
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
             <AvailabilityCheck />
