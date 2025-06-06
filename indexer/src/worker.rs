@@ -87,6 +87,22 @@ impl IotaNamesWorker {
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
+            // `auctions`
+            IotaNamesEvent::AuctionStarted(_event) => {
+                self.metrics.total_auction_started.inc();
+            }
+            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionFinalized(_event) => {
+                self.metrics.total_auction_finalized.inc();
+            }
+            // `coupons`
+            IotaNamesEvent::CouponApplied(event) => match event.kind {
+                0 => self.metrics.total_percentage_discount.inc(),
+                1 => self.metrics.total_fixed_discount.inc(),
+                k => unreachable!("unknown coupon kind {k}"),
+            },
+            // `iota-names`
             IotaNamesEvent::IotaNamesRegistry(event) => {
                 self.metrics.total_name_records.inc();
                 let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
@@ -96,14 +112,7 @@ impl IotaNamesWorker {
                     .inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
-            IotaNamesEvent::AuctionStarted(_event) => {
-                self.metrics.total_auction_started.inc();
-            }
-            IotaNamesEvent::AuctionBid(_event) => (),
-            IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => {
-                self.metrics.total_auction_finalized.inc();
-            }
+            // `subdomains`
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
             }

@@ -6,14 +6,16 @@ use iota_types::{base_types::IotaAddress, event::Event};
 use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
-    // `iota-names`
-    IotaNamesRegistry(IotaNamesRegistryEvent),
-    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
     AuctionBid(AuctionBidEvent),
     AuctionExtended(AuctionExtendedEvent),
     AuctionFinalized(AuctionFinalizedEvent),
+    // `coupons`
+    CouponApplied(CouponAppliedEvent),
+    // `iota-names`
+    IotaNamesRegistry(IotaNamesRegistryEvent),
+    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
     // `subdomains`
     NodeSubdomainCreated(NodeSubdomainCreatedEvent),
     NodeSubdomainBurned(NodeSubdomainBurnedEvent),
@@ -28,14 +30,19 @@ impl IotaNamesEvent {
     ) -> anyhow::Result<Option<Self>> {
         // TODO check package IDs
         Ok(Some(match event.type_.name.as_str() {
-            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
-            "IotaNamesReverseRegistryEvent" => {
-                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
-            }
+            // `auctions`
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
             "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
             "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
+            // `coupons`
+            "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
+            // `iota-names`
+            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
+            "IotaNamesReverseRegistryEvent" => {
+                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
+            }
+            // `subdomains`
             "NodeSubdomainCreatedEvent" => {
                 Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
             }
@@ -53,17 +60,7 @@ impl IotaNamesEvent {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesRegistryEvent {
-    pub domain: Domain,
-    pub name_record: NameRecord,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesReverseRegistryEvent {
-    pub default_address: IotaAddress,
-    pub domain: Domain,
-}
+// `auctions`
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionStartedEvent {
@@ -95,6 +92,30 @@ pub(crate) struct AuctionFinalizedEvent {
     pub winning_bid: u64,
     pub winner: IotaAddress,
 }
+
+// `coupons`
+
+#[derive(Serialize, Deserialize)]
+pub struct CouponAppliedEvent {
+    pub kind: u8,
+    pub discount: u64,
+}
+
+// `iota-names`
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct IotaNamesRegistryEvent {
+    pub domain: Domain,
+    pub name_record: NameRecord,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct IotaNamesReverseRegistryEvent {
+    pub default_address: IotaAddress,
+    pub domain: Domain,
+}
+
+// `subdomains`
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {
