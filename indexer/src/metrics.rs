@@ -23,6 +23,7 @@ pub(crate) struct IotaNamesMetrics {
     pub total_leaf_subdomains: IntGauge,
     pub total_auction_started: IntGauge,
     pub total_auction_finalized: IntGauge,
+    pub name_length_distribution: AssertUnwindSafe<IntCounterVec>,
 }
 
 impl IotaNamesMetrics {
@@ -73,6 +74,15 @@ impl IotaNamesMetrics {
                 registry,
             )
             .unwrap(),
+            name_length_distribution: AssertUnwindSafe(
+                register_int_counter_vec_with_registry!(
+                    "name_length_distribution",
+                    "The length of second level names",
+                    &["length"],
+                    registry,
+                )
+                .unwrap(),
+            ),
         }
     }
 }

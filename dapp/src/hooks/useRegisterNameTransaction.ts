@@ -30,8 +30,7 @@ export function useRegisterNameTransaction(
                 years,
                 coin,
             });
-            iotaNamesTx.transaction.transferObjects([nft], address);
-            iotaNamesTx.transaction.transferObjects([coin], address);
+            iotaNamesTx.transaction.transferObjects([nft, coin], address);
             iotaNamesTx.transaction.setSender(address);
             const transaction = await iotaNamesTx.transaction.build({
                 client,

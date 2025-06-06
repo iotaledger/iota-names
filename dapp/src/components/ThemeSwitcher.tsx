@@ -1,3 +1,8 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+'use client';
+
 import { DarkMode, LightMode } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
 
