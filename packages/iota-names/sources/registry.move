@@ -51,7 +51,7 @@ public struct Registry has store {
 }
 
 public struct IotaNamesRegistryEvent has copy, drop {
-    domain: String,
+    domain: Domain,
     name_record: NameRecord
 }
 
@@ -189,7 +189,7 @@ public fun add_leaf_record(
     let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
 
     event::emit(IotaNamesRegistryEvent {
-        domain: domain.to_string(),
+        domain,
         name_record
     });
 
@@ -368,7 +368,7 @@ fun internal_add_record(
     );
     
     event::emit(IotaNamesRegistryEvent {
-        domain: domain.to_string(),
+        domain,
         name_record
     });
 
