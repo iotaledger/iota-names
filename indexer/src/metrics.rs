@@ -1,11 +1,17 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::{
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+    panic::AssertUnwindSafe,
+};
 
 use axum::{Extension, Router, routing::get};
 use iota_metrics::{METRICS_ROUTE, RegistryService};
-use prometheus::{IntGauge, Registry, register_int_gauge_with_registry};
+use prometheus::{
+    IntCounterVec, IntGauge, Registry, register_int_counter_vec_with_registry,
+    register_int_gauge_with_registry,
+};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
@@ -16,6 +22,8 @@ pub(crate) struct IotaNamesMetrics {
     pub total_leaf_subdomains: IntGauge,
     pub total_auction_started: IntGauge,
     pub total_auction_finalized: IntGauge,
+    pub name_length_distribution: AssertUnwindSafe<IntCounterVec>,
+    pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
 }
 
 impl IotaNamesMetrics {
@@ -57,6 +65,24 @@ impl IotaNamesMetrics {
                 registry,
             )
             .unwrap(),
+            name_length_distribution: AssertUnwindSafe(
+                register_int_counter_vec_with_registry!(
+                    "name_length_distribution",
+                    "The length of second level names",
+                    &["length"],
+                    registry,
+                )
+                .unwrap(),
+            ),
+            renewal_years_distribution: AssertUnwindSafe(
+                register_int_counter_vec_with_registry!(
+                    "renewal_years_distribution",
+                    "The number of years per renewal",
+                    &["years"],
+                    registry,
+                )
+                .unwrap(),
+            ),
         }
     }
 }
