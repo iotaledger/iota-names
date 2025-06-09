@@ -23,13 +23,13 @@ export function useSubdomainRegistrations() {
     const { iotaNamesClient } = useIotaNamesClient();
     const packageId = iotaNamesClient.config.packageId;
 
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, {
+    const { data: ownedObjects } = useGetAllOwnedObjects(address, {
         StructType: getIotaSubdomainRegistrationType(packageId),
     });
 
     const registrationNfts: RegistrationNft[] =
-        namesRegistrationData?.map((nameRecord) => {
-            const data = nameRecord?.display?.data;
+        ownedObjects?.map((obj) => {
+            const data = obj?.display?.data;
             return {
                 name: data?.name ?? '',
                 description: data?.description,
