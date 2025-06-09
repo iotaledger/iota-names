@@ -27,15 +27,25 @@ function MyNamesPage(): JSX.Element {
                         fullwidth
                     />
                 ))}
-                {subdomainRegistrations?.map((nameRecord) => (
-                    <KeyValueInfo
-                        key={nameRecord.name}
-                        keyText={nameRecord.name}
-                        value={nameRecord?.description ?? ''}
-                        fullwidth
-                    />
-                ))}
             </div>
+
+            {subdomainRegistrations ? (
+                <>
+                    <div className="pt-md">
+                        <Title title="My subdomains" testId="my-names-page" />
+                    </div>
+                    <div className="flex flex-col gap-x-sm items-center">
+                        {subdomainRegistrations?.map((nameRecord) => (
+                            <KeyValueInfo
+                                key={nameRecord.name}
+                                keyText={nameRecord.name}
+                                value={nameRecord?.description ?? ''}
+                                fullwidth
+                            />
+                        ))}
+                    </div>
+                </>
+            ) : null}
         </div>
     );
 }
