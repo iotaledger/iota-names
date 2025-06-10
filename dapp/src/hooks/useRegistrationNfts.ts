@@ -4,17 +4,10 @@
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
 
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { useIotaNamesClient } from '@/providers/contexts';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
-
-interface RegistrationNft {
-    name: string;
-    description?: string;
-    image_url?: string;
-    link?: string;
-    project_url?: string;
-}
 
 export function useRegistrationNfts() {
     const account = useCurrentAccount();
@@ -30,12 +23,26 @@ export function useRegistrationNfts() {
     const registrationNfts: RegistrationNft[] =
         namesRegistrationData?.map((nameRecord) => {
             const data = nameRecord?.display?.data;
+
+            const expirationTimestampMsValue =
+                nameRecord.content &&
+                'fields' in nameRecord.content &&
+                'expiration_timestamp_ms' in nameRecord.content.fields
+                    ? nameRecord.content.fields.expiration_timestamp_ms
+                    : undefined;
+
+            const expirationTimestampMs = Number.isNaN(Number(expirationTimestampMsValue))
+                ? undefined
+                : Number(expirationTimestampMsValue);
+
             return {
                 name: data?.name ?? '',
                 description: data?.description,
                 image_url: data?.image_url,
                 link: data?.link,
                 project_url: data?.project_url,
+                objectId: nameRecord.objectId,
+                expiration_timestamp_ms: expirationTimestampMs,
             };
         }) ?? [];
 
