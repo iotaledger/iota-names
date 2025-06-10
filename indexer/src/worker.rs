@@ -96,6 +96,14 @@ impl IotaNamesWorker {
                     .inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::Transaction(event) => {
+                if event.is_renewal {
+                    self.metrics
+                        .renewal_years_distribution
+                        .with_label_values(&[event.years.to_string()])
+                        .inc();
+                }
+            }
             IotaNamesEvent::AuctionStarted(_event) => {
                 self.metrics.total_auction_started.inc();
             }
