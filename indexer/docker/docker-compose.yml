@@ -5,8 +5,8 @@ services:
       prometheus:
         condition: service_started
     build:
-      context: ../..
-      dockerfile: indexer/docker/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         - GIT_REVISION
         - BUILD_DATE
