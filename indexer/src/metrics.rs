@@ -9,8 +9,8 @@ use std::{
 use axum::{Extension, Router, routing::get};
 use iota_metrics::{METRICS_ROUTE, RegistryService};
 use prometheus::{
-    IntCounterVec, IntGauge, Registry, register_int_counter_vec_with_registry,
-    register_int_gauge_with_registry,
+    IntCounterVec, IntGauge, IntGaugeVec, Registry, register_int_counter_vec_with_registry,
+    register_int_gauge_vec_with_registry, register_int_gauge_with_registry,
 };
 use tokio_util::sync::CancellationToken;
 use tracing::info;
@@ -22,7 +22,7 @@ pub(crate) struct IotaNamesMetrics {
     pub total_leaf_subdomains: IntGauge,
     pub total_auction_started: IntGauge,
     pub total_auction_finalized: IntGauge,
-    pub name_length_distribution: AssertUnwindSafe<IntCounterVec>,
+    pub name_length_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
 }
 
@@ -66,7 +66,7 @@ impl IotaNamesMetrics {
             )
             .unwrap(),
             name_length_distribution: AssertUnwindSafe(
-                register_int_counter_vec_with_registry!(
+                register_int_gauge_vec_with_registry!(
                     "name_length_distribution",
                     "The length of second level names",
                     &["length"],

@@ -116,14 +116,13 @@ impl IotaNamesWorker {
                     .with_label_values(&[&second_level_name_len.to_string()])
                     .inc();
             }
-            IotaNamesEvent::NameRecordRemoved(_event) => {
+            IotaNamesEvent::NameRecordRemoved(event) => {
                 self.metrics.total_name_records.dec();
-                // let second_level_name_len =
-                // event.domain.label(1).expect("missing SLD").len();
-                // self.metrics
-                //     .name_length_distribution
-                //     .with_label_values(&[&second_level_name_len.to_string()])
-                //     .dec();
+                let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
+                self.metrics
+                    .name_length_distribution
+                    .with_label_values(&[&second_level_name_len.to_string()])
+                    .dec()
             }
             IotaNamesEvent::ReverseLookupSet(_event) => (),
             IotaNamesEvent::Transaction(event) => {
