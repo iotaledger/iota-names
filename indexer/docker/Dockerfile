@@ -37,6 +37,8 @@ RUN rm -rf src
 # 5. Copy the rest of the source code
 COPY ./ .
 
+ARG CACHEBUST=1
+RUN echo "Cache bust: $CACHEBUST" && touch src/main.rs
 # 6. Build the actual project
 RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
 
