@@ -14,6 +14,10 @@ interface RegistrationNft {
     image_url?: string;
     link?: string;
     project_url?: string;
+    expiration_timestamp_ms: string;
+    id: string;
+    isAllowRenew: boolean;
+    isAllowSubdomains: boolean;
 }
 
 export function useRegistrationNfts() {
@@ -30,12 +34,17 @@ export function useRegistrationNfts() {
     const registrationNfts: RegistrationNft[] =
         namesRegistrationData?.map((nameRecord) => {
             const data = nameRecord?.display?.data;
+            const fields = nameRecord?.content?.fields;
             return {
                 name: data?.name ?? '',
                 description: data?.description,
                 image_url: data?.image_url,
                 link: data?.link,
                 project_url: data?.project_url,
+                expiration_timestamp_ms: fields?.expiration_timestamp_ms as string,
+                id: nameRecord?.objectId,
+                isAllowRenew: false,
+                isAllowSubdomains: false,
             };
         }) ?? [];
 
