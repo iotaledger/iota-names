@@ -46,6 +46,7 @@ export function useNameRecord(
             if (!isValidIotaName(name)) {
                 throw new Error('Name is not valid.');
             }
+
             const nameRecord = await iotaNamesClient.getNameRecord(name);
             let nameRecordPrice = null;
 
