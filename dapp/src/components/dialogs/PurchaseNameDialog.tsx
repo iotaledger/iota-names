@@ -7,6 +7,7 @@ import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header } from '@
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useState } from 'react';
 
+import { useAddSubname } from '@/hooks/useAddSubname';
 import { useBalance } from '@/hooks/useBalance';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
@@ -44,6 +45,17 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
+    const {
+        data: addSubnameData,
+        isLoading: isAddSubnameLoading,
+        error: addSubnameError,
+    } = useAddSubname(
+        'tooling1.superdomain00.iota',
+        '0xcca9951ec2779f0fc01a1aa012175c0749c5a307a037e1e1f8ad42458b696c0a',
+    );
+    console.log('addSubnameData', addSubnameData);
+    console.log('addSubnameError', addSubnameError);
+    console.log('isAddSubnameLoading', isAddSubnameLoading);
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
