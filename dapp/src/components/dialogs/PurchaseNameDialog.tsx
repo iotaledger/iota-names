@@ -51,7 +51,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         if (!registerNameData || nameRecordData?.type !== 'available') return;
         try {
             setPurchaseError('');
-            // TODO https://github.com/iotaledger/iota/issues/7286 - UnsupportedMethodError: Method iota_executeTransactionBlock is not supported in the GraphQL API
             await signAndExecuteTransaction({
                 transaction: registerNameData.transaction,
             });
