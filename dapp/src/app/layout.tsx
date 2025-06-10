@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
+import { ConnectionGuard, Navbar } from '@/components';
 import { AppProviders } from '@/providers';
 
 export const metadata: Metadata = {
@@ -21,7 +22,12 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className="antialiased">
-                <AppProviders>{children}</AppProviders>
+                <AppProviders>
+                    <ConnectionGuard>
+                        <Navbar />
+                        {children}
+                    </ConnectionGuard>
+                </AppProviders>
             </body>
         </html>
     );

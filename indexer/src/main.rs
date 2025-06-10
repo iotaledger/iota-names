@@ -63,8 +63,9 @@ impl Command {
                 // Spawn the prometheus API
                 let handle = cancel_token.clone();
                 tasks.spawn(async move {
-                    prometheus.start(handle).await?;
-                    Ok(())
+                    let res = prometheus.start(handle.clone()).await;
+                    handle.cancel();
+                    res
                 });
 
                 // Spawn the metrics worker
@@ -73,13 +74,15 @@ impl Command {
                     let worker = IotaNamesWorker::new(
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
-                    );
+                        handle.clone(),
+                    )?;
 
-                    tokio::select! {
-                        res = run_iota_names_reader(worker, &node_url, &registry, handle.clone(), num_workers) => res?,
-                        _ = handle.cancelled() => {},
-                    }
-                    Ok(())
+                    let res = tokio::select! {
+                        res = run_iota_names_reader(worker, &node_url, &registry, num_workers) => res,
+                        _ = handle.cancelled() => Ok(()),
+                    };
+                    handle.cancel();
+                    res
                 });
 
                 let mut exit_code = Ok(());
