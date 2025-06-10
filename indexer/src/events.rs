@@ -7,8 +7,9 @@ use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
     // `iota-names`
-    IotaNamesRegistry(IotaNamesRegistryEvent),
-    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
+    NameRecordAdded(NameRecordAddedEvent),
+    NameRecordRemoved(NameRecordRemovedEvent),
+    ReverseLookupSet(ReverseLookupSetEvent),
     Transaction(TransactionEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
@@ -29,10 +30,9 @@ impl IotaNamesEvent {
     ) -> anyhow::Result<Option<Self>> {
         // TODO check package IDs
         Ok(Some(match event.type_.name.as_str() {
-            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
-            "IotaNamesReverseRegistryEvent" => {
-                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
-            }
+            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
             "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
@@ -56,13 +56,18 @@ impl IotaNamesEvent {
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesRegistryEvent {
+pub(crate) struct NameRecordAddedEvent {
     pub domain: Domain,
     pub name_record: NameRecord,
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesReverseRegistryEvent {
+pub(crate) struct NameRecordRemovedEvent {
+    pub domain: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupSetEvent {
     pub default_address: IotaAddress,
     pub domain: Domain,
 }
