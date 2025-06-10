@@ -115,14 +115,14 @@ importers:
         specifier: ^0.4.5
         version: 0.4.5(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250610130929
+        version: 0.0.0-experimental-20250610130929(typescript@5.8.3)
       '@iota/iota-names-sdk':
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: ^1.1.0
-        version: 1.1.0(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250610130929
+        version: 0.0.0-experimental-20250610130929(typescript@5.8.3)
       '@tanstack/react-query':
         specifier: ^5.76.1
         version: 5.76.1(react@18.3.1)
@@ -233,8 +233,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@iota/iota-sdk':
-        specifier: ^1.1.0
-        version: 1.1.0(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250610130929
+        version: 0.0.0-experimental-20250610130929(typescript@5.8.3)
       '@iota/kiosk':
         specifier: 0.3.2
         version: 0.3.2(typescript@5.8.3)
@@ -258,8 +258,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: ^1.1.0
-        version: 1.1.0(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250610130929
+        version: 0.0.0-experimental-20250610130929(typescript@5.8.3)
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -271,8 +271,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: ^0.5.1
-        version: 0.5.1(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250610130929
+        version: 0.0.0-experimental-20250610130929(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -1446,18 +1446,18 @@ packages:
       '@tanstack/react-query': ^5.50.1
       react: '*'
 
-  '@iota/graphql-transport@0.5.1':
-    resolution: {integrity: sha512-ygfv2vUJcCyna4xaphNCt6WjC0SqTnBfevWVXyILpJFUY0jUKXIHwqhbiuMIh368HKOgB1pzT4SiA6vqWBVH2A==}
+  '@iota/graphql-transport@0.0.0-experimental-20250610130929':
+    resolution: {integrity: sha512-mwW+Lk4ZWDXusgFRNhxlBP0egpT9IAjQg1FCS+hl2M6/GZ8CuJi7jHEh041c5RuJcU/Eto4f153X3HDg4+f4GA==}
 
   '@iota/http-client@1.0.0-beta.30':
     resolution: {integrity: sha512-Dc4UnNmO5mgPi6pZOwgJ7wR9/ETJoSlU/C0HlSIdkzeuRchpRc70STG2pA8hfIfLnNQE2N8HzMvceSPntKlWZg==}
 
-  '@iota/iota-sdk@0.5.0':
-    resolution: {integrity: sha512-ZFg4C5EuHV55fHITKOO6Mg1dLqgojZqJsDsR3SRt8W9Ofzbjt8shlM2uLNRwDpiM7GzTb4UUFcKXpOt//5gEmQ==}
+  '@iota/iota-sdk@0.0.0-experimental-20250610130929':
+    resolution: {integrity: sha512-kl/IuBw/NO9iYarZfuxTJHMPgQBrl4zccFsFG21y2lOVSvpLM/ZbS0Tu7CdcbriK9ytSU5Lslvf1H6iQxDrqiA==}
     engines: {node: '>=20'}
 
-  '@iota/iota-sdk@1.0.1':
-    resolution: {integrity: sha512-1AYDlYB1re8EKwsIdl6pOAzYNHVxnaOY9hvh9S6zTEI0W6jQS+byS+xMVym5LS/7g1S3gcCpiEbPFuPN7Wd6xA==}
+  '@iota/iota-sdk@0.5.0':
+    resolution: {integrity: sha512-ZFg4C5EuHV55fHITKOO6Mg1dLqgojZqJsDsR3SRt8W9Ofzbjt8shlM2uLNRwDpiM7GzTb4UUFcKXpOt//5gEmQ==}
     engines: {node: '>=20'}
 
   '@iota/iota-sdk@1.1.0':
@@ -7552,11 +7552,11 @@ snapshots:
       - react-dom
       - typescript
 
-  '@iota/graphql-transport@0.5.1(typescript@5.8.3)':
+  '@iota/graphql-transport@0.0.0-experimental-20250610130929(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@iota/bcs': 1.0.0
-      '@iota/iota-sdk': 1.0.1(typescript@5.8.3)
+      '@iota/iota-sdk': 0.0.0-experimental-20250610130929(typescript@5.8.3)
       graphql: 16.11.0
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
@@ -7571,10 +7571,10 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@iota/iota-sdk@0.5.0(typescript@5.8.3)':
+  '@iota/iota-sdk@0.0.0-experimental-20250610130929(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 0.2.1
+      '@iota/bcs': 1.0.0
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
@@ -7590,10 +7590,10 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/iota-sdk@1.0.1(typescript@5.8.3)':
+  '@iota/iota-sdk@0.5.0(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.0.0
+      '@iota/bcs': 0.2.1
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
@@ -9865,7 +9865,7 @@ snapshots:
       stable-hash: 0.0.5
       tinyglobby: 0.2.12
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 

@@ -1,9 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useIotaClientContext } from '@iota/dapp-kit';
+import { useIotaClient } from '@iota/dapp-kit';
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
@@ -16,10 +15,8 @@ export function useRegisterNameTransaction(
     price: number,
     years: number = 1,
 ) {
-    const { network } = useIotaClientContext();
-
     // TODO: We need to use this client (graphql transport)
-    // const client = useIotaClient();
+    const rpcIotaClient = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
@@ -37,11 +34,6 @@ export function useRegisterNameTransaction(
                 });
                 iotaNamesTx.transaction.transferObjects([nft, coin], address);
                 iotaNamesTx.transaction.setSender(address);
-
-                // TODO Fix
-                // This is a workaround to pass through the methods
-                // and see where it fails next...
-                const rpcIotaClient = new IotaClient({ url: getNetwork(network).url });
 
                 let transaction;
                 try {
