@@ -23,7 +23,7 @@ export function useEditSetup() {
         allowTimeExtension: boolean,
     ) => {
         if (!address || !parentNft || !name) {
-            throw new Error('Faltan parámetros requeridos');
+            throw new Error('Required parameters are missing');
         }
 
         try {
