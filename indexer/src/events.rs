@@ -9,7 +9,9 @@ pub(crate) enum IotaNamesEvent {
     // `iota-names`
     NameRecordAdded(NameRecordAddedEvent),
     NameRecordRemoved(NameRecordRemovedEvent),
+    TargetAddressSet(TargetAddressSetEvent),
     ReverseLookupSet(ReverseLookupSetEvent),
+    ReverseLookupUnset(ReverseLookupUnsetEvent),
     Transaction(TransactionEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
@@ -32,7 +34,11 @@ impl IotaNamesEvent {
         Ok(Some(match event.type_.name.as_str() {
             "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
             "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
             "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupUnsetEvent" => {
+                Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
+            }
             "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
@@ -67,7 +73,19 @@ pub(crate) struct NameRecordRemovedEvent {
 }
 
 #[derive(Serialize, Deserialize)]
+pub(crate) struct TargetAddressSetEvent {
+    pub domain: Domain,
+    pub target_address: Option<IotaAddress>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub(crate) struct ReverseLookupSetEvent {
+    pub default_address: IotaAddress,
+    pub domain: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupUnsetEvent {
     pub default_address: IotaAddress,
     pub domain: Domain,
 }

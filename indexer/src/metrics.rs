@@ -24,6 +24,8 @@ pub(crate) struct IotaNamesMetrics {
     pub total_leaf_subdomains: IntGauge,
     pub total_auction_started: IntGauge,
     pub total_auction_finalized: IntGauge,
+    pub total_target_address: IntGauge,
+    pub total_default_address: IntGauge,
     pub name_length_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
 }
@@ -70,6 +72,18 @@ impl IotaNamesMetrics {
             total_auction_finalized: register_int_gauge_with_registry!(
                 "total_auction_finalized",
                 "The total number of auction that were finalized",
+                registry,
+            )
+            .unwrap(),
+            total_target_address: register_int_gauge_with_registry!(
+                "total_target_address",
+                "The total number of target addresses set",
+                registry,
+            )
+            .unwrap(),
+            total_default_address: register_int_gauge_with_registry!(
+                "total_default_address",
+                "The total number of default addresses set",
                 registry,
             )
             .unwrap(),

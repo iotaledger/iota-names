@@ -124,7 +124,15 @@ impl IotaNamesWorker {
                     .with_label_values(&[&second_level_name_len.to_string()])
                     .dec()
             }
-            IotaNamesEvent::ReverseLookupSet(_event) => (),
+            IotaNamesEvent::TargetAddressSet(event) => {
+                if event.target_address.is_some() {
+                    self.metrics.total_target_address.inc()
+                } else {
+                    self.metrics.total_target_address.dec()
+                }
+            }
+            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_address.inc(),
+            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_address.dec(),
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
