@@ -93,6 +93,74 @@
       "type": "stat"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 5,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "total_name_records_added",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Total Name Records ever created",
+      "type": "stat"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -288,16 +356,13 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "total_name_records",
-          "fullMetaSearch": false,
-          "includeNullMetadata": true,
+          "editorMode": "code",
+          "expr": "total_name_records_added-total_name_records_removed",
+          "hide": false,
           "instant": false,
           "legendFormat": "Record Count",
           "range": true,
-          "refId": "A",
-          "useBackend": false
+          "refId": "A"
         }
       ],
       "title": "Total Name Records",
@@ -852,5 +917,5 @@
   "timezone": "browser",
   "title": "IOTA-Names",
   "uid": "1fd4a3ec-9556-42b6-8589-7eec88d04011",
-  "version": 11
+  "version": 5
 }

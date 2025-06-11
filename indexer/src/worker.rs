@@ -108,15 +108,23 @@ impl IotaNamesWorker {
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
-            IotaNamesEvent::IotaNamesRegistry(event) => {
-                self.metrics.total_name_records.inc();
+            IotaNamesEvent::NameRecordAdded(event) => {
+                self.metrics.total_name_records_added.inc();
                 let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
                     .with_label_values(&[&second_level_name_len.to_string()])
                     .inc();
             }
-            IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::NameRecordRemoved(event) => {
+                self.metrics.total_name_records_removed.inc();
+                let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
+                self.metrics
+                    .name_length_distribution
+                    .with_label_values(&[&second_level_name_len.to_string()])
+                    .dec()
+            }
+            IotaNamesEvent::ReverseLookupSet(_event) => (),
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
