@@ -18,7 +18,7 @@ cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd
 ### Build the indexer image
 
 ```bash
-docker compose -f indexer/docker/docker-compose.yml build
+docker compose -f indexer/docker/docker-compose.yml build --build-arg CACHEBUST=$(date +%s)
 ```
 
 Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.

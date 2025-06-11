@@ -50,12 +50,16 @@ public struct Registry has store {
     reverse_registry: Table<address, Domain>,
 }
 
-public struct IotaNamesRegistryEvent has copy, drop {
-    domain: String,
+public struct NameRecordAddedEvent has copy, drop {
+    domain: Domain,
     name_record: NameRecord
 }
 
-public struct IotaNamesReverseRegistryEvent has copy, drop {
+public struct NameRecordRemovedEvent has copy, drop {
+    domain: Domain,
+}
+
+public struct ReverseLookupSetEvent has copy, drop {
     default_address: address,
     domain: Domain
 }
@@ -114,6 +118,9 @@ public fun burn_registration_object(
 
         // We wanna remove the record only if the NFT ID matches.
         if (record.nft_id() == object::id(&nft)) {
+            event::emit(NameRecordRemovedEvent {
+                domain,
+            });
             let record = self.registry.remove(domain);
             self.handle_invalidate_reverse_record(
                 &domain,
@@ -188,8 +195,8 @@ public fun add_leaf_record(
 
     let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
 
-    event::emit(IotaNamesRegistryEvent {
-        domain: domain.to_string(),
+    event::emit(NameRecordAddedEvent {
+        domain,
         name_record
     });
 
@@ -213,6 +220,9 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     // if it's a leaf record, there's no `IotaNamesRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
     let record = self.registry.remove(domain);
     let old_target_address = record.target_address();
 
@@ -242,7 +252,7 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     if (self.reverse_registry.contains(address)) {
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
-        event::emit(IotaNamesReverseRegistryEvent {
+        event::emit(ReverseLookupSetEvent {
             default_address: address,
             domain
         });
@@ -367,8 +377,8 @@ fun internal_add_record(
         nft.expiration_timestamp_ms(),
     );
     
-    event::emit(IotaNamesRegistryEvent {
-        domain: domain.to_string(),
+    event::emit(NameRecordAddedEvent {
+        domain,
         name_record
     });
 
@@ -387,6 +397,9 @@ fun remove_existing_record_if_exists_and_expired(
 
     // Remove the record and assert that it has expired (past the grace period
     // if applicable)
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
     let record = self.registry.remove(domain);
 
     // Special case for leaf records, we can override them iff their parent has

@@ -32,8 +32,10 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
         url,
     });
 
+    const graphQlClient = new IotaGraphQLClient({ url: graphql });
+
     const iotaNamesClient = new IotaNamesClient({
-        client: iotaClient,
+        graphQlClient,
         network: 'devnet',
     });
 
