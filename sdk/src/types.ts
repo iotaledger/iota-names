@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { IotaClient } from '@iota/iota-sdk/client';
+import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import type {
     TransactionObjectArgument,
     TransactionObjectInput,
@@ -74,7 +74,7 @@ export type ReceiptParams = {
 };
 
 export type IotaNamesClientConfig = {
-    client: IotaClient;
+    graphQlClient: IotaGraphQLClient;
 } & IotaNamesClientNetworkConfig;
 
 export type IotaNamesClientNetworkConfig =
