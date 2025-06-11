@@ -214,17 +214,20 @@ export class IotaNamesClient {
         // in case the name record is not found, return null
         if (!nameRecord) return null;
 
-        const fields = nameRecord.data?.contents;
+        const nameRecordData = nameRecord.data?.contents;
 
-        if (nameRecord.error || !fields)
+        if (nameRecord.error || !nameRecordData)
             throw new Error('Name record not found. This domain is not registered.');
 
         const data: Record<string, string> = {};
-        // TODO: Support fields
-        // content.value.fields.data.fields.contents.forEach((item: any) => {
-        //     // @ts-ignore-next-line
-        //     data[item.fields.key as string] = item.fields.value;
-        // });
+
+        if (nameRecordData) {
+            nameRecordData.forEach((field: any) => {
+                if (field.key && field.value) {
+                    data[field.key as string] = field.value;
+                }
+            });
+        }
 
         return {
             name,
