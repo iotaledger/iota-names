@@ -9,18 +9,18 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { useIotaNamesClient } from '@/providers/contexts';
 
-interface UpdateNFTDisplayParams {
+interface UpdateNftDisplayParams {
     newNftId: string;
 }
 
-export function useMutateNftDisplay(registrationNft: RegistrationNft) {
+export function useUpdateNftDisplay(registrationNft: RegistrationNft) {
     const { iotaNamesClient } = useIotaNamesClient();
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationKey: ['update-nft-display', registrationNft.objectId],
-        mutationFn: async ({ newNftId }: UpdateNFTDisplayParams) => {
+        mutationFn: async ({ newNftId }: UpdateNftDisplayParams) => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
