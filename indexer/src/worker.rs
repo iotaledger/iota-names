@@ -109,7 +109,7 @@ impl IotaNamesWorker {
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
             IotaNamesEvent::NameRecordAdded(event) => {
-                self.metrics.total_name_records.inc();
+                self.metrics.total_name_records_added.inc();
                 let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
@@ -117,7 +117,7 @@ impl IotaNamesWorker {
                     .inc();
             }
             IotaNamesEvent::NameRecordRemoved(event) => {
-                self.metrics.total_name_records.dec();
+                self.metrics.total_name_records_removed.inc();
                 let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
