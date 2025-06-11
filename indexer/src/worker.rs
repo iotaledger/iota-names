@@ -14,6 +14,7 @@ use iota_names::config::IotaNamesConfig;
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
+    base_types::ObjectID,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
@@ -70,6 +71,7 @@ pub(crate) struct IotaNamesWorker {
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
+    balance_object_id: ObjectID,
 }
 
 impl IotaNamesWorker {
@@ -77,12 +79,31 @@ impl IotaNamesWorker {
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
-    ) -> Self {
-        Self {
+    ) -> anyhow::Result<Self> {
+        let config_type = StructTag::from_str(&format!(
+            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
+            config.package_address,
+        ))?;
+        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
+            type_: config_type.clone(),
+            fields: vec![MoveFieldLayout::new(
+                Identifier::from_str("dummy_field")?,
+                MoveTypeLayout::Bool,
+            )],
+        }));
+        let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
+            config.object_id,
+            &TypeTag::Struct(Box::new(config_type)),
+            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
+                .to_bcs_bytes(&layout)?,
+        )?;
+
+        Ok(Self {
             config,
             metrics,
             token,
-        }
+            balance_object_id,
+        })
     }
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
@@ -96,6 +117,14 @@ impl IotaNamesWorker {
                     .inc();
             }
             IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::Transaction(event) => {
+                if event.is_renewal {
+                    self.metrics
+                        .renewal_years_distribution
+                        .with_label_values(&[event.years.to_string()])
+                        .inc();
+                }
+            }
             IotaNamesEvent::AuctionStarted(_event) => {
                 self.metrics.total_auction_started.inc();
             }
@@ -144,26 +173,8 @@ impl IotaNamesWorker {
             checkpoint.checkpoint_summary.sequence_number
         );
 
-        let config_type = StructTag::from_str(&format!(
-            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
-            self.config.package_address,
-        ))?;
-        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
-            type_: config_type.clone(),
-            fields: vec![MoveFieldLayout::new(
-                Identifier::from_str("dummy_field")?,
-                MoveTypeLayout::Bool,
-            )],
-        }));
-        let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
-            self.config.object_id,
-            &TypeTag::Struct(Box::new(config_type)),
-            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
-                .to_bcs_bytes(&layout)?,
-        )?;
-
         for object in checkpoint.latest_live_output_objects() {
-            if object.id() == balance_object_id {
+            if object.id() == self.balance_object_id {
                 let balance = bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
                     object
                         .as_inner()

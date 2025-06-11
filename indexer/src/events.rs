@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
-use iota_types::{base_types::IotaAddress, event::Event};
+use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
     // `iota-names`
     IotaNamesRegistry(IotaNamesRegistryEvent),
     IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
+    Transaction(TransactionEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
     AuctionBid(AuctionBidEvent),
@@ -32,6 +33,7 @@ impl IotaNamesEvent {
             "IotaNamesReverseRegistryEvent" => {
                 Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
             }
+            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
             "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
@@ -94,6 +96,19 @@ pub(crate) struct AuctionFinalizedEvent {
     pub end_timestamp_ms: u64,
     pub winning_bid: u64,
     pub winner: IotaAddress,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TransactionEvent {
+    pub app: String,
+    pub domain: Domain,
+    pub years: u8,
+    pub request_data_version: u8,
+    pub base_amount: u64,
+    pub metadata: VecMap<String, String>,
+    pub is_renewal: bool,
+    pub currency: String,
+    pub currency_amount: u64,
 }
 
 #[derive(Serialize, Deserialize)]
