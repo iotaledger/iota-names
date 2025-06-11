@@ -6,28 +6,13 @@
 import { Button, KeyValueInfo, Title } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
-import { AvailabilityCheck } from '@/components';
-import { useAddSubname, useRegistrationNfts } from '@/hooks';
+import { AddSubnameDialog, AvailabilityCheck } from '@/components';
+import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const registrationNfts = useRegistrationNfts();
-    const isDisabled = false;
-    const [selectedSubname, setSelectedSubname] = useState<string | null>(null);
-    const { data: addSubnameData, refetch: refetchAddSubname } = useAddSubname(
-        selectedSubname || '',
-    );
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    const handleAddSubname = (subname: string): void => {
-        // Actualizar el estado con el subnombre seleccionado
-        console.log('1', subname);
-        setSelectedSubname(subname);
-        console.log('2', selectedSubname);
-        console.log('3', addSubnameData);
-        // Refetch para ejecutar la lógica del hook
-        refetchAddSubname()
-            .then((result) => console.log('Subname added successfully:', result))
-            .catch((error) => console.error('Error adding subname:', error));
-    };
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
             <AvailabilityCheck />
@@ -47,9 +32,16 @@ function MyNamesPage(): JSX.Element {
                         />
                         <Button
                             text="Add subname"
-                            onClick={() => handleAddSubname(nameRecord.name)}
-                            disabled={isDisabled}
+                            onClick={() => setIsDialogOpen(true)}
+                            disabled={nameRecord.expiration_timestamp_ms < Date.now()}
                         />
+                        {isDialogOpen && (
+                            <AddSubnameDialog
+                                nft={nameRecord}
+                                open={isDialogOpen}
+                                setOpen={setIsDialogOpen}
+                            />
+                        )}
                     </div>
                 ))}
             </div>

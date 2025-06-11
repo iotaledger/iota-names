@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isValidIotaName, NameRecord } from '@iota/iota-names-sdk';
+import { isSubName, isValidIotaName, NameRecord } from '@iota/iota-names-sdk';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/providers/contexts';
@@ -50,7 +50,7 @@ export function useNameRecord(
             const nameRecord = await iotaNamesClient.getNameRecord(name);
             let nameRecordPrice = null;
 
-            if (!nameRecord) {
+            if (!nameRecord && !isSubName(name)) {
                 nameRecordPrice = await iotaNamesClient.calculatePrice({
                     name,
                     years: price.years,
