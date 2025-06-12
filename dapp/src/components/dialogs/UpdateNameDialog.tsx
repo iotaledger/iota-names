@@ -18,6 +18,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
@@ -63,28 +64,34 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }, [addressName]);
 
+    const isTargetCurrentAddress = editTargetAddress === account?.address;
+    const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
+    const isDefaultName = addressName === name;
+
+    // Setting a different target address than the owner address and using the name as default is not possible
+    const isWrongCombination = !isTargetCurrentAddress && editIsDefaultName;
+    const isValidAddress = isValidIotaAddress(editTargetAddress);
+    const isThereAddress = editTargetAddress.length > 0;
+
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (editTargetAddress) {
-        if (editTargetAddress !== nameRecord?.nameRecord.targetAddress) {
-            updates.push({
-                type: 'set-target-address',
-                address: editTargetAddress,
-                isSubname: false,
-            });
-        }
+    if (isThereAddress && isValidAddress && !isTargetUsedInName) {
+        // Only allow changing the target address if it is valid and it is not used yet
+        updates.push({
+            type: 'set-target-address',
+            address: editTargetAddress,
+            isSubname: false,
+        });
     }
 
-    // Setting a different target address than the owner can give issues, specially when setting the name as a default name for a different address
-    const targetAddressDiffer =
-        editTargetAddress.length > 0 && account ? editTargetAddress !== account?.address : true;
-
-    if (addressName === name && !editIsDefaultName) {
+    if (isDefaultName && !editIsDefaultName) {
+        // If it is currently the default name, but it is now disabled
         updates.push({
             type: 'unset-default',
         });
-    } else if (addressName !== name && editIsDefaultName && !targetAddressDiffer) {
+    } else if (!isDefaultName && editIsDefaultName && isTargetCurrentAddress) {
+        // If it is not currently the default name, but it is now enabled and the target address matches
         updates.push({
             type: 'set-default',
             name,
@@ -142,7 +149,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
-    const isWrongCombination = targetAddressDiffer && editIsDefaultName;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading;
@@ -152,6 +158,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             <DialogContent containerId="overlay-portal-container">
                 <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
                 <DialogBody>
+                    {isThereAddress && !isValidAddress ? (
+                        <Card>
+                            <p className="text-yellow-300"> Not valid IOTA address.</p>
+                        </Card>
+                    ) : null}
                     <Card type={CardType.Outlined}>
                         <CardBody title="Target Address" />
                         <Input
@@ -160,7 +171,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             disabled={disableEdit}
                             onChange={handleTargetAddressChange}
                         />
-                        {targetAddressDiffer && (
+                        {!isTargetCurrentAddress && (
                             <Button onClick={handleSetCurrentAsTargetAddress} text="Use current" />
                         )}
                     </Card>
