@@ -75,7 +75,7 @@ impl Command {
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
-                    );
+                    )?;
 
                     let res = tokio::select! {
                         res = run_iota_names_reader(worker, &node_url, &registry, num_workers) => res,
