@@ -22,8 +22,8 @@ export function getGasSummary(
         sender = transaction.transaction.data.sender;
         gasData = transaction.transaction.data.gasData;
     } else if ('input' in transaction) {
-        sender = transaction.input.sender;
-        gasData = transaction.input.gasData;
+        sender = transaction.input?.sender;
+        gasData = transaction.input?.gasData;
     }
     const owner = gasData?.owner ?? '';
     const isSponsored = !!owner && !!sender && owner !== sender;

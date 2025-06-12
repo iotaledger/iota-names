@@ -28,6 +28,7 @@ pub(crate) struct IotaNamesMetrics {
     pub total_default_address: IntGauge,
     pub name_length_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
+    pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
 }
 
 impl IotaNamesMetrics {
@@ -101,6 +102,15 @@ impl IotaNamesMetrics {
                     "renewal_years_distribution",
                     "The number of years per renewal",
                     &["years"],
+                    registry,
+                )
+                .unwrap(),
+            ),
+            name_depth_distribution: AssertUnwindSafe(
+                register_int_gauge_vec_with_registry!(
+                    "name_depth_distribution",
+                    "Distribution of names depth",
+                    &["depth"],
                     registry,
                 )
                 .unwrap(),
