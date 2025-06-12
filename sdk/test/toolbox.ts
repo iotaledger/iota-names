@@ -6,12 +6,13 @@ import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
-import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { getFullnodeUrl } from '@iota/iota-sdk/client';
 import {
     FaucetRateLimitError,
     getFaucetHost,
     requestIotaFromFaucetV0,
 } from '@iota/iota-sdk/faucet';
+import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { retry } from 'ts-retry-promise';
 
@@ -25,12 +26,12 @@ const DEFAULT_FULLNODE_URL = process.env.VITE_FULLNODE_URL ?? getFullnodeUrl('lo
 
 export class TestToolbox {
     keypair: Ed25519Keypair;
-    client: IotaClient;
+    graphqlClient: IotaGraphQLClient;
     configPath: string;
 
-    constructor(keypair: Ed25519Keypair, client: IotaClient, configPath: string) {
+    constructor(keypair: Ed25519Keypair, graphqlClient: IotaGraphQLClient, configPath: string) {
         this.keypair = keypair;
-        this.client = client;
+        this.graphqlClient = graphqlClient;
         this.configPath = configPath;
     }
 
@@ -38,13 +39,34 @@ export class TestToolbox {
         return this.keypair.getPublicKey().toIotaAddress();
     }
 
-    public async getActiveValidators() {
-        return (await this.client.getLatestIotaSystemState()).activeValidators;
+    balance() {
+        return this.graphqlClient.query<{
+            address: {
+                balance: {
+                    totalBalance: string;
+                };
+            };
+        }>({
+            query: `
+                query balance(
+                    $address: IotaAddress!
+                    ) {
+                    address(address: $address) {
+                        balance {
+                        totalBalance
+                        }
+                    }
+                }
+            `,
+            variables: {
+                address: this.address(),
+            },
+        });
     }
 }
 
-export function getClient(): IotaClient {
-    return new IotaClient({
+export function getClient(): IotaGraphQLClient {
+    return new IotaGraphQLClient({
         url: DEFAULT_FULLNODE_URL,
     });
 }
@@ -53,7 +75,7 @@ export function getClient(): IotaClient {
 export async function setupIotaClient() {
     const keypair = Ed25519Keypair.generate();
     const address = keypair.getPublicKey().toIotaAddress();
-    const client = getClient();
+    const graphqlClient = getClient();
     await retry(() => requestIotaFromFaucetV0({ host: DEFAULT_FAUCET_URL, recipient: address }), {
         backoff: 'EXPONENTIAL',
         // overall timeout in 60 seconds
@@ -67,5 +89,5 @@ export async function setupIotaClient() {
     const tmpDir = await mkdtemp(tmpDirPath);
     const configPath = path.join(tmpDir, 'client.yaml');
     execSync(`${IOTA_BIN} client --yes --client.config ${configPath}`, { encoding: 'utf-8' });
-    return new TestToolbox(keypair, client, configPath);
+    return new TestToolbox(keypair, graphqlClient, configPath);
 }
