@@ -2,13 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
-
-import { useIotaNamesClient } from '@/providers/contexts';
+import { IotaObjectDataFilter } from '@iota/iota-sdk/client';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
-interface RegistrationNft {
+export interface RegistrationNft {
     name: string;
     description?: string;
     image_url?: string;
@@ -16,16 +14,11 @@ interface RegistrationNft {
     project_url?: string;
 }
 
-export function useRegistrationNfts() {
+export function useRegistrationNfts(filter: IotaObjectDataFilter) {
     const account = useCurrentAccount();
     const address = account?.address ?? '';
 
-    const { iotaNamesClient } = useIotaNamesClient();
-    const packageId = iotaNamesClient.config.packageId;
-
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, {
-        StructType: getIotaNamesRegistrationType(packageId),
-    });
+    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, filter);
 
     const registrationNfts: RegistrationNft[] =
         namesRegistrationData?.map((nameRecord) => {
