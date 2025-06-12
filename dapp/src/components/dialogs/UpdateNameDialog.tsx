@@ -17,15 +17,11 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import {
-    useCurrentAccount,
-    useIotaClient,
-    useIotaClientQuery,
-    useSignAndExecuteTransaction,
-} from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
+import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 
@@ -40,14 +36,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
-    const { data: addressName, isLoading: isAddressNameLoading } = useIotaClientQuery(
-        'iotaNamesReverseLookup',
-        {
-            address: account?.address || '',
-        },
-        {
-            queryKey: ['iota-name', name],
-        },
+    const { data: addressName, isLoading: isAddressNameLoading } = useGetDefaultName(
+        account?.address || '',
     );
 
     // We are sure that only owned names are passed here
@@ -59,14 +49,10 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
 
-    // Setting a different target address than the owner can give issues, specially when setting the name as a default name for a different address
-    const targetAddressDiffer =
-        editTargetAddress.length > 0 && account ? editTargetAddress !== account?.address : null;
-
     // Sync name target address
     useEffect(() => {
         if (nameRecord && editTargetAddress.length === 0) {
-            setEditTargetAddress(nameRecord.nameRecord.targetAddress);
+            setEditTargetAddress(nameRecord.nameRecord.targetAddress ?? '');
         }
     }, [nameRecord]);
 
@@ -80,13 +66,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (editTargetAddress !== nameRecord?.nameRecord.targetAddress) {
-        updates.push({
-            type: 'set-target-address',
-            address: editTargetAddress,
-            isSubname: false,
-        });
+    if (editTargetAddress) {
+        if (editTargetAddress !== nameRecord?.nameRecord.targetAddress) {
+            updates.push({
+                type: 'set-target-address',
+                address: editTargetAddress,
+                isSubname: false,
+            });
+        }
     }
+
+    // Setting a different target address than the owner can give issues, specially when setting the name as a default name for a different address
+    const targetAddressDiffer =
+        editTargetAddress.length > 0 && account ? editTargetAddress !== account?.address : true;
 
     if (addressName === name && !editIsDefaultName) {
         updates.push({
@@ -148,19 +140,31 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }
 
-    const isLoading = isSaving || isLoadingUpdateNameTransaction;
+    const isLoading =
+        isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
+    const isWrongCombination = targetAddressDiffer && editIsDefaultName;
 
-    const disableTargetAddressEdit = isNameRecordLoading || isSendingTransaction;
-    const disableNameCheckboxEdit =
-        targetAddressDiffer || isAddressNameLoading || isSendingTransaction;
-    const disableSaveButton = updates.length === 0 || isSendingTransaction || isLoading;
+    const disableEdit = isNameRecordLoading || isSendingTransaction;
+    const disableSave = updates.length === 0 || isWrongCombination || isLoading;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
                 <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
                 <DialogBody>
-                    {targetAddressDiffer ? (
+                    <Card type={CardType.Outlined}>
+                        <CardBody title="Target Address" />
+                        <Input
+                            type={InputType.Text}
+                            value={editTargetAddress}
+                            disabled={disableEdit}
+                            onChange={handleTargetAddressChange}
+                        />
+                        {targetAddressDiffer && (
+                            <Button onClick={handleSetCurrentAsTargetAddress} text="Use current" />
+                        )}
+                    </Card>
+                    {isWrongCombination ? (
                         <Card>
                             <p className="text-yellow-300">
                                 {' '}
@@ -170,22 +174,10 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                         </Card>
                     ) : null}
                     <Card type={CardType.Outlined}>
-                        <CardBody title="Target Address" />
-                        <Input
-                            type={InputType.Text}
-                            value={editTargetAddress}
-                            disabled={disableTargetAddressEdit}
-                            onChange={handleTargetAddressChange}
-                        />
-                        {targetAddressDiffer && (
-                            <Button onClick={handleSetCurrentAsTargetAddress} text="Use current" />
-                        )}
-                    </Card>
-                    <Card type={CardType.Outlined}>
                         <CardBody title="Set as default name" subtitle="Enables reverse lookup." />
                         <Checkbox
                             isChecked={editIsDefaultName}
-                            isDisabled={disableNameCheckboxEdit}
+                            isDisabled={disableEdit}
                             onCheckedChange={handleReverseLookupChange}
                         />
                     </Card>
@@ -195,7 +187,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     <Button
                         icon={isLoading ? <LoadingIndicator /> : null}
                         text="Save"
-                        disabled={disableSaveButton}
+                        disabled={disableSave}
                         onClick={() => save()}
                     />
                 </DialogBody>

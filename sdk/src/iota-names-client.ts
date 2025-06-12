@@ -175,6 +175,25 @@ export class IotaNamesClient {
         return priceMap;
     }
 
+    async getDefaultName(address: string): Promise<string | null> {
+        const response: any = await this.graphQlClient.query({
+            query: graphql(`
+                query resolveNameServiceName($address: IotaAddress!, $domainFormat: DomainFormat) {
+                    address(address: $address) {
+                        iotaNamesDefaultName(format: $domainFormat)
+                    }
+                }
+            `),
+            variables: {
+                address,
+            },
+        });
+
+        const defaultName = response?.data?.address?.iotaNamesDefaultName ?? null;
+
+        return defaultName;
+    }
+
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
         if (!this.config.registryTableId) throw new Error('IotaNames package ID is not set');
