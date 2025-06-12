@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
-use iota_types::{base_types::IotaAddress, event::Event};
+use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
     // `iota-names`
-    IotaNamesRegistry(IotaNamesRegistryEvent),
-    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
+    NameRecordAdded(NameRecordAddedEvent),
+    NameRecordRemoved(NameRecordRemovedEvent),
+    ReverseLookupSet(ReverseLookupSetEvent),
+    Transaction(TransactionEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
     AuctionBid(AuctionBidEvent),
@@ -28,10 +30,10 @@ impl IotaNamesEvent {
     ) -> anyhow::Result<Option<Self>> {
         // TODO check package IDs
         Ok(Some(match event.type_.name.as_str() {
-            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
-            "IotaNamesReverseRegistryEvent" => {
-                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
-            }
+            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
+            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
             "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
@@ -54,13 +56,18 @@ impl IotaNamesEvent {
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesRegistryEvent {
-    pub domain: String,
+pub(crate) struct NameRecordAddedEvent {
+    pub domain: Domain,
     pub name_record: NameRecord,
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesReverseRegistryEvent {
+pub(crate) struct NameRecordRemovedEvent {
+    pub domain: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupSetEvent {
     pub default_address: IotaAddress,
     pub domain: Domain,
 }
@@ -94,6 +101,19 @@ pub(crate) struct AuctionFinalizedEvent {
     pub end_timestamp_ms: u64,
     pub winning_bid: u64,
     pub winner: IotaAddress,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TransactionEvent {
+    pub app: String,
+    pub domain: Domain,
+    pub years: u8,
+    pub request_data_version: u8,
+    pub base_amount: u64,
+    pub metadata: VecMap<String, String>,
+    pub is_renewal: bool,
+    pub currency: String,
+    pub currency_amount: u64,
 }
 
 #[derive(Serialize, Deserialize)]
