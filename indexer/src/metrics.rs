@@ -104,7 +104,7 @@ impl IotaNamesMetrics {
             ),
             auction_final_prices: Histogram::new_in_registry(
                 "auction_final_prices",
-                "The final price paid for a domain in auctions",
+                "The final prices paid for domains in auctions",
                 registry,
             ),
         }
