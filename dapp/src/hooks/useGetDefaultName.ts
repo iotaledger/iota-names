@@ -13,8 +13,6 @@ export function useGetDefaultName(address: string) {
         async queryFn() {
             const defaultName = await iotaNamesClient.getDefaultName(address);
 
-            console.log(defaultName);
-
             return defaultName;
         },
         enabled: !!iotaNamesClient && address.length > 0,
