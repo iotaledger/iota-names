@@ -12,6 +12,7 @@ interface UseUpdateNameTransactionOptions {
     address: string;
     name: string;
     nft: TransactionObjectArgument | string;
+    isExpired: boolean;
 
     updates: NameUpdate[];
 }
@@ -34,6 +35,7 @@ export function useUpdateNameTransaction({
     address,
     name,
     nft,
+    isExpired,
     updates,
 }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
@@ -70,7 +72,7 @@ export function useUpdateNameTransaction({
             });
             return iotaNamesTx.transaction;
         },
-        enabled: !!address && !!updates.length && !!name && name.length > 0,
+        enabled: !!address && !!updates.length && !!name && name.length > 0 && !isExpired,
         gcTime: 0,
     });
 }

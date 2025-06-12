@@ -25,6 +25,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { isNameRecordExpired } from '@/lib/utils/names';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -45,6 +46,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
+
+    const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
 
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
@@ -107,6 +110,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         name,
         nft: nameRecord?.nameRecord?.nftId || '',
         updates,
+        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
@@ -150,14 +154,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
-    const disableEdit = isNameRecordLoading || isSendingTransaction;
-    const disableSave = updates.length === 0 || isWrongCombination || isLoading;
+    const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
+    const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
                 <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
                 <DialogBody>
+                    {isExpired && !isLoading ? (
+                        <Card>
+                            <p className="text-yellow-300">Name is expired.</p>
+                        </Card>
+                    ) : null}
                     {isThereAddress && !isValidAddress ? (
                         <Card>
                             <p className="text-yellow-300"> Not valid IOTA address.</p>
@@ -172,7 +181,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             onChange={handleTargetAddressChange}
                         />
                         {!isTargetCurrentAddress && (
-                            <Button onClick={handleSetCurrentAsTargetAddress} text="Use current" />
+                            <Button
+                                onClick={handleSetCurrentAsTargetAddress}
+                                text="Use current"
+                                disabled={disableEdit}
+                            />
                         )}
                     </Card>
                     {isWrongCombination ? (
