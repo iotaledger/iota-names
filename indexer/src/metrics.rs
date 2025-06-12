@@ -7,7 +7,7 @@ use std::{
 };
 
 use axum::{Extension, Router, routing::get};
-use iota_metrics::{METRICS_ROUTE, RegistryService};
+use iota_metrics::{METRICS_ROUTE, RegistryService, histogram::Histogram};
 use prometheus::{
     IntCounter, IntCounterVec, IntGauge, IntGaugeVec, Registry,
     register_int_counter_vec_with_registry, register_int_counter_with_registry,
@@ -26,6 +26,8 @@ pub(crate) struct IotaNamesMetrics {
     pub total_auction_finalized: IntGauge,
     pub name_length_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
+    pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
+    pub auction_final_prices: Histogram,
 }
 
 impl IotaNamesMetrics {
@@ -90,6 +92,20 @@ impl IotaNamesMetrics {
                     registry,
                 )
                 .unwrap(),
+            ),
+            name_depth_distribution: AssertUnwindSafe(
+                register_int_gauge_vec_with_registry!(
+                    "name_depth_distribution",
+                    "Distribution of names depth",
+                    &["depth"],
+                    registry,
+                )
+                .unwrap(),
+            ),
+            auction_final_prices: Histogram::new_in_registry(
+                "auction_final_prices",
+                "The final prices paid for domains in auctions",
+                registry,
             ),
         }
     }
