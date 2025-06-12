@@ -8,6 +8,7 @@ import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './';
@@ -32,22 +33,24 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 defaultNetwork={defaultNetwork}
                 onNetworkChange={handleNetworkChange}
             >
-                <IotaNamesClientProvider>
-                    <WalletProvider
-                        autoConnect={true}
-                        theme={[
-                            {
-                                variables: lightTheme,
-                            },
-                            {
-                                selector: '.dark',
-                                variables: darkTheme,
-                            },
-                        ]}
-                    >
-                        <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
-                    </WalletProvider>
-                </IotaNamesClientProvider>
+                <KioskClientProvider>
+                    <IotaNamesClientProvider>
+                        <WalletProvider
+                            autoConnect={true}
+                            theme={[
+                                {
+                                    variables: lightTheme,
+                                },
+                                {
+                                    selector: '.dark',
+                                    variables: darkTheme,
+                                },
+                            ]}
+                        >
+                            <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
+                        </WalletProvider>
+                    </IotaNamesClientProvider>
+                </KioskClientProvider>
             </IotaClientProvider>
         </QueryClientProvider>
     );
