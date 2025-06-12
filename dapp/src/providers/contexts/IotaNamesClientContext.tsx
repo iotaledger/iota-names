@@ -5,6 +5,8 @@
 
 import { useIotaClientContext } from '@iota/dapp-kit';
 import { IotaNamesClient, Network } from '@iota/iota-names-sdk';
+import { getNetwork } from '@iota/iota-sdk/client';
+import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import React, { createContext, useContext, useMemo } from 'react';
 
 export const IotaNamesClientProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -34,14 +36,16 @@ export function useIotaNamesClientContext(): IotaNamesClientContextType {
 }
 
 export function useIotaNamesClient() {
-    const { network: networkName, client } = useIotaClientContext();
+    const { network } = useIotaClientContext();
 
     const iotaNamesClient = useMemo(() => {
         return new IotaNamesClient({
-            client,
-            network: networkName as Network,
+            graphQlClient: new IotaGraphQLClient({
+                url: getNetwork(network).graphql!,
+            }),
+            network: network as Network,
         });
-    }, [client, networkName]);
+    }, [network]);
 
     return { iotaNamesClient };
 }
