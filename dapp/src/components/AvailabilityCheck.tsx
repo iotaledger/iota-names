@@ -12,6 +12,32 @@ import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 
+function normalizeNameInput(name: string) {
+    return name.toLowerCase().replace(/\.iota$/i, '');
+}
+
+function getValidationError(
+    name: string,
+    minLength: number = 3,
+    maxLength: number = 64,
+): string | null {
+    const IOTA_NAME_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
+    if (!name) return null;
+
+    if (name.includes('.')) {
+        return 'No subdomains allowed';
+    }
+    if (!IOTA_NAME_REGEX.test(name)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
+    }
+
+    if (name.length < minLength || name.length > maxLength) {
+        return `Name must be ${minLength}-${maxLength} characters long`;
+    }
+
+    return null;
+}
+
 export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
@@ -21,33 +47,14 @@ export function AvailabilityCheck() {
     const { data, error } = useNameRecord(name);
     const { data: priceList } = usePriceList();
 
-    const minLengthAllowed = priceList?.minLength;
-    const maxLengthAllowed = priceList?.maxLength;
+    const validationError = useMemo(
+        () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
+        [searchValue, priceList],
+    );
 
-    function normalizeNameInput(name: string) {
-        return name.toLowerCase().replace(/\.iota$/i, '');
-    }
-
-    function getValidationError(name: string): string | null {
-        const IOTA_NAME_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
-        if (!name) return null;
-
-        if (name.includes('.')) {
-            return 'No subdomains allowed';
-        }
-        if (!IOTA_NAME_REGEX.test(name)) {
-            return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
-        }
-
-        const minLength = minLengthAllowed ?? 3;
-        const maxLength = maxLengthAllowed ?? 64;
-
-        if (name.length < minLength || name.length > maxLength) {
-            return `Name must be ${minLength}-${maxLength} characters long`;
-        }
-
-        return null;
-    }
+    const handleSearch = useCallback(() => {
+        if (searchValue) setName(`${searchValue}.iota`);
+    }, [searchValue]);
 
     function handleChange(inputValue: string) {
         setSearchValue(normalizeNameInput(inputValue));
@@ -55,16 +62,12 @@ export function AvailabilityCheck() {
             setName('');
         }
     }
+
     function handlePurchase() {
         setPurchaseDialogOpen(false);
         setSearchValue('');
         setName('');
     }
-
-    const validationError = useMemo(() => getValidationError(searchValue), [searchValue]);
-    const handleSearch = useCallback(() => {
-        if (searchValue) setName(`${searchValue}.iota`);
-    }, [searchValue]);
 
     const errorMessage = error?.message ?? validationError ?? '';
     const canBuy = data?.type === 'available';
@@ -97,7 +100,7 @@ export function AvailabilityCheck() {
                 <Button
                     size={ButtonSize.Medium}
                     text="Search"
-                    disabled={!enableSearch || Boolean(errorMessage)}
+                    disabled={!enableSearch || !!errorMessage}
                     onClick={handleSearch}
                 />
             </div>
@@ -116,7 +119,7 @@ export function AvailabilityCheck() {
 
             {canBuy && (
                 <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {formatNanosToIota(data!.price)}</div>
+                    <div className="text-body-md">Price: {formatNanosToIota(data.price)}</div>
                     {isConnected ? (
                         <Button
                             type={ButtonType.Secondary}
