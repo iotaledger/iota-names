@@ -9,12 +9,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useIotaNamesClient } from '@/contexts';
 import { AuctionFieldBcs, createDomainFromName, deriveAuctionDynamicFieldId } from '@/lib/auction';
 
-import { useIotaGraphQLClient } from '../useIotaGraphQLClient';
 import { useAuctionHouse } from './useAuctionHouse';
 
 export function useGetAuctionMetadata(domainName: string) {
     const { iotaNamesClient } = useIotaNamesClient();
-    const { iotaGraphQLClient } = useIotaGraphQLClient();
     const { data: auctionHouseData } = useAuctionHouse();
 
     const { auctionsTableObjectId } = auctionHouseData || {};
@@ -36,7 +34,7 @@ export function useGetAuctionMetadata(domainName: string) {
                 domain,
             );
 
-            const auctionObjectResponse = await iotaGraphQLClient.query<{
+            const auctionObjectResponse = await iotaNamesClient.graphQlClient.query<{
                 object: {
                     address: string;
                     asMoveObject: {
@@ -76,6 +74,6 @@ export function useGetAuctionMetadata(domainName: string) {
 
             return objectBCS;
         },
-        enabled: !!iotaGraphQLClient && !!auctionsTableObjectId && !!domainName,
+        enabled: !!auctionsTableObjectId && !!domainName,
     });
 }

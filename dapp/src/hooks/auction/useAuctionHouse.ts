@@ -8,8 +8,6 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { useIotaNamesClient } from '@/contexts';
 import { AuctionHouseBcs } from '@/lib/auction';
 
-import { useIotaGraphQLClient } from '../useIotaGraphQLClient';
-
 interface AuctionHouseData {
     auctionHouseId: string;
     auctionsTableObjectId: string;
@@ -19,14 +17,13 @@ interface AuctionHouseData {
 
 export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error> {
     const { iotaNamesClient } = useIotaNamesClient();
-    const { iotaGraphQLClient } = useIotaGraphQLClient();
 
     const auctionPackageId = iotaNamesClient.config.auctionPackageId;
 
     return useQuery({
         queryKey: ['auctionHouse', auctionPackageId],
         async queryFn() {
-            const auctionHouseByTypeResponse = await iotaGraphQLClient.query<{
+            const auctionHouseByTypeResponse = await iotaNamesClient.graphQlClient.query<{
                 objects: {
                     edges: [
                         { node: { address: string; asMoveObject: { contents: { bcs: string } } } },
@@ -73,6 +70,6 @@ export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error
                 tailAuction: auctionHouse.auctions.tail?.labels.reverse().join('.'),
             };
         },
-        enabled: !!iotaGraphQLClient && !!auctionPackageId,
+        enabled: !!auctionPackageId,
     });
 }

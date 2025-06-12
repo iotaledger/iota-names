@@ -12,7 +12,6 @@ import { IotaNamesClientProvider } from '@/contexts';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './';
-import { IotaGraphQLClientProvider } from './IotaGraphQLClientProvider';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
@@ -33,24 +32,22 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 defaultNetwork={defaultNetwork}
                 onNetworkChange={handleNetworkChange}
             >
-                <IotaGraphQLClientProvider>
-                    <IotaNamesClientProvider>
-                        <WalletProvider
-                            autoConnect={true}
-                            theme={[
-                                {
-                                    variables: lightTheme,
-                                },
-                                {
-                                    selector: '.dark',
-                                    variables: darkTheme,
-                                },
-                            ]}
-                        >
-                            <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
-                        </WalletProvider>
-                    </IotaNamesClientProvider>
-                </IotaGraphQLClientProvider>
+                <IotaNamesClientProvider>
+                    <WalletProvider
+                        autoConnect={true}
+                        theme={[
+                            {
+                                variables: lightTheme,
+                            },
+                            {
+                                selector: '.dark',
+                                variables: darkTheme,
+                            },
+                        ]}
+                    >
+                        <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
+                    </WalletProvider>
+                </IotaNamesClientProvider>
             </IotaClientProvider>
         </QueryClientProvider>
     );
