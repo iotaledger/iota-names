@@ -16,7 +16,7 @@ import {
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useState } from 'react';
 
-import { useAddSubname, useNameRecord, type RegistrationNft } from '@/hooks';
+import { useAddSubname, useSubnameRecord, type RegistrationNft } from '@/hooks';
 
 type AddSubnameProps = {
     nft: RegistrationNft;
@@ -28,7 +28,7 @@ export function AddSubnameDialog({ nft, open, setOpen }: AddSubnameProps) {
     const addSubname = useAddSubname();
     const [subdomainName, setSubdomainName] = useState('');
     const fullSubdomainName = subdomainName.trim() ? subdomainName + '.' + nft.name : '';
-    const { data, error } = useNameRecord(fullSubdomainName);
+    const { data: isAvailable, error } = useSubnameRecord(fullSubdomainName);
 
     const handleCancelAddSubname = () => {
         setSubdomainName('');
@@ -41,8 +41,8 @@ export function AddSubnameDialog({ nft, open, setOpen }: AddSubnameProps) {
             console.error('Subdomain name required');
             return;
         }
-
-        if (!data || error) {
+        console.log('available: ', isAvailable);
+        if (!isAvailable || error) {
             console.error('subdomain name is not available');
             return;
         }
@@ -99,7 +99,7 @@ export function AddSubnameDialog({ nft, open, setOpen }: AddSubnameProps) {
                                 type={ButtonType.Primary}
                                 text="Confirm"
                                 onClick={handleConfirmAddSubname}
-                                disabled={!subdomainName.trim() /*|| subdomainName.length < 3*/}
+                                disabled={!subdomainName.trim() || subdomainName.length < 3} // constant MIN_LABEL_SIZE (?)
                             />
                         </div>
                     </div>
