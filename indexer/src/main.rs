@@ -1,11 +1,13 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod db;
 mod events;
 mod metrics;
+mod models;
 mod worker;
 
-use std::sync::Arc;
+use std::{panic::AssertUnwindSafe, sync::Arc};
 
 use anyhow::Result;
 use clap::Parser;
@@ -21,6 +23,7 @@ use self::{
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
+use crate::db::{ConnectionPool, ConnectionPoolConfig};
 
 // Define the `GIT_REVISION` and `VERSION` consts
 bin_version::bin_version!();
@@ -35,6 +38,8 @@ bin_version::bin_version!();
 )]
 enum Command {
     Start {
+        #[clap(flatten)]
+        connection_pool_config: ConnectionPoolConfig,
         /// The URL of an IOTA node to get data from.
         #[arg(long, default_value = "http://localhost:9000")]
         node_url: String,
@@ -48,6 +53,7 @@ impl Command {
     async fn execute(self) -> Result<()> {
         match self {
             Command::Start {
+                connection_pool_config,
                 node_url,
                 num_workers,
             } => {
@@ -71,7 +77,10 @@ impl Command {
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
                 tasks.spawn(async move {
+                    let connection_pool = AssertUnwindSafe(ConnectionPool::new(connection_pool_config)?);
+                    connection_pool.run_migrations()?;
                     let worker = IotaNamesWorker::new(
+                        connection_pool,
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),

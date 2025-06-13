@@ -1,10 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use diesel::{Connection, RunQueryDsl, insert_into};
 use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
@@ -29,7 +30,15 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{IotaNamesMetrics, events::IotaNamesEvent};
+use crate::{
+    IotaNamesMetrics,
+    db::{
+        ConnectionPool,
+        auctions_table::{self, domain},
+    },
+    events::IotaNamesEvent,
+    models::Auction,
+};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -68,6 +77,7 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
+    pool: AssertUnwindSafe<ConnectionPool>,
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
@@ -76,6 +86,7 @@ pub(crate) struct IotaNamesWorker {
 
 impl IotaNamesWorker {
     pub(crate) fn new(
+        pool: AssertUnwindSafe<ConnectionPool>,
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
@@ -99,6 +110,7 @@ impl IotaNamesWorker {
         )?;
 
         Ok(Self {
+            pool,
             config,
             metrics,
             token,
@@ -161,10 +173,24 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            IotaNamesEvent::AuctionStarted(_event) => {
+            IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                let mut pool = self.pool.get_connection()?;
+                let event: Auction = event.try_into()?;
+                pool.transaction::<_, anyhow::Error, _>(|conn| {
+                    insert_into(crate::worker::auctions_table::dsl::auctions_table)
+                        .values(&event)
+                        .on_conflict(domain)
+                        .do_update()
+                        .set(&event)
+                        .execute(conn)?;
+
+                    Ok(())
+                })?;
             }
-            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionBid(_event) => {
+                // TODO: save to auction db
+            }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
