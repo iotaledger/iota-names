@@ -106,8 +106,8 @@ importers:
         specifier: ^0.3.0
         version: 0.3.0
       '@iota/apps-ui-kit':
-        specifier: ^0.5.0
-        version: 0.5.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)
+        specifier: ^0.6.0
+        version: 0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)
       '@iota/dapp-kit':
         specifier: 0.0.0-experimental-20250611113155
         version: 0.0.0-experimental-20250611113155(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
@@ -124,7 +124,7 @@ importers:
         specifier: ^1.4.0
         version: 1.8.0
       '@tanstack/react-query':
-        specifier: ^5.76.1
+        specifier: ^5.50.1
         version: 5.76.1(react@18.3.1)
       bignumber.js:
         specifier: ^9.3.0
@@ -1413,8 +1413,11 @@ packages:
   '@iota/apps-ui-icons@0.3.0':
     resolution: {integrity: sha512-VpTREdN88AoM3s+k9x4EIPDhS3s5Tj8esVl2Dd/kP+U1ejibDSMfc2ttCV0lTI0mfWFu5SDmgBqbQEXI1EgOkA==}
 
-  '@iota/apps-ui-kit@0.5.0':
-    resolution: {integrity: sha512-iSjBHe8dr12WXbGyk3efChXzGwG/UxfPsMDUl2UdingoS5IzP+fpoAILZPnht+5UE1Bp03NJSVu3+SnEm+3ceQ==}
+  '@iota/apps-ui-icons@0.3.1':
+    resolution: {integrity: sha512-E/qjkMQpjO01EmLzMNTCKnLaEfG/8uEhvCJwZhpN+Fl8CeOk8xMRPOHjf77XgSU2MOnEVRXMg3bgSGfGldDhcA==}
+
+  '@iota/apps-ui-kit@0.6.0':
+    resolution: {integrity: sha512-b2NUvE+R7oXil3g61KGTlKRkndUt3C3F466g6/U09c3xJNH+aew7vLJehtwhzKjdeLWKRqYkZ3cDnTlr6puu6g==}
 
   '@iota/bcs@0.2.1':
     resolution: {integrity: sha512-T+iv5gZhUZP7BiDY7+Ir4MA2rYmyGNZA2b+nxjv219Fp8klFt+l38OWA+1RgJXrCmzuZ+M4hbMAeHhHziURX6Q==}
@@ -7372,10 +7375,12 @@ snapshots:
 
   '@iota/apps-ui-icons@0.3.0': {}
 
-  '@iota/apps-ui-kit@0.5.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)':
+  '@iota/apps-ui-icons@0.3.1': {}
+
+  '@iota/apps-ui-kit@0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)':
     dependencies:
       '@fontsource/inter': 5.2.5
-      '@iota/apps-ui-icons': 0.3.0
+      '@iota/apps-ui-icons': 0.3.1
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-visually-hidden': 1.2.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1

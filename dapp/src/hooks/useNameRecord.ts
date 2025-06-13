@@ -15,7 +15,7 @@ type UseNameRecordOptions = {
     price?: PriceOption;
 };
 
-type NameRecordData =
+export type NameRecordData =
     | {
           type: 'unavailable';
           nameRecord: NameRecord;
@@ -41,7 +41,7 @@ export function useNameRecord(
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: ['name-record', name, price],
+        queryKey: ['name-record', name, price, 'iota-name'],
         async queryFn() {
             if (!isValidIotaName(name)) {
                 throw new Error('Name is not valid.');
