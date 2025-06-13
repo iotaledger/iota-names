@@ -4,6 +4,7 @@
 
 module iota_names::controller;
 
+use iota::event;
 use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::domain;
@@ -23,6 +24,16 @@ const EUnsupportedKey: vector<u8> = b"Unsupported key.";
 
 /// Authorization witness to call protected functions of `iota_names`.
 public struct ControllerAuth has drop {}
+
+public struct UserDataSetEvent has copy, drop {
+    key: String,
+    value: String,
+    new: bool
+}
+
+public struct UserDataUnsetEvent has copy, drop {
+    key: String,
+}
 
 /// Set the target address of a domain.
 public fun set_target_address(
@@ -84,9 +95,17 @@ public fun set_user_data(
     let key_bytes = *key.as_bytes();
     assert!(key_bytes == AVATAR || key_bytes == CONTENT_HASH, EUnsupportedKey);
 
-    if (data.contains(&key)) {
+    let exists = data.contains(&key);
+
+    if (exists) {
         data.remove(&key);
     };
+
+    event::emit(UserDataSetEvent {
+        key,
+        value,
+        new: !exists
+    });
 
     data.insert(key, value);
     registry.set_data(domain, data);
@@ -106,6 +125,9 @@ public fun unset_user_data(
     registry.assert_nft_is_authorized(nft, clock);
 
     if (data.contains(&key)) {
+        event::emit(UserDataUnsetEvent {
+            key,
+        });
         data.remove(&key);
     };
 
