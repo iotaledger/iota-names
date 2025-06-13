@@ -1,0 +1,14 @@
+export const queryKey = {
+    all: ['iota-name'],
+
+    // Names
+    nameRecord: (name: string) => ['iota-name', name],
+    registerName: (name: string, address?: string) => ['register-name', name, address],
+    updateName: (name: string, address?: string) => ['update-name', name, address],
+
+    // Address
+    defaultName: (address: string) => ['default-name', address],
+
+    // Generic
+    ownedObjects: (address: string) => ['owned-objects', address],
+};

@@ -13,7 +13,7 @@ import { useRegistrationNfts } from '@/hooks';
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
 
-    const registrationNfts = useRegistrationNfts();
+    const { data: registrationNfts } = useRegistrationNfts();
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">

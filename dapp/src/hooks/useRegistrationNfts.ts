@@ -23,21 +23,24 @@ export function useRegistrationNfts() {
     const { iotaNamesClient } = useIotaNamesClient();
     const packageId = iotaNamesClient.config.packageId;
 
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, {
-        StructType: getIotaNamesRegistrationType(packageId),
-    });
-
-    const registrationNfts: RegistrationNft[] =
-        namesRegistrationData?.map((nameRecord) => {
-            const data = nameRecord?.display?.data;
-            return {
-                name: data?.name ?? '',
-                description: data?.description,
-                image_url: data?.image_url,
-                link: data?.link,
-                project_url: data?.project_url,
-            };
-        }) ?? [];
-
-    return registrationNfts;
+    return useGetAllOwnedObjects(
+        address,
+        {
+            StructType: getIotaNamesRegistrationType(packageId),
+        },
+        {
+            select(data) {
+                return data.map((nameRecord) => {
+                    const data = nameRecord?.display?.data;
+                    return {
+                        name: data?.name ?? '',
+                        description: data?.description,
+                        image_url: data?.image_url,
+                        link: data?.link,
+                        project_url: data?.project_url,
+                    };
+                });
+            },
+        },
+    );
 }
