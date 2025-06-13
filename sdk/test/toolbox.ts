@@ -39,6 +39,23 @@ export class TestToolbox {
         return this.keypair.getPublicKey().toIotaAddress();
     }
 
+    gqlAddress() {
+        return this.graphqlClient.query<{
+            address: string;
+        }>({
+            query: `
+                query resolveNameServiceNames($address: IotaAddress!) {
+                    address(address: $address) {
+                        address
+                    }
+                }
+            `,
+            variables: {
+                address: this.address(),
+            },
+        });
+    }
+
     balance() {
         return this.graphqlClient.query<{
             address: {

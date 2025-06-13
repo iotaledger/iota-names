@@ -207,6 +207,8 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
     describe('Client settings', () => {
         it('client should have some balance', async () => {
+            const gqlAddr = await toolbox.gqlAddress();
+            console.log('GraphQL Address response:', gqlAddr.data?.address);
             const qBalance = await toolbox.balance();
             expect(Number(qBalance.data?.address.balance.totalBalance)).toBeGreaterThan(0);
         });
