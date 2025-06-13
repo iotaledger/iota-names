@@ -6,7 +6,8 @@ import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
-import { getNetwork } from '@iota/iota-sdk/client';
+import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
+import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import {
     FaucetRateLimitError,
     getFaucetHost,
@@ -22,16 +23,16 @@ export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
 //@ts-ignore-next-line
 const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localnet');
 //@ts-ignore-next-line
-const DEFAULT_GRAPHQL_ENDPOINT = getNetwork('localnet').graphql!;
+const DEFAULT_GRAPHQL_URL = process.env.VITE_GRAPHQL_URL ?? getNetwork('localnet').graphql!;
 
 export class TestToolbox {
     keypair: Ed25519Keypair;
-    graphqlClient: IotaGraphQLClient;
+    client: IotaClient;
     configPath: string;
 
-    constructor(keypair: Ed25519Keypair, graphqlClient: IotaGraphQLClient, configPath: string) {
+    constructor(keypair: Ed25519Keypair, client: IotaClient, configPath: string) {
         this.keypair = keypair;
-        this.graphqlClient = graphqlClient;
+        this.client = client;
         this.configPath = configPath;
     }
 
@@ -39,52 +40,20 @@ export class TestToolbox {
         return this.keypair.getPublicKey().toIotaAddress();
     }
 
-    gqlAddress() {
-        return this.graphqlClient.query<{
-            address: string;
-        }>({
-            query: `
-                query resolveNameServiceNames($address: IotaAddress!) {
-                    address(address: $address) {
-                        address
-                    }
-                }
-            `,
-            variables: {
-                address: this.address(),
-            },
-        });
-    }
-
-    balance() {
-        return this.graphqlClient.query<{
-            address: {
-                balance: {
-                    totalBalance: string;
-                };
-            };
-        }>({
-            query: `
-                query balance(
-                    $address: IotaAddress!
-                    ) {
-                    address(address: $address) {
-                        balance {
-                        totalBalance
-                        }
-                    }
-                }
-            `,
-            variables: {
-                address: this.address(),
-            },
-        });
+    public async getActiveValidators() {
+        return (await this.client.getLatestIotaSystemState()).activeValidators;
     }
 }
 
-export function getClient(): IotaGraphQLClient {
+export function getClient(): IotaClient {
+    return new IotaClient({
+        transport: new IotaClientGraphQLTransport({ url: DEFAULT_GRAPHQL_URL }),
+    });
+}
+
+export function getGraphQLClient(): IotaGraphQLClient {
     return new IotaGraphQLClient({
-        url: DEFAULT_GRAPHQL_ENDPOINT,
+        url: DEFAULT_GRAPHQL_URL,
     });
 }
 
@@ -92,7 +61,7 @@ export function getClient(): IotaGraphQLClient {
 export async function setupIotaClient() {
     const keypair = Ed25519Keypair.generate();
     const address = keypair.getPublicKey().toIotaAddress();
-    const graphqlClient = getClient();
+    const client = getClient();
     await retry(() => requestIotaFromFaucetV0({ host: DEFAULT_FAUCET_URL, recipient: address }), {
         backoff: 'EXPONENTIAL',
         // overall timeout in 60 seconds
@@ -102,9 +71,14 @@ export async function setupIotaClient() {
         logger: (msg) => console.warn('Retrying requesting from faucet: ' + msg),
     });
 
+    const b = await client.getBalance({
+        owner: address,
+    });
+    console.log(`Balance for ${address}: ${b.totalBalance} IOTA`);
+
     const tmpDirPath = path.join(tmpdir(), 'config-');
     const tmpDir = await mkdtemp(tmpDirPath);
     const configPath = path.join(tmpDir, 'client.yaml');
     execSync(`${IOTA_BIN} client --yes --client.config ${configPath}`, { encoding: 'utf-8' });
-    return new TestToolbox(keypair, graphqlClient, configPath);
+    return new TestToolbox(keypair, client, configPath);
 }
