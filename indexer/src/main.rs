@@ -4,7 +4,6 @@
 mod db;
 mod events;
 mod metrics;
-mod models;
 mod worker;
 
 use std::{panic::AssertUnwindSafe, sync::Arc};
@@ -23,7 +22,7 @@ use self::{
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
-use crate::db::{ConnectionPool, ConnectionPoolConfig};
+use crate::db::pool::{ConnectionPool, ConnectionPoolConfig};
 
 // Define the `GIT_REVISION` and `VERSION` consts
 bin_version::bin_version!();

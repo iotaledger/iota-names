@@ -14,31 +14,30 @@ use diesel::{
 
 use crate::events::AuctionStartedEvent;
 
-// #[derive(
-//     From, Into, PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq,
-// FromSqlRow, AsExpression, )]
-// #[diesel(sql_type = diesel::sql_types::Binary)]
-// pub struct IotaAddress(pub iota_types::base_types::IotaAddress);
+#[derive(
+    From, Into, PartialOrd, Ord, Debug, Copy, Clone, PartialEq, Eq, FromSqlRow, AsExpression,
+)]
+#[diesel(sql_type = diesel::sql_types::Binary)]
+pub struct IotaAddress(pub iota_types::base_types::IotaAddress);
 
-// impl ToSql<diesel::sql_types::Binary, diesel::sqlite::Sqlite> for IotaAddress
-// {     fn to_sql<'b>(
-//         &'b self,
-//         out: &mut diesel::serialize::Output<'b, '_, diesel::sqlite::Sqlite>,
-//     ) -> diesel::serialize::Result {
-//         <[u8] as ToSql<diesel::sql_types::Binary,
-// diesel::sqlite::Sqlite>>::to_sql(             self.0.as_ref(),
-//             out,
-//         )
-//     }
-// }
+impl ToSql<diesel::sql_types::Binary, diesel::sqlite::Sqlite> for IotaAddress {
+    fn to_sql<'b>(
+        &'b self,
+        out: &mut diesel::serialize::Output<'b, '_, diesel::sqlite::Sqlite>,
+    ) -> diesel::serialize::Result {
+        <[u8] as ToSql<diesel::sql_types::Binary, diesel::sqlite::Sqlite>>::to_sql(
+            self.0.as_ref(),
+            out,
+        )
+    }
+}
 
-// impl FromSql<diesel::sql_types::Binary, diesel::sqlite::Sqlite> for
-// IotaAddress {     fn from_sql(bytes: SqliteValue<'_, '_, '_>) ->
-// diesel::deserialize::Result<Self> {         let stored =
-// Vec::<u8>::from_sql(bytes)?;
-//         Ok(iota_types::base_types::IotaAddress::try_from(stored)?.into())
-//     }
-// }
+impl FromSql<diesel::sql_types::Binary, diesel::sqlite::Sqlite> for IotaAddress {
+    fn from_sql(bytes: SqliteValue<'_, '_, '_>) -> diesel::deserialize::Result<Self> {
+        let stored = Vec::<u8>::from_sql(bytes)?;
+        Ok(iota_types::base_types::IotaAddress::try_from(stored)?.into())
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Queryable, Selectable, Insertable, AsChangeset)]
 #[diesel(table_name = crate::db::auctions_table)]
@@ -48,7 +47,7 @@ pub(crate) struct Auction {
     pub start_timestamp_ms: i64,
     pub end_timestamp_ms: i64,
     pub starting_bid: i64,
-    pub bidder: String,
+    pub bidder: IotaAddress,
 }
 
 impl TryFrom<AuctionStartedEvent> for Auction {
@@ -60,7 +59,7 @@ impl TryFrom<AuctionStartedEvent> for Auction {
             start_timestamp_ms: auction_started_event.start_timestamp_ms as i64,
             end_timestamp_ms: auction_started_event.end_timestamp_ms as i64,
             starting_bid: auction_started_event.starting_bid as i64,
-            bidder: auction_started_event.bidder.to_string(),
+            bidder: auction_started_event.bidder.try_into()?,
         })
     }
 }

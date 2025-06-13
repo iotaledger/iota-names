@@ -33,11 +33,11 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     db::{
-        ConnectionPool,
         auctions_table::{self, domain},
+        models::Auction,
+        pool::ConnectionPool,
     },
     events::IotaNamesEvent,
-    models::Auction,
 };
 
 pub(crate) async fn run_iota_names_reader(

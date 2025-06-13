@@ -1,7 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Database related logic.
 use std::time::Duration;
 
 use anyhow::{Result, anyhow};
@@ -12,10 +11,9 @@ use diesel::{
     r2d2::{ConnectionManager, Pool, PooledConnection},
     sqlite::Sqlite,
 };
-use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
+use diesel_migrations::MigrationHarness;
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
-const AUCTION_DB_URL: &str = "AUCTIONS_DB";
+use crate::db::{AUCTION_DB_URL, MIGRATIONS};
 
 pub type PoolConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
 
@@ -125,11 +123,6 @@ impl ConnectionPool {
     pub fn run_migrations(&self) -> Result<()> {
         run_migrations(&mut self.get_connection()?)
     }
-
-    /// Revert all applied migrations
-    pub fn revert_all_migrations(&self) -> Result<()> {
-        revert_all_migrations(&mut self.get_connection()?)
-    }
 }
 
 /// Run any pending migrations to the connected database.
@@ -139,23 +132,4 @@ pub fn run_migrations(connection: &mut impl MigrationHarness<Sqlite>) -> Result<
         .map_err(|e| anyhow!("failed to run migrations {e}"))?;
 
     Ok(())
-}
-
-/// Revert all applied migrations to the connected database
-pub fn revert_all_migrations(connection: &mut impl MigrationHarness<Sqlite>) -> Result<()> {
-    connection
-        .revert_all_migrations(MIGRATIONS)
-        .map_err(|e| anyhow!("failed to revert all migrations {e}"))?;
-
-    Ok(())
-}
-
-diesel::table! {
-    auctions_table (domain) {
-        domain -> Text,
-        start_timestamp_ms-> BigInt,
-        end_timestamp_ms -> BigInt,
-        starting_bid -> BigInt,
-        bidder -> Text,
-    }
 }
