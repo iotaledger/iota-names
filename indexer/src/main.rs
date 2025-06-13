@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+// mod api;
 mod db;
 mod events;
 mod metrics;
@@ -19,6 +20,7 @@ use tracing_subscriber::{
 };
 
 use self::{
+    // api::start_api_server,
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
@@ -45,6 +47,9 @@ enum Command {
         /// The number of workers to spawn in parallel.
         #[arg(long, default_value_t = 1)]
         num_workers: usize,
+        /// The port to run the API server on.
+        #[arg(long, default_value_t = 3030)]
+        api_port: u16,
     },
 }
 
@@ -55,6 +60,7 @@ impl Command {
                 connection_pool_config,
                 node_url,
                 num_workers,
+                api_port,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -75,11 +81,21 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
+                let connection_pool = Arc::new(ConnectionPool::new(connection_pool_config)?);
+                connection_pool.run_migrations()?;
+
+                // Spawn the API server
+                let api_handle = cancel_token.clone();
+                let api_pool = connection_pool.clone();
+                // tasks.spawn(async move {
+                //     let res = start_api_server(api_pool, api_port, api_handle.clone()).await;
+                //     api_handle.cancel();
+                //     res
+                // });
+
                 tasks.spawn(async move {
-                    let connection_pool = AssertUnwindSafe(ConnectionPool::new(connection_pool_config)?);
-                    connection_pool.run_migrations()?;
                     let worker = IotaNamesWorker::new(
-                        connection_pool,
+                        AssertUnwindSafe((*connection_pool).clone()),
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),

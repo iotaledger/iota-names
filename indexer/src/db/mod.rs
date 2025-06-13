@@ -12,11 +12,27 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 pub const AUCTION_DB_URL: &str = "AUCTIONS_DB";
 
 diesel::table! {
-    auctions_table (domain) {
-        domain -> Text,
-        start_timestamp_ms-> BigInt,
-        end_timestamp_ms -> BigInt,
-        starting_bid -> BigInt,
-        bidder -> Binary,
+    domains (id) {
+        id -> Int4,
+        name -> Text,
     }
 }
+
+diesel::table! {
+    bidders (id) {
+        id -> Int4,
+        address -> Text,
+    }
+}
+
+diesel::table! {
+    bidder_domain (bidder_id, domain_id) {
+        bidder_id -> Int4,
+        domain_id -> Int4,
+    }
+}
+
+diesel::joinable!(bidder_domain -> domains (domain_id));
+diesel::joinable!(bidder_domain -> bidders (bidder_id));
+
+diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain,);
