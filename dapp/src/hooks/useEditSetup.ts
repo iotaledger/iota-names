@@ -19,7 +19,6 @@ export function useEditSetup(
     const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const address = account?.address ?? '';
-
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [
@@ -32,8 +31,6 @@ export function useEditSetup(
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-            parentNft = '0xcca9951ec2779f0fc01a1aa012175c0749c5a307a037e1e1f8ad42458b696c0a'; // remove
-            name = 'tooling.superdomain00.iota'; // remove
             iotaNamesTx.editSetup({
                 parentNft: tx.object(parentNft),
                 name,

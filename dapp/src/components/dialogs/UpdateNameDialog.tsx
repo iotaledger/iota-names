@@ -116,7 +116,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     const { data: editSetupData, isLoading: isEditSetupLoading } = useEditSetup(
         nameRecord?.nameRecord?.nftId || '',
-        /*name,*/ 'tooling.superdomain00.iota',
+        name,
         isAllowingRenew,
         isAllowSubnames,
     );
