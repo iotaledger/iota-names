@@ -6,7 +6,7 @@ import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
 
 interface UseUpdateNameTransactionOptions {
     address: string;

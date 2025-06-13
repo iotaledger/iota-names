@@ -3,7 +3,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
 
 export function useGetDefaultName(address: string) {
     const { iotaNamesClient } = useIotaNamesClient();
