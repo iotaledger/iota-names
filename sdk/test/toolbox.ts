@@ -23,6 +23,7 @@ export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
 const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localnet');
 //@ts-ignore-next-line
 const DEFAULT_FULLNODE_URL = process.env.VITE_FULLNODE_URL ?? getFullnodeUrl('localnet');
+console.log('-- URL:', DEFAULT_FULLNODE_URL);
 
 export class TestToolbox {
     keypair: Ed25519Keypair;
