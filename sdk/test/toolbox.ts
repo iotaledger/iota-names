@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
-import { getFullnodeUrl } from '@iota/iota-sdk/client';
+import { getNetwork } from '@iota/iota-sdk/client';
 import {
     FaucetRateLimitError,
     getFaucetHost,
@@ -22,8 +22,7 @@ export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
 //@ts-ignore-next-line
 const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localnet');
 //@ts-ignore-next-line
-const DEFAULT_FULLNODE_URL = process.env.VITE_FULLNODE_URL ?? getFullnodeUrl('localnet');
-console.log('-- URL:', DEFAULT_FULLNODE_URL);
+const DEFAULT_GRAPHQL_ENDPOINT = getNetwork('localnet').graphql!;
 
 export class TestToolbox {
     keypair: Ed25519Keypair;
@@ -85,7 +84,7 @@ export class TestToolbox {
 
 export function getClient(): IotaGraphQLClient {
     return new IotaGraphQLClient({
-        url: DEFAULT_FULLNODE_URL,
+        url: DEFAULT_GRAPHQL_ENDPOINT,
     });
 }
 
