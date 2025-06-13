@@ -133,7 +133,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     case 'unset-default':
                     case 'set-default':
                         queryClient.invalidateQueries({
-                            queryKey: queryKey.defaultName(account?.address!),
+                            queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
                     case 'set-target-address':
