@@ -27,6 +27,7 @@ pub(crate) struct IotaNamesMetrics {
     pub name_length_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
     pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
+    pub user_data_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub auction_final_prices: Histogram,
 }
 
@@ -97,6 +98,15 @@ impl IotaNamesMetrics {
                 register_int_gauge_vec_with_registry!(
                     "name_depth_distribution",
                     "Distribution of names depth",
+                    &["depth"],
+                    registry,
+                )
+                .unwrap(),
+            ),
+            user_data_distribution: AssertUnwindSafe(
+                register_int_gauge_vec_with_registry!(
+                    "user_data_distribution",
+                    "Distribution of user data",
                     &["depth"],
                     registry,
                 )
