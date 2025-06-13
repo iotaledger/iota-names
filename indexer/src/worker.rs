@@ -145,8 +145,8 @@ impl IotaNamesWorker {
                     self.metrics.total_target_address.dec()
                 }
             }
-            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_address.inc(),
-            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_address.dec(),
+            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_name.inc(),
+            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_name.dec(),
             IotaNamesEvent::UserDataSet(event) => {
                 if event.new {
                     self.metrics
