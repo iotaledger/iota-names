@@ -8,14 +8,6 @@ import { useIotaNamesClient } from '@/providers/contexts';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
-interface RegistrationNft {
-    name: string;
-    description?: string;
-    image_url?: string;
-    link?: string;
-    project_url?: string;
-}
-
 export function useRegistrationNfts() {
     const account = useCurrentAccount();
     const address = account?.address ?? '';
