@@ -15,10 +15,14 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
 
     const supportedNetwork = getNetwork(network);
     // If network is not supported, we use assume we are using a custom RPC
-    const networkUrl = supportedNetwork?.graphql ?? network;
+    const networkGraphqlUrl = supportedNetwork?.graphql ?? network;
+    const networkJsonRpcUrl = supportedNetwork?.url;
 
     const client = new IotaClient({
-        transport: new IotaClientGraphQLTransport({ url: networkUrl }),
+        transport: new IotaClientGraphQLTransport({
+            url: networkGraphqlUrl,
+            fallbackTransportUrl: networkJsonRpcUrl,
+        }),
     });
     defaultClientMap.set(network, client);
     return client;
