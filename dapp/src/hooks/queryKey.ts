@@ -4,7 +4,7 @@ export const queryKey = {
     all: ['iota-name'],
 
     // Names
-    nameRecord: (name: string) => ['iota-name', name],
+    nameRecord: (name: string) => ['name-record', name],
     registerName: (name: string, address?: string) => ['register-name', name, address],
     updateName: (name: string, address?: string) => ['update-name', name, address],
 
