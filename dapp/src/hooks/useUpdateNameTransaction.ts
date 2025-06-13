@@ -45,7 +45,7 @@ export function useUpdateNameTransaction({
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.updateName(name, address), nft, updates, ...queryKey.all],
+        queryKey: [...queryKey.updateName(name, address), nft, updates],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);

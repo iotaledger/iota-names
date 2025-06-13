@@ -22,7 +22,7 @@ export function useRegisterNameTransaction(
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.registerName(name, address), years, price, ...queryKey.all],
+        queryKey: [...queryKey.registerName(name, address), years, price],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);

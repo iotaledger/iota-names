@@ -17,7 +17,7 @@ export function useGetAllOwnedObjects<Data>(
     const client = useIotaClient();
     return useQuery({
         ...options,
-        queryKey: [...queryKey.ownedObjects(address), filter, ...queryKey.all],
+        queryKey: [...queryKey.ownedObjects(address), filter],
         queryFn: async () => {
             let cursor: string | undefined | null = null;
             const allData: IotaObjectData[] = [];

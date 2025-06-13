@@ -43,7 +43,7 @@ export function useNameRecord(
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: [...queryKey.nameRecord(name), price, ...queryKey.all],
+        queryKey: [...queryKey.nameRecord(name), price],
         async queryFn() {
             if (!isValidIotaName(name)) {
                 throw new Error('Name is not valid.');
