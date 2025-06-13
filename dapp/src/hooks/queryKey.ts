@@ -1,3 +1,6 @@
+
+// Query keys mostly to identify queries
+// Non-identifying variables should not be included here (e.g, price of a name)
 export const queryKey = {
     all: ['iota-name'],
 
