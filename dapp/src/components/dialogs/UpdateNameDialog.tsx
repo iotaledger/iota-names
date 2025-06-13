@@ -18,15 +18,15 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { isSubName } from '@iota/iota-names-sdk';
 import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
-import { useEditSetup, useGetSubnamePermissions } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -42,29 +42,31 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const { data: addressName, isLoading: isAddressNameLoading } = useGetDefaultName(
         account?.address || '',
     );
-    const { data: getFlagsData, isLoading: isGetFlagsLoading } = useGetSubnamePermissions(
-        /* nameRecord?.nameRecord?.name || '', */ 'tooling.superdomain00.iota',
-    );
+
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const isNameSubName = nameRecord?.nameRecord ? isSubName(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
+    const namePermissions = nameRecord?.nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : null;
 
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
-    const [isAllowingRenew, setIsAllowingRenew] = useState<boolean>(false);
-    const [isAllowSubnames, setIsAllowSubnames] = useState<boolean>(false);
+    const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
+    const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
 
     // Sync permissions
     useEffect(() => {
-        if (getFlagsData && !isGetFlagsLoading) {
-            setIsAllowingRenew(getFlagsData.allowTimeExtension === 'true' || false);
-            setIsAllowSubnames(getFlagsData.allowChildCreation === 'true' || false);
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowChildCreation);
+            setEditIsAllowSubnames(namePermissions.allowTimeExtension);
         }
-    }, [getFlagsData]);
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
     // Sync name target address
     useEffect(() => {
@@ -114,13 +116,21 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         });
     }
 
-    const { data: editSetupData, isLoading: isEditSetupLoading } = useEditSetup(
-        nameRecord?.nameRecord?.nftId || '',
-        name,
-        isAllowingRenew,
-        isAllowSubnames,
-    );
-    console.log('editSetupData', editSetupData);
+    if (
+        nameRecord &&
+        isNameSubName &&
+        (editIsAllowSubnames != namePermissions?.allowChildCreation ||
+            editIsAllowingRenew != namePermissions.allowTimeExtension)
+    ) {
+        // Only allow editing the setup if it is a subname and the config has changed
+        updates.push({
+            type: 'edit-setup',
+            nft: nameRecord.nameRecord.nftId,
+            allowChildCreation: editIsAllowSubnames,
+            allowTimeExtension: editIsAllowingRenew,
+        });
+    }
+
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -165,11 +175,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         setEditDefaultName(checked);
     }
     const handleAllowRenewChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
-        setIsAllowingRenew(checked);
+        setEditIsAllowingRenew(checked);
     };
 
     const handleAllowSubnameChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
-        setIsAllowSubnames(checked);
+        setEditIsAllowSubnames(checked);
     };
 
     function handleSetCurrentAsTargetAddress() {
@@ -179,14 +189,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     }
 
     const isLoading =
-        isSaving ||
-        isAddressNameLoading ||
-        isLoadingUpdateNameTransaction ||
-        isSendingTransaction ||
-        isEditSetupLoading;
+        isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
-    const disableEdit =
-        isNameRecordLoading || isEditSetupLoading || isSendingTransaction || isExpired;
+    const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
 
     return (
@@ -237,22 +242,32 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             onCheckedChange={handleReverseLookupChange}
                         />
                     </Card>
-                    <Card type={CardType.Outlined}>
-                        <CardBody title="Set allow renew name" subtitle="Allow renew name." />
-                        <Checkbox
-                            isChecked={isAllowingRenew}
-                            isDisabled={disableEdit}
-                            onCheckedChange={handleAllowRenewChange}
-                        />
-                    </Card>
-                    <Card type={CardType.Outlined}>
-                        <CardBody title="Set allow subname" subtitle="Allow creating subdomains." />
-                        <Checkbox
-                            isChecked={isAllowSubnames}
-                            isDisabled={disableEdit}
-                            onCheckedChange={handleAllowSubnameChange}
-                        />
-                    </Card>
+                    {isNameSubName ? (
+                        <>
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Set allow renew name"
+                                    subtitle="Allow renew name."
+                                />
+                                <Checkbox
+                                    isChecked={editIsAllowingRenew}
+                                    isDisabled={disableEdit}
+                                    onCheckedChange={handleAllowRenewChange}
+                                />
+                            </Card>
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Set allow subname"
+                                    subtitle="Allow creating subdomains."
+                                />
+                                <Checkbox
+                                    isChecked={editIsAllowSubnames}
+                                    isDisabled={disableEdit}
+                                    onCheckedChange={handleAllowSubnameChange}
+                                />
+                            </Card>
+                        </>
+                    ) : null}
 
                     {updateNameError ? (
                         <div className="text-red-400">{updateNameError.message}</div>

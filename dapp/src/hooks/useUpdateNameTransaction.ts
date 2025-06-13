@@ -29,6 +29,12 @@ export type NameUpdate =
       }
     | {
           type: 'unset-default';
+      }
+    | {
+          type: 'edit-setup';
+          nft: string;
+          allowChildCreation: boolean;
+          allowTimeExtension: boolean;
       };
 
 export function useUpdateNameTransaction({
@@ -62,6 +68,14 @@ export function useUpdateNameTransaction({
                         break;
                     case 'unset-default':
                         iotaNamesTx.unsetDefault();
+                        break;
+                    case 'edit-setup':
+                        iotaNamesTx.editSetup({
+                            parentNft: tx.object(nft),
+                            name,
+                            allowChildCreation: update.allowChildCreation,
+                            allowTimeExtension: update.allowTimeExtension,
+                        });
                         break;
                 }
             }

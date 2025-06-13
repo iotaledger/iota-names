@@ -7,5 +7,3 @@ export * from './useNameRecord';
 export * from './useRegisterNameTransaction';
 export * from './useRegistrationNfts';
 export * from './useTheme';
-export * from './useEditSetup';
-export * from './useGetSubnamePermissions';

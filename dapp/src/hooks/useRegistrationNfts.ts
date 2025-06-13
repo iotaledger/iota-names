@@ -3,12 +3,11 @@
 
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
+import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/providers/contexts';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
-import { IotaParsedData } from '@iota/iota-sdk/client';
-
 
 interface RegistrationNft {
     name: string;
@@ -47,7 +46,7 @@ export function useRegistrationNfts() {
                 image_url: data?.image_url,
                 link: data?.link,
                 project_url: data?.project_url,
-                expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? '') ,
+                expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
                 id: nameRecord?.objectId ?? '',
             };
         }) ?? [];
