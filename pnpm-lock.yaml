@@ -258,8 +258,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250613070423
+        version: 0.0.0-experimental-20250613070423(typescript@5.8.3)
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -271,8 +271,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250613070423
+        version: 0.0.0-experimental-20250613070423(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -1427,9 +1427,6 @@ packages:
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
-
-  '@iota/graphql-transport@0.0.0-experimental-20250611113155':
-    resolution: {integrity: sha512-iiYoId+zbzSgGFLVXt6V9IQ+Utz4ZxRR7NX7xkpjzshYWi442gxcFZeZ6eWABR2ByYQfgcBJAefPTz5mpRd1oA==}
 
   '@iota/graphql-transport@0.0.0-experimental-20250613070423':
     resolution: {integrity: sha512-BHilef3hrAY2rs7TSngB8Pz+9sTg0am7FB9KEKAFATw0ozJ0PYDZC3TeTnz4ct07wTOuvjWKEke7NCsiUAA7kg==}
@@ -7428,17 +7425,6 @@ snapshots:
       - babel-plugin-macros
       - immer
       - react-dom
-      - typescript
-
-  '@iota/graphql-transport@0.0.0-experimental-20250611113155(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.0.0
-      '@iota/iota-sdk': 0.0.0-experimental-20250611113155(typescript@5.8.3)
-      graphql: 16.11.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
       - typescript
 
   '@iota/graphql-transport@0.0.0-experimental-20250613070423(typescript@5.8.3)':
