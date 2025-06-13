@@ -1,0 +1,20 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import { useQuery } from '@tanstack/react-query';
+
+import { useIotaNamesClient } from '@/providers/contexts';
+
+export function useGetDefaultName(address: string) {
+    const { iotaNamesClient } = useIotaNamesClient();
+
+    return useQuery({
+        queryKey: ['default-name', 'iota-name', address],
+        async queryFn() {
+            const defaultName = await iotaNamesClient.getDefaultName(address);
+
+            return defaultName;
+        },
+        enabled: !!iotaNamesClient && address.length > 0,
+    });
+}

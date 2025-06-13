@@ -41,7 +41,7 @@ export function useRegistrationNfts() {
                 image_url: data?.image_url,
                 link: data?.link,
                 project_url: data?.project_url,
-                expiration_timestamp_ms: fields?.expiration_timestamp_ms as string,
+                expiration_timestamp_ms: fields?.expiration_timestamp_ms,
                 id: nameRecord?.objectId,
                 isAllowRenew: false,
                 isAllowSubdomains: false,
