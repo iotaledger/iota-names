@@ -147,6 +147,20 @@ impl IotaNamesWorker {
             }
             IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_address.inc(),
             IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_address.dec(),
+            IotaNamesEvent::UserDataSet(event) => {
+                if event.new {
+                    self.metrics
+                        .user_data_distribution
+                        .with_label_values(&[&event.key])
+                        .inc();
+                }
+            }
+            IotaNamesEvent::UserDataUnset(event) => {
+                self.metrics
+                    .user_data_distribution
+                    .with_label_values(&[&event.key])
+                    .dec();
+            }
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
