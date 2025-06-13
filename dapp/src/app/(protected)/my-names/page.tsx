@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
 import { useRegistrationNfts } from '@/hooks';
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const registrationNfts = useRegistrationNfts();
