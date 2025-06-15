@@ -155,7 +155,16 @@ export const Packages = (network: string) => {
         Auction: {
             order: 2,
             folder: 'auction',
-            processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
+            processPublish: (data: IotaTransactionBlockResponse) => {
+                const { packageId, upgradeCap } = parseCorePackageObjects(data);
+                const auctionHouse = parseCreatedObject(data, `${packageId}::auction::AuctionHouse`);
+
+                return {
+                    packageId,
+                    upgradeCap,
+                    auctionHouse,
+                };
+            },
             authorizationType: (packageId: string) => `${packageId}::auction::AuctionAuth`,
         },
         DenyList: {

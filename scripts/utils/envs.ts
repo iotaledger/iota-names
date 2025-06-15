@@ -28,6 +28,8 @@ const envVars = {
     IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: json.paymentsPackageId,
     IOTA_NAMES_REGISTRY_ID: json.registryTableId,
     IOTA_NAMES_REVERSE_REGISTRY_ID: json.reverseRegistryTableId,
+    IOTA_NAMES_AUCTION_PACKAGE_ADDRESS: json.auctionPackageId,
+    IOTA_NAMES_AUCTION_HOUSE_ID: json.auctionHouseId,
 };
 
 function formatEnvVar(name: string, value: string): string {

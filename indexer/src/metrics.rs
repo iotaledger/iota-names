@@ -28,6 +28,7 @@ pub(crate) struct IotaNamesMetrics {
     pub renewal_years_distribution: AssertUnwindSafe<IntCounterVec>,
     pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub auction_final_prices: Histogram,
+    pub auction_house_balance: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -107,6 +108,12 @@ impl IotaNamesMetrics {
                 "The final prices paid for domains in auctions",
                 registry,
             ),
+            auction_house_balance: register_int_gauge_with_registry!(
+                "auction_house_balance",
+                "The balance held in the auction house",
+                registry,
+            )
+            .unwrap(),
         }
     }
 }

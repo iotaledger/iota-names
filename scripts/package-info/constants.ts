@@ -9,12 +9,14 @@ export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
     auctionPackageId: string;
+    auctionHouseId: string;
     coins: {
         [key: string]: {
             type: string;
             metadataId: string;
         };
     };
+    couponsPackageId: string;
     denyListPackageId: string;
     iotaNames: string;
     packageId: string;
@@ -23,7 +25,6 @@ export type PackageInfo = {
     registryTableId: string;
     reverseRegistryTableId: string;
     subNamesPackageId: string;
-    couponsPackageId: string;
     tempSubdomainsProxyPackageId: string;
     upgradeCap?: string;
 };

@@ -19,6 +19,7 @@ use iota_types::{
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
+    object::Object,
     transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
 };
 use move_core_types::{
@@ -72,6 +73,7 @@ pub(crate) struct IotaNamesWorker {
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
     balance_object_id: ObjectID,
+    auction_house_object_id: ObjectID,
 }
 
 impl IotaNamesWorker {
@@ -98,11 +100,30 @@ impl IotaNamesWorker {
                 .to_bcs_bytes(&layout)?,
         )?;
 
+        let config_type = StructTag::from_str(&format!(
+            "{}::auction::BalanceKey<0x2::iota::IOTA>",
+            config.auction_package_address,
+        ))?;
+        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
+            type_: config_type.clone(),
+            fields: vec![MoveFieldLayout::new(
+                Identifier::from_str("dummy_field")?,
+                MoveTypeLayout::Bool,
+            )],
+        }));
+        let auction_house_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
+            config.auction_house_id,
+            &TypeTag::Struct(Box::new(config_type)),
+            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
+                .to_bcs_bytes(&layout)?,
+        )?;
+
         Ok(Self {
             config,
             metrics,
             token,
             balance_object_id,
+            auction_house_object_id,
         })
     }
 
@@ -196,19 +217,21 @@ impl IotaNamesWorker {
             checkpoint.checkpoint_summary.sequence_number
         );
 
+        let mut iota_names_balance = false;
+        let mut auction_house_balance = false;
         for object in checkpoint.latest_live_output_objects() {
             if object.id() == self.balance_object_id {
-                let balance = bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
-                    object
-                        .as_inner()
-                        .data
-                        .try_as_move()
-                        .expect("invalid move object")
-                        .contents(),
-                )?
-                .value;
-
+                let balance = get_balance(object)?;
                 self.metrics.iota_names_balance.set(balance.value() as _);
+                iota_names_balance = true;
+            } else if object.id() == self.auction_house_object_id {
+                let balance = get_balance(object)?;
+                self.metrics.auction_house_balance.set(balance.value() as _);
+                auction_house_balance = true;
+            } else {
+                continue;
+            }
+            if iota_names_balance && auction_house_balance {
                 break;
             }
         }
@@ -280,4 +303,16 @@ fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error 
     } else {
         anyhow!("unknown panic occurred")
     }
+}
+
+fn get_balance(object: &Object) -> anyhow::Result<Balance> {
+    Ok(bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
+        object
+            .as_inner()
+            .data
+            .try_as_move()
+            .expect("invalid move object")
+            .contents(),
+    )?
+    .value)
 }

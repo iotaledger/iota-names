@@ -5,9 +5,10 @@
 /// Implementation of auction module.
 module iota_names_auction::auction;
 
-use iota::balance::{Self, Balance};
+use iota::balance::Balance;
 use iota::clock::Clock;
 use iota::coin::{Self, Coin};
+use iota::dynamic_field as df;
 use iota::event;
 use iota::iota::IOTA;
 use iota::linked_table::{Self, LinkedTable};
@@ -19,6 +20,10 @@ use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
 use std::option::{none, some, is_some};
 use std::string::String;
+
+use fun df::add as UID.add;
+use fun df::exists_ as UID.exists_;
+use fun df::borrow_mut as UID.borrow_mut;
 
 /// One year is the default duration for a domain.
 const DEFAULT_DURATION: u8 = 1;
@@ -50,10 +55,14 @@ const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AuctionAuth has drop {}
 
+public struct BalanceKey<phantom T> has copy, drop, store {}
+
 /// The AuctionHouse application.
+/// 
+/// Dynamic fields:
+/// - `balance: BalanceKey<IOTA> -> Balance<IOTA>`
 public struct AuctionHouse has key, store {
     id: UID,
-    balance: Balance<IOTA>,
     auctions: LinkedTable<Domain, Auction>,
 }
 
@@ -71,7 +80,6 @@ public struct Auction has store {
 fun init(ctx: &mut TxContext) {
     iota::transfer::share_object(AuctionHouse {
         id: object::new(ctx),
-        balance: balance::zero(),
         auctions: linked_table::new(ctx),
     });
 }
@@ -240,7 +248,15 @@ public fun claim(
 
     // Extract the NFT and their bid, returning the NFT to the user
     // and add the bid amount to the AuctionHouse
-    self.balance.join(current_bid.into_balance());
+    let key = BalanceKey<IOTA> {};
+    let winning_balance = current_bid.into_balance();
+    if (self.id.exists_(key)) {
+        let balance: &mut Balance<IOTA> = self.id.borrow_mut(key);
+        balance.join(winning_balance);
+    } else {
+        self.id.add(key, winning_balance);
+    };
+    
     nft
 }
 
@@ -286,7 +302,15 @@ public fun collect_winning_auction_fund(
     assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEnded);
 
     let amount = auction.current_bid.value();
-    self.balance.join(auction.current_bid.split(amount, ctx).into_balance());
+
+    let key = BalanceKey<IOTA> {};
+    let bid = auction.current_bid.split(amount, ctx).into_balance();
+    if (self.id.exists_(key)) {
+        let balance: &mut Balance<IOTA> = self.id.borrow_mut(key);
+        balance.join(bid);
+    } else {
+        self.id.add(key, bid);
+    };
 }
 
 // === Admin Functions ===
@@ -296,9 +320,14 @@ public fun admin_withdraw_funds(
     self: &mut AuctionHouse,
     ctx: &mut TxContext,
 ): Coin<IOTA> {
-    let amount = self.balance.value();
+    let balance_key = BalanceKey<IOTA> {};
+    assert!(self.id.exists_(balance_key), ENoProfits);
+
+    let balance = self.id.borrow_mut<_, Balance<IOTA>>(balance_key);
+    let amount = balance.value();
     assert!(amount > 0, ENoProfits);
-    coin::take(&mut self.balance, amount, ctx)
+
+    coin::take(balance, amount, ctx)
 }
 
 /// Admin functionality used to finalize a single auction.
@@ -345,7 +374,16 @@ fun admin_finalize_auction_internal(
         winner: current_bidder,
     });
 
-    self.balance.join(current_bid.into_balance());
+
+    let key = BalanceKey<IOTA> {};
+    let bid = current_bid.into_balance();
+    if (self.id.exists_(key)) {
+        let balance: &mut Balance<IOTA> = self.id.borrow_mut(key);
+        balance.join(bid);
+    } else {
+        self.id.add(key, bid);
+    };
+
     transfer::public_transfer(nft, current_bidder);
 }
 
