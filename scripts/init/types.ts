@@ -5,7 +5,7 @@
 export type PackageInfo = {
     IotaNames: IotaNames;
     DenyList: Package;
-    Auction: Package;
+    Auction: Auction;
     Coupons: Package;
     Subdomains: Package;
     Payments: Package;
@@ -23,4 +23,10 @@ export type IotaNames = {
     publisher: string;
     iotaNames: string;
     adminCap: string;
+};
+
+export type Auction = {
+    packageId: string;
+    upgradeCap: string;
+    auctionHouseId: string;
 };
