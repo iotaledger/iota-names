@@ -7,7 +7,7 @@ import {
     getIotaSubdomainRegistrationType,
 } from '@iota/iota-names-sdk';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
