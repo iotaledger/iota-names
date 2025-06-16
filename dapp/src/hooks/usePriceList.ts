@@ -5,11 +5,13 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/providers/contexts';
 
+import { queryKey } from './queryKey';
+
 export function usePriceList() {
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: ['price-list'],
+        queryKey: [...queryKey.priceList()],
         queryFn: async () => {
             const priceList = await iotaNamesClient.getPriceList();
             const domainLengthRanges = Array.from(priceList.keys()) as [number, number][];
