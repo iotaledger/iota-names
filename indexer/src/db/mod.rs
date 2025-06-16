@@ -3,6 +3,7 @@
 
 //! Database for auctions
 
+pub mod helpers;
 pub mod models;
 pub mod pool;
 

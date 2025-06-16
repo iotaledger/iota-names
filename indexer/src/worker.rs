@@ -5,10 +5,7 @@ use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
-use diesel::{
-    Connection, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    insert_into,
-};
+use diesel::Connection;
 use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
@@ -36,8 +33,7 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     db::{
-        bidder_domain, bidders, domains,
-        models::{Bidder, BidderDomain, Domain},
+        helpers::{create_bidder_domain_relationship, get_or_create_bidder, get_or_create_domain},
         pool::ConnectionPool,
     },
     events::IotaNamesEvent,
@@ -180,80 +176,18 @@ impl IotaNamesWorker {
                 self.metrics.total_auction_started.inc();
                 let mut pool = self.pool.get_connection()?;
                 pool.transaction::<_, anyhow::Error, _>(|conn| {
-                    let maybe_bidder = insert_into(bidders::table)
-                        .values(bidders::address.eq(event.bidder.to_string()))
-                        .returning(Bidder::as_returning())
-                        .on_conflict_do_nothing()
-                        .get_result(conn)
-                        .optional()?;
-                    let bidder = match maybe_bidder {
-                        Some(b) => b,
-                        None => bidders::table
-                            .filter(bidders::address.eq(event.bidder.to_string()))
-                            .first::<Bidder>(conn)?,
-                    };
-
-                    let maybe_domain = insert_into(domains::table)
-                        .values(domains::name.eq(event.domain.to_string()))
-                        .on_conflict_do_nothing()
-                        .returning(Domain::as_returning())
-                        .get_result(conn)
-                        .optional()?;
-                    let domain = match maybe_domain {
-                        Some(b) => b,
-                        None => domains::table
-                            .filter(domains::name.eq(event.domain.to_string()))
-                            .first::<Domain>(conn)?,
-                    };
-
-                    insert_into(bidder_domain::table)
-                        .values((
-                            bidder_domain::bidder_id.eq(bidder.id),
-                            bidder_domain::domain_id.eq(domain.id),
-                        ))
-                        .on_conflict_do_nothing()
-                        .returning(BidderDomain::as_returning())
-                        .execute(conn)?;
+                    let bidder = get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let domain = get_or_create_domain(conn, &event.domain.to_string())?;
+                    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
                     Ok(())
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
-                // TODO: cleanup as this is basically a duplicate of AuctionStarted
                 let mut pool = self.pool.get_connection()?;
                 pool.transaction::<_, anyhow::Error, _>(|conn| {
-                    let maybe_bidder = insert_into(bidders::table)
-                        .values(bidders::address.eq(event.bidder.to_string()))
-                        .on_conflict_do_nothing()
-                        .returning(Bidder::as_returning())
-                        .get_result(conn)
-                        .optional()?;
-                    let bidder = match maybe_bidder {
-                        Some(b) => b,
-                        None => bidders::table
-                            .filter(bidders::address.eq(event.bidder.to_string()))
-                            .first::<Bidder>(conn)?,
-                    };
-
-                    let maybe_domain = insert_into(domains::table)
-                        .values(domains::name.eq(event.domain.to_string()))
-                        .on_conflict_do_nothing()
-                        .returning(Domain::as_returning())
-                        .get_result(conn)
-                        .optional()?;
-                    let domain = match maybe_domain {
-                        Some(b) => b,
-                        None => domains::table
-                            .filter(domains::name.eq(event.domain.to_string()))
-                            .first::<Domain>(conn)?,
-                    };
-                    insert_into(bidder_domain::table)
-                        .values((
-                            bidder_domain::bidder_id.eq(bidder.id),
-                            bidder_domain::domain_id.eq(domain.id),
-                        ))
-                        .on_conflict_do_nothing()
-                        .returning(BidderDomain::as_returning())
-                        .execute(conn)?;
+                    let bidder = get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let domain = get_or_create_domain(conn, &event.domain.to_string())?;
+                    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
                     Ok(())
                 })?;
             }
