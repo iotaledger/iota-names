@@ -29,6 +29,7 @@ pub(crate) struct IotaNamesMetrics {
     pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub user_data_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub auction_final_prices: Histogram,
+    pub auction_durations: Histogram,
 }
 
 impl IotaNamesMetrics {
@@ -115,6 +116,11 @@ impl IotaNamesMetrics {
             auction_final_prices: Histogram::new_in_registry(
                 "auction_final_prices",
                 "The final prices paid for domains in auctions",
+                registry,
+            ),
+            auction_durations: Histogram::new_in_registry(
+                "auction_durations",
+                "The durations of auctions",
                 registry,
             ),
         }
