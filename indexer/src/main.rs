@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod config;
 mod events;
 mod metrics;
 mod worker;
@@ -21,6 +22,7 @@ use self::{
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
+use crate::config::IotaNamesExtendedConfig;
 
 // Define the `GIT_REVISION` and `VERSION` consts
 bin_version::bin_version!();
@@ -73,6 +75,7 @@ impl Command {
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         IotaNamesConfig::from_env().unwrap_or_default(),
+                        IotaNamesExtendedConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
                     )?;

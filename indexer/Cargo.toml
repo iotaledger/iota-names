@@ -12,7 +12,7 @@ anyhow = "1.0"
 async-trait = "0.1"
 axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
 bcs = "0.1"
-clap = { version = "4.4", features = ["derive", "wrap_help"] }
+clap = { version = "4.4", features = ["derive", "wrap_help", "env"] }
 dotenvy = "0.15"
 futures = "0.3"
 prometheus = "0.14"
@@ -23,14 +23,13 @@ tokio-util = "0.7"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["std", "fmt", "ansi", "smallvec", "tracing-log", "local-time", "env-filter"] }
 
-bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-iota-json = { git = "https://github.com/iotaledger/iota", package = "iota-json", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-metrics", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-# iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
-iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
-move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types", rev = "ebd10776578ea5649ef536d3d5a05c011b2d7d47" }
+bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version" }
+iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core" }
+iota-json = { git = "https://github.com/iotaledger/iota", package = "iota-json" }
+iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-metrics" }
+iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
+iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types" }
+move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types" }
 
 [features]
 default = []

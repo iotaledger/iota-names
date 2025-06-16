@@ -31,7 +31,7 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{IotaNamesMetrics, events::IotaNamesEvent};
+use crate::{IotaNamesMetrics, config::IotaNamesExtendedConfig, events::IotaNamesEvent};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -71,15 +71,16 @@ pub(crate) async fn run_iota_names_reader(
 
 pub(crate) struct IotaNamesWorker {
     config: IotaNamesConfig,
+    extended_config: IotaNamesExtendedConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
     balance_object_id: ObjectID,
-    auction_house_object_id: ObjectID,
 }
 
 impl IotaNamesWorker {
     pub(crate) fn new(
         config: IotaNamesConfig,
+        extended_config: IotaNamesExtendedConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
     ) -> anyhow::Result<Self> {
@@ -101,30 +102,12 @@ impl IotaNamesWorker {
                 .to_bcs_bytes(&layout)?,
         )?;
 
-        let config_type = StructTag::from_str(&format!(
-            "{}::auction::BalanceKey<0x2::iota::IOTA>",
-            config.auction_package_address,
-        ))?;
-        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
-            type_: config_type.clone(),
-            fields: vec![MoveFieldLayout::new(
-                Identifier::from_str("dummy_field")?,
-                MoveTypeLayout::Bool,
-            )],
-        }));
-        let auction_house_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
-            config.auction_house_id,
-            &TypeTag::Struct(Box::new(config_type)),
-            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
-                .to_bcs_bytes(&layout)?,
-        )?;
-
         Ok(Self {
             config,
+            extended_config,
             metrics,
             token,
             balance_object_id,
-            auction_house_object_id,
         })
     }
 
@@ -225,7 +208,7 @@ impl IotaNamesWorker {
                 let balance = get_iota_names_balance(object)?;
                 self.metrics.iota_names_balance.set(balance.value() as _);
                 iota_names_balance = true;
-            } else if object.id() == self.auction_house_object_id {
+            } else if object.id() == self.extended_config.auction_house_id {
                 let balance = get_auction_house_balance(object)?;
                 self.metrics.auction_house_balance.set(balance.value() as _);
                 auction_house_balance = true;
