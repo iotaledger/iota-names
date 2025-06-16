@@ -2,6 +2,7 @@
     "adminAddress": "0xb98bc58cd2cae4c621b47ed0a3bbed2e1dcb78da60d578625384dad3a231c6fb",
     "adminCap": "0x84096eeb81f666bc8e7b14803b387617ad92aa796b5f84ddc752a513b273fc34",
     "auctionPackageId": "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50",
+    "auctionHousseId": "0x12345",
     "coins": {
         "IOTA": {
             "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
