@@ -6,7 +6,9 @@ import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
+
+import { queryKey } from './queryKey';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
@@ -57,7 +59,7 @@ export function useUpdateNameTransaction({
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ['update-name-transaction', address, name, nft, updates],
+        queryKey: [...queryKey.updateName(name, address), nft, updates],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);

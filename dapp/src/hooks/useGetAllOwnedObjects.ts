@@ -3,14 +3,21 @@
 
 import { useIotaClient } from '@iota/dapp-kit';
 import { IotaObjectData, type IotaObjectDataFilter } from '@iota/iota-sdk/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+
+import { queryKey } from './queryKey';
 
 const MAX_OBJECTS_PER_REQ = 10;
 
-export function useGetAllOwnedObjects(address: string, filter?: IotaObjectDataFilter) {
+export function useGetAllOwnedObjects<Data>(
+    address: string,
+    filter?: IotaObjectDataFilter,
+    options?: Omit<UseQueryOptions<IotaObjectData[], Error, Data>, 'queryKey' | 'queryFn'>,
+) {
     const client = useIotaClient();
     return useQuery({
-        queryKey: ['get-all-owned-objects', address, filter],
+        ...options,
+        queryKey: [...queryKey.ownedObjects(address), filter],
         queryFn: async () => {
             let cursor: string | undefined | null = null;
             const allData: IotaObjectData[] = [];

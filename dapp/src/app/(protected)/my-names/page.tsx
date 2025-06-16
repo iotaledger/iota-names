@@ -12,7 +12,8 @@ import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
-    const registrationNfts = useRegistrationNfts();
+    const { data: domains } = useRegistrationNfts('domain');
+    const { data: subdomains } = useRegistrationNfts('subdomain');
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -27,8 +28,9 @@ function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />
             </div>
-            <div className="flex flex-col gap-x-sm items-center">
-                {registrationNfts.map((nft) => (
+            <div className="flex flex-col gap-y-sm items-center">
+                {' '}
+                {domains?.map((nft) => (
                     <Card key={nft.name} type={CardType.Filled}>
                         <CardBody
                             title={nft.name}
@@ -43,6 +45,28 @@ function MyNamesPage(): JSX.Element {
                     </Card>
                 ))}
             </div>
+            <div className="pt-md">
+                <Title title="My subnames" />
+            </div>
+            {subdomains?.length && (
+                <div className="flex flex-col gap-y-sm items-center">
+                    {' '}
+                    {subdomains.map((subdomain) => (
+                        <Card key={subdomain.name} type={CardType.Filled}>
+                            <CardBody
+                                title={subdomain.name}
+                                subtitle={subdomain.name}
+                                clickableAction={
+                                    <Button
+                                        text="Manage"
+                                        onClick={() => setUpdateNameDialog(subdomain.name)}
+                                    />
+                                }
+                            />
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

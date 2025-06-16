@@ -9,3 +9,4 @@ export * from './useRegistrationNfts';
 export * from './useTheme';
 export * from './useIotaGraphQLClient';
 export * from './useSubnameRecord';
+export * from './queryKey';

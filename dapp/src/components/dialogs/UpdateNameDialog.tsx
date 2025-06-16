@@ -25,6 +25,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
 import { useSubnameRecord } from '@/hooks';
+import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
@@ -178,9 +179,21 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                 digest: transaction.digest,
             });
 
-            await queryClient.refetchQueries({
-                predicate: (query) => query.queryKey.includes('iota-name'),
-            });
+            for (const update of updates) {
+                switch (update.type) {
+                    case 'unset-default':
+                    case 'set-default':
+                        queryClient.invalidateQueries({
+                            queryKey: queryKey.defaultName(account?.address || ''),
+                        });
+                        break;
+                    case 'set-target-address':
+                        queryClient.invalidateQueries({
+                            queryKey: queryKey.nameRecord(name),
+                        });
+                        break;
+                }
+            }
         },
     });
 
