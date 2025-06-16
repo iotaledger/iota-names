@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// mod api;
+mod api;
 mod db;
 mod events;
 mod metrics;
@@ -19,12 +19,12 @@ use tracing_subscriber::{
     EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
 };
 
-use self::{
-    // api::start_api_server,
+use crate::{
+    api::start_api_server,
+    db::pool::{ConnectionPool, ConnectionPoolConfig},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
-use crate::db::pool::{ConnectionPool, ConnectionPoolConfig};
 
 // Define the `GIT_REVISION` and `VERSION` consts
 bin_version::bin_version!();
@@ -84,14 +84,14 @@ impl Command {
                 let connection_pool = Arc::new(ConnectionPool::new(connection_pool_config)?);
                 connection_pool.run_migrations()?;
 
-                // Spawn the API server
+                // Spawn the auction API server
                 let api_handle = cancel_token.clone();
-                let api_pool = connection_pool.clone();
-                // tasks.spawn(async move {
-                //     let res = start_api_server(api_pool, api_port, api_handle.clone()).await;
-                //     api_handle.cancel();
-                //     res
-                // });
+                let database_pool = connection_pool.clone();
+                tasks.spawn(async move {
+                    let res = start_api_server(database_pool, api_port, api_handle.clone()).await;
+                    api_handle.cancel();
+                    res
+                });
 
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(

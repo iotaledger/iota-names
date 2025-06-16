@@ -7,28 +7,22 @@ use axum::{
     Router,
     extract::{Path, State},
     http::StatusCode,
-    response::Json,
+    response::{IntoResponse, Json, Response},
     routing::get,
 };
-use serde::{Deserialize, Serialize};
+use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 use crate::db::{
-    models::{AuctionBid, IotaAddress},
+    bidders, domains,
+    models::{Bidder, BidderDomain, Domain},
     pool::ConnectionPool,
 };
 
 #[derive(Clone)]
 pub struct ApiState {
     pub pool: Arc<ConnectionPool>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct BidInfo {
-    pub domain: String,
-    pub bid: i64,
-    pub timestamp_ms: i64,
 }
 
 pub async fn start_api_server(
@@ -39,14 +33,14 @@ pub async fn start_api_server(
     let state = ApiState { pool };
 
     let app = Router::new()
-        .route("/bids/{address}", get(get_bids_for_address))
         .route("/health", get(health_check))
+        .route("/auctions/{address}", get(get_domains_for_address))
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await?;
 
-    info!("API server listening on {}", addr);
+    info!("API server listening on {addr}");
 
     tokio::select! {
         result = axum::serve(listener, app) => {
@@ -66,45 +60,47 @@ async fn health_check() -> &'static str {
     "OK"
 }
 
-async fn get_bids_for_address(
+async fn get_domains_for_address(
     State(state): State<ApiState>,
     Path(address_str): Path<String>,
-) -> Result<Json<Vec<BidInfo>>, StatusCode> {
-    use diesel::prelude::*;
+) -> Result<Json<Vec<String>>, AppError> {
+    let mut conn = state.pool.get_connection()?;
 
-    use crate::db::auction_bids;
+    let bidder = bidders::table
+        .filter(bidders::address.eq(address_str))
+        .select(Bidder::as_select())
+        .get_result(&mut conn)?;
 
-    // Parse the address
-    let address = match address_str.parse::<iota_types::base_types::IotaAddress>() {
-        Ok(addr) => IotaAddress(addr),
-        Err(_) => return Err(StatusCode::BAD_REQUEST),
-    };
+    let domains = BidderDomain::belonging_to(&bidder)
+        .inner_join(domains::table)
+        .select(Domain::as_select())
+        .load(&mut conn)?;
 
-    // Get database connection
-    let mut conn = match state.pool.get_connection() {
-        Ok(conn) => conn,
-        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
-    };
+    Ok(Json(domains.into_iter().map(|d| d.name).collect()))
+}
 
-    // Query for bids by this address
-    let bids = match auction_bids::dsl::auction_bids
-        .filter(auction_bids::dsl::bidder.eq(address))
-        .order(auction_bids::dsl::timestamp_ms.desc())
-        .load::<AuctionBid>(&mut conn)
-    {
-        Ok(bids) => bids,
-        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR),
-    };
+// Make our own error that wraps `anyhow::Error`.
+struct AppError(anyhow::Error);
 
-    // Convert to response format
-    let bid_infos: Vec<BidInfo> = bids
-        .into_iter()
-        .map(|bid| BidInfo {
-            domain: bid.domain,
-            bid: bid.bid,
-            timestamp_ms: bid.timestamp_ms,
-        })
-        .collect();
+// Tell axum how to convert `AppError` into a response.
+impl IntoResponse for AppError {
+    fn into_response(self) -> Response {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Something went wrong: {}", self.0),
+        )
+            .into_response()
+    }
+}
 
-    Ok(Json(bid_infos))
+// This enables using `?` on functions that return `Result<_, anyhow::Error>` to
+// turn them into `Result<_, AppError>`. That way you don't need to do that
+// manually.
+impl<E> From<E> for AppError
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }

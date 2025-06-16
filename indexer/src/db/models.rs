@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use diesel::prelude::*;
-use iota_types::base_types::IotaAddress;
 
 use crate::db::{bidder_domain, bidders, domains};
 
