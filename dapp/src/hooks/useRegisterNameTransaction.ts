@@ -9,6 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useIotaNamesClient } from '@/contexts';
 import { getGasSummary } from '@/lib/utils/getGasSummary';
 
+import { queryKey } from './queryKey';
+
 export function useRegisterNameTransaction(
     address: string,
     name: string,
@@ -20,7 +22,7 @@ export function useRegisterNameTransaction(
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ['register-name-transaction', address, name, years, price],
+        queryKey: [...queryKey.registerName(name, address), years, price],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
