@@ -73,7 +73,7 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
-    pool: AssertUnwindSafe<ConnectionPool>,
+    pool: ConnectionPool,
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
@@ -82,7 +82,7 @@ pub(crate) struct IotaNamesWorker {
 
 impl IotaNamesWorker {
     pub(crate) fn new(
-        pool: AssertUnwindSafe<ConnectionPool>,
+        pool: ConnectionPool,
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
@@ -289,8 +289,7 @@ impl Worker for IotaNamesWorker {
         &self,
         checkpoint: Arc<CheckpointData>,
     ) -> Result<Self::Message, Self::Error> {
-        let res = self
-            .process_checkpoint(&checkpoint)
+        let res = AssertUnwindSafe(self.process_checkpoint(&checkpoint))
             .catch_unwind()
             .await
             .map_err(map_panic);

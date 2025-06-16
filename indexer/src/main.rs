@@ -7,7 +7,7 @@ mod events;
 mod metrics;
 mod worker;
 
-use std::{panic::AssertUnwindSafe, sync::Arc};
+use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
@@ -95,7 +95,7 @@ impl Command {
 
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
-                        AssertUnwindSafe(connection_pool),
+                        connection_pool,
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
