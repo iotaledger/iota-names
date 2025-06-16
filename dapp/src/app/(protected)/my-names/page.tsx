@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Button, Card, CardBody, CardType, Title } from '@iota/apps-ui-kit';
+import { Button, Card, CardBody, CardType, KeyValueInfo, Title } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
@@ -12,8 +12,13 @@ import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+<<<<<<< tooling/centralize-query-keys -- Incoming Change
 
     const { data: registrationNfts } = useRegistrationNfts();
+=======
+    const domains = useRegistrationNfts('domain');
+    const subdomains = useRegistrationNfts('subdomain');
+>>>>>>> develop -- Current Change
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -29,7 +34,7 @@ function MyNamesPage(): JSX.Element {
                 <Title title="My names" testId="my-names-page" />
             </div>
             <div className="flex flex-col gap-y-sm items-center">
-                {registrationNfts?.map((nft) => (
+                {domains?.map((nft) => (
                     <Card key={nft.name} type={CardType.Filled}>
                         <CardBody
                             title={nft.name}
@@ -44,6 +49,21 @@ function MyNamesPage(): JSX.Element {
                     </Card>
                 ))}
             </div>
+            <div className="pt-md">
+                <Title title="My subnames" />
+            </div>
+            {subdomains?.length && (
+                <div className="flex flex-col gap-x-sm items-center pl-4">
+                    {subdomains.map((subdomain) => (
+                        <KeyValueInfo
+                            key={subdomain.name}
+                            keyText={subdomain.name}
+                            value={subdomain?.description ?? ''}
+                            fullwidth
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
