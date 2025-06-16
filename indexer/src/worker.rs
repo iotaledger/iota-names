@@ -164,7 +164,12 @@ impl IotaNamesWorker {
             IotaNamesEvent::AuctionStarted(_event) => {
                 self.metrics.total_auction_started.inc();
             }
-            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionBid(event) => {
+                self.metrics
+                    .total_bids_per_auction
+                    .with_label_values(&[event.domain.to_string()])
+                    .inc();
+            }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
