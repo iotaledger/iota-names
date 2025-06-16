@@ -51,9 +51,6 @@ const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 public struct AuctionAuth has drop {}
 
 /// The AuctionHouse application.
-/// 
-/// Dynamic fields:
-/// - `balance: BalanceKey<IOTA> -> Balance<IOTA>`
 public struct AuctionHouse has key, store {
     id: UID,
     balance: Balance<IOTA>,
