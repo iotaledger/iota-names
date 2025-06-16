@@ -10,11 +10,12 @@ use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
 };
 use iota_json::IotaJsonValue;
-use iota_names::config::IotaNamesConfig;
+use iota_names::{config::IotaNamesConfig, domain::Domain};
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
     base_types::ObjectID,
+    collection_types::LinkedTable,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
@@ -221,11 +222,11 @@ impl IotaNamesWorker {
         let mut auction_house_balance = false;
         for object in checkpoint.latest_live_output_objects() {
             if object.id() == self.balance_object_id {
-                let balance = get_balance(object)?;
+                let balance = get_iota_names_balance(object)?;
                 self.metrics.iota_names_balance.set(balance.value() as _);
                 iota_names_balance = true;
             } else if object.id() == self.auction_house_object_id {
-                let balance = get_balance(object)?;
+                let balance = get_auction_house_balance(object)?;
                 self.metrics.auction_house_balance.set(balance.value() as _);
                 auction_house_balance = true;
             } else {
@@ -305,7 +306,7 @@ fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error 
     }
 }
 
-fn get_balance(object: &Object) -> anyhow::Result<Balance> {
+fn get_iota_names_balance(object: &Object) -> anyhow::Result<Balance> {
     Ok(bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
         object
             .as_inner()
@@ -315,4 +316,24 @@ fn get_balance(object: &Object) -> anyhow::Result<Balance> {
             .contents(),
     )?
     .value)
+}
+
+fn get_auction_house_balance(object: &Object) -> anyhow::Result<Balance> {
+    #[expect(dead_code)]
+    #[derive(serde::Deserialize)]
+    struct AuctionHouse {
+        pub id: ObjectID,
+        pub balance: Balance,
+        pub auctions: LinkedTable<Domain>,
+    }
+
+    Ok(bcs::from_bytes::<AuctionHouse>(
+        object
+            .as_inner()
+            .data
+            .try_as_move()
+            .expect("invalid move object")
+            .contents(),
+    )?
+    .balance)
 }
