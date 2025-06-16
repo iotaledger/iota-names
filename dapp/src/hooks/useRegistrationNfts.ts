@@ -40,19 +40,18 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
         }
     })();
 
-    const { data: namesRegistrationData } = useGetAllOwnedObjects(address, filter);
-
-    const registrationNfts: RegistrationNft[] =
-        namesRegistrationData?.map((nameRecord) => {
-            const data = nameRecord?.display?.data;
-            return {
-                name: data?.name ?? '',
-                description: data?.description,
-                image_url: data?.image_url,
-                link: data?.link,
-                project_url: data?.project_url,
-            };
-        }) ?? [];
-
-    return registrationNfts;
+    return useGetAllOwnedObjects(address, filter, {
+        select(data) {
+            return data.map((nameRecord) => {
+                const data = nameRecord?.display?.data;
+                return {
+                    name: data?.name ?? '',
+                    description: data?.description,
+                    image_url: data?.image_url,
+                    link: data?.link,
+                    project_url: data?.project_url,
+                };
+            });
+        },
+    });
 }
