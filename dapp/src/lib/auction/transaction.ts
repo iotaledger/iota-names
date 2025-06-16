@@ -66,7 +66,7 @@ export function buildClaimDomainTransaction(
 
     transaction.setSender(senderAddress);
 
-    transaction.moveCall({
+    const [nft] = transaction.moveCall({
         target: `${auctionPackageId}::auction::claim`,
         arguments: [
             transaction.object(auctionHouseId),
@@ -74,6 +74,8 @@ export function buildClaimDomainTransaction(
             transaction.object(IOTA_CLOCK_OBJECT_ID),
         ],
     });
+
+    transaction.transferObjects([nft], senderAddress);
 
     return transaction;
 }
