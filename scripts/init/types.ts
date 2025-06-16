@@ -28,5 +28,5 @@ export type IotaNames = {
 export type Auction = {
     packageId: string;
     upgradeCap: string;
-    auctionHouseId: string;
+    auctionHouse: string;
 };

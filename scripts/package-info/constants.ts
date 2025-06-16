@@ -9,7 +9,7 @@ export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
     auctionPackageId: string;
-    auctionHouseId: string;
+    auctionHouse: string;
     coins: {
         [key: string]: {
             type: string;
