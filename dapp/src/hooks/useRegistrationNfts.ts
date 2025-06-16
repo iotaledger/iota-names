@@ -26,7 +26,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
     const { iotaNamesClient } = useIotaNamesClient();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
-  
+
     const filter = (() => {
         switch (type) {
             case 'domain':
@@ -39,23 +39,19 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 };
         }
     })();
-  
-    return useGetAllOwnedObjects(
-        address,
-        filter,
-        {
-            select(data) {
-                return data.map((nameRecord) => {
-                    const data = nameRecord?.display?.data;
-                    return {
-                        name: data?.name ?? '',
-                        description: data?.description,
-                        image_url: data?.image_url,
-                        link: data?.link,
-                        project_url: data?.project_url,
-                    };
-                });
-            },
+
+    return useGetAllOwnedObjects(address, filter, {
+        select(data) {
+            return data.map((nameRecord) => {
+                const data = nameRecord?.display?.data;
+                return {
+                    name: data?.name ?? '',
+                    description: data?.description,
+                    image_url: data?.image_url,
+                    link: data?.link,
+                    project_url: data?.project_url,
+                };
+            });
         },
-    );
+    });
 }

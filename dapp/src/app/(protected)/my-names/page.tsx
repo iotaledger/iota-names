@@ -12,13 +12,8 @@ import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
-<<<<<<< tooling/centralize-query-keys -- Incoming Change
-
-    const { data: registrationNfts } = useRegistrationNfts();
-=======
-    const domains = useRegistrationNfts('domain');
-    const subdomains = useRegistrationNfts('subdomain');
->>>>>>> develop -- Current Change
+    const { data: domains } = useRegistrationNfts('domain');
+    const { data: subdomains } = useRegistrationNfts('subdomain');
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
