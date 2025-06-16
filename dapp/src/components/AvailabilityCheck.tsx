@@ -71,7 +71,7 @@ export function AvailabilityCheck() {
 
     const errorMessage = error?.message ?? validationError ?? '';
     const canBuy = data?.type === 'available';
-    const enableSearch = Boolean(searchValue);
+    const enableSearch = Boolean(searchValue) && !errorMessage;
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -100,7 +100,7 @@ export function AvailabilityCheck() {
                 <Button
                     size={ButtonSize.Medium}
                     text="Search"
-                    disabled={!enableSearch || !!errorMessage}
+                    disabled={!enableSearch}
                     onClick={handleSearch}
                 />
             </div>
