@@ -6,8 +6,8 @@ use std::time::Duration;
 use anyhow::{Result, anyhow};
 use clap::Args;
 use diesel::{
+    SqliteConnection,
     connection::SimpleConnection,
-    prelude::*,
     r2d2::{ConnectionManager, Pool, PooledConnection},
     sqlite::Sqlite,
 };
