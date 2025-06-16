@@ -32,10 +32,7 @@ use tracing::{debug, info, warn};
 
 use crate::{
     IotaNamesMetrics,
-    db::{
-        helpers::{create_bidder_domain_relationship, get_or_create_bidder, get_or_create_domain},
-        pool::ConnectionPool,
-    },
+    db::{helpers::add_bidder_domain_entry, pool::ConnectionPool},
     events::IotaNamesEvent,
 };
 
@@ -176,19 +173,21 @@ impl IotaNamesWorker {
                 self.metrics.total_auction_started.inc();
                 let mut pool = self.pool.get_connection()?;
                 pool.transaction::<_, anyhow::Error, _>(|conn| {
-                    let bidder = get_or_create_bidder(conn, &event.bidder.to_string())?;
-                    let domain = get_or_create_domain(conn, &event.domain.to_string())?;
-                    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
-                    Ok(())
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let mut pool = self.pool.get_connection()?;
                 pool.transaction::<_, anyhow::Error, _>(|conn| {
-                    let bidder = get_or_create_bidder(conn, &event.bidder.to_string())?;
-                    let domain = get_or_create_domain(conn, &event.domain.to_string())?;
-                    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
-                    Ok(())
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),

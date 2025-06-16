@@ -7,10 +7,7 @@ use diesel::{
     SqliteConnection, insert_into,
 };
 
-use super::{
-    bidder_domain, bidders, domains,
-    models::{Bidder, BidderDomain, Domain},
-};
+use super::models::{Bidder, BidderDomain, Domain, bidder_domain, bidders, domains};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -59,5 +56,16 @@ pub fn create_bidder_domain_relationship(
         .on_conflict_do_nothing()
         .returning(BidderDomain::as_returning())
         .execute(conn)?;
+    Ok(())
+}
+
+pub fn add_bidder_domain_entry(
+    conn: &mut SqliteConnection,
+    bidder_address: &str,
+    domain_name: &str,
+) -> Result<()> {
+    let bidder = get_or_create_bidder(conn, bidder_address)?;
+    let domain = get_or_create_domain(conn, domain_name)?;
+    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
     Ok(())
 }

@@ -3,8 +3,6 @@
 
 use diesel::prelude::*;
 
-use crate::db::{bidder_domain, bidders, domains};
-
 #[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
 #[diesel(table_name = domains)]
 pub struct Domain {
@@ -28,3 +26,29 @@ pub struct Bidder {
     pub id: i32,
     pub address: String,
 }
+
+diesel::table! {
+    domains (id) {
+        id -> Int4,
+        name -> Text,
+    }
+}
+
+diesel::table! {
+    bidders (id) {
+        id -> Int4,
+        address -> Text,
+    }
+}
+
+diesel::table! {
+    bidder_domain (bidder_id, domain_id) {
+        bidder_id -> Int4,
+        domain_id -> Int4,
+    }
+}
+
+diesel::joinable!(bidder_domain -> domains (domain_id));
+diesel::joinable!(bidder_domain -> bidders (bidder_id));
+
+diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain,);

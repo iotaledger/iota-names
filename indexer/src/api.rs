@@ -15,8 +15,7 @@ use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 use crate::db::{
-    bidders, domains,
-    models::{Bidder, BidderDomain, Domain},
+    models::{Bidder, BidderDomain, Domain, bidders, domains},
     pool::ConnectionPool,
 };
 
