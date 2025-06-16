@@ -85,9 +85,7 @@ impl diesel::r2d2::CustomizeConnection<SqliteConnection, diesel::r2d2::Error>
 ///
 /// Uses [`Arc`][`std::sync::Arc`] internally.
 #[derive(Debug, Clone)]
-pub struct ConnectionPool {
-    pool: Pool<ConnectionManager<SqliteConnection>>,
-}
+pub struct ConnectionPool(Pool<ConnectionManager<SqliteConnection>>);
 
 impl ConnectionPool {
     /// Build a new pool of connections.
@@ -101,8 +99,8 @@ impl ConnectionPool {
     pub fn new_with_url(db_url: &str, pool_config: ConnectionPoolConfig) -> Result<Self> {
         let manager = ConnectionManager::new(db_url);
 
-        Ok(Self {
-            pool: Pool::builder()
+        Ok(Self(
+            Pool::builder()
                 .max_size(pool_config.pool_size)
                 .connection_timeout(pool_config.connection_timeout_secs)
                 .connection_customizer(Box::new(pool_config))
@@ -110,12 +108,12 @@ impl ConnectionPool {
                 .map_err(|e| {
                     anyhow!("failed to initialize connection pool for {db_url} with error: {e:?}")
                 })?,
-        })
+        ))
     }
 
     /// Get a connection from the pool.
     pub fn get_connection(&self) -> Result<PoolConnection> {
-        self.pool.get().map_err(|e| {
+        self.0.get().map_err(|e| {
             anyhow!("failed to get connection from PG connection pool with error: {e:?}",)
         })
     }
