@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::net::SocketAddr;
+use std::{net::SocketAddr, str::FromStr};
 
 use axum::{
     Router,
@@ -10,6 +10,7 @@ use axum::{
     response::{IntoResponse, Json, Response},
     routing::get,
 };
+use iota_types::base_types::IotaAddress;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
@@ -58,34 +59,76 @@ async fn health_check() -> &'static str {
 async fn get_domains_for_address(
     State(state): State<ApiState>,
     Path(address_str): Path<String>,
-) -> Result<Json<Vec<String>>, AppError> {
+) -> Result<Json<Vec<String>>, ApiError> {
+    IotaAddress::from_str(&address_str)
+        .map_err(|_| ApiError::BadRequest("Invalid IOTA address".to_string()))?;
+
     let mut conn = state.pool.get_connection()?;
     let domains = get_domains_for_bidder_address(&mut conn, &address_str)?;
+
     Ok(Json(domains))
 }
 
-// Make our own error that wraps `anyhow::Error`.
-struct AppError(anyhow::Error);
+#[derive(Debug)]
+pub enum ApiError {
+    // Database connection or query errors
+    DatabaseError(anyhow::Error),
+    // Invalid input data (e.g., malformed address)
+    BadRequest(String),
+    // Internal server errors
+    InternalError(anyhow::Error),
+}
 
-// Tell axum how to convert `AppError` into a response.
-impl IntoResponse for AppError {
+// Tell axum how to convert `ApiError` into a response.
+impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Something went wrong: {}", self.0),
-        )
-            .into_response()
+        match self {
+            ApiError::BadRequest(msg) => (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({
+                    "error": "Bad Request",
+                    "message": msg
+                })),
+            )
+                .into_response(),
+
+            ApiError::DatabaseError(err) => {
+                tracing::error!("Database error: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({
+                        "error": "Database Error",
+                        "message": "A database error occurred"
+                    })),
+                )
+                    .into_response()
+            }
+
+            ApiError::InternalError(err) => {
+                tracing::error!("Internal error: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(serde_json::json!({
+                        "error": "Internal Server Error",
+                        "message": "An unexpected error occurred"
+                    })),
+                )
+                    .into_response()
+            }
+        }
     }
 }
 
-// This enables using `?` on functions that return `Result<_, anyhow::Error>` to
-// turn them into `Result<_, AppError>`. That way you don't need to do that
-// manually.
-impl<E> From<E> for AppError
-where
-    E: Into<anyhow::Error>,
-{
-    fn from(err: E) -> Self {
-        Self(err.into())
+// Convert anyhow::Error to ApiError::InternalError by default
+impl From<anyhow::Error> for ApiError {
+    fn from(err: anyhow::Error) -> Self {
+        ApiError::InternalError(err)
+    }
+}
+
+// Convert database errors specifically
+impl From<diesel::result::Error> for ApiError {
+    fn from(err: diesel::result::Error) -> Self {
+        ApiError::DatabaseError(err.into())
     }
 }
