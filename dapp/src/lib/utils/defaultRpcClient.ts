@@ -1,13 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    getAllNetworks,
-    getNetwork,
-    IotaClient,
-    IotaHTTPTransport,
-    type NetworkId,
-} from '@iota/iota-sdk/client';
+import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
+import { getAllNetworks, getNetwork, IotaClient, type NetworkId } from '@iota/iota-sdk/client';
 
 export const SupportedNetworks = getAllNetworks();
 
@@ -20,10 +15,14 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
 
     const supportedNetwork = getNetwork(network);
     // If network is not supported, we use assume we are using a custom RPC
-    const networkUrl = supportedNetwork?.url ?? network;
+    const networkGraphqlUrl = supportedNetwork?.graphql ?? network;
+    const networkJsonRpcUrl = supportedNetwork?.url;
 
     const client = new IotaClient({
-        transport: new IotaHTTPTransport({ url: networkUrl }),
+        transport: new IotaClientGraphQLTransport({
+            url: networkGraphqlUrl,
+            fallbackTransportUrl: networkJsonRpcUrl,
+        }),
     });
     defaultClientMap.set(network, client);
     return client;

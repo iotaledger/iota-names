@@ -108,15 +108,51 @@ impl IotaNamesWorker {
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
-            IotaNamesEvent::IotaNamesRegistry(event) => {
-                self.metrics.total_name_records.inc();
-                let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
+            IotaNamesEvent::NameRecordAdded(event) => {
+                self.metrics.total_name_records_added.inc();
+
+                let sld_length = event.domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&second_level_name_len.to_string()])
+                    .with_label_values(&[&sld_length.to_string()])
+                    .inc();
+
+                let depth = event.domain.num_labels();
+                self.metrics
+                    .name_depth_distribution
+                    .with_label_values(&[&depth.to_string()])
                     .inc();
             }
-            IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::NameRecordRemoved(event) => {
+                self.metrics.total_name_records_removed.inc();
+
+                let sld_length = event.domain.label(1).expect("missing SLD").len();
+                self.metrics
+                    .name_length_distribution
+                    .with_label_values(&[&sld_length.to_string()])
+                    .dec();
+
+                let depth = event.domain.num_labels();
+                self.metrics
+                    .name_depth_distribution
+                    .with_label_values(&[&depth.to_string()])
+                    .dec();
+            }
+            IotaNamesEvent::ReverseLookupSet(_event) => (),
+            IotaNamesEvent::UserDataSet(event) => {
+                if event.new {
+                    self.metrics
+                        .user_data_distribution
+                        .with_label_values(&[&event.key])
+                        .inc();
+                }
+            }
+            IotaNamesEvent::UserDataUnset(event) => {
+                self.metrics
+                    .user_data_distribution
+                    .with_label_values(&[&event.key])
+                    .dec();
+            }
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
@@ -130,8 +166,9 @@ impl IotaNamesWorker {
             }
             IotaNamesEvent::AuctionBid(_event) => (),
             IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => {
+            IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
+                self.metrics.auction_final_prices.observe(event.winning_bid);
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();

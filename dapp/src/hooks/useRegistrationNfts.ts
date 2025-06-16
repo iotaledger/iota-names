@@ -3,6 +3,7 @@
 
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { getIotaNamesRegistrationType } from '@iota/iota-names-sdk';
+import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/providers/contexts';
 
@@ -16,8 +17,6 @@ export interface RegistrationNft {
     project_url?: string;
     expiration_timestamp_ms: number;
     id: string;
-    isAllowRenew?: boolean; // subdomains
-    isAllowSubdomains?: boolean; //subdomains
 }
 
 export function useRegistrationNfts() {
@@ -33,18 +32,22 @@ export function useRegistrationNfts() {
 
     const registrationNfts: RegistrationNft[] =
         namesRegistrationData?.map((nameRecord) => {
-            const data = nameRecord?.display?.data;
-            const fields = nameRecord?.content?.fields;
+            const data = nameRecord.display?.data;
+            const content = nameRecord.content as
+                | Extract<IotaParsedData, { dataType: 'moveObject' }>
+                | undefined
+                | null;
+
+            const fields = content?.fields as { expiration_timestamp_ms?: string } | undefined;
+
             return {
                 name: data?.name ?? '',
                 description: data?.description,
                 image_url: data?.image_url,
                 link: data?.link,
                 project_url: data?.project_url,
-                expiration_timestamp_ms: fields?.expiration_timestamp_ms,
-                id: nameRecord?.objectId,
-                isAllowRenew: false,
-                isAllowSubdomains: false,
+                expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
+                id: nameRecord?.objectId ?? '',
             };
         }) ?? [];
 
