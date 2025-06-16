@@ -55,10 +55,10 @@ GET /health
 
 Returns `OK` if the server is running.
 
-### Get Bids for Address
+### Get Domains an Address Bid for
 
 ```
-GET /bids/{address}
+GET /auctions/{address}
 ```
 
 Returns all domains that a specific address has bid on.
@@ -70,15 +70,11 @@ Returns all domains that a specific address has bid on.
 **Response:**
 
 ```json
-[
-  {
-    "domains":[ "example.iota"]
-  }
-]
+["auction.iota","one-more.iota"]
 ```
 
 **Example:**
 
 ```bash
-curl http://localhost:3030/bids/0x0000000000000000000000000000000000000000000000000000000000000000
+curl http://localhost:3030/auctions/0x111111111504e9350e635d65cd38ccd2c029434c6a3a480d8947a9ba6a15b215
 ```
