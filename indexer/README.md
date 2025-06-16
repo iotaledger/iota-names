@@ -53,8 +53,7 @@ GET /health
 
 Returns `OK` if the server is running.
 
-### Get Domains an Address Bid for
-
+### Get Domains for an Address
 ```
 GET /auctions/{address}
 ```
