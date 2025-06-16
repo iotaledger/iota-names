@@ -318,17 +318,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             </Card>
                         </>
                     ) : null}
-                    <Card type={CardType.Outlined}>
-                        <CardBody title="Add new subname" subtitle="Create a new subdomain." />
-                        <Button
-                            text="Add subname"
-                            onClick={() => setSubdomainDialogOpen(true)}
-                            disabled={
-                                (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) < Date.now() &&
-                                fullSubdomainName !== ''
-                            }
-                        />
-                    </Card>
+                    {(!isNameSubName || editIsAllowSubnames) && (
+                        <Card type={CardType.Outlined}>
+                            <CardBody title="Add new subname" subtitle="Create a new subdomain." />
+                            <Button
+                                text="Add subname"
+                                onClick={() => setSubdomainDialogOpen(true)}
+                                disabled={
+                                    (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
+                                        Date.now() && fullSubdomainName !== ''
+                                }
+                            />
+                        </Card>
+                    )}
                     {subdomainDialogOpen && (
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogContent containerId="overlay-portal-container">
