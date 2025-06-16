@@ -3,7 +3,7 @@
 
 use anyhow::Result;
 use diesel::{
-    ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
+    BelongingToDsl, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
     SqliteConnection, insert_into,
 };
 
@@ -68,4 +68,21 @@ pub fn add_bidder_domain_entry(
     let domain = get_or_create_domain(conn, domain_name)?;
     create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
     Ok(())
+}
+
+pub fn get_domains_for_bidder_address(
+    conn: &mut SqliteConnection,
+    address: &str,
+) -> Result<Vec<String>> {
+    let bidder = bidders::table
+        .filter(bidders::address.eq(address))
+        .select(Bidder::as_select())
+        .get_result(conn)?;
+
+    let domains = BidderDomain::belonging_to(&bidder)
+        .inner_join(domains::table)
+        .select(Domain::as_select())
+        .load(conn)?;
+
+    Ok(domains.into_iter().map(|d| d.name).collect())
 }

@@ -1,9 +1,9 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-pub mod helpers;
 pub mod models;
 pub mod pool;
+pub mod queries;
 
 use diesel_migrations::{EmbeddedMigrations, embed_migrations};
 

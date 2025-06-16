@@ -10,6 +10,13 @@ pub struct Domain {
     pub name: String,
 }
 
+#[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
+#[diesel(table_name = bidders)]
+pub struct Bidder {
+    pub id: i32,
+    pub address: String,
+}
+
 #[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
 #[diesel(belongs_to(Bidder))]
 #[diesel(belongs_to(Domain))]
@@ -18,13 +25,6 @@ pub struct Domain {
 pub struct BidderDomain {
     pub bidder_id: i32,
     pub domain_id: i32,
-}
-
-#[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
-#[diesel(table_name = bidders)]
-pub struct Bidder {
-    pub id: i32,
-    pub address: String,
 }
 
 diesel::table! {

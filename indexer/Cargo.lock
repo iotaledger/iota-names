@@ -3836,7 +3836,6 @@ dependencies = [
  "bcs",
  "bin-version",
  "clap",
- "derive_more 1.0.0",
  "diesel",
  "diesel_migrations",
  "dotenvy",

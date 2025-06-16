@@ -32,7 +32,7 @@ use tracing::{debug, info, warn};
 
 use crate::{
     IotaNamesMetrics,
-    db::{helpers::add_bidder_domain_entry, pool::ConnectionPool},
+    db::{pool::ConnectionPool, queries::add_bidder_domain_entry},
     events::IotaNamesEvent,
 };
 
@@ -171,8 +171,8 @@ impl IotaNamesWorker {
             }
             IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
-                let mut pool = self.pool.get_connection()?;
-                pool.transaction::<_, anyhow::Error, _>(|conn| {
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
                     add_bidder_domain_entry(
                         conn,
                         &event.bidder.to_string(),
@@ -181,8 +181,8 @@ impl IotaNamesWorker {
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
-                let mut pool = self.pool.get_connection()?;
-                pool.transaction::<_, anyhow::Error, _>(|conn| {
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
                     add_bidder_domain_entry(
                         conn,
                         &event.bidder.to_string(),

@@ -45,8 +45,6 @@ The following endpoints will be available:
 
 ## REST API Endpoints
 
-The indexer includes a REST API server that provides access to auction bid data:
-
 ### Health Check
 
 ```

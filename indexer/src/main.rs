@@ -81,7 +81,7 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
-                let connection_pool = Arc::new(ConnectionPool::new(connection_pool_config)?);
+                let connection_pool = ConnectionPool::new(connection_pool_config)?;
                 connection_pool.run_migrations()?;
 
                 // Spawn the auction API server
@@ -95,7 +95,7 @@ impl Command {
 
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
-                        AssertUnwindSafe((*connection_pool).clone()),
+                        AssertUnwindSafe(connection_pool),
                         IotaNamesConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),

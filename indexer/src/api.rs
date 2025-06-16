@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{net::SocketAddr, sync::Arc};
+use std::net::SocketAddr;
 
 use axum::{
     Router,
@@ -10,22 +10,18 @@ use axum::{
     response::{IntoResponse, Json, Response},
     routing::get,
 };
-use diesel::{BelongingToDsl, ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
-use crate::db::{
-    models::{Bidder, BidderDomain, Domain, bidders, domains},
-    pool::ConnectionPool,
-};
+use crate::db::{pool::ConnectionPool, queries::get_domains_for_bidder_address};
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub pool: Arc<ConnectionPool>,
+    pub pool: ConnectionPool,
 }
 
 pub async fn start_api_server(
-    pool: Arc<ConnectionPool>,
+    pool: ConnectionPool,
     port: u16,
     token: CancellationToken,
 ) -> anyhow::Result<()> {
@@ -64,18 +60,8 @@ async fn get_domains_for_address(
     Path(address_str): Path<String>,
 ) -> Result<Json<Vec<String>>, AppError> {
     let mut conn = state.pool.get_connection()?;
-
-    let bidder = bidders::table
-        .filter(bidders::address.eq(address_str))
-        .select(Bidder::as_select())
-        .get_result(&mut conn)?;
-
-    let domains = BidderDomain::belonging_to(&bidder)
-        .inner_join(domains::table)
-        .select(Domain::as_select())
-        .load(&mut conn)?;
-
-    Ok(Json(domains.into_iter().map(|d| d.name).collect()))
+    let domains = get_domains_for_bidder_address(&mut conn, &address_str)?;
+    Ok(Json(domains))
 }
 
 // Make our own error that wraps `anyhow::Error`.
