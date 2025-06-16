@@ -1,8 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Database for auctions
-
 pub mod helpers;
 pub mod models;
 pub mod pool;

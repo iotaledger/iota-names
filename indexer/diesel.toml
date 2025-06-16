@@ -1,2 +1,2 @@
 [print_schema]
-file = "src/db/mod.rs"
+file = "src/db/models.rs"

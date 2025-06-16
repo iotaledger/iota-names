@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use diesel::prelude::*;
+use diesel::{Associations, Identifiable, Queryable, Selectable};
 
 #[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
 #[diesel(table_name = domains)]
