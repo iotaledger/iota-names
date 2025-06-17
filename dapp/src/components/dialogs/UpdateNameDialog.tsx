@@ -122,7 +122,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         nameRecord &&
         isNameSubName &&
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
-            editIsAllowingRenew != namePermissions.allowTimeExtension)
+            editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         // Only allow editing the setup if it is a subname and the config has changed
         updates.push({
@@ -130,6 +130,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             nft: nameRecord.nameRecord.nftId,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
+        });
+    }
+
+    if (
+        nameRecord &&
+        renewYears &&
+        !isExpired &&
+        (!isNameSubName || (isNameSubName && editIsAllowingRenew))
+    ) {
+        updates.push({
+            type: 'renew-name',
+            nft: nameRecord.nameRecord.nftId,
+            years: renewYears || 0,
         });
     }
     const {
@@ -201,7 +214,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     }
 
     const handleCancelRenewName = () => {
-        setRenewYears(undefined);
+        setRenewYears(0);
         setRenewDialogOpen(false);
     };
 
@@ -210,10 +223,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             console.error('Renew years required');
             return;
         }
-        // if (!isSubdomainAvailable || error) {
-        //     console.error('subdomain name is not available');
-        //     return;
-        // }
         setRenewDialogOpen(false);
     };
     const isLoading =
@@ -297,11 +306,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                         </>
                     ) : null}
 
-                    {editIsAllowingRenew && (
+                    {(!isNameSubName || (isNameSubName && editIsAllowingRenew)) && (
                         <Card type={CardType.Outlined}>
-                            <CardBody title="Add new subname" subtitle="Create a new subdomain." />
+                            <CardBody title="Renew subname" subtitle="Renew a subdomain." />
                             <Button
-                                text="Add subname"
+                                text="Renew subname"
                                 onClick={() => setRenewDialogOpen(true)}
                                 disabled={
                                     (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
@@ -322,10 +331,10 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                         <div className="mb-4">
                                             <Input
                                                 type={InputType.Text}
-                                                value={renewYears}
-                                                onChange={(e) =>
-                                                    setRenewYears(Number(e.target.value))
-                                                }
+                                                onChange={(e) => {
+                                                    const val = Number(e.target.value);
+                                                    setRenewYears(isNaN(val) ? 0 : val);
+                                                }}
                                                 placeholder="Input renew years"
                                             />
                                         </div>
