@@ -59,9 +59,19 @@ public struct NameRecordRemovedEvent has copy, drop {
     domain: Domain,
 }
 
+public struct TargetAddressSetEvent has copy, drop {
+    domain: Domain,
+    target_address: Option<address>
+}
+
 public struct ReverseLookupSetEvent has copy, drop {
     default_address: address,
-    domain: Domain
+    default_name: Domain
+}
+
+public struct ReverseLookupUnsetEvent has copy, drop {
+    default_address: address,
+    default_name: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -233,12 +243,22 @@ public fun set_target_address(self: &mut Registry, domain: Domain, new_target: O
     let record = &mut self.registry[domain];
     let old_target = record.target_address();
 
+    event::emit(TargetAddressSetEvent {
+        domain,
+        target_address: new_target
+    });
+
     record.set_target_address(new_target);
     self.handle_invalidate_reverse_record(&domain, old_target, new_target);
 }
 
 public fun unset_reverse_lookup(self: &mut Registry, address: address) {
-    self.reverse_registry.remove(address);
+    let domain = self.reverse_registry.remove(address);
+    event::emit(ReverseLookupUnsetEvent {
+        default_address: address,
+        default_name: domain
+    });
+    
 }
 
 /// Reverse lookup can only be set for the record that has the target address.
@@ -254,7 +274,7 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     } else {
         event::emit(ReverseLookupSetEvent {
             default_address: address,
-            domain
+            default_name: domain
         });
         self.reverse_registry.add(address, domain);
     };
