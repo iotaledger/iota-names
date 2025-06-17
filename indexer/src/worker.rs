@@ -1,7 +1,12 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{
+    collections::HashMap,
+    path::PathBuf,
+    str::FromStr,
+    sync::{Arc, Mutex},
+};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
@@ -72,6 +77,7 @@ pub(crate) struct IotaNamesWorker {
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
     balance_object_id: ObjectID,
+    bids_per_domain: Arc<Mutex<HashMap<String, u64>>>,
 }
 
 impl IotaNamesWorker {
@@ -103,6 +109,7 @@ impl IotaNamesWorker {
             metrics,
             token,
             balance_object_id,
+            bids_per_domain: Arc::new(Mutex::new(HashMap::new())),
         })
     }
 
@@ -163,26 +170,29 @@ impl IotaNamesWorker {
             }
             IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
-                self.metrics
-                    .bids_per_auction
-                    .with_label_values(&[event.domain.to_string()])
-                    .inc();
+                self.bids_per_domain
+                    .lock()
+                    .expect("error taking lock")
+                    .insert(event.domain.to_string(), 1);
             }
             IotaNamesEvent::AuctionBid(event) => {
-                self.metrics
-                    .bids_per_auction
-                    .with_label_values(&[event.domain.to_string()])
-                    .inc();
+                *self
+                    .bids_per_domain
+                    .lock()
+                    .expect("error taking lock")
+                    .get_mut(&event.domain.to_string())
+                    .expect("missing auction") += 1;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
                 let bid_count = self
-                    .metrics
-                    .bids_per_auction
-                    .with_label_values(&[event.domain.to_string()])
-                    .get();
+                    .bids_per_domain
+                    .lock()
+                    .expect("error taking lock")
+                    .remove(&event.domain.to_string())
+                    .expect("missing auction");
                 self.metrics
                     .bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])
