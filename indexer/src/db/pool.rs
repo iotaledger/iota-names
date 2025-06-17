@@ -13,7 +13,7 @@ use diesel::{
 };
 use diesel_migrations::MigrationHarness;
 
-use crate::db::{AUCTION_DB_URL, MIGRATIONS};
+use crate::db::{AUCTIONS_DB_FILENAME, MIGRATIONS};
 
 pub type PoolConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
 
@@ -92,7 +92,7 @@ impl DbConnectionPool {
     ///
     /// Resolves the database URL from the environment.
     pub fn new(pool_config: ConnectionPoolConfig) -> Result<Self> {
-        Self::new_with_url(AUCTION_DB_URL, pool_config)
+        Self::new_with_url(AUCTIONS_DB_FILENAME, pool_config)
     }
 
     /// Build a new pool of connections to the given URL.
