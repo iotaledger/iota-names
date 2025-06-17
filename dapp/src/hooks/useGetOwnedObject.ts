@@ -4,12 +4,12 @@
 import { useIotaClient } from '@iota/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
 
-export function useGetOwnedObject(address: string, objectId: string | null | undefined) {
+export function useGetObject(objectId: string | null | undefined) {
     const client = useIotaClient();
     return useQuery({
-        queryKey: ['get-owned-object', address, objectId],
+        queryKey: ['get-object', objectId],
         queryFn: async () => {
-            if (!address || !objectId) {
+            if (!objectId) {
                 return;
             }
 
@@ -25,6 +25,6 @@ export function useGetOwnedObject(address: string, objectId: string | null | und
             return objectResponse;
         },
         staleTime: 10 * 1000,
-        enabled: !!address && !!objectId,
+        enabled: !!objectId,
     });
 }

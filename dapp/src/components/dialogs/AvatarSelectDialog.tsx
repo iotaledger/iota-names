@@ -12,46 +12,20 @@ import {
     LoadingIndicator,
     VisualAssetCard,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useIotaClient } from '@iota/dapp-kit';
+import { useCurrentAccount } from '@iota/dapp-kit';
 
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { useUpdateNftDisplay } from '@/hooks/useUpdateNftDisplay';
-import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 interface AvatarSelectDialogProps {
-    open: boolean;
     setOpen: (bool: boolean) => void;
-    registration: RegistrationNft;
+    onAssetClick: (assetId: string) => void;
 }
-export function AvatarSelectDialog({ open, setOpen, registration }: AvatarSelectDialogProps) {
-    const iotaClient = useIotaClient();
+export function VisualAssetsDialog({ setOpen, onAssetClick }: AvatarSelectDialogProps) {
     const address = useCurrentAccount()?.address ?? '';
     const { data: visualAssets, isLoading } = useGetVisualAssets(address);
-    const { mutateAsync: updateNFTDisplay } = useUpdateNftDisplay(registration);
-
-    async function handleUpdateDisplay(newNftId: string) {
-        if (!registration) {
-            console.error('No name registration selected');
-            return;
-        }
-
-        const result = await updateNFTDisplay({
-            newNftId,
-        });
-
-        setOpen(false);
-
-        iotaClient
-            .waitForTransaction({
-                digest: result.digest,
-            })
-            .then(() => {
-                console.log('Display updated successfully', result.digest);
-            });
-    }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent showCloseOnOverlay customWidth="w-full max-w-[60vw]">
                 <Header
                     title="Select NFT to use as Alias"
@@ -76,7 +50,7 @@ export function AvatarSelectDialog({ open, setOpen, registration }: AvatarSelect
                                         altText={asset.display?.data?.name || 'NFT'}
                                         key={asset.objectId}
                                         isHoverable
-                                        onClick={() => handleUpdateDisplay(asset.objectId)}
+                                        onClick={() => onAssetClick(asset.objectId)}
                                     />
                                 ))
                             )}

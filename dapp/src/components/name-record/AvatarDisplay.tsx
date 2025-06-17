@@ -2,15 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useNameRecord } from '@/hooks';
-import { useGetOwnedObject } from '@/hooks/useGetOwnedObject';
+import { useGetObject } from '@/hooks/useGetOwnedObject';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
-interface NameRecordDisplayProps {
+interface AvatarDisplayProps {
     registration: RegistrationNft;
-    ownerAddress: string;
 }
 
-export function NameRecordDisplay({ registration, ownerAddress }: NameRecordDisplayProps) {
+export function AvatarDisplay({ registration }: AvatarDisplayProps) {
     const {
         data,
         isLoading: isLoadingRegistration,
@@ -23,7 +22,7 @@ export function NameRecordDisplay({ registration, ownerAddress }: NameRecordDisp
         data: avatarObject,
         isLoading: isLoadingAvatarObject,
         isError: isErrorAvatarObject,
-    } = useGetOwnedObject(ownerAddress, avatarId);
+    } = useGetObject(avatarId);
 
     const mediaUrl =
         isLoadingAvatarObject || isLoadingRegistration || isErrorAvatarObject || isErrorRegistration

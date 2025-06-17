@@ -8,11 +8,11 @@ import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { IotaNamesClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './';
-import { IotaNamesClientProvider } from './contexts';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
