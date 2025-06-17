@@ -161,13 +161,16 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            IotaNamesEvent::AuctionStarted(_event) => {
+            IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                self.metrics
+                    .bids_per_auction
+                    .with_label_values(&[event.domain.to_string()])
+                    .inc();
             }
             IotaNamesEvent::AuctionBid(event) => {
-                self.metrics.total_bids.inc();
                 self.metrics
-                    .total_bids_per_auction
+                    .bids_per_auction
                     .with_label_values(&[event.domain.to_string()])
                     .inc();
             }
@@ -175,6 +178,15 @@ impl IotaNamesWorker {
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
+                let bid_count = self
+                    .metrics
+                    .bids_per_auction
+                    .with_label_values(&[event.domain.to_string()])
+                    .get();
+                self.metrics
+                    .bid_count_distribution
+                    .with_label_values(&[&bid_count.to_string()])
+                    .inc();
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();

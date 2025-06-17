@@ -29,8 +29,8 @@ pub(crate) struct IotaNamesMetrics {
     pub name_depth_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub user_data_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub auction_final_prices: Histogram,
-    pub total_bids_per_auction: AssertUnwindSafe<IntCounterVec>,
-    pub total_bids: IntCounter,
+    pub bids_per_auction: AssertUnwindSafe<IntCounterVec>,
+    pub bid_count_distribution: AssertUnwindSafe<IntGaugeVec>,
 }
 
 impl IotaNamesMetrics {
@@ -119,21 +119,24 @@ impl IotaNamesMetrics {
                 "The final prices paid for domains in auctions",
                 registry,
             ),
-            total_bids_per_auction: AssertUnwindSafe(
+            bids_per_auction: AssertUnwindSafe(
                 register_int_counter_vec_with_registry!(
-                    "total_bids_per_auction",
-                    "The total number of bids per auction",
+                    "bids_per_auction",
+                    "The number of bids per auction",
                     &["auctions"],
                     registry,
                 )
                 .unwrap(),
             ),
-            total_bids: register_int_counter_with_registry!(
-                "total_bids",
-                "The total number of bids",
-                registry,
-            )
-            .unwrap(),
+            bid_count_distribution: AssertUnwindSafe(
+                register_int_gauge_vec_with_registry!(
+                    "bid_count_distribution",
+                    "The total bid count per auction",
+                    &["bid_count"],
+                    registry,
+                )
+                .unwrap(),
+            ),
         }
     }
 }
