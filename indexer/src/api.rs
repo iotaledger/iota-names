@@ -82,40 +82,32 @@ pub enum ApiError {
 // Tell axum how to convert `ApiError` into a response.
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
-        match self {
+        tracing::error!("{self:?}");
+        let (status, json_body) = match self {
             ApiError::BadRequest(msg) => (
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({
                     "error": "Bad Request",
                     "message": msg
                 })),
-            )
-                .into_response(),
+            ),
+            ApiError::DatabaseError(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "Database Error",
+                    "message": err.to_string()
+                })),
+            ),
+            ApiError::InternalError(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({
+                    "error": "Internal Server Error",
+                    "message": err.to_string()
+                })),
+            ),
+        };
 
-            ApiError::DatabaseError(err) => {
-                tracing::error!("Database error: {err}");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(serde_json::json!({
-                        "error": "Database Error",
-                        "message": "A database error occurred"
-                    })),
-                )
-                    .into_response()
-            }
-
-            ApiError::InternalError(err) => {
-                tracing::error!("Internal error: {err}");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    Json(serde_json::json!({
-                        "error": "Internal Server Error",
-                        "message": "An unexpected error occurred"
-                    })),
-                )
-                    .into_response()
-            }
-        }
+        (status, json_body).into_response()
     }
 }
 
