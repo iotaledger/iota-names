@@ -165,7 +165,7 @@ async fn main() -> Result<()> {
 
 fn set_up_logging() -> Result<()> {
     std::panic::set_hook(Box::new(|p| {
-        error!("{}", p);
+        error!("{p}");
     }));
 
     tracing_subscriber::registry()

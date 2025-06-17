@@ -41,7 +41,7 @@ pub async fn start_api_server(
     tokio::select! {
         result = axum::serve(listener, app) => {
             if let Err(e) = result {
-                tracing::error!("API server error: {}", e);
+                tracing::error!("API server error: {e}");
             }
         }
         _ = token.cancelled() => {
@@ -93,7 +93,7 @@ impl IntoResponse for ApiError {
                 .into_response(),
 
             ApiError::DatabaseError(err) => {
-                tracing::error!("Database error: {}", err);
+                tracing::error!("Database error: {err}");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(serde_json::json!({
@@ -105,7 +105,7 @@ impl IntoResponse for ApiError {
             }
 
             ApiError::InternalError(err) => {
-                tracing::error!("Internal error: {}", err);
+                tracing::error!("Internal error: {err}");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(serde_json::json!({
