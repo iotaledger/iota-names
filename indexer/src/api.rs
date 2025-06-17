@@ -71,10 +71,10 @@ async fn get_domains_for_address(
 
 #[derive(Debug)]
 pub enum ApiError {
-    // Database connection or query errors
-    Database(anyhow::Error),
     // Invalid input data (e.g., malformed address)
     BadRequest(String),
+    // Database connection or query errors
+    Database(anyhow::Error),
     // Internal server errors
     Internal(anyhow::Error),
 }
