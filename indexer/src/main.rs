@@ -79,20 +79,20 @@ impl Command {
                     res
                 });
 
-                let handle = cancel_token.clone();
                 let connection_pool = DbConnectionPool::new(connection_pool_config)?;
                 connection_pool.run_migrations()?;
 
                 // Spawn the auction API server
-                let api_handle = cancel_token.clone();
+                let handle = cancel_token.clone();
                 let database_pool = connection_pool.clone();
                 tasks.spawn(async move {
-                    let res = start_api_server(database_pool, api_port, api_handle.clone()).await;
-                    api_handle.cancel();
+                    let res = start_api_server(database_pool, api_port, handle.clone()).await;
+                    handle.cancel();
                     res
                 });
 
                 // Spawn the metrics worker
+                let handle = cancel_token.clone();
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
