@@ -72,11 +72,11 @@ async fn get_domains_for_address(
 #[derive(Debug)]
 pub enum ApiError {
     // Database connection or query errors
-    DatabaseError(anyhow::Error),
+    Database(anyhow::Error),
     // Invalid input data (e.g., malformed address)
     BadRequest(String),
     // Internal server errors
-    InternalError(anyhow::Error),
+    Internal(anyhow::Error),
 }
 
 // Tell axum how to convert `ApiError` into a response.
@@ -91,14 +91,14 @@ impl IntoResponse for ApiError {
                     "message": msg
                 })),
             ),
-            ApiError::DatabaseError(err) => (
+            ApiError::Database(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({
                     "error": "Database Error",
                     "message": err.to_string()
                 })),
             ),
-            ApiError::InternalError(err) => (
+            ApiError::Internal(err) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 Json(serde_json::json!({
                     "error": "Internal Server Error",
@@ -111,16 +111,16 @@ impl IntoResponse for ApiError {
     }
 }
 
-// Convert anyhow::Error to ApiError::InternalError by default
+// Convert anyhow::Error to ApiError::Internal by default
 impl From<anyhow::Error> for ApiError {
     fn from(err: anyhow::Error) -> Self {
-        ApiError::InternalError(err)
+        ApiError::Internal(err)
     }
 }
 
 // Convert database errors specifically
 impl From<diesel::result::Error> for ApiError {
     fn from(err: diesel::result::Error) -> Self {
-        ApiError::DatabaseError(err.into())
+        ApiError::Database(err.into())
     }
 }

@@ -79,7 +79,6 @@ impl Command {
                     res
                 });
 
-                // Spawn the metrics worker
                 let handle = cancel_token.clone();
                 let connection_pool = DbConnectionPool::new(connection_pool_config)?;
                 connection_pool.run_migrations()?;
@@ -93,6 +92,7 @@ impl Command {
                     res
                 });
 
+                // Spawn the metrics worker
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
