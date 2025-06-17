@@ -9,17 +9,19 @@ use diesel::{
     SqliteConnection,
     connection::SimpleConnection,
     r2d2::{ConnectionManager, Pool, PooledConnection},
-    sqlite::Sqlite,
 };
-use diesel_migrations::MigrationHarness;
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
-use crate::db::{AUCTIONS_DB_FILENAME, MIGRATIONS};
+// The migrations directory that contains the SQL migration files.
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
+// The filename for the sqlite database.
+pub const AUCTIONS_DB_FILENAME: &str = "AUCTIONS_DB";
 
 pub type PoolConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
 
 #[derive(Args, Debug, Clone)]
 pub struct DbConnectionPoolConfig {
-    #[arg(long, default_value_t = 20)]
+    #[arg(long, default_value_t = Self::DEFAULT_POOL_SIZE)]
     pub pool_size: u32,
     #[arg(long, value_parser = parse_duration, default_value = "30")]
     pub connection_timeout_secs: Duration,
@@ -33,18 +35,9 @@ fn parse_duration(arg: &str) -> Result<std::time::Duration, std::num::ParseIntEr
     Ok(std::time::Duration::from_secs(seconds))
 }
 
-#[allow(dead_code)]
 impl DbConnectionPoolConfig {
     const DEFAULT_POOL_SIZE: u32 = 20;
     const DEFAULT_CONNECTION_TIMEOUT_SECS: u64 = 30;
-
-    pub fn set_pool_size(&mut self, size: u32) {
-        self.pool_size = size;
-    }
-
-    pub fn set_connection_timeout(&mut self, timeout: Duration) {
-        self.connection_timeout_secs = timeout;
-    }
 }
 
 impl Default for DbConnectionPoolConfig {
@@ -92,12 +85,12 @@ impl DbConnectionPool {
     ///
     /// Resolves the filename URL from the environment.
     pub fn new(pool_config: DbConnectionPoolConfig) -> Result<Self> {
-        Self::new_with_url(AUCTIONS_DB_FILENAME, pool_config)
+        Self::new_with_filename(AUCTIONS_DB_FILENAME, pool_config)
     }
 
-    /// Build a new pool of connections to the given URL.
-    pub fn new_with_url(db_url: &str, pool_config: DbConnectionPoolConfig) -> Result<Self> {
-        let manager = ConnectionManager::new(db_url);
+    /// Build a new pool of connections to the given filename.
+    pub fn new_with_filename(filename: &str, pool_config: DbConnectionPoolConfig) -> Result<Self> {
+        let manager = ConnectionManager::new(filename);
 
         Ok(Self(
             Pool::builder()
@@ -106,7 +99,7 @@ impl DbConnectionPool {
                 .connection_customizer(Box::new(pool_config))
                 .build(manager)
                 .map_err(|e| {
-                    anyhow!("failed to initialize connection pool for {db_url} with error: {e:?}")
+                    anyhow!("failed to initialize connection pool for {filename} with error: {e:?}")
                 })?,
         ))
     }
@@ -117,17 +110,12 @@ impl DbConnectionPool {
             anyhow!("failed to get connection from PG connection pool with error: {e:?}",)
         })
     }
+
     /// Run pending migrations.
     pub fn run_migrations(&self) -> Result<()> {
-        run_migrations(&mut self.get_connection()?)
+        self.get_connection()?
+            .run_pending_migrations(MIGRATIONS)
+            .map_err(|e| anyhow!("failed to run migrations {e}"))?;
+        Ok(())
     }
-}
-
-/// Run any pending migrations to the connected database.
-pub fn run_migrations(connection: &mut impl MigrationHarness<Sqlite>) -> Result<()> {
-    connection
-        .run_pending_migrations(MIGRATIONS)
-        .map_err(|e| anyhow!("failed to run migrations {e}"))?;
-
-    Ok(())
 }
