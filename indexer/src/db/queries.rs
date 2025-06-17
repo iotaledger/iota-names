@@ -54,7 +54,6 @@ pub fn create_bidder_domain_relationship(
             bidder_domain::domain_id.eq(domain_id),
         ))
         .on_conflict_do_nothing()
-        .returning(BidderDomain::as_returning())
         .execute(conn)?;
     Ok(())
 }
