@@ -65,8 +65,7 @@ pub fn add_bidder_domain_entry(
 ) -> Result<()> {
     let bidder = get_or_create_bidder(conn, bidder_address)?;
     let domain = get_or_create_domain(conn, domain_name)?;
-    create_bidder_domain_relationship(conn, bidder.id, domain.id)?;
-    Ok(())
+    create_bidder_domain_relationship(conn, bidder.id, domain.id)
 }
 
 pub fn get_domains_for_bidder_address(
