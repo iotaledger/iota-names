@@ -20,11 +20,14 @@ const FILTER_NONE_STRUCT_TYPES = [
 export function useGetVisualAssets(address: string) {
     const kioskClient = useKioskClient();
 
-    const { data: ownedObjects, ...ownedObjectsQuery } = useGetAllOwnedObjects(address, {
-        MatchNone: FILTER_NONE_STRUCT_TYPES.map((type) => ({
-            StructType: type,
-        })),
-    });
+    const { data: ownedObjects, ...ownedObjectsQuery } = useGetAllOwnedObjects<IotaObjectData[]>(
+        address,
+        {
+            MatchNone: FILTER_NONE_STRUCT_TYPES.map((type) => ({
+                StructType: type,
+            })),
+        },
+    );
 
     const visualAssets = useMemo(() => {
         const visualAssets = ownedObjects?.filter((obj) => !!obj.display?.data) ?? [];
