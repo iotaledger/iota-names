@@ -4,6 +4,7 @@
 
 import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
@@ -15,7 +16,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
     const network = 'devnet';
 
-    const { url, faucet } = getNetwork(network);
+    const { url, graphql, faucet } = getNetwork(network);
 
     const keypair = new Ed25519Keypair();
     const address = keypair.toIotaAddress();
@@ -30,12 +31,13 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
     console.log('[Faucet]: Received funds');
 
+    const graphQlClient = new IotaGraphQLClient({ url: graphql! });
     const iotaClient = new IotaClient({
         url,
     });
 
     const iotaNamesClient = new IotaNamesClient({
-        client: iotaClient,
+        graphQlClient,
         network,
     });
 
