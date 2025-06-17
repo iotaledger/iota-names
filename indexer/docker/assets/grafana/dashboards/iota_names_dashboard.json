@@ -1178,7 +1178,7 @@
           "useBackend": false
         }
       ],
-      "title": "Auction Durations",
+      "title": "Auction durations",
       "type": "histogram"
     },
     {
