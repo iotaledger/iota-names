@@ -37,6 +37,11 @@ export type NameUpdate =
           nft: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
+      }
+    | {
+          type: 'renew-name';
+          nft: string;
+          years: number;
       };
 
 export function useUpdateNameTransaction({
@@ -77,6 +82,13 @@ export function useUpdateNameTransaction({
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
+                        });
+                        break;
+                    case 'renew-name':
+                        iotaNamesTx.renew({
+                            nft,
+                            years: update.years,
+                            coin: tx.gas,
                         });
                         break;
                 }
