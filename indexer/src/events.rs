@@ -85,13 +85,13 @@ pub(crate) struct TargetAddressSetEvent {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ReverseLookupSetEvent {
     pub default_address: IotaAddress,
-    pub domain: Domain,
+    pub default_name: Domain,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ReverseLookupUnsetEvent {
     pub default_address: IotaAddress,
-    pub domain: Domain,
+    pub default_name: Domain,
 }
 
 #[derive(Serialize, Deserialize)]

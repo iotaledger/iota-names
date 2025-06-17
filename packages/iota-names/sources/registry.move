@@ -66,12 +66,12 @@ public struct TargetAddressSetEvent has copy, drop {
 
 public struct ReverseLookupSetEvent has copy, drop {
     default_address: address,
-    domain: Domain
+    default_name: Domain
 }
 
 public struct ReverseLookupUnsetEvent has copy, drop {
     default_address: address,
-    domain: Domain
+    default_name: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -256,7 +256,7 @@ public fun unset_reverse_lookup(self: &mut Registry, address: address) {
     let domain = self.reverse_registry.remove(address);
     event::emit(ReverseLookupUnsetEvent {
         default_address: address,
-        domain
+        default_name: domain
     });
     
 }
@@ -274,7 +274,7 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     } else {
         event::emit(ReverseLookupSetEvent {
             default_address: address,
-            domain
+            default_name: domain
         });
         self.reverse_registry.add(address, domain);
     };
