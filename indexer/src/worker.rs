@@ -165,6 +165,7 @@ impl IotaNamesWorker {
                 self.metrics.total_auction_started.inc();
             }
             IotaNamesEvent::AuctionBid(event) => {
+                self.metrics.total_bids.inc();
                 self.metrics
                     .total_bids_per_auction
                     .with_label_values(&[event.domain.to_string()])

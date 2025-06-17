@@ -30,6 +30,7 @@ pub(crate) struct IotaNamesMetrics {
     pub user_data_distribution: AssertUnwindSafe<IntGaugeVec>,
     pub auction_final_prices: Histogram,
     pub total_bids_per_auction: AssertUnwindSafe<IntCounterVec>,
+    pub total_bids: IntCounter,
 }
 
 impl IotaNamesMetrics {
@@ -127,6 +128,12 @@ impl IotaNamesMetrics {
                 )
                 .unwrap(),
             ),
+            total_bids: register_int_counter_with_registry!(
+                "total_bids",
+                "The total number of bids",
+                registry,
+            )
+            .unwrap(),
         }
     }
 }
