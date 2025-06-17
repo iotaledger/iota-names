@@ -202,6 +202,9 @@ impl IotaNamesWorker {
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
+                self.metrics
+                    .auction_durations
+                    .observe(event.end_timestamp_ms - event.start_timestamp_ms);
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
