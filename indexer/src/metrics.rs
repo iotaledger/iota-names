@@ -121,7 +121,7 @@ impl IotaNamesMetrics {
             bid_count_distribution: AssertUnwindSafe(
                 register_int_gauge_vec_with_registry!(
                     "bid_count_distribution",
-                    "The total bid count per auction",
+                    "Distribution of total bid count",
                     &["bid_count"],
                     registry,
                 )
