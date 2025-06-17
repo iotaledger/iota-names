@@ -21,7 +21,7 @@ use tracing_subscriber::{
 
 use crate::{
     api::start_api_server,
-    db::pool::{ConnectionPoolConfig, DbConnectionPool},
+    db::pool::{DbConnectionPool, DbConnectionPoolConfig},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
@@ -40,7 +40,7 @@ bin_version::bin_version!();
 enum Command {
     Start {
         #[clap(flatten)]
-        connection_pool_config: ConnectionPoolConfig,
+        connection_pool_config: DbConnectionPoolConfig,
         /// The URL of an IOTA node to get data from.
         #[arg(long, default_value = "http://localhost:9000")]
         node_url: String,

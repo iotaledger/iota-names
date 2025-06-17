@@ -18,7 +18,7 @@ use crate::db::{AUCTIONS_DB_FILENAME, MIGRATIONS};
 pub type PoolConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
 
 #[derive(Args, Debug, Clone)]
-pub struct ConnectionPoolConfig {
+pub struct DbConnectionPoolConfig {
     #[arg(long, default_value_t = 20)]
     pub pool_size: u32,
     #[arg(long, value_parser = parse_duration, default_value = "30")]
@@ -34,7 +34,7 @@ fn parse_duration(arg: &str) -> Result<std::time::Duration, std::num::ParseIntEr
 }
 
 #[allow(dead_code)]
-impl ConnectionPoolConfig {
+impl DbConnectionPoolConfig {
     const DEFAULT_POOL_SIZE: u32 = 20;
     const DEFAULT_CONNECTION_TIMEOUT_SECS: u64 = 30;
 
@@ -47,7 +47,7 @@ impl ConnectionPoolConfig {
     }
 }
 
-impl Default for ConnectionPoolConfig {
+impl Default for DbConnectionPoolConfig {
     fn default() -> Self {
         Self {
             pool_size: Self::DEFAULT_POOL_SIZE,
@@ -63,7 +63,7 @@ impl Default for ConnectionPoolConfig {
 ///
 /// See more in: https://www.sqlite.org/pragma.html
 impl diesel::r2d2::CustomizeConnection<SqliteConnection, diesel::r2d2::Error>
-    for ConnectionPoolConfig
+    for DbConnectionPoolConfig
 {
     fn on_acquire(&self, conn: &mut SqliteConnection) -> Result<(), diesel::r2d2::Error> {
         (|| {
@@ -91,12 +91,12 @@ impl DbConnectionPool {
     /// Build a new pool of connections.
     ///
     /// Resolves the database URL from the environment.
-    pub fn new(pool_config: ConnectionPoolConfig) -> Result<Self> {
+    pub fn new(pool_config: DbConnectionPoolConfig) -> Result<Self> {
         Self::new_with_url(AUCTIONS_DB_FILENAME, pool_config)
     }
 
     /// Build a new pool of connections to the given URL.
-    pub fn new_with_url(db_url: &str, pool_config: ConnectionPoolConfig) -> Result<Self> {
+    pub fn new_with_url(db_url: &str, pool_config: DbConnectionPoolConfig) -> Result<Self> {
         let manager = ConnectionManager::new(db_url);
 
         Ok(Self(
