@@ -21,7 +21,7 @@ use tracing_subscriber::{
 
 use crate::{
     api::start_api_server,
-    db::pool::{ConnectionPool, ConnectionPoolConfig},
+    db::pool::{ConnectionPoolConfig, DbConnectionPool},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
@@ -81,7 +81,7 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
-                let connection_pool = ConnectionPool::new(connection_pool_config)?;
+                let connection_pool = DbConnectionPool::new(connection_pool_config)?;
                 connection_pool.run_migrations()?;
 
                 // Spawn the auction API server

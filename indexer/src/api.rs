@@ -14,15 +14,15 @@ use iota_types::base_types::IotaAddress;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 
-use crate::db::{pool::ConnectionPool, queries::get_domains_for_bidder_address};
+use crate::db::{pool::DbConnectionPool, queries::get_domains_for_bidder_address};
 
 #[derive(Clone)]
 pub struct ApiState {
-    pub pool: ConnectionPool,
+    pub pool: DbConnectionPool,
 }
 
 pub async fn start_api_server(
-    pool: ConnectionPool,
+    pool: DbConnectionPool,
     port: u16,
     token: CancellationToken,
 ) -> anyhow::Result<()> {

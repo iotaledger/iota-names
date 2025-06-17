@@ -85,9 +85,9 @@ impl diesel::r2d2::CustomizeConnection<SqliteConnection, diesel::r2d2::Error>
 ///
 /// Uses [`Arc`][`std::sync::Arc`] internally.
 #[derive(Debug, Clone)]
-pub struct ConnectionPool(Pool<ConnectionManager<SqliteConnection>>);
+pub struct DbConnectionPool(Pool<ConnectionManager<SqliteConnection>>);
 
-impl ConnectionPool {
+impl DbConnectionPool {
     /// Build a new pool of connections.
     ///
     /// Resolves the database URL from the environment.

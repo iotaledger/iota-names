@@ -32,7 +32,7 @@ use tracing::{debug, info, warn};
 
 use crate::{
     IotaNamesMetrics,
-    db::{pool::ConnectionPool, queries::add_bidder_domain_entry},
+    db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
     events::IotaNamesEvent,
 };
 
@@ -73,7 +73,7 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
-    pool: ConnectionPool,
+    pool: DbConnectionPool,
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
@@ -82,7 +82,7 @@ pub(crate) struct IotaNamesWorker {
 
 impl IotaNamesWorker {
     pub(crate) fn new(
-        pool: ConnectionPool,
+        pool: DbConnectionPool,
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
