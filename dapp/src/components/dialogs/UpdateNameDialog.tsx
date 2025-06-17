@@ -5,6 +5,7 @@
 
 import {
     Button,
+    ButtonType,
     Card,
     CardBody,
     CardType,
@@ -18,6 +19,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { isSubName } from '@iota/iota-names-sdk';
 import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
@@ -26,7 +28,7 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -48,11 +50,26 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const isNameSubName = nameRecord?.nameRecord ? isSubName(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-
+    const namePermissions = nameRecord?.nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : null;
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
+    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+    const [renewYears, setRenewYears] = useState<number>();
+    const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
+    const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+
+    // Sync permissions
+    useEffect(() => {
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowChildCreation);
+            setEditIsAllowSubnames(namePermissions.allowTimeExtension);
+        }
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
     // Sync name target address
     useEffect(() => {
@@ -101,7 +118,20 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             name,
         });
     }
-
+    if (
+        nameRecord &&
+        isNameSubName &&
+        (editIsAllowSubnames != namePermissions?.allowChildCreation ||
+            editIsAllowingRenew != namePermissions.allowTimeExtension)
+    ) {
+        // Only allow editing the setup if it is a subname and the config has changed
+        updates.push({
+            type: 'edit-setup',
+            nft: nameRecord.nameRecord.nftId,
+            allowChildCreation: editIsAllowSubnames,
+            allowTimeExtension: editIsAllowingRenew,
+        });
+    }
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -157,13 +187,35 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     function handleReverseLookupChange({ target: { checked } }: ChangeEvent<HTMLInputElement>) {
         setEditDefaultName(checked);
     }
+    const handleAllowRenewChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
+        setEditIsAllowingRenew(checked);
+    };
 
+    const handleAllowSubnameChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
+        setEditIsAllowSubnames(checked);
+    };
     function handleSetCurrentAsTargetAddress() {
         if (account?.address) {
             setEditTargetAddress(account?.address);
         }
     }
 
+    const handleCancelRenewName = () => {
+        setRenewYears(undefined);
+        setRenewDialogOpen(false);
+    };
+
+    const handleConfirmRenewName = async () => {
+        if (!renewYears) {
+            console.error('Renew years required');
+            return;
+        }
+        // if (!isSubdomainAvailable || error) {
+        //     console.error('subdomain name is not available');
+        //     return;
+        // }
+        setRenewDialogOpen(false);
+    };
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
@@ -218,6 +270,83 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             onCheckedChange={handleReverseLookupChange}
                         />
                     </Card>
+                    {isNameSubName ? (
+                        <>
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Set allow renew name"
+                                    subtitle="Allow renew name."
+                                />
+                                <Checkbox
+                                    isChecked={editIsAllowingRenew}
+                                    isDisabled={disableEdit}
+                                    onCheckedChange={handleAllowRenewChange}
+                                />
+                            </Card>
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Set allow subname"
+                                    subtitle="Allow creating subdomains."
+                                />
+                                <Checkbox
+                                    isChecked={editIsAllowSubnames}
+                                    isDisabled={disableEdit}
+                                    onCheckedChange={handleAllowSubnameChange}
+                                />
+                            </Card>
+                        </>
+                    ) : null}
+
+                    {editIsAllowingRenew && (
+                        <Card type={CardType.Outlined}>
+                            <CardBody title="Add new subname" subtitle="Create a new subdomain." />
+                            <Button
+                                text="Add subname"
+                                onClick={() => setRenewDialogOpen(true)}
+                                disabled={
+                                    (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
+                                    Date.now()
+                                }
+                            />
+                        </Card>
+                    )}
+                    {renewDialogOpen && (
+                        <Dialog open={open} onOpenChange={setOpen}>
+                            <DialogContent containerId="overlay-portal-container">
+                                <Header title="Renew name" titleCentered />
+                                <DialogBody>
+                                    <div className="flex flex-col items-center gap-y-md">
+                                        <h3 className="text-lg font-semibold mb-4">
+                                            Renew name to {nameRecord?.nameRecord?.name}
+                                        </h3>
+                                        <div className="mb-4">
+                                            <Input
+                                                type={InputType.Text}
+                                                value={renewYears}
+                                                onChange={(e) =>
+                                                    setRenewYears(Number(e.target.value))
+                                                }
+                                                placeholder="Input renew years"
+                                            />
+                                        </div>
+                                        <div className="flex gap-2 justify-end">
+                                            <Button
+                                                type={ButtonType.Secondary}
+                                                text="Cancel"
+                                                onClick={handleCancelRenewName}
+                                            />
+                                            <Button
+                                                type={ButtonType.Primary}
+                                                text="Confirm"
+                                                onClick={handleConfirmRenewName}
+                                                disabled={!renewYears || renewYears < 1} //tODO: add not expired
+                                            />
+                                        </div>
+                                    </div>
+                                </DialogBody>
+                            </DialogContent>
+                        </Dialog>
+                    )}
                     {updateNameError ? (
                         <div className="text-red-400">{updateNameError.message}</div>
                     ) : null}
