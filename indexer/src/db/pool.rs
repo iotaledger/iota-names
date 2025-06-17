@@ -90,7 +90,7 @@ pub struct DbConnectionPool(Pool<ConnectionManager<SqliteConnection>>);
 impl DbConnectionPool {
     /// Build a new pool of connections.
     ///
-    /// Resolves the database URL from the environment.
+    /// Resolves the filename URL from the environment.
     pub fn new(pool_config: DbConnectionPoolConfig) -> Result<Self> {
         Self::new_with_url(AUCTIONS_DB_FILENAME, pool_config)
     }
