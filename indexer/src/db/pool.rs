@@ -107,7 +107,7 @@ impl DbConnectionPool {
     /// Get a connection from the pool.
     pub fn get_connection(&self) -> Result<PoolConnection> {
         self.0.get().map_err(|e| {
-            anyhow!("failed to get connection from PG connection pool with error: {e:?}",)
+            anyhow!("failed to get connection from Sqlite connection pool with error: {e:?}",)
         })
     }
 
