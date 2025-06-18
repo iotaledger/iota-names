@@ -191,9 +191,7 @@ impl IotaNamesWorker {
                         conn,
                         &event.bidder.to_string(),
                         &event.domain.to_string(),
-                    )
-                })?;
-                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    )?;
                     add_domain_bids_entry(conn, &event.domain.to_string())
                 })?;
             }
@@ -204,9 +202,7 @@ impl IotaNamesWorker {
                         conn,
                         &event.bidder.to_string(),
                         &event.domain.to_string(),
-                    )
-                })?;
-                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    )?;
                     update_domain_bids_entry(conn, &event.domain.to_string())
                 })?;
             }

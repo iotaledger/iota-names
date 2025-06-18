@@ -16,9 +16,3 @@ CREATE TABLE `bidder_domain`(
 	FOREIGN KEY (`bidder_id`) REFERENCES `bidders`(`id`),
 	FOREIGN KEY (`domain_id`) REFERENCES `domains`(`id`)
 );
-
-CREATE TABLE `domain_bids`(
-	`domain_id` INTEGER NOT NULL,
-	`bids` INTEGER NOT NULL,
-	PRIMARY KEY(`domain_id`)
-);
