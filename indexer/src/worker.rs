@@ -33,7 +33,7 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
-    events::IotaNamesEvent,
+    events::{CouponKind, IotaNamesEvent},
 };
 
 pub(crate) async fn run_iota_names_reader(
@@ -148,12 +148,11 @@ impl IotaNamesWorker {
             }
             // `coupons`
             IotaNamesEvent::CouponApplied(event) => match event.kind {
-                0 => self
+                CouponKind::Percentage => self
                     .metrics
                     .total_percentage_discount
                     .add(event.discount as _),
-                1 => self.metrics.total_fixed_discount.add(event.discount as _),
-                k => unreachable!("unknown coupon kind {k}"),
+                CouponKind::Fixed => self.metrics.total_fixed_discount.add(event.discount as _),
             },
             // `iota-names`
             IotaNamesEvent::NameRecordAdded(event) => {

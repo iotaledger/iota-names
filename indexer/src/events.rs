@@ -108,8 +108,15 @@ pub(crate) struct AuctionFinalizedEvent {
 // `coupons`
 
 #[derive(Serialize, Deserialize)]
+#[repr(u8)]
+pub enum CouponKind {
+    Percentage = 0,
+    Fixed = 1,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct CouponAppliedEvent {
-    pub kind: u8,
+    pub kind: CouponKind,
     pub discount: u64,
 }
 
