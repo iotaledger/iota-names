@@ -4,9 +4,12 @@
 
 module iota_names_coupons::coupons;
 
+use iota::hex;
 use iota::table::{Self, Table};
 use iota_names_coupons::coupon::{Self, Coupon};
 use iota_names_coupons::rules::CouponRules;
+
+use std::string::String;
 
 #[error]
 const ECouponAlreadyExists: vector<u8> = b"Coupon already exists.";
@@ -31,7 +34,7 @@ public(package) fun new(ctx: &mut TxContext): Coupons {
 // Add percentaged based coupon.
 public fun add_percentage_coupon(
     self: &mut Coupons,
-    hash: vector<u8>,
+    hash: String,
     percentage: u64,
     rules: CouponRules,
 ) {
@@ -41,7 +44,7 @@ public fun add_percentage_coupon(
 // Add fixed amount coupon.
 public fun add_fixed_coupon(
     self: &mut Coupons,
-    hash: vector<u8>,
+    hash: String,
     amount: u64,
     rules: CouponRules,
 ) {
@@ -49,14 +52,16 @@ public fun add_fixed_coupon(
 }
 
 // A function to remove a coupon from the system.
-public(package) fun remove_coupon(self: &mut Coupons, hash: vector<u8>) {
+public(package) fun remove_coupon(self: &mut Coupons, hash: String) {
+    let hash = hex::decode(hash.into_bytes());
     assert!(self.coupons.contains(hash), ECouponDoesNotExist);
     let _: Coupon = self.coupons.remove(hash);
 }
 
 /// Private internal functions
 /// An internal function to save the coupon in the shared object's config.
-public(package) fun save_coupon(self: &mut Coupons, hash: vector<u8>, coupon: Coupon) {
+public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon) {
+    let hash = hex::decode(hash.into_bytes());
     assert!(!self.coupons.contains(hash), ECouponAlreadyExists);
     self.coupons.add(hash, coupon);
 }

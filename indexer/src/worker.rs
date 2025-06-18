@@ -1,10 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use diesel::Connection;
 use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
@@ -29,7 +30,11 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{IotaNamesMetrics, events::IotaNamesEvent};
+use crate::{
+    IotaNamesMetrics,
+    db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
+    events::IotaNamesEvent,
+};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -68,6 +73,7 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
+    pool: DbConnectionPool,
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
@@ -76,6 +82,7 @@ pub(crate) struct IotaNamesWorker {
 
 impl IotaNamesWorker {
     pub(crate) fn new(
+        pool: DbConnectionPool,
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
@@ -99,6 +106,7 @@ impl IotaNamesWorker {
         )?;
 
         Ok(Self {
+            pool,
             config,
             metrics,
             token,
@@ -138,7 +146,15 @@ impl IotaNamesWorker {
                     .with_label_values(&[&depth.to_string()])
                     .dec();
             }
-            IotaNamesEvent::ReverseLookupSet(_event) => (),
+            IotaNamesEvent::TargetAddressSet(event) => {
+                if event.target_address.is_some() {
+                    self.metrics.total_target_address.inc()
+                } else {
+                    self.metrics.total_target_address.dec()
+                }
+            }
+            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_name.inc(),
+            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_name.dec(),
             IotaNamesEvent::UserDataSet(event) => {
                 if event.new {
                     self.metrics
@@ -161,14 +177,34 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            IotaNamesEvent::AuctionStarted(_event) => {
+            IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
             }
-            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionBid(event) => {
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
+            }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
+                self.metrics
+                    .auction_durations
+                    .observe(event.end_timestamp_ms - event.start_timestamp_ms);
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
@@ -264,8 +300,7 @@ impl Worker for IotaNamesWorker {
         &self,
         checkpoint: Arc<CheckpointData>,
     ) -> Result<Self::Message, Self::Error> {
-        let res = self
-            .process_checkpoint(&checkpoint)
+        let res = AssertUnwindSafe(self.process_checkpoint(&checkpoint))
             .catch_unwind()
             .await
             .map_err(map_panic);
