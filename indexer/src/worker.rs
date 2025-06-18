@@ -1,13 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{
-    collections::HashMap,
-    panic::AssertUnwindSafe,
-    path::PathBuf,
-    str::FromStr,
-    sync::{Arc, Mutex},
-};
+use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
@@ -38,7 +32,13 @@ use tracing::{debug, info, warn};
 
 use crate::{
     IotaNamesMetrics,
-    db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
+    db::{
+        pool::DbConnectionPool,
+        queries::{
+            add_bidder_domain_entry, add_domain_bids_entry, remove_domain_bids_entry,
+            update_domain_bids_entry,
+        },
+    },
     events::IotaNamesEvent,
 };
 
@@ -84,7 +84,6 @@ pub(crate) struct IotaNamesWorker {
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
     balance_object_id: ObjectID,
-    bids_per_domain: Arc<Mutex<HashMap<String, u64>>>,
 }
 
 impl IotaNamesWorker {
@@ -118,7 +117,6 @@ impl IotaNamesWorker {
             metrics,
             token,
             balance_object_id,
-            bids_per_domain: Arc::new(Mutex::new(HashMap::new())),
         })
     }
 
@@ -195,10 +193,9 @@ impl IotaNamesWorker {
                         &event.domain.to_string(),
                     )
                 })?;
-                self.bids_per_domain
-                    .lock()
-                    .expect("error taking lock")
-                    .insert(event.domain.to_string(), 1);
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_domain_bids_entry(conn, &event.domain.to_string())
+                })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let mut conn = self.pool.get_connection()?;
@@ -209,14 +206,9 @@ impl IotaNamesWorker {
                         &event.domain.to_string(),
                     )
                 })?;
-                if let Some(bid_count) = self
-                    .bids_per_domain
-                    .lock()
-                    .expect("error taking lock")
-                    .get_mut(&event.domain.to_string())
-                {
-                    *bid_count += 1;
-                }
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    update_domain_bids_entry(conn, &event.domain.to_string())
+                })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
@@ -225,17 +217,14 @@ impl IotaNamesWorker {
                 self.metrics
                     .auction_durations
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
-                if let Some(bid_count) = self
-                    .bids_per_domain
-                    .lock()
-                    .expect("error taking lock")
-                    .remove(&event.domain.to_string())
-                {
-                    self.metrics
-                        .bid_count_distribution
-                        .with_label_values(&[&bid_count.to_string()])
-                        .inc();
-                }
+                let mut conn = self.pool.get_connection()?;
+                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    remove_domain_bids_entry(conn, &event.domain.to_string())
+                })?;
+                self.metrics
+                    .bid_count_distribution
+                    .with_label_values(&[&bid_count.to_string()])
+                    .inc();
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();

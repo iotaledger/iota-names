@@ -4,10 +4,10 @@
 use anyhow::Result;
 use diesel::{
     BelongingToDsl, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    SqliteConnection, insert_into,
+    SqliteConnection, delete, insert_into, update,
 };
 
-use super::models::{Bidder, BidderDomain, Domain, bidder_domain, bidders, domains};
+use super::models::{Bidder, BidderDomain, Domain, bidder_domain, bidders, domain_bids, domains};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -83,4 +83,38 @@ pub fn get_domains_for_bidder_address(
         .load(conn)?;
 
     Ok(domains.into_iter().map(|d| d.name).collect())
+}
+
+pub fn add_domain_bids_entry(conn: &mut SqliteConnection, domain_name: &str) -> Result<()> {
+    let domain = get_or_create_domain(conn, domain_name)?;
+    insert_into(domain_bids::table)
+        .values((
+            domain_bids::domain_id.eq(domain.id),
+            domain_bids::bids.eq(1),
+        ))
+        .on_conflict_do_nothing()
+        .execute(conn)?;
+    Ok(())
+}
+
+pub fn update_domain_bids_entry(conn: &mut SqliteConnection, domain_name: &str) -> Result<()> {
+    let domain = get_or_create_domain(conn, domain_name)?;
+
+    update(domain_bids::table.find(domain.id))
+        .set(domain_bids::bids.eq(domain_bids::bids + 1))
+        .execute(conn)?;
+
+    Ok(())
+}
+
+pub fn remove_domain_bids_entry(conn: &mut SqliteConnection, domain_name: &str) -> Result<i32> {
+    let domain = get_or_create_domain(conn, domain_name)?;
+    let bid_count = domain_bids::table
+        .find(domain.id)
+        .select(domain_bids::bids)
+        .first(conn)?;
+
+    delete(domain_bids::table.find(domain.id)).execute(conn)?;
+
+    Ok(bid_count)
 }
