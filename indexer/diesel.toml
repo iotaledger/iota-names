@@ -1,2 +1,3 @@
-[print_schema]
-file = "src/db/models.rs"
+# TODO do we still need this, because it's overwriting our manually written src/db/models.rs?
+#[print_schema]
+#file = "src/db/models.rs"
