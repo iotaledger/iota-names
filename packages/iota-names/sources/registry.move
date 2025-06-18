@@ -50,14 +50,28 @@ public struct Registry has store {
     reverse_registry: Table<address, Domain>,
 }
 
-public struct IotaNamesRegistryEvent has copy, drop {
+public struct NameRecordAddedEvent has copy, drop {
     domain: Domain,
     name_record: NameRecord
 }
 
-public struct IotaNamesReverseRegistryEvent has copy, drop {
+public struct NameRecordRemovedEvent has copy, drop {
+    domain: Domain,
+}
+
+public struct TargetAddressSetEvent has copy, drop {
+    domain: Domain,
+    target_address: Option<address>
+}
+
+public struct ReverseLookupSetEvent has copy, drop {
     default_address: address,
-    domain: Domain
+    default_name: Domain
+}
+
+public struct ReverseLookupUnsetEvent has copy, drop {
+    default_address: address,
+    default_name: Domain
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -114,6 +128,9 @@ public fun burn_registration_object(
 
         // We wanna remove the record only if the NFT ID matches.
         if (record.nft_id() == object::id(&nft)) {
+            event::emit(NameRecordRemovedEvent {
+                domain,
+            });
             let record = self.registry.remove(domain);
             self.handle_invalidate_reverse_record(
                 &domain,
@@ -188,7 +205,7 @@ public fun add_leaf_record(
 
     let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
 
-    event::emit(IotaNamesRegistryEvent {
+    event::emit(NameRecordAddedEvent {
         domain,
         name_record
     });
@@ -213,6 +230,9 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     // if it's a leaf record, there's no `IotaNamesRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
     let record = self.registry.remove(domain);
     let old_target_address = record.target_address();
 
@@ -223,12 +243,22 @@ public fun set_target_address(self: &mut Registry, domain: Domain, new_target: O
     let record = &mut self.registry[domain];
     let old_target = record.target_address();
 
+    event::emit(TargetAddressSetEvent {
+        domain,
+        target_address: new_target
+    });
+
     record.set_target_address(new_target);
     self.handle_invalidate_reverse_record(&domain, old_target, new_target);
 }
 
 public fun unset_reverse_lookup(self: &mut Registry, address: address) {
-    self.reverse_registry.remove(address);
+    let domain = self.reverse_registry.remove(address);
+    event::emit(ReverseLookupUnsetEvent {
+        default_address: address,
+        default_name: domain
+    });
+    
 }
 
 /// Reverse lookup can only be set for the record that has the target address.
@@ -242,9 +272,9 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
     if (self.reverse_registry.contains(address)) {
         *self.reverse_registry.borrow_mut(address) = domain;
     } else {
-        event::emit(IotaNamesReverseRegistryEvent {
+        event::emit(ReverseLookupSetEvent {
             default_address: address,
-            domain
+            default_name: domain
         });
         self.reverse_registry.add(address, domain);
     };
@@ -367,7 +397,7 @@ fun internal_add_record(
         nft.expiration_timestamp_ms(),
     );
     
-    event::emit(IotaNamesRegistryEvent {
+    event::emit(NameRecordAddedEvent {
         domain,
         name_record
     });
@@ -387,6 +417,9 @@ fun remove_existing_record_if_exists_and_expired(
 
     // Remove the record and assert that it has expired (past the grace period
     // if applicable)
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
     let record = self.registry.remove(domain);
 
     // Special case for leaf records, we can override them iff their parent has

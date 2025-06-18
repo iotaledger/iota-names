@@ -5,7 +5,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { ThemeContext } from '../contexts';
+import { ThemeContext } from '@/contexts';
+
 import { Theme, ThemePreference } from '../lib/enums';
 
 interface ThemeProviderProps {

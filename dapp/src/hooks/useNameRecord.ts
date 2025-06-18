@@ -4,7 +4,9 @@
 import { isValidIotaName, NameRecord } from '@iota/iota-names-sdk';
 import { useQuery } from '@tanstack/react-query';
 
-import { useIotaNamesClient } from '@/providers/contexts';
+import { useIotaNamesClient } from '@/contexts';
+
+import { queryKey } from './queryKey';
 
 type PriceOption = {
     years: number;
@@ -15,7 +17,7 @@ type UseNameRecordOptions = {
     price?: PriceOption;
 };
 
-type NameRecordData =
+export type NameRecordData =
     | {
           type: 'unavailable';
           nameRecord: NameRecord;
@@ -41,7 +43,7 @@ export function useNameRecord(
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: ['name-record', name, price],
+        queryKey: [...queryKey.nameRecord(name), price],
         async queryFn() {
             if (!isValidIotaName(name)) {
                 throw new Error('Name is not valid.');

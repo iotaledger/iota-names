@@ -1,10 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{path::PathBuf, str::FromStr, sync::Arc};
+use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
 use anyhow::{Result, anyhow};
 use async_trait::async_trait;
+use diesel::Connection;
 use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
@@ -14,6 +15,7 @@ use iota_names::config::IotaNamesConfig;
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
+    base_types::ObjectID,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
     execution_status::ExecutionStatus,
@@ -28,7 +30,11 @@ use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
-use crate::{IotaNamesMetrics, events::IotaNamesEvent};
+use crate::{
+    IotaNamesMetrics,
+    db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
+    events::IotaNamesEvent,
+};
 
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
@@ -67,34 +73,78 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
+    pool: DbConnectionPool,
     config: IotaNamesConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
+    balance_object_id: ObjectID,
 }
 
 impl IotaNamesWorker {
     pub(crate) fn new(
+        pool: DbConnectionPool,
         config: IotaNamesConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
-    ) -> Self {
-        Self {
+    ) -> anyhow::Result<Self> {
+        let config_type = StructTag::from_str(&format!(
+            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
+            config.package_address,
+        ))?;
+        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
+            type_: config_type.clone(),
+            fields: vec![MoveFieldLayout::new(
+                Identifier::from_str("dummy_field")?,
+                MoveTypeLayout::Bool,
+            )],
+        }));
+        let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
+            config.object_id,
+            &TypeTag::Struct(Box::new(config_type)),
+            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
+                .to_bcs_bytes(&layout)?,
+        )?;
+
+        Ok(Self {
+            pool,
             config,
             metrics,
             token,
-        }
+            balance_object_id,
+        })
     }
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
             // `auctions`
-            IotaNamesEvent::AuctionStarted(_event) => {
+            IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
             }
-            IotaNamesEvent::AuctionBid(_event) => (),
+            IotaNamesEvent::AuctionBid(event) => {
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
+            }
             IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(_event) => {
+            IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
+                self.metrics.auction_final_prices.observe(event.winning_bid);
+                self.metrics
+                    .auction_durations
+                    .observe(event.end_timestamp_ms - event.start_timestamp_ms);
             }
             // `coupons`
             IotaNamesEvent::CouponApplied(event) => match event.kind {
@@ -103,15 +153,59 @@ impl IotaNamesWorker {
                 k => unreachable!("unknown coupon kind {k}"),
             },
             // `iota-names`
-            IotaNamesEvent::IotaNamesRegistry(event) => {
-                self.metrics.total_name_records.inc();
-                let second_level_name_len = event.domain.label(1).expect("missing SLD").len();
+            IotaNamesEvent::NameRecordAdded(event) => {
+                self.metrics.total_name_records_added.inc();
+
+                let sld_length = event.domain.label(1).expect("missing SLD").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&second_level_name_len.to_string()])
+                    .with_label_values(&[&sld_length.to_string()])
+                    .inc();
+
+                let depth = event.domain.num_labels();
+                self.metrics
+                    .name_depth_distribution
+                    .with_label_values(&[&depth.to_string()])
                     .inc();
             }
-            IotaNamesEvent::IotaNamesReverseRegistry(_event) => (),
+            IotaNamesEvent::NameRecordRemoved(event) => {
+                self.metrics.total_name_records_removed.inc();
+
+                let sld_length = event.domain.label(1).expect("missing SLD").len();
+                self.metrics
+                    .name_length_distribution
+                    .with_label_values(&[&sld_length.to_string()])
+                    .dec();
+
+                let depth = event.domain.num_labels();
+                self.metrics
+                    .name_depth_distribution
+                    .with_label_values(&[&depth.to_string()])
+                    .dec();
+            }
+            IotaNamesEvent::TargetAddressSet(event) => {
+                if event.target_address.is_some() {
+                    self.metrics.total_target_address.inc()
+                } else {
+                    self.metrics.total_target_address.dec()
+                }
+            }
+            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_name.inc(),
+            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_name.dec(),
+            IotaNamesEvent::UserDataSet(event) => {
+                if event.new {
+                    self.metrics
+                        .user_data_distribution
+                        .with_label_values(&[&event.key])
+                        .inc();
+                }
+            }
+            IotaNamesEvent::UserDataUnset(event) => {
+                self.metrics
+                    .user_data_distribution
+                    .with_label_values(&[&event.key])
+                    .dec();
+            }
             IotaNamesEvent::Transaction(event) => {
                 if event.is_renewal {
                     self.metrics
@@ -161,26 +255,8 @@ impl IotaNamesWorker {
             checkpoint.checkpoint_summary.sequence_number
         );
 
-        let config_type = StructTag::from_str(&format!(
-            "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
-            self.config.package_address,
-        ))?;
-        let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
-            type_: config_type.clone(),
-            fields: vec![MoveFieldLayout::new(
-                Identifier::from_str("dummy_field")?,
-                MoveTypeLayout::Bool,
-            )],
-        }));
-        let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
-            self.config.object_id,
-            &TypeTag::Struct(Box::new(config_type)),
-            &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
-                .to_bcs_bytes(&layout)?,
-        )?;
-
         for object in checkpoint.latest_live_output_objects() {
-            if object.id() == balance_object_id {
+            if object.id() == self.balance_object_id {
                 let balance = bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
                     object
                         .as_inner()
@@ -233,8 +309,7 @@ impl Worker for IotaNamesWorker {
         &self,
         checkpoint: Arc<CheckpointData>,
     ) -> Result<Self::Message, Self::Error> {
-        let res = self
-            .process_checkpoint(&checkpoint)
+        let res = AssertUnwindSafe(self.process_checkpoint(&checkpoint))
             .catch_unwind()
             .await
             .map_err(map_panic);

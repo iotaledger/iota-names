@@ -14,8 +14,13 @@ pub(crate) enum IotaNamesEvent {
     // `coupons`
     CouponApplied(CouponAppliedEvent),
     // `iota-names`
-    IotaNamesRegistry(IotaNamesRegistryEvent),
-    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
+    NameRecordAdded(NameRecordAddedEvent),
+    NameRecordRemoved(NameRecordRemovedEvent),
+    TargetAddressSet(TargetAddressSetEvent),
+    ReverseLookupSet(ReverseLookupSetEvent),
+    ReverseLookupUnset(ReverseLookupUnsetEvent),
+    UserDataSet(UserDataSetEvent),
+    UserDataUnset(UserDataUnsetEvent),
     Transaction(TransactionEvent),
     // `subdomains`
     NodeSubdomainCreated(NodeSubdomainCreatedEvent),
@@ -39,10 +44,15 @@ impl IotaNamesEvent {
             // `coupons`
             "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
             // `iota-names`
-            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
-            "IotaNamesReverseRegistryEvent" => {
-                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
+            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupUnsetEvent" => {
+                Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
             }
+            "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
+            "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
             "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
             // `subdomains`
             "NodeSubdomainCreatedEvent" => {
@@ -106,18 +116,45 @@ pub struct CouponAppliedEvent {
 // `iota-names`
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesRegistryEvent {
+pub(crate) struct NameRecordAddedEvent {
     pub domain: Domain,
     pub name_record: NameRecord,
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesReverseRegistryEvent {
-    pub default_address: IotaAddress,
+pub(crate) struct NameRecordRemovedEvent {
     pub domain: Domain,
 }
 
-// `subdomains`
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TargetAddressSetEvent {
+    pub domain: Domain,
+    pub target_address: Option<IotaAddress>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupSetEvent {
+    pub default_address: IotaAddress,
+    pub default_name: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupUnsetEvent {
+    pub default_address: IotaAddress,
+    pub default_name: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct UserDataSetEvent {
+    pub key: String,
+    pub value: String,
+    pub new: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct UserDataUnsetEvent {
+    pub key: String,
+}
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct TransactionEvent {
@@ -131,6 +168,8 @@ pub(crate) struct TransactionEvent {
     pub currency: String,
     pub currency_amount: u64,
 }
+
+// `subdomains`
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {
