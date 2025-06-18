@@ -214,7 +214,7 @@ public fun assert_version_is_valid(self: &CouponHouse) {
 public fun admin_add_percentage_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
-    hash: vector<u8>,
+    hash: String,
     amount: u64,
     rules: CouponRules,
 ) {
@@ -228,7 +228,7 @@ public fun admin_add_percentage_coupon(
 public fun admin_add_fixed_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
-    hash: vector<u8>,
+    hash: String,
     amount: u64,
     rules: CouponRules,
 ) {
@@ -238,7 +238,7 @@ public fun admin_add_fixed_coupon(
 }
 
 // Remove a coupon as a system's admin.
-public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: vector<u8>) {
+public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: String) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
     coupon_house.coupons.remove_coupon(hash);
