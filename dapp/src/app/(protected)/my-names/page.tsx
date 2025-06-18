@@ -8,11 +8,12 @@ import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
-import { useRegistrationNfts } from '@/hooks';
+import { useRegistrationNfts, useSubdomainRegistrations } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const registrationNfts = useRegistrationNfts();
+    const subdomainRegistrations = useSubdomainRegistrations();
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -43,6 +44,30 @@ function MyNamesPage(): JSX.Element {
                     </Card>
                 ))}
             </div>
+
+            {subdomainRegistrations ? (
+                <>
+                    <div className="pt-md">
+                        <Title title="My subdomains" testId="my-names-page" />
+                    </div>
+                    <div className="flex flex-col gap-x-sm items-center">
+                        {subdomainRegistrations?.map((nameRecord) => (
+                            <Card key={nameRecord.name} type={CardType.Filled}>
+                                <CardBody
+                                    title={nameRecord.name}
+                                    subtitle={nameRecord.name}
+                                    clickableAction={
+                                        <Button
+                                            text="Manage"
+                                            onClick={() => setUpdateNameDialog(nameRecord.name)}
+                                        />
+                                    }
+                                />
+                            </Card>
+                        ))}
+                    </div>
+                </>
+            ) : null}
         </div>
     );
 }
