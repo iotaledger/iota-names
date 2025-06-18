@@ -8,12 +8,12 @@ import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
-import { useRegistrationNfts, useSubdomainRegistrations } from '@/hooks';
+import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
-    const registrationNfts = useRegistrationNfts();
-    const subdomainRegistrations = useSubdomainRegistrations();
+    const { data: domains } = useRegistrationNfts('domain');
+    const { data: subdomains } = useRegistrationNfts('subdomain');
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -29,7 +29,7 @@ function MyNamesPage(): JSX.Element {
                 <Title title="My names" testId="my-names-page" />
             </div>
             <div className="flex flex-col gap-y-sm items-center">
-                {registrationNfts.map((nft) => (
+                {domains?.map((nft) => (
                     <Card key={nft.name} type={CardType.Filled}>
                         <CardBody
                             title={nft.name}
@@ -44,30 +44,27 @@ function MyNamesPage(): JSX.Element {
                     </Card>
                 ))}
             </div>
-
-            {subdomainRegistrations ? (
-                <>
-                    <div className="pt-md">
-                        <Title title="My subdomains" testId="my-names-page" />
-                    </div>
-                    <div className="flex flex-col gap-x-sm items-center">
-                        {subdomainRegistrations?.map((nameRecord) => (
-                            <Card key={nameRecord.name} type={CardType.Filled}>
-                                <CardBody
-                                    title={nameRecord.name}
-                                    subtitle={nameRecord.name}
-                                    clickableAction={
-                                        <Button
-                                            text="Manage"
-                                            onClick={() => setUpdateNameDialog(nameRecord.name)}
-                                        />
-                                    }
-                                />
-                            </Card>
-                        ))}
-                    </div>
-                </>
-            ) : null}
+            <div className="pt-md">
+                <Title title="My subnames" />
+            </div>
+            {subdomains?.length && (
+                <div className="flex flex-col gap-x-sm items-center pl-4">
+                    {subdomains.map((subdomain) => (
+                        <Card key={subdomain.name} type={CardType.Filled}>
+                            <CardBody
+                                title={subdomain.name}
+                                subtitle={subdomain.name}
+                                clickableAction={
+                                    <Button
+                                        text="Manage"
+                                        onClick={() => setUpdateNameDialog(subdomain.name)}
+                                    />
+                                }
+                            />
+                        </Card>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
