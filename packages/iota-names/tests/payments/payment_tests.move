@@ -282,6 +282,41 @@ fun try_renewal_process_longer_than_max_years() {
     abort 1337
 }
 
+#[test]
+fun test_calculate_total_after_discount() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+
+    let domain = b"test.iota".to_string();
+
+    // Create a payment intent to get request data
+    let intent = payment::init_registration(&mut iota_names, domain);
+    let request_data = intent.request_data();
+
+    // Test with 0% discount
+    let price_0_percent = payment::calculate_total_after_discount(request_data, 0);
+    assert_eq(price_0_percent, 100); // original price should be unchanged
+
+    // Test with 25% discount
+    let price_25_percent = payment::calculate_total_after_discount(request_data, 25);
+    assert_eq(price_25_percent, 75); // 100 - (100 * 25 / 100) = 75
+
+    // Test with 50% discount
+    let price_50_percent = payment::calculate_total_after_discount(request_data, 50);
+    assert_eq(price_50_percent, 50); // 100 - (100 * 50 / 100) = 50
+
+    // Test with 75% discount
+    let price_75_percent = payment::calculate_total_after_discount(request_data, 75);
+    assert_eq(price_75_percent, 25); // 100 - (100 * 75 / 100) = 25
+
+    // Test with 100% discount (should be free)
+    let price_100_percent = payment::calculate_total_after_discount(request_data, 100);
+    assert_eq(price_100_percent, 0); // 100 - (100 * 100 / 100) = 0
+
+    destroy(intent);
+    destroy(iota_names);
+}
+
 public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
     let (mut iota_names, cap) = iota_names::new_for_testing(ctx);
 
