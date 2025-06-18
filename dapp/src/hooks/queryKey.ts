@@ -12,6 +12,7 @@ export const queryKey = {
         address,
     ],
     updateName: (name: string, address?: string) => [queryKey.all, 'update-name', name, address],
+    deleteName: (name: string, address?: string) => [queryKey.all, 'delete-name', name, address],
 
     // Address
     defaultName: (address: string) => [queryKey.all, 'default-name', address],
