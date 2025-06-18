@@ -176,27 +176,30 @@ impl IotaNamesWorker {
                     .insert(event.domain.to_string(), 1);
             }
             IotaNamesEvent::AuctionBid(event) => {
-                *self
+                if let Some(bid_count) = self
                     .bids_per_domain
                     .lock()
                     .expect("error taking lock")
                     .get_mut(&event.domain.to_string())
-                    .expect("missing auction") += 1;
+                {
+                    *bid_count += 1;
+                }
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.total_auction_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
-                let bid_count = self
+                if let Some(bid_count) = self
                     .bids_per_domain
                     .lock()
                     .expect("error taking lock")
                     .remove(&event.domain.to_string())
-                    .expect("missing auction");
-                self.metrics
-                    .bid_count_distribution
-                    .with_label_values(&[&bid_count.to_string()])
-                    .inc();
+                {
+                    self.metrics
+                        .bid_count_distribution
+                        .with_label_values(&[&bid_count.to_string()])
+                        .inc();
+                }
             }
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
