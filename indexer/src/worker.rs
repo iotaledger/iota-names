@@ -148,8 +148,11 @@ impl IotaNamesWorker {
             }
             // `coupons`
             IotaNamesEvent::CouponApplied(event) => match event.kind {
-                0 => self.metrics.total_percentage_discount.inc(),
-                1 => self.metrics.total_fixed_discount.inc(),
+                0 => self
+                    .metrics
+                    .total_percentage_discount
+                    .add(event.discount as _),
+                1 => self.metrics.total_fixed_discount.add(event.discount as _),
                 k => unreachable!("unknown coupon kind {k}"),
             },
             // `iota-names`
