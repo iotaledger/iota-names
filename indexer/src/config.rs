@@ -34,7 +34,7 @@ impl IotaNamesExtendedConfig {
     pub fn from_env() -> anyhow::Result<Self> {
         let iota_names_config = IotaNamesConfig::from_env()?;
         Ok(Self::new(
-            std::env::var("IOTA_NAMES_AUCTION_HOUSE_ID")?.parse()?,
+            std::env::var("IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID")?.parse()?,
             iota_names_config,
         ))
     }
