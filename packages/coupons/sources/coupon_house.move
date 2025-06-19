@@ -17,6 +17,7 @@
 module iota_names_coupons::coupon_house;
 
 use iota::table::Table;
+use iota::event;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::hash::blake2b256;
@@ -56,6 +57,11 @@ public struct CouponHouse has store {
     coupons: Coupons,
     version: u8,
     id: UID,
+}
+
+public struct CouponAppliedEvent has copy, drop {
+    kind: u8,
+    discount: u64
 }
 
 /// Called once to setup the Coupon House on IOTA-Names.
@@ -151,22 +157,6 @@ public fun apply_coupon(
     };
 }
 
-/// Apply a fixed discount to the payment intent.
-fun apply_fixed_discount(
-    intent: &mut PaymentIntent,
-    iota_names: &IotaNames,
-    discount: u64,
-) {
-    let mut price = intent.request_data().base_amount();
-    price = if (price >= discount) {
-        price - discount
-    } else {
-        0
-    };
-
-    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price;
-}
-
 /// Apply a percentage discount to the payment intent.
 fun apply_percentage_discount(
     intent: &mut PaymentIntent,
@@ -175,6 +165,28 @@ fun apply_percentage_discount(
 ) {
     let price = intent.request_data().base_amount();
     let discount_amount = (((price as u128) * (percentage as u128) / 100) as u64);
+
+    event::emit(CouponAppliedEvent {
+        kind: 0,
+        discount: discount_amount
+    });
+
+    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
+}
+
+/// Apply a fixed discount to the payment intent.
+fun apply_fixed_discount(
+    intent: &mut PaymentIntent,
+    iota_names: &IotaNames,
+    discount: u64,
+) {
+    let price = intent.request_data().base_amount();    
+    let discount_amount = price.min(discount);
+
+    event::emit(CouponAppliedEvent {
+        kind: 1,
+        discount: discount_amount
+    });
 
     *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
 }

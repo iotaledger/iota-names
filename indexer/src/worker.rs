@@ -33,7 +33,7 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
-    events::IotaNamesEvent,
+    events::{CouponKind, IotaNamesEvent},
 };
 
 pub(crate) async fn run_iota_names_reader(
@@ -116,6 +116,45 @@ impl IotaNamesWorker {
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
         match event {
+            // `auctions`
+            IotaNamesEvent::AuctionStarted(event) => {
+                self.metrics.total_auction_started.inc();
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
+            }
+            IotaNamesEvent::AuctionBid(event) => {
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    add_bidder_domain_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &event.domain.to_string(),
+                    )
+                })?;
+            }
+            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionFinalized(event) => {
+                self.metrics.total_auction_finalized.inc();
+                self.metrics.auction_final_prices.observe(event.winning_bid);
+                self.metrics
+                    .auction_durations
+                    .observe(event.end_timestamp_ms - event.start_timestamp_ms);
+            }
+            // `coupons`
+            IotaNamesEvent::CouponApplied(event) => match event.kind {
+                CouponKind::Percentage => self
+                    .metrics
+                    .total_percentage_discount
+                    .add(event.discount as _),
+                CouponKind::Fixed => self.metrics.total_fixed_discount.add(event.discount as _),
+            },
+            // `iota-names`
             IotaNamesEvent::NameRecordAdded(event) => {
                 self.metrics.total_name_records_added.inc();
 
@@ -177,35 +216,7 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            IotaNamesEvent::AuctionStarted(event) => {
-                self.metrics.total_auction_started.inc();
-                let mut conn = self.pool.get_connection()?;
-                conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )
-                })?;
-            }
-            IotaNamesEvent::AuctionBid(event) => {
-                let mut conn = self.pool.get_connection()?;
-                conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )
-                })?;
-            }
-            IotaNamesEvent::AuctionExtended(_event) => (),
-            IotaNamesEvent::AuctionFinalized(event) => {
-                self.metrics.total_auction_finalized.inc();
-                self.metrics.auction_final_prices.observe(event.winning_bid);
-                self.metrics
-                    .auction_durations
-                    .observe(event.end_timestamp_ms - event.start_timestamp_ms);
-            }
+            // `subdomains`
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
             }
