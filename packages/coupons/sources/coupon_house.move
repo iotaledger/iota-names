@@ -17,6 +17,7 @@
 module iota_names_coupons::coupon_house;
 
 use iota::table::Table;
+use iota::event;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::hash::blake2b256;
@@ -56,6 +57,11 @@ public struct CouponHouse has store {
     coupons: Coupons,
     version: u8,
     id: UID,
+}
+
+public struct CouponAppliedEvent has copy, drop {
+    kind: u8,
+    discount: u64
 }
 
 /// Called once to setup the Coupon House on IOTA-Names.
@@ -151,22 +157,6 @@ public fun apply_coupon(
     };
 }
 
-/// Apply a fixed discount to the payment intent.
-fun apply_fixed_discount(
-    intent: &mut PaymentIntent,
-    iota_names: &IotaNames,
-    discount: u64,
-) {
-    let mut price = intent.request_data().base_amount();
-    price = if (price >= discount) {
-        price - discount
-    } else {
-        0
-    };
-
-    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price;
-}
-
 /// Apply a percentage discount to the payment intent.
 fun apply_percentage_discount(
     intent: &mut PaymentIntent,
@@ -175,6 +165,28 @@ fun apply_percentage_discount(
 ) {
     let price = intent.request_data().base_amount();
     let discount_amount = (((price as u128) * (percentage as u128) / 100) as u64);
+
+    event::emit(CouponAppliedEvent {
+        kind: 0,
+        discount: discount_amount
+    });
+
+    *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
+}
+
+/// Apply a fixed discount to the payment intent.
+fun apply_fixed_discount(
+    intent: &mut PaymentIntent,
+    iota_names: &IotaNames,
+    discount: u64,
+) {
+    let price = intent.request_data().base_amount();    
+    let discount_amount = price.min(discount);
+
+    event::emit(CouponAppliedEvent {
+        kind: 1,
+        discount: discount_amount
+    });
 
     *intent.request_data_mut(iota_names, CouponsAuth {}).base_amount_mut() = price - discount_amount;
 }
@@ -214,7 +226,7 @@ public fun assert_version_is_valid(self: &CouponHouse) {
 public fun admin_add_percentage_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
-    hash: vector<u8>,
+    hash: String,
     amount: u64,
     rules: CouponRules,
 ) {
@@ -228,7 +240,7 @@ public fun admin_add_percentage_coupon(
 public fun admin_add_fixed_coupon(
     _: &AdminCap,
     iota_names: &mut IotaNames,
-    hash: vector<u8>,
+    hash: String,
     amount: u64,
     rules: CouponRules,
 ) {
@@ -238,7 +250,7 @@ public fun admin_add_fixed_coupon(
 }
 
 // Remove a coupon as a system's admin.
-public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: vector<u8>) {
+public fun admin_remove_coupon(_: &AdminCap, iota_names: &mut IotaNames, hash: String) {
     let coupon_house = coupon_house_mut(iota_names);
     coupon_house.assert_version_is_valid();
     coupon_house.coupons.remove_coupon(hash);
@@ -282,8 +294,6 @@ fun coupon_house(iota_names: &IotaNames): &CouponHouse {
 
 /// Gets a mutable reference to the coupon house
 public(package) fun coupon_house_mut(iota_names: &mut IotaNames): &mut CouponHouse {
-    // Verify coupon house is authorized to get the registry / register names.
-    iota_names.assert_is_authorized<CouponsAuth>();
     let coupons = iota_names::auth_registry_mut<CouponsAuth, CouponHouse>(
         CouponsAuth {},
         iota_names,

@@ -52,3 +52,7 @@ export function getRenewalPricelistConfigType(iotaNamesPackageId: string): strin
 export function getIotaNamesRegistrationType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
 }
+
+export function getIotaSubdomainRegistrationType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::subdomain_registration::SubdomainRegistration`;
+}
