@@ -94,10 +94,12 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
+                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
-                        IotaNamesExtendedConfig::from_env().unwrap_or_default(),
+                        iota_names_config,
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
                     )?;
