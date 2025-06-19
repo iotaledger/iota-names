@@ -8,13 +8,14 @@ module iota_names::registry_tests;
 
 use iota::clock::{Self, Clock};
 use iota::test_utils::assert_eq;
+use iota::vec_map;
 use iota_names::constants;
 use iota_names::domain::{Self, Domain};
 use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 use iota_names::name_record as record;
 use iota_names::registry::{Self, Registry};
-use std::option::some;
-use std::string::utf8;
+use std::option::{some, none};
+use std::string::{String, utf8};
 
 // === Registry + Record Addition ===
 
@@ -615,4 +616,590 @@ public fun burn_nfts(mut nfts: vector<IotaNamesRegistration>) {
         nft::burn_for_testing(vector::pop_back(&mut nfts));
     };
     vector::destroy_empty(nfts);
+}
+
+#[test]
+fun test_set_expiration_timestamp_ms() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create a record for the test domain with expiration set to 1 year
+    let mut nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    
+    let new_expiration = 5 * constants::year_ms();
+    registry.set_expiration_timestamp_ms(&mut nft, domain, new_expiration);
+
+    // Verify both the NFT and the registry record have been updated
+    assert_eq(nft.expiration_timestamp_ms(), new_expiration);
+    
+    let record_option = registry.lookup(domain);
+    assert!(record_option.is_some(), 0);
+    let record = record_option.destroy_some();
+    assert_eq(record.expiration_timestamp_ms(), new_expiration);
+
+    // Clean up
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::EIdMismatch)]
+fun test_set_expiration_timestamp_ms_nft_mismatch() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create two different records
+    let mut nft1 = registry.add_record(domain, 1, &clock, &mut ctx);
+    let domain2 = domain::new(utf8(b"other.iota"));
+    let _nft2 = registry.add_record(domain2, 1, &clock, &mut ctx);
+
+    // Try to update domain with wrong NFT (should fail)
+    registry.set_expiration_timestamp_ms(&mut nft1, domain2, 5 * constants::year_ms());
+
+    abort 1337
+}
+
+#[test]
+fun test_set_and_get_data() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create a record for the test domain
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+
+    // Test with empty data initially
+    let initial_data = registry.get_data(domain);
+    assert_eq(initial_data.size(), 0);
+
+    // Create some test data
+    let mut test_data = vec_map::empty<String, String>();
+    test_data.insert(utf8(b"avatar"), utf8(b"avatar_url"));
+    test_data.insert(utf8(b"email"), utf8(b"test@example.com"));
+    test_data.insert(utf8(b"website"), utf8(b"https://example.com"));
+
+    // Set the data
+    registry.set_data(domain, test_data);
+
+    // Verify the data was set correctly
+    let retrieved_data = registry.get_data(domain);
+    assert_eq(retrieved_data.size(), 3);
+    assert_eq(*retrieved_data.get(&utf8(b"avatar")), utf8(b"avatar_url"));
+    assert_eq(*retrieved_data.get(&utf8(b"email")), utf8(b"test@example.com"));
+    assert_eq(*retrieved_data.get(&utf8(b"website")), utf8(b"https://example.com"));
+
+    // Update with new data
+    let mut updated_data = vec_map::empty<String, String>();
+    updated_data.insert(utf8(b"avatar"), utf8(b"new_avatar_url"));
+    updated_data.insert(utf8(b"bio"), utf8(b"My bio"));
+
+    registry.set_data(domain, updated_data);
+
+    // Verify the data was updated (should replace, not merge)
+    let final_data = registry.get_data(domain);
+    assert_eq(final_data.size(), 2);
+    assert_eq(*final_data.get(&utf8(b"avatar")), utf8(b"new_avatar_url"));
+    assert_eq(*final_data.get(&utf8(b"bio")), utf8(b"My bio"));
+
+    // Clean up
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+/// Test `assert_nft_is_authorized` function with valid NFT
+fun test_assert_nft_is_authorized_success() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create a record for the test domain
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+
+    // This should succeed - NFT matches record and hasn't expired
+    registry.assert_nft_is_authorized(&nft, &clock);
+
+    // Clean up
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::EIdMismatch)]
+fun test_assert_nft_is_authorized_id_mismatch() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // create two different records
+    let nft1 = registry.add_record(domain, 1, &clock, &mut ctx);
+
+    // Override the first domain with a new NFT
+    let mut clock_temp = clock;
+    clock::increment_for_testing(&mut clock_temp, constants::year_ms() + constants::grace_period_ms() + 1);
+    let _nft3 = registry.add_record(domain, 1, &clock_temp, &mut ctx);
+
+    // Now assert with the old NFT should fail
+    registry.assert_nft_is_authorized(&nft1, &clock_temp);
+
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ERecordExpired)]
+fun test_assert_nft_is_authorized_record_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, domain) = setup(&mut ctx);
+
+    // create a record for the test domain
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+
+    // Move time forward so the record expires
+    clock::increment_for_testing(&mut clock, constants::year_ms() + 1);
+
+    // This should fail - record has expired
+    registry.assert_nft_is_authorized(&nft, &clock);
+
+    abort 1337
+}
+
+#[test]
+fun test_update_existing_reverse_lookup() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+    
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    let domain2 = domain::new(utf8(b"second.iota"));
+    let nft2 = registry.add_record(domain2, 1, &clock, &mut ctx);
+
+    let target_addr = @0xB0B;
+
+    // Set target address for both domains
+    registry.set_target_address(domain, some(target_addr));
+    registry.set_target_address(domain2, some(target_addr));
+
+    // Set reverse lookup to first domain
+    registry.set_reverse_lookup(target_addr, domain);
+    let lookup_result = registry.reverse_lookup(target_addr);
+    assert_eq(lookup_result, some(domain));
+
+    // Update reverse lookup to second domain
+    registry.set_reverse_lookup(target_addr, domain2);
+    let lookup_result = registry.reverse_lookup(target_addr);
+    assert_eq(lookup_result, some(domain2));
+
+    // Clean up
+    registry.unset_reverse_lookup(target_addr);
+    let _ = registry.remove_record_for_testing(domain);
+    let _ = registry.remove_record_for_testing(domain2);
+
+    wrapup(registry, clock);
+    burn_nfts(vector[nft, nft2]);
+}
+
+#[test]
+fun test_has_record() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Initially no record should exist
+    assert_eq(registry.has_record(domain), false);
+
+    // Add a record
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    assert_eq(registry.has_record(domain), true);
+
+    // Remove the record
+    let _ = registry.remove_record_for_testing(domain);
+    assert_eq(registry.has_record(domain), false);
+
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_lookup_nonexistent() {
+    let mut ctx = tx_context::dummy();
+    let (registry, clock, _domain) = setup(&mut ctx);
+
+    // Test lookup for a domain that doesn't exist
+    let nonexistent_domain = domain::new(utf8(b"nonexistent.iota"));
+    let result = registry.lookup(nonexistent_domain);
+    assert!(result.is_none(), 0);
+
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_reverse_lookup_nonexistent() {
+    let mut ctx = tx_context::dummy();
+    let (registry, clock, _domain) = setup(&mut ctx);
+
+    // Test reverse lookup for an address that doesn't have a mapping
+    let result = registry.reverse_lookup(@0x999);
+    assert!(result.is_none(), 0);
+
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_unset_target_address() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    
+    // Set a target address first
+    registry.set_target_address(domain, some(@0x123));
+    let record = registry.lookup(domain).destroy_some();
+    assert_eq(record.target_address(), some(@0x123));
+
+    // Now unset it
+    registry.set_target_address(domain, none());
+    let record = registry.lookup(domain).destroy_some();
+    assert_eq(record.target_address(), none());
+
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_reverse_record_invalidation_on_target_change() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    let addr1 = @0x111;
+    let addr2 = @0x222;
+
+    // Set target to addr1 and set reverse lookup
+    registry.set_target_address(domain, some(addr1));
+    registry.set_reverse_lookup(addr1, domain);
+    assert_eq(registry.reverse_lookup(addr1), some(domain));
+
+    // Change target to addr2 - should invalidate reverse lookup for addr1
+    registry.set_target_address(domain, some(addr2));
+    assert_eq(registry.reverse_lookup(addr1), none());
+
+    // Set reverse lookup for addr2
+    registry.set_reverse_lookup(addr2, domain);
+    assert_eq(registry.reverse_lookup(addr2), some(domain));
+
+    // Unset target address - should invalidate reverse lookup for addr2
+    registry.set_target_address(domain, none());
+    assert_eq(registry.reverse_lookup(addr2), none());
+
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_reverse_record_invalidation_different_domain() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    let nft1 = registry.add_record(domain, 1, &clock, &mut ctx);
+    let domain2 = domain::new(utf8(b"other.iota"));
+    let nft2 = registry.add_record(domain2, 1, &clock, &mut ctx);
+    
+    let shared_addr = @0x123;
+
+    // Set both domains to point to the same address
+    registry.set_target_address(domain, some(shared_addr));
+    registry.set_target_address(domain2, some(shared_addr));
+
+    // Set reverse lookup to domain2
+    registry.set_reverse_lookup(shared_addr, domain2);
+    assert_eq(registry.reverse_lookup(shared_addr), some(domain2));
+
+    // Changing domain1's target should not affect the reverse lookup since it points to domain2
+    registry.set_target_address(domain, none());
+    assert_eq(registry.reverse_lookup(shared_addr), some(domain2));
+
+    // But changing domain2's target should invalidate it
+    registry.set_target_address(domain2, none());
+    assert_eq(registry.reverse_lookup(shared_addr), none());
+
+    let _ = registry.remove_record_for_testing(domain);
+    let _ = registry.remove_record_for_testing(domain2);
+    burn_nfts(vector[nft1, nft2]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_set_same_target_address() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    let target_addr = @0x123;
+    
+    // Set target address
+    registry.set_target_address(domain, some(target_addr));
+    registry.set_reverse_lookup(target_addr, domain);
+    
+    // Set the same target address again (should not change reverse lookup)
+    registry.set_target_address(domain, some(target_addr));
+    assert_eq(registry.reverse_lookup(target_addr), some(domain));
+
+    // Clean up
+    registry.unset_reverse_lookup(target_addr);
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ERecordExpired)]
+fun test_add_leaf_record_parent_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, domain) = setup(&mut ctx);
+
+    // Create a parent record
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    
+    // Create subdomain
+    let subdomain = domain::new(utf8(b"sub.hahaha.iota"));
+    
+    // Move time forward so parent expires
+    clock::increment_for_testing(&mut clock, constants::year_ms() + 1);
+    
+    // Try to add leaf record with expired parent (should fail)
+    registry.add_leaf_record(subdomain, &clock, @0x123, &mut ctx);
+
+    burn_nfts(vector[nft]);
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ENftExpired)]
+fun test_assert_nft_is_authorized_nft_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, domain) = setup(&mut ctx);
+
+    // create a record for the test domain with 1 year expiration
+    let mut nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    
+    // First extend both NFT and record to 5 years
+    let long_expiration = clock.timestamp_ms() + (5 * constants::year_ms());
+    registry.set_expiration_timestamp_ms(&mut nft, domain, long_expiration);
+    
+    // Now manually set the NFT expiration to be much shorter using the testing function
+    let short_expiration = clock.timestamp_ms() + 1000; // expires very soon
+    nft.set_expiration_timestamp_ms_for_testing(short_expiration);
+    
+    // Move time forward so the NFT expires but the record is still valid
+    clock::increment_for_testing(&mut clock, 2000);
+    
+    // This should fail with ENftExpired - the record is valid but the NFT has expired
+    registry.assert_nft_is_authorized(&nft, &clock);
+
+    burn_nfts(vector[nft]);
+    abort 1337
+}
+
+#[test]
+fun test_remove_leaf_record_covers_is_leaf_record() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create a parent record
+    let nft = registry.add_record(domain, 1, &clock, &mut ctx);
+    
+    // Create a leaf record under the parent
+    let subdomain = domain::new(utf8(b"leaf.hahaha.iota"));
+    registry.add_leaf_record(subdomain, &clock, @0x123, &mut ctx);
+
+    // Remove the leaf record (this will internally call is_leaf_record and cover the true case)
+    registry.remove_leaf_record(subdomain);
+
+    // Verify it was removed
+    assert!(registry.lookup(subdomain).is_none(), 0);
+
+    let _ = registry.remove_record_for_testing(domain);
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ENonLeafRecord)]
+fun test_remove_leaf_record_nonexistent() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, _domain) = setup(&mut ctx);
+
+    // Create a subdomain that doesn't exist in registry
+    let nonexistent_subdomain = domain::new(utf8(b"nonexistent.hahaha.iota"));
+
+    // Try to remove non-existent subdomain as leaf record - should fail (covers is_leaf_record return false for non-existent)
+    registry.remove_leaf_record(nonexistent_subdomain);
+
+    wrapup(registry, clock);
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ENonLeafRecord)]
+fun test_remove_leaf_record_non_leaf() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, domain) = setup(&mut ctx);
+
+    // Create a regular SLD record (not a leaf)
+    let _nft = registry.add_record(domain, 1, &clock, &mut ctx);
+
+    // Try to remove it as a leaf record - should fail
+    registry.remove_leaf_record(domain);
+
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = iota_names::registry::ERecordNotExpired)]
+fun test_leaf_record_parent_same_nft_not_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, clock, _domain) = setup(&mut ctx);
+
+    // Create a parent domain
+    let parent_domain = domain::new(utf8(b"parent.iota"));
+    let _nft = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Create a leaf record under the parent
+    let leaf_domain = domain::new(utf8(b"leaf.parent.iota"));
+    registry.add_leaf_record(leaf_domain, &clock, @0x123, &mut ctx);
+
+    // Try to override the leaf record by adding a new record with the same domain
+    // This should fail because the parent (which shares the same NFT ID) hasn't expired
+    let _new_nft = registry.add_record_ignoring_grace_period(leaf_domain, 1, &clock, &mut ctx);
+
+    abort 1337
+}
+
+#[test]
+/// Test the case where a leaf record's parent has a different NFT ID (parent was transferred/re-registered)
+fun test_leaf_record_parent_different_nft_id() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _domain) = setup(&mut ctx);
+
+    // Create a parent domain
+    let parent_domain = domain::new(utf8(b"parent.iota"));
+    let nft1 = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Create a leaf record under the parent
+    let leaf_domain = domain::new(utf8(b"leaf.parent.iota"));
+    registry.add_leaf_record(leaf_domain, &clock, @0x123, &mut ctx);
+
+    // Simulate the parent being expired and re-registered with a different NFT ID
+    // First advance time to make the parent expire past grace period
+    clock.increment_for_testing(constants::year_ms() + constants::grace_period_ms() + 1);
+    
+    // Burn the old NFT (simulating transfer or expiration)
+    burn_nfts(vector[nft1]);
+    
+    // Re-register the parent domain (this will have a different NFT ID)
+    let _nft2 = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Now try to add a new record at the leaf domain
+    // This should succeed because the parent NFT ID has changed and the old record can be removed
+    let _new_leaf_nft = registry.add_record_ignoring_grace_period(leaf_domain, 1, &clock, &mut ctx);
+
+    // Clean up the leaf record first
+    let _leaf_record = registry.remove_record_for_testing(leaf_domain);
+    let _parent_record = registry.remove_record_for_testing(parent_domain);
+
+    // Clean up
+    burn_nfts(vector[_nft2, _new_leaf_nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+/// Test leaf record removal when parent exists but has different NFT ID (the else path)
+fun test_leaf_record_parent_different_nft_id_else_path() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _domain) = setup(&mut ctx);
+
+    // Create a parent domain
+    let parent_domain = domain::new(utf8(b"parent.iota"));
+    let nft1 = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Create a leaf record under the parent
+    let leaf_domain = domain::new(utf8(b"leaf.parent.iota"));
+    registry.add_leaf_record(leaf_domain, &clock, @0x123, &mut ctx);
+
+    // Advance time to make parent expire past grace period
+    clock.increment_for_testing(constants::year_ms() + constants::grace_period_ms() + 1);
+    
+    // Burn the old NFT and remove the parent record
+    let _parent_record = registry.remove_record_for_testing(parent_domain);
+    burn_nfts(vector[nft1]);
+    
+    // Re-register the parent domain with a different NFT ID (after expiration)
+    let _nft2 = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Now try to add a new record at the leaf domain
+    // This should succeed because the parent NFT ID has changed (not equal condition)
+    let _new_leaf_nft = registry.add_record_ignoring_grace_period(leaf_domain, 1, &clock, &mut ctx);
+
+    // Clean up
+    let _leaf_record = registry.remove_record_for_testing(leaf_domain);
+    let _parent_record = registry.remove_record_for_testing(parent_domain);
+    burn_nfts(vector[_nft2, _new_leaf_nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_add_leaf_record_no_parent() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _domain) = setup(&mut ctx);
+
+    // Create a parent domain
+    let parent_domain = domain::new(utf8(b"parent.iota"));
+    let nft1 = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Create a leaf record under the parent
+    let leaf_domain = domain::new(utf8(b"leaf.parent.iota"));
+    registry.add_leaf_record(leaf_domain, &clock, @0x123, &mut ctx);
+
+    // Advance time to make parent expire past grace period
+    clock.increment_for_testing(constants::year_ms() + constants::grace_period_ms() + 1);
+    
+    // Burn the NFT and completely remove the parent record
+    registry.burn_registration_object(nft1, &clock);
+
+    // Now the parent should not exist at all
+    assert!(registry.lookup(parent_domain).is_none(), 0);
+
+    // Now try to add a new record at the leaf domain
+    let _new_leaf_nft = registry.add_record_ignoring_grace_period(leaf_domain, 1, &clock, &mut ctx);
+
+    // Clean up
+    let _leaf_record = registry.remove_record_for_testing(leaf_domain);
+    burn_nfts(vector[_new_leaf_nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_leaf_record_parent_removed_after_creation() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _domain) = setup(&mut ctx);
+
+    // Create a parent domain
+    let parent_domain = domain::new(utf8(b"parent.iota"));
+    let parent_nft = registry.add_record(parent_domain, 1, &clock, &mut ctx);
+
+    // Create a leaf record under the parent
+    let leaf_domain = domain::new(utf8(b"leaf.parent.iota"));
+    registry.add_leaf_record(leaf_domain, &clock, @0x123, &mut ctx);
+
+    // Verify the leaf record exists and parent exists
+    assert!(registry.has_record(leaf_domain), 0);
+    assert!(registry.has_record(parent_domain), 0);
+
+    // Wait for parent to expire
+    clock.increment_for_testing(constants::year_ms() + 1);
+
+    // Now try to create a new record at the leaf domain
+    // This will call remove_existing_record_if_exists_and_expired
+    let new_leaf_nft = registry.add_record_ignoring_grace_period(leaf_domain, 1, &clock, &mut ctx);
+
+    // Verify the new record was created
+    assert!(registry.has_record(leaf_domain), 0);
+
+    // Clean up
+    registry.burn_registration_object(parent_nft, &clock);
+    let _leaf_record = registry.remove_record_for_testing(leaf_domain);
+    burn_nfts(vector[new_leaf_nft]);
+    wrapup(registry, clock);
 }
