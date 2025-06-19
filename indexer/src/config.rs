@@ -3,6 +3,7 @@
 
 use std::str::FromStr;
 
+use iota_names::config::IotaNamesConfig;
 use iota_types::base_types::ObjectID;
 use serde::{Deserialize, Serialize};
 
@@ -11,6 +12,7 @@ use serde::{Deserialize, Serialize};
 pub struct IotaNamesExtendedConfig {
     /// ID of the `AuctionHouse` object.
     pub auction_house_id: ObjectID,
+    pub iota_names_config: IotaNamesConfig,
 }
 
 impl Default for IotaNamesExtendedConfig {
@@ -22,13 +24,18 @@ impl Default for IotaNamesExtendedConfig {
 }
 
 impl IotaNamesExtendedConfig {
-    pub fn new(auction_house_id: ObjectID) -> Self {
-        Self { auction_house_id }
+    pub fn new(auction_house_id: ObjectID, iota_names_config: IotaNamesConfig) -> Self {
+        Self {
+            auction_house_id,
+            iota_names_config,
+        }
     }
 
     pub fn from_env() -> anyhow::Result<Self> {
+        let iota_names_config = IotaNamesConfig::from_env()?;
         Ok(Self::new(
             std::env::var("IOTA_NAMES_AUCTION_HOUSE_ID")?.parse()?,
+            iota_names_config,
         ))
     }
 
@@ -41,6 +48,6 @@ impl IotaNamesExtendedConfig {
             "0x31deb8cbd320867089d52c37fed2d443520aac0fc5a957de1f64f9135b83f42b";
 
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
-        Self::new(auction_house_id)
+        Self::new(auction_house_id, IotaNamesConfig::devnet())
     }
 }

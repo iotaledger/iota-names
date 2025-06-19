@@ -70,7 +70,6 @@ pub(crate) async fn run_iota_names_reader(
 }
 
 pub(crate) struct IotaNamesWorker {
-    config: IotaNamesConfig,
     extended_config: IotaNamesExtendedConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
@@ -79,14 +78,13 @@ pub(crate) struct IotaNamesWorker {
 
 impl IotaNamesWorker {
     pub(crate) fn new(
-        config: IotaNamesConfig,
         extended_config: IotaNamesExtendedConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
     ) -> anyhow::Result<Self> {
         let config_type = StructTag::from_str(&format!(
             "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
-            config.package_address,
+            extended_config.iota_names_config.package_address,
         ))?;
         let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
             type_: config_type.clone(),
@@ -96,14 +94,13 @@ impl IotaNamesWorker {
             )],
         }));
         let balance_object_id = iota_types::dynamic_field::derive_dynamic_field_id(
-            config.object_id,
+            extended_config.iota_names_config.object_id,
             &TypeTag::Struct(Box::new(config_type)),
             &IotaJsonValue::new(serde_json::json!({ "dummy_field": false }))?
                 .to_bcs_bytes(&layout)?,
         )?;
 
         Ok(Self {
-            config,
             extended_config,
             metrics,
             token,
@@ -229,7 +226,10 @@ impl IotaNamesWorker {
 
             if let Some(events) = &transaction.events {
                 for event in events.data.iter() {
-                    match IotaNamesEvent::try_from_event(event, &self.config) {
+                    match IotaNamesEvent::try_from_event(
+                        event,
+                        &self.extended_config.iota_names_config,
+                    ) {
                         Ok(Some(event)) => self.process_event(event)?,
                         Err(e) => warn!("parsing event failed: {e}"),
                         _ => {}

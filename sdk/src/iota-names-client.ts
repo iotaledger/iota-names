@@ -51,7 +51,7 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 20000000
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
-        if (!this.config.iotaNames) throw new Error('IotaNames object ID is not set');
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
         if (!this.config.packageId) throw new Error('Price list config not found');
 
         const pricingConfigBcsB64 = toB64(
@@ -76,7 +76,7 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNames,
+                parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
                         this.config.packageId,
@@ -118,7 +118,7 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 20000000
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
-        if (!this.config.iotaNames) throw new Error('IotaNames object ID is not set');
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
         if (!this.config.packageId) throw new Error('Price list config not found');
 
         const pricingConfigBcsB64 = toB64(
@@ -143,7 +143,7 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNames,
+                parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
                         this.config.packageId,

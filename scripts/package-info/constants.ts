@@ -9,7 +9,7 @@ export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
     auctionPackageId: string;
-    auctionHouse: string;
+    auctionHouseObjectId: string;
     coins: {
         [key: string]: {
             type: string;
@@ -18,7 +18,7 @@ export type PackageInfo = {
     };
     couponsPackageId: string;
     denyListPackageId: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     packageId: string;
     paymentsPackageId: string;
     publisherId: string;

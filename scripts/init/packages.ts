@@ -47,14 +47,17 @@ export const Packages = (network: string) => {
             processPublish: (data: IotaTransactionBlockResponse) => {
                 const { packageId, upgradeCap } = parseCorePackageObjects(data);
                 const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-                const iotaNames = parseCreatedObject(data, `${packageId}::iota_names::IotaNames`);
+                const iotaNamesObjectId = parseCreatedObject(
+                    data,
+                    `${packageId}::iota_names::IotaNames`,
+                );
                 const adminCap = parseCreatedObject(data, `${packageId}::iota_names::AdminCap`);
 
                 return {
                     packageId,
                     upgradeCap,
                     publisher,
-                    iotaNames,
+                    iotaNamesObjectId,
                     adminCap,
                 };
             },
@@ -62,14 +65,14 @@ export const Packages = (network: string) => {
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
                 publisher: string,
             ) => {
                 // Adds the default registry where name records and reverse records will live
                 addRegistry({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     registry: newLookupRegistry({
                         txb,
@@ -82,7 +85,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: addCoreConfig({ txb, latestPackageId: packageId }),
                     type: `${packageId}::core_config::CoreConfig`,
@@ -91,7 +94,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: newPriceConfig({
                         txb,
@@ -113,7 +116,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: newRenewalConfig({
                         txb,
@@ -157,7 +160,10 @@ export const Packages = (network: string) => {
             folder: 'auction',
             processPublish: (data: IotaTransactionBlockResponse) => {
                 const { packageId, upgradeCap } = parseCorePackageObjects(data);
-                const auctionHouse = parseCreatedObject(data, `${packageId}::auction::AuctionHouse`);
+                const auctionHouse = parseCreatedObject(
+                    data,
+                    `${packageId}::auction::AuctionHouse`,
+                );
 
                 return {
                     packageId,
@@ -176,9 +182,9 @@ export const Packages = (network: string) => {
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
             ) => {
-                setup({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
+                setup({ txb, adminCap, iotaNamesObjectId, target: `${packageId}::deny_list` });
             },
         },
         Coupons: {
@@ -190,9 +196,9 @@ export const Packages = (network: string) => {
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
             ) => {
-                setup({ txb, adminCap, iotaNames, target: `${packageId}::coupon_house` });
+                setup({ txb, adminCap, iotaNamesObjectId, target: `${packageId}::coupon_house` });
             },
         },
         Payments: {
@@ -204,13 +210,13 @@ export const Packages = (network: string) => {
                 txb,
                 packageId,
                 adminCap,
-                iotaNames,
+                iotaNamesObjectId,
                 iotaNamesPackageId,
             }: {
                 txb: Transaction;
                 packageId: string;
                 adminCap: string;
-                iotaNames: string;
+                iotaNamesObjectId: string;
                 iotaNamesPackageId: string;
             }) => {
                 const packageInfo = readPackageInfo(network);
@@ -223,7 +229,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId,
                     config: paymentsconfig,
                     type: `${packageId}::payments::PaymentsConfig`,
@@ -238,13 +244,13 @@ export const Packages = (network: string) => {
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
                 iotaNamesPackageId: string,
             ) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId,
                     config: txb.moveCall({
                         target: `${packageId}::config::default`,

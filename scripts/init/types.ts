@@ -21,12 +21,12 @@ export type IotaNames = {
     packageId: string;
     upgradeCap: string;
     publisher: string;
-    iotaNames: string;
+    objectId: string;
     adminCap: string;
 };
 
 export type Auction = {
     packageId: string;
     upgradeCap: string;
-    auctionHouse: string;
+    objectId: string;
 };

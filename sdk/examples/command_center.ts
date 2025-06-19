@@ -198,7 +198,7 @@ async function startAuctionAndPlaceBid(
         target: `${config.auctionPackageId}::auction::start_auction_and_place_bid`,
         arguments: [
             transaction.object(auctionHouse),
-            transaction.object(config.iotaNames),
+            transaction.object(config.iotaNamesObjectId),
             transaction.pure.string(domain),
             coin,
             transaction.object('0x06'),

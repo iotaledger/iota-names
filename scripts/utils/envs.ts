@@ -24,11 +24,11 @@ const json = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
 const envVars = {
     IOTA_NAMES_PACKAGE_ADDRESS: json.packageId,
-    IOTA_NAMES_OBJECT_ID: json.iotaNames,
+    IOTA_NAMES_OBJECT_ID: json.iotaNamesObjectId,
     IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: json.paymentsPackageId,
     IOTA_NAMES_REGISTRY_ID: json.registryTableId,
     IOTA_NAMES_REVERSE_REGISTRY_ID: json.reverseRegistryTableId,
-    IOTA_NAMES_AUCTION_HOUSE_ID: json.auctionHouse,
+    IOTA_NAMES_AUCTION_HOUSE_ID: json.auctionHouseObjectId,
 };
 
 function formatEnvVar(name: string, value: string): string {

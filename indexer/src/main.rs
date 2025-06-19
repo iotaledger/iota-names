@@ -74,7 +74,6 @@ impl Command {
                 let handle = cancel_token.clone();
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
-                        IotaNamesConfig::from_env().unwrap_or_default(),
                         IotaNamesExtendedConfig::from_env().unwrap_or_default(),
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
