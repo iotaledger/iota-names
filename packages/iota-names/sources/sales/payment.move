@@ -109,7 +109,6 @@ public fun finalize_payment<A: drop, T>(
     app: A,
     coin: Coin<T>,
 ): Receipt {
-    iota_names.assert_is_authorized<A>();
     event::emit(intent.to_event<A, T>(coin.value()));
     iota_names.auth_add_balance(app, coin.into_balance());
 
