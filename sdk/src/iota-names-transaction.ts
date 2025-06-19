@@ -306,12 +306,12 @@ export class IotaNamesTransaction {
      * Unsets a default name for the user.
      */
     unsetDefault() {
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
             target: `${this.iotaNamesClient.config.packageId}::controller::unset_reverse_lookup`,
-            arguments: [this.transaction.object(this.iotaNamesClient.config.iotaNames)],
+            arguments: [this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId)],
         });
     }
 
