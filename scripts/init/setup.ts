@@ -138,6 +138,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
             );
             constants.registryTableId = registryTableId;
             constants.reverseRegistryTableId = reverseRegistryTableId;
+            constants.auctionHouseObjectId = packageInfo.Auction.objectId;
 
             writePackageInfo(network, constants);
         } catch (e) {

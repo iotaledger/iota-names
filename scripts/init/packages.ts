@@ -47,7 +47,7 @@ export const Packages = (network: string) => {
             processPublish: (data: IotaTransactionBlockResponse) => {
                 const { packageId, upgradeCap } = parseCorePackageObjects(data);
                 const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-                const iotaNamesObjectId = parseCreatedObject(
+                const objectId = parseCreatedObject(
                     data,
                     `${packageId}::iota_names::IotaNames`,
                 );
@@ -57,7 +57,7 @@ export const Packages = (network: string) => {
                     packageId,
                     upgradeCap,
                     publisher,
-                    iotaNamesObjectId,
+                    objectId,
                     adminCap,
                 };
             },
@@ -160,7 +160,7 @@ export const Packages = (network: string) => {
             folder: 'auction',
             processPublish: (data: IotaTransactionBlockResponse) => {
                 const { packageId, upgradeCap } = parseCorePackageObjects(data);
-                const auctionHouse = parseCreatedObject(
+                const objectId = parseCreatedObject(
                     data,
                     `${packageId}::auction::AuctionHouse`,
                 );
@@ -168,7 +168,7 @@ export const Packages = (network: string) => {
                 return {
                     packageId,
                     upgradeCap,
-                    auctionHouse,
+                    objectId,
                 };
             },
             authorizationType: (packageId: string) => `${packageId}::auction::AuctionAuth`,
