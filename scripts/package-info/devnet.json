@@ -2,6 +2,7 @@
     "adminAddress": "0xb98bc58cd2cae4c621b47ed0a3bbed2e1dcb78da60d578625384dad3a231c6fb",
     "adminCap": "0x84096eeb81f666bc8e7b14803b387617ad92aa796b5f84ddc752a513b273fc34",
     "auctionPackageId": "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50",
+    "auctionHouseObjectId": "0x31deb8cbd320867089d52c37fed2d443520aac0fc5a957de1f64f9135b83f42b",
     "coins": {
         "IOTA": {
             "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
@@ -9,7 +10,7 @@
         }
     },
     "denyListPackageId": "0xe2d9b88ccfd3c752152873385e3da7d2d849e0bd98e91db68e7bd16e41fe8345",
-    "iotaNames": "0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7",
+    "iotaNamesObjectId": "0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7",
     "packageId": "0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f",
     "paymentsPackageId": "0x882f88d252a650649f490e96e32e53979758fdda645863ca856d83c72d5e0e72",
     "publisherId": "0xc10d3ab816bdbbb0b04c45b4fafebaad9d739fcd57bfc805120193bc7eeee25f",

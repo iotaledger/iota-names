@@ -24,7 +24,7 @@ const setupIotaNames = (txb: Transaction) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: addCoreConfig({ txb, latestPackageId: packageInfo.packageId }),
         type: `${packageInfo.packageId}::core_config::CoreConfig`,
@@ -34,7 +34,7 @@ const setupIotaNames = (txb: Transaction) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: newPriceConfig({
             txb,
@@ -55,7 +55,7 @@ const setupIotaNames = (txb: Transaction) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: newRenewalConfig({
             txb,
@@ -77,7 +77,7 @@ const setupIotaNames = (txb: Transaction) => {
     authorize({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         type: `${packageInfo.packageId}::controller::Controller`,
         iotaNamesPackageId: packageInfo.packageId,
     });
@@ -86,7 +86,7 @@ const setupIotaNames = (txb: Transaction) => {
     authorize({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         type: `${packageInfo.paymentsPackageId}::payments::PaymentsAuth`,
         iotaNamesPackageId: packageInfo.packageId,
     });
@@ -99,7 +99,7 @@ const setupIotaNames = (txb: Transaction) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: paymentsConfig,
         type: `${packageInfo.paymentsPackageId}::payments::PaymentsConfig`,
