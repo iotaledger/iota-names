@@ -32,7 +32,7 @@ export function loadLocalnetConfig(): PackageInfo {
         return {
             auctionPackageId: localnetConfig.auctionPackageId,
             coins: localnetConfig.coins,
-            iotaNames: localnetConfig.iotaNames,
+            iotaNamesObjectId: localnetConfig.iotaNamesObjectId,
             packageId: localnetConfig.packageId,
             payments: {
                 packageId: localnetConfig.paymentsPackageId,
