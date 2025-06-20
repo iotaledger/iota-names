@@ -29,6 +29,9 @@ pub(crate) struct IotaNamesMetrics {
     pub user_data_distribution: IntGaugeVec,
     pub auction_final_prices: Histogram,
     pub auction_durations: Histogram,
+    pub auction_house_balance: IntGauge,
+    pub total_percentage_discount: IntGauge,
+    pub total_fixed_discount: IntGauge,
 }
 
 impl IotaNamesMetrics {
@@ -126,6 +129,24 @@ impl IotaNamesMetrics {
                 "The durations of auctions",
                 registry,
             ),
+            auction_house_balance: register_int_gauge_with_registry!(
+                "auction_house_balance",
+                "The balance held in the auction house",
+                registry,
+            )
+            .unwrap(),
+            total_percentage_discount: register_int_gauge_with_registry!(
+                "total_percentage_discount",
+                "The total amount of percentage discount applied",
+                registry,
+            )
+            .unwrap(),
+            total_fixed_discount: register_int_gauge_with_registry!(
+                "total_fixed_discount",
+                "The total amount of fixed discount applied",
+                registry,
+            )
+            .unwrap(),
         }
     }
 }
