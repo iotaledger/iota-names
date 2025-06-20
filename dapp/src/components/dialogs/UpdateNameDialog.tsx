@@ -27,6 +27,7 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { useSubdomainPermissionsValidation } from '@/lib/auction/utils';
 import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 type UpdateNameDialogProps = {
@@ -60,6 +61,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+
+    const { canModifyTimeExtension, canModifyChildCreation } =
+        useSubdomainPermissionsValidation(name);
 
     // Sync permissions
     useEffect(() => {
@@ -264,7 +268,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                                 <Checkbox
                                     isChecked={editIsAllowingRenew}
-                                    isDisabled={disableEdit}
+                                    isDisabled={disableEdit || !canModifyTimeExtension}
                                     onCheckedChange={handleAllowRenewChange}
                                 />
                             </Card>
@@ -275,7 +279,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                                 <Checkbox
                                     isChecked={editIsAllowSubnames}
-                                    isDisabled={disableEdit}
+                                    isDisabled={disableEdit || !canModifyChildCreation}
                                     onCheckedChange={handleAllowSubnameChange}
                                 />
                             </Card>
