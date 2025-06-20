@@ -48,14 +48,14 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     | undefined
                     | null;
                 const fields = content?.fields as { expiration_timestamp_ms?: string } | undefined;
-
                 return {
                     name: data?.name ?? '',
                     description: data?.description,
                     image_url: data?.image_url,
                     link: data?.link,
-                    expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
                     project_url: data?.project_url,
+                    expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
+                    id: nameRecord.objectId,
                 };
             });
         },

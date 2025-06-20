@@ -12,6 +12,8 @@ import { useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+    const [updateNftIdDialog, setUpdateNftIdDialog] = useState<string | null>(null);
+
     const { data: domains } = useRegistrationNfts('domain');
     const { data: subdomains } = useRegistrationNfts('subdomain');
 
@@ -21,6 +23,7 @@ function MyNamesPage(): JSX.Element {
             {updateNameDialog ? (
                 <UpdateNameDialog
                     name={updateNameDialog}
+                    nftId={updateNftIdDialog ?? ''}
                     open
                     setOpen={() => setUpdateNameDialog(null)}
                 />
@@ -37,7 +40,10 @@ function MyNamesPage(): JSX.Element {
                             clickableAction={
                                 <Button
                                     text="Manage"
-                                    onClick={() => setUpdateNameDialog(nft.name)}
+                                    onClick={() => {
+                                        setUpdateNameDialog(nft.name);
+                                        setUpdateNftIdDialog(nft.id);
+                                    }}
                                 />
                             }
                         />
@@ -57,7 +63,10 @@ function MyNamesPage(): JSX.Element {
                                 clickableAction={
                                     <Button
                                         text="Manage"
-                                        onClick={() => setUpdateNameDialog(subdomain.name)}
+                                        onClick={() => {
+                                            setUpdateNameDialog(subdomain.name);
+                                            setUpdateNftIdDialog(subdomain.id);
+                                        }}
                                     />
                                 }
                             />
