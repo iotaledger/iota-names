@@ -121,8 +121,8 @@ importers:
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: 0.0.0-experimental-20250613152206
-        version: 0.0.0-experimental-20250613152206(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
@@ -261,8 +261,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20250613070423
-        version: 0.0.0-experimental-20250613070423(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -274,8 +274,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20250613070423
-        version: 0.0.0-experimental-20250613070423(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -1431,22 +1431,11 @@ packages:
       '@tanstack/react-query': ^5.50.1
       react: '*'
 
-  '@iota/graphql-transport@0.0.0-experimental-20250613070423':
-    resolution: {integrity: sha512-BHilef3hrAY2rs7TSngB8Pz+9sTg0am7FB9KEKAFATw0ozJ0PYDZC3TeTnz4ct07wTOuvjWKEke7NCsiUAA7kg==}
-
   '@iota/graphql-transport@0.0.0-experimental-20250620081851':
     resolution: {integrity: sha512-YaWYVGstssbpF97UnjwKH6BQAVJUJWEJb9VafwpubkADV+Hzg/Y6Mmf6nzHW7UJ5nIPJm0otOs8LaevTg9Fd1A==}
 
   '@iota/iota-sdk@0.0.0-experimental-20250611113155':
     resolution: {integrity: sha512-10UOxuAspdWnTzU/C6W9apihDdo3VugXHZWATYhO+e4+YfwEXTB0iAc1Xnmgrl64MmnL9tlsa64YMItbCoTXbQ==}
-    engines: {node: '>=20'}
-
-  '@iota/iota-sdk@0.0.0-experimental-20250613070423':
-    resolution: {integrity: sha512-dg/8RBdu2Xmyi49zDZkSZhwVRGhKRsc+lCBaMq5Q9EOSsDA7TEyeb5RLcysMw9UnRXOo+dRRzR5Ol4jHhvELiA==}
-    engines: {node: '>=20'}
-
-  '@iota/iota-sdk@0.0.0-experimental-20250613152206':
-    resolution: {integrity: sha512-dGNq40kYFi3b73VyYypCH0jkGPdM/H4/72b2Wa4YQyCjjPYIuoR6/63kH07ztHu2LQioyCHWi0eq0BSeLjvzJQ==}
     engines: {node: '>=20'}
 
   '@iota/iota-sdk@0.0.0-experimental-20250620081851':
@@ -1457,8 +1446,8 @@ packages:
     resolution: {integrity: sha512-ZFg4C5EuHV55fHITKOO6Mg1dLqgojZqJsDsR3SRt8W9Ofzbjt8shlM2uLNRwDpiM7GzTb4UUFcKXpOt//5gEmQ==}
     engines: {node: '>=20'}
 
-  '@iota/kiosk@0.0.0-experimental-20250613152206':
-    resolution: {integrity: sha512-uCwT6USqtP5bJk9BSEnQA91ZytJDQZCC7iC9aEnScArQmhRPhEfxvGRe+c/wv7w8203uiW70Anytc3gkHXlOyg==}
+  '@iota/kiosk@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-EZbWIDiFhsZQ9aSSO40p7awFrOy++GmjgItFgza2AlZMIhnUgJJ1X3xLHti+Y/0rQ7n1RwWjzb26L1IHNaDT/Q==}
     engines: {node: '>=20'}
 
   '@iota/kiosk@0.3.2':
@@ -7441,17 +7430,6 @@ snapshots:
       - react-dom
       - typescript
 
-  '@iota/graphql-transport@0.0.0-experimental-20250613070423(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.0.0
-      '@iota/iota-sdk': 0.0.0-experimental-20250613070423(typescript@5.8.3)
-      graphql: 16.11.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
   '@iota/graphql-transport@0.0.0-experimental-20250620081851(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
@@ -7464,44 +7442,6 @@ snapshots:
       - typescript
 
   '@iota/iota-sdk@0.0.0-experimental-20250611113155(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.0.0
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      '@suchipi/femver': 1.0.0
-      bech32: 2.0.0
-      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
-      graphql: 16.11.0
-      tweetnacl: 1.0.3
-      valibot: 0.36.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
-  '@iota/iota-sdk@0.0.0-experimental-20250613070423(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.0.0
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      '@suchipi/femver': 1.0.0
-      bech32: 2.0.0
-      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
-      graphql: 16.11.0
-      tweetnacl: 1.0.3
-      valibot: 0.36.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
-  '@iota/iota-sdk@0.0.0-experimental-20250613152206(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@iota/bcs': 1.0.0
@@ -7558,9 +7498,9 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/kiosk@0.0.0-experimental-20250613152206(typescript@5.8.3)':
+  '@iota/kiosk@0.0.0-experimental-20250620081851(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20250613152206(typescript@5.8.3)
+      '@iota/iota-sdk': 0.0.0-experimental-20250620081851(typescript@5.8.3)
       dotenv: 16.4.7
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
