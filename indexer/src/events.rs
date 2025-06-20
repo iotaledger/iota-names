@@ -38,57 +38,49 @@ impl IotaNamesEvent {
     ) -> anyhow::Result<Option<Self>> {
         let package_address = IotaAddress::from(event.package_id);
 
-        if package_address == config.auction_package_address
-            || package_address == config.coupons_package_address
-            || package_address == config.iota_names_config.package_address
-            || package_address == config.iota_names_config.payments_package_address
-            || package_address == config.subdomains_package_address
+        if package_address != config.auction_package_address
+            && package_address != config.coupons_package_address
+            && package_address != config.iota_names_config.package_address
+            && package_address != config.iota_names_config.payments_package_address
+            && package_address != config.subdomains_package_address
         {
-            Ok(Some(match event.type_.name.as_str() {
-                // `auctions`
-                "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
-                "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
-                "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
-                "AuctionFinalizedEvent" => {
-                    Self::AuctionFinalized(bcs::from_bytes(&event.contents)?)
-                }
-                // `coupons`
-                "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
-                // `iota-names`
-                "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
-                "NameRecordRemovedEvent" => {
-                    Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?)
-                }
-                "TargetAddressSetEvent" => {
-                    Self::TargetAddressSet(bcs::from_bytes(&event.contents)?)
-                }
-                "ReverseLookupSetEvent" => {
-                    Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?)
-                }
-                "ReverseLookupUnsetEvent" => {
-                    Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
-                }
-                "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
-                "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
-                "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
-                // `subdomains`
-                "NodeSubdomainCreatedEvent" => {
-                    Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
-                }
-                "NodeSubdomainBurnedEvent" => {
-                    Self::NodeSubdomainBurned(bcs::from_bytes(&event.contents)?)
-                }
-                "LeafSubdomainCreatedEvent" => {
-                    Self::LeafSubdomainCreated(bcs::from_bytes(&event.contents)?)
-                }
-                "LeafSubdomainRemovedEvent" => {
-                    Self::LeafSubdomainRemoved(bcs::from_bytes(&event.contents)?)
-                }
-                _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
-            }))
-        } else {
-            Ok(None)
+            return Ok(None);
         }
+
+        Ok(Some(match event.type_.name.as_str() {
+            // `auctions`
+            "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
+            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
+            "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
+            "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
+            // `coupons`
+            "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
+            // `iota-names`
+            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupUnsetEvent" => {
+                Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
+            }
+            "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
+            "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
+            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
+            // `subdomains`
+            "NodeSubdomainCreatedEvent" => {
+                Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
+            }
+            "NodeSubdomainBurnedEvent" => {
+                Self::NodeSubdomainBurned(bcs::from_bytes(&event.contents)?)
+            }
+            "LeafSubdomainCreatedEvent" => {
+                Self::LeafSubdomainCreated(bcs::from_bytes(&event.contents)?)
+            }
+            "LeafSubdomainRemovedEvent" => {
+                Self::LeafSubdomainRemoved(bcs::from_bytes(&event.contents)?)
+            }
+            _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
+        }))
     }
 }
 
