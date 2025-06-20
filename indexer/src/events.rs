@@ -1,9 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
+use iota_names::{domain::Domain, registry::NameRecord};
 use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
+
+use crate::config::IotaNamesExtendedConfig;
 
 pub(crate) enum IotaNamesEvent {
     // `auctions`
@@ -32,43 +34,61 @@ pub(crate) enum IotaNamesEvent {
 impl IotaNamesEvent {
     pub(crate) fn try_from_event(
         event: &Event,
-        _config: &IotaNamesConfig,
+        config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        // TODO check package IDs
-        Ok(Some(match event.type_.name.as_str() {
-            // `auctions`
-            "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
-            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
-            "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
-            "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
-            // `coupons`
-            "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
-            // `iota-names`
-            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
-            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
-            "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
-            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
-            "ReverseLookupUnsetEvent" => {
-                Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
-            }
-            "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
-            "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
-            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
-            // `subdomains`
-            "NodeSubdomainCreatedEvent" => {
-                Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
-            }
-            "NodeSubdomainBurnedEvent" => {
-                Self::NodeSubdomainBurned(bcs::from_bytes(&event.contents)?)
-            }
-            "LeafSubdomainCreatedEvent" => {
-                Self::LeafSubdomainCreated(bcs::from_bytes(&event.contents)?)
-            }
-            "LeafSubdomainRemovedEvent" => {
-                Self::LeafSubdomainRemoved(bcs::from_bytes(&event.contents)?)
-            }
-            _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
-        }))
+        let package_address = IotaAddress::from(event.package_id);
+
+        if package_address == config.auction_package_address
+            || package_address == config.coupons_package_address
+            || package_address == config.iota_names_config.package_address
+            || package_address == config.iota_names_config.payments_package_address
+            || package_address == config.subdomains_package_address
+        {
+            Ok(Some(match event.type_.name.as_str() {
+                // `auctions`
+                "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
+                "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
+                "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
+                "AuctionFinalizedEvent" => {
+                    Self::AuctionFinalized(bcs::from_bytes(&event.contents)?)
+                }
+                // `coupons`
+                "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
+                // `iota-names`
+                "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+                "NameRecordRemovedEvent" => {
+                    Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?)
+                }
+                "TargetAddressSetEvent" => {
+                    Self::TargetAddressSet(bcs::from_bytes(&event.contents)?)
+                }
+                "ReverseLookupSetEvent" => {
+                    Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?)
+                }
+                "ReverseLookupUnsetEvent" => {
+                    Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
+                }
+                "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
+                "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
+                "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
+                // `subdomains`
+                "NodeSubdomainCreatedEvent" => {
+                    Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
+                }
+                "NodeSubdomainBurnedEvent" => {
+                    Self::NodeSubdomainBurned(bcs::from_bytes(&event.contents)?)
+                }
+                "LeafSubdomainCreatedEvent" => {
+                    Self::LeafSubdomainCreated(bcs::from_bytes(&event.contents)?)
+                }
+                "LeafSubdomainRemovedEvent" => {
+                    Self::LeafSubdomainRemoved(bcs::from_bytes(&event.contents)?)
+                }
+                _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }
 
