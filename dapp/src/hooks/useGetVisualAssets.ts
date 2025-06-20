@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { type IotaObjectData } from '@iota/iota-sdk/client';
-import { useMemo } from 'react';
 
 import { isKioskOwnerToken } from '@/lib/utils/kiosk';
 
@@ -20,29 +19,30 @@ const FILTER_NONE_STRUCT_TYPES = [
 export function useGetVisualAssets(address: string) {
     const kioskClient = useKioskClient();
 
-    const { data: ownedObjects, ...ownedObjectsQuery } = useGetAllOwnedObjects<IotaObjectData[]>(
+    return useGetAllOwnedObjects<IotaObjectData[]>(
         address,
         {
             MatchNone: FILTER_NONE_STRUCT_TYPES.map((type) => ({
                 StructType: type,
             })),
         },
+        {
+            select: (data) => getAllVisualAssets(data, kioskClient),
+        },
     );
+}
 
-    const visualAssets = useMemo(() => {
-        const visualAssets = ownedObjects?.filter((obj) => !!obj.display?.data) ?? [];
+function getAllVisualAssets(
+    ownedObjects: IotaObjectData[],
+    kioskClient: ReturnType<typeof useKioskClient>,
+) {
+    const visualAssets = ownedObjects?.filter((obj) => !!obj.display?.data) ?? [];
 
-        const kioskAssets =
-            ownedObjects?.reduce((acc, curr) => {
-                if (isKioskOwnerToken(kioskClient.network, curr)) acc.push(curr);
-                return acc;
-            }, [] as IotaObjectData[]) ?? [];
+    const kioskAssets =
+        ownedObjects?.reduce((acc, curr) => {
+            if (isKioskOwnerToken(kioskClient.network, curr)) acc.push(curr);
+            return acc;
+        }, [] as IotaObjectData[]) ?? [];
 
-        return [...visualAssets, ...kioskAssets];
-    }, [ownedObjects]);
-
-    return {
-        data: visualAssets,
-        ...ownedObjectsQuery,
-    };
+    return [...visualAssets, ...kioskAssets];
 }

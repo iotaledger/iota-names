@@ -22,7 +22,7 @@ export function AvatarDisplay({ registration }: AvatarDisplayProps) {
         data: avatarObject,
         isLoading: isLoadingAvatarObject,
         isError: isErrorAvatarObject,
-    } = useGetObject(avatarId);
+    } = useGetObject({ id: avatarId ?? '', options: { showDisplay: true, showContent: true } });
 
     const mediaUrl =
         isLoadingAvatarObject || isLoadingRegistration || isErrorAvatarObject || isErrorRegistration
