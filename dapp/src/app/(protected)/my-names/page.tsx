@@ -3,15 +3,17 @@
 
 'use client';
 
-import { Button, Card, CardBody, CardType, KeyValueInfo, Title } from '@iota/apps-ui-kit';
+import { Button, Card, CardType, KeyValueInfo, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
+import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
 import { useRegistrationNfts } from '@/hooks';
 
-function MyNamesPage(): JSX.Element {
+export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+
     const { data: domains } = useRegistrationNfts('domain');
     const { data: subdomains } = useRegistrationNfts('subdomain');
 
@@ -28,20 +30,23 @@ function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />
             </div>
-            <div className="flex flex-col gap-y-sm items-center">
+
+            <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                 {domains?.map((nft) => (
-                    <Card key={nft.name} type={CardType.Filled}>
-                        <CardBody
-                            title={nft.name}
-                            subtitle={nft.name}
-                            clickableAction={
+                    <div key={nft.name}>
+                        <Card type={CardType.Filled}>
+                            <div className="flex flex-col items-center gap-y-sm">
+                                <div className="w-40 h-40 object-cover">
+                                    <AvatarDisplay registration={nft} />
+                                </div>
+                                <Title title={nft.name} size={TitleSize.Small} />
                                 <Button
                                     text="Manage"
                                     onClick={() => setUpdateNameDialog(nft.name)}
                                 />
-                            }
-                        />
-                    </Card>
+                            </div>
+                        </Card>
+                    </div>
                 ))}
             </div>
             <div className="pt-md">
@@ -62,5 +67,3 @@ function MyNamesPage(): JSX.Element {
         </div>
     );
 }
-
-export default MyNamesPage;

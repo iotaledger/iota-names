@@ -28,7 +28,7 @@ importers:
         version: 10.1.1(eslint@8.57.1)
       eslint-config-react-app:
         specifier: ^7.0.1
-        version: 7.0.1(@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10))(@babel/plugin-transform-react-jsx@7.25.9(@babel/core@7.26.10))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)(typescript@5.8.2)
+        version: 7.0.1(@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10))(@babel/plugin-transform-react-jsx@7.25.9(@babel/core@7.26.10))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)(typescript@5.8.2)
       eslint-import-resolver-typescript:
         specifier: ^3.6.1
         version: 3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1)
@@ -103,23 +103,26 @@ importers:
   dapp:
     dependencies:
       '@iota/apps-ui-icons':
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.3.1
+        version: 0.3.1
       '@iota/apps-ui-kit':
         specifier: ^0.6.0
         version: 0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)
       '@iota/dapp-kit':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@iota/iota-names-sdk':
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
+      '@iota/kiosk':
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
@@ -258,8 +261,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       axios:
         specifier: ^0.24.0
         version: 0.24.0
@@ -271,8 +274,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20250611113155
-        version: 0.0.0-experimental-20250611113155(typescript@5.8.3)
+        specifier: 0.0.0-experimental-20250620081851
+        version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -1410,9 +1413,6 @@ packages:
   '@iarna/toml@3.0.0':
     resolution: {integrity: sha512-td6ZUkz2oS3VeleBcN+m//Q6HlCFCPrnI0FZhrt/h4XqLEdOyYp2u21nd8MdsR+WJy5r9PTDaHTDDfhf4H4l6Q==}
 
-  '@iota/apps-ui-icons@0.3.0':
-    resolution: {integrity: sha512-VpTREdN88AoM3s+k9x4EIPDhS3s5Tj8esVl2Dd/kP+U1ejibDSMfc2ttCV0lTI0mfWFu5SDmgBqbQEXI1EgOkA==}
-
   '@iota/apps-ui-icons@0.3.1':
     resolution: {integrity: sha512-E/qjkMQpjO01EmLzMNTCKnLaEfG/8uEhvCJwZhpN+Fl8CeOk8xMRPOHjf77XgSU2MOnEVRXMg3bgSGfGldDhcA==}
 
@@ -1425,29 +1425,37 @@ packages:
   '@iota/bcs@1.0.0':
     resolution: {integrity: sha512-oxXgpzlL0d2jbzZH/9XmLcM+jmPbYT1hbbPfkvzMZvGChIDw1zLvp1EFsJtb2hAcLHORIAHIV0xEhzhBpIlSqA==}
 
-  '@iota/dapp-kit@0.0.0-experimental-20250611113155':
-    resolution: {integrity: sha512-PNPQuE7tmEfm0lH2jlVz/C5F6bnpV67qo5tPTcxoeXdDI1Gu3iAWtyyd47h9E1Jgo7fyyN0muc1T5y4i8ryjng==}
+  '@iota/dapp-kit@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-7HgFhk4fsi3rb/p4wlnNn3NCU6UhPoU4uBId3znO3KZFxrjBn/JlYQ0gcfmDSo6msGMHKQPZXBgvSo08BWgX6Q==}
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
 
-  '@iota/graphql-transport@0.0.0-experimental-20250611113155':
-    resolution: {integrity: sha512-iiYoId+zbzSgGFLVXt6V9IQ+Utz4ZxRR7NX7xkpjzshYWi442gxcFZeZ6eWABR2ByYQfgcBJAefPTz5mpRd1oA==}
+  '@iota/graphql-transport@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-YaWYVGstssbpF97UnjwKH6BQAVJUJWEJb9VafwpubkADV+Hzg/Y6Mmf6nzHW7UJ5nIPJm0otOs8LaevTg9Fd1A==}
 
   '@iota/iota-sdk@0.0.0-experimental-20250611113155':
     resolution: {integrity: sha512-10UOxuAspdWnTzU/C6W9apihDdo3VugXHZWATYhO+e4+YfwEXTB0iAc1Xnmgrl64MmnL9tlsa64YMItbCoTXbQ==}
+    engines: {node: '>=20'}
+
+  '@iota/iota-sdk@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-kNBsyoLwKV95OvJyfq81BN9AklYLJbA/YVAz9PS5g6NE+rOWQNr2TQPef56I3TXLpyir1+cUkl6kpCvLGlZYfA==}
     engines: {node: '>=20'}
 
   '@iota/iota-sdk@0.5.0':
     resolution: {integrity: sha512-ZFg4C5EuHV55fHITKOO6Mg1dLqgojZqJsDsR3SRt8W9Ofzbjt8shlM2uLNRwDpiM7GzTb4UUFcKXpOt//5gEmQ==}
     engines: {node: '>=20'}
 
+  '@iota/kiosk@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-EZbWIDiFhsZQ9aSSO40p7awFrOy++GmjgItFgza2AlZMIhnUgJJ1X3xLHti+Y/0rQ7n1RwWjzb26L1IHNaDT/Q==}
+    engines: {node: '>=20'}
+
   '@iota/kiosk@0.3.2':
     resolution: {integrity: sha512-GXmzByvoRPJ4Qpdt/agI/j8FWJigQJbOlOoeNOzzJNMlUnUv1NYB4aLsvqx0CEL972yv9L4y+s5/1JMVm1IChg==}
     engines: {node: '>=20'}
 
-  '@iota/wallet-standard@0.0.0-experimental-20250611113155':
-    resolution: {integrity: sha512-eg0qg5Q4v9VicRCMRY+5COUiqvOJkzNa3mgfb94WPcSpTmRvbi4k24O4v7el3ZO7ohKLj6iqrDyIjxxBklVqJw==}
+  '@iota/wallet-standard@0.0.0-experimental-20250620081851':
+    resolution: {integrity: sha512-wVhuiIzi4uuOU2/u7ZnocjHFcazBXBm0DjhR51T6Ub+Kkvb2VEEpTR86E5i3q4u72MvY2bfKqdRFJoj+9zRMKQ==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -7373,8 +7381,6 @@ snapshots:
 
   '@iarna/toml@3.0.0': {}
 
-  '@iota/apps-ui-icons@0.3.0': {}
-
   '@iota/apps-ui-icons@0.3.1': {}
 
   '@iota/apps-ui-kit@0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)':
@@ -7400,10 +7406,10 @@ snapshots:
     dependencies:
       bs58: 6.0.0
 
-  '@iota/dapp-kit@0.0.0-experimental-20250611113155(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@iota/dapp-kit@0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20250611113155(typescript@5.8.3)
-      '@iota/wallet-standard': 0.0.0-experimental-20250611113155(typescript@5.8.3)
+      '@iota/iota-sdk': 0.0.0-experimental-20250620081851(typescript@5.8.3)
+      '@iota/wallet-standard': 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.15(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.3(@types/react@18.3.21)(react@18.3.1)
@@ -7424,11 +7430,11 @@ snapshots:
       - react-dom
       - typescript
 
-  '@iota/graphql-transport@0.0.0-experimental-20250611113155(typescript@5.8.3)':
+  '@iota/graphql-transport@0.0.0-experimental-20250620081851(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@iota/bcs': 1.0.0
-      '@iota/iota-sdk': 0.0.0-experimental-20250611113155(typescript@5.8.3)
+      '@iota/iota-sdk': 0.0.0-experimental-20250620081851(typescript@5.8.3)
       graphql: 16.11.0
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
@@ -7436,6 +7442,25 @@ snapshots:
       - typescript
 
   '@iota/iota-sdk@0.0.0-experimental-20250611113155(typescript@5.8.3)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      '@iota/bcs': 1.0.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      '@suchipi/femver': 1.0.0
+      bech32: 2.0.0
+      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
+      graphql: 16.11.0
+      tweetnacl: 1.0.3
+      valibot: 0.36.0
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
+  '@iota/iota-sdk@0.0.0-experimental-20250620081851(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@iota/bcs': 1.0.0
@@ -7473,6 +7498,15 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
+  '@iota/kiosk@0.0.0-experimental-20250620081851(typescript@5.8.3)':
+    dependencies:
+      '@iota/iota-sdk': 0.0.0-experimental-20250620081851(typescript@5.8.3)
+      dotenv: 16.4.7
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
   '@iota/kiosk@0.3.2(typescript@5.8.3)':
     dependencies:
       '@iota/iota-sdk': 0.5.0(typescript@5.8.3)
@@ -7482,9 +7516,9 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/wallet-standard@0.0.0-experimental-20250611113155(typescript@5.8.3)':
+  '@iota/wallet-standard@0.0.0-experimental-20250620081851(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20250611113155(typescript@5.8.3)
+      '@iota/iota-sdk': 0.0.0-experimental-20250620081851(typescript@5.8.3)
       '@wallet-standard/core': 1.0.3
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
@@ -9619,7 +9653,7 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-config-react-app@7.0.1(@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10))(@babel/plugin-transform-react-jsx@7.25.9(@babel/core@7.26.10))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)(typescript@5.8.2):
+  eslint-config-react-app@7.0.1(@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10))(@babel/plugin-transform-react-jsx@7.25.9(@babel/core@7.26.10))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)(typescript@5.8.2):
     dependencies:
       '@babel/core': 7.26.10
       '@babel/eslint-parser': 7.26.10(@babel/core@7.26.10)(eslint@8.57.1)
@@ -9630,7 +9664,7 @@ snapshots:
       confusing-browser-globals: 1.0.11
       eslint: 8.57.1
       eslint-plugin-flowtype: 8.0.3(@babel/plugin-syntax-flow@7.26.0(@babel/core@7.26.10))(@babel/plugin-transform-react-jsx@7.25.9(@babel/core@7.26.10))(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jest: 25.7.0(@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint@8.57.1)(typescript@5.8.2))(eslint@8.57.1)(typescript@5.8.2)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.4(eslint@8.57.1)
@@ -9669,7 +9703,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -9680,7 +9714,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -9691,7 +9725,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -9714,7 +9748,7 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -9725,7 +9759,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -9754,7 +9788,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -9783,7 +9817,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
