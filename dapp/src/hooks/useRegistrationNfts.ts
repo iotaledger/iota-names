@@ -21,6 +21,7 @@ export interface RegistrationNft {
     project_url?: string;
     expiration_timestamp_ms?: number;
     isExpired?: boolean;
+    objectId: string;
 }
 
 type RegistrationNftType = 'domain' | 'subdomain';
@@ -85,6 +86,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     project_url: data?.project_url,
                     expiration_timestamp_ms: expirationTimestamp,
                     isExpired: !!expirationTimestamp && expirationTimestamp < Date.now(),
+                    objectId: nameRecord?.objectId,
                 } satisfies RegistrationNft;
             });
         },

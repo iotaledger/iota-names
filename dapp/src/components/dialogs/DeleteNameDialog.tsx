@@ -3,13 +3,16 @@
 
 'use client';
 
+import { Info } from '@iota/apps-ui-icons';
 import {
     Button,
-    Card,
     Dialog,
     DialogBody,
     DialogContent,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
@@ -78,9 +81,13 @@ export function DeleteNameDialog({ name, open, setOpen }: DeleteNameDialogProps)
                 <DialogBody>
                     <div className="flex flex-col gap-y-md">
                         {isExpired && !isLoading ? (
-                            <Card>
-                                <p className="text-yellow-300">Name is expired.</p>
-                            </Card>
+                            <InfoBox
+                                title="Name is expired"
+                                supportingText="This name is expired and can be deleted."
+                                icon={<Info />}
+                                type={InfoBoxType.Warning}
+                                style={InfoBoxStyle.Elevated}
+                            />
                         ) : null}
 
                         <div className="flex flex-col gap-y-xs items-center">
