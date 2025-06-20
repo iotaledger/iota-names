@@ -20,7 +20,7 @@ export interface CoinConfig {
 export interface PackageInfo {
     auctionPackageId: string;
     packageId: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     subNamesPackageId: string;
     tempSubdomainsProxyPackageId: string;
     payments: {
