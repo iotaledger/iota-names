@@ -1,8 +1,13 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import {
+    getIotaNamesRegistrationType,
+    getIotaSubdomainRegistrationType,
+} from '@iota/iota-names-sdk';
 import { type IotaObjectData } from '@iota/iota-sdk/client';
 
+import { useIotaNamesClient } from '@/contexts';
 import { isKioskOwnerToken } from '@/lib/utils/kiosk';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
@@ -18,11 +23,18 @@ const FILTER_NONE_STRUCT_TYPES = [
 
 export function useGetVisualAssets(address: string) {
     const kioskClient = useKioskClient();
+    const { iotaNamesClient } = useIotaNamesClient();
+    const packageId = iotaNamesClient.config.packageId;
+
+    const iotaNamesStructsToRemove = [
+        getIotaNamesRegistrationType(packageId),
+        getIotaSubdomainRegistrationType(packageId),
+    ];
 
     return useGetAllOwnedObjects<IotaObjectData[]>(
         address,
         {
-            MatchNone: FILTER_NONE_STRUCT_TYPES.map((type) => ({
+            MatchNone: [...FILTER_NONE_STRUCT_TYPES, ...iotaNamesStructsToRemove].map((type) => ({
                 StructType: type,
             })),
         },
