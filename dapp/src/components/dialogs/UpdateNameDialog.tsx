@@ -27,17 +27,20 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { useSubdomainPermissionsValidation } from '@/lib/auction/utils';
-import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
+import {
+    getNamePermissions,
+    isNameRecordExpired,
+    useSubdomainPermissionsValidation,
+} from '@/lib/utils/names';
 
 type UpdateNameDialogProps = {
     name: string;
-    nftId: string;
+    objectId: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function UpdateNameDialog({ name, nftId, open, setOpen }: UpdateNameDialogProps) {
+export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -68,8 +71,8 @@ export function UpdateNameDialog({ name, nftId, open, setOpen }: UpdateNameDialo
     // Sync permissions
     useEffect(() => {
         if (namePermissions) {
-            setEditIsAllowingRenew(namePermissions.allowChildCreation);
-            setEditIsAllowSubnames(namePermissions.allowTimeExtension);
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
         }
     }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
@@ -105,6 +108,7 @@ export function UpdateNameDialog({ name, nftId, open, setOpen }: UpdateNameDialo
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
+            nft: objectId,
         });
     }
 
@@ -127,12 +131,9 @@ export function UpdateNameDialog({ name, nftId, open, setOpen }: UpdateNameDialo
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions.allowTimeExtension)
     ) {
-        console.log('NFT id de getNameRecord', nameRecord.nameRecord.nftId);
-        console.log('NFT id de registrationNFT', nftId);
         // Only allow editing the setup if it is a subname and the config has changed
         updates.push({
             type: 'edit-setup',
-            nft: nftId,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
@@ -145,7 +146,7 @@ export function UpdateNameDialog({ name, nftId, open, setOpen }: UpdateNameDialo
     } = useUpdateNameTransaction({
         address: account?.address || '',
         name,
-        nft: nameRecord?.nameRecord?.nftId || '',
+        objectId: objectId,
         updates,
         isExpired,
     });

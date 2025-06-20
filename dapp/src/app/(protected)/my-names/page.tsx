@@ -23,7 +23,7 @@ function MyNamesPage(): JSX.Element {
             {updateNameDialog ? (
                 <UpdateNameDialog
                     name={updateNameDialog}
-                    nftId={updateNftIdDialog ?? ''}
+                    objectId={updateNftIdDialog ?? ''}
                     open
                     setOpen={() => setUpdateNameDialog(null)}
                 />
