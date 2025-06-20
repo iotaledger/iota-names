@@ -5,6 +5,7 @@
 module iota_names::pricing_config;
 
 use iota::vec_map::{Self, VecMap};
+use iota_names::domain::Domain;
 
 #[error]
 const EInvalidLength: vector<u8> = b"Tried to create a range with more than two values.";
@@ -30,7 +31,6 @@ public struct RenewalConfig has drop, store { config: PricingConfig }
 
 /// Calculates the base price for a given length.
 /// - Base price type is abstracted away. We can switch to a different base.
-///  Our core base will become USDC.
 /// - The price is calculated based on the length of the domain name and the
 /// available ranges.
 public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
@@ -41,6 +41,12 @@ public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
     let range = keys[idx.extract()];
 
     *config.pricing.get(&range)
+}
+
+/// Calculates the base price for a given domain based on its SLD length.
+/// For example, "my-name.iota" uses length 7 (the length of "my-name").
+public fun calculate_base_price_with_domain(config: &PricingConfig, domain: Domain): u64 {
+    calculate_base_price(config, domain.sld().length())
 }
 
 /// Creates a new PricingConfig with the given ranges and prices.
