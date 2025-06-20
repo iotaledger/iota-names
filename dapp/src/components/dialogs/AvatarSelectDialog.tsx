@@ -41,7 +41,7 @@ export function VisualAssetsDialog({ setOpen, onAssetClick }: AvatarSelectDialog
                         </div>
                     ) : (
                         <div className="max-h-[600px] w-full grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-md">
-                            {visualAssets.length === 0 ? (
+                            {!visualAssets || visualAssets?.length === 0 ? (
                                 <p>No NFTs found</p>
                             ) : (
                                 visualAssets.map((asset) => (
