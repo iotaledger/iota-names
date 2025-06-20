@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod api;
+mod config;
 mod db;
 mod events;
 mod metrics;
@@ -11,7 +12,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
-use iota_names::config::IotaNamesConfig;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info};
@@ -21,6 +21,7 @@ use tracing_subscriber::{
 
 use crate::{
     api::start_api_server,
+    config::IotaNamesExtendedConfig,
     db::pool::{DbConnectionPool, DbConnectionPoolConfig},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
@@ -93,10 +94,12 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
+                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
-                        IotaNamesConfig::from_env().unwrap_or_default(),
+                        iota_names_config,
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
                     )?;

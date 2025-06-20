@@ -15,8 +15,9 @@ export const ALLOWED_METADATA = {
 export const packages = {
     devnet: {
         auctionPackageId: '0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50',
+        auctionHouseObjectId: '0x31deb8cbd320867089d52c37fed2d443520aac0fc5a957de1f64f9135b83f42b',
         packageId: '0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f',
-        iotaNames: '0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7',
+        iotaNamesObjectId: '0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7',
         subNamesPackageId: '0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925',
         tempSubdomainsProxyPackageId:
             '0x3f2927e8e78a094bb98271fd73e06a3aa056edfecbf32dddb8a65d30de9b8a3f',

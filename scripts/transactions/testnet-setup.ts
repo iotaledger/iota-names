@@ -13,7 +13,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
     removeConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         type: `${packageInfo.packageId}::pricing_config::PricingConfig`,
         iotaNamesPackageId: packageInfo.packageId,
     });
@@ -21,7 +21,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
     removeConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         type: `${packageInfo.packageId}::pricing_config::RenewalConfig`,
         iotaNamesPackageId: packageInfo.packageId,
     });
@@ -30,7 +30,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: newPriceConfig({
             txb,
@@ -51,7 +51,7 @@ const setupIotaNames = (txb: Transaction, packageInfo: PackageInfo) => {
     addConfig({
         txb,
         adminCap: packageInfo.adminCap,
-        iotaNames: packageInfo.iotaNames,
+        iotaNamesObjectId: packageInfo.iotaNamesObjectId,
         iotaNamesPackageId: packageInfo.packageId,
         config: newRenewalConfig({
             txb,
