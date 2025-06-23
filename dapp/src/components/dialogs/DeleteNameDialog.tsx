@@ -15,11 +15,9 @@ import {
     InfoBoxType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { useMutation } from '@tanstack/react-query';
+import { useCurrentAccount } from '@iota/dapp-kit';
 
-import { NameRecordData, RegistrationNft, useDeleteNameTransaction, useNameRecord } from '@/hooks';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { RegistrationNft, useDeleteNameTransaction } from '@/hooks';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;
@@ -28,52 +26,34 @@ type DeleteNameDialogProps = {
 };
 
 export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
-    const iotaClient = useIotaClient();
     const account = useCurrentAccount();
 
-    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(nft.name);
-
-    // We are sure that only owned names are passed here
-    const nameRecord = nameRecordData as
-        | Extract<NameRecordData, { type: 'unavailable' }>
-        | undefined;
-
-    const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-
     const {
-        data: deleteNameTransaction,
-        isLoading: isLoadingDeleteNameTransaction,
+        mutateAsync: deleteName,
+        isPending: isDeleteInProgress,
         error: deleteNameError,
     } = useDeleteNameTransaction({
-        nft: nft.objectId,
-        isSubname: nft.name.includes('.'),
+        nft: nft,
         address: account?.address || '',
-        isExpired: isExpired,
     });
 
-    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
-        useSignAndExecuteTransaction();
+    const isLoading = isDeleteInProgress;
+    const isExpired = nft.isExpired;
+    const disableDeleteButton = isDeleteInProgress || !isExpired;
 
-    const { mutate: deleteName, isPending: isDeleteInProgress } = useMutation({
-        async mutationFn() {
-            if (!deleteNameTransaction) return;
-            const transaction = await signAndExecuteTransaction({
-                transaction: deleteNameTransaction,
-            });
-
-            await iotaClient.waitForTransaction({
-                digest: transaction.digest,
-            });
-        },
-    });
+    async function handleDeleteName() {
+        try {
+            await deleteName();
+            console.log('Name deleted successfully!');
+            setOpen(false);
+        } catch (err) {
+            console.error('Error deleting name:', err);
+        }
+    }
 
     function handleClose() {
         setOpen(false);
     }
-
-    const isLoading = isDeleteInProgress || isSendingTransaction;
-
-    const disableDeleteButton = isNameRecordLoading || isSendingTransaction || !isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -101,7 +81,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
                             icon={isLoading ? <LoadingIndicator /> : null}
                             text="Delete Name"
                             disabled={disableDeleteButton}
-                            onClick={() => deleteName()}
+                            onClick={handleDeleteName}
                         />
                         {deleteNameError ? (
                             <p className="text-error-30 dark:text-error-70 text-center">
