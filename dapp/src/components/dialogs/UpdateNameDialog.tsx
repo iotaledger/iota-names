@@ -297,6 +297,26 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
                                 />
                             )}
                         </Card>
+                        <Card type={CardType.Outlined}>
+                            <CardBody
+                                title="Set as default name"
+                                subtitle="Enables reverse lookup."
+                            />
+                            <Checkbox
+                                isChecked={editIsDefaultName}
+                                isDisabled={disableEdit}
+                                onCheckedChange={handleReverseLookupChange}
+                            />
+                        </Card>
+
+                        <Card type={CardType.Outlined}>
+                            <CardBody title="Avatar NFT" />
+                            <CardAction
+                                type={CardActionType.Button}
+                                title="Update Avatar NFT"
+                                onClick={() => setIsAvatarSelectorOpen(true)}
+                            />
+                        </Card>
                         {isWrongCombination ? (
                             <Card>
                                 <p className="text-yellow-300">
@@ -418,27 +438,6 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
                                 </DialogContent>
                             </Dialog>
                         )}
-                        <Card type={CardType.Outlined}>
-                            <CardBody
-                                title="Set as default name"
-                                subtitle="Enables reverse lookup."
-                            />
-                            <Checkbox
-                                isChecked={editIsDefaultName}
-                                isDisabled={disableEdit}
-                                onCheckedChange={handleReverseLookupChange}
-                            />
-                        </Card>
-
-                        <Card type={CardType.Outlined}>
-                            <CardBody title="Avatar NFT" />
-                            <CardAction
-                                type={CardActionType.Button}
-                                title="Update Avatar NFT"
-                                onClick={() => setIsAvatarSelectorOpen(true)}
-                            />
-                        </Card>
-
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
