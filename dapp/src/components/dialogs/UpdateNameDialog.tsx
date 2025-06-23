@@ -25,6 +25,7 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
+import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
@@ -63,6 +64,9 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
 
+    const domainsOwned = useRegistrationNfts('domain');
+    const subdomainsOwned = useRegistrationNfts('subdomain');
+
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
@@ -95,6 +99,25 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
             setEditDefaultName(true);
         }
     }, [addressName]);
+
+    // For subnames, get the parent subdomain object ID
+    function getParentSubdomainObjectId(name: string) {
+        if (!isSubName(name)) return;
+        const parts = name.split('.');
+        const directParentName = parts.slice(1).join('.');
+        const parentParts = directParentName?.split('.').length;
+        if (parentParts === 2) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === directParentName,
+            );
+            return parentDomain?.id || null;
+        } else if (parentParts && parentParts >= 3) {
+            const parentSubdomain = subdomainsOwned.data?.find(
+                (subdomain: { name: string | null }) => subdomain.name === directParentName,
+            );
+            return parentSubdomain?.id || null;
+        }
+    }
 
     const isTargetCurrentAddress = editTargetAddress === account?.address;
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
@@ -138,8 +161,10 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
             editIsAllowingRenew != namePermissions.allowTimeExtension)
     ) {
         // Only allow editing the setup if it is a subname and the config has changed
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'edit-setup',
+            nft: parentObjectId ?? '',
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
