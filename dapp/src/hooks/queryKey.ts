@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 // Query keys mostly to identify queries
 // Non-identifying variables should not be included here (e.g, price of a name)
 export const queryKey = {
@@ -18,4 +21,7 @@ export const queryKey = {
 
     // Generic
     ownedObjects: (address: string) => [queryKey.all, 'owned-objects', address],
+
+    // Price List
+    priceList: () => [queryKey.all, 'price-list'],
 };

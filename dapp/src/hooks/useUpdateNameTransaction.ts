@@ -2,18 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useIotaClient } from '@iota/dapp-kit';
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
+import { useFindParentObjectId } from './useFindParentObjectId';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
     name: string;
-    nft: TransactionObjectArgument | string;
+    objectId: TransactionObjectArgument | string;
     isExpired: boolean;
 
     updates: NameUpdate[];
@@ -21,9 +22,14 @@ interface UseUpdateNameTransactionOptions {
 
 export type NameUpdate =
     | {
+          type: 'set-avatar';
+          nftId: string;
+      }
+    | {
           type: 'set-target-address';
           address: string;
           isSubname: boolean;
+          nft: string;
       }
     | {
           type: 'set-default';
@@ -34,7 +40,6 @@ export type NameUpdate =
       }
     | {
           type: 'edit-setup';
-          nft: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
@@ -50,25 +55,32 @@ export type NameUpdate =
 export function useUpdateNameTransaction({
     address,
     name,
-    nft,
     isExpired,
     updates,
 }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
+    const { data: parentInfo } = useFindParentObjectId(name);
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.updateName(name, address), nft, updates],
+        queryKey: [...queryKey.updateName(name, address), updates],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
             for (const update of updates) {
                 switch (update.type) {
+                    case 'set-avatar':
+                        iotaNamesTx.setUserData({
+                            nft: update.nftId,
+                            key: ALLOWED_METADATA.avatar,
+                            value: update.nftId,
+                        });
+                        break;
                     case 'set-target-address':
                         iotaNamesTx.setTargetAddress({
-                            nft,
+                            nft: update.nft,
                             address: update.address,
                             isSubname: update.isSubname,
                         });
@@ -81,7 +93,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
-                            parentNft: tx.object(nft),
+                            parentNft: tx.object(parentInfo?.objectId ?? ''),
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,

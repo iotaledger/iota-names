@@ -7,7 +7,9 @@ iota.log.*
 .trace
 .coverage_map.mvcov
 /scripts/tx/*
+/scripts/package-info/localnet.json
 !/scripts/tx/.gitkeep
+localnet.json
 
 **/.env
 node_modules

@@ -10,19 +10,19 @@ import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactio
 export const authorize = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     type,
     iotaNamesPackageId,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     type: string;
     iotaNamesPackageId: string;
 }) => {
     txb.moveCall({
         target: `${iotaNamesPackageId}::iota_names::authorize`,
-        arguments: [txb.object(adminCap), txb.object(iotaNames)],
+        arguments: [txb.object(adminCap), txb.object(iotaNamesObjectId)],
         typeArguments: [type],
     });
 };
@@ -33,19 +33,19 @@ export const authorize = ({
 export const deauthorize = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     type,
     iotaNamesPackageId,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     type: string;
     iotaNamesPackageId: string;
 }) => {
     txb.moveCall({
         target: `${iotaNamesPackageId}::iota_names::deauthorize`,
-        arguments: [txb.object(adminCap), txb.object(iotaNames)],
+        arguments: [txb.object(adminCap), txb.object(iotaNamesObjectId)],
         typeArguments: [type],
     });
 };
@@ -56,19 +56,19 @@ export const deauthorize = ({
 export const setup = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     target,
     args,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     target: `${string}::${string}`;
     args?: TransactionArgument[];
 }) => {
     txb.moveCall({
         target: `${target}::setup`,
-        arguments: [txb.object(iotaNames), txb.object(adminCap), ...(args || [])],
+        arguments: [txb.object(iotaNamesObjectId), txb.object(adminCap), ...(args || [])],
     });
 };
 
@@ -78,21 +78,21 @@ export const setup = ({
 export const addConfig = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     type,
     config,
     iotaNamesPackageId,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     iotaNamesPackageId: string;
     config: TransactionArgument;
     type: string;
 }) => {
     txb.moveCall({
         target: `${iotaNamesPackageId}::iota_names::add_config`,
-        arguments: [txb.object(adminCap), txb.object(iotaNames), config],
+        arguments: [txb.object(adminCap), txb.object(iotaNamesObjectId), config],
         typeArguments: [type],
     });
 };
@@ -103,19 +103,19 @@ export const addConfig = ({
 export const removeConfig = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     type,
     iotaNamesPackageId,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     iotaNamesPackageId: string;
     type: string;
 }) => {
     txb.moveCall({
         target: `${iotaNamesPackageId}::iota_names::remove_config`,
-        arguments: [txb.object(adminCap), txb.object(iotaNames)],
+        arguments: [txb.object(adminCap), txb.object(iotaNamesObjectId)],
         typeArguments: [type],
     });
 };
@@ -275,21 +275,21 @@ export const newCoinTypeData = ({
 export const addRegistry = ({
     txb,
     adminCap,
-    iotaNames,
+    iotaNamesObjectId,
     type,
     registry,
     iotaNamesPackageId,
 }: {
     txb: Transaction;
     adminCap: string;
-    iotaNames: string;
+    iotaNamesObjectId: string;
     iotaNamesPackageId: string;
     registry: TransactionArgument;
     type: string;
 }) => {
     txb.moveCall({
         target: `${iotaNamesPackageId}::iota_names::add_registry`,
-        arguments: [txb.object(adminCap), txb.object(iotaNames), registry],
+        arguments: [txb.object(adminCap), txb.object(iotaNamesObjectId), registry],
         typeArguments: [type],
     });
 };
