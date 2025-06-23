@@ -5,7 +5,7 @@
 
 import { Delete } from '@iota/apps-ui-icons';
 import { Card, CardAction, CardActionType, CardBody, CardType, Title } from '@iota/apps-ui-kit';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { RegistrationNft, useRegistrationNfts } from '@/hooks';
@@ -16,6 +16,20 @@ function MyNamesPage(): JSX.Element {
 
     const { data: domains } = useRegistrationNfts('domain');
     const { data: subdomains } = useRegistrationNfts('subdomain');
+
+    const namesWithChildren = useMemo(() => {
+        const parents = new Set<string>();
+
+        [...(domains ?? []), ...(subdomains ?? [])].forEach(({ name }) => {
+            const firstDot = name.indexOf('.');
+            if (firstDot !== -1) {
+                const parentName = name.slice(firstDot + 1);
+                parents.add(parentName);
+            }
+        });
+
+        return parents;
+    }, [domains, subdomains]);
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -38,74 +52,81 @@ function MyNamesPage(): JSX.Element {
                 <Title title="My names" testId="my-names-page" />
             </div>
             <div className="flex flex-col gap-y-sm items-center w-1/2">
-                {domains?.map((nft) => (
-                    <Card key={nft.name} type={CardType.Filled}>
-                        <CardBody
-                            title={nft.name}
-                            subtitle={`Expiration Date: ${
-                                nft?.expiration_timestamp_ms
-                                    ? new Date(nft.expiration_timestamp_ms).toLocaleDateString(
-                                          'en-US',
-                                          {
-                                              year: 'numeric',
-                                              month: 'short',
-                                              day: 'numeric',
-                                          },
-                                      )
-                                    : '--'
-                            }`}
-                            clickableAction={
-                                nft.isExpired ? (
-                                    <Delete
-                                        className="text-error-30 dark:text-error-70 cursor-pointer"
-                                        onClick={() => setDeleteNameDialog(nft)}
-                                    />
-                                ) : undefined
-                            }
-                        />
-                        <CardAction
-                            title="Manage"
-                            type={CardActionType.Button}
-                            onClick={() => setUpdateNameDialog(nft.name)}
-                        />
-                    </Card>
-                ))}
+                {domains?.map((nft) => {
+                    const isNftDeletable = nft.isExpired && !namesWithChildren.has(nft.name);
+                    return (
+                        <Card key={nft.name} type={CardType.Filled}>
+                            <CardBody
+                                title={nft.name}
+                                subtitle={`Expiration Date: ${
+                                    nft?.expiration_timestamp_ms
+                                        ? new Date(nft.expiration_timestamp_ms).toLocaleDateString(
+                                              'en-US',
+                                              {
+                                                  year: 'numeric',
+                                                  month: 'short',
+                                                  day: 'numeric',
+                                              },
+                                          )
+                                        : '--'
+                                }`}
+                                clickableAction={
+                                    isNftDeletable ? (
+                                        <Delete
+                                            className="text-error-30 dark:text-error-70 cursor-pointer"
+                                            onClick={() => setDeleteNameDialog(nft)}
+                                        />
+                                    ) : undefined
+                                }
+                            />
+                            <CardAction
+                                title="Manage"
+                                type={CardActionType.Button}
+                                onClick={() => setUpdateNameDialog(nft.name)}
+                            />
+                        </Card>
+                    );
+                })}
             </div>
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
             {subdomains?.length && (
                 <div className="flex flex-col gap-y-sm items-center w-1/2">
-                    {subdomains.map((subdomain) => (
-                        <Card key={subdomain.name} type={CardType.Filled}>
-                            <CardBody
-                                title={subdomain.name}
-                                subtitle={`Expiration Date: ${
-                                    subdomain?.expiration_timestamp_ms
-                                        ? new Date(
-                                              subdomain.expiration_timestamp_ms,
-                                          ).toLocaleDateString('en-US', {
-                                              year: 'numeric',
-                                              month: 'short',
-                                              day: 'numeric',
-                                          })
-                                        : '--'
-                                }`}
-                                clickableAction={
-                                    subdomain.isExpired ? (
-                                        <Delete
-                                            className="text-error-30 dark:text-error-70 cursor-pointer"
-                                            onClick={() => setDeleteNameDialog(subdomain)}
-                                        />
-                                    ) : undefined
-                                }
-                            />
-                            <CardAction
-                                type={CardActionType.SupportingText}
-                                subtitle={subdomain.description ?? ''}
-                            />
-                        </Card>
-                    ))}
+                    {subdomains.map((subdomain) => {
+                        const isSubdomainRemovable =
+                            subdomain.isExpired && !namesWithChildren.has(subdomain.name);
+                        return (
+                            <Card key={subdomain.name} type={CardType.Filled}>
+                                <CardBody
+                                    title={subdomain.name}
+                                    subtitle={`Expiration Date: ${
+                                        subdomain?.expiration_timestamp_ms
+                                            ? new Date(
+                                                  subdomain.expiration_timestamp_ms,
+                                              ).toLocaleDateString('en-US', {
+                                                  year: 'numeric',
+                                                  month: 'short',
+                                                  day: 'numeric',
+                                              })
+                                            : '--'
+                                    }`}
+                                    clickableAction={
+                                        isSubdomainRemovable ? (
+                                            <Delete
+                                                className="text-error-30 dark:text-error-70 cursor-pointer"
+                                                onClick={() => setDeleteNameDialog(subdomain)}
+                                            />
+                                        ) : undefined
+                                    }
+                                />
+                                <CardAction
+                                    type={CardActionType.SupportingText}
+                                    subtitle={subdomain.description ?? ''}
+                                />
+                            </Card>
+                        );
+                    })}
                 </div>
             )}
         </div>
