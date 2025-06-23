@@ -14,12 +14,18 @@ import { useIotaNamesClient } from '@/contexts';
 export function useFindParentObjectId(subdomainName: string) {
     const { iotaNamesClient } = useIotaNamesClient();
 
-    const getParentDomainName = (name: string): string => {
+    const getRootParentDomainName = (name: string): string => {
         const parts = name.split('.');
-        return parts.slice(1).join('.');
+
+        if (parts.length <= 2) {
+            return name;
+        }
+
+        const rootParts = parts.slice(-2);
+        return rootParts.join('.');
     };
 
-    const parentDomainName = getParentDomainName(subdomainName);
+    const parentDomainName = getRootParentDomainName(subdomainName);
 
     return useQuery({
         queryKey: ['find-parent-object-id', subdomainName, parentDomainName],
