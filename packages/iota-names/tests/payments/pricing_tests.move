@@ -6,6 +6,7 @@
 module iota_names::pricing_config_tests;
 
 use iota_names::pricing_config;
+use iota_names::domain;
 
 #[test]
 fun test_e2e() {
@@ -106,4 +107,47 @@ fun test_price_not_set() {
     let pricing = pricing_config::new(ranges, vector[10]);
 
     pricing.calculate_base_price(20);
+}
+
+#[test]
+fun test_calculate_base_price_of_domain() {
+    let ranges = vector[
+        pricing_config::new_range(vector[1, 10]),
+        pricing_config::new_range(vector[11, 20]),
+        pricing_config::new_range(vector[21, 21]),
+    ];
+
+    let pricing_config = pricing_config::new(
+        ranges,
+        vector[10, 20, 30],
+    );
+
+    let domain_short = domain::new(b"5char.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_short) == 10);
+
+    let domain_medium = domain::new(b"15char-----name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_medium) == 20);
+
+    // Test boundary values
+    let domain_boundary_0 = domain::new(b"1.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_0) == 10);
+
+    let domain_boundary_1 = domain::new(b"10charname.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_1) == 10);
+
+    let domain_boundary_2 = domain::new(b"11char-name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_2) == 20);
+
+    let domain_boundary_3 = domain::new(b"21char-----------name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_3) == 30);
+}
+
+#[test, expected_failure(abort_code = ::iota_names::pricing_config::EPriceNotSet)]
+fun test_calculate_base_price_of_domain_price_not_set() {
+    let ranges = vector[pricing_config::new_range(vector[1, 10])];
+    let pricing = pricing_config::new(ranges, vector[10]);
+    
+    // Test domain with length outside configured range
+    let domain_out_of_range = domain::new(b"15-out-of-range.iota".to_string());
+    pricing.calculate_base_price_of_domain(domain_out_of_range);
 }
