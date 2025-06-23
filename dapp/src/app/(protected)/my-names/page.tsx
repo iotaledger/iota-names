@@ -4,7 +4,17 @@
 'use client';
 
 import { Delete } from '@iota/apps-ui-icons';
-import { Card, CardAction, CardActionType, CardBody, CardType, Title } from '@iota/apps-ui-kit';
+import {
+    Button,
+    ButtonType,
+    Card,
+    CardAction,
+    CardActionType,
+    CardBody,
+    CardType,
+    Title,
+    TitleSize,
+} from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
@@ -57,39 +67,41 @@ export default function MyNamesPage(): JSX.Element {
                     const isNftDeletable = nft.isExpired && !namesWithChildren.has(nft.name);
                     return (
                         <Card key={nft.name} type={CardType.Filled}>
-                            <CardBody
-                                title={nft.name}
-                                subtitle={`Expiration Date: ${
-                                    nft?.expiration_timestamp_ms
-                                        ? new Date(nft.expiration_timestamp_ms).toLocaleDateString(
-                                              'en-US',
-                                              {
+                            <div className="flex flex-col  gap-y-sm w-full">
+                                <div className="w-full h-40 object-cover">
+                                    <AvatarDisplay registration={nft} />
+                                </div>
+                                <Title
+                                    title={nft.name}
+                                    size={TitleSize.Small}
+                                    subtitle={`Expiration Date: ${
+                                        nft?.expiration_timestamp_ms
+                                            ? new Date(
+                                                  nft.expiration_timestamp_ms,
+                                              ).toLocaleDateString('en-US', {
                                                   year: 'numeric',
                                                   month: 'short',
                                                   day: 'numeric',
-                                              },
-                                          )
-                                        : '--'
-                                }`}
-                                icon={
-                                    <div className="w-10 h-10 rounded-full overflow-hidden object-cover">
-                                        <AvatarDisplay registration={nft} />
-                                    </div>
-                                }
-                                clickableAction={
-                                    isNftDeletable ? (
-                                        <Delete
-                                            className="text-error-30 dark:text-error-70 cursor-pointer"
+                                              })
+                                            : '--'
+                                    }`}
+                                />
+                                <div className="flex flex-row gap-x-xs">
+                                    <Button
+                                        text="Manage"
+                                        fullWidth
+                                        onClick={() => setUpdateNameDialog(nft.name)}
+                                    />
+                                    {isNftDeletable ? (
+                                        <Button
+                                            text="Delete"
+                                            type={ButtonType.Destructive}
                                             onClick={() => setDeleteNameDialog(nft)}
                                         />
-                                    ) : undefined
-                                }
-                            />
-                            <CardAction
-                                title="Manage"
-                                type={CardActionType.Button}
-                                onClick={() => setUpdateNameDialog(nft.name)}
-                            />
+                                    ) : null}
+                                </div>
+                            </div>
+                            {/* </CardBody> */}
                         </Card>
                     );
                 })}
