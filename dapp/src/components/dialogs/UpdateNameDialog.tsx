@@ -40,12 +40,11 @@ import { VisualAssetsDialog } from './AvatarSelectDialog';
 
 type UpdateNameDialogProps = {
     name: string;
-    objectId: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDialogProps) {
+export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -131,13 +130,14 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (isThereAddress && isValidAddress && !isTargetUsedInName) {
+    if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
-            nft: objectId,
+            nft: parentObjectId ?? '',
         });
     }
 
@@ -184,7 +184,6 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
     } = useUpdateNameTransaction({
         address: account?.address || '',
         name,
-        objectId: objectId,
         updates,
         isExpired,
     });

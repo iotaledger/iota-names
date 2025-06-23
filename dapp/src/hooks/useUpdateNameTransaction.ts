@@ -3,7 +3,7 @@
 
 import { useIotaClient } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -13,9 +13,7 @@ import { queryKey } from './queryKey';
 interface UseUpdateNameTransactionOptions {
     address: string;
     name: string;
-    objectId: TransactionObjectArgument | string;
     isExpired: boolean;
-
     updates: NameUpdate[];
 }
 
