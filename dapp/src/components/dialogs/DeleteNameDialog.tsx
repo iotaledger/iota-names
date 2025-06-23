@@ -18,20 +18,20 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation } from '@tanstack/react-query';
 
-import { NameRecordData, useDeleteNameTransaction, useNameRecord } from '@/hooks';
+import { NameRecordData, RegistrationNft, useDeleteNameTransaction, useNameRecord } from '@/hooks';
 import { isNameRecordExpired } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
-    name: string;
+    nft: RegistrationNft;
     open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function DeleteNameDialog({ name, open, setOpen }: DeleteNameDialogProps) {
+export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
 
-    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
+    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(nft.name);
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -45,15 +45,16 @@ export function DeleteNameDialog({ name, open, setOpen }: DeleteNameDialogProps)
         isLoading: isLoadingDeleteNameTransaction,
         error: deleteNameError,
     } = useDeleteNameTransaction({
-        nft: name,
-        isSubname: false,
+        nft: nft.objectId,
+        isSubname: nft.name.includes('.'),
         address: account?.address || '',
+        isExpired: isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const { mutate: deleteName, isPending: isSaving } = useMutation({
+    const { mutate: deleteName, isPending: isDeleteInProgress } = useMutation({
         async mutationFn() {
             if (!deleteNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
@@ -70,14 +71,14 @@ export function DeleteNameDialog({ name, open, setOpen }: DeleteNameDialogProps)
         setOpen(false);
     }
 
-    const isLoading = isSaving || isLoadingDeleteNameTransaction || isSendingTransaction;
+    const isLoading = isDeleteInProgress || isSendingTransaction;
 
     const disableDeleteButton = isNameRecordLoading || isSendingTransaction || !isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
-                <Header title={`Delete ${name}`} onClose={handleClose} titleCentered />
+                <Header title={`Delete ${nft.name}`} onClose={handleClose} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col gap-y-md">
                         {isExpired && !isLoading ? (

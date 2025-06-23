@@ -8,11 +8,11 @@ import { Card, CardAction, CardActionType, CardBody, CardType, Title } from '@io
 import { useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
-import { useRegistrationNfts } from '@/hooks';
+import { RegistrationNft, useRegistrationNfts } from '@/hooks';
 
 function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
-    const [deleteNameDialog, setDeleteNameDialog] = useState<string | null>(null);
+    const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
 
     const { data: domains } = useRegistrationNfts('domain');
     const { data: subdomains } = useRegistrationNfts('subdomain');
@@ -29,7 +29,7 @@ function MyNamesPage(): JSX.Element {
             ) : null}
             {deleteNameDialog ? (
                 <DeleteNameDialog
-                    name={deleteNameDialog}
+                    nft={deleteNameDialog}
                     open
                     setOpen={() => setDeleteNameDialog(null)}
                 />
@@ -58,7 +58,7 @@ function MyNamesPage(): JSX.Element {
                                 nft.isExpired ? (
                                     <Delete
                                         className="text-error-30 dark:text-error-70 cursor-pointer"
-                                        onClick={() => setDeleteNameDialog(nft.name)}
+                                        onClick={() => setDeleteNameDialog(nft)}
                                     />
                                 ) : undefined
                             }
@@ -95,7 +95,7 @@ function MyNamesPage(): JSX.Element {
                                     subdomain.isExpired ? (
                                         <Delete
                                             className="text-error-30 dark:text-error-70 cursor-pointer"
-                                            onClick={() => setDeleteNameDialog(subdomain.name)}
+                                            onClick={() => setDeleteNameDialog(subdomain)}
                                         />
                                     ) : undefined
                                 }

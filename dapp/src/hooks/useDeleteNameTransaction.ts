@@ -14,26 +14,28 @@ interface UseDeleteNameTransactionOptions {
     nft: string;
     isSubname: boolean;
     address: string;
+    isExpired: boolean;
 }
 
 export function useDeleteNameTransaction({
     nft,
     isSubname,
     address,
+    isExpired,
 }: UseDeleteNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: [...queryKey.deleteName(nft, address), isSubname, client],
+        queryKey: [...queryKey.deleteName(nft, address), isSubname, client, isExpired],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
 
-            iotaNamesTx.burnExpired({
-                nft: nft,
-                isSubname,
-            });
+            if (isExpired) {
+                console.log('Burning expired name:', nft);
+                iotaNamesTx.burnExpired({ nft, isSubname });
+            }
             iotaNamesTx.transaction.setSender(address);
             await iotaNamesTx.transaction.build({ client });
             return iotaNamesTx.transaction;
