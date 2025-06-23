@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Delete } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
