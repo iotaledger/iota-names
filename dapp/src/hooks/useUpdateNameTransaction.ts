@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useIotaClient } from '@iota/dapp-kit';
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
@@ -20,6 +20,10 @@ interface UseUpdateNameTransactionOptions {
 }
 
 export type NameUpdate =
+    | {
+          type: 'set-avatar';
+          nftId: string;
+      }
     | {
           type: 'set-target-address';
           address: string;
@@ -52,6 +56,13 @@ export function useUpdateNameTransaction({
 
             for (const update of updates) {
                 switch (update.type) {
+                    case 'set-avatar':
+                        iotaNamesTx.setUserData({
+                            nft,
+                            key: ALLOWED_METADATA.avatar,
+                            value: update.nftId,
+                        });
+                        break;
                     case 'set-target-address':
                         iotaNamesTx.setTargetAddress({
                             nft,
