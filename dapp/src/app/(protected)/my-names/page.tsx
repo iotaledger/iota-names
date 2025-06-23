@@ -3,7 +3,6 @@
 
 'use client';
 
-import { Delete } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -101,7 +100,6 @@ export default function MyNamesPage(): JSX.Element {
                                     ) : null}
                                 </div>
                             </div>
-                            {/* </CardBody> */}
                         </Card>
                     );
                 })}
