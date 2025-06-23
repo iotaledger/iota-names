@@ -207,8 +207,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         const parentObjectId = getSubdomainObjectId(nameRecord.nameRecord.name);
-        console.log('parentObjectId', parentObjectId);
-        console.log('nameRecord?.nameRecord?.nftId', nameRecord?.nameRecord?.nftId);
         updates.push({
             type: 'new-subdomain',
             subdomainName: fullSubdomainName,
