@@ -55,7 +55,7 @@ export const init = async (
                 names,
                 packageInfo.packageId,
                 packageInfo.adminCap,
-                packageInfo.iotaNames,
+                packageInfo.iotaNamesObjectId,
             );
             const result = await signAndExecute(tx, network);
             await client.waitForTransaction({ digest: result.digest });
