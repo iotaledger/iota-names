@@ -22,6 +22,11 @@ fun test_e2e() {
         vector[10, 20, 30, 45],
     );
 
+    assert!(pricing_config.pricing().get(&pricing_config::new_range(vector[1, 10])) == 10);
+    assert!(pricing_config.pricing().get(&pricing_config::new_range(vector[11, 20])) == 20);
+    assert!(pricing_config.pricing().get(&pricing_config::new_range(vector[21, 30])) == 30);
+    assert!(pricing_config.pricing().get(&pricing_config::new_range(vector[31, 31])) == 45);
+
     // test internal values
     assert!(pricing_config.calculate_base_price(5) == 10);
     assert!(pricing_config.calculate_base_price(15) == 20);
@@ -150,4 +155,16 @@ fun test_calculate_base_price_of_domain_price_not_set() {
     // Test domain with length outside configured range
     let domain_out_of_range = domain::new(b"15-out-of-range.iota".to_string());
     pricing.calculate_base_price_of_domain(domain_out_of_range);
+}
+
+#[test]
+fun test_is_between_inclusive() {
+    let range = pricing_config::new_range(vector[1, 10]);
+
+    assert!(range.is_between_inclusive(0) == false);
+    assert!(range.is_between_inclusive(1) == true);
+    assert!(range.is_between_inclusive(5) == true);
+    assert!(range.is_between_inclusive(10) == true);
+    assert!(range.is_between_inclusive(11) == false);
+    assert!(range.is_between_inclusive(100) == false);
 }
