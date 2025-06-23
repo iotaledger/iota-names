@@ -7,7 +7,8 @@ import { Delete } from '@iota/apps-ui-icons';
 import { Card, CardAction, CardActionType, CardBody, CardType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
-import { AvailabilityCheck, AvatarDisplay, DeleteNameDialog, UpdateNameDialog } from '@/components';
+import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
+import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
 import { RegistrationNft, useRegistrationNfts } from '@/hooks';
 
 export default function MyNamesPage(): JSX.Element {
@@ -70,7 +71,11 @@ export default function MyNamesPage(): JSX.Element {
                                           )
                                         : '--'
                                 }`}
-                                icon={<AvatarDisplay registration={nft} />}
+                                icon={
+                                    <div className="w-10 h-10 rounded-full overflow-hidden object-cover">
+                                        <AvatarDisplay registration={nft} />
+                                    </div>
+                                }
                                 clickableAction={
                                     isNftDeletable ? (
                                         <Delete

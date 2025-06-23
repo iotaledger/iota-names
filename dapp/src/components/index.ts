@@ -7,4 +7,3 @@ export * from './ThemeSwitcher';
 export * from './Navbar';
 
 export * from './dialogs';
-export * from './name-record';
