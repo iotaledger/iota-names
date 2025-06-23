@@ -36,14 +36,7 @@ impl IotaNamesEvent {
         event: &Event,
         config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        let package_address = IotaAddress::from(event.package_id);
-
-        if package_address != config.auction_package_address
-            && package_address != config.coupons_package_address
-            && package_address != config.iota_names_config.package_address
-            && package_address != config.iota_names_config.payments_package_address
-            && package_address != config.subdomains_package_address
-        {
+        if !config.is_iota_names_package(event.package_id) {
             return Ok(None);
         }
 
