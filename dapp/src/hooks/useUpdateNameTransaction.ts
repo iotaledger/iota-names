@@ -3,20 +3,17 @@
 
 import { useIotaClient } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { Transaction, TransactionObjectArgument } from '@iota/iota-sdk/transactions';
+import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
-import { useFindParentObjectId } from './useFindParentObjectId';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
     name: string;
-    objectId: TransactionObjectArgument | string;
     isExpired: boolean;
-
     updates: NameUpdate[];
 }
 
@@ -40,6 +37,7 @@ export type NameUpdate =
       }
     | {
           type: 'edit-setup';
+          nft: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
@@ -60,7 +58,6 @@ export function useUpdateNameTransaction({
 }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
-    const { data: parentInfo } = useFindParentObjectId(name);
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
@@ -93,15 +90,16 @@ export function useUpdateNameTransaction({
                         break;
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
-                            parentNft: tx.object(parentInfo?.objectId ?? ''),
+                            parentNft: tx.object(update?.nft),
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
                         });
                         break;
                     case 'new-subdomain':
+                        console.log('uptadet subdomain', update);
                         const subnameNft = iotaNamesTx.createSubName({
-                            parentNft: tx.object(parentInfo?.objectId ?? ''),
+                            parentNft: tx.object(update?.parentNftId),
                             name: update.subdomainName,
                             expirationTimestampMs: update.expirationTimeParent,
                             allowChildCreation: update.allowChildCreation,

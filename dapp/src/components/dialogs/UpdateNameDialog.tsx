@@ -26,7 +26,7 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
-import { useSubnameRecord } from '@/hooks';
+import { useRegistrationNfts, useSubnameRecord } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
@@ -41,12 +41,11 @@ import { VisualAssetsDialog } from './AvatarSelectDialog';
 
 type UpdateNameDialogProps = {
     name: string;
-    objectId: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDialogProps) {
+export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -64,6 +63,9 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
     const namePermissions = nameRecord?.nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
+
+    const domainsOwned = useRegistrationNfts('domain');
+    const subdomainsOwned = useRegistrationNfts('subdomain');
 
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     // Editable values
@@ -104,6 +106,49 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
         }
     }, [addressName]);
 
+    function getSubdomainObjectId(name: string) {
+        if (!isSubName(name)) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === name,
+            );
+            return parentDomain?.id || null;
+        }
+        const parentParts = name?.split('.').length;
+        if (parentParts === 2) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === name,
+            );
+            return parentDomain?.id || null;
+        } else if (parentParts && parentParts >= 3) {
+            const parentSubdomain = subdomainsOwned.data?.find(
+                (subdomain: { name: string | null }) => subdomain.name === name,
+            );
+            return parentSubdomain?.id || null;
+        }
+    }
+    function getParentSubdomainObjectId(name: string) {
+        if (!isSubName(name)) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === name,
+            );
+            return parentDomain?.id || null;
+        }
+        const parts = name.split('.');
+        const directParentName = parts.slice(1).join('.');
+        const parentParts = directParentName?.split('.').length;
+        if (parentParts === 2) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === directParentName,
+            );
+            return parentDomain?.id || null;
+        } else if (parentParts && parentParts >= 3) {
+            const parentSubdomain = subdomainsOwned.data?.find(
+                (subdomain: { name: string | null }) => subdomain.name === directParentName,
+            );
+            return parentSubdomain?.id || null;
+        }
+    }
+
     const isTargetCurrentAddress = editTargetAddress === account?.address;
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
     const isDefaultName = addressName === name;
@@ -116,13 +161,14 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (isThereAddress && isValidAddress && !isTargetUsedInName) {
+    if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
-            nft: objectId,
+            nft: parentObjectId ?? '',
         });
     }
 
@@ -146,22 +192,27 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         // Only allow editing the setup if it is a subname and the config has changed
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'edit-setup',
+            nft: parentObjectId ?? '',
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
     }
-
     if (
-        (nameRecord && isSubdomainAvailable && fullSubdomainName) ||
-        editIsAllowSubnames != namePermissions?.allowChildCreation ||
-        editIsAllowingRenew != namePermissions?.allowTimeExtension
+        nameRecord &&
+        ((isSubdomainAvailable && fullSubdomainName) ||
+            editIsAllowSubnames != namePermissions?.allowChildCreation ||
+            editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
+        const parentObjectId = getSubdomainObjectId(nameRecord.nameRecord.name);
+        console.log('parentObjectId', parentObjectId);
+        console.log('nameRecord?.nameRecord?.nftId', nameRecord?.nameRecord?.nftId);
         updates.push({
             type: 'new-subdomain',
             subdomainName: fullSubdomainName,
-            parentNftId: nameRecord?.nameRecord?.nftId || '',
+            parentNftId: parentObjectId ?? '',
             expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
@@ -181,7 +232,6 @@ export function UpdateNameDialog({ name, objectId, open, setOpen }: UpdateNameDi
     } = useUpdateNameTransaction({
         address: account?.address || '',
         name,
-        objectId: objectId,
         updates,
         isExpired,
     });
