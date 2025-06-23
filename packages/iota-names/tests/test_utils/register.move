@@ -48,7 +48,7 @@ public fun register<T>(
 
     assert!(0 < no_years && no_years <= 5, EInvalidYearsArgument);
 
-    let price = config.calculate_base_price_with_domain(domain) * (no_years as u64);
+    let price = config.calculate_base_price_of_domain(domain) * (no_years as u64);
     assert!(payment.value() == price, EIncorrectAmount);
 
     iota_names.auth_add_balance<_, T>(RegisterAuth {}, payment.into_balance());

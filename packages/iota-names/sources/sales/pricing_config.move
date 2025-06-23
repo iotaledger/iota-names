@@ -43,9 +43,9 @@ public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
     *config.pricing.get(&range)
 }
 
-/// Calculates the base price for a given domain based on its SLD length.
+/// Calculates the base price of a given domain based on its SLD length.
 /// For example, "my-name.iota" uses length 7 (the length of "my-name").
-public fun calculate_base_price_with_domain(config: &PricingConfig, domain: Domain): u64 {
+public fun calculate_base_price_of_domain(config: &PricingConfig, domain: Domain): u64 {
     calculate_base_price(config, domain.sld().length())
 }
 

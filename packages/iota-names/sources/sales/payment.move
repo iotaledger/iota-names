@@ -136,7 +136,7 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
     let domain = domain::new(domain);
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
 
-    let price = iota_names.get_config<PricingConfig>().calculate_base_price_with_domain(domain);
+    let price = iota_names.get_config<PricingConfig>().calculate_base_price_of_domain(domain);
 
     PaymentIntent::Registration(RequestData {
         domain,
@@ -161,7 +161,7 @@ public fun init_renewal(
     let price = iota_names
         .get_config<RenewalConfig>()
         .config()
-        .calculate_base_price_with_domain(domain);
+        .calculate_base_price_of_domain(domain);
 
     PaymentIntent::Renewal(RequestData {
         domain,
