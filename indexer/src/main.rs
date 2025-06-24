@@ -121,8 +121,10 @@ impl Command {
                             tracing::error!("a worker failed with error: {err}");
                             exit_code = Err(err);
                         }
-                        while let Some(Ok(Err(err))) = tasks.join_next().await {
-                            tracing::error!("a worker failed with error: {err}");
+                        while let Some(res) = tasks.join_next().await {
+                            if let Ok(Err(err)) = res {
+                                tracing::error!("a worker failed with error: {err}");
+                            }
                         }
                     },
                 }
@@ -140,8 +142,10 @@ impl Command {
                         tracing::info!("runtime aborted");
                     },
                     _ = async {
-                            while let Some(Ok(Err(err))) = tasks.join_next().await {
-                                tracing::error!("a worker failed with error: {err}");
+                            while let Some(res) = tasks.join_next().await {
+                                if let Ok(Err(err)) = res {
+                                    tracing::error!("a worker failed with error: {err}");
+                                }
                             }
                         } => {
                         tracing::info!("runtime stopped");
