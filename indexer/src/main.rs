@@ -1,6 +1,9 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod api;
+mod config;
+mod db;
 mod events;
 mod metrics;
 mod worker;
@@ -9,7 +12,6 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
-use iota_names::config::IotaNamesConfig;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info};
@@ -17,7 +19,10 @@ use tracing_subscriber::{
     EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
 };
 
-use self::{
+use crate::{
+    api::start_api_server,
+    config::IotaNamesExtendedConfig,
+    db::pool::{DbConnectionPool, DbConnectionPoolConfig},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
@@ -35,12 +40,17 @@ bin_version::bin_version!();
 )]
 enum Command {
     Start {
+        #[clap(flatten)]
+        connection_pool_config: DbConnectionPoolConfig,
         /// The URL of an IOTA node to get data from.
         #[arg(long, default_value = "http://localhost:9000")]
         node_url: String,
         /// The number of workers to spawn in parallel.
         #[arg(long, default_value_t = 1)]
         num_workers: usize,
+        /// The port to run the API server on.
+        #[arg(long, default_value_t = 3030)]
+        api_port: u16,
     },
 }
 
@@ -48,8 +58,10 @@ impl Command {
     async fn execute(self) -> Result<()> {
         match self {
             Command::Start {
+                connection_pool_config,
                 node_url,
                 num_workers,
+                api_port,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -68,11 +80,26 @@ impl Command {
                     res
                 });
 
+                let connection_pool = DbConnectionPool::new(connection_pool_config)?;
+                connection_pool.run_migrations()?;
+
+                // Spawn the auction API server
+                let handle = cancel_token.clone();
+                let database_pool = connection_pool.clone();
+                tasks.spawn(async move {
+                    let res = start_api_server(database_pool, api_port, handle.clone()).await;
+                    handle.cancel();
+                    res
+                });
+
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
+                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
-                        IotaNamesConfig::from_env().unwrap_or_default(),
+                        connection_pool,
+                        iota_names_config,
                         Arc::new(IotaNamesMetrics::new(&registry)),
                         handle.clone(),
                     )?;
@@ -141,7 +168,7 @@ async fn main() -> Result<()> {
 
 fn set_up_logging() -> Result<()> {
     std::panic::set_hook(Box::new(|p| {
-        error!("{}", p);
+        error!("{p}");
     }));
 
     tracing_subscriber::registry()

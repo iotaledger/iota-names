@@ -109,7 +109,6 @@ public fun finalize_payment<A: drop, T>(
     app: A,
     coin: Coin<T>,
 ): Receipt {
-    iota_names.assert_is_authorized<A>();
     event::emit(intent.to_event<A, T>(coin.value()));
     iota_names.auth_add_balance(app, coin.into_balance());
 
@@ -137,7 +136,7 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
     let domain = domain::new(domain);
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
 
-    let price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
+    let price = iota_names.get_config<PricingConfig>().calculate_base_price_of_domain(domain);
 
     PaymentIntent::Registration(RequestData {
         domain,
@@ -162,7 +161,7 @@ public fun init_renewal(
     let price = iota_names
         .get_config<RenewalConfig>()
         .config()
-        .calculate_base_price(domain.sld().length());
+        .calculate_base_price_of_domain(domain);
 
     PaymentIntent::Renewal(RequestData {
         domain,

@@ -6,6 +6,13 @@ use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event
 use serde::{Deserialize, Serialize};
 
 pub(crate) enum IotaNamesEvent {
+    // `auctions`
+    AuctionStarted(AuctionStartedEvent),
+    AuctionBid(AuctionBidEvent),
+    AuctionExtended(AuctionExtendedEvent),
+    AuctionFinalized(AuctionFinalizedEvent),
+    // `coupons`
+    CouponApplied(CouponAppliedEvent),
     // `iota-names`
     NameRecordAdded(NameRecordAddedEvent),
     NameRecordRemoved(NameRecordRemovedEvent),
@@ -15,11 +22,6 @@ pub(crate) enum IotaNamesEvent {
     UserDataSet(UserDataSetEvent),
     UserDataUnset(UserDataUnsetEvent),
     Transaction(TransactionEvent),
-    // `auctions`
-    AuctionStarted(AuctionStartedEvent),
-    AuctionBid(AuctionBidEvent),
-    AuctionExtended(AuctionExtendedEvent),
-    AuctionFinalized(AuctionFinalizedEvent),
     // `subdomains`
     NodeSubdomainCreated(NodeSubdomainCreatedEvent),
     NodeSubdomainBurned(NodeSubdomainBurnedEvent),
@@ -34,6 +36,14 @@ impl IotaNamesEvent {
     ) -> anyhow::Result<Option<Self>> {
         // TODO check package IDs
         Ok(Some(match event.type_.name.as_str() {
+            // `auctions`
+            "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
+            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
+            "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
+            "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
+            // `coupons`
+            "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
+            // `iota-names`
             "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
             "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
             "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
@@ -44,10 +54,7 @@ impl IotaNamesEvent {
             "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
             "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
             "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
-            "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
-            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
-            "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
-            "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
+            // `subdomains`
             "NodeSubdomainCreatedEvent" => {
                 Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
             }
@@ -64,6 +71,56 @@ impl IotaNamesEvent {
         }))
     }
 }
+
+// `auctions`
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct AuctionStartedEvent {
+    pub domain: Domain,
+    pub start_timestamp_ms: u64,
+    pub end_timestamp_ms: u64,
+    pub starting_bid: u64,
+    pub bidder: IotaAddress,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct AuctionBidEvent {
+    pub domain: Domain,
+    pub bid: u64,
+    pub bidder: IotaAddress,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct AuctionExtendedEvent {
+    pub domain: Domain,
+    pub end_timestamp_ms: u64,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct AuctionFinalizedEvent {
+    pub domain: Domain,
+    pub start_timestamp_ms: u64,
+    pub end_timestamp_ms: u64,
+    pub winning_bid: u64,
+    pub winner: IotaAddress,
+}
+
+// `coupons`
+
+#[derive(Serialize, Deserialize)]
+#[repr(u8)]
+pub enum CouponKind {
+    Percentage = 0,
+    Fixed = 1,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CouponAppliedEvent {
+    pub kind: CouponKind,
+    pub discount: u64,
+}
+
+// `iota-names`
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct NameRecordAddedEvent {
@@ -107,37 +164,6 @@ pub(crate) struct UserDataUnsetEvent {
 }
 
 #[derive(Serialize, Deserialize)]
-pub(crate) struct AuctionStartedEvent {
-    pub domain: Domain,
-    pub start_timestamp_ms: u64,
-    pub end_timestamp_ms: u64,
-    pub starting_bid: u64,
-    pub bidder: IotaAddress,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct AuctionBidEvent {
-    pub domain: Domain,
-    pub bid: u64,
-    pub bidder: IotaAddress,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct AuctionExtendedEvent {
-    pub domain: Domain,
-    pub end_timestamp_ms: u64,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct AuctionFinalizedEvent {
-    pub domain: Domain,
-    pub start_timestamp_ms: u64,
-    pub end_timestamp_ms: u64,
-    pub winning_bid: u64,
-    pub winner: IotaAddress,
-}
-
-#[derive(Serialize, Deserialize)]
 pub(crate) struct TransactionEvent {
     pub app: String,
     pub domain: Domain,
@@ -149,6 +175,8 @@ pub(crate) struct TransactionEvent {
     pub currency: String,
     pub currency_amount: u64,
 }
+
+// `subdomains`
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {

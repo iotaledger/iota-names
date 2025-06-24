@@ -85,8 +85,6 @@ public fun start_auction_and_place_bid(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    iota_names.assert_is_authorized<AuctionAuth>();
-
     let domain = domain::new(domain_name);
 
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
