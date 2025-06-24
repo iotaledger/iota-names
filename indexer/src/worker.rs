@@ -161,7 +161,7 @@ impl IotaNamesWorker {
                     remove_domain_bids_entry(conn, &event.domain.to_string())
                 })?;
                 self.metrics
-                    .bid_count_distribution
+                    .auction_bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])
                     .inc();
             }
