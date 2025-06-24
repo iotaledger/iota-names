@@ -176,7 +176,6 @@ fun tries_to_extend_with_burned_parent() {
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    // child is an expired name ofc.
     let mut child = create_node_subdomain(
         &parent,
         utf8(b"node.test.iota"),
@@ -186,8 +185,9 @@ fun tries_to_extend_with_burned_parent() {
         scenario,
     );
 
+    // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1,
+        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -220,8 +220,9 @@ fun tries_to_extend_while_parent_changed() {
         scenario,
     );
 
+    // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1,
+        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -249,8 +250,9 @@ fun tries_to_extend_with_too_long_date() {
         scenario,
     );
 
+    // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1,
+        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -275,8 +277,9 @@ fun tries_to_extend_with_too_short_date() {
         scenario,
     );
 
+    // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) +grace_period_ms() + 1,
+        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
