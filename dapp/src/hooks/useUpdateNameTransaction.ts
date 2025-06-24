@@ -45,6 +45,11 @@ export type NameUpdate =
           type: 'renew-name';
           nft: string;
           years: number;
+      }
+    | {
+          type: 'renew-subname';
+          nft: string;
+          expirationTimestampMs: number;
       };
 
 export function useUpdateNameTransaction({
@@ -98,6 +103,12 @@ export function useUpdateNameTransaction({
                             nft: update.nft,
                             years: update.years,
                             coin: tx.gas,
+                        });
+                        break;
+                    case 'renew-subname':
+                        iotaNamesTx.extendExpiration({
+                            nft: update.nft,
+                            expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
                 }
