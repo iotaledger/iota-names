@@ -1,9 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
+use iota_names::{domain::Domain, registry::NameRecord};
 use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
+
+use crate::config::IotaNamesExtendedConfig;
 
 pub(crate) enum IotaNamesEvent {
     // `auctions`
@@ -32,9 +34,12 @@ pub(crate) enum IotaNamesEvent {
 impl IotaNamesEvent {
     pub(crate) fn try_from_event(
         event: &Event,
-        _config: &IotaNamesConfig,
+        config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        // TODO check package IDs
+        if !config.is_iota_names_package(event.package_id) {
+            return Ok(None);
+        }
+
         Ok(Some(match event.type_.name.as_str() {
             // `auctions`
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
