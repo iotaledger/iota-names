@@ -117,6 +117,26 @@ fun remove_reserved_word() {
     scenario_val.end();
 }
 
+#[test, expected_failure(abort_code = ::iota_names_deny_list::deny_list::ENoWordsInList)]
+fun tries_to_remove_no_words() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+
+    scenario.next_tx(ADDR);
+    let mut iota_names = scenario.take_shared<IotaNames>();
+    let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
+
+    deny_list::add_reserved_names(&mut iota_names, &cap, some_reserved_names());
+
+    let name = utf8(b"test");
+
+    assert!(deny_list::is_reserved_name(&iota_names, name), 0);
+
+    deny_list::remove_reserved_names(&mut iota_names, &cap, vector[]);
+
+    abort 1337
+}
+
 // data preparation
 
 public fun test_init(): (Scenario) {
