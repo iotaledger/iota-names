@@ -37,10 +37,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{
         pool::DbConnectionPool,
-        queries::{
-            add_bidder_domain_entry, add_domain_bids_entry, remove_domain_bids_entry,
-            update_domain_bids_entry,
-        },
+        queries::{add_bidder_domain_entry, remove_domain_bids_entry, upsert_domain_bids_entry},
     },
     events::{CouponKind, IotaNamesEvent},
 };
@@ -135,7 +132,7 @@ impl IotaNamesWorker {
                         &event.bidder.to_string(),
                         &event.domain.to_string(),
                     )?;
-                    add_domain_bids_entry(conn, &event.domain.to_string())
+                    upsert_domain_bids_entry(conn, &event.domain.to_string())
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
@@ -146,7 +143,7 @@ impl IotaNamesWorker {
                         &event.bidder.to_string(),
                         &event.domain.to_string(),
                     )?;
-                    update_domain_bids_entry(conn, &event.domain.to_string())
+                    upsert_domain_bids_entry(conn, &event.domain.to_string())
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
