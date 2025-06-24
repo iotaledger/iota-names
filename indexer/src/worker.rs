@@ -300,10 +300,7 @@ impl IotaNamesWorker {
 
             if let Some(events) = &transaction.events {
                 for event in events.data.iter() {
-                    match IotaNamesEvent::try_from_event(
-                        event,
-                        &self.extended_config.iota_names_config,
-                    ) {
+                    match IotaNamesEvent::try_from_event(event, &self.extended_config) {
                         Ok(Some(event)) => self.process_event(event)?,
                         Err(e) => warn!("parsing event failed: {e}"),
                         _ => {}
