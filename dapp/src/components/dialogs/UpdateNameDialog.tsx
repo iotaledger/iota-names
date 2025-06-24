@@ -296,9 +296,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onCheckedChange={handleReverseLookupChange}
                             />
                         </Card>
-                        {updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
-                        ) : null}
                         <Card type={CardType.Outlined}>
                             <CardBody title="Avatar NFT" />
                             <CardAction
@@ -316,12 +313,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 }}
                             />
                         )}
-                        <Button
-                            icon={isLoading ? <LoadingIndicator /> : null}
-                            text="Save"
-                            disabled={disableSave}
-                            onClick={() => save()}
-                        />
                         {isNameSubName ? (
                             <>
                                 <Card type={CardType.Outlined}>
@@ -357,7 +348,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     onClick={() => setRenewDialogOpen(true)}
                                     disabled={
                                         (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
-                                        Date.now()
+                                        Date.now() //TODO: add grace period
                                     }
                                 />
                             </Card>

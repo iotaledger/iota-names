@@ -97,7 +97,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'renew-name':
                         iotaNamesTx.renew({
-                            nft,
+                            nft: update.nft,
                             years: update.years,
                             coin: tx.gas,
                         });
