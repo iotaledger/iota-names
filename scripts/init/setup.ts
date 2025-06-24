@@ -39,6 +39,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         couponsPackageId: packageInfo.Coupons.packageId,
         subNamesPackageId: packageInfo.Subdomains.packageId,
         tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+        upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);
 
