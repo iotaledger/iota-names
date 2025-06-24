@@ -42,7 +42,9 @@ export default function MyNamesPage(): JSX.Element {
                                 <Title title={nft.name} size={TitleSize.Small} />
                                 <Button
                                     text="Manage"
-                                    onClick={() => setUpdateNameDialog(nft.name)}
+                                    onClick={() => {
+                                        setUpdateNameDialog(nft.name);
+                                    }}
                                 />
                             </div>
                         </Card>

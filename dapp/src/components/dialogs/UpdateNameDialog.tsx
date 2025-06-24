@@ -26,11 +26,16 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
+import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
+import {
+    getNamePermissions,
+    isNameRecordExpired,
+    useSubdomainPermissionsValidation,
+} from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
 
@@ -53,27 +58,33 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
-
     const isNameSubName = nameRecord?.nameRecord ? isSubName(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
     const namePermissions = nameRecord?.nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
+
+    const domainsOwned = useRegistrationNfts('domain');
+    const subdomainsOwned = useRegistrationNfts('subdomain');
+
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
-    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
-    const [renewYears, setRenewYears] = useState<number>();
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
     const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
+    const [renewYears, setRenewYears] = useState<number>();
+    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+
+    const { canModifyTimeExtension, canModifyChildCreation } =
+        useSubdomainPermissionsValidation(name);
 
     // Sync permissions
     useEffect(() => {
         if (namePermissions) {
-            setEditIsAllowingRenew(namePermissions.allowChildCreation);
-            setEditIsAllowSubnames(namePermissions.allowTimeExtension);
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
         }
     }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
@@ -91,6 +102,25 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }, [addressName]);
 
+    // For subnames, get the parent subdomain object ID
+    function getParentSubdomainObjectId(name: string) {
+        if (!isSubName(name)) return;
+        const parts = name.split('.');
+        const directParentName = parts.slice(1).join('.');
+        const parentParts = directParentName?.split('.').length;
+        if (parentParts === 2) {
+            const parentDomain = domainsOwned.data?.find(
+                (domain: { name: string | null }) => domain.name === directParentName,
+            );
+            return parentDomain?.id || null;
+        } else if (parentParts && parentParts >= 3) {
+            const parentSubdomain = subdomainsOwned.data?.find(
+                (subdomain: { name: string | null }) => subdomain.name === directParentName,
+            );
+            return parentSubdomain?.id || null;
+        }
+    }
+
     const isTargetCurrentAddress = editTargetAddress === account?.address;
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
     const isDefaultName = addressName === name;
@@ -103,12 +133,14 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (isThereAddress && isValidAddress && !isTargetUsedInName) {
+    if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
+            nft: parentObjectId ?? '',
         });
     }
 
@@ -124,6 +156,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             name,
         });
     }
+
     if (
         nameRecord &&
         isNameSubName &&
@@ -131,9 +164,10 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         // Only allow editing the setup if it is a subname and the config has changed
+        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'edit-setup',
-            nft: nameRecord.nameRecord.nftId,
+            nft: parentObjectId ?? '',
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
@@ -165,7 +199,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     } = useUpdateNameTransaction({
         address: account?.address || '',
         name,
-        nft: nameRecord?.nameRecord?.nftId || '',
         updates,
         isExpired,
     });
@@ -296,6 +329,32 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onCheckedChange={handleReverseLookupChange}
                             />
                         </Card>
+                        {isNameSubName ? (
+                            <>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow renew name"
+                                        subtitle="Allow renew name."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowingRenew}
+                                        isDisabled={disableEdit || !canModifyTimeExtension}
+                                        onCheckedChange={handleAllowRenewChange}
+                                    />
+                                </Card>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow subname"
+                                        subtitle="Allow creating subdomains."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowSubnames}
+                                        isDisabled={disableEdit || !canModifyChildCreation}
+                                        onCheckedChange={handleAllowSubnameChange}
+                                    />
+                                </Card>
+                            </>
+                        ) : null}
                         <Card type={CardType.Outlined}>
                             <CardBody title="Avatar NFT" />
                             <CardAction
@@ -313,32 +372,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 }}
                             />
                         )}
-                        {isNameSubName ? (
-                            <>
-                                <Card type={CardType.Outlined}>
-                                    <CardBody
-                                        title="Set allow renew name"
-                                        subtitle="Allow renew name."
-                                    />
-                                    <Checkbox
-                                        isChecked={editIsAllowingRenew}
-                                        isDisabled={disableEdit}
-                                        onCheckedChange={handleAllowRenewChange}
-                                    />
-                                </Card>
-                                <Card type={CardType.Outlined}>
-                                    <CardBody
-                                        title="Set allow subname"
-                                        subtitle="Allow creating subdomains."
-                                    />
-                                    <Checkbox
-                                        isChecked={editIsAllowSubnames}
-                                        isDisabled={disableEdit}
-                                        onCheckedChange={handleAllowSubnameChange}
-                                    />
-                                </Card>
-                            </>
-                        ) : null}
 
                         {(!isNameSubName || (isNameSubName && editIsAllowingRenew)) && (
                             <Card type={CardType.Outlined}>
@@ -390,6 +423,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 </DialogContent>
                             </Dialog>
                         )}
+
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}

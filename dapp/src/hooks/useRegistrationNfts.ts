@@ -1,6 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import { useCurrentAccount } from '@iota/dapp-kit';
 import {
     getIotaNamesRegistrationType,
@@ -23,13 +22,11 @@ export interface RegistrationNft {
 }
 
 type RegistrationNftType = 'domain' | 'subdomain';
-
 export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
-
     const filter = (() => {
         switch (type) {
             case 'domain':
@@ -42,7 +39,6 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 };
         }
     })();
-
     return useGetAllOwnedObjects(address, filter, {
         select(data) {
             return data.map((nameRecord) => {
@@ -60,6 +56,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     link: data?.link,
                     expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
                     project_url: data?.project_url,
+                    id: nameRecord.objectId,
                 };
             });
         },
