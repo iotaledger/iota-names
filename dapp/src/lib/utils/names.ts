@@ -26,12 +26,12 @@ export function getNamePermissions(nameRecord: NameRecord) {
     };
 }
 
-function getSubdomainLevel(name: string): number {
+export function getSubdomainLevel(name: string): number {
     const parts = name.split('.');
     return Math.max(0, parts.length - 2);
 }
 
-function getDirectParent(name: string): string | null {
+export function getDirectParent(name: string): string | null {
     const parts = name.split('.');
     if (parts.length <= 2) {
         return null;
@@ -56,39 +56,47 @@ export function useSubdomainPermissionsValidation(fullSubdomainName: string) {
     const subdomainLevel = getSubdomainLevel(fullSubdomainName);
     const directParent = getDirectParent(fullSubdomainName);
 
-    const { data: parentNameRecord } = useNameRecord(directParent || '');
-
     const { data } =
         subdomainLevel >= 2 ? useNameRecord(directParent!) : useNameRecord(fullSubdomainName);
     const nameRecord = data as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
 
-    const parentPermissions =
-        parentNameRecord && nameRecord?.nameRecord
-            ? getNamePermissions(nameRecord.nameRecord)
-            : undefined;
+    const parentPermissions = nameRecord?.nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : undefined;
 
     const canModifyTimeExtension = useMemo(() => {
-        if (subdomainLevel === 0) return false;
-        if (subdomainLevel === 1) return true;
         if (subdomainLevel >= 2) {
             if (!parentPermissions) return false;
-            return parentPermissions.allowTimeExtension === true;
+            return parentPermissions.allowTimeExtension;
         }
 
-        return false;
-    }, [fullSubdomainName, subdomainLevel, directParent, parentPermissions]);
+        return true;
+    }, [subdomainLevel, parentPermissions]);
 
     const canModifyChildCreation = useMemo(() => {
-        if (subdomainLevel === 0) return false;
-        if (subdomainLevel === 1) return true;
         if (subdomainLevel >= 2) {
             if (!parentPermissions) return false;
-            return parentPermissions?.allowChildCreation === true;
+            return parentPermissions?.allowChildCreation;
         }
-        return false;
+        return true;
     }, [subdomainLevel, parentPermissions]);
     return {
         canModifyTimeExtension,
         canModifyChildCreation,
     };
+}
+/**
+ * Finds all subdomains that belong to a specific parent domain (including all nested levels).
+ *
+ * Example: 'test.domain.iota' → finds ['app.test.domain.iota', 'blog.test.domain.iota', 'deep.app.test.domain.iota', etc.]
+ *
+ * @param parentDomain - The parent domain name (e.g., "test.domain.iota")
+ * @param subdomainsOwned - Array of all owned subdomains
+ * @returns Array of ALL subdomain objects that are descendants of the parent domain
+ */
+export function findChildSubdomains(parentDomain: string, subdomainsOwned: any[]): any[] {
+    return subdomainsOwned.filter((subdomain) => {
+        const endsWithParent = subdomain.name.endsWith('.' + parentDomain);
+        return endsWithParent;
+    });
 }

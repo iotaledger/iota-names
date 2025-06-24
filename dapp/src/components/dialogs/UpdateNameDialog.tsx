@@ -32,6 +32,7 @@ import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import {
+    findChildSubdomains,
     getNamePermissions,
     isNameRecordExpired,
     useSubdomainPermissionsValidation,
@@ -126,6 +127,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             return parentSubdomain?.id || null;
         }
     }
+
     function getParentSubdomainObjectId(name: string) {
         if (!isSubName(name)) {
             const parentDomain = domainsOwned.data?.find(
@@ -191,21 +193,35 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
-        // Only allow editing the setup if it is a subname and the config has changed
+        if (editIsAllowSubnames === false || editIsAllowingRenew === false) {
+            const childrens = findChildSubdomains(
+                nameRecord.nameRecord.name,
+                subdomainsOwned.data ?? [],
+            );
+            // console.log('Child subdomains found:', childrens);
+            childrens.forEach((child) => {
+                const parentObjectId = getParentSubdomainObjectId(child.name);
+                // console.log('name: ', child.name, ' parent object ID:', parentObjectId);
+                updates.push({
+                    type: 'edit-setup',
+                    nft: parentObjectId ?? '',
+                    name: child.name,
+                    allowChildCreation: false,
+                    allowTimeExtension: false,
+                });
+            });
+        }
         const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
+        // console.log('name: ', nameRecord.nameRecord.name, 'parent object ID:', parentObjectId);
         updates.push({
             type: 'edit-setup',
             nft: parentObjectId ?? '',
+            name: nameRecord.nameRecord.name,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
     }
-    if (
-        nameRecord &&
-        ((isSubdomainAvailable && fullSubdomainName) ||
-            editIsAllowSubnames != namePermissions?.allowChildCreation ||
-            editIsAllowingRenew != namePermissions?.allowTimeExtension)
-    ) {
+    if (nameRecord && isSubdomainAvailable && newSubdomainName && fullSubdomainName) {
         const parentObjectId = getSubdomainObjectId(nameRecord.nameRecord.name);
         updates.push({
             type: 'new-subdomain',

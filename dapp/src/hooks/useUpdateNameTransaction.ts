@@ -38,6 +38,7 @@ export type NameUpdate =
     | {
           type: 'edit-setup';
           nft: string;
+          name: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
