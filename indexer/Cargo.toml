@@ -12,6 +12,7 @@ anyhow = "1.0"
 async-trait = "0.1"
 axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
 bcs = "0.1"
+tower-http = { version = "0.6.6", features = ["cors"] }
 clap = { version = "4.4", features = ["derive", "wrap_help", "env"] }
 diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "r2d2"] }
 diesel_migrations = { version = "2.2.0", features = ["sqlite"] }

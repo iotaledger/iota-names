@@ -10,6 +10,7 @@ use axum::{
     response::{IntoResponse, Json, Response},
     routing::get,
 };
+use tower_http::cors::{CorsLayer, Any};
 use iota_types::base_types::IotaAddress;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
@@ -31,6 +32,12 @@ pub async fn start_api_server(
     let app = Router::new()
         .route("/health", get(health_check))
         .route("/auctions/{address}", get(get_domains_for_address))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any)
+        )
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
