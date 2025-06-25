@@ -27,7 +27,8 @@ pub struct BidderDomain {
     pub domain_id: i32,
 }
 
-#[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
+#[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
+#[diesel(belongs_to(Domain))]
 #[diesel(table_name = domain_bids)]
 #[diesel(primary_key(domain_id))]
 pub struct DomainBids {
@@ -65,5 +66,6 @@ diesel::table! {
 
 diesel::joinable!(bidder_domain -> domains (domain_id));
 diesel::joinable!(bidder_domain -> bidders (bidder_id));
+diesel::joinable!(domain_bids -> domains (domain_id));
 
 diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain);
