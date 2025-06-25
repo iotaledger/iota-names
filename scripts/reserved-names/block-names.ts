@@ -20,10 +20,10 @@ export const parseTextFile = (filePath: string): string[] => {
 
 export const addBlockedNames = (
     txb: Transaction,
-    names: string[],
     denyListPackageId: string,
-    adminCap: string,
     iotaNamesObjectId: string,
+    adminCap: string,
+    names: string[],
 ) => {
     return txb.moveCall({
         target: `${denyListPackageId}::deny_list::add_blocked_names`,

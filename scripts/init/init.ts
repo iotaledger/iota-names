@@ -72,13 +72,13 @@ export const init = async (
             console.log('No names to block');
         } else {
             console.log(`Blocking ${blockCount} names`);
-            const tx = new Transaction();
+            let tx = new Transaction();
             addBlockedNames(
                 tx,
-                namesToBlock,
                 packageInfo.denyListPackageId,
-                packageInfo.adminCap,
                 packageInfo.iotaNamesObjectId,
+                packageInfo.adminCap,
+                namesToBlock,
             );
             const result = await signAndExecute(tx, network);
             await client.waitForTransaction({ digest: result.digest });
