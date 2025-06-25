@@ -67,6 +67,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
+    const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
     const [subdomainDialogOpen, setSubdomainDialogOpen] = useState(false);
@@ -83,7 +84,14 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             setEditIsAllowSubnames(namePermissions.allowChildCreation);
         }
     }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
-    const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
+
+    // Sync permissions
+    useEffect(() => {
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
+        }
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
     // Sync name target address
     useEffect(() => {
@@ -162,7 +170,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
-            nft: parentObjectId ?? '',
+            nftId: parentObjectId || '',
         });
     }
 
@@ -205,6 +213,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             allowTimeExtension: editIsAllowingRenew,
         });
     }
+
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
         updates.push({
             type: 'set-avatar',
@@ -245,6 +254,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
+                    case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
                             queryKey: queryKey.nameRecord(name),

@@ -17,6 +17,8 @@ export interface RegistrationNft {
     image_url?: string;
     link?: string;
     project_url?: string;
+    expiration_timestamp_ms: number;
+    id: string;
 }
 
 type RegistrationNftType = 'domain' | 'subdomain';

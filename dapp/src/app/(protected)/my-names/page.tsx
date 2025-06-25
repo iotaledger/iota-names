@@ -56,7 +56,6 @@ export default function MyNamesPage(): JSX.Element {
             </div>
             {subdomains?.length && (
                 <div className="flex flex-col gap-y-sm items-center">
-                    {' '}
                     {subdomains.map((subdomain) => (
                         <Card key={subdomain.name} type={CardType.Filled}>
                             <CardBody
