@@ -10,9 +10,9 @@ use axum::{
     response::{IntoResponse, Json, Response},
     routing::get,
 };
-use tower_http::cors::{CorsLayer, Any};
 use iota_types::base_types::IotaAddress;
 use tokio_util::sync::CancellationToken;
+use tower_http::cors::{CorsLayer, Any};
 use tracing::info;
 
 use crate::db::{pool::DbConnectionPool, queries::get_domains_for_bidder_address};
@@ -36,7 +36,7 @@ pub async fn start_api_server(
             CorsLayer::new()
                 .allow_origin(Any)
                 .allow_methods(Any)
-                .allow_headers(Any)
+                .allow_headers(Any),
         )
         .with_state(state);
 
