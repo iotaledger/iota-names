@@ -39,11 +39,11 @@ docker volume rm iota-names-indexer_prometheus_data
 The following endpoints will be available:
 
 - **IOTA Names Indexer Metrics:** [http://localhost:9189/metrics](http://localhost:9189/metrics)
-- **REST API:** [http://localhost:3030](http://localhost:3030)
+- **Auction REST API:** [http://localhost:3030](http://localhost:3030)
 - **Prometheus:** [http://localhost:9090](http://localhost:9090)
 - **Grafana:** [http://localhost:3000](http://localhost:3000)
 
-## REST API Endpoints
+## Auction REST API Endpoints
 
 ### Health Check
 
