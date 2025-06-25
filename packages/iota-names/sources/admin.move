@@ -66,6 +66,7 @@ public fun admin_remove_records(
     mut domains: vector<String>,
 ) {
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
+    assert!(!domains.is_empty(), ENoDomainsProvided);
     while (!domains.is_empty()) {
         let domain = domain::new(domains.pop_back());
         registry.admin_force_remove_record(domain);
