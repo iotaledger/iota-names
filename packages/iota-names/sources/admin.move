@@ -52,3 +52,18 @@ entry fun reserve_domains(
         iota::transfer::public_transfer(nft, sender);
     };
 }
+
+/// Admin function to forcefully remove registry entries by their domain.
+/// This bypasses all expiration and authorization checks and immediately 
+/// removes the records and invalidates any reverse lookup entries.
+public fun admin_remove_records(
+    _: &AdminCap,
+    iota_names: &mut IotaNames,
+    mut domains: vector<String>,
+) {
+    let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
+    while (!domains.is_empty()) {
+        let domain = domain::new(domains.pop_back());
+        registry.admin_force_remove_record(domain);
+    };
+}
