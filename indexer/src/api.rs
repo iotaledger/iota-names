@@ -12,7 +12,7 @@ use axum::{
 };
 use iota_types::base_types::IotaAddress;
 use tokio_util::sync::CancellationToken;
-use tower_http::cors::{CorsLayer, Any};
+use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
 use crate::db::{pool::DbConnectionPool, queries::get_domains_for_bidder_address};
