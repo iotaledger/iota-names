@@ -12,7 +12,7 @@ const network = process.env.NETWORK || 'mainnet';
 
 // Active env of iota has to be the same with the env we're publishing to.
 // if upgradeCap & gasObject is on mainnet, it has to be on mainnet.
-const mainPackageUpgrade = async () => {
+const upgradeIotaNamesPackage = async () => {
     const packageInfo = readPackageInfo(network);
     let client = getClient(network);
     let gasCoinsPage = await client.getCoins({ owner: packageInfo.adminAddress });
@@ -23,13 +23,13 @@ const mainPackageUpgrade = async () => {
     if (!gasObjectId) throw new Error('No gas object found for a transaction');
 
     const currentDir = process.cwd();
-    const iotaNamesDir = `${currentDir}/../packages/iota-names`;
+    const packageDir = `${currentDir}/../packages/iota-names`;
     const txFilePath = `${currentDir}/tx/tx-data.txt`;
     const upgradeCall = `iota client upgrade --upgrade-capability ${packageInfo.upgradeCap} --gas-budget 2000000000 --gas ${gasObjectId} --skip-dependency-verification --serialize-unsigned-transaction`;
 
     try {
         // Execute the command with the specified working directory and capture the output
-        const output = execSync(upgradeCall, { cwd: iotaNamesDir, stdio: 'pipe' }).toString();
+        const output = execSync(upgradeCall, { cwd: packageDir, stdio: 'pipe' }).toString();
 
         writeFileSync(txFilePath, output);
         console.log('Upgrade transaction successfully created and saved to tx-data.txt');
@@ -42,4 +42,4 @@ const mainPackageUpgrade = async () => {
     }
 };
 
-mainPackageUpgrade();
+upgradeIotaNamesPackage();
