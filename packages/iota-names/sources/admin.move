@@ -15,6 +15,9 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
 use std::string::String;
 
+#[error]
+const ENoDomainsProvided: vector<u8> = b"No domains provided";
+
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AdminAuth has drop {}
 
@@ -45,6 +48,7 @@ entry fun reserve_domains(
     let sender = sender(ctx);
     let config = *iota_names.get_config<CoreConfig>();
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
+    assert!(!domains.is_empty(), ENoDomainsProvided);
     while (!domains.is_empty()) {
         let domain = domain::new(domains.pop_back());
         config.assert_is_valid_for_sale(&domain);

@@ -319,3 +319,41 @@ fun test_admin_remove_mixed_records() {
 
     scenario.end();
 }
+
+#[test, expected_failure(abort_code = ::iota_names::admin::ENoDomainsProvided)]
+fun test_reserve_domains_empty_list_fails() {
+    let ctx = tx_context::dummy();
+    let mut scenario = iota::test_scenario::begin(ctx.sender());
+
+    {
+        let iota_names = iota_names::init_for_testing(scenario.ctx());
+        iota_names.share_for_testing();
+    };
+
+    {
+        scenario.next_tx(ctx.sender());
+
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        let clock = clock::create_for_testing(scenario.ctx());
+        
+        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+
+        // Try to reserve an empty list of domains - this should fail
+        admin::reserve_domains(
+            &admin_cap,
+            &mut iota_names,
+            vector::empty<std::string::String>(),
+            1,
+            &clock,
+            scenario.ctx()
+        );
+
+        clock.share_for_testing();
+        scenario.return_to_sender(admin_cap);
+        iota::test_scenario::return_shared(iota_names);
+    };
+
+    scenario.end();
+}
