@@ -26,7 +26,7 @@ export function getNamePermissions(nameRecord: NameRecord) {
 }
 
 /**
- * Get the parent object id of a given subndomain
+ * Get the parent object id of a given subdomain
  */
 export function getParentSubdomainObjectId(
     ownedNames: RegistrationNft[],
@@ -37,13 +37,9 @@ export function getParentSubdomainObjectId(
     const parentName = parts.slice(1).join('.');
     const parentParts = parentName?.split('.').length;
 
-    if (parentParts === 2) {
-        // Subdomains with names as parent
-        const parentDomain = ownedNames.find(({ name }) => name === parentName);
-        return parentDomain?.id || null;
-    } else if (parentParts && parentParts >= 3) {
-        // Subdomains with another subdomain as parent
-        const parentSubdomain = ownedSubdomains.find(({ name }) => name === parentName);
-        return parentSubdomain?.id || null;
-    }
+    // 2 parts domains are names, the rest are subdomains
+    const parentNames = parentParts === 2 ? ownedNames : ownedSubdomains;
+
+    const parent = parentNames.find(({ name }) => name === parentName);
+    return parent?.id || null;
 }
