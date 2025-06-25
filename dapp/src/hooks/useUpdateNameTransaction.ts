@@ -50,10 +50,6 @@ export type NameUpdate =
           type: 'renew-subname';
           nft: string;
           expirationTimestampMs: number;
-          parentNftId: string;
-          name: string;
-          allowChildCreation: boolean;
-          allowTimeExtension: boolean;
       };
 
 export function useUpdateNameTransaction({
