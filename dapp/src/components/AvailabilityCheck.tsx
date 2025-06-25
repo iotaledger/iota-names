@@ -11,6 +11,7 @@ import { useNameRecord, usePriceList } from '@/hooks';
 import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
+import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 
 function normalizeNameInput(name: string) {
@@ -46,6 +47,7 @@ export function AvailabilityCheck() {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
 
     const { data: nameRecordData, error } = useNameRecord(name);
     const { data: priceList } = usePriceList();
@@ -159,9 +161,7 @@ export function AvailabilityCheck() {
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Bid"
-                                    onClick={() =>
-                                        console.log('Bid functionality not implemented yet')
-                                    }
+                                    onClick={() => setAuctionDialogOpen(true)}
                                 />
                             ) : (
                                 <ConnectButton connectText="Connect" />
@@ -169,6 +169,14 @@ export function AvailabilityCheck() {
                         </div>
                     )}
                 </div>
+            )}
+            {isAuctionBidDialogOpen && (
+                <AuctionBidDialog
+                    name={name}
+                    setOpen={setAuctionDialogOpen}
+                    minBidNanos={BigInt(minimumBidInNanos)}
+                    isNewAuction={isAvailable}
+                />
             )}
         </div>
     );
