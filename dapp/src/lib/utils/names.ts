@@ -34,20 +34,16 @@ export function getParentSubdomainObjectId(
     name: string,
 ) {
     const parts = name.split('.');
-    const directParentName = parts.slice(1).join('.');
-    const parentParts = directParentName?.split('.').length;
+    const parentName = parts.slice(1).join('.');
+    const parentParts = parentName?.split('.').length;
 
     if (parentParts === 2) {
         // Subdomains with names as parent
-        const parentDomain = ownedNames.find(
-            (domain: { name: string | null }) => domain.name === directParentName,
-        );
+        const parentDomain = ownedNames.find(({ name }) => name === parentName);
         return parentDomain?.id || null;
     } else if (parentParts && parentParts >= 3) {
         // Subdomains with another subdomain as parent
-        const parentSubdomain = ownedSubdomains.find(
-            (subdomain: { name: string | null }) => subdomain.name === directParentName,
-        );
+        const parentSubdomain = ownedSubdomains.find(({ name }) => name === parentName);
         return parentSubdomain?.id || null;
     }
 }
