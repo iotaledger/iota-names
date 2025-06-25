@@ -26,7 +26,7 @@ export type NameUpdate =
           type: 'set-target-address';
           address: string;
           isSubname: boolean;
-          nft: string;
+          nftId: string;
       }
     | {
           type: 'set-default';
@@ -50,6 +50,10 @@ export type NameUpdate =
           type: 'renew-subname';
           nft: string;
           expirationTimestampMs: number;
+          parentNftId: string;
+          name: string;
+          allowChildCreation: boolean;
+          allowTimeExtension: boolean;
       };
 
 export function useUpdateNameTransaction({
@@ -79,7 +83,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'set-target-address':
                         iotaNamesTx.setTargetAddress({
-                            nft: update.nft,
+                            nft: update.nftId,
                             address: update.address,
                             isSubname: update.isSubname,
                         });
@@ -92,7 +96,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
-                            parentNft: tx.object(update?.nft),
+                            parentNft: tx.object(update.nft),
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,

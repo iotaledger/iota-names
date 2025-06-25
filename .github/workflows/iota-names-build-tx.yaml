@@ -19,7 +19,6 @@ on:
           - Transfer Reserved Names
           - Transfer IOTA-Names Admin Objects
           - Upgrade IOTA-Names
-          - Authorize Packages
       iota_tools_image:
         description: "image reference of iota_tools"
         default: "iotaledger/iota-tools:mainnet"
@@ -104,21 +103,11 @@ jobs:
         if: ${{ inputs.transaction_type == 'Upgrade IOTA-Names' }}
         env:
           NODE_ENV: production
-          NETWORK: mainnet
+          NETWORK: ${{ inputs.network }}
           ORIGIN: gh_action
           RPC_URL: ${{ inputs.rpc }}
         run: |
-          cd scripts && pnpm ts-node transactions/main-package-upgrade.ts
-
-      - name: Authorize Packages
-        if: ${{ inputs.transaction_type == 'Authorize Packages' }}
-        env:
-          NODE_ENV: production
-          NETWORK: mainnet
-          ORIGIN: gh_action
-          RPC_URL: ${{ inputs.rpc }}
-        run: |
-          cd scripts && pnpm ts-node transactions/mainnet-setup.ts
+          cd scripts && pnpm ts-node transactions/upgrade-iota-names.ts
 
       - name: Show Transaction Data (To sign)
         run: |

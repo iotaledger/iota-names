@@ -33,6 +33,7 @@ import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import {
     getNamePermissions,
+    getParentSubdomainObjectId,
     isNameRecordExpired,
     useSubdomainPermissionsValidation,
 } from '@/lib/utils/names';
@@ -78,9 +79,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [renewDialogOpen, setRenewDialogOpen] = useState(false);
     const [renewSubname, setRenewSubname] = useState(false);
 
-    const { canModifyTimeExtension, canModifyChildCreation } =
-        useSubdomainPermissionsValidation(name);
-
     // Sync permissions
     useEffect(() => {
         if (namePermissions) {
@@ -123,29 +121,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             return parentSubdomain?.id || null;
         }
     }
-    // For subnames, get the parent subdomain object ID
-    function getParentSubdomainObjectId(name: string) {
-        if (!isSubName(name)) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === name,
-            );
-            return parentDomain?.id || null;
-        }
-        const parts = name.split('.');
-        const directParentName = parts.slice(1).join('.');
-        const parentParts = directParentName?.split('.').length;
-        if (parentParts === 2) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === directParentName,
-            );
-            return parentDomain?.id || null;
-        } else if (parentParts && parentParts >= 3) {
-            const parentSubdomain = subdomainsOwned.data?.find(
-                (subdomain: { name: string | null }) => subdomain.name === directParentName,
-            );
-            return parentSubdomain?.id || null;
-        }
-    }
 
     const isTargetCurrentAddress = editTargetAddress === account?.address;
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
@@ -161,12 +136,15 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
+        const parentObjectId = getParentSubdomainObjectId(
+            domainsOwned.data ?? [],
+            subdomainsOwned.data ?? [],
+            name,);
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
-            nft: parentObjectId ?? '',
+            nftId: parentObjectId || '',
         });
     }
 
@@ -180,22 +158,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         updates.push({
             type: 'set-default',
             name,
-        });
-    }
-
-    if (
-        nameRecord &&
-        isNameSubName &&
-        (editIsAllowSubnames != namePermissions?.allowChildCreation ||
-            editIsAllowingRenew != namePermissions?.allowTimeExtension)
-    ) {
-        // Only allow editing the setup if it is a subname and the config has changed
-        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
-        updates.push({
-            type: 'edit-setup',
-            nft: parentObjectId ?? '',
-            allowChildCreation: editIsAllowSubnames,
-            allowTimeExtension: editIsAllowingRenew,
         });
     }
 
@@ -228,6 +190,28 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             expirationTimestampMs: nameRecord.nameRecord.expirationTimestampMs + 1,
         });
     }
+
+   if (
+        editIsAllowSubnames != namePermissions?.allowChildCreation ||
+        editIsAllowingRenew != namePermissions?.allowTimeExtension
+    ) {
+        // To edit the setup of a subdomain we need to get its parent
+        // Its parent can be another name or another subdomain
+        const parentObjectId = getParentSubdomainObjectId(
+            domainsOwned.data ?? [],
+            subdomainsOwned.data ?? [],
+            name,
+        );
+        if (nameRecord && isNameSubName && parentObjectId) {
+            updates.push({
+                type: 'edit-setup',
+                nft: parentObjectId,
+                allowChildCreation: editIsAllowSubnames,
+                allowTimeExtension: editIsAllowingRenew,
+            });
+        }
+    }
+
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
         updates.push({
             type: 'set-avatar',
@@ -268,6 +252,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
+                    case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
                             queryKey: queryKey.nameRecord(name),
@@ -296,6 +281,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const handleAllowSubnameChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
         setEditIsAllowSubnames(checked);
     };
+
     function handleSetCurrentAsTargetAddress() {
         if (account?.address) {
             setEditTargetAddress(account?.address);
@@ -381,7 +367,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     />
                                     <Checkbox
                                         isChecked={editIsAllowingRenew}
-                                        isDisabled={disableEdit || !canModifyTimeExtension}
+                                        isDisabled={disableEdit}
                                         onCheckedChange={handleAllowRenewChange}
                                     />
                                 </Card>
@@ -392,7 +378,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     />
                                     <Checkbox
                                         isChecked={editIsAllowSubnames}
-                                        isDisabled={disableEdit || !canModifyChildCreation}
+                                        isDisabled={disableEdit}
                                         onCheckedChange={handleAllowSubnameChange}
                                     />
                                 </Card>
@@ -497,6 +483,31 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
+                        {isNameSubName ? (
+                            <>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow renew name"
+                                        subtitle="Allow renew name."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowingRenew}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowRenewChange}
+                                    />
+                                </Card>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow subname"
+                                        subtitle="Allow creating subdomains."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowSubnames}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowSubnameChange}
+                                    />
+                                </Card>
+                            </>
                         ) : null}
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}

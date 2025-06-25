@@ -26,7 +26,7 @@ export type PackageInfo = {
     reverseRegistryTableId: string;
     subNamesPackageId: string;
     tempSubdomainsProxyPackageId: string;
-    upgradeCap?: string;
+    upgradeCap: string;
 };
 
 export const readPackageInfo = (network: string): PackageInfo => {

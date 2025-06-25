@@ -4,7 +4,7 @@
 import { NameRecord } from '@iota/iota-names-sdk';
 import { useMemo } from 'react';
 
-import { NameRecordData, useNameRecord } from '@/hooks';
+import { NameRecordData, RegistrationNft, useNameRecord } from '@/hooks';
 
 export function isNameRecordExpired(nameRecord: NameRecord) {
     return nameRecord.expirationTimestampMs < Date.now();
@@ -91,4 +91,22 @@ export function useSubdomainPermissionsValidation(fullSubdomainName: string) {
         canModifyTimeExtension,
         canModifyChildCreation,
     };
+}
+/**
+ * Get the parent object id of a given subdomain
+ */
+export function getParentSubdomainObjectId(
+    ownedNames: RegistrationNft[],
+    ownedSubdomains: RegistrationNft[],
+    name: string,
+) {
+    const parts = name.split('.');
+    const parentName = parts.slice(1).join('.');
+    const parentParts = parentName?.split('.').length;
+
+    // 2 parts domains are names, the rest are subdomains
+    const parentNames = parentParts === 2 ? ownedNames : ownedSubdomains;
+
+    const parent = parentNames.find(({ name }) => name === parentName);
+    return parent?.id || null;
 }
