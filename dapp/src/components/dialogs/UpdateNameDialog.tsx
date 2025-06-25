@@ -31,7 +31,12 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
+import {
+    getNamePermissions,
+    getParentSubdomainObjectId,
+    getSubdomainObjectId,
+    isNameRecordExpired,
+} from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
 
@@ -107,50 +112,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }, [addressName]);
 
-    function getSubdomainObjectId(name: string) {
-        if (!isSubName(name)) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === name,
-            );
-            return parentDomain?.id || null;
-        }
-        const parentParts = name?.split('.').length;
-        if (parentParts === 2) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === name,
-            );
-            return parentDomain?.id || null;
-        } else if (parentParts && parentParts >= 3) {
-            const parentSubdomain = subdomainsOwned.data?.find(
-                (subdomain: { name: string | null }) => subdomain.name === name,
-            );
-            return parentSubdomain?.id || null;
-        }
-    }
-
-    function getParentSubdomainObjectId(name: string) {
-        if (!isSubName(name)) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === name,
-            );
-            return parentDomain?.id || null;
-        }
-        const parts = name.split('.');
-        const directParentName = parts.slice(1).join('.');
-        const parentParts = directParentName?.split('.').length;
-        if (parentParts === 2) {
-            const parentDomain = domainsOwned.data?.find(
-                (domain: { name: string | null }) => domain.name === directParentName,
-            );
-            return parentDomain?.id || null;
-        } else if (parentParts && parentParts >= 3) {
-            const parentSubdomain = subdomainsOwned.data?.find(
-                (subdomain: { name: string | null }) => subdomain.name === directParentName,
-            );
-            return parentSubdomain?.id || null;
-        }
-    }
-
     const isTargetCurrentAddress = editTargetAddress === account?.address;
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
     const isDefaultName = addressName === name;
@@ -165,7 +126,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
+        const parentObjectId = getParentSubdomainObjectId(
+            domainsOwned.data ?? [],
+            subdomainsOwned.data ?? [],
+            nameRecord.nameRecord.name,
+        );
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
@@ -193,7 +158,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
-        const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
+        const parentObjectId = getParentSubdomainObjectId(
+            domainsOwned.data ?? [],
+            subdomainsOwned.data ?? [],
+            nameRecord.nameRecord.name,
+        );
         updates.push({
             type: 'edit-setup',
             nft: parentObjectId ?? '',
@@ -203,7 +172,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         });
     }
     if (nameRecord && isSubdomainAvailable && newSubdomainName && fullSubdomainName) {
-        const parentObjectId = getSubdomainObjectId(nameRecord.nameRecord.name);
+        const parentObjectId = getSubdomainObjectId(
+            domainsOwned.data ?? [],
+            subdomainsOwned.data ?? [],
+            nameRecord.nameRecord.name,
+        );
         updates.push({
             type: 'new-subdomain',
             subdomainName: fullSubdomainName,
