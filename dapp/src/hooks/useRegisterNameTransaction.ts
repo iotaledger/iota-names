@@ -6,8 +6,10 @@ import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
+import { useIotaNamesClient } from '@/contexts';
 import { getGasSummary } from '@/lib/utils/getGasSummary';
-import { useIotaNamesClient } from '@/providers/contexts';
+
+import { queryKey } from './queryKey';
 
 export function useRegisterNameTransaction(
     address: string,
@@ -20,7 +22,7 @@ export function useRegisterNameTransaction(
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ['register-name-transaction', address, name, years, price],
+        queryKey: [...queryKey.registerName(name, address), years, price],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
@@ -30,8 +32,7 @@ export function useRegisterNameTransaction(
                 years,
                 coin,
             });
-            iotaNamesTx.transaction.transferObjects([nft], address);
-            iotaNamesTx.transaction.transferObjects([coin], address);
+            iotaNamesTx.transaction.transferObjects([nft, coin], address);
             iotaNamesTx.transaction.setSender(address);
             const transaction = await iotaNamesTx.transaction.build({
                 client,

@@ -5,8 +5,8 @@ services:
       prometheus:
         condition: service_started
     build:
-      context: ../..
-      dockerfile: indexer/docker/Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
       args:
         - GIT_REVISION
         - BUILD_DATE
@@ -29,6 +29,10 @@ services:
       - IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS=${IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS}
       - IOTA_NAMES_REGISTRY_ID=${IOTA_NAMES_REGISTRY_ID}
       - IOTA_NAMES_REVERSE_REGISTRY_ID=${IOTA_NAMES_REVERSE_REGISTRY_ID}
+      - IOTA_NAMES_AUCTION_PACKAGE_ADDRESS=${IOTA_NAMES_AUCTION_PACKAGE_ADDRESS}
+      - IOTA_NAMES_COUPONS_PACKAGE_ADDRESS=${IOTA_NAMES_COUPONS_PACKAGE_ADDRESS}
+      - IOTA_NAMES_SUBDOMAINS_PACKAGE_ADDRESS=${IOTA_NAMES_SUBDOMAINS_PACKAGE_ADDRESS}
+      - IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID=${IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command:

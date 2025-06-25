@@ -1,19 +1,29 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_names::{config::IotaNamesConfig, domain::Domain, registry::NameRecord};
-use iota_types::{base_types::IotaAddress, event::Event};
+use iota_names::{domain::Domain, registry::NameRecord};
+use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
 
+use crate::config::IotaNamesExtendedConfig;
+
 pub(crate) enum IotaNamesEvent {
-    // `iota-names`
-    IotaNamesRegistry(IotaNamesRegistryEvent),
-    IotaNamesReverseRegistry(IotaNamesReverseRegistryEvent),
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
     AuctionBid(AuctionBidEvent),
     AuctionExtended(AuctionExtendedEvent),
     AuctionFinalized(AuctionFinalizedEvent),
+    // `coupons`
+    CouponApplied(CouponAppliedEvent),
+    // `iota-names`
+    NameRecordAdded(NameRecordAddedEvent),
+    NameRecordRemoved(NameRecordRemovedEvent),
+    TargetAddressSet(TargetAddressSetEvent),
+    ReverseLookupSet(ReverseLookupSetEvent),
+    ReverseLookupUnset(ReverseLookupUnsetEvent),
+    UserDataSet(UserDataSetEvent),
+    UserDataUnset(UserDataUnsetEvent),
+    Transaction(TransactionEvent),
     // `subdomains`
     NodeSubdomainCreated(NodeSubdomainCreatedEvent),
     NodeSubdomainBurned(NodeSubdomainBurnedEvent),
@@ -24,18 +34,32 @@ pub(crate) enum IotaNamesEvent {
 impl IotaNamesEvent {
     pub(crate) fn try_from_event(
         event: &Event,
-        _config: &IotaNamesConfig,
+        config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        // TODO check package IDs
+        if !config.is_iota_names_package(event.package_id) {
+            return Ok(None);
+        }
+
         Ok(Some(match event.type_.name.as_str() {
-            "IotaNamesRegistryEvent" => Self::IotaNamesRegistry(bcs::from_bytes(&event.contents)?),
-            "IotaNamesReverseRegistryEvent" => {
-                Self::IotaNamesReverseRegistry(bcs::from_bytes(&event.contents)?)
-            }
+            // `auctions`
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
-            "BidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
+            "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
             "AuctionExtendedEvent" => Self::AuctionExtended(bcs::from_bytes(&event.contents)?),
             "AuctionFinalizedEvent" => Self::AuctionFinalized(bcs::from_bytes(&event.contents)?),
+            // `coupons`
+            "CouponAppliedEvent" => Self::CouponApplied(bcs::from_bytes(&event.contents)?),
+            // `iota-names`
+            "NameRecordAddedEvent" => Self::NameRecordAdded(bcs::from_bytes(&event.contents)?),
+            "NameRecordRemovedEvent" => Self::NameRecordRemoved(bcs::from_bytes(&event.contents)?),
+            "TargetAddressSetEvent" => Self::TargetAddressSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupSetEvent" => Self::ReverseLookupSet(bcs::from_bytes(&event.contents)?),
+            "ReverseLookupUnsetEvent" => {
+                Self::ReverseLookupUnset(bcs::from_bytes(&event.contents)?)
+            }
+            "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
+            "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
+            "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
+            // `subdomains`
             "NodeSubdomainCreatedEvent" => {
                 Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
             }
@@ -53,17 +77,7 @@ impl IotaNamesEvent {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesRegistryEvent {
-    pub domain: String,
-    pub name_record: NameRecord,
-}
-
-#[derive(Serialize, Deserialize)]
-pub(crate) struct IotaNamesReverseRegistryEvent {
-    pub default_address: IotaAddress,
-    pub domain: Domain,
-}
+// `auctions`
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionStartedEvent {
@@ -95,6 +109,79 @@ pub(crate) struct AuctionFinalizedEvent {
     pub winning_bid: u64,
     pub winner: IotaAddress,
 }
+
+// `coupons`
+
+#[derive(Serialize, Deserialize)]
+#[repr(u8)]
+pub enum CouponKind {
+    Percentage = 0,
+    Fixed = 1,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct CouponAppliedEvent {
+    pub kind: CouponKind,
+    pub discount: u64,
+}
+
+// `iota-names`
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct NameRecordAddedEvent {
+    pub domain: Domain,
+    pub name_record: NameRecord,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct NameRecordRemovedEvent {
+    pub domain: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TargetAddressSetEvent {
+    pub domain: Domain,
+    pub target_address: Option<IotaAddress>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupSetEvent {
+    pub default_address: IotaAddress,
+    pub default_name: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct ReverseLookupUnsetEvent {
+    pub default_address: IotaAddress,
+    pub default_name: Domain,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct UserDataSetEvent {
+    pub key: String,
+    pub value: String,
+    pub new: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct UserDataUnsetEvent {
+    pub key: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub(crate) struct TransactionEvent {
+    pub app: String,
+    pub domain: Domain,
+    pub years: u8,
+    pub request_data_version: u8,
+    pub base_amount: u64,
+    pub metadata: VecMap<String, String>,
+    pub is_renewal: bool,
+    pub currency: String,
+    pub currency_amount: u64,
+}
+
+// `subdomains`
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeSubdomainCreatedEvent {

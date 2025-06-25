@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: TS Lint
+  build_and_lint:
+    name: TS Build / Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -39,6 +39,10 @@ jobs:
         run: |
           pnpm install
 
+      - name: Run pnpm build
+        run: |
+          pnpm turbo build
+
       - name: Run pnpm lint
         run: |
           pnpm lint
@@ -46,6 +50,21 @@ jobs:
   sdk_test:
     name: SDK Tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespw
+          POSTGRES_DB: iota_indexer
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -71,19 +90,28 @@ jobs:
         run: |
           pnpm install
 
+      - name: Build SDK
+        run: |
+          pnpm sdk build
+
       - name: Prepare local network & run SDK tests
         env:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
-          iota start --with-faucet --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
-          cd sdk
-          VITE_IOTA_BIN="iota" pnpm test:e2e
-          sleep 5 # wait some time for the network
-          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000
+          iota start --with-faucet --committee-size 2 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
+          sleep 10
+
+          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
           iota client switch --env localnet
           iota client faucet
-          cd ../scripts
+          sleep 5
+
+          cd scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
           pnpm ts-node tests/register-name.ts
+          sleep 5
+
+          cd ../sdk
+          VITE_IOTA_BIN="iota" pnpm test:e2e

@@ -18,12 +18,28 @@ RUN mkdir -p ~/.cargo && \
   echo -e "[target.x86_64-unknown-linux-gnu]\nlinker = \"clang\"\nrustflags = [\"-C\", \"link-arg=-fuse-ld=lld\"]" > ~/.cargo/config.toml
 
 # Install additional dependencies
-RUN apt install -y libpq5 libpq-dev ca-certificates
+RUN apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev
 
-COPY indexer indexer
+WORKDIR /iota-names/indexer
 
-WORKDIR "/iota-names/indexer"
+# 1. Copy only Cargo.toml and Cargo.lock first (for dependency caching)
+COPY Cargo.toml Cargo.lock ./
 
+# 2. Create a dummy src/main.rs so cargo build can resolve dependencies, the actual source code would create another cache
+RUN mkdir -p src && echo "fn main() {}" > src/main.rs
+
+# 3. Build dependencies (this will be cached unless Cargo.toml/Cargo.lock changes)
+RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default} || true
+
+# 4. Remove the dummy main.rs
+RUN rm -rf src
+
+# 5. Copy the rest of the source code
+COPY ./ .
+
+ARG CACHEBUST=1
+RUN echo "Cache bust: $CACHEBUST" && touch src/main.rs
+# 6. Build the actual project
 RUN cargo build --profile ${PROFILE} --features ${CARGO_BUILD_FEATURES:=default}
 
 # Copy the built binary to the working directory depending on the output folder of the profile,
@@ -42,7 +58,7 @@ RUN if [ -d target/release ]; then \
 FROM debian:bookworm-slim AS runtime
 
 # Install runtime dependencies and tools
-RUN apt update && apt install -y libpq5 ca-certificates curl
+RUN apt update && apt install -y libpq5 ca-certificates curl libsqlite3-0
 
 COPY --from=builder /iota-names/indexer/iota-names-indexer /usr/local/bin
 

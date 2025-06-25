@@ -7,6 +7,7 @@ module iota_names_coupons::coupon_tests;
 
 use iota::clock::Clock;
 use iota::hash::blake2b256;
+use iota::hex;
 use iota::test_scenario::{Scenario, return_shared};
 use iota::test_utils::{Self, destroy};
 use iota_names::iota_names::IotaNames;
@@ -526,7 +527,7 @@ fun add_coupon_twice_failure() {
 fun remove_non_existing_coupon() {
     let mut ctx = tx_context::dummy();
     let mut data = coupons::new(&mut ctx);
-    data.remove_coupon(blake2b256(&b"TEST_SUCCESS_ADDITION"));
+    data.remove_coupon(hex::encode(blake2b256(&b"TEST_SUCCESS_ADDITION")).to_string());
     test_utils::destroy(data);
 }
 

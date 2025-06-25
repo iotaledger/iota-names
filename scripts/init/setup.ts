@@ -22,6 +22,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         adminAddress: getActiveAddress(),
         adminCap: packageInfo.IotaNames.adminCap,
         auctionPackageId: packageInfo.Auction.packageId,
+        auctionHouseObjectId: packageInfo.Auction.objectId,
         coins: {
             IOTA: {
                 type: iotaCoinType,
@@ -29,7 +30,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
             },
         },
         denyListPackageId: packageInfo.DenyList.packageId,
-        iotaNames: packageInfo.IotaNames.iotaNames,
+        iotaNamesObjectId: packageInfo.IotaNames.objectId,
         packageId: packageInfo.IotaNames.packageId,
         paymentsPackageId: packageInfo.Payments.packageId,
         publisherId: packageInfo.IotaNames.publisher,
@@ -38,6 +39,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         couponsPackageId: packageInfo.Coupons.packageId,
         subNamesPackageId: packageInfo.Subdomains.packageId,
         tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+        upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);
 
@@ -50,7 +52,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
     authorize({
         txb,
         adminCap: packageInfo.IotaNames.adminCap,
-        iotaNames: packageInfo.IotaNames.iotaNames,
+        iotaNamesObjectId: packageInfo.IotaNames.objectId,
         type: `${packageInfo.IotaNames.packageId}::admin::AdminAuth`,
         iotaNamesPackageId: packageInfo.IotaNames.packageId,
     });
@@ -60,7 +62,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
             authorize({
                 txb,
                 adminCap: packageInfo.IotaNames.adminCap,
-                iotaNames: packageInfo.IotaNames.iotaNames,
+                iotaNamesObjectId: packageInfo.IotaNames.objectId,
                 type: data.authorizationType(pkg.packageId),
                 iotaNamesPackageId: packageInfo.IotaNames.packageId,
             });
@@ -71,34 +73,34 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         txb,
         packageInfo.Subdomains.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.packageId,
     );
     packages.DenyList.setupFunction(
         txb,
         packageInfo.DenyList.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
     );
     packages.IotaNames.setupFunction(
         txb,
         packageInfo.IotaNames.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.publisher,
     );
     packages.Payments.setupFunction({
         txb,
         packageId: packageInfo.Payments.packageId,
         adminCap: packageInfo.IotaNames.adminCap,
-        iotaNames: packageInfo.IotaNames.iotaNames,
+        iotaNamesObjectId: packageInfo.IotaNames.objectId,
         iotaNamesPackageId: packageInfo.IotaNames.packageId,
     });
     packages.Coupons.setupFunction(
         txb,
         packageInfo.Coupons.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
     );
     let retries = 0;
 
@@ -132,11 +134,12 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 
             let { registryTableId, reverseRegistryTableId } = await queryRegistryTables(
                 client,
-                packageInfo.IotaNames.iotaNames,
+                packageInfo.IotaNames.objectId,
                 packageInfo.IotaNames.packageId,
             );
             constants.registryTableId = registryTableId;
             constants.reverseRegistryTableId = reverseRegistryTableId;
+            constants.auctionHouseObjectId = packageInfo.Auction.objectId;
 
             writePackageInfo(network, constants);
         } catch (e) {

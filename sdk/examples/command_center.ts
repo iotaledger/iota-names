@@ -26,15 +26,16 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
     );
     const address = keypair.toIotaAddress();
 
-    const { url, faucet } = getNetwork('devnet');
-    const graphql = 'https://graphql.devnet.iota.cafe'; // TODO: @iota/iota-sdk does not bundle any graphql endpoint atm
+    const { url, faucet, graphql } = getNetwork('devnet');
 
     const iotaClient = new IotaClient({
         url,
     });
 
+    const graphQlClient = new IotaGraphQLClient({ url: graphql });
+
     const iotaNamesClient = new IotaNamesClient({
-        client: iotaClient,
+        graphQlClient,
         network: 'devnet',
     });
 
@@ -196,7 +197,7 @@ async function startAuctionAndPlaceBid(
         target: `${config.auctionPackageId}::auction::start_auction_and_place_bid`,
         arguments: [
             transaction.object(auctionHouse),
-            transaction.object(config.iotaNames),
+            transaction.object(config.iotaNamesObjectId),
             transaction.pure.string(domain),
             coin,
             transaction.object('0x06'),
