@@ -35,7 +35,6 @@ import {
     getNamePermissions,
     getParentSubdomainObjectId,
     isNameRecordExpired,
-    useSubdomainPermissionsValidation,
 } from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
@@ -139,7 +138,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         const parentObjectId = getParentSubdomainObjectId(
             domainsOwned.data ?? [],
             subdomainsOwned.data ?? [],
-            name,);
+            name,
+        );
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
@@ -191,7 +191,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         });
     }
 
-   if (
+    if (
         editIsAllowSubnames != namePermissions?.allowChildCreation ||
         editIsAllowingRenew != namePermissions?.allowTimeExtension
     ) {
@@ -443,6 +443,32 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                             </Card>
                         )}
+                        {isNameSubName ? (
+                            <>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow renew name"
+                                        subtitle="Allow renew name."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowingRenew}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowRenewChange}
+                                    />
+                                </Card>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow subname"
+                                        subtitle="Allow creating subdomains."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowSubnames}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowSubnameChange}
+                                    />
+                                </Card>
+                            </>
+                        ) : null}
                         {renewDialogOpen && (
                             <Dialog open={open} onOpenChange={setOpen}>
                                 <DialogContent containerId="overlay-portal-container">
@@ -483,31 +509,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
-                        {isNameSubName ? (
-                            <>
-                                <Card type={CardType.Outlined}>
-                                    <CardBody
-                                        title="Set allow renew name"
-                                        subtitle="Allow renew name."
-                                    />
-                                    <Checkbox
-                                        isChecked={editIsAllowingRenew}
-                                        isDisabled={disableEdit}
-                                        onCheckedChange={handleAllowRenewChange}
-                                    />
-                                </Card>
-                                <Card type={CardType.Outlined}>
-                                    <CardBody
-                                        title="Set allow subname"
-                                        subtitle="Allow creating subdomains."
-                                    />
-                                    <Checkbox
-                                        isChecked={editIsAllowSubnames}
-                                        isDisabled={disableEdit}
-                                        onCheckedChange={handleAllowSubnameChange}
-                                    />
-                                </Card>
-                            </>
                         ) : null}
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}
