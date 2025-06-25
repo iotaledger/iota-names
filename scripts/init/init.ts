@@ -6,6 +6,7 @@ import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo, writePackageInfo } from '../package-info/constants';
+import { addBlockedNames, parseTextFile } from '../reserved-names/block-names';
 import { parseCsvFile, reserveDomains } from '../reserved-names/reserve-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
@@ -54,6 +55,28 @@ export const init = async (
                 tx,
                 names,
                 packageInfo.packageId,
+                packageInfo.adminCap,
+                packageInfo.iotaNamesObjectId,
+            );
+            const result = await signAndExecute(tx, network);
+            await client.waitForTransaction({ digest: result.digest });
+            console.log(`Transaction digest: ${result.digest}`);
+        }
+    }
+
+    let namesToBlockFile = './init/names-to-block.txt';
+    if (fs.existsSync(namesToBlockFile)) {
+        const namesToBlock = parseTextFile(namesToBlockFile);
+        const blockCount = namesToBlock.length;
+        if (blockCount === 0) {
+            console.log('No names to block');
+        } else {
+            console.log(`Blocking ${blockCount} names`);
+            const tx = new Transaction();
+            addBlockedNames(
+                tx,
+                namesToBlock,
+                packageInfo.denyListPackageId,
                 packageInfo.adminCap,
                 packageInfo.iotaNamesObjectId,
             );
