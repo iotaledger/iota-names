@@ -127,23 +127,17 @@ impl IotaNamesWorker {
                 self.metrics.total_auction_started.inc();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )?;
-                    upsert_domain_bids_entry(conn, &event.domain.to_string())
+                    let domain_name = &event.domain.to_string();
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), domain_name)?;
+                    upsert_domain_bids_entry(conn, domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )?;
-                    upsert_domain_bids_entry(conn, &event.domain.to_string())
+                    let domain_name = &event.domain.to_string();
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), domain_name)?;
+                    upsert_domain_bids_entry(conn, domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
