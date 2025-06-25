@@ -85,18 +85,3 @@ export function useSubdomainPermissionsValidation(fullSubdomainName: string) {
         canModifyChildCreation,
     };
 }
-/**
- * Finds all subdomains that belong to a specific parent domain (including all nested levels).
- *
- * Example: 'test.domain.iota' → finds ['app.test.domain.iota', 'blog.test.domain.iota', 'deep.app.test.domain.iota', etc.]
- *
- * @param parentDomain - The parent domain name (e.g., "test.domain.iota")
- * @param subdomainsOwned - Array of all owned subdomains
- * @returns Array of ALL subdomain objects that are descendants of the parent domain
- */
-export function findChildSubdomains(parentDomain: string, subdomainsOwned: any[]): any[] {
-    return subdomainsOwned.filter((subdomain) => {
-        const endsWithParent = subdomain.name.endsWith('.' + parentDomain);
-        return endsWithParent;
-    });
-}

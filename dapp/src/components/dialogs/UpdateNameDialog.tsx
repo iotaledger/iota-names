@@ -31,12 +31,7 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import {
-    findChildSubdomains,
-    getNamePermissions,
-    isNameRecordExpired,
-    useSubdomainPermissionsValidation,
-} from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
 
@@ -80,9 +75,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         ? newSubdomainName + '.' + nameRecord?.nameRecord.name
         : '';
     const { data: isSubdomainAvailable, error } = useSubnameRecord(fullSubdomainName);
-
-    const { canModifyTimeExtension, canModifyChildCreation } =
-        useSubdomainPermissionsValidation(name);
 
     // Sync permissions
     useEffect(() => {
@@ -193,26 +185,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
-        if (editIsAllowSubnames === false || editIsAllowingRenew === false) {
-            const childrens = findChildSubdomains(
-                nameRecord.nameRecord.name,
-                subdomainsOwned.data ?? [],
-            );
-            // console.log('Child subdomains found:', childrens);
-            childrens.forEach((child) => {
-                const parentObjectId = getParentSubdomainObjectId(child.name);
-                // console.log('name: ', child.name, ' parent object ID:', parentObjectId);
-                updates.push({
-                    type: 'edit-setup',
-                    nft: parentObjectId ?? '',
-                    name: child.name,
-                    allowChildCreation: false,
-                    allowTimeExtension: false,
-                });
-            });
-        }
         const parentObjectId = getParentSubdomainObjectId(nameRecord.nameRecord.name);
-        // console.log('name: ', nameRecord.nameRecord.name, 'parent object ID:', parentObjectId);
         updates.push({
             type: 'edit-setup',
             nft: parentObjectId ?? '',
@@ -415,7 +388,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     />
                                     <Checkbox
                                         isChecked={editIsAllowingRenew}
-                                        isDisabled={disableEdit || !canModifyTimeExtension}
+                                        isDisabled={disableEdit}
                                         onCheckedChange={handleAllowRenewChange}
                                     />
                                 </Card>
@@ -426,7 +399,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     />
                                     <Checkbox
                                         isChecked={editIsAllowSubnames}
-                                        isDisabled={disableEdit || !canModifyChildCreation}
+                                        isDisabled={disableEdit}
                                         onCheckedChange={handleAllowSubnameChange}
                                     />
                                 </Card>
