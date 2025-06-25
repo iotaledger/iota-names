@@ -25,19 +25,6 @@ export function getNamePermissions(nameRecord: NameRecord) {
     };
 }
 
-export function getSubdomainLevel(name: string): number {
-    const parts = name.split('.');
-    return Math.max(0, parts.length - 2);
-}
-
-export function getDirectParent(name: string): string | null {
-    const parts = name.split('.');
-    if (parts.length <= 2) {
-        return null;
-    }
-    return parts.slice(1).join('.');
-}
-
 /**
  * Get the parent object id of a given subdomain
  */
