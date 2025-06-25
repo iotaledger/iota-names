@@ -14,6 +14,7 @@ services:
     image: iota-names-indexer:dev
     ports:
       - "9189:9189/tcp" # Metrics
+      - 3030:3030 # Auction REST API
     tty: true
     deploy:
       restart_policy:

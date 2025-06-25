@@ -66,7 +66,8 @@ impl IotaNamesExtendedConfig {
         const AUCTION_PACKAGE_ADDRESS: &str =
             "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50";
         // TODO https://github.com/iotaledger/iota-names/issues/318
-        const COUPONS_PACKAGE_ADDRESS: &str = "0x";
+        const COUPONS_PACKAGE_ADDRESS: &str =
+            "0x0000000000000000000000000000000000000000000000000000000000000000";
         const SUBDOMAINS_PACKAGE_ADDRESS: &str =
             "0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925";
         const AUCTION_HOUSE_ID: &str =
