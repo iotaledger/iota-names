@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { isSubName, NameRecord } from '@iota/iota-names-sdk';
-import { useMemo } from 'react';
 
-import { NameRecordData, RegistrationNft, useNameRecord } from '@/hooks';
+import { RegistrationNft } from '@/hooks';
 
 export function isNameRecordExpired(nameRecord: NameRecord) {
     return nameRecord.expirationTimestampMs < Date.now();
@@ -37,53 +36,6 @@ export function getDirectParent(name: string): string | null {
         return null;
     }
     return parts.slice(1).join('.');
-}
-
-/**
- * Helper function to validate subdomain permissions based on hierarchical inheritance rules.
- *
- * - Root domains (domain.iota): Cannot configure permissions (always implicitly enabled)
- * - First-level subdomains (sub.domain.iota): Can configure permissions freely
- * - Deep subdomains (test.sub.domain.iota): Must respect parent's permission restrictions
- *
- * For deep subdomains, if a parent has a permission disabled (e.g., allowTimeExtension: false),
- * the child subdomain cannot enable that permission, ensuring hierarchical permission inheritance.
- *
- * @param fullSubdomainName - The complete subdomain name to validate (e.g., "test.sub.domain.iota")
- * @returns Parent permissions: canModifyTimeExtension and canModifyChildCreation
- */
-export function useSubdomainPermissionsValidation(fullSubdomainName: string) {
-    const subdomainLevel = getSubdomainLevel(fullSubdomainName);
-    const directParent = getDirectParent(fullSubdomainName);
-
-    const { data } =
-        subdomainLevel >= 2 ? useNameRecord(directParent!) : useNameRecord(fullSubdomainName);
-    const nameRecord = data as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
-
-    const parentPermissions = nameRecord?.nameRecord
-        ? getNamePermissions(nameRecord.nameRecord)
-        : undefined;
-
-    const canModifyTimeExtension = useMemo(() => {
-        if (subdomainLevel >= 2) {
-            if (!parentPermissions) return false;
-            return parentPermissions.allowTimeExtension;
-        }
-
-        return true;
-    }, [subdomainLevel, parentPermissions]);
-
-    const canModifyChildCreation = useMemo(() => {
-        if (subdomainLevel >= 2) {
-            if (!parentPermissions) return false;
-            return parentPermissions?.allowChildCreation;
-        }
-        return true;
-    }, [subdomainLevel, parentPermissions]);
-    return {
-        canModifyTimeExtension,
-        canModifyChildCreation,
-    };
 }
 
 /**
