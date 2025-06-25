@@ -218,7 +218,6 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            // `subdomains`
             IotaNamesEvent::UserDataUnset(event) => {
                 self.metrics
                     .user_data_distribution
@@ -233,6 +232,7 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
+            // `subdomains`
             IotaNamesEvent::NodeSubdomainCreated(_event) => {
                 self.metrics.total_node_subdomains.inc();
             }
