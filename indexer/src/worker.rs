@@ -64,7 +64,7 @@ pub(crate) async fn run_iota_names_reader(
 
     info!("Connecting to node at {node_url}");
     // Localnet does not support remote store, so we use the REST API
-    if node_url == "http://localhost:9000" || node_url == "http://host.docker.internal:9000" {
+    if node_url.contains("localhost") || node_url.contains("host.docker.internal") {
         executor
             .run(
                 // path to a local directory where checkpoints are stored.
