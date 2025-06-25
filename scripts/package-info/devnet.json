@@ -17,5 +17,6 @@
     "registryTableId": "0xef24c78e8c085e29760d37b287fc16647f0f578e8d22f18dd65f655285afad3e",
     "reverseRegistryTableId": "0x566dc13eafceaf8c3487ee2c41464553839ef4d50937c63741e359c98080c7b6",
     "subNamesPackageId": "0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925",
-    "tempSubdomainsProxyPackageId": "0x3f2927e8e78a094bb98271fd73e06a3aa056edfecbf32dddb8a65d30de9b8a3f"
+    "tempSubdomainsProxyPackageId": "0x3f2927e8e78a094bb98271fd73e06a3aa056edfecbf32dddb8a65d30de9b8a3f",
+    "upgradeCap": "0x2df3ddd284413138bf28a9cdc61baaebc6f9e6b47d8cb3b35309094b7de4d5a6"
 }
