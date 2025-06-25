@@ -66,4 +66,4 @@ diesel::table! {
 diesel::joinable!(bidder_domain -> domains (domain_id));
 diesel::joinable!(bidder_domain -> bidders (bidder_id));
 
-diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain, domain_bids);
+diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain);
