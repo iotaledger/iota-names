@@ -26,8 +26,8 @@ export function AvatarDisplay({ registration }: AvatarDisplayProps) {
 
     const mediaUrl =
         isLoadingAvatarObject || isLoadingRegistration || isErrorAvatarObject || isErrorRegistration
-            ? registration.image_url
-            : avatarObject?.display?.data?.image_url || registration.image_url;
+            ? registration.imageUrl
+            : avatarObject?.display?.data?.image_url || registration.imageUrl;
 
     return mediaUrl && avatarObject ? (
         <img

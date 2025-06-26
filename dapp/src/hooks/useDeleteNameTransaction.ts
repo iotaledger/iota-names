@@ -7,9 +7,9 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 import { queryKey } from './queryKey';
-import { RegistrationNft } from './useRegistrationNfts';
 
 interface UseDeleteNameTransactionOptions {
     nft: RegistrationNft;

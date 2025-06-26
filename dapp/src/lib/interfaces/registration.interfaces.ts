@@ -4,9 +4,11 @@
 export interface RegistrationNft {
     name: string;
     description?: string;
-    image_url?: string;
+    imageUrl?: string;
     link?: string;
-    project_url?: string;
-    objectId?: string;
-    expiration_timestamp_ms?: number;
+    projectUrl?: string;
+    expirationTimestampMs?: number;
+    isExpired?: boolean;
+    isSubdomain?: boolean;
+    id: string;
 }

@@ -17,7 +17,8 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 
-import { RegistrationNft, useDeleteNameTransaction } from '@/hooks';
+import { useDeleteNameTransaction } from '@/hooks';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;

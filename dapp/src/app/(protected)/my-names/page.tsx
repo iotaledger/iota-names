@@ -8,7 +8,8 @@ import { useMemo, useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
-import { RegistrationNft, useRegistrationNfts } from '@/hooks';
+import { useRegistrationNfts } from '@/hooks';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);

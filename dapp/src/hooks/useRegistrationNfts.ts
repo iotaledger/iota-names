@@ -8,20 +8,9 @@ import {
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/contexts';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
-
-export interface RegistrationNft {
-    name: string;
-    description?: string;
-    imageUrl?: string;
-    link?: string;
-    projectUrl?: string;
-    expirationTimestampMs?: number;
-    isExpired?: boolean;
-    isSubdomain?: boolean;
-    id: string;
-}
 
 type RegistrationNftType = 'domain' | 'subdomain';
 
