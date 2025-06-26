@@ -138,8 +138,11 @@ export default function MyNamesPage(): JSX.Element {
                                     }
                                 />
                                 <CardAction
-                                    type={CardActionType.SupportingText}
-                                    subtitle={subdomain.description ?? ''}
+                                    type={CardActionType.Button}
+                                    onClick={() => {
+                                        setUpdateNameDialog(subdomain.name);
+                                    }}
+                                    title="Manage"
                                 />
                             </Card>
                         );

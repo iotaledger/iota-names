@@ -27,7 +27,7 @@ export function useDeleteNameTransaction({ nft, address }: UseDeleteNameTransact
             const transaction = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, transaction);
 
-            iotaNamesTx.burnExpired({ nft: nft.objectId, isSubname: nft.isSubdomain });
+            iotaNamesTx.burnExpired({ nft: nft.id, isSubname: nft.isSubdomain });
             iotaNamesTx.transaction.setSender(address);
             await iotaNamesTx.transaction.build({ client: iotaClient });
 
