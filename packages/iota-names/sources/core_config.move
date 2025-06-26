@@ -78,6 +78,8 @@ public fun max_years(config: &CoreConfig): u8 {
     config.max_years
 }
 
+/// Validates name against core configuration rules (length, TLN, subname restrictions).
+/// Does NOT check deny list - use validation::assert_is_valid_for_sale for complete validation.
 public fun assert_is_valid_for_sale(config: &CoreConfig, name: &Name) {
     assert!(!name.is_subname(), ESubnameNotSupported);
     assert!(config.is_valid_tln(name.tln()), EInvalidTln);

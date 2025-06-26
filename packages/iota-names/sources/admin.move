@@ -13,6 +13,7 @@ use iota_names::name;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::string::String;
 
 #[error]
@@ -31,7 +32,7 @@ public fun reserve_name(
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     let name = name::new(name);
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     registry.add_record(name, no_years, clock, ctx)
 }
@@ -47,11 +48,11 @@ entry fun reserve_names(
 ) {
     let sender = sender(ctx);
     let config = *iota_names.get_config<CoreConfig>();
-    let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     assert!(!names.is_empty(), ENoNamesProvided);
     while (!names.is_empty()) {
         let name = name::new(names.pop_back());
-        config.assert_is_valid_for_sale(&name);
+        validation::assert_is_valid_for_sale(&config, iota_names, &name);
+        let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
         let nft = registry.add_record(name, no_years, clock, ctx);
         iota::transfer::public_transfer(nft, sender);
     };

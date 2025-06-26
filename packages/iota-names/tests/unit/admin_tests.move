@@ -20,6 +20,7 @@ use iota_names::name;
 use iota_names::registry;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::test_init_utils;
 use std::string::utf8;
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
@@ -28,6 +29,7 @@ fun try_unauthorized_fail() {
     let mut iota_names = iota_names::init_for_testing(&mut ctx);
     let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &cap, &mut ctx);
 
     let _nft = admin::reserve_name(
         &cap,
@@ -47,7 +49,7 @@ fun authorized() {
     let mut iota_names = iota_names::init_for_testing(&mut ctx);
     let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
-    registry::init_for_testing(&cap, &mut iota_names, &mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &cap, &mut ctx);
 
     iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
@@ -93,7 +95,7 @@ fun register_multiple() {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let clock = clock::create_for_testing(scenario.ctx());
         
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
 
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
@@ -151,7 +153,7 @@ fun test_admin_remove_existing_records() {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let clock = clock::create_for_testing(scenario.ctx());
         
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         // Register names
@@ -251,7 +253,7 @@ fun test_admin_remove_mixed_records() {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let clock = clock::create_for_testing(scenario.ctx());
         
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         admin::reserve_names(
@@ -337,7 +339,7 @@ fun test_reserve_names_empty_list_fails() {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let clock = clock::create_for_testing(scenario.ctx());
         
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         // Try to reserve an empty list of names - this should fail

@@ -2,12 +2,11 @@
 
 [move]
 version = 3
-manifest_digest = "46BE5B4D8FB1BBBDC797208D892E7328E20475AA67F59D0E520945B8FB324716"
-deps_digest = "060AD7E57DFB13104F21BE5F5C3759D03F0553FC3229247D9A7A6B45F50D03A3"
+manifest_digest = "BD65ECA23F2353F3E9AB83CC2D7C0DF3D2C21548C7F5AF4518CEDB5BD344618B"
+deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { id = "Iota", name = "Iota" },
   { id = "iota_names", name = "iota_names" },
-  { id = "iota_names_deny_list", name = "iota_names_deny_list" },
 ]
 
 [[move.package]]
@@ -30,17 +29,8 @@ dependencies = [
   { id = "Iota", name = "Iota" },
 ]
 
-[[move.package]]
-id = "iota_names_deny_list"
-source = { local = "../deny-list" }
-
-dependencies = [
-  { id = "Iota", name = "Iota" },
-  { id = "iota_names", name = "iota_names" },
-]
-
 [move.toolchain-version]
-compiler-version = "1.2.2-rc"
+compiler-version = "1.1.0"
 edition = "2024"
 flavor = "iota"
 

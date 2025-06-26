@@ -6,11 +6,11 @@
 #[allow(lint(abort_without_constant))]
 module iota_names_subnames::subname_tests;
 
-use iota_names_deny_list::deny_list::{Self, DenyListAuth};
 use iota::clock::{Self, Clock};
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iota_names::constants::{grace_period_ms, year_ms};
 use iota_names::controller::{Self, ControllerAuth};
+use iota_names::deny_list::{Self, DenyListAuth};
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
@@ -342,15 +342,58 @@ fun tries_to_created_nested_leaf_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ENotAllowedName)]
-fun tries_to_create_denied_leaf_subname() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EReservedName)]
+fun tries_to_create_reserved_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    deny_list::add_blocked_names(&mut iota_names, &admin_cap, vector[b"blocked.test.iota".to_string()]);
+    deny_list::add_reserved_labels(&mut iota_names, &admin_cap, vector[b"reserved".to_string()]);
+    ts::return_shared(iota_names);
+    ts::return_to_sender(scenario, admin_cap);
+
+    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    create_leaf_subdomain(&parent, utf8(b"reserved.test.iota"), TEST_ADDRESS, scenario);
+
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EReservedName)]
+fun tries_to_create_denied_node_subdomain() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+
+    ts::next_tx(scenario, USER_ADDRESS);
+    let mut iota_names = ts::take_shared<IotaNames>(scenario);
+    let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+    deny_list::add_reserved_labels(&mut iota_names, &admin_cap, vector[b"reserved".to_string()]);
+    ts::return_shared(iota_names);
+    ts::return_to_sender(scenario, admin_cap);
+
+    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let _child = create_node_subdomain(
+        &parent, 
+        utf8(b"reserved.test.iota"), 
+        1,
+        true,
+        true,
+        scenario
+    );
+
+    abort 1337
+}
+
+#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EBlockedName)]
+fun tries_to_create_blocked_leaf_subdomain() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+
+    ts::next_tx(scenario, USER_ADDRESS);
+    let mut iota_names = ts::take_shared<IotaNames>(scenario);
+    let admin_cap = ts::take_from_sender<AdminCap>(scenario);
+    deny_list::add_blocked_labels(&mut iota_names, &admin_cap, vector[b"blocked".to_string()]);
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 
@@ -360,15 +403,15 @@ fun tries_to_create_denied_leaf_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ENotAllowedName)]
-fun tries_to_create_denied_node_subname() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EBlockedName)]
+fun tries_to_create_blocked_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let admin_cap = ts::take_from_sender<AdminCap>(scenario);
-    deny_list::add_blocked_names(&mut iota_names, &admin_cap, vector[b"blocked.test.iota".to_string()]);
+    deny_list::add_blocked_labels(&mut iota_names, &admin_cap, vector[b"blocked".to_string()]);
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 

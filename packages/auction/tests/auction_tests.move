@@ -28,7 +28,7 @@ use iota_names::core_config;
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::IotaNamesRegistration;
-use iota_names::registry;
+use iota_names::test_init_utils;
 use std::string::{String, utf8};
 
 const IOTA_NAMES_ADDRESS: address = @0xA001;
@@ -57,7 +57,7 @@ public fun test_init(): Scenario {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut iota_names = scenario.take_shared<IotaNames>();
 
-        registry::init_for_testing(&admin_cap, &mut iota_names, ctx(scenario));
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, ctx(scenario));
 
         test_scenario::return_shared(iota_names);
         test_scenario::return_to_sender(scenario, admin_cap);

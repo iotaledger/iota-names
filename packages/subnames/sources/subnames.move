@@ -25,12 +25,12 @@
 ///
 module iota_names_subnames::subnames;
 
-use iota_names_deny_list::deny_list;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::event;
 use iota::vec_map::VecMap;
 use iota_names::constants::{subname_allow_extension_key, subname_allow_creation_key};
+use iota_names::deny_list;
 use iota_names::name::{Self, Name, is_subname};
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
@@ -55,8 +55,9 @@ const ESubnameReplaced: vector<u8> =
 const EParentChanged: vector<u8> =
     b"Parent for a given subname has changed, hence time extension cannot be done.";
 #[error]
-const ENotAllowedName: vector<u8> =
-    b"Checks whether a name is allowed or not (against blocked names list).";
+const EBlockedName: vector<u8> = b"Name is blocked.";
+#[error]
+const EReservedName: vector<u8> = b"Name is reserved.";
 
 /// Enabled metadata value.
 const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
@@ -73,13 +74,14 @@ public fun new_leaf(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     target: address,
     ctx: &mut TxContext,
 ) {
-    assert!(!deny_list::is_blocked_name(iota_names, subname_name), ENotAllowedName);
-
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
+    assert!(!deny_list::is_blocked_name(iota_names, &subname), EBlockedName);
+    assert!(!deny_list::is_reserved_name(iota_names, &subname), EReservedName);
+    
     // all validation logic for subname creation / management.
     internal_validate_nft_can_manage_subname(iota_names, parent, clock, subname, true);
 
@@ -98,9 +100,11 @@ public fun remove_leaf(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
 ) {
     let subname = name::new(subname_name);
+    assert!(!deny_list::is_blocked_name(iota_names, &subname), EBlockedName);
+    assert!(!deny_list::is_reserved_name(iota_names, &subname), EReservedName);
 
     // All validation logic for subname creation / management.
     // We pass `false` as last argument because even if we don't have create capabilities (anymore),

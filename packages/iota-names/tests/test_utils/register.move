@@ -13,6 +13,7 @@ use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::string::String;
 
 #[error]
@@ -44,7 +45,7 @@ public fun register<T>(
     // If no PricingConfig of type T, add an error code
 
     let name = name::new(name);
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
 
     assert!(0 < no_years && no_years <= 5, EInvalidYearsArgument);
 
