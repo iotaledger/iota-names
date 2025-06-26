@@ -69,6 +69,6 @@ public fun admin_remove_records(
     assert!(!domains.is_empty(), ENoDomainsProvided);
     while (!domains.is_empty()) {
         let domain = domain::new(domains.pop_back());
-        registry.admin_force_remove_record(domain);
+        registry.force_remove_record(domain);
     };
 }

@@ -239,10 +239,10 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     self.handle_invalidate_reverse_record(&domain, old_target_address, none());
 }
 
-/// Admin function to forcefully remove any record by domain.
+/// Forcefully remove any record by domain.
 /// This bypasses all expiration and authorization checks.
-/// Should only be called by admin functions in the main module.
-public(package) fun admin_force_remove_record(self: &mut Registry, domain: Domain) {
+/// Should only be called by admin functions.
+public(package) fun force_remove_record(self: &mut Registry, domain: Domain) {
     // Check if the record exists before trying to remove it
     if (!self.registry.contains(domain)) {
         return
