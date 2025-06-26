@@ -64,9 +64,9 @@ export default function MyNamesPage(): JSX.Element {
                                     title={nft.name}
                                     size={TitleSize.Small}
                                     subtitle={`Expiration Date: ${
-                                        nft?.expiration_timestamp_ms
+                                        nft?.expirationTimestampMs
                                             ? new Date(
-                                                  nft.expiration_timestamp_ms,
+                                                  nft.expirationTimestampMs,
                                               ).toLocaleDateString('en-US', {
                                                   year: 'numeric',
                                                   month: 'short',
@@ -112,9 +112,9 @@ export default function MyNamesPage(): JSX.Element {
                                         title={subdomain.name}
                                         size={TitleSize.Small}
                                         subtitle={`Expiration Date: ${
-                                            subdomain?.expiration_timestamp_ms
+                                            subdomain?.expirationTimestampMs
                                                 ? new Date(
-                                                      subdomain.expiration_timestamp_ms,
+                                                      subdomain.expirationTimestampMs,
                                                   ).toLocaleDateString('en-US', {
                                                       year: 'numeric',
                                                       month: 'short',

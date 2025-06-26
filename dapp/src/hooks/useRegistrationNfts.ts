@@ -14,10 +14,10 @@ import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 export interface RegistrationNft {
     name: string;
     description?: string;
-    image_url?: string;
+    imageUrl?: string;
     link?: string;
-    project_url?: string;
-    expiration_timestamp_ms?: number;
+    projectUrl?: string;
+    expirationTimestampMs?: number;
     isExpired?: boolean;
     isSubdomain?: boolean;
     id: string;
@@ -56,13 +56,13 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 return {
                     name: data?.name ?? '',
                     description: data?.description,
-                    image_url: data?.image_url,
+                    imageUrl: data?.image_url,
                     link: data?.link,
-                    project_url: data?.project_url,
+                    projectUrl: data?.project_url,
                     isExpired:
                         !!fields?.expiration_timestamp_ms &&
                         Number(fields?.expiration_timestamp_ms) < Date.now(),
-                    expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
+                    expirationTimestampMs: Number(fields?.expiration_timestamp_ms ?? ''),
                     id: nameRecord.objectId,
                     isSubdomain: type === 'subdomain',
                 } satisfies RegistrationNft;
