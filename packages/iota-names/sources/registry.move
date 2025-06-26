@@ -239,6 +239,26 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     self.handle_invalidate_reverse_record(&domain, old_target_address, none());
 }
 
+/// Forcefully remove any record by domain.
+/// This bypasses all expiration and authorization checks.
+/// Should only be called by admin functions.
+public(package) fun force_remove_record(self: &mut Registry, domain: Domain) {
+    // Check if the record exists before trying to remove it
+    if (!self.registry.contains(domain)) {
+        return
+    };
+
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
+    
+    let record = self.registry.remove(domain);
+    let old_target_address = record.target_address();
+
+    // Invalidate any reverse lookup entries
+    self.handle_invalidate_reverse_record(&domain, old_target_address, none());
+}
+
 public fun set_target_address(self: &mut Registry, domain: Domain, new_target: Option<address>) {
     let record = &mut self.registry[domain];
     let old_target = record.target_address();
