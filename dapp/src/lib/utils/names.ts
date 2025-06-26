@@ -52,14 +52,12 @@ export function getSubdomainObjectId(
     name: string,
 ) {
     if (!isSubName(name)) {
-        const parentDomain = ownedNames.find(
-            (domain: { name: string | null }) => domain.name === name,
-        );
-        return parentDomain?.id || null;
+        const domain = ownedNames.find((domain: { name: string | null }) => domain.name === name);
+        return domain?.id || null;
     } else {
-        const parentSubdomain = ownedSubdomains.find(
+        const subdomain = ownedSubdomains.find(
             (subdomain: { name: string | null }) => subdomain.name === name,
         );
-        return parentSubdomain?.id || null;
+        return subdomain?.id || null;
     }
 }

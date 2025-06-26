@@ -65,8 +65,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
 
-    const domainsOwned = useRegistrationNfts('domain');
-    const subdomainsOwned = useRegistrationNfts('subdomain');
+    const domainsOwned = useRegistrationNfts('domain').data || [];
+    const subdomainsOwned = useRegistrationNfts('subdomain').data || [];
 
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     // Editable values
@@ -126,16 +126,24 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        const parentObjectId = getParentSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
-            nameRecord.nameRecord.name,
-        );
+        let nftId = '';
+        if (isNameSubName) {
+            nftId =
+                getParentSubdomainObjectId(
+                    domainsOwned,
+                    subdomainsOwned,
+                    nameRecord.nameRecord.name,
+                ) || '';
+        } else {
+            nftId =
+                getSubdomainObjectId(domainsOwned, subdomainsOwned, nameRecord.nameRecord.name) ||
+                '';
+        }
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
             isSubname: false,
-            nftId: parentObjectId || '',
+            nftId: nftId,
         });
     }
 
@@ -159,28 +167,31 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         const parentObjectId = getParentSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
+            domainsOwned,
+            subdomainsOwned,
             nameRecord.nameRecord.name,
         );
         updates.push({
             type: 'edit-setup',
-            nft: parentObjectId ?? '',
+            parentNftId: parentObjectId ?? '',
             name: nameRecord.nameRecord.name,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
         });
     }
     if (nameRecord && isSubdomainAvailable && newSubdomainName && fullSubdomainName) {
-        const parentObjectId = getSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
-            nameRecord.nameRecord.name,
-        );
+        let nftId = '';
+        if (isNameSubName) {
+            nftId =
+                getSubdomainObjectId(domainsOwned, subdomainsOwned, nameRecord.nameRecord.name) ||
+                '';
+        } else {
+            nftId = nameRecord.nameRecord.nftId;
+        }
         updates.push({
             type: 'new-subdomain',
             subdomainName: fullSubdomainName,
-            parentNftId: parentObjectId ?? '',
+            nftId: nftId ?? '',
             expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
             allowChildCreation: editIsAllowSubnames,
             allowTimeExtension: editIsAllowingRenew,
