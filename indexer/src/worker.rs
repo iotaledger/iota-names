@@ -138,19 +138,19 @@ impl IotaNamesWorker {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                let domain_name = event.domain.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    let domain_name = &event.domain.to_string();
-                    add_bidder_domain_entry(conn, &event.bidder.to_string(), domain_name)?;
-                    upsert_domain_bids_entry(conn, domain_name)
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
+                    upsert_domain_bids_entry(conn, &domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
+                let domain_name = event.domain.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    let domain_name = &event.domain.to_string();
-                    add_bidder_domain_entry(conn, &event.bidder.to_string(), domain_name)?;
-                    upsert_domain_bids_entry(conn, domain_name)
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
+                    upsert_domain_bids_entry(conn, &domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
@@ -160,9 +160,10 @@ impl IotaNamesWorker {
                 self.metrics
                     .auction_durations
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
+                let domain_name = event.domain.to_string();
                 let mut conn = self.pool.get_connection()?;
                 let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    remove_domain_bids_entry(conn, &event.domain.to_string())
+                    remove_domain_bids_entry(conn, &domain_name)
                 })?;
                 self.metrics
                     .auction_bid_count_distribution
