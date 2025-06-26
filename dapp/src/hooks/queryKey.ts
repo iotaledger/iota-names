@@ -27,4 +27,12 @@ export const queryKey = {
 
     // Auctions indexer
     userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
+
+    // Auction claim
+    claimAuction: (domain: string, address?: string) => [
+        queryKey.all,
+        'claim-auction',
+        domain,
+        address,
+    ],
 };

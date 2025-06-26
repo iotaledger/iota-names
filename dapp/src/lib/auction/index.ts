@@ -4,3 +4,5 @@
 export * from './transaction';
 export * from './bcs';
 export * from './utils';
+export * from './metadata';
+export * from './types';

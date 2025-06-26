@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { bcs } from '@iota/iota-sdk/bcs';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { blake2b } from '@noble/hashes/blake2';
 import { bytesToHex } from '@noble/hashes/utils';
 
 import { DomainBcs } from './bcs';
+import { AuctionMetadata } from './types';
 
 /**
  * Derives an auction dynamic field object ID.
@@ -51,4 +53,98 @@ export function deriveAuctionDynamicFieldId(
 export function createDomainFromName(domainName: string): { labels: string[] } {
     const labels = domainName.split('.');
     return { labels: labels.reverse() };
+}
+
+export type AuctionStatus = 'active' | 'ended' | 'not_found';
+
+export type UserAuctionStatus =
+    | 'top_bidder'
+    | 'outbid'
+    | 'winner'
+    | 'lost'
+    | 'claimable'
+    | 'unknown';
+
+export function isAuctionActive(auction: AuctionMetadata | null): boolean {
+    if (!auction) return false;
+
+    const now = Date.now();
+    return now < auction.endTimestampMs;
+}
+
+export function isAuctionEnded(auction: AuctionMetadata | null): boolean {
+    if (!auction) return false;
+
+    const now = Date.now();
+    return now >= auction.endTimestampMs;
+}
+
+export function getAuctionStatus(auction: AuctionMetadata | null): AuctionStatus {
+    if (!auction) return 'not_found';
+
+    if (isAuctionActive(auction)) return 'active';
+    return 'ended';
+}
+
+export function isUserWinner(auction: AuctionMetadata | null, userAddress: string): boolean {
+    if (!auction || !userAddress) return false;
+
+    return auction.winner === userAddress;
+}
+
+export function getUserAuctionStatus(
+    auction: AuctionMetadata | null,
+    userAddress: string,
+): UserAuctionStatus {
+    if (!auction || !userAddress) return 'unknown';
+
+    const isWinner = isUserWinner(auction, userAddress);
+    const auctionStatus = getAuctionStatus(auction);
+
+    if (auctionStatus === 'active') {
+        return isWinner ? 'top_bidder' : 'outbid';
+    } else if (auctionStatus === 'ended') {
+        if (isWinner) {
+            // TODO: Do we need to check if it was already claimed ?
+            return 'claimable';
+        } else {
+            return 'lost';
+        }
+    }
+
+    return 'unknown';
+}
+
+export function getCurrentBidAmount(auction: AuctionMetadata | null): bigint {
+    if (!auction) return BigInt(0);
+
+    return auction.currentBidNanos;
+}
+
+export function getTimeRemaining(auction: AuctionMetadata | null): number {
+    if (!auction) return 0;
+
+    const now = Date.now();
+    return Math.max(0, auction.endTimestampMs - now);
+}
+
+export function formatTimeRemaining(milliseconds: number): string {
+    if (milliseconds <= 0) return 'Ended';
+
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) return `${days}d ${hours % 24}h`;
+    if (hours > 0) return `${hours}h ${minutes % 60}m`;
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    return `${seconds}s`;
+}
+
+export function getNextBidAmount(auction: AuctionMetadata | null): bigint {
+    const currentBid = getCurrentBidAmount(auction);
+    const oneIotaInNanos = BigInt(1) * NANOS_PER_IOTA;
+
+    return currentBid + oneIotaInNanos;
 }
