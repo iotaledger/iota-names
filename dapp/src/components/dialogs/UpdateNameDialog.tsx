@@ -5,7 +5,6 @@
 
 import {
     Button,
-    ButtonType,
     Card,
     CardAction,
     CardActionType,
@@ -26,7 +25,7 @@ import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
-import { useRegistrationNfts, useSubnameRecord } from '@/hooks';
+import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
@@ -39,6 +38,7 @@ import {
 } from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
+import { CreateSubnameDialog } from './CreateSubnameDialog';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -76,19 +76,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
     const [subdomainDialogOpen, setSubdomainDialogOpen] = useState(false);
-    const [newSubdomainName, setNewSubdomainName] = useState('');
-    const fullSubdomainName = newSubdomainName.trim()
-        ? newSubdomainName + '.' + nameRecord?.nameRecord.name
-        : '';
-    const { data: isSubdomainAvailable, error } = useSubnameRecord(fullSubdomainName);
-
-    // Sync permissions
-    useEffect(() => {
-        if (namePermissions) {
-            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
-            setEditIsAllowSubnames(namePermissions.allowChildCreation);
-        }
-    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
     // Sync permissions
     useEffect(() => {
@@ -169,19 +156,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             allowTimeExtension: editIsAllowingRenew,
         });
     }
-    if (nameRecord && isSubdomainAvailable && newSubdomainName && fullSubdomainName) {
-        const nftId = isNameSubName
-            ? (getSubdomainObjectId(subdomainsOwned, nameRecord.nameRecord.name) ?? '')
-            : nameRecord.nameRecord.nftId;
-        updates.push({
-            type: 'new-subdomain',
-            subdomainName: fullSubdomainName,
-            nftId: nftId ?? '',
-            expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
-            allowChildCreation: editIsAllowSubnames,
-            allowTimeExtension: editIsAllowingRenew,
-        });
-    }
 
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
         updates.push({
@@ -258,29 +232,13 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             setEditTargetAddress(account?.address);
         }
     }
-    const handleCancelAddSubname = () => {
-        setNewSubdomainName('');
-        setSubdomainDialogOpen(false);
-    };
-
-    const handleConfirmAddSubname = async () => {
-        if (!newSubdomainName.trim()) {
-            console.error('Subdomain name required');
-            return;
-        }
-        if (!isSubdomainAvailable || error) {
-            console.error('subdomain name is not available');
-            return;
-        }
-        setSubdomainDialogOpen(false);
-    };
 
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
-
+    const disableAddSubname = isExpired;
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>
@@ -313,6 +271,15 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                             )}
                         </Card>
+                        {isWrongCombination ? (
+                            <Card>
+                                <p className="text-yellow-300">
+                                    {' '}
+                                    Use your account as target address to be able to set this name
+                                    as default.
+                                </p>
+                            </Card>
+                        ) : null}
                         <Card type={CardType.Outlined}>
                             <CardBody
                                 title="Set as default name"
@@ -333,16 +300,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onClick={() => setIsAvatarSelectorOpen(true)}
                             />
                         </Card>
-                        {isWrongCombination ? (
-                            <Card>
-                                <p className="text-yellow-300">
-                                    {' '}
-                                    Use your account as target address to be able to set this name
-                                    as default.
-                                </p>
-                            </Card>
-                        ) : null}
-                        {(!isNameSubName || editIsAllowSubnames) && (
+                        {editIsAllowSubnames && (
                             <Card type={CardType.Outlined}>
                                 <CardBody
                                     title="Add new subname"
@@ -351,10 +309,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 <Button
                                     text="Add subname"
                                     onClick={() => setSubdomainDialogOpen(true)}
-                                    disabled={
-                                        (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
-                                            Date.now() && fullSubdomainName !== ''
-                                    }
+                                    disabled={disableAddSubname}
                                 />
                             </Card>
                         )}
@@ -385,74 +340,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             </>
                         ) : null}
                         {subdomainDialogOpen && (
-                            <Dialog open={open} onOpenChange={setOpen}>
-                                <DialogContent containerId="overlay-portal-container">
-                                    <Header title="Add subname" titleCentered />
-                                    <DialogBody>
-                                        <div className="flex flex-col items-center gap-y-md">
-                                            <h3 className="text-lg font-semibold mb-4">
-                                                Add subdomain to {nameRecord?.nameRecord?.name}
-                                            </h3>
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-medium mb-2">
-                                                    Subdomain name:
-                                                </label>
-                                                <Input
-                                                    type={InputType.Text}
-                                                    value={newSubdomainName}
-                                                    onChange={(e) =>
-                                                        setNewSubdomainName(e.target.value)
-                                                    }
-                                                    placeholder="Input subdomain name"
-                                                />
-                                                <Card type={CardType.Outlined}>
-                                                    <CardBody
-                                                        title="Set allow renew name"
-                                                        subtitle="Allow renew name."
-                                                    />
-                                                    <Checkbox
-                                                        isChecked={editIsAllowingRenew}
-                                                        isDisabled={disableEdit}
-                                                        onCheckedChange={handleAllowRenewChange}
-                                                    />
-                                                </Card>
-                                                <Card type={CardType.Outlined}>
-                                                    <CardBody
-                                                        title="Set allow subname"
-                                                        subtitle="Allow creating subdomains."
-                                                    />
-                                                    <Checkbox
-                                                        isChecked={editIsAllowSubnames}
-                                                        isDisabled={disableEdit}
-                                                        onCheckedChange={handleAllowSubnameChange}
-                                                    />
-                                                </Card>
-                                                {newSubdomainName && (
-                                                    <p className="text-sm text-gray-600 mt-1">
-                                                        Preview: {fullSubdomainName}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <div className="flex gap-2 justify-end">
-                                                <Button
-                                                    type={ButtonType.Secondary}
-                                                    text="Cancel"
-                                                    onClick={handleCancelAddSubname}
-                                                />
-                                                <Button
-                                                    type={ButtonType.Primary}
-                                                    text="Confirm"
-                                                    onClick={handleConfirmAddSubname}
-                                                    disabled={
-                                                        !newSubdomainName.trim() ||
-                                                        newSubdomainName.length < 3
-                                                    } // constant MIN_LABEL_SIZE (?)
-                                                />
-                                            </div>
-                                        </div>
-                                    </DialogBody>
-                                </DialogContent>
-                            </Dialog>
+                            <CreateSubnameDialog
+                                parent={nameRecord?.nameRecord?.name || ''}
+                                open={subdomainDialogOpen}
+                                setOpen={setSubdomainDialogOpen}
+                            />
                         )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>

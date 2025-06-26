@@ -3,4 +3,3 @@
 
 export * from './IotaNamesClientContext';
 export * from './ThemeContext';
-export * from './IotaGraphQLClientContext';
