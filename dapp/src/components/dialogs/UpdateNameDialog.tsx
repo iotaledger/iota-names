@@ -129,20 +129,15 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         let nftId = '';
         if (isNameSubName) {
             nftId =
-                getParentSubdomainObjectId(
-                    domainsOwned,
-                    subdomainsOwned,
-                    nameRecord.nameRecord.name,
-                ) || '';
-        } else {
-            nftId =
                 getSubdomainObjectId(domainsOwned, subdomainsOwned, nameRecord.nameRecord.name) ||
                 '';
+        } else {
+            nftId = nameRecord.nameRecord.nftId;
         }
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
-            isSubname: false,
+            isSubname: !!isNameSubName,
             nftId: nftId,
         });
     }
