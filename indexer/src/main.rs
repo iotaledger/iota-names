@@ -51,6 +51,9 @@ enum Command {
         /// The port to run the API server on.
         #[arg(long, default_value_t = 3030)]
         api_port: u16,
+        /// The URL of Prometheus to restore metrics from on startup.
+        #[arg(long, default_value = "http://localhost:9090")]
+        prometheus_url: String,
     },
 }
 
@@ -62,11 +65,20 @@ impl Command {
                 node_url,
                 num_workers,
                 api_port,
+                prometheus_url,
             } => {
                 info!("Starting IOTA Names Indexer");
 
                 let prometheus = PrometheusServer::new();
                 let registry = prometheus.registry();
+                let metrics = Arc::new(IotaNamesMetrics::new(&registry));
+
+                // Try to restore metrics from Prometheus
+                if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
+                    info!("Could not restore metrics from Prometheus ({e}), starting fresh");
+                } else {
+                    info!("Successfully restored metrics from Prometheus");
+                }
 
                 let cancel_token = CancellationToken::new();
 
@@ -92,7 +104,7 @@ impl Command {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
                         iota_names_config,
-                        Arc::new(IotaNamesMetrics::new(&registry)),
+                        metrics,
                         handle.clone(),
                     )?;
 

@@ -46,7 +46,7 @@ pub(crate) async fn run_iota_names_reader(
     registry: &Registry,
     concurrency: usize,
 ) -> anyhow::Result<()> {
-    let progress_store = FileProgressStore::new("./progress_store").await?;
+    let progress_store = FileProgressStore::new("/data/progress_store").await?;
 
     let mut executor = IndexerExecutor::new(
         progress_store,
@@ -68,7 +68,7 @@ pub(crate) async fn run_iota_names_reader(
         executor
             .run(
                 // path to a local directory where checkpoints are stored.
-                PathBuf::from("./chk"),
+                PathBuf::from("./data/chk"),
                 Some(format!("{node_url}/api/v1")),
                 // optional remote store access options.
                 vec![],
@@ -81,6 +81,7 @@ pub(crate) async fn run_iota_names_reader(
                 historical_url: node_url.to_string(),
                 live_url: Some(format!("{node_url}/ingestion/live")),
             }),
+            ingestion_path: Some(PathBuf::from("./data/chk")),
             ..Default::default()
         };
         executor.run_with_config(config).await?;

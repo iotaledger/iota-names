@@ -23,6 +23,8 @@ services:
         max_attempts: 3
     networks:
       - indexer-metrics-net
+    volumes:
+      - indexer_progress:/data
     environment:
       - RUST_LOG=info,iota_names_indexer=debug,iota_data_ingestion_core=off
       - IOTA_NAMES_PACKAGE_ADDRESS=${IOTA_NAMES_PACKAGE_ADDRESS}
@@ -39,6 +41,7 @@ services:
     command:
       - "start"
       - "--node-url=http://host.docker.internal:9000"
+      - "--prometheus-url=http://prometheus:9090"
 
   prometheus:
     image: prom/prometheus:latest
@@ -72,6 +75,7 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+  indexer_progress:
 
 networks:
   indexer-metrics-net:
