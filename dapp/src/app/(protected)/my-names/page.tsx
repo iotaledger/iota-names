@@ -3,18 +3,7 @@
 
 'use client';
 
-import { Delete } from '@iota/apps-ui-icons';
-import {
-    Button,
-    ButtonType,
-    Card,
-    CardAction,
-    CardActionType,
-    CardBody,
-    CardType,
-    Title,
-    TitleSize,
-} from '@iota/apps-ui-kit';
+import { Button, ButtonType, Card, CardType, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
