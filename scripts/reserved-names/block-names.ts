@@ -4,7 +4,9 @@
 import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-// Parses a text file with comma-separated names (labels without ".iota")
+const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
+
+// Parses a text file with comma-separated labels
 export const parseTextFile = (filePath: string): string[] => {
     const fileContent = fs.readFileSync(filePath, 'utf8').trim();
 
@@ -14,8 +16,16 @@ export const parseTextFile = (filePath: string): string[] => {
 
     return fileContent
         .split(',')
-        .map((name) => name.trim())
-        .filter((name) => name.length > 0);
+        .map((label) => label.trim())
+        .filter((label) => {
+            if (label.length === 0) {
+                return false;
+            }
+            if (!LABEL_REGEX.test(label)) {
+                throw new Error(`Invalid label provided: "${label}"`);
+            }
+            return true;
+        });
 };
 
 export const addBlockedNames = (
