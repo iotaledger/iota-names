@@ -33,7 +33,7 @@ import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import {
     getNamePermissions,
-    getParentSubdomainObjectId,
+    getParentObjectId,
     getSubdomainObjectId,
     isNameRecordExpired,
 } from '@/lib/utils/names';
@@ -126,14 +126,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        let nftId = '';
-        if (isNameSubName) {
-            nftId =
-                getSubdomainObjectId(domainsOwned, subdomainsOwned, nameRecord.nameRecord.name) ||
-                '';
-        } else {
-            nftId = nameRecord.nameRecord.nftId;
-        }
+        const nftId = isNameSubName
+            ? (getSubdomainObjectId(subdomainsOwned, nameRecord.nameRecord.name) ?? '')
+            : nameRecord.nameRecord.nftId;
         updates.push({
             type: 'set-target-address',
             address: editTargetAddress,
@@ -161,7 +156,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
-        const parentObjectId = getParentSubdomainObjectId(
+        const parentObjectId = getParentObjectId(
             domainsOwned,
             subdomainsOwned,
             nameRecord.nameRecord.name,
@@ -175,14 +170,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         });
     }
     if (nameRecord && isSubdomainAvailable && newSubdomainName && fullSubdomainName) {
-        let nftId = '';
-        if (isNameSubName) {
-            nftId =
-                getSubdomainObjectId(domainsOwned, subdomainsOwned, nameRecord.nameRecord.name) ||
-                '';
-        } else {
-            nftId = nameRecord.nameRecord.nftId;
-        }
+        const nftId = isNameSubName
+            ? (getSubdomainObjectId(subdomainsOwned, nameRecord.nameRecord.name) ?? '')
+            : nameRecord.nameRecord.nftId;
         updates.push({
             type: 'new-subdomain',
             subdomainName: fullSubdomainName,

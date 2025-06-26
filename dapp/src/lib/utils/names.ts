@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isSubName, NameRecord } from '@iota/iota-names-sdk';
+import { NameRecord } from '@iota/iota-names-sdk';
 
 import { RegistrationNft } from '@/hooks';
 
@@ -28,7 +28,7 @@ export function getNamePermissions(nameRecord: NameRecord) {
 /**
  * Get the parent object id of a given subdomain
  */
-export function getParentSubdomainObjectId(
+export function getParentObjectId(
     ownedNames: RegistrationNft[],
     ownedSubdomains: RegistrationNft[],
     name: string,
@@ -46,18 +46,9 @@ export function getParentSubdomainObjectId(
 /**
  * Get object id of a given subdomain
  */
-export function getSubdomainObjectId(
-    ownedNames: RegistrationNft[],
-    ownedSubdomains: RegistrationNft[],
-    name: string,
-) {
-    if (!isSubName(name)) {
-        const domain = ownedNames.find((domain: { name: string | null }) => domain.name === name);
-        return domain?.id || null;
-    } else {
-        const subdomain = ownedSubdomains.find(
-            (subdomain: { name: string | null }) => subdomain.name === name,
-        );
-        return subdomain?.id || null;
-    }
+export function getSubdomainObjectId(ownedSubdomains: RegistrationNft[], name: string) {
+    const subdomain = ownedSubdomains.find(
+        (subdomain: { name: string | null }) => subdomain.name === name,
+    );
+    return subdomain?.id || null;
 }

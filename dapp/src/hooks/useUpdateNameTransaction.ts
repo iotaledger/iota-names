@@ -106,7 +106,6 @@ export function useUpdateNameTransaction({
                             allowTimeExtension: update.allowTimeExtension,
                         });
                         iotaNamesTx.transaction.transferObjects([subnameNft], address);
-
                         break;
                 }
             }
