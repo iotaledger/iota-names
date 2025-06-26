@@ -29,5 +29,17 @@ export function AvatarDisplay({ registration }: AvatarDisplayProps) {
             ? registration.image_url
             : avatarObject?.display?.data?.image_url || registration.image_url;
 
-    return <img src={mediaUrl} alt={registration.name} className="w-full h-full object-cover" />;
+    return mediaUrl && avatarObject ? (
+        <img
+            src={mediaUrl}
+            alt={registration.name}
+            className="w-full h-full object-cover rounded-lg"
+        />
+    ) : (
+        <div className="w-full h-full bg-neutral-30/20 rounded-lg flex items-end justify-end">
+            <small className="text-neutral-50 m-xs">
+                {registration.name} - No avatar available
+            </small>
+        </div>
+    );
 }

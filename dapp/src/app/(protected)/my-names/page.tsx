@@ -115,35 +115,40 @@ export default function MyNamesPage(): JSX.Element {
                             subdomain.isExpired && !namesWithChildren.has(subdomain.name);
                         return (
                             <Card key={subdomain.name} type={CardType.Filled}>
-                                <CardBody
-                                    title={subdomain.name}
-                                    subtitle={`Expiration Date: ${
-                                        subdomain?.expiration_timestamp_ms
-                                            ? new Date(
-                                                  subdomain.expiration_timestamp_ms,
-                                              ).toLocaleDateString('en-US', {
-                                                  year: 'numeric',
-                                                  month: 'short',
-                                                  day: 'numeric',
-                                              })
-                                            : '--'
-                                    }`}
-                                    clickableAction={
-                                        isSubdomainRemovable ? (
-                                            <Delete
-                                                className="text-error-30 dark:text-error-70 cursor-pointer"
+                                <div className="flex flex-col  gap-y-sm w-full">
+                                    <div className="w-full h-40 object-cover">
+                                        <AvatarDisplay registration={subdomain} />
+                                    </div>
+                                    <Title
+                                        title={subdomain.name}
+                                        size={TitleSize.Small}
+                                        subtitle={`Expiration Date: ${
+                                            subdomain?.expiration_timestamp_ms
+                                                ? new Date(
+                                                      subdomain.expiration_timestamp_ms,
+                                                  ).toLocaleDateString('en-US', {
+                                                      year: 'numeric',
+                                                      month: 'short',
+                                                      day: 'numeric',
+                                                  })
+                                                : '--'
+                                        }`}
+                                    />
+                                    <div className="flex flex-row gap-x-xs">
+                                        <Button
+                                            text="Manage"
+                                            fullWidth
+                                            onClick={() => setUpdateNameDialog(subdomain.name)}
+                                        />
+                                        {isSubdomainRemovable ? (
+                                            <Button
+                                                text="Delete"
+                                                type={ButtonType.Destructive}
                                                 onClick={() => setDeleteNameDialog(subdomain)}
                                             />
-                                        ) : undefined
-                                    }
-                                />
-                                <CardAction
-                                    type={CardActionType.Button}
-                                    onClick={() => {
-                                        setUpdateNameDialog(subdomain.name);
-                                    }}
-                                    title="Manage"
-                                />
+                                        ) : null}
+                                    </div>
+                                </div>
                             </Card>
                         );
                     })}
