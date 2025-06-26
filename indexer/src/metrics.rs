@@ -30,6 +30,7 @@ pub(crate) struct IotaNamesMetrics {
     pub auction_final_prices: Histogram,
     pub auction_durations: Histogram,
     pub auction_house_balance: IntGauge,
+    pub auction_bid_count_distribution: IntGaugeVec,
     pub total_percentage_discount: IntGauge,
     pub total_fixed_discount: IntGauge,
 }
@@ -129,6 +130,13 @@ impl IotaNamesMetrics {
                 "The durations of auctions",
                 registry,
             ),
+            auction_bid_count_distribution: register_int_gauge_vec_with_registry!(
+                "auction_bid_count_distribution",
+                "Distribution of total bid count per auction",
+                &["bid_count"],
+                registry,
+            )
+            .unwrap(),
             auction_house_balance: register_int_gauge_with_registry!(
                 "auction_house_balance",
                 "The balance held in the auction house",
