@@ -242,7 +242,7 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
 /// Admin function to forcefully remove any record by domain.
 /// This bypasses all expiration and authorization checks.
 /// Should only be called by admin functions in the main module.
-public fun admin_force_remove_record(self: &mut Registry, domain: Domain) {
+public(package) fun admin_force_remove_record(self: &mut Registry, domain: Domain) {
     // Check if the record exists before trying to remove it
     if (!self.registry.contains(domain)) {
         return
