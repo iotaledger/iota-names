@@ -496,6 +496,10 @@ fun handle_invalidate_reverse_record(
         let default_domain = &reverse_registry[old_target_address];
         if (default_domain == domain) {
             reverse_registry.remove(old_target_address);
+            event::emit(ReverseLookupUnsetEvent {
+                default_address: old_target_address,
+                default_name: *domain
+            });
         }
     };
 }
