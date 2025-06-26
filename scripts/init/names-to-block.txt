@@ -1,1 +1,1 @@
-these-names,will-be,blocked
+these-labels,will-be,blocked
