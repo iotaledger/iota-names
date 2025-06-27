@@ -9,6 +9,7 @@ use diesel::Connection;
 use futures::FutureExt;
 use iota_data_ingestion_core::{
     DataIngestionMetrics, FileProgressStore, IndexerExecutor, ReaderOptions, Worker, WorkerPool,
+    reader::v2::{CheckpointReaderConfig, RemoteUrl},
 };
 use iota_json::IotaJsonValue;
 use iota_names::domain::Domain;
@@ -35,7 +36,10 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     config::IotaNamesExtendedConfig,
-    db::{pool::DbConnectionPool, queries::add_bidder_domain_entry},
+    db::{
+        pool::DbConnectionPool,
+        queries::{add_bidder_domain_entry, remove_domain_bids_entry, upsert_domain_bids_entry},
+    },
     events::{CouponKind, IotaNamesEvent},
 };
 
@@ -62,16 +66,28 @@ pub(crate) async fn run_iota_names_reader(
     executor.register(worker_pool).await?;
 
     info!("Connecting to node at {node_url}");
-    executor
-        .run(
-            // path to a local directory where checkpoints are stored.
-            PathBuf::from("./chk"),
-            Some(format!("{node_url}/api/v1")),
-            // optional remote store access options.
-            vec![],
-            ReaderOptions::default(),
-        )
-        .await?;
+    // Localnet does not support remote store, so we use the REST API
+    if node_url.contains("localhost") || node_url.contains("host.docker.internal") {
+        executor
+            .run(
+                // path to a local directory where checkpoints are stored.
+                PathBuf::from("./chk"),
+                Some(format!("{node_url}/api/v1")),
+                // optional remote store access options.
+                vec![],
+                ReaderOptions::default(),
+            )
+            .await?;
+    } else {
+        let config = CheckpointReaderConfig {
+            remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
+                historical_url: node_url.to_string(),
+                live_url: Some(format!("{node_url}/ingestion/live")),
+            }),
+            ..Default::default()
+        };
+        executor.run_with_config(config).await?;
+    }
     Ok(())
 }
 
@@ -122,23 +138,19 @@ impl IotaNamesWorker {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
+                let domain_name = event.domain.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
+                    upsert_domain_bids_entry(conn, &domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
+                let domain_name = event.domain.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &event.domain.to_string(),
-                    )
+                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
+                    upsert_domain_bids_entry(conn, &domain_name)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
@@ -148,6 +160,15 @@ impl IotaNamesWorker {
                 self.metrics
                     .auction_durations
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
+                let domain_name = event.domain.to_string();
+                let mut conn = self.pool.get_connection()?;
+                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    remove_domain_bids_entry(conn, &domain_name)
+                })?;
+                self.metrics
+                    .auction_bid_count_distribution
+                    .with_label_values(&[&bid_count.to_string()])
+                    .inc();
             }
             // `coupons`
             IotaNamesEvent::CouponApplied(event) => match event.kind {

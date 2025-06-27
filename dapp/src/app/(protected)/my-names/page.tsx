@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Button, Card, CardType, KeyValueInfo, Title, TitleSize } from '@iota/apps-ui-kit';
+import { Button, Card, CardBody, CardType, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
 import { AvailabilityCheck } from '@/components';
@@ -54,14 +54,22 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My subnames" />
             </div>
             {subdomains?.length && (
-                <div className="flex flex-col gap-x-sm items-center pl-4">
+                <div className="flex flex-col gap-y-sm items-center">
                     {subdomains.map((subdomain) => (
-                        <KeyValueInfo
-                            key={subdomain.name}
-                            keyText={subdomain.name}
-                            value={subdomain?.description ?? ''}
-                            fullwidth
-                        />
+                        <Card key={subdomain.name} type={CardType.Filled}>
+                            <CardBody
+                                title={subdomain.name}
+                                subtitle={subdomain.name}
+                                clickableAction={
+                                    <Button
+                                        text="Manage"
+                                        onClick={() => {
+                                            setUpdateNameDialog(subdomain.name);
+                                        }}
+                                    />
+                                }
+                            />
+                        </Card>
                     ))}
                 </div>
             )}
