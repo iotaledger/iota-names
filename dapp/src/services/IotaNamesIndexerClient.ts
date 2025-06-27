@@ -5,7 +5,7 @@ export class IotaNamesIndexerClient {
     private host: string;
 
     constructor(host: string) {
-        this.host = host.endsWith('/') ? host.slice(0, -1) : host;
+        this.host = new URL(host).origin;
     }
 
     async getUserAuctions(address: string): Promise<string[]> {
