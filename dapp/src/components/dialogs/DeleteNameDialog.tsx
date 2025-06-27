@@ -19,8 +19,9 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubName } from '@iota/iota-names-sdk';
 import { useMutation } from '@tanstack/react-query';
 
-import { NameUpdate, useUpdateNameTransaction } from '@/hooks';
+import { NameUpdate, useRegistrationNfts, useUpdateNameTransaction } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
+import { getSubdomainObjectId } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;
@@ -31,21 +32,22 @@ type DeleteNameDialogProps = {
 export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
-    // queryClient.invalidateQueries({ queryKey: queryKey.ownedObjects(address) }); // onSuccess
+    const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const isNameSubName = nft ? isSubName(nft.name) : null;
     const isExpired = nft.isExpired || false;
+
     // Create updates
     const updates: NameUpdate[] = [];
 
     if (nft && isExpired) {
-        // const parentNftId = isNameSubName
-        //     ? (getSubdomainObjectId(subdomainsOwned, parent) ?? '')
-        //     : nft.id;
+        const nftid = isNameSubName
+            ? (getSubdomainObjectId(subdomainsOwned ?? [], nft.name) ?? '')
+            : nft.id;
 
         updates.push({
             type: 'delete-name',
-            nft: nft.id ?? '',
+            nft: nftid,
             isSubname: isNameSubName || false,
         });
     }
