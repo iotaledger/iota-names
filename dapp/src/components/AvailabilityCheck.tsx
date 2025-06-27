@@ -195,7 +195,6 @@ export function AvailabilityCheck() {
                 <AuctionBidDialog
                     name={name}
                     setOpen={setAuctionDialogOpen}
-                    minBidNanos={BigInt(minimumBidInNanos)}
                     isNewAuction={isAvailable}
                 />
             )}

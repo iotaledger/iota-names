@@ -15,58 +15,46 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import { useMemo, useState } from 'react';
+import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { useState } from 'react';
 
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
 import { formatNanosToIota } from '@/lib/utils';
 
 interface AuctionBidDialogDialogProps {
     name: string;
-    minBidNanos: bigint;
     isNewAuction: boolean;
     setOpen: (open: boolean) => void;
 }
 
 const ONE_IOTA_NANOS = 1_000_000_000;
 
-function parseIotaToNanos(iotas: string | number): bigint {
-    const asNumber = typeof iotas === 'number' ? iotas : Number(iotas);
-    return BigInt(Math.round(asNumber * ONE_IOTA_NANOS));
+function toNano(iota: string) {
+    return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
 }
 
-export function AuctionBidDialog({
-    name,
-    minBidNanos,
-    isNewAuction,
-    setOpen,
-}: AuctionBidDialogDialogProps) {
-    const [initialBidAmount, setInitialBidAmount] = useState(
-        formatNanosToIota(minBidNanos, {
+export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDialogDialogProps) {
+    const [bidAmountValue, setBidAmountValue] = useState(
+        formatNanosToIota(ONE_IOTA_NANOS, {
             formatRounded: false,
             showIotaSymbol: false,
         }),
     );
 
-    const IotaBid = Number(initialBidAmount) || 0;
-    const bidAmountInNanos = parseIotaToNanos(initialBidAmount);
-    const minimumBidInIota = Number(minBidNanos) / ONE_IOTA_NANOS;
-    const isBidBelowMinimum = IotaBid < minimumBidInIota;
+    const bidNanos = toNano(bidAmountValue);
+    const isBidBelowMinimum = bidNanos < ONE_IOTA_NANOS;
 
-    const minBidLabel = useMemo(
-        () =>
-            formatNanosToIota(minBidNanos, {
-                formatRounded: false,
-                showIotaSymbol: true,
-            }),
-        [minBidNanos],
-    );
+    const minBidLabel = formatNanosToIota(ONE_IOTA_NANOS, {
+        formatRounded: false,
+        showIotaSymbol: true,
+    });
 
     const { mutate: createBid, isPending, error } = useAuctionBid();
 
     const handleConfirm = () => {
         createBid({
             name,
-            bidNanos: bidAmountInNanos,
+            bidNanos,
             isNewAuction,
         });
     };
@@ -86,9 +74,9 @@ export function AuctionBidDialog({
                         <Input
                             type={InputType.Number}
                             label="Your bid (IOTA)"
-                            min={minimumBidInIota}
-                            value={initialBidAmount}
-                            onChange={({ target: { value } }) => setInitialBidAmount(value)}
+                            min={ONE_IOTA_NANOS}
+                            value={bidAmountValue}
+                            onChange={({ target: { value } }) => setBidAmountValue(value)}
                             errorMessage={
                                 isBidBelowMinimum
                                     ? `Bid must be ≥ ${minBidLabel}`

@@ -17,7 +17,7 @@ interface BidArgs {
 }
 
 export function useAuctionBid() {
-    const qc = useQueryClient();
+    const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
     const address = account?.address ?? '';
@@ -51,9 +51,8 @@ export function useAuctionBid() {
             });
             return { name };
         },
-        // onSuccess: (_, { name }) => {
-        //     qc.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
-        //     qc.invalidateQueries({ queryKey: ['auctionHouse'] });
-        // },
+        onSuccess: (_) => {
+            queryClient.invalidateQueries({ queryKey: queryKey.userAuctionHistory(address) });
+        },
     });
 }
