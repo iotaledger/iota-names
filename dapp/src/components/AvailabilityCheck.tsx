@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
+import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -52,17 +52,14 @@ export function AvailabilityCheck() {
     const { data: nameRecordData, error } = useNameRecord(name);
     const { data: priceList } = usePriceList();
 
-    const isAuctionInProgress =
-        nameRecordData?.type === 'unavailable' && !!nameRecordData?.nameRecord;
-    const { data: auctionMetadata } = useGetAuctionMetadata(isAuctionInProgress ? name : '');
+    const { data: auctionMetadata, isLoading: isAuctionMetadataLoading } =
+        useGetAuctionMetadata(name);
 
     const isAvailable = nameRecordData?.type === 'available';
-
-    let minimumBidInNanos = ONE_IOTA_NANOS;
-    if (isAuctionInProgress && auctionMetadata) {
-        const highestBid = Number(auctionMetadata.value.value.current_bid.balance.value ?? 0);
-        minimumBidInNanos = highestBid + ONE_IOTA_NANOS;
-    }
+    const isAuctionInProgress =
+        nameRecordData?.type === 'unavailable' &&
+        auctionMetadata?.value &&
+        new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() > Date.now();
 
     const validationError = useMemo(
         () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
@@ -89,15 +86,30 @@ export function AvailabilityCheck() {
         setName('');
     }
 
-    const statusLabel = isAvailable ? (
-        <span className="text-green-700 dark:text-green-200">Available</span>
-    ) : isAuctionInProgress ? (
-        <span className="text-orange-600 dark:text-orange-300">In auction</span>
-    ) : nameRecordData?.type === 'not-priced' ? (
-        <span className="text-red-700 dark:text-red-200">Not priced</span>
-    ) : nameRecordData?.type === 'unavailable' ? (
-        <span className="text-red-700 dark:text-red-200">Unavailable</span>
-    ) : null;
+    const statusLabel = useMemo(() => {
+        if (isAvailable) {
+            return <span className="text-green-700 dark:text-green-200">Available</span>;
+        } else if (nameRecordData?.type === 'not-priced') {
+            return <span className="text-red-700 dark:text-red-200">Not priced</span>;
+        } else if (nameRecordData?.type === 'unavailable') {
+            if (isAuctionMetadataLoading) {
+                return <Skeleton widthClass="w-32" heightClass="h-6" />;
+            }
+
+            const isInProgress =
+                auctionMetadata?.value &&
+                new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() >
+                    Date.now();
+
+            if (isInProgress) {
+                return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
+            } else {
+                return <span className="text-red-700 dark:text-red-200">Unavailable</span>;
+            }
+        } else {
+            return null;
+        }
+    }, [nameRecordData, auctionMetadata, isAuctionMetadataLoading]);
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -122,7 +134,6 @@ export function AvailabilityCheck() {
                         <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
                     }
                 />
-
                 <Button
                     size={ButtonSize.Medium}
                     text="Search"
@@ -131,7 +142,7 @@ export function AvailabilityCheck() {
                 />
             </div>
 
-            {nameRecordData !== null && <div className="text-headline-sm">{statusLabel}</div>}
+            {nameRecordData && <div className="text-headline-sm">{statusLabel}</div>}
 
             {(isAvailable || isAuctionInProgress) && (
                 <div className="flex flex-col items-center space-y-4">
@@ -152,22 +163,32 @@ export function AvailabilityCheck() {
                         </div>
                     )}
 
-                    {(isAvailable || isAuctionInProgress) && (
-                        <div className="flex items-center space-x-4">
-                            <div className="text-body-md">
-                                Minimum bid: {formatNanosToIota(minimumBidInNanos)}
+                    {isAuctionInProgress &&
+                        (isAuctionMetadataLoading ? (
+                            <Skeleton />
+                        ) : (
+                            <div className="flex items-center space-x-4">
+                                <div className="text-body-md">
+                                    Minimum bid:{' '}
+                                    {formatNanosToIota(
+                                        Number(
+                                            auctionMetadata.value.value.current_bid.balance.value,
+                                        ) + ONE_IOTA_NANOS,
+                                    )}
+                                </div>
+                                {isConnected ? (
+                                    <Button
+                                        type={ButtonType.Secondary}
+                                        text="Bid"
+                                        onClick={() =>
+                                            console.log('Bid functionality not implemented yet')
+                                        }
+                                    />
+                                ) : (
+                                    <ConnectButton connectText="Connect" />
+                                )}
                             </div>
-                            {isConnected ? (
-                                <Button
-                                    type={ButtonType.Secondary}
-                                    text="Bid"
-                                    onClick={() => setAuctionDialogOpen(true)}
-                                />
-                            ) : (
-                                <ConnectButton connectText="Connect" />
-                            )}
-                        </div>
-                    )}
+                        ))}
                 </div>
             )}
             {isAuctionBidDialogOpen && (
