@@ -456,11 +456,11 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "total_node_subdomains",
+          "expr": "total_node_subnames",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Node Subdomains",
+          "legendFormat": "Node Subnames",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -472,18 +472,18 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "total_leaf_subdomains",
+          "expr": "total_leaf_subnames",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Leaf Subdomains",
+          "legendFormat": "Leaf Subnames",
           "range": true,
           "refId": "B",
           "useBackend": false
         }
       ],
-      "title": "Subdomain Records",
+      "title": "Subname Records",
       "type": "timeseries"
     },
     {
@@ -739,7 +739,7 @@
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "total_node_subdomains",
+          "expr": "total_node_subnames",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "Node",
@@ -754,7 +754,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "total_leaf_subdomains",
+          "expr": "total_leaf_subnames",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
@@ -765,7 +765,7 @@
           "useBackend": false
         }
       ],
-      "title": "Proportion of node/leaf subdomains",
+      "title": "Proportion of node/leaf subnames",
       "type": "piechart"
     },
     {

@@ -1,5 +1,5 @@
 -- Your SQL goes here
-CREATE TABLE `domains`(
+CREATE TABLE `names`(
 	`id` INTEGER PRIMARY KEY AUTOINCREMENT,
 	`name` TEXT NOT NULL UNIQUE
 );
@@ -9,10 +9,10 @@ CREATE TABLE `bidders`(
 	`address` TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE `bidder_domain`(
+CREATE TABLE `bidder_name`(
 	`bidder_id` INTEGER NOT NULL,
-	`domain_id` INTEGER NOT NULL,
-	PRIMARY KEY (`bidder_id`, `domain_id`),
+	`name_id` INTEGER NOT NULL,
+	PRIMARY KEY (`bidder_id`, `name_id`),
 	FOREIGN KEY (`bidder_id`) REFERENCES `bidders`(`id`),
-	FOREIGN KEY (`domain_id`) REFERENCES `domains`(`id`)
+	FOREIGN KEY (`name_id`) REFERENCES `names`(`id`)
 );

@@ -1,7 +1,7 @@
 -- Your SQL goes here
-CREATE TABLE `domain_bids`(
-	`domain_id` INTEGER NOT NULL,
+CREATE TABLE `name_bids`(
+	`name_id` INTEGER NOT NULL,
 	`bids` INTEGER NOT NULL,
-	PRIMARY KEY (`domain_id`),
-	FOREIGN KEY (`domain_id`) REFERENCES `domains`(`id`)
+	PRIMARY KEY (`name_id`),
+	FOREIGN KEY (`name_id`) REFERENCES `names`(`id`)
 );
