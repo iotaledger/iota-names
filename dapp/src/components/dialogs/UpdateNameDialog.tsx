@@ -65,8 +65,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
 
-    const domainsOwned = useRegistrationNfts('domain').data || [];
-    const subdomainsOwned = useRegistrationNfts('subdomain').data || [];
+    const { data: domainsOwned } = useRegistrationNfts('domain');
+    const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     // Editable values
@@ -114,7 +114,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
         const nftId = isNameSubName
-            ? (getSubdomainObjectId(subdomainsOwned, nameRecord.nameRecord.name) ?? '')
+            ? (getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name) ?? '')
             : nameRecord.nameRecord.nftId;
         updates.push({
             type: 'set-target-address',
@@ -144,8 +144,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         const parentObjectId = getParentObjectId(
-            domainsOwned,
-            subdomainsOwned,
+            domainsOwned ?? [],
+            subdomainsOwned ?? [],
             nameRecord.nameRecord.name,
         );
         updates.push({
@@ -201,6 +201,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     case 'set-target-address':
                         queryClient.invalidateQueries({
                             queryKey: queryKey.nameRecord(name),
+                        });
+                        break;
+                    case 'new-subdomain':
+                        queryClient.invalidateQueries({
+                            queryKey: queryKey.ownedObjects(account?.address || ''),
                         });
                         break;
                 }
@@ -300,19 +305,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onClick={() => setIsAvatarSelectorOpen(true)}
                             />
                         </Card>
-                        {editIsAllowSubnames && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Add new subname"
-                                    subtitle="Create a new subdomain."
-                                />
-                                <Button
-                                    text="Add subname"
-                                    onClick={() => setSubdomainDialogOpen(true)}
-                                    disabled={disableAddSubname}
-                                />
-                            </Card>
-                        )}
                         {isNameSubName ? (
                             <>
                                 <Card type={CardType.Outlined}>
@@ -339,12 +331,25 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 </Card>
                             </>
                         ) : null}
-                        {subdomainDialogOpen && (
+                        {subdomainDialogOpen && nameRecord?.nameRecord.name && (
                             <CreateSubnameDialog
-                                parent={nameRecord?.nameRecord?.name || ''}
+                                parent={nameRecord.nameRecord.name}
                                 open={subdomainDialogOpen}
                                 setOpen={setSubdomainDialogOpen}
                             />
+                        )}
+                        {namePermissions?.allowChildCreation && (
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Add new subname"
+                                    subtitle="Create a new subdomain."
+                                />
+                                <Button
+                                    text="Add subname"
+                                    onClick={() => setSubdomainDialogOpen(true)}
+                                    disabled={disableAddSubname}
+                                />
+                            </Card>
                         )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>

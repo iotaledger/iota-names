@@ -188,7 +188,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                             />
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Save"
+                                text="Create"
                                 disabled={disableSave}
                                 onClick={() => save()}
                             />

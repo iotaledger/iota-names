@@ -99,7 +99,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'new-subdomain':
                         const subnameNft = iotaNamesTx.createSubName({
-                            parentNft: tx.object(update?.parentNftId),
+                            parentNft: tx.object(update.parentNftId),
                             name: update.subdomainName,
                             expirationTimestampMs: update.expirationTimeParent,
                             allowChildCreation: update.allowChildCreation,
