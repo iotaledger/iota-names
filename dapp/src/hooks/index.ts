@@ -10,5 +10,4 @@ export * from './useTheme';
 export * from './usePriceList';
 export * from './queryKey';
 export * from './useGetDefaultName';
-export * from './useDeleteNameTransaction';
 export * from './useUpdateNameTransaction';

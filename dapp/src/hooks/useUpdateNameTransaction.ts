@@ -41,6 +41,11 @@ export type NameUpdate =
           name: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
+      }
+    | {
+          type: 'delete-name';
+          nft: string;
+          isSubname: boolean;
       };
 
 export function useUpdateNameTransaction({
@@ -87,6 +92,12 @@ export function useUpdateNameTransaction({
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
+                        });
+                        break;
+                    case 'delete-name':
+                        iotaNamesTx.burnExpired({
+                            nft: tx.object(update.nft),
+                            isSubname: update.isSubname,
                         });
                         break;
                 }
