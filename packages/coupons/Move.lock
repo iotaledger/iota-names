@@ -35,9 +35,3 @@ edition = "2024"
 flavor = "iota"
 
 [env]
-
-[env.localnet]
-chain-id = "2d2fba3d"
-original-published-id = "0x63b087faf63d952cece308e381052fa9415d4d22130beb927280ca35a528bbab"
-latest-published-id = "0x63b087faf63d952cece308e381052fa9415d4d22130beb927280ca35a528bbab"
-published-version = "1"

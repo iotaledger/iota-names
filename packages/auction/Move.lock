@@ -41,9 +41,3 @@ chain-id = "e678123a"
 original-published-id = "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50"
 latest-published-id = "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50"
 published-version = "1"
-
-[env.localnet]
-chain-id = "2d2fba3d"
-original-published-id = "0x6d7aed39544df0578bebf208b1537a9b77b9328b2e57a4b12b5f1af32cb42e76"
-latest-published-id = "0x6d7aed39544df0578bebf208b1537a9b77b9328b2e57a4b12b5f1af32cb42e76"
-published-version = "1"
