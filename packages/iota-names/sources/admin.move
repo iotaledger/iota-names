@@ -21,7 +21,7 @@ const ENoNamesProvided: vector<u8> = b"No names provided";
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AdminAuth has drop {}
 
-/// Reserve a `name` in the `IotaNames`.
+/// Reserve a `name` in `IotaNames`.
 public fun reserve_name(
     _: &AdminCap,
     iota_names: &mut IotaNames,

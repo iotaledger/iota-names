@@ -14,7 +14,7 @@ use std::string::{Self, String, utf8};
 #[error]
 const EInvalidName: vector<u8> = b"Invalid name.";
 
-/// The maximum length of a full name
+/// The maximum length of a full name.
 const MAX_DOMAIN_LENGTH: u64 = 235;
 /// The minimum length of an individual label in a name.
 const MIN_LABEL_LENGTH: u64 = 1;
