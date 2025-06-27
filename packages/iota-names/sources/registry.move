@@ -239,6 +239,26 @@ public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
     self.handle_invalidate_reverse_record(&domain, old_target_address, none());
 }
 
+/// Forcefully remove any record by domain.
+/// This bypasses all expiration and authorization checks.
+/// Should only be called by admin functions.
+public(package) fun force_remove_record(self: &mut Registry, domain: Domain) {
+    // Check if the record exists before trying to remove it
+    if (!self.registry.contains(domain)) {
+        return
+    };
+
+    event::emit(NameRecordRemovedEvent {
+        domain,
+    });
+    
+    let record = self.registry.remove(domain);
+    let old_target_address = record.target_address();
+
+    // Invalidate any reverse lookup entries
+    self.handle_invalidate_reverse_record(&domain, old_target_address, none());
+}
+
 public fun set_target_address(self: &mut Registry, domain: Domain, new_target: Option<address>) {
     let record = &mut self.registry[domain];
     let old_target = record.target_address();
@@ -470,12 +490,12 @@ fun handle_invalidate_reverse_record(
     };
 
     let old_target_address = old_target_address.destroy_some();
-    let reverse_registry = &mut self.reverse_registry;
+    let reverse_registry = &self.reverse_registry;
 
     if (reverse_registry.contains(old_target_address)) {
         let default_domain = &reverse_registry[old_target_address];
         if (default_domain == domain) {
-            reverse_registry.remove(old_target_address);
+            self.unset_reverse_lookup(old_target_address)
         }
     };
 }
