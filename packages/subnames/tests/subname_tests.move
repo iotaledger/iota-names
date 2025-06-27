@@ -32,7 +32,7 @@ fun test_multiple_operation_cases() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let mut child = create_node_subname(
         &parent,
@@ -89,7 +89,7 @@ fun test_multiple_operation_cases() {
 fun expiration_past_parents_expiration() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let _child = create_node_subname(
         &parent,
@@ -108,7 +108,7 @@ fun expiration_past_parents_expiration() {
 fun invalid_parent_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let _child = create_node_subname(
         &parent,
@@ -126,7 +126,7 @@ fun invalid_parent_failure() {
 fun tries_to_create_subname_with_disallowed_node_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let child = create_node_subname(
         &parent,
@@ -154,7 +154,7 @@ fun tries_to_create_subname_with_disallowed_node_parent() {
 fun tries_to_extend_without_permissions() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let mut child = create_node_subname(
         &parent,
@@ -174,7 +174,7 @@ fun tries_to_extend_without_permissions() {
 fun tries_to_extend_with_burned_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let mut child = create_node_subname(
         &parent,
@@ -208,7 +208,7 @@ fun tries_to_extend_with_burned_parent() {
 fun tries_to_extend_while_parent_changed() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
     let mut child = create_node_subname(
@@ -226,7 +226,7 @@ fun tries_to_extend_while_parent_changed() {
         scenario,
     );
 
-    let _parent_w_different_owner = create_sld_name(utf8(b"test.iota"), scenario);
+    let _parent_w_different_owner = create_sln(utf8(b"test.iota"), scenario);
 
     // any extension.
     extend_node_subname(&mut child, 2, scenario);
@@ -238,7 +238,7 @@ fun tries_to_extend_while_parent_changed() {
 fun tries_to_extend_with_too_long_date() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
     let mut child = create_node_subname(
@@ -265,7 +265,7 @@ fun tries_to_extend_with_too_long_date() {
 fun tries_to_extend_with_too_short_date() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
     let mut child = create_node_subname(
@@ -292,7 +292,7 @@ fun tries_to_extend_with_too_short_date() {
 fun tries_to_use_expired_subname_to_create_new() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let child = create_node_subname(
         &parent,
@@ -318,7 +318,7 @@ fun tries_to_use_expired_subname_to_create_new() {
 fun tries_to_create_too_short_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
 
     let _child = create_node_subname(
         &parent,
@@ -336,7 +336,7 @@ fun tries_to_create_too_short_subname() {
 fun tries_to_created_nested_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
     create_leaf_subname(&parent, utf8(b"node.node.test.iota"), TEST_ADDRESS, scenario);
 
     abort 1337
@@ -354,7 +354,7 @@ fun tries_to_create_denied_leaf_subname() {
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
     create_leaf_subname(&parent, utf8(b"blocked.test.iota"), TEST_ADDRESS, scenario);
 
     abort 1337
@@ -372,7 +372,7 @@ fun tries_to_create_denied_node_subname() {
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
     let _child = create_node_subname(
         &parent, 
         utf8(b"blocked.test.iota"), 
@@ -425,7 +425,7 @@ public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
 }
 
 /// Create a regular name to help with our tests.
-public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegistration {
+public fun create_sln(name: String, scenario: &mut Scenario): IotaNamesRegistration {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);

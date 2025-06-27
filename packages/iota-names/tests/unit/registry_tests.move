@@ -468,8 +468,8 @@ fun set_reverse_lookup_fail_record_mismatch() {
 }
 
 #[test, expected_failure(abort_code = iota_names::registry::EInvalidDepth)]
-/// Attempt to add a SLD record as a `leaf` record.
-fun add_sld_as_leaf_record_failure() {
+/// Attempt to add a SLN record as a `leaf` record.
+fun add_sln_as_leaf_record_failure() {
     let mut ctx = tx_context::dummy();
     let (mut registry, clock, _name) = setup(&mut ctx);
 
@@ -1038,7 +1038,7 @@ fun test_remove_leaf_record_non_leaf() {
     let mut ctx = tx_context::dummy();
     let (mut registry, clock, name) = setup(&mut ctx);
 
-    // Create a regular SLD record (not a leaf)
+    // Create a regular SLN record (not a leaf)
     let _nft = registry.add_record(name, 1, &clock, &mut ctx);
 
     // Try to remove it as a leaf record - should fail

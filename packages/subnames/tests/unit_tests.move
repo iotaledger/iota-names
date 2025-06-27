@@ -84,7 +84,7 @@ fun test_invalid_parent_failure() {
 }
 
 #[test, expected_failure(abort_code = iota_names_subnames::config::EInvalidParent)]
-fun test_invalid_parent_tld_failure() {
+fun test_invalid_parent_tln_failure() {
     assert_is_valid_subname(
         &new_name(utf8(b"sub.example.move")),
         &new_name(utf8(b"sub.sub.example.iota")),
@@ -93,7 +93,7 @@ fun test_invalid_parent_tld_failure() {
 }
 
 #[test, expected_failure(abort_code = iota_names_subnames::config::EInvalidParent)]
-fun test_invalid_parent_sld_failure() {
+fun test_invalid_parent_sln_failure() {
     assert_is_valid_subname(
         &new_name(utf8(b"sub.test.iota")),
         &new_name(utf8(b"sub.sub.example.iota")),
@@ -110,8 +110,8 @@ fun test_invalid_child_label_size_failure() {
     );
 }
 
-#[test, expected_failure(abort_code = iota_names_subnames::config::ENotSupportedTLD)]
-fun test_not_supported_tld_failure() {
+#[test, expected_failure(abort_code = iota_names_subnames::config::ENotSupportedTLN)]
+fun test_not_supported_tln_failure() {
     assert_is_valid_subname(
         &new_name(utf8(b"sub.sub.example.move")),
         &new_name(utf8(b"sub.example.move")),

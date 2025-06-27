@@ -93,7 +93,7 @@ public fun start_auction_and_place_bid(
 
     let min_price = iota_names
         .get_config<PricingConfig>()
-        .calculate_base_price(name.sld().length());
+        .calculate_base_price(name.sln().length());
     assert!(bid.value() >= min_price, EInitialBidTooLow);
 
     let registry = iota_names::auth_registry_mut<AuctionAuth, Registry>(AuctionAuth {}, iota_names);

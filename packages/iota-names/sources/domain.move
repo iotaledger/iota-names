@@ -25,7 +25,7 @@ const MAX_LABEL_LENGTH: u64 = 63;
 public struct Name has copy, drop, store {
     /// Vector of labels that make up a name.
     ///
-    /// Labels are stored in reverse order such that the TLD is always in
+    /// Labels are stored in reverse order such that the TLN is always in
     /// position `0`.
     /// e.g. name "pay.name.iota" will be stored in the vector as ["iota",
     /// "name", "pay"].
@@ -72,22 +72,22 @@ public fun to_string(self: &Name): String {
 /// - "name" - `1`
 /// - "iota" - `0`
 ///
-/// This means that the TLD will always be at level `0`.
+/// This means that the TLN will always be at level `0`.
 public fun label(self: &Name, level: u64): &String {
     &self.labels[level]
 }
 
-/// Returns the TLD (Top-Level Name) of a `Name`.
+/// Returns the TLN (Top-Level Name) of a `Name`.
 ///
 /// "name.iota" -> "iota"
-public fun tld(self: &Name): &String {
+public fun tln(self: &Name): &String {
     label(self, 0)
 }
 
-/// Returns the SLD (Second-Level Name) of a `Name`.
+/// Returns the SLN (Second-Level Name) of a `Name`.
 ///
 /// "name.iota" -> "iota"
-public fun sld(self: &Name): &String {
+public fun sln(self: &Name): &String {
     label(self, 1)
 }
 

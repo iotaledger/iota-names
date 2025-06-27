@@ -18,14 +18,14 @@ fun test_config_creation_and_field_access() {
         63,
         constants::payments_version!(),
         1,
-        vector[constants::iota_tld()],
+        vector[constants::iota_tln()],
         vec_map::empty(),
     );
 
     assert_eq(config.min_label_length(), 3);
     assert_eq(config.max_label_length(), 63);
     assert_eq(config.payments_version(), constants::payments_version!());
-    assert!(config.is_valid_tld(&constants::iota_tld()));
+    assert!(config.is_valid_tln(&constants::iota_tln()));
 }
 
 #[test]
@@ -45,14 +45,14 @@ fun custom_config_valid_length() {
         63,
         constants::payments_version!(),
         5,
-        vector[constants::iota_tld()],
+        vector[constants::iota_tln()],
         vec_map::empty(),
     );
     config.assert_is_valid_for_sale(&name::new(b"0.iota".to_string()));
 }
 
-#[test, expected_failure(abort_code = core_config::EInvalidTld)]
-fun test_invalid_tld() {
+#[test, expected_failure(abort_code = core_config::EInvalidTln)]
+fun test_invalid_tln() {
     core_config::default().assert_is_valid_for_sale(
         &name::new(b"iota-names.move".to_string()),
     );
@@ -83,7 +83,7 @@ fun custom_config(min: u8, max: u8): CoreConfig {
         max,
         constants::payments_version!(),
         5,
-        vector[constants::iota_tld()],
+        vector[constants::iota_tln()],
         vec_map::empty(),
     )
 }

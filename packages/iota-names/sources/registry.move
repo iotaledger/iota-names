@@ -33,7 +33,7 @@ const ETargetNotSet: vector<u8> =
 const ENonLeafRecord: vector<u8> =
     b"Trying to remove or operate on a non-leaf record as if it were a leaf record.";
 #[error]
-const EInvalidDepth: vector<u8> = b"Trying to add a leaf record for a TLD or SLD.";
+const EInvalidDepth: vector<u8> = b"Trying to add a leaf record for a TLN or SLN.";
 #[error]
 const ERecordNotFound: vector<u8> = b"Trying to lookup a record that doesn't exist.";
 

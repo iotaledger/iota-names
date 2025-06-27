@@ -27,7 +27,7 @@ public struct RegisterAuth has drop {}
 //
 // Makes sure that:
 // - the name is not already registered (or, if active, expired)
-// - the name TLD is .iota
+// - the name TLN is .iota
 // - the name is not a subname
 // - number of years is within [1-5] interval
 public fun register<T>(

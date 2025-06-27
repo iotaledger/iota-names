@@ -43,10 +43,10 @@ public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
     *config.pricing.get(&range)
 }
 
-/// Calculates the base price of a given name based on its SLD length.
+/// Calculates the base price of a given name based on its SLN length.
 /// For example, "my-name.iota" uses length 7 (the length of "my-name").
 public fun calculate_base_price_of_name(config: &PricingConfig, name: Name): u64 {
-    calculate_base_price(config, name.sld().length())
+    calculate_base_price(config, name.sln().length())
 }
 
 /// Creates a new PricingConfig with the given ranges and prices.

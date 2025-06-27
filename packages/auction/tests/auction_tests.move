@@ -591,8 +591,8 @@ fun test_admin_withdraw_funds_aborts_if_no_profits() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = core_config::EInvalidTld)]
-fun test_start_auction_aborts_with_wrong_tld() {
+#[test, expected_failure(abort_code = core_config::EInvalidTln)]
+fun test_start_auction_aborts_with_wrong_tln() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 

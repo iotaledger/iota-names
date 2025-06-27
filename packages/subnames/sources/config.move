@@ -4,13 +4,13 @@
 
 module iota_names_subnames::config;
 
-use iota_names::constants::iota_tld;
+use iota_names::constants::iota_tln;
 use iota_names::name::{Name, is_parent_of};
 use std::string::String;
 
 /// the minimum size a subname label can have.
 const MIN_LABEL_SIZE: u8 = 3;
-/// the maximum depth a subname can have -> 8 (+ 2 for TLD, SLD)
+/// the maximum depth a subname can have -> 8 (+ 2 for TLN, SLN)
 const MAX_SUBDOMAIN_DEPTH: u8 = 10;
 /// Minimum duration for a subname in milliseconds. (1 day)
 const MINIMUM_SUBDOMAIN_DURATION: u64 = 24 * 60 * 60 * 1000;
@@ -25,12 +25,12 @@ const EInvalidParent: vector<u8> =
 const EInvalidLabelSize: vector<u8> =
     b"Tried to register a subname containing a label of size less than 3.";
 #[error]
-const ENotSupportedTLD: vector<u8> = b"Tried to register a name with an unsupported TLD.";
+const ENotSupportedTLN: vector<u8> = b"Tried to register a name with an unsupported TLN.";
 
 /// A Subname configuration object.
-/// Holds the allow-listed tlds, the max depth and the minimum label size.
+/// Holds the allow-listed tlns, the max depth and the minimum label size.
 public struct SubnameConfig has copy, drop, store {
-    allowed_tlds: vector<String>,
+    allowed_tlns: vector<String>,
     max_depth: u8,
     min_label_size: u8,
     minimum_duration: u64,
@@ -38,7 +38,7 @@ public struct SubnameConfig has copy, drop, store {
 
 public fun default(): SubnameConfig {
     SubnameConfig {
-        allowed_tlds: vector[iota_tld()],
+        allowed_tlns: vector[iota_tln()],
         max_depth: MAX_SUBDOMAIN_DEPTH,
         min_label_size: MIN_LABEL_SIZE,
         minimum_duration: MINIMUM_SUBDOMAIN_DURATION,
@@ -47,13 +47,13 @@ public fun default(): SubnameConfig {
 
 // Generates a custom config for Subnames.
 public fun new(
-    allowed_tlds: vector<String>,
+    allowed_tlns: vector<String>,
     max_depth: u8,
     min_label_size: u8,
     minimum_duration: u64,
 ): SubnameConfig {
     SubnameConfig {
-        allowed_tlds,
+        allowed_tlns,
         max_depth,
         min_label_size,
         minimum_duration,
@@ -62,7 +62,7 @@ public fun new(
 
 /// Validates that the child name is a valid child for parent.
 public fun assert_is_valid_subname(parent: &Name, child: &Name, config: &SubnameConfig) {
-    assert!(is_valid_tld(child, config), ENotSupportedTLD);
+    assert!(is_valid_tln(child, config), ENotSupportedTLN);
     assert!(is_valid_label(child, config), EInvalidLabelSize);
     assert!(has_valid_depth(child, config), EDepthExceedsLimit);
     assert!(is_parent_of(parent, child), EInvalidParent);
@@ -77,14 +77,14 @@ public fun has_valid_depth(name: &Name, config: &SubnameConfig): bool {
     name.number_of_levels() <= (config.max_depth as u64)
 }
 
-/// Validates that the TLD of the name is supported for subnames.
+/// Validates that the TLN of the name is supported for subnames.
 /// In the beginning, only .iota names will be supported but we might
 /// want to add support for others (or not allow).
 /// (E.g., with `.move` service, we might want to restrict how subnames are created)
-public fun is_valid_tld(name: &Name, config: &SubnameConfig): bool {
+public fun is_valid_tln(name: &Name, config: &SubnameConfig): bool {
     let mut i = 0;
-    while (i < config.allowed_tlds.length()) {
-        if (name.tld() == &config.allowed_tlds[i]) { return true };
+    while (i < config.allowed_tlns.length()) {
+        if (name.tln() == &config.allowed_tlns[i]) { return true };
         i = i + 1;
     };
     false

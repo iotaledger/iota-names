@@ -124,7 +124,7 @@ public fun apply_coupon(
     coupon
         .rules()
         .assert_coupon_valid_for_name_length(
-            intent.request_data().name().sld().length() as u8,
+            intent.request_data().name().sln().length() as u8,
         );
     // 2. Decrease available claims. Will ABORT if the coupon doesn't have
     // enough available claims.

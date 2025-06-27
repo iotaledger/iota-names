@@ -12,7 +12,7 @@ module iota_names::constants;
 use std::string::String;
 
 /// Top level name for IOTA.
-const IOTA_TLD: vector<u8> = b"iota";
+const IOTA_TLN: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
 const YEAR_MS: u64 = 365 * 24 * 60 * 60 * 1000;
 /// 30 day Grace period in milliseconds.
@@ -36,7 +36,7 @@ const ALLOW_TIME_EXTENSION: vector<u8> = b"S_ATE";
 // === Public functions ===
 
 /// Top level name for IOTA as a String.
-public fun iota_tld(): String { IOTA_TLD.to_string() }
+public fun iota_tln(): String { IOTA_TLN.to_string() }
 
 /// The amount of milliseconds in a year.
 public fun year_ms(): u64 { YEAR_MS }

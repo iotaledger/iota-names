@@ -119,9 +119,9 @@ public fun remove_leaf(
 /// The following script does the following lookups:
 /// 1. Checks if app is authorized.
 /// 2. Validates that the parent NFT is valid and non expired.
-/// 3. Validates that the parent can create subnames (based on the on-chain setup). [all 2nd level names with valid tld can create names]
+/// 3. Validates that the parent can create subnames (based on the on-chain setup). [all 2nd level names with valid tln can create names]
 /// 4. Validates the subname validity.
-///     2.1 Checks that the TLD is in the list of supported tlds.
+///     2.1 Checks that the TLN is in the list of supported tlns.
 ///     2.2 Checks that the length of the new label has the min length.
 ///     2.3 Validates that this subname can indeed be registered by that parent.
 ///     2.4 Validates that the subname's expiration timestamp is less or equal to the parents.
@@ -324,7 +324,7 @@ fun record_metadata(self: &IotaNames, subname: Name): VecMap<String, String> {
 ///
 /// 1. Checks that NFT is authorized.
 /// 2. Checks that the parent can create subnames (applies to subname `node` names).
-/// 3. Validates that the subname is valid (accepted TLD, depth, length, is child of given parent, etc).
+/// 3. Validates that the subname is valid (accepted TLN, depth, length, is child of given parent, etc).
 fun internal_validate_nft_can_manage_subname(
     iota_names: &IotaNames,
     parent: &IotaNamesRegistration,
