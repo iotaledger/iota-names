@@ -248,7 +248,7 @@ public fun claim(
 /// Get metadata of an auction
 ///
 /// #### Params
-/// The name name being auctioned.
+/// The name being auctioned.
 ///
 /// #### Return
 /// (`start_timestamp_ms`, `end_timestamp_ms`, `current_bidder`, `highest_amount`)

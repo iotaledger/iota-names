@@ -31,7 +31,7 @@ public struct RenewalConfig has drop, store { config: PricingConfig }
 
 /// Calculates the base price for a given length.
 /// - Base price type is abstracted away. We can switch to a different base.
-/// - The price is calculated based on the length of the name name and the
+/// - The price is calculated based on the length of the name and the
 /// available ranges.
 public fun calculate_base_price(config: &PricingConfig, length: u64): u64 {
     let keys = config.pricing.keys();
