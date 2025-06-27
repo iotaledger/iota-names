@@ -25,7 +25,7 @@ use iota_names::auction::{
 };
 use iota_names::constants;
 use iota_names::core_config;
-use iota_names::domain;
+use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry;
@@ -68,7 +68,7 @@ public fun test_init(): Scenario {
 public fun start_auction_and_place_bid_util(
     scenario: &mut Scenario,
     sender: address,
-    domain_name: String,
+    name: String,
     amount: u64,
 ) {
     scenario.next_tx(sender);
@@ -79,7 +79,7 @@ public fun start_auction_and_place_bid_util(
 
     auction_house.start_auction_and_place_bid(
         &mut iota_names,
-        domain_name,
+        name,
         payment,
         &clock,
         ctx(scenario),
@@ -93,7 +93,7 @@ public fun start_auction_and_place_bid_util(
 fun place_bid_util(
     scenario: &mut Scenario,
     sender: address,
-    domain_name: String,
+    name: String,
     value: u64,
     clock_tick: u64,
 ) {
@@ -103,7 +103,7 @@ fun place_bid_util(
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
-    auction_house.place_bid(domain_name, payment, &clock, ctx(scenario));
+    auction_house.place_bid(name, payment, &clock, ctx(scenario));
 
     test_scenario::return_shared(clock);
     test_scenario::return_shared(auction_house);
@@ -112,7 +112,7 @@ fun place_bid_util(
 public fun claim_util(
     scenario: &mut Scenario,
     sender: address,
-    domain_name: String,
+    name: String,
     clock_tick: u64,
 ): IotaNamesRegistration {
     scenario.next_tx(sender);
@@ -120,7 +120,7 @@ public fun claim_util(
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
-    let nft = auction_house.claim(domain_name, &clock, ctx(scenario));
+    let nft = auction_house.claim(name, &clock, ctx(scenario));
 
     test_scenario::return_shared(clock);
     test_scenario::return_shared(auction_house);
@@ -133,7 +133,7 @@ fun withdraw_util(scenario: &mut Scenario, sender: address): Coin<IOTA> {
     returned_payment
 }
 
-fun admin_collect_fund_util(scenario: &mut Scenario, domain_name: String, clock_tick: u64) {
+fun admin_collect_fund_util(scenario: &mut Scenario, name: String, clock_tick: u64) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
@@ -141,7 +141,7 @@ fun admin_collect_fund_util(scenario: &mut Scenario, domain_name: String, clock_
     clock.increment_for_testing(clock_tick);
     collect_winning_auction_fund(
         &mut auction_house,
-        domain_name,
+        name,
         &clock,
         ctx(scenario),
     );
@@ -150,14 +150,14 @@ fun admin_collect_fund_util(scenario: &mut Scenario, domain_name: String, clock_
     test_scenario::return_shared(auction_house);
 }
 
-fun admin_try_finalize_auction_util(scenario: &mut Scenario, domain: String, clock_tick: u64) {
+fun admin_try_finalize_auction_util(scenario: &mut Scenario, name: String, clock_tick: u64) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let admin_cap = scenario.take_from_sender<AdminCap>();
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
-    admin_finalize_auction(&admin_cap, &mut auction_house, domain, &clock);
+    admin_finalize_auction(&admin_cap, &mut auction_house, name, &clock);
 
     test_scenario::return_shared(clock);
     test_scenario::return_shared(auction_house);
@@ -223,7 +223,7 @@ fun assert_balance(scenario: &mut Scenario, amount: u64) {
 
 fun assert_auction(
     scenario: &mut Scenario,
-    domain_name: String,
+    name: String,
     expected_start_ms: Option<u64>,
     expected_end_ms: Option<u64>,
     expected_bidder: Option<address>,
@@ -232,7 +232,7 @@ fun assert_auction(
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let auction_house = scenario.take_shared<AuctionHouse>();
     let (start_ms, end_ms, current_bidder, highest_amount) = auction_house.get_auction_metadata(
-        domain_name,
+        name,
     );
     assert!(start_ms == expected_start_ms, 0);
     assert!(end_ms == expected_end_ms, 0);
@@ -278,7 +278,7 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
         utf8(FIRST_DOMAIN_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -458,7 +458,7 @@ fun test_admin_try_finalize_auction() {
         scenario,
         THIRD_ADDRESS,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -509,7 +509,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
         scenario,
         SECOND_ADDRESS,
     );
-    assert!(nft.domain() == domain::new(utf8(SECOND_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(SECOND_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -517,7 +517,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
         scenario,
         FIRST_ADDRESS,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -607,7 +607,7 @@ fun test_start_auction_aborts_with_wrong_tld() {
 }
 
 #[test, expected_failure(abort_code = core_config::EInvalidLength)]
-fun test_start_auction_aborts_if_domain_name_too_short() {
+fun test_start_auction_aborts_if_name_too_short() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -621,8 +621,8 @@ fun test_start_auction_aborts_if_domain_name_too_short() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = domain::EInvalidDomain)]
-fun test_start_auction_aborts_if_domain_name_too_long() {
+#[test, expected_failure(abort_code = name::EInvalidName)]
+fun test_start_auction_aborts_if_name_too_long() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -638,8 +638,8 @@ fun test_start_auction_aborts_if_domain_name_too_long() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = domain::EInvalidDomain)]
-fun test_start_auction_aborts_if_domain_name_starts_with_dash() {
+#[test, expected_failure(abort_code = name::EInvalidName)]
+fun test_start_auction_aborts_if_name_starts_with_dash() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -653,8 +653,8 @@ fun test_start_auction_aborts_if_domain_name_starts_with_dash() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = domain::EInvalidDomain)]
-fun test_start_auction_aborts_if_domain_name_ends_with_dash() {
+#[test, expected_failure(abort_code = name::EInvalidName)]
+fun test_start_auction_aborts_if_name_ends_with_dash() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -668,8 +668,8 @@ fun test_start_auction_aborts_if_domain_name_ends_with_dash() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = domain::EInvalidDomain)]
-fun test_start_auction_aborts_if_domain_name_contains_uppercase_characters() {
+#[test, expected_failure(abort_code = name::EInvalidName)]
+fun test_start_auction_aborts_if_name_contains_uppercase_characters() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -746,7 +746,7 @@ fun test_admin_collect_fund() {
         utf8(FIRST_DOMAIN_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -829,7 +829,7 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
         utf8(FIRST_DOMAIN_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -884,7 +884,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
         scenario,
         THIRD_ADDRESS,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -939,7 +939,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
         utf8(FIRST_DOMAIN_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.domain() == domain::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 

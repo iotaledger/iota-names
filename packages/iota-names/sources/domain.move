@@ -2,50 +2,50 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Defines the `Domain` type and helper functions.
+/// Defines the `Name` type and helper functions.
 ///
-/// Domains are structured similar to their web2 counterpart and the rules
-/// determining what a valid domain is can be found here:
-/// https://en.wikipedia.org/wiki/Domain_name#Domain_name_syntax
-module iota_names::domain;
+/// Names are structured similar to their web2 counterpart and the rules
+/// determining what a valid name is can be found here:
+/// https://en.wikipedia.org/wiki/Name_name#Name_name_syntax
+module iota_names::name;
 
 use std::string::{Self, String, utf8};
 
 #[error]
-const EInvalidDomain: vector<u8> = b"Invalid domain.";
+const EInvalidName: vector<u8> = b"Invalid name.";
 
-/// The maximum length of a full domain
+/// The maximum length of a full name
 const MAX_DOMAIN_LENGTH: u64 = 235;
-/// The minimum length of an individual label in a domain.
+/// The minimum length of an individual label in a name.
 const MIN_LABEL_LENGTH: u64 = 1;
-/// The maximum length of an individual label in a domain.
+/// The maximum length of an individual label in a name.
 const MAX_LABEL_LENGTH: u64 = 63;
 
-/// Representation of a valid IotaNames `Domain`.
-public struct Domain has copy, drop, store {
-    /// Vector of labels that make up a domain.
+/// Representation of a valid IotaNames `Name`.
+public struct Name has copy, drop, store {
+    /// Vector of labels that make up a name.
     ///
     /// Labels are stored in reverse order such that the TLD is always in
     /// position `0`.
-    /// e.g. domain "pay.name.iota" will be stored in the vector as ["iota",
+    /// e.g. name "pay.name.iota" will be stored in the vector as ["iota",
     /// "name", "pay"].
     labels: vector<String>,
 }
 
-// Construct a `Domain` by parsing and validating the provided string
-public fun new(domain: String): Domain {
-    assert!(domain.length() <= MAX_DOMAIN_LENGTH, EInvalidDomain);
+// Construct a `Name` by parsing and validating the provided string
+public fun new(name: String): Name {
+    assert!(name.length() <= MAX_DOMAIN_LENGTH, EInvalidName);
 
-    let mut labels = split_by_dot(domain);
+    let mut labels = split_by_dot(name);
     validate_labels(&labels);
     labels.reverse();
-    Domain {
+    Name {
         labels,
     }
 }
 
-/// Converts a domain into a fully-qualified string representation.
-public fun to_string(self: &Domain): String {
+/// Converts a name into a fully-qualified string representation.
+public fun to_string(self: &Name): String {
     let dot = utf8(b".");
     let len = self.labels.length();
     let mut i = 0;
@@ -64,50 +64,50 @@ public fun to_string(self: &Domain): String {
     out
 }
 
-/// Returns the `label` in a domain specified by `level`.
+/// Returns the `label` in a name specified by `level`.
 ///
-/// Given the domain "pay.name.iota" the individual labels have the following
+/// Given the name "pay.name.iota" the individual labels have the following
 /// levels:
 /// - "pay" - `2`
 /// - "name" - `1`
 /// - "iota" - `0`
 ///
 /// This means that the TLD will always be at level `0`.
-public fun label(self: &Domain, level: u64): &String {
+public fun label(self: &Name, level: u64): &String {
     &self.labels[level]
 }
 
-/// Returns the TLD (Top-Level Domain) of a `Domain`.
+/// Returns the TLD (Top-Level Name) of a `Name`.
 ///
 /// "name.iota" -> "iota"
-public fun tld(self: &Domain): &String {
+public fun tld(self: &Name): &String {
     label(self, 0)
 }
 
-/// Returns the SLD (Second-Level Domain) of a `Domain`.
+/// Returns the SLD (Second-Level Name) of a `Name`.
 ///
 /// "name.iota" -> "iota"
-public fun sld(self: &Domain): &String {
+public fun sld(self: &Name): &String {
     label(self, 1)
 }
 
-public fun number_of_levels(self: &Domain): u64 {
+public fun number_of_levels(self: &Name): u64 {
     self.labels.length()
 }
 
-public fun is_subdomain(domain: &Domain): bool {
-    number_of_levels(domain) > 2
+public fun is_subname(name: &Name): bool {
+    number_of_levels(name) > 2
 }
 
-/// Derive the parent of a subdomain.
-/// e.g. `subdomain.example.iota` -> `example.iota`
-public fun parent(domain: &Domain): Option<Domain> {
-    if (is_subdomain(domain)) {
-        let mut labels = domain.labels;
+/// Derive the parent of a subname.
+/// e.g. `subname.example.iota` -> `example.iota`
+public fun parent(name: &Name): Option<Name> {
+    if (is_subname(name)) {
+        let mut labels = name.labels;
         // we pop the last element and construct the parent from the remaining
         // labels.
         labels.pop_back();
-        option::some(Domain {
+        option::some(Name {
             labels,
         })
     } else {
@@ -115,13 +115,13 @@ public fun parent(domain: &Domain): Option<Domain> {
     }
 }
 
-/// Checks if `parent` domain is a valid parent for `child`.
-public fun is_parent_of(parent: &Domain, child: &Domain): bool {
+/// Checks if `parent` name is a valid parent for `child`.
+public fun is_parent_of(parent: &Name, child: &Name): bool {
     if (number_of_levels(parent) < number_of_levels(child)) {
         let mut maybe_parent = parent(child);
         if (maybe_parent.is_some()) {
-            let parent_domain = maybe_parent.extract();
-            parent_domain.labels == &parent.labels
+            let parent_name = maybe_parent.extract();
+            parent_name.labels == &parent.labels
         } else {
             false
         }
@@ -131,14 +131,14 @@ public fun is_parent_of(parent: &Domain, child: &Domain): bool {
 }
 
 fun validate_labels(labels: &vector<String>) {
-    assert!(!labels.is_empty(), EInvalidDomain);
+    assert!(!labels.is_empty(), EInvalidName);
 
     let len = labels.length();
     let mut index = 0;
 
     while (index < len) {
         let label = &labels[index];
-        assert!(is_valid_label(label), EInvalidDomain);
+        assert!(is_valid_label(label), EInvalidName);
         index = index + 1;
     }
 }
@@ -198,20 +198,20 @@ fun split_by_dot(mut s: String): vector<String> {
 use iota::test_utils::assert_eq;
 
 #[test_only]
-fun test_valid_domain(name: vector<u8>, expected_labels: vector<vector<u8>>) {
+fun test_valid_name(name: vector<u8>, expected_labels: vector<vector<u8>>) {
     let name = utf8(name);
-    let domain = new(name);
+    let name = new(name);
     let expected_labels = prep_expected_labels(expected_labels);
-    assert_eq(domain.labels, expected_labels);
-    assert_eq(name, to_string(&domain));
+    assert_eq(name.labels, expected_labels);
+    assert_eq(name, to_string(&name));
 
-    // Validate `domain::label` function
+    // Validate `name::label` function
     let len = vector::length(&expected_labels);
     let mut index = 0;
 
     while (index < len) {
         let label = &expected_labels[index];
-        assert_eq(*label, *label(&domain, index));
+        assert_eq(*label, *label(&name, index));
         index = index + 1;
     }
 }
@@ -227,19 +227,19 @@ fun prep_expected_labels(mut labels: vector<vector<u8>>): vector<String> {
 }
 
 #[test]
-fun valid_domains() {
-    test_valid_domain(b"abc.123", vector[b"abc", b"123"]);
-    test_valid_domain(b"iotanames.iota", vector[b"iotanames", b"iota"]);
-    test_valid_domain(
+fun valid_names() {
+    test_valid_name(b"abc.123", vector[b"abc", b"123"]);
+    test_valid_name(b"iotanames.iota", vector[b"iotanames", b"iota"]);
+    test_valid_name(
         b"1.2.3.4.5.6.7.8.9.0.iota",
         vector[b"1", b"2", b"3", b"4", b"5", b"6", b"7", b"8", b"9", b"0", b"iota"],
     );
-    test_valid_domain(b"pay.foundation.iota", vector[b"pay", b"foundation", b"iota"]);
-    test_valid_domain(
+    test_valid_name(b"pay.foundation.iota", vector[b"pay", b"foundation", b"iota"]);
+    test_valid_name(
         b"abcdefghijklmnopqrstuvxyz0123456789.move",
         vector[b"abcdefghijklmnopqrstuvxyz0123456789", b"move"],
     );
-    test_valid_domain(b"a----b.iota", vector[b"a----b", b"iota"]);
+    test_valid_name(b"a----b.iota", vector[b"a----b", b"iota"]);
 }
 
 #[test_only]
@@ -259,17 +259,17 @@ fun test_valid_labels() {
 }
 
 #[test_only]
-fun expect_is_subdomain(domain: vector<u8>, subdomain: vector<u8>, expected: bool) {
-    let domain = new(utf8(domain));
-    let subdomain = new(utf8(subdomain));
-    assert_eq(is_parent_of(&domain, &subdomain), expected);
+fun expect_is_subname(name: vector<u8>, subname: vector<u8>, expected: bool) {
+    let name = new(utf8(name));
+    let subname = new(utf8(subname));
+    assert_eq(is_parent_of(&name, &subname), expected);
 }
 
 #[test]
-fun test_is_subdomain() {
-    expect_is_subdomain(b"foundation.iota", b"pay.foundation.iota", true);
-    expect_is_subdomain(b"pay.foundation.iota", b"foundation.iota", false);
-    expect_is_subdomain(b"foundation.iota", b"pay.move.iota", false);
+fun test_is_subname() {
+    expect_is_subname(b"foundation.iota", b"pay.foundation.iota", true);
+    expect_is_subname(b"pay.foundation.iota", b"foundation.iota", false);
+    expect_is_subname(b"foundation.iota", b"pay.move.iota", false);
 }
 
 #[test]

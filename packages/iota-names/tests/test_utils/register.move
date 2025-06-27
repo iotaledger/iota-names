@@ -8,7 +8,7 @@ module iota_names::register;
 use iota::clock::Clock;
 use iota::coin::Coin;
 use iota_names::core_config::CoreConfig;
-use iota_names::domain;
+use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::PricingConfig;
@@ -18,21 +18,21 @@ use std::string::String;
 #[error]
 const EInvalidYearsArgument: vector<u8> = b"Number of years passed is not within allowed interval.";
 #[error]
-const EIncorrectAmount: vector<u8> = b"The payment does not match the price for the domain.";
+const EIncorrectAmount: vector<u8> = b"The payment does not match the price for the name.";
 
 /// Authorization witness to call protected functions of `iota_names`.
 public struct RegisterAuth has drop {}
 
-// Allows direct purchases of domains
+// Allows direct purchases of names
 //
 // Makes sure that:
-// - the domain is not already registered (or, if active, expired)
-// - the domain TLD is .iota
-// - the domain is not a subdomain
+// - the name is not already registered (or, if active, expired)
+// - the name TLD is .iota
+// - the name is not a subname
 // - number of years is within [1-5] interval
 public fun register<T>(
     iota_names: &mut IotaNames,
-    domain_name: String,
+    name: String,
     no_years: u8,
     payment: Coin<T>,
     clock: &Clock,
@@ -43,12 +43,12 @@ public fun register<T>(
     let config = iota_names.get_config<PricingConfig>();
     // If no PricingConfig of type T, add an error code
 
-    let domain = domain::new(domain_name);
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
+    let name = name::new(name);
+    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
 
     assert!(0 < no_years && no_years <= 5, EInvalidYearsArgument);
 
-    let price = config.calculate_base_price_of_domain(domain) * (no_years as u64);
+    let price = config.calculate_base_price_of_name(name) * (no_years as u64);
     assert!(payment.value() == price, EIncorrectAmount);
 
     iota_names.auth_add_balance<_, T>(RegisterAuth {}, payment.into_balance());
@@ -56,5 +56,5 @@ public fun register<T>(
         RegisterAuth {},
         iota_names,
     );
-    registry.add_record(domain, no_years, clock, ctx)
+    registry.add_record(name, no_years, clock, ctx)
 }

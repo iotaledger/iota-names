@@ -8,11 +8,11 @@ use iota::event;
 use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
-use iota_names::domain::Domain;
+use iota_names::name::Name;
 use iota_names::iota_names::AdminCap;
 use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 use iota_names::name_record::{Self, NameRecord};
-use iota_names::subdomain_registration::{Self, SubdomainRegistration};
+use iota_names::subname_registration::{Self, SubnameRegistration};
 use std::option::{none, some};
 use std::string::String;
 
@@ -42,36 +42,36 @@ const ERecordNotFound: vector<u8> = b"Trying to lookup a record that doesn't exi
 ///
 /// Contains two tables necessary for the lookup.
 public struct Registry has store {
-    /// The `registry` table maps `Domain` to `NameRecord`.
+    /// The `registry` table maps `Name` to `NameRecord`.
     /// Added / replaced in the `add_record` function.
-    registry: Table<Domain, NameRecord>,
-    /// The `reverse_registry` table maps `address` to `domain_name`.
+    registry: Table<Name, NameRecord>,
+    /// The `reverse_registry` table maps `address` to `name`.
     /// Updated in the `set_reverse_lookup` function.
-    reverse_registry: Table<address, Domain>,
+    reverse_registry: Table<address, Name>,
 }
 
 public struct NameRecordAddedEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     name_record: NameRecord
 }
 
 public struct NameRecordRemovedEvent has copy, drop {
-    domain: Domain,
+    name: Name,
 }
 
 public struct TargetAddressSetEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     target_address: Option<address>
 }
 
 public struct ReverseLookupSetEvent has copy, drop {
     default_address: address,
-    default_name: Domain
+    default_name: Name
 }
 
 public struct ReverseLookupUnsetEvent has copy, drop {
     default_address: address,
-    default_name: Domain
+    default_name: Name
 }
 
 public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
@@ -83,30 +83,30 @@ public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
 
 /// Attempts to add a new record to the registry without looking at the grace
 /// period.
-/// Currently used for subdomains where there's no grace period to respect.
+/// Currently used for subnames where there's no grace period to respect.
 /// Returns a `IotaNamesRegistration` upon success.
 public fun add_record_ignoring_grace_period(
     self: &mut Registry,
-    domain: Domain,
+    name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
-    self.internal_add_record(domain, no_years, clock, false, ctx)
+    self.internal_add_record(name, no_years, clock, false, ctx)
 }
 
 /// Attempts to add a new record to the registry and returns a
 /// `IotaNamesRegistration` upon success.
 /// Only use with second-level names. Enforces a `grace_period` by default.
-/// Not suitable for subdomains (unless a grace period is needed).
+/// Not suitable for subnames (unless a grace period is needed).
 public fun add_record(
     self: &mut Registry,
-    domain: Domain,
+    name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
-    self.internal_add_record(domain, no_years, clock, true, ctx)
+    self.internal_add_record(name, no_years, clock, true, ctx)
 }
 
 /// Attempts to burn an NFT and get storage rebates.
@@ -119,21 +119,21 @@ public fun burn_registration_object(
     // First we make sure that the IotaNamesRegistration object has expired.
     assert!(nft.has_expired(clock), ERecordNotExpired);
 
-    let domain = nft.domain();
+    let name = nft.name();
 
-    // Then, if the registry still has a record for this domain and the NFT ID
+    // Then, if the registry still has a record for this name and the NFT ID
     // matches, we remove it.
-    if (self.registry.contains(domain)) {
-        let record = &self.registry[domain];
+    if (self.registry.contains(name)) {
+        let record = &self.registry[name];
 
         // We wanna remove the record only if the NFT ID matches.
         if (record.nft_id() == object::id(&nft)) {
             event::emit(NameRecordRemovedEvent {
-                domain,
+                name,
             });
-            let record = self.registry.remove(domain);
+            let record = self.registry.remove(name);
             self.handle_invalidate_reverse_record(
-                &domain,
+                &name,
                 record.target_address(),
                 none(),
             );
@@ -143,25 +143,25 @@ public fun burn_registration_object(
     nft.burn();
 }
 
-/// Allow creation of subdomain wrappers only to authorized modules.
-public fun wrap_subdomain(
+/// Allow creation of subname wrappers only to authorized modules.
+public fun wrap_subname(
     _: &mut Registry,
     nft: IotaNamesRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
-): SubdomainRegistration {
-    subdomain_registration::new(nft, clock, ctx)
+): SubnameRegistration {
+    subname_registration::new(nft, clock, ctx)
 }
 
-/// Attempts to burn a subdomain registration object,
+/// Attempts to burn a subname registration object,
 /// and also invalidates any records in the registry / reverse registry.
-public fun burn_subdomain_object(self: &mut Registry, nft: SubdomainRegistration, clock: &Clock) {
+public fun burn_subname_object(self: &mut Registry, nft: SubnameRegistration, clock: &Clock) {
     let nft = nft.burn(clock);
     self.burn_registration_object(nft, clock);
 }
 
 /// Adds a `leaf` record to the registry.
-/// A `leaf` record is a record that is a subdomain and doesn't have
+/// A `leaf` record is a record that is a subname and doesn't have
 /// an equivalent `IotaNamesRegistration` object.
 ///
 /// Instead, the parent's `IotaNamesRegistration` object is used to manage
@@ -178,15 +178,15 @@ public fun burn_subdomain_object(self: &mut Registry, nft: SubdomainRegistration
 /// we need to check that the parent's NFT_ID is valid & hasn't expired.
 public fun add_leaf_record(
     self: &mut Registry,
-    domain: Domain,
+    name: Name,
     clock: &Clock,
     target: address,
     _ctx: &mut TxContext,
 ) {
-    assert!(domain.is_subdomain(), EInvalidDepth);
+    assert!(name.is_subname(), EInvalidDepth);
 
-    // get the parent of the domain
-    let parent = domain.parent().extract();
+    // get the parent of the name
+    let parent = name.parent().extract();
     let option_parent_name_record = self.lookup(parent);
 
     assert!(option_parent_name_record.is_some(), ERecordNotFound);
@@ -201,12 +201,12 @@ public fun add_leaf_record(
     assert!(!parent_name_record.has_expired(clock), ERecordExpired);
 
     // Removes an existing record if it exists and is expired.
-    self.remove_existing_record_if_exists_and_expired(domain, clock, false);
+    self.remove_existing_record_if_exists_and_expired(name, clock, false);
 
     let name_record = name_record::new_leaf(parent_name_record.nft_id(), some(target));
 
     event::emit(NameRecordAddedEvent {
-        domain,
+        name,
         name_record
     });
 
@@ -214,7 +214,7 @@ public fun add_leaf_record(
     self
         .registry
         .add(
-            domain,
+            name,
             name_record
         );
 }
@@ -223,80 +223,80 @@ public fun add_leaf_record(
 /// Leaf records do not have any symmetrical `IotaNamesRegistration` object.
 /// Authorization of who calls this is delegated to the authorized module that
 /// calls this.
-public fun remove_leaf_record(self: &mut Registry, domain: Domain) {
+public fun remove_leaf_record(self: &mut Registry, name: Name) {
     // We can only call remove on a leaf record.
-    assert!(self.is_leaf_record(domain), ENonLeafRecord);
+    assert!(self.is_leaf_record(name), ENonLeafRecord);
 
     // if it's a leaf record, there's no `IotaNamesRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
     event::emit(NameRecordRemovedEvent {
-        domain,
+        name,
     });
-    let record = self.registry.remove(domain);
+    let record = self.registry.remove(name);
     let old_target_address = record.target_address();
 
-    self.handle_invalidate_reverse_record(&domain, old_target_address, none());
+    self.handle_invalidate_reverse_record(&name, old_target_address, none());
 }
 
-/// Forcefully remove any record by domain.
+/// Forcefully remove any record by name.
 /// This bypasses all expiration and authorization checks.
 /// Should only be called by admin functions.
-public(package) fun force_remove_record(self: &mut Registry, domain: Domain) {
+public(package) fun force_remove_record(self: &mut Registry, name: Name) {
     // Check if the record exists before trying to remove it
-    if (!self.registry.contains(domain)) {
+    if (!self.registry.contains(name)) {
         return
     };
 
     event::emit(NameRecordRemovedEvent {
-        domain,
+        name,
     });
     
-    let record = self.registry.remove(domain);
+    let record = self.registry.remove(name);
     let old_target_address = record.target_address();
 
     // Invalidate any reverse lookup entries
-    self.handle_invalidate_reverse_record(&domain, old_target_address, none());
+    self.handle_invalidate_reverse_record(&name, old_target_address, none());
 }
 
-public fun set_target_address(self: &mut Registry, domain: Domain, new_target: Option<address>) {
-    let record = &mut self.registry[domain];
+public fun set_target_address(self: &mut Registry, name: Name, new_target: Option<address>) {
+    let record = &mut self.registry[name];
     let old_target = record.target_address();
 
     event::emit(TargetAddressSetEvent {
-        domain,
+        name,
         target_address: new_target
     });
 
     record.set_target_address(new_target);
-    self.handle_invalidate_reverse_record(&domain, old_target, new_target);
+    self.handle_invalidate_reverse_record(&name, old_target, new_target);
 }
 
 public fun unset_reverse_lookup(self: &mut Registry, address: address) {
-    let domain = self.reverse_registry.remove(address);
+    let name = self.reverse_registry.remove(address);
     event::emit(ReverseLookupUnsetEvent {
         default_address: address,
-        default_name: domain
+        default_name: name
     });
     
 }
 
 /// Reverse lookup can only be set for the record that has the target address.
-public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Domain) {
-    let record = &self.registry[domain];
+public fun set_reverse_lookup(self: &mut Registry, address: address, name: Name) {
+    let record = &self.registry[name];
     let target = record.target_address();
 
     assert!(target.is_some(), ETargetNotSet);
     assert!(some(address) == target, ERecordMismatch);
 
     if (self.reverse_registry.contains(address)) {
-        *self.reverse_registry.borrow_mut(address) = domain;
+        *self.reverse_registry.borrow_mut(address) = name;
     } else {
         event::emit(ReverseLookupSetEvent {
             default_address: address,
-            default_name: domain
+            default_name: name
         });
-        self.reverse_registry.add(address, domain);
+        self.reverse_registry.add(address, name);
     };
 }
 
@@ -306,10 +306,10 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, domain: Dom
 public fun set_expiration_timestamp_ms(
     self: &mut Registry,
     nft: &mut IotaNamesRegistration,
-    domain: Domain,
+    name: Name,
     expiration_timestamp_ms: u64,
 ) {
-    let record = &mut self.registry[domain];
+    let record = &mut self.registry[name];
 
     assert!(object::id(nft) == record.nft_id(), EIdMismatch);
     record.set_expiration_timestamp_ms(expiration_timestamp_ms);
@@ -320,30 +320,30 @@ public fun set_expiration_timestamp_ms(
 /// Use with caution and validate(!!) that any system fields are not removed
 /// (accidently),
 /// when building authorized packages that can write the metadata field.
-public fun set_data(self: &mut Registry, domain: Domain, data: VecMap<String, String>) {
-    let record = &mut self.registry[domain];
+public fun set_data(self: &mut Registry, name: Name, data: VecMap<String, String>) {
+    let record = &mut self.registry[name];
     record.set_data(data);
 }
 
 // === Reads ===
 
-/// Check whether the given `domain` is registered in the `Registry`.
-public fun has_record(self: &Registry, domain: Domain): bool {
-    self.registry.contains(domain)
+/// Check whether the given `name` is registered in the `Registry`.
+public fun has_record(self: &Registry, name: Name): bool {
+    self.registry.contains(name)
 }
 
-/// Returns the `NameRecord` associated with the given domain or None.
-public fun lookup(self: &Registry, domain: Domain): Option<NameRecord> {
-    if (self.registry.contains(domain)) {
-        let record = &self.registry[domain];
+/// Returns the `NameRecord` associated with the given name or None.
+public fun lookup(self: &Registry, name: Name): Option<NameRecord> {
+    if (self.registry.contains(name)) {
+        let record = &self.registry[name];
         some(*record)
     } else {
         none()
     }
 }
 
-/// Returns the `domain_name` associated with the given address or None.
-public fun reverse_lookup(self: &Registry, address: address): Option<Domain> {
+/// Returns the `name` associated with the given address or None.
+public fun reverse_lookup(self: &Registry, address: address): Option<Name> {
     if (self.reverse_registry.contains(address)) {
         some(self.reverse_registry[address])
     } else {
@@ -355,8 +355,8 @@ public fun reverse_lookup(self: &Registry, address: address): Option<Domain> {
 /// 1. Matches the ID in the corresponding `Record`
 /// 2. Has not expired (does not take into account the grace period)
 public fun assert_nft_is_authorized(self: &Registry, nft: &IotaNamesRegistration, clock: &Clock) {
-    let domain = nft.domain();
-    let record = &self.registry[domain];
+    let name = nft.name();
+    let record = &self.registry[name];
 
     // The NFT does not
     assert!(object::id(nft) == record.nft_id(), EIdMismatch);
@@ -364,28 +364,28 @@ public fun assert_nft_is_authorized(self: &Registry, nft: &IotaNamesRegistration
     assert!(!nft.has_expired(clock), ENftExpired);
 }
 
-/// Returns the `data` associated with the given `Domain`.
-public fun get_data(self: &Registry, domain: Domain): &VecMap<String, String> {
-    let record = &self.registry[domain];
+/// Returns the `data` associated with the given `Name`.
+public fun get_data(self: &Registry, name: Name): &VecMap<String, String> {
+    let record = &self.registry[name];
     record.data()
 }
 
 // === Private Functions ===
 
-/// Checks whether a subdomain record is `leaf`.
+/// Checks whether a subname record is `leaf`.
 /// `leaf` record: a record whose target address can only be set by the parent,
 /// hence the nft_id points to the parent's ID. Leaf records can't create
-/// subdomains
+/// subnames
 /// and don't have their own `IotaNamesRegistration` object Cap. The
 /// `IotaNamesRegistration` of the parent
 /// is the one that manages them.
 ///
-fun is_leaf_record(self: &Registry, domain: Domain): bool {
-    if (!domain.is_subdomain()) {
+fun is_leaf_record(self: &Registry, name: Name): bool {
+    if (!name.is_subname()) {
         return false
     };
 
-    let option_name_record = self.lookup(domain);
+    let option_name_record = self.lookup(name);
 
     if (option_name_record.is_none()) {
         return false
@@ -397,56 +397,56 @@ fun is_leaf_record(self: &Registry, domain: Domain): bool {
 /// An internal helper to add a record
 fun internal_add_record(
     self: &mut Registry,
-    domain: Domain,
+    name: Name,
     no_years: u8,
     clock: &Clock,
     with_grace_period: bool,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     self.remove_existing_record_if_exists_and_expired(
-        domain,
+        name,
         clock,
         with_grace_period,
     );
 
     // If we've made it to this point then we know that we are able to
-    // register an entry for this domain.
-    let nft = nft::new(domain, no_years, clock, ctx);
+    // register an entry for this name.
+    let nft = nft::new(name, no_years, clock, ctx);
     let name_record = name_record::new(
         object::id(&nft),
         nft.expiration_timestamp_ms(),
     );
     
     event::emit(NameRecordAddedEvent {
-        domain,
+        name,
         name_record
     });
 
-    self.registry.add(domain, name_record);
+    self.registry.add(name, name_record);
     nft
 }
 
 fun remove_existing_record_if_exists_and_expired(
     self: &mut Registry,
-    domain: Domain,
+    name: Name,
     clock: &Clock,
     with_grace_period: bool,
 ) {
-    // if the domain is not part of the registry, we can override.
-    if (!self.registry.contains(domain)) return;
+    // if the name is not part of the registry, we can override.
+    if (!self.registry.contains(name)) return;
 
     // Remove the record and assert that it has expired (past the grace period
     // if applicable)
     event::emit(NameRecordRemovedEvent {
-        domain,
+        name,
     });
-    let record = self.registry.remove(domain);
+    let record = self.registry.remove(name);
 
     // Special case for leaf records, we can override them iff their parent has
     // changed or has expired.
     if (record.is_leaf_record()) {
         // find the parent of the leaf record.
-        let option_parent_name_record = self.lookup(domain.parent().extract());
+        let option_parent_name_record = self.lookup(name.parent().extract());
 
         // if there's a parent (if not, we can just remove it), we need to check
         // if the parent is valid.
@@ -472,12 +472,12 @@ fun remove_existing_record_if_exists_and_expired(
     };
 
     let old_target_address = record.target_address();
-    self.handle_invalidate_reverse_record(&domain, old_target_address, none());
+    self.handle_invalidate_reverse_record(&name, old_target_address, none());
 }
 
 fun handle_invalidate_reverse_record(
     self: &mut Registry,
-    domain: &Domain,
+    name: &Name,
     old_target_address: Option<address>,
     new_target_address: Option<address>,
 ) {
@@ -493,8 +493,8 @@ fun handle_invalidate_reverse_record(
     let reverse_registry = &self.reverse_registry;
 
     if (reverse_registry.contains(old_target_address)) {
-        let default_domain = &reverse_registry[old_target_address];
-        if (default_domain == domain) {
+        let default_name = &reverse_registry[old_target_address];
+        if (default_name == name) {
             self.unset_reverse_lookup(old_target_address)
         }
     };
@@ -519,8 +519,8 @@ public fun new_for_testing(ctx: &mut TxContext): Registry {
 }
 
 #[test_only]
-public fun remove_record_for_testing(self: &mut Registry, domain: Domain): NameRecord {
-    self.registry.remove(domain)
+public fun remove_record_for_testing(self: &mut Registry, name: Name): NameRecord {
+    self.registry.remove(name)
 }
 
 #[test_only]

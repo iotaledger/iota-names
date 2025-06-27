@@ -4,22 +4,22 @@
 
 #[test_only]
 #[allow(lint(abort_without_constant))]
-module iota_names_subdomains::subdomain_tests;
+module iota_names_subnames::subname_tests;
 
 use iota_names_deny_list::deny_list::{Self, DenyListAuth};
 use iota::clock::{Self, Clock};
 use iota::test_scenario::{Self as ts, Scenario, ctx};
 use iota_names::constants::{grace_period_ms, year_ms};
 use iota_names::controller::{Self, ControllerAuth};
-use iota_names::domain;
+use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 use iota_names::registry::{Self, Registry};
 use iota_names::registry_tests::burn_nfts;
-use iota_names::subdomain_registration::{Self, SubdomainRegistration};
+use iota_names::subname_registration::{Self, SubnameRegistration};
 use std::string::{String, utf8};
-use iota_names_subdomains::config;
-use iota_names_subdomains::subdomains::{Self, SubdomainsAuth};
+use iota_names_subnames::config;
+use iota_names_subnames::subnames::{Self, SubnamesAuth};
 
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;
@@ -34,7 +34,7 @@ fun test_multiple_operation_cases() {
 
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -43,11 +43,11 @@ fun test_multiple_operation_cases() {
         scenario,
     );
 
-    create_leaf_subdomain(&parent, utf8(b"leaf.test.iota"), TEST_ADDRESS, scenario);
-    remove_leaf_subdomain(&parent, utf8(b"leaf.test.iota"), scenario);
+    create_leaf_subname(&parent, utf8(b"leaf.test.iota"), TEST_ADDRESS, scenario);
+    remove_leaf_subname(&parent, utf8(b"leaf.test.iota"), scenario);
 
     // Create a node name with the same name as the leaf that was deleted.
-    let another_child = create_node_subdomain(
+    let another_child = create_node_subname(
         &parent,
         utf8(b"leaf.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -56,8 +56,8 @@ fun test_multiple_operation_cases() {
         scenario,
     );
 
-    let nested = create_node_subdomain(
-        subdomain_registration::nft(&child),
+    let nested = create_node_subname(
+        subname_registration::nft(&child),
         utf8(b"nested.node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
         true,
@@ -65,33 +65,33 @@ fun test_multiple_operation_cases() {
         scenario,
     );
 
-    // extend node's subdomain expiration to the limit.
-    extend_node_subdomain(
+    // extend node's subname expiration to the limit.
+    extend_node_subname(
         &mut child,
         iota_names_registration::expiration_timestamp_ms(&parent),
         scenario,
     );
 
-    // update subdomain's setup for testing
-    update_subdomain_setup(&parent, utf8(b"node.test.iota"), false, false, scenario);
+    // update subname's setup for testing
+    update_subname_setup(&parent, utf8(b"node.test.iota"), false, false, scenario);
 
     increment_clock(year_ms() +1, scenario);
 
-    burn_subdomain(child, scenario);
-    burn_subdomain(nested, scenario);
-    burn_subdomain(another_child, scenario);
+    burn_subname(child, scenario);
+    burn_subname(nested, scenario);
+    burn_subname(another_child, scenario);
 
     burn_nfts(vector[parent]);
     ts::end(scenario_val);
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EInvalidExpirationDate)]
 fun expiration_past_parents_expiration() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let _child = create_node_subdomain(
+    let _child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         iota_names_registration::expiration_timestamp_ms(&parent) + 1,
@@ -103,14 +103,14 @@ fun expiration_past_parents_expiration() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::config::EInvalidParent)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::config::EInvalidParent)]
 /// tries to create a child node using an invalid parent.
 fun invalid_parent_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let _child = create_node_subdomain(
+    let _child = create_node_subname(
         &parent,
         utf8(b"node.example.iota"),
         iota_names_registration::expiration_timestamp_ms(&parent),
@@ -122,13 +122,13 @@ fun invalid_parent_failure() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::ECreationDisabledForSubdomain)]
-fun tries_to_create_subdomain_with_disallowed_node_parent() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ECreationDisabledForSubname)]
+fun tries_to_create_subname_with_disallowed_node_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let child = create_node_subdomain(
+    let child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         iota_names_registration::expiration_timestamp_ms(&parent),
@@ -137,8 +137,8 @@ fun tries_to_create_subdomain_with_disallowed_node_parent() {
         scenario,
     );
 
-    let child_nft = subdomain_registration::nft(&child);
-    let _nested = create_node_subdomain(
+    let child_nft = subname_registration::nft(&child);
+    let _nested = create_node_subname(
         child_nft,
         utf8(b"test.node.test.iota"),
         iota_names_registration::expiration_timestamp_ms(child_nft),
@@ -150,13 +150,13 @@ fun tries_to_create_subdomain_with_disallowed_node_parent() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EExtensionDisabledForSubdomain)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EExtensionDisabledForSubname)]
 fun tries_to_extend_without_permissions() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -165,18 +165,18 @@ fun tries_to_extend_without_permissions() {
         scenario,
     );
 
-    extend_node_subdomain(&mut child, 2, scenario);
+    extend_node_subname(&mut child, 2, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::ESubdomainReplaced)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ESubnameReplaced)]
 fun tries_to_extend_with_burned_parent() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -199,19 +199,19 @@ fun tries_to_extend_with_burned_parent() {
     ts::return_shared(clock);
 
     // any extension.
-    extend_node_subdomain(&mut child, 2, scenario);
+    extend_node_subname(&mut child, 2, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EParentChanged)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EParentChanged)]
 fun tries_to_extend_while_parent_changed() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -229,19 +229,19 @@ fun tries_to_extend_while_parent_changed() {
     let _parent_w_different_owner = create_sld_name(utf8(b"test.iota"), scenario);
 
     // any extension.
-    extend_node_subdomain(&mut child, 2, scenario);
+    extend_node_subname(&mut child, 2, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EInvalidExpirationDate)]
 fun tries_to_extend_with_too_long_date() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -256,19 +256,19 @@ fun tries_to_extend_with_too_long_date() {
         scenario,
     );
 
-    extend_node_subdomain(&mut child, MIN_SUBDOMAIN_DURATION + 24 * 60 * 60 * 1000 * 366, scenario);
+    extend_node_subname(&mut child, MIN_SUBDOMAIN_DURATION + 24 * 60 * 60 * 1000 * 366, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EInvalidExpirationDate)]
 fun tries_to_extend_with_too_short_date() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
     // child is an expired name ofc.
-    let mut child = create_node_subdomain(
+    let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -283,18 +283,18 @@ fun tries_to_extend_with_too_short_date() {
         scenario,
     );
 
-    extend_node_subdomain(&mut child, 1, scenario);
+    extend_node_subname(&mut child, 1, scenario);
 
     abort 1337
 }
 
 #[test, expected_failure(abort_code = ::iota_names::registry::ERecordExpired)]
-fun tries_to_use_expired_subdomain_to_create_new() {
+fun tries_to_use_expired_subname_to_create_new() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let child = create_node_subdomain(
+    let child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         MIN_SUBDOMAIN_DURATION,
@@ -304,8 +304,8 @@ fun tries_to_use_expired_subdomain_to_create_new() {
     );
 
     increment_clock(MIN_SUBDOMAIN_DURATION +1, scenario);
-    create_leaf_subdomain(
-        subdomain_registration::nft(&child),
+    create_leaf_subname(
+        subname_registration::nft(&child),
         utf8(b"node.node.test.iota"),
         TEST_ADDRESS,
         scenario,
@@ -314,13 +314,13 @@ fun tries_to_use_expired_subdomain_to_create_new() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EInvalidExpirationDate)]
-fun tries_to_create_too_short_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EInvalidExpirationDate)]
+fun tries_to_create_too_short_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
 
-    let _child = create_node_subdomain(
+    let _child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
         1,
@@ -332,18 +332,18 @@ fun tries_to_create_too_short_subdomain() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::config::EInvalidParent)]
-fun tries_to_created_nested_leaf_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::config::EInvalidParent)]
+fun tries_to_created_nested_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
-    create_leaf_subdomain(&parent, utf8(b"node.node.test.iota"), TEST_ADDRESS, scenario);
+    create_leaf_subname(&parent, utf8(b"node.node.test.iota"), TEST_ADDRESS, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::ENotAllowedName)]
-fun tries_to_create_denied_leaf_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ENotAllowedName)]
+fun tries_to_create_denied_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -355,13 +355,13 @@ fun tries_to_create_denied_leaf_subdomain() {
     ts::return_to_sender(scenario, admin_cap);
 
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
-    create_leaf_subdomain(&parent, utf8(b"blocked.test.iota"), TEST_ADDRESS, scenario);
+    create_leaf_subname(&parent, utf8(b"blocked.test.iota"), TEST_ADDRESS, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::ENotAllowedName)]
-fun tries_to_create_denied_node_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::ENotAllowedName)]
+fun tries_to_create_denied_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -373,7 +373,7 @@ fun tries_to_create_denied_node_subdomain() {
     ts::return_to_sender(scenario, admin_cap);
 
     let parent = create_sld_name(utf8(b"test.iota"), scenario);
-    let _child = create_node_subdomain(
+    let _child = create_node_subname(
         &parent, 
         utf8(b"blocked.test.iota"), 
         1,
@@ -392,7 +392,7 @@ public fun test_init(): Scenario {
     let scenario = &mut scenario_val;
     {
         let mut iota_names = iota_names::init_for_testing(ctx(scenario));
-        iota_names::authorize_for_testing<SubdomainsAuth>(&mut iota_names);
+        iota_names::authorize_for_testing<SubnamesAuth>(&mut iota_names);
         iota_names::authorize_for_testing<DenyListAuth>(&mut iota_names);
         iota_names::authorize_for_testing<ControllerAuth>(&mut iota_names);
         iota_names::share_for_testing(iota_names);
@@ -416,8 +416,8 @@ public fun test_init(): Scenario {
 
 /// Get the active registry of the current scenario. (mutable, so we can add extra names ourselves)
 public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
-    let registry_mut = iota_names::auth_registry_mut<SubdomainsAuth, Registry>(
-        subdomains::auth_for_testing(),
+    let registry_mut = iota_names::auth_registry_mut<SubnamesAuth, Registry>(
+        subnames::auth_for_testing(),
         iota_names,
     );
 
@@ -433,7 +433,7 @@ public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegi
 
     let parent = registry::add_record(
         registry_mut,
-        domain::new(name),
+        name::new(name),
         1,
         &clock,
         ctx(scenario),
@@ -444,8 +444,8 @@ public fun create_sld_name(name: String, scenario: &mut Scenario): IotaNamesRegi
     parent
 }
 
-/// Create a leaf subdomain
-public fun create_leaf_subdomain(
+/// Create a leaf subname
+public fun create_leaf_subname(
     parent: &IotaNamesRegistration,
     name: String,
     target: address,
@@ -455,14 +455,14 @@ public fun create_leaf_subdomain(
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    subdomains::new_leaf(&mut iota_names, parent, &clock, name, target, ctx(scenario));
+    subnames::new_leaf(&mut iota_names, parent, &clock, name, target, ctx(scenario));
 
     ts::return_shared(iota_names);
     ts::return_shared(clock);
 }
 
-/// Remove a leaf subdomain
-public fun remove_leaf_subdomain(
+/// Remove a leaf subname
+public fun remove_leaf_subname(
     parent: &IotaNamesRegistration,
     name: String,
     scenario: &mut Scenario,
@@ -471,26 +471,26 @@ public fun remove_leaf_subdomain(
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    subdomains::remove_leaf(&mut iota_names, parent, &clock, name);
+    subnames::remove_leaf(&mut iota_names, parent, &clock, name);
 
     ts::return_shared(iota_names);
     ts::return_shared(clock);
 }
 
-/// Create a node subdomain
-public fun create_node_subdomain(
+/// Create a node subname
+public fun create_node_subname(
     parent: &IotaNamesRegistration,
     name: String,
     expiration: u64,
     allow_creation: bool,
     allow_extension: bool,
     scenario: &mut Scenario,
-): SubdomainRegistration {
+): SubnameRegistration {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    let nft = subdomains::new(
+    let nft = subnames::new(
         &mut iota_names,
         parent,
         &clock,
@@ -507,9 +507,9 @@ public fun create_node_subdomain(
     nft
 }
 
-/// Extend a node subdomain's expiration.
-public fun extend_node_subdomain(
-    nft: &mut SubdomainRegistration,
+/// Extend a node subname's expiration.
+public fun extend_node_subname(
+    nft: &mut SubnameRegistration,
     expiration: u64,
     scenario: &mut Scenario,
 ) {
@@ -517,15 +517,15 @@ public fun extend_node_subdomain(
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    subdomains::extend_expiration(&mut iota_names, nft, expiration);
+    subnames::extend_expiration(&mut iota_names, nft, expiration);
 
     ts::return_shared(iota_names);
     ts::return_shared(clock);
 }
 
-public fun update_subdomain_setup(
+public fun update_subname_setup(
     parent: &IotaNamesRegistration,
-    subdomain: String,
+    subname: String,
     allow_creation: bool,
     allow_extension: bool,
     scenario: &mut Scenario,
@@ -534,11 +534,11 @@ public fun update_subdomain_setup(
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    subdomains::edit_setup(
+    subnames::edit_setup(
         &mut iota_names,
         parent,
         &clock,
-        subdomain,
+        subname,
         allow_creation,
         allow_extension,
     );
@@ -547,12 +547,12 @@ public fun update_subdomain_setup(
     ts::return_shared(clock);
 }
 
-public fun burn_subdomain(nft: SubdomainRegistration, scenario: &mut Scenario) {
+public fun burn_subname(nft: SubnameRegistration, scenario: &mut Scenario) {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
 
-    subdomains::burn(&mut iota_names, nft, &clock);
+    subnames::burn(&mut iota_names, nft, &clock);
 
     ts::return_shared(iota_names);
     ts::return_shared(clock);

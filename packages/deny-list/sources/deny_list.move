@@ -17,7 +17,7 @@ public struct DenyList has store {
     // Our public SLD registrations will be checking against it.
     reserved: Table<String, bool>,
     // The list of blocked names.
-    // Subdomains + registrations will be checking against.
+    // Subnames + registrations will be checking against.
     blocked: Table<String, bool>,
 }
 
