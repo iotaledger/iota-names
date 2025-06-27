@@ -84,7 +84,7 @@ export function AvailabilityCheck() {
         setName('');
     }
 
-    const statusLabel = useMemo(() => {
+    const statusLabel = (() => {
         if (isAvailable) {
             return <span className="text-green-700 dark:text-green-200">Available</span>;
         } else if (nameRecordData?.type === 'not-priced') {
@@ -107,7 +107,7 @@ export function AvailabilityCheck() {
         } else {
             return null;
         }
-    }, [nameRecordData, auctionMetadata, isAuctionMetadataLoading]);
+    })();
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
