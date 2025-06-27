@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { NameRecord } from '@iota/iota-names-sdk';
+import { isSubName, NameRecord } from '@iota/iota-names-sdk';
 
 import { RegistrationNft } from '../interfaces/registration.interfaces';
 
@@ -10,8 +10,11 @@ export function isNameRecordExpired(nameRecord: NameRecord) {
 }
 
 export function getNamePermissions(nameRecord: NameRecord) {
-    let allowChildCreation = false;
-    let allowTimeExtension = false;
+    const isSubname = isSubName(nameRecord.name);
+    // Names are allowed always
+    let allowChildCreation = !isSubname;
+    let allowTimeExtension = !isSubname;
+    // But subdomains need their permissions checked
     if ('S_AC' in nameRecord.data) {
         allowChildCreation = nameRecord.data.S_AC === '1';
     }
@@ -28,7 +31,7 @@ export function getNamePermissions(nameRecord: NameRecord) {
 /**
  * Get the parent object id of a given subdomain
  */
-export function getParentSubdomainObjectId(
+export function getParentObjectId(
     ownedNames: RegistrationNft[],
     ownedSubdomains: RegistrationNft[],
     name: string,
@@ -42,4 +45,13 @@ export function getParentSubdomainObjectId(
 
     const parent = parentNames.find(({ name }) => name === parentName);
     return parent?.id || null;
+}
+/**
+ * Get object id of a given subdomain
+ */
+export function getSubdomainObjectId(ownedSubdomains: RegistrationNft[], name: string) {
+    const subdomain = ownedSubdomains.find(
+        (subdomain: { name: string | null }) => subdomain.name === name,
+    );
+    return subdomain?.id || null;
 }

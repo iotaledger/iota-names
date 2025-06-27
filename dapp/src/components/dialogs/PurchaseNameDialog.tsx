@@ -31,6 +31,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         isLoading: isNameRecordLoading,
         error: nameRecordError,
     } = useNameRecord(name);
+
     const [purchaseError, setPurchaseError] = useState<string>('');
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;

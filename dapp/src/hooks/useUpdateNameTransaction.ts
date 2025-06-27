@@ -46,6 +46,14 @@ export type NameUpdate =
           type: 'delete-name';
           nft: string;
           isSubname: boolean;
+      }
+    | {
+          type: 'new-subdomain';
+          parentNftId: string;
+          subdomainName: string;
+          expirationTimeParent: number;
+          allowChildCreation: boolean;
+          allowTimeExtension: boolean;
       };
 
 export function useUpdateNameTransaction({
@@ -99,6 +107,16 @@ export function useUpdateNameTransaction({
                             nft: tx.object(update.nft),
                             isSubname: update.isSubname,
                         });
+                        break;
+                    case 'new-subdomain':
+                        const subnameNft = iotaNamesTx.createSubName({
+                            parentNft: tx.object(update.parentNftId),
+                            name: update.subdomainName,
+                            expirationTimestampMs: update.expirationTimeParent,
+                            allowChildCreation: update.allowChildCreation,
+                            allowTimeExtension: update.allowTimeExtension,
+                        });
+                        iotaNamesTx.transaction.transferObjects([subnameNft], address);
                         break;
                 }
             }

@@ -13,13 +13,11 @@ import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
 type RegistrationNftType = 'domain' | 'subdomain';
-
 export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
-    const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
+    const account = useCurrentAccount();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
-
     const filter = (() => {
         switch (type) {
             case 'domain':
