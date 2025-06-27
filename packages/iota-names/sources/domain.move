@@ -199,11 +199,11 @@ use iota::test_utils::assert_eq;
 
 #[test_only]
 fun test_valid_name(name: vector<u8>, expected_labels: vector<vector<u8>>) {
-    let name = utf8(name);
-    let name = new(name);
+    let name_str = utf8(name);
+    let name = new(name_str);
     let expected_labels = prep_expected_labels(expected_labels);
     assert_eq(name.labels, expected_labels);
-    assert_eq(name, to_string(&name));
+    assert_eq(name_str, to_string(&name));
 
     // Validate `name::label` function
     let len = vector::length(&expected_labels);

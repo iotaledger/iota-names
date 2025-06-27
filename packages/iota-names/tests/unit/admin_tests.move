@@ -118,7 +118,7 @@ fun register_multiple() {
         assert_eq(ids.length(), names.length());
         while (!ids.is_empty()) {
             let nft = scenario.take_from_sender_by_id<IotaNamesRegistration>(ids.pop_back());
-            assert!(vector::contains(&names, &nft.name()));
+            assert!(vector::contains(&names, &nft.name_str()));
             assert_eq(nft.expiration_timestamp_ms(), constants::year_ms());
             scenario.return_to_sender(nft);
         };
