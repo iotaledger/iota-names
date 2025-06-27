@@ -8,7 +8,7 @@ import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { IotaNamesClientProvider } from '@/contexts';
+import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
@@ -35,20 +35,22 @@ export function AppProviders({ children }: React.PropsWithChildren) {
             >
                 <KioskClientProvider>
                     <IotaNamesClientProvider>
-                        <WalletProvider
-                            autoConnect={true}
-                            theme={[
-                                {
-                                    variables: lightTheme,
-                                },
-                                {
-                                    selector: '.dark',
-                                    variables: darkTheme,
-                                },
-                            ]}
-                        >
-                            <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
-                        </WalletProvider>
+                        <IotaNamesIndexerClientProvider>
+                            <WalletProvider
+                                autoConnect={true}
+                                theme={[
+                                    {
+                                        variables: lightTheme,
+                                    },
+                                    {
+                                        selector: '.dark',
+                                        variables: darkTheme,
+                                    },
+                                ]}
+                            >
+                                <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
+                            </WalletProvider>
+                        </IotaNamesIndexerClientProvider>
                     </IotaNamesClientProvider>
                 </KioskClientProvider>
             </IotaClientProvider>

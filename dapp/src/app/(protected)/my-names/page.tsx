@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
+import { UserAuctions } from '@/components/UserAuctions';
 import { useRegistrationNfts } from '@/hooks';
 
 export default function MyNamesPage(): JSX.Element {
@@ -72,6 +73,9 @@ export default function MyNamesPage(): JSX.Element {
                     ))}
                 </div>
             )}
+            <div className="pt-md w-full max-w-md">
+                <UserAuctions />
+            </div>
         </div>
     );
 }
