@@ -6,13 +6,15 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesIndexerClientContext } from '@/contexts';
 
+import { queryKey } from './queryKey';
+
 export function useUserAuctions() {
     const account = useCurrentAccount();
     const indexerClient = useIotaNamesIndexerClientContext();
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ['user-auctions', account?.address],
+        queryKey: [...queryKey.userAuctionHistory(account?.address)],
         queryFn: async () => {
             if (!account?.address || !indexerClient) {
                 return [];
