@@ -16,6 +16,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
@@ -30,7 +31,11 @@ interface AuctionBidDialogDialogProps {
 const ONE_IOTA_NANOS = 1_000_000_000;
 
 function toNano(iota: string) {
-    return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
+    try {
+        return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
+    } catch {
+        return BigInt(0);
+    }
 }
 
 export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDialogDialogProps) {
@@ -49,15 +54,16 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
         showIotaSymbol: true,
     });
 
-    const { mutate: createBid, isPending, error } = useAuctionBid();
+    const { mutateAsync: createBid, isPending, error } = useAuctionBid();
 
-    const handleConfirm = () => {
-        createBid({
+    async function handleConfirm() {
+        await createBid({
             name,
             bidNanos,
             isNewAuction,
         });
-    };
+        setOpen(false);
+    }
 
     return (
         <Dialog open onOpenChange={setOpen}>

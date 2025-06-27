@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -20,6 +20,7 @@ export function useAuctionBid() {
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
+    const iotaClient = useIotaClient();
     const address = account?.address ?? '';
     const { data: auctionHouse } = useAuctionHouse();
 
@@ -32,7 +33,7 @@ export function useAuctionBid() {
             const tx = isNewAuction
                 ? buildCreateAuctionTransaction(
                       iotaNamesClient.config.auctionPackageId,
-                      iotaNamesClient.config.packageId,
+                      iotaNamesClient.config.iotaNamesObjectId,
                       auctionHouse.auctionHouseId,
                       address,
                       bidNanos,
@@ -45,6 +46,10 @@ export function useAuctionBid() {
                       bidNanos,
                       name,
                   );
+
+            await tx.build({
+                client: iotaClient,
+            });
 
             await signAndExecuteTransaction({
                 transaction: tx,

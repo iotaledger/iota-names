@@ -144,7 +144,7 @@ export function AvailabilityCheck() {
 
             {nameRecordData && <div className="text-headline-sm">{statusLabel}</div>}
 
-            {(isAvailable || isAuctionInProgress) && (
+            {isAvailable && (
                 <div className="flex flex-col items-center space-y-4">
                     {isAvailable && (
                         <div className="flex items-center space-x-4">
@@ -163,39 +163,36 @@ export function AvailabilityCheck() {
                         </div>
                     )}
 
-                    {isAuctionInProgress &&
-                        (isAuctionMetadataLoading ? (
-                            <Skeleton />
-                        ) : (
-                            <div className="flex items-center space-x-4">
-                                <div className="text-body-md">
-                                    Minimum bid:{' '}
-                                    {formatNanosToIota(
-                                        Number(
-                                            auctionMetadata.value.value.current_bid.balance.value,
-                                        ) + ONE_IOTA_NANOS,
-                                    )}
-                                </div>
-                                {isConnected ? (
-                                    <Button
-                                        type={ButtonType.Secondary}
-                                        text="Bid"
-                                        onClick={() =>
-                                            console.log('Bid functionality not implemented yet')
-                                        }
-                                    />
-                                ) : (
-                                    <ConnectButton connectText="Connect" />
+                    {isAuctionMetadataLoading ? (
+                        <Skeleton />
+                    ) : (
+                        <div className="flex items-center space-x-4">
+                            <div className="text-body-md">
+                                Minimum bid:{' '}
+                                {formatNanosToIota(
+                                    Number(
+                                        auctionMetadata?.value.value.current_bid.balance.value || 0,
+                                    ) + ONE_IOTA_NANOS,
                                 )}
                             </div>
-                        ))}
+                            {isConnected ? (
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Bid"
+                                    onClick={() => setAuctionDialogOpen(true)}
+                                />
+                            ) : (
+                                <ConnectButton connectText="Connect" />
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
             {isAuctionBidDialogOpen && (
                 <AuctionBidDialog
                     name={name}
                     setOpen={setAuctionDialogOpen}
-                    isNewAuction={isAvailable}
+                    isNewAuction={!isAuctionInProgress}
                 />
             )}
         </div>
