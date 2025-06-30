@@ -135,19 +135,19 @@ export const Packages = (network: string) => {
                 createDisplay({
                     txb,
                     publisher,
-                    isSubdomain: false,
+                    isSubname: false,
                     iotaNamesPackageId: packageId,
                     network,
-                    subdomainsPackageId: packageId,
+                    subnamesPackageId: packageId,
                 });
                 // create display for subnames
                 createDisplay({
                     txb,
                     publisher,
-                    isSubdomain: true,
+                    isSubname: true,
                     iotaNamesPackageId: packageId,
                     network,
-                    subdomainsPackageId: packageId,
+                    subnamesPackageId: packageId,
                 });
             },
             authorizationType: (packageId: string) => `${packageId}::controller::ControllerAuth`, // Authorize the iotaNames controller
@@ -230,9 +230,9 @@ export const Packages = (network: string) => {
                 });
             },
         },
-        Subdomains: {
+        Subnames: {
             order: 3,
-            folder: 'subdomains',
+            folder: 'subnames',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
             setupFunction: (
                 txb: Transaction,
@@ -249,17 +249,17 @@ export const Packages = (network: string) => {
                     config: txb.moveCall({
                         target: `${packageId}::config::default`,
                     }),
-                    type: `${packageId}::config::SubdomainConfig`,
+                    type: `${packageId}::config::SubnameConfig`,
                 });
             },
-            authorizationType: (packageId: string) => `${packageId}::subdomains::SubdomainsAuth`,
+            authorizationType: (packageId: string) => `${packageId}::subnames::SubnamesAuth`,
         },
-        TempSubdomainProxy: {
+        TempSubnameProxy: {
             order: 3,
-            folder: 'temp-subdomain-proxy',
+            folder: 'temp-subname-proxy',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
             authorizationType: (packageId: string) =>
-                `${packageId}::subdomain_proxy::SubdomainProxyAuth`,
+                `${packageId}::subname_proxy::SubnameProxyAuth`,
         },
     };
 };

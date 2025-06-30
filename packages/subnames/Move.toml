@@ -1,5 +1,5 @@
 [package]
-name = "iota_names_subdomains"
+name = "iota_names_subnames"
 edition = "2024"
 
 [dependencies]
@@ -8,4 +8,4 @@ iota_names = { local = "../iota-names" }
 iota_names_deny_list = { local = "../deny-list" }
 
 [addresses]
-iota_names_subdomains = "0x0"
+iota_names_subnames = "0x0"
