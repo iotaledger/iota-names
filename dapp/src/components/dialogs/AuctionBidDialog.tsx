@@ -15,7 +15,7 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 
@@ -28,8 +28,6 @@ interface AuctionBidDialogDialogProps {
     setOpen: (open: boolean) => void;
 }
 
-const ONE_IOTA_NANOS = 1_000_000_000;
-
 function toNano(iota: string) {
     try {
         return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
@@ -40,16 +38,16 @@ function toNano(iota: string) {
 
 export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDialogDialogProps) {
     const [bidAmountValue, setBidAmountValue] = useState(
-        formatNanosToIota(ONE_IOTA_NANOS, {
+        formatNanosToIota(NANOS_PER_IOTA, {
             formatRounded: false,
             showIotaSymbol: false,
         }),
     );
 
     const bidNanos = toNano(bidAmountValue);
-    const isBidBelowMinimum = bidNanos < ONE_IOTA_NANOS;
+    const isBidBelowMinimum = bidNanos < NANOS_PER_IOTA;
 
-    const minBidLabel = formatNanosToIota(ONE_IOTA_NANOS, {
+    const minBidLabel = formatNanosToIota(NANOS_PER_IOTA, {
         formatRounded: false,
         showIotaSymbol: true,
     });
@@ -80,7 +78,7 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
                         <Input
                             type={InputType.Number}
                             label="Your bid (IOTA)"
-                            min={ONE_IOTA_NANOS}
+                            min={Number(NANOS_PER_IOTA)}
                             value={bidAmountValue}
                             onChange={({ target: { value } }) => setBidAmountValue(value)}
                             errorMessage={

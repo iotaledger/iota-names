@@ -41,8 +41,6 @@ function getValidationError(
     return null;
 }
 
-const ONE_IOTA_NANOS = 1_000_000_000;
-
 export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
@@ -171,9 +169,9 @@ export function AvailabilityCheck() {
                             <div className="text-body-md">
                                 Minimum bid:{' '}
                                 {formatNanosToIota(
-                                    Number(
+                                    BigInt(
                                         auctionMetadata?.value.value.current_bid.balance.value || 0,
-                                    ) + ONE_IOTA_NANOS,
+                                    ) + NANOS_PER_IOTA,
                                 )}
                             </div>
                             {isConnected ? (
