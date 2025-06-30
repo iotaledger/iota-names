@@ -24,6 +24,7 @@ export function useAuctionBid({ name, bidNanos, isNewAuction }: UseActionBidPara
     const { data: auctionHouse } = useAuctionHouse();
 
     return useQuery({
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [...queryKey.placeBid(address || ''), name, bidNanos, isNewAuction],
         queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
