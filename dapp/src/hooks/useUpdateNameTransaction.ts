@@ -43,17 +43,17 @@ export type NameUpdate =
           allowTimeExtension: boolean;
       }
     | {
-          type: 'delete-name';
-          nft: string;
-          isSubname: boolean;
-      }
-    | {
           type: 'new-subdomain';
           parentNftId: string;
           subdomainName: string;
           expirationTimeParent: number;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
+      }
+    | {
+          type: 'delete-name';
+          nft: string;
+          isSubname: boolean;
       };
 
 export function useUpdateNameTransaction({
@@ -126,7 +126,7 @@ export function useUpdateNameTransaction({
             });
             return iotaNamesTx.transaction;
         },
-        enabled: !!address && !!updates.length && !!name && name.length > 0 && !isExpired,
+        enabled: !!address && !!updates.length && !!name && name.length > 0,
         gcTime: 0,
     });
 }

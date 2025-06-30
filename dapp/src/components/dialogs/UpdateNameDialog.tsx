@@ -208,11 +208,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.ownedObjects(account?.address || ''),
                         });
                         break;
-                    case 'delete-name':
-                        queryClient.invalidateQueries({
-                            queryKey: queryKey.ownedObjects(account?.address || ''),
-                        });
-                        break;
                 }
             }
         },

@@ -17,9 +17,11 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubName } from '@iota/iota-names-sdk';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { NameUpdate, useRegistrationNfts, useUpdateNameTransaction } from '@/hooks';
+import { useRegistrationNfts } from '@/hooks';
+import { queryKey } from '@/hooks/queryKey';
+import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { getSubdomainObjectId } from '@/lib/utils/names';
 
@@ -30,8 +32,13 @@ type DeleteNameDialogProps = {
 };
 
 export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
-    const account = useCurrentAccount();
     const iotaClient = useIotaClient();
+    const queryClient = useQueryClient();
+
+    const account = useCurrentAccount();
+    const isConnected = !!account?.address;
+    if (!isConnected) return null;
+
     const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const isNameSubName = nft ? isSubName(nft.name) : null;
@@ -76,6 +83,15 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
             });
+            for (const update of updates) {
+                switch (update.type) {
+                    case 'delete-name':
+                        queryClient.invalidateQueries({
+                            queryKey: queryKey.ownedObjects(account?.address || ''),
+                        });
+                        break;
+                }
+            }
         },
         onSuccess: () => {
             closeDialog();
@@ -87,7 +103,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     }
 
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
-    const disableDeleteButton = isLoadingUpdateNameTransaction || !isExpired;
+    const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -111,17 +127,17 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
                             </p>
                             <p>This action cannot be undone</p>
                         </div>
+                        {updateNameError ? (
+                            <p className="text-error-30 dark:text-error-70 text-center">
+                                {updateNameError.message}
+                            </p>
+                        ) : null}
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}
                             text="Delete Name"
                             disabled={disableDeleteButton}
                             onClick={() => save()}
                         />
-                        {updateNameError ? (
-                            <p className="text-error-30 dark:text-error-70 text-center">
-                                {updateNameError.message}
-                            </p>
-                        ) : null}
                     </div>
                 </DialogBody>
             </DialogContent>
