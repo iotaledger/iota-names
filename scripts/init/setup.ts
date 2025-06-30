@@ -37,8 +37,8 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         registryTableId: '',
         reverseRegistryTableId: '',
         couponsPackageId: packageInfo.Coupons.packageId,
-        subNamesPackageId: packageInfo.Subdomains.packageId,
-        tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+        subNamesPackageId: packageInfo.Subnames.packageId,
+        tempSubnameProxyPackageId: packageInfo.TempSubnameProxy.packageId,
         upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);
@@ -69,9 +69,9 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         }
     }
     // Call setup functions for our packages.
-    packages.Subdomains.setupFunction(
+    packages.Subnames.setupFunction(
         txb,
-        packageInfo.Subdomains.packageId,
+        packageInfo.Subnames.packageId,
         packageInfo.IotaNames.adminCap,
         packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.packageId,
