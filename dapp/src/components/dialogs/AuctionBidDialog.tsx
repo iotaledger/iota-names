@@ -15,10 +15,13 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 
+import { queryKey } from '@/hooks';
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
 import { formatNanosToIota } from '@/lib/utils';
 
@@ -37,6 +40,8 @@ function toNano(iota: string) {
 }
 
 export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDialogDialogProps) {
+    const account = useCurrentAccount();
+    const queryClient = useQueryClient();
     const [bidAmountValue, setBidAmountValue] = useState(
         formatNanosToIota(NANOS_PER_IOTA, {
             formatRounded: false,
@@ -52,16 +57,31 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
         showIotaSymbol: true,
     });
 
-    const { mutateAsync: createBid, isPending, error } = useAuctionBid();
+    const {
+        data: auctionBidTransaction,
+        isLoading: isAuctionBidLoading,
+        error,
+    } = useAuctionBid({
+        name,
+        bidNanos,
+        isNewAuction,
+    });
+    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
+        useSignAndExecuteTransaction();
 
     async function handleConfirm() {
-        await createBid({
-            name,
-            bidNanos,
-            isNewAuction,
+        if (!auctionBidTransaction) return;
+
+        await signAndExecuteTransaction({
+            transaction: auctionBidTransaction,
         });
+
+        queryClient.invalidateQueries({ queryKey: queryKey.userAuctionHistory(account?.address) });
         setOpen(false);
     }
+
+    const isLoading = isAuctionBidLoading || isSendingTransaction;
+    const disablePlaceBid = isLoading || isBidBelowMinimum;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -109,8 +129,8 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
                     <Button
                         size={ButtonSize.Small}
                         type={ButtonType.Primary}
-                        disabled={isPending || isBidBelowMinimum}
-                        icon={isPending ? <LoadingIndicator /> : null}
+                        disabled={disablePlaceBid}
+                        icon={isLoading ? <LoadingIndicator /> : null}
                         text={isNewAuction ? 'Start auction' : 'Place bid'}
                         onClick={handleConfirm}
                     />

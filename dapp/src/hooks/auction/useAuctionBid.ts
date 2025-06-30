@@ -1,8 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrentAccount, useIotaClient } from '@iota/dapp-kit';
+import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
@@ -10,27 +10,25 @@ import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/lib/a
 
 import { useAuctionHouse } from './useAuctionHouse';
 
-interface BidArgs {
+export interface UseActionBidParams {
     name: string;
     bidNanos: bigint;
     isNewAuction: boolean;
 }
 
-export function useAuctionBid() {
-    const queryClient = useQueryClient();
+export function useAuctionBid({ name, bidNanos, isNewAuction }: UseActionBidParams) {
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
     const address = account?.address ?? '';
     const { data: auctionHouse } = useAuctionHouse();
 
-    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-
-    return useMutation({
-        mutationFn: async ({ name, bidNanos, isNewAuction }: BidArgs) => {
+    return useQuery({
+        queryKey: [...queryKey.placeBid(address || ''), name, bidNanos, isNewAuction],
+        queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
 
-            const tx = isNewAuction
+            const transaction = isNewAuction
                 ? buildCreateAuctionTransaction(
                       iotaNamesClient.config.auctionPackageId,
                       iotaNamesClient.config.iotaNamesObjectId,
@@ -47,17 +45,11 @@ export function useAuctionBid() {
                       name,
                   );
 
-            await tx.build({
+            await transaction.build({
                 client: iotaClient,
             });
 
-            await signAndExecuteTransaction({
-                transaction: tx,
-            });
-            return { name };
-        },
-        onSuccess: (_) => {
-            queryClient.invalidateQueries({ queryKey: queryKey.userAuctionHistory(address) });
+            return transaction;
         },
     });
 }
