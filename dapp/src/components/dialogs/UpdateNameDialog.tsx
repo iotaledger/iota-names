@@ -116,12 +116,14 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         const nftId = isNameSubName
             ? (getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name) ?? '')
             : nameRecord.nameRecord.nftId;
-        updates.push({
-            type: 'set-target-address',
-            address: editTargetAddress,
-            isSubname: !!isNameSubName,
-            nftId: nftId,
-        });
+        if (nftId) {
+            updates.push({
+                type: 'set-target-address',
+                address: editTargetAddress,
+                isSubname: !!isNameSubName,
+                nftId: nftId,
+            });
+        }
     }
 
     if (isDefaultName && !editIsDefaultName) {
@@ -148,13 +150,15 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
             subdomainsOwned ?? [],
             nameRecord.nameRecord.name,
         );
-        updates.push({
-            type: 'edit-setup',
-            parentNftId: parentObjectId ?? '',
-            name: nameRecord.nameRecord.name,
-            allowChildCreation: editIsAllowSubnames,
-            allowTimeExtension: editIsAllowingRenew,
-        });
+        if (parentObjectId) {
+            updates.push({
+                type: 'edit-setup',
+                parentNftId: parentObjectId,
+                name: nameRecord.nameRecord.name,
+                allowChildCreation: editIsAllowSubnames,
+                allowTimeExtension: editIsAllowingRenew,
+            });
+        }
     }
 
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
