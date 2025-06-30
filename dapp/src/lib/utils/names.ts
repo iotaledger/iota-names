@@ -43,3 +43,13 @@ export function getParentSubdomainObjectId(
     const parent = parentNames.find(({ name }) => name === parentName);
     return parent?.id || null;
 }
+
+/**
+ * Get object id of a given subdomain
+ */
+export function getSubdomainObjectId(ownedSubdomains: RegistrationNft[], name: string) {
+    const subdomain = ownedSubdomains.find(
+        (subdomain: { name: string | null }) => subdomain.name === name,
+    );
+    return subdomain?.id || null;
+}

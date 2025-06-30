@@ -21,6 +21,7 @@ export type NameUpdate =
     | {
           type: 'set-avatar';
           nftId: string;
+          avatarNftId: string;
       }
     | {
           type: 'set-target-address';
@@ -65,7 +66,7 @@ export function useUpdateNameTransaction({
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
                             key: ALLOWED_METADATA.avatar,
-                            value: update.nftId,
+                            value: update.avatarNftId,
                         });
                         break;
                     case 'set-target-address':

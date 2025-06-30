@@ -33,6 +33,7 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import {
     getNamePermissions,
     getParentSubdomainObjectId,
+    getSubdomainObjectId,
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
@@ -63,8 +64,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         ? getNamePermissions(nameRecord.nameRecord)
         : null;
 
-    const domainsOwned = useRegistrationNfts('domain');
-    const subdomainsOwned = useRegistrationNfts('subdomain');
+    const { data: domainsOwned } = useRegistrationNfts('domain');
+    const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     // Editable values
@@ -110,12 +111,17 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        updates.push({
-            type: 'set-target-address',
-            address: editTargetAddress,
-            isSubname: false,
-            nftId: nameRecord.nameRecord?.nftId || '',
-        });
+        const nftId = isNameSubName
+            ? getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name)
+            : nameRecord.nameRecord.nftId;
+        if (nftId) {
+            updates.push({
+                type: 'set-target-address',
+                address: editTargetAddress,
+                isSubname: !!isNameSubName,
+                nftId: nftId,
+            });
+        }
     }
 
     if (isDefaultName && !editIsDefaultName) {
@@ -138,8 +144,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         // To edit the setup of a subdomain we need to get its parent
         // Its parent can be another name or another subdomain
         const parentObjectId = getParentSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
+            domainsOwned ?? [],
+            subdomainsOwned ?? [],
             name,
         );
         if (nameRecord && isNameSubName && parentObjectId) {
@@ -153,11 +159,17 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }
 
-    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
-        updates.push({
-            type: 'set-avatar',
-            nftId: avatarNftId,
-        });
+    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
+        const nftId = isNameSubName
+            ? getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name)
+            : nameRecord.nameRecord.nftId;
+        if (nftId) {
+            updates.push({
+                type: 'set-avatar',
+                nftId,
+                avatarNftId: avatarNftId,
+            });
+        }
     }
 
     const {
@@ -193,6 +205,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
+                    case 'set-avatar':
                     case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
