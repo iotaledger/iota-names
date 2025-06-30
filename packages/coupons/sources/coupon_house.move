@@ -120,11 +120,11 @@ public fun apply_coupon(
     // We need to do a total of 5 checks, based on `CouponRules`
     // Our checks work with `AND`, all of the conditions must pass for a coupon
     // to be used.
-    // 1. Validate domain length.
+    // 1. Validate name length.
     coupon
         .rules()
-        .assert_coupon_valid_for_domain_length(
-            intent.request_data().domain().sld().length() as u8,
+        .assert_coupon_valid_for_name_length(
+            intent.request_data().name().sln().length() as u8,
         );
     // 2. Decrease available claims. Will ABORT if the coupon doesn't have
     // enough available claims.
@@ -134,7 +134,7 @@ public fun apply_coupon(
     // 4. Validate the coupon hasn't expired (Based on clock)
     coupon.rules().assert_coupon_is_not_expired(clock);
     // 5. Validate years are valid for the coupon.
-    coupon.rules().assert_coupon_valid_for_domain_years(intent.request_data().years());
+    coupon.rules().assert_coupon_valid_for_name_years(intent.request_data().years());
 
     // Clean up our registry by removing the coupon if no more available claims!
     if (!coupon.rules().has_available_claims()) {

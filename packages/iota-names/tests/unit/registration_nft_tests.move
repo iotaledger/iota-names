@@ -14,7 +14,7 @@ module iota_names::registration_nft_tests;
 use iota::clock::{Self, Clock};
 use iota::test_utils::assert_eq;
 use iota_names::constants;
-use iota_names::domain;
+use iota_names::name;
 use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
 use std::string::{utf8, String};
 
@@ -26,7 +26,7 @@ fun test_new() {
 
     // expiration date for 1 year should be 365 days from now
     assert_eq(nft.expiration_timestamp_ms(), 365 * 24 * 60 * 60 * 1000);
-    assert_eq(nft.domain(), domain::new(utf8(b"test.iota")));
+    assert_eq(nft.name(), name::new(utf8(b"test.iota")));
 
     // bump the clock value to 1 year from now
     // and create a new NFT with expiration in 2 years + 1 ms
@@ -64,13 +64,13 @@ fun test_update_values() {
 // === Helpers ===
 
 fun new(
-    domain_name: String,
+    name: String,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     nft::new_for_testing(
-        domain::new(domain_name),
+        name::new(name),
         no_years,
         clock,
         ctx,

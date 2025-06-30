@@ -12,7 +12,7 @@ use iota::iota::IOTA;
 use iota::test_utils::{assert_eq, destroy};
 use iota_names::constants;
 use iota_names::core_config;
-use iota_names::domain;
+use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration;
 use iota_names::payment::{Self, PaymentIntent, Receipt};
@@ -28,11 +28,11 @@ fun test_e2e() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let domain = b"test.iota".to_string();
+    let name = b"test.iota".to_string();
 
     let intent = payment::init_registration(
         &mut iota_names,
-        domain,
+        name,
     );
     // checking the price is valid.
     assert_eq(intent.request_data().base_amount(), 100);
@@ -44,7 +44,7 @@ fun test_e2e() {
     let mut nft = receipt.register(&mut iota_names, &clock, &mut ctx);
 
     // let's validate our nft is the same name we expected for sanity check.
-    assert_eq(nft.domain_name(), domain);
+    assert_eq(nft.name_str(), name);
 
     // now let's renew this nft for 4 years.
     let intent = payment::init_renewal(&mut iota_names, &nft, 4);
@@ -52,7 +52,7 @@ fun test_e2e() {
     // Checking the price is valid.
     assert_eq(intent.request_data().base_amount(), 10 * 4);
     assert_eq(intent.request_data().years(), 4);
-    assert_eq(intent.request_data().domain().to_string(), domain);
+    assert_eq(intent.request_data().name().to_string(), name);
 
     // calling our "payments" package here.
     let receipt = handle_payment(intent, &mut iota_names, &mut ctx);
@@ -95,7 +95,7 @@ fun try_to_renew_using_registration_receipt() {
     let clock = clock::create_for_testing(&mut ctx);
 
     let mut nft = iota_names_registration::new_for_testing(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -111,14 +111,14 @@ fun try_to_renew_using_registration_receipt() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names::payment::EReceiptDomainMismatch)]
+#[test, expected_failure(abort_code = ::iota_names::payment::EReceiptNameMismatch)]
 fun try_to_renew_with_other_name_receipt() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
     let mut nft = iota_names_registration::new_for_testing(
-        domain::new(b"test2.iota".to_string()),
+        name::new(b"test2.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -158,7 +158,7 @@ fun try_to_renew_using_invalid_receipt_version() {
     let clock = clock::create_for_testing(&mut ctx);
 
     let mut nft = iota_names_registration::new_for_testing(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -175,16 +175,16 @@ fun try_to_renew_using_invalid_receipt_version() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names::payment::ECannotRenewSubdomain)]
-fun try_to_renew_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names::payment::ECannotRenewSubname)]
+fun try_to_renew_subname() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
     let registry = iota_names.pkg_registry_mut<Registry>();
-    // forceful scenario, cannot add a subdomain like that.
+    // forceful scenario, cannot add a subname like that.
     let nft = registry.add_record(
-        domain::new(b"inner.test.iota".to_string()),
+        name::new(b"inner.test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -201,9 +201,9 @@ fun try_renewing_expired_name() {
     let mut clock = clock::create_for_testing(&mut ctx);
 
     let registry = iota_names.pkg_registry_mut<Registry>();
-    // forceful scenario, cannot add a subdomain like that.
+    // forceful scenario, cannot add a subname like that.
     let mut nft = registry.add_record(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -228,7 +228,7 @@ fun try_renewing_non_existent_name() {
     let clock = clock::create_for_testing(&mut ctx);
 
     let mut nft = iota_names_registration::new_for_testing(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -251,13 +251,13 @@ fun try_to_renew_for_too_long() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let domain = b"test.iota".to_string();
+    let name = b"test.iota".to_string();
 
-    let intent = payment::init_registration(&mut iota_names, domain);
+    let intent = payment::init_registration(&mut iota_names, name);
     let receipt = handle_payment(intent, &mut iota_names, &mut ctx);
     let mut nft = receipt.register(&mut iota_names, &clock, &mut ctx);
 
-    let receipt = payment::test_renewal_receipt(domain, 6, constants::payments_version!());
+    let receipt = payment::test_renewal_receipt(name, 6, constants::payments_version!());
 
     receipt.renew(&mut iota_names, &mut nft, &clock, &mut ctx);
 
@@ -271,7 +271,7 @@ fun try_renewal_process_longer_than_max_years() {
     let clock = clock::create_for_testing(&mut ctx);
 
     let nft = iota_names_registration::new_for_testing(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         &mut ctx,
@@ -287,10 +287,10 @@ fun test_calculate_total_after_discount() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = setup_iota_names(&mut ctx);
 
-    let domain = b"test.iota".to_string();
+    let name = b"test.iota".to_string();
 
     // Create a payment intent to get request data
-    let intent = payment::init_registration(&mut iota_names, domain);
+    let intent = payment::init_registration(&mut iota_names, name);
     let request_data = intent.request_data();
 
     // Test with 0% discount
