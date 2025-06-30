@@ -244,6 +244,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
     const disableAddSubname = isExpired;
+
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>

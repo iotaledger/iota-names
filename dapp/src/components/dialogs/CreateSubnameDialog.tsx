@@ -62,17 +62,19 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
 
     if (parent && newSubdomainName && fullSubdomainName && isAvailable) {
         const parentNftId = isNameSubName
-            ? (getSubdomainObjectId(subdomainsOwned, parent) ?? '')
+            ? getSubdomainObjectId(subdomainsOwned, parent)
             : nameRecord?.nameRecord.nftId;
 
-        updates.push({
-            type: 'new-subdomain',
-            subdomainName: fullSubdomainName,
-            parentNftId: parentNftId ?? '',
-            expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
-            allowChildCreation: editIsAllowSubnames,
-            allowTimeExtension: editIsAllowingRenew,
-        });
+        if (parentNftId) {
+            updates.push({
+                type: 'new-subdomain',
+                subdomainName: fullSubdomainName,
+                parentNftId: parentNftId ?? '',
+                expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
+                allowChildCreation: editIsAllowSubnames,
+                allowTimeExtension: editIsAllowingRenew,
+            });
+        }
     }
     const {
         data: updateNameTransaction,
