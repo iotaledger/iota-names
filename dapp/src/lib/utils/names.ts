@@ -46,6 +46,7 @@ export function getParentObjectId(
     const parent = parentNames.find(({ name }) => name === parentName);
     return parent?.id || null;
 }
+
 /**
  * Get object id of a given subdomain
  */

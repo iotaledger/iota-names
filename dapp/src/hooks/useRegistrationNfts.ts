@@ -22,11 +22,13 @@ export interface RegistrationNft {
 }
 
 type RegistrationNftType = 'domain' | 'subdomain';
+
 export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
-    const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
+    const { iotaNamesClient } = useIotaNamesClient();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
+
     const filter = (() => {
         switch (type) {
             case 'domain':

@@ -36,8 +36,6 @@ type CreateSubnameProps = {
 export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const isConnected = !!account?.address;
-    if (!isConnected) return null;
 
     const subdomainsOwned = useRegistrationNfts('subdomain').data || [];
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(parent);
@@ -131,6 +129,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         isExpired ||
         !newSubdomainName.trim() ||
         newSubdomainName.length < MIN_LABEL_SIZE;
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">
