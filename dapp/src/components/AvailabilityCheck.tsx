@@ -5,6 +5,7 @@
 
 import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNameRecord, usePriceList } from '@/hooks';
@@ -95,7 +96,7 @@ export function AvailabilityCheck() {
             if (isAuctionMetadataLoading) {
                 return <Skeleton widthClass="w-32" heightClass="h-6" />;
             }
-
+          
             const isInProgress =
                 auctionMetadata?.value &&
                 new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() >
@@ -185,7 +186,6 @@ export function AvailabilityCheck() {
                                 <ConnectButton connectText="Connect" />
                             )}
                         </div>
-                    )}
                 </div>
             )}
             {isAuctionBidDialogOpen && (
