@@ -95,12 +95,7 @@ export function AvailabilityCheck() {
                 return <Skeleton widthClass="w-32" heightClass="h-6" />;
             }
 
-            const isInProgress =
-                auctionMetadata?.value &&
-                new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() >
-                    Date.now();
-
-            if (isInProgress) {
+            if (isAuctionInProgress) {
                 return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
             } else {
                 return <span className="text-red-700 dark:text-red-200">Unavailable</span>;
