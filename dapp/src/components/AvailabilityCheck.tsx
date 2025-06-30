@@ -96,7 +96,7 @@ export function AvailabilityCheck() {
             if (isAuctionMetadataLoading) {
                 return <Skeleton widthClass="w-32" heightClass="h-6" />;
             }
-          
+
             const isInProgress =
                 auctionMetadata?.value &&
                 new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() >
@@ -186,6 +186,7 @@ export function AvailabilityCheck() {
                                 <ConnectButton connectText="Connect" />
                             )}
                         </div>
+                    )}
                 </div>
             )}
             {isAuctionBidDialogOpen && (
