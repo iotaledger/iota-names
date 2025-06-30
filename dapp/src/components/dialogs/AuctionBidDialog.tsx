@@ -17,7 +17,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -54,7 +54,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
         error,
     } = useAuctionBid({
         name,
-        bidNanos,
+        bidNanos: bidNanos ?? BigInt(0),
     });
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -82,11 +82,22 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
         formatRounded: false,
         showIotaSymbol: true,
     });
-    const isBidBelowMinimum = bidNanos < minBidNanos;
+    const isBidAboveDecimals = bidNanos === null;
+    const isBidBelowMinimum = (bidNanos || BigInt(0)) < minBidNanos;
 
     const isLoading = isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
     const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
+
+    const errorMessage = (() => {
+        if (isBidAboveDecimals) {
+            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
+        } else if (isBidBelowMinimum) {
+            return `Bid must be ≥ ${minBidLabel}`;
+        } else if (error) {
+            return error.message;
+        }
+    })();
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -106,13 +117,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                             min={Number(minBidNanos)}
                             value={bidAmountValue}
                             onChange={({ target: { value } }) => setBidAmountValue(value)}
-                            errorMessage={
-                                isBidBelowMinimum
-                                    ? `Bid must be ≥ ${minBidLabel}`
-                                    : error
-                                      ? error.message
-                                      : undefined
-                            }
+                            errorMessage={errorMessage}
                         />
 
                         <div className="flex items-center justify-between">

@@ -5,6 +5,6 @@ export function toNanos(iota: string) {
     try {
         return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
     } catch {
-        return BigInt(0);
+        return null;
     }
 }
