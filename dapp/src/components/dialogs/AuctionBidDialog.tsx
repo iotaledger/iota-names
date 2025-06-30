@@ -16,27 +16,19 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import BigNumber from 'bignumber.js';
 import { useState } from 'react';
 
 import { queryKey } from '@/hooks';
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
 import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
+import { toNanos } from '@/lib/utils/amount';
 
 interface AuctionBidDialogDialogProps {
     name: string;
     setOpen: (open: boolean) => void;
-}
-
-function toNano(iota: string) {
-    try {
-        return BigInt(new BigNumber(iota).shiftedBy(IOTA_DECIMALS).toNumber());
-    } catch {
-        return BigInt(0);
-    }
 }
 
 export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
@@ -51,7 +43,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
         }),
     );
 
-    const bidNanos = toNano(bidAmountValue);
+    const bidNanos = toNanos(bidAmountValue);
 
     const {
         data: auctionBidTransaction,
