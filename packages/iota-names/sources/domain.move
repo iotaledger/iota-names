@@ -4,9 +4,9 @@
 
 /// Defines the `Name` type and helper functions.
 ///
-/// Names are structured similar to their web2 counterpart and the rules
+/// Names are structured similar to web2 domains and the rules
 /// determining what a valid name is can be found here:
-/// https://en.wikipedia.org/wiki/Name_name#Name_name_syntax
+/// https://en.wikipedia.org/wiki/Domain_name#Domain_name_syntax
 module iota_names::name;
 
 use std::string::{Self, String, utf8};
