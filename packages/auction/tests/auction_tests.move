@@ -35,8 +35,8 @@ const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
 const SECOND_ADDRESS: address = @0xB002;
 const THIRD_ADDRESS: address = @0xB003;
-const FIRST_DOMAIN_NAME: vector<u8> = b"tes-t2.iota";
-const SECOND_DOMAIN_NAME: vector<u8> = b"tesq.iota";
+const FIRST_NAME: vector<u8> = b"tes-t2.iota";
+const SECOND_NAME: vector<u8> = b"tesq.iota";
 const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
 /// The amount of NANOS in 1 IOTA.
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
@@ -245,12 +245,12 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     assert_auction(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         option::some(0),
         option::some(AUCTION_BIDDING_PERIOD_MS),
         option::some(FIRST_ADDRESS),
@@ -259,13 +259,13 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         10,
     );
     assert_auction(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         option::some(0),
         option::some(AUCTION_BIDDING_PERIOD_MS),
         option::some(SECOND_ADDRESS),
@@ -275,10 +275,10 @@ public fun normal_auction_flow(scenario: &mut Scenario) {
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -311,13 +311,13 @@ fun test_claim_aborts_if_winner_claims_twice() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         0,
     );
@@ -325,14 +325,14 @@ fun test_claim_aborts_if_winner_claims_twice() {
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     nft.burn_for_testing();
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     nft.burn_for_testing();
@@ -348,20 +348,20 @@ fun test_current_bidder_can_place_bid() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1201 * NANOS_PER_IOTA,
         0,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1202 * NANOS_PER_IOTA,
         0,
     );
@@ -377,13 +377,13 @@ fun test_place_bid_aborts_if_value_is_too_low() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
         0,
     );
@@ -399,13 +399,13 @@ fun test_non_winner_cannot_claim() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         0,
     );
@@ -413,7 +413,7 @@ fun test_non_winner_cannot_claim() {
     let nft = claim_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     nft.burn_for_testing();
@@ -429,27 +429,27 @@ fun test_admin_try_finalize_auction() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         0,
     );
     place_bid_util(
         scenario,
         THIRD_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1220 * NANOS_PER_IOTA,
         1,
     );
 
     admin_try_finalize_auction_util(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     assert_balance(scenario, 1220 * NANOS_PER_IOTA);
@@ -458,7 +458,7 @@ fun test_admin_try_finalize_auction() {
         scenario,
         THIRD_ADDRESS,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -488,13 +488,13 @@ fun test_admin_try_finalize_auction_2_auctions() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     start_auction_and_place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(SECOND_DOMAIN_NAME),
+        utf8(SECOND_NAME),
         1210 * NANOS_PER_IOTA,
     );
 
@@ -509,7 +509,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
         scenario,
         SECOND_ADDRESS,
     );
-    assert!(nft.name() == name::new(utf8(SECOND_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(SECOND_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -517,7 +517,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
         scenario,
         FIRST_ADDRESS,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -532,11 +532,11 @@ fun test_admin_try_finalize_auction_too_early() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
 
-    admin_try_finalize_auction_util(scenario, utf8(FIRST_DOMAIN_NAME), 0);
+    admin_try_finalize_auction_util(scenario, utf8(FIRST_NAME), 0);
 
     scenario_val.end();
 }
@@ -549,7 +549,7 @@ fun test_admin_try_finalize_auctions_too_early() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     admin_try_finalize_auctions_util(scenario, 3, 0);
@@ -566,13 +566,13 @@ fun test_place_bid_aborts_if_too_late() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
@@ -691,7 +691,7 @@ fun test_place_bid_aborts_if_auction_not_started() {
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         0,
     );
@@ -722,20 +722,20 @@ fun test_admin_collect_fund() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         AUCTION_BIDDING_PERIOD_MS,
     );
     assert_balance(scenario, 0);
     admin_collect_fund_util(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     assert_balance(scenario, 1210 * NANOS_PER_IOTA);
@@ -743,10 +743,10 @@ fun test_admin_collect_fund() {
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -771,10 +771,10 @@ fun test_admin_collect_fund_aborts_if_too_early() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
-    admin_collect_fund_util(scenario, utf8(FIRST_DOMAIN_NAME), 0);
+    admin_collect_fund_util(scenario, utf8(FIRST_NAME), 0);
 
     scenario_val.end();
 }
@@ -788,7 +788,7 @@ fun test_start_auction_and_place_bid_aborts_if_auction_is_deauthorized() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
 
@@ -803,20 +803,20 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     deauthorize_util(scenario);
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         10,
     );
     assert_auction(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         option::some(0),
         option::some(AUCTION_BIDDING_PERIOD_MS),
         option::some(SECOND_ADDRESS),
@@ -826,10 +826,10 @@ fun test_place_bid_and_claim_and_withdraw_works_even_if_auction_is_deauthorized(
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -854,20 +854,20 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         0,
     );
     place_bid_util(
         scenario,
         THIRD_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1220 * NANOS_PER_IOTA,
         1,
     );
@@ -875,7 +875,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
     deauthorize_util(scenario);
     admin_try_finalize_auction_util(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     assert_balance(scenario, 1220 * NANOS_PER_IOTA);
@@ -884,7 +884,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
         scenario,
         THIRD_ADDRESS,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -914,13 +914,13 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1210 * NANOS_PER_IOTA,
         AUCTION_BIDDING_PERIOD_MS,
     );
@@ -928,7 +928,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     deauthorize_util(scenario);
     admin_collect_fund_util(
         scenario,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
     assert_balance(scenario, 1210 * NANOS_PER_IOTA);
@@ -936,10 +936,10 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
     let nft = claim_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS + 1,
     );
-    assert!(nft.name() == name::new(utf8(FIRST_DOMAIN_NAME)), 0);
+    assert!(nft.name() == name::new(utf8(FIRST_NAME)), 0);
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
@@ -964,13 +964,13 @@ fun test_overbid_less_than_1_IOTA() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA + 100,
         0,
     );
@@ -986,13 +986,13 @@ fun test_overbid_of_1_IOTA() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         101 * NANOS_PER_IOTA,
         0,
     );
@@ -1008,13 +1008,13 @@ fun test_overbid_of_1_IOTA_and_1_NANO() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         101 * NANOS_PER_IOTA + 1,
         0,
     );
@@ -1030,13 +1030,13 @@ fun test_auction_started() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
 
@@ -1051,13 +1051,13 @@ fun test_auction_not_ended() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         100 * NANOS_PER_IOTA,
     );
     let nft = claim_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         AUCTION_BIDDING_PERIOD_MS,
     );
 
@@ -1074,12 +1074,12 @@ fun test_auction_metadata_none() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
     assert_auction(
         scenario,
-        utf8(SECOND_DOMAIN_NAME),
+        utf8(SECOND_NAME),
         option::none(),
         option::none(),
         option::none(),
@@ -1097,7 +1097,7 @@ fun test_admin_try_finalize_auctions_zero_operations() {
     start_auction_and_place_bid_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(FIRST_DOMAIN_NAME),
+        utf8(FIRST_NAME),
         1200 * NANOS_PER_IOTA,
     );
 

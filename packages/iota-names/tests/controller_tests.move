@@ -39,7 +39,7 @@ use fun unset_object_reverse_lookup_util as Scenario.unset_object_reverse_lookup
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
 const SECOND_ADDRESS: address = @0xB002;
-const DOMAIN_NAME: vector<u8> = b"abc.iota";
+const NAME: vector<u8> = b"abc.iota";
 const AVATAR: vector<u8> = b"avatar";
 const CONTENT_HASH: vector<u8> = b"content_hash";
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
@@ -71,7 +71,7 @@ fun test_init(): Scenario {
 fun setup(scenario: &mut Scenario, sender: address, clock_tick: u64) {
     let nft = register_util<IOTA>(
         scenario,
-        DOMAIN_NAME.to_string(),
+        NAME.to_string(),
         1,
         1200 * NANOS_PER_IOTA,
         clock_tick,
@@ -240,11 +240,11 @@ fun test_set_target_address() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(SECOND_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(SECOND_ADDRESS));
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(FIRST_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(FIRST_ADDRESS));
     scenario.set_target_address_util(FIRST_ADDRESS, none(), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), none());
+    scenario.lookup_util(NAME.to_string(), none());
 
     scenario_val.end();
 }
@@ -284,7 +284,7 @@ fun test_set_target_address_works_if_name_is_registered_again() {
     scenario.setup(SECOND_ADDRESS, 2 * year_ms());
 
     scenario.set_target_address_util(SECOND_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(SECOND_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(SECOND_ADDRESS));
 
     scenario_val.end();
 }
@@ -309,21 +309,21 @@ fun test_set_reverse_lookup() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         SECOND_ADDRESS,
-        some(name::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(FIRST_ADDRESS, none());
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(FIRST_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(FIRST_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         FIRST_ADDRESS,
-        some(name::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
 
@@ -337,7 +337,7 @@ fun test_set_reverse_lookup_aborts_if_target_address_not_set() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -350,7 +350,7 @@ fun test_set_reverse_lookup_aborts_if_target_address_not_match() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -363,7 +363,7 @@ fun test_set_reverse_lookup_aborts_if_controller_is_deauthorized() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
     scenario.deauthorize_util();
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -375,11 +375,11 @@ fun test_unset_reverse_lookup() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         SECOND_ADDRESS,
-        some(name::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
     scenario.unset_reverse_lookup_util(SECOND_ADDRESS);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
@@ -394,7 +394,7 @@ fun test_unset_reverse_lookup_if_controller_is_deauthorized() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     scenario.deauthorize_util();
     scenario.unset_reverse_lookup_util(SECOND_ADDRESS);
 
@@ -418,7 +418,7 @@ fun test_set_user_data() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
     set_user_data_util(
         scenario,
@@ -427,7 +427,7 @@ fun test_set_user_data() {
         b"value_avatar".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
 
@@ -438,7 +438,7 @@ fun test_set_user_data() {
         b"value_content_hash".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 2);
     assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
     assert_eq(*data.get(&utf8(CONTENT_HASH)), b"value_content_hash".to_string());
@@ -512,7 +512,7 @@ fun test_set_user_data_works_if_name_is_registered_again() {
         b"value".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&AVATAR.to_string()), b"value".to_string());
 
@@ -549,7 +549,7 @@ fun test_unset_user_data() {
         0,
     );
     scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 0);
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
 
     scenario.set_user_data_util(
@@ -565,7 +565,7 @@ fun test_unset_user_data() {
         0,
     );
     scenario.unset_user_data_util(FIRST_ADDRESS, utf8(CONTENT_HASH), 0);
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
 
@@ -670,9 +670,9 @@ fun test_object_reverse_lookup() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(uid.to_address()), 0);
-    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, DOMAIN_NAME.to_string());
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(uid.to_address()));
-    scenario.reverse_lookup_util(uid.to_address(), some(name::new(DOMAIN_NAME.to_string())));
+    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, NAME.to_string());
+    scenario.lookup_util(NAME.to_string(), some(uid.to_address()));
+    scenario.reverse_lookup_util(uid.to_address(), some(name::new(NAME.to_string())));
 
     // now let's remove this reverse lookup
     scenario.unset_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS);
@@ -692,9 +692,9 @@ fun test_reverse_reset_when_target_address_changes() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(uid.to_address()), 0);
-    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, DOMAIN_NAME.to_string());
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(uid.to_address()));
-    scenario.reverse_lookup_util(uid.to_address(), some(name::new(DOMAIN_NAME.to_string())));
+    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, NAME.to_string());
+    scenario.lookup_util(NAME.to_string(), some(uid.to_address()));
+    scenario.reverse_lookup_util(uid.to_address(), some(name::new(NAME.to_string())));
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(uid.to_address(), none());
