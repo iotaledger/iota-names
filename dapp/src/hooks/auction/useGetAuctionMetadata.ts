@@ -67,7 +67,7 @@ export function useGetAuctionMetadata(domainName: string) {
             const auctionBcsB64 = data?.object?.asMoveObject?.contents?.bcs;
 
             if (!auctionBcsB64) {
-                throw new Error('Auction object not found');
+                return null;
             }
 
             const objectBCS = AuctionFieldBcs.parse(fromB64(auctionBcsB64));
