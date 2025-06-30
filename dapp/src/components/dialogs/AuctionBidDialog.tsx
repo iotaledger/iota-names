@@ -15,9 +15,10 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { queryKey } from '@/hooks';
@@ -32,6 +33,7 @@ interface AuctionBidDialogDialogProps {
 }
 
 export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
+    const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
@@ -57,16 +59,24 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    async function handleConfirm() {
-        if (!auctionBidTransaction) return;
+    const { mutateAsync: handleConfirm, isPending: isSigningTransaction } = useMutation({
+        async mutationFn(auctionBidTransaction: Transaction) {
+            const transactionResult = await signAndExecuteTransaction({
+                transaction: auctionBidTransaction,
+            });
 
-        await signAndExecuteTransaction({
-            transaction: auctionBidTransaction,
-        });
-
-        queryClient.invalidateQueries({ queryKey: queryKey.userAuctionHistory(account?.address) });
-        setOpen(false);
-    }
+            await iotaClient.waitForTransaction({
+                digest: transactionResult.digest,
+            });
+        },
+        onSuccess() {
+            queryClient.invalidateQueries({
+                queryKey: queryKey.userAuctionHistory(account?.address),
+            });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+            setOpen(false);
+        },
+    });
 
     const minBidLabel = formatNanosToIota(minBidNanos, {
         formatRounded: false,
@@ -74,7 +84,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
     });
     const isBidBelowMinimum = bidNanos < minBidNanos;
 
-    const isLoading = isAuctionBidLoading || isSendingTransaction;
+    const isLoading = isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
     const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
 
@@ -127,7 +137,11 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                         disabled={disablePlaceBid}
                         icon={isLoading ? <LoadingIndicator /> : null}
                         text={auctionMetadata ? 'Place bid' : 'Start auction'}
-                        onClick={handleConfirm}
+                        onClick={() => {
+                            if (auctionBidTransaction) {
+                                handleConfirm(auctionBidTransaction);
+                            }
+                        }}
                     />
                 </div>
             </DialogContent>
