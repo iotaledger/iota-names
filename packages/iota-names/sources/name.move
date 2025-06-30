@@ -15,7 +15,7 @@ use std::string::{Self, String, utf8};
 const EInvalidName: vector<u8> = b"Invalid name.";
 
 /// The maximum length of a full name.
-const MAX_DOMAIN_LENGTH: u64 = 235;
+const MAX_NAME_LENGTH: u64 = 235;
 /// The minimum length of an individual label in a name.
 const MIN_LABEL_LENGTH: u64 = 1;
 /// The maximum length of an individual label in a name.
@@ -34,7 +34,7 @@ public struct Name has copy, drop, store {
 
 // Construct a `Name` by parsing and validating the provided string
 public fun new(name: String): Name {
-    assert!(name.length() <= MAX_DOMAIN_LENGTH, EInvalidName);
+    assert!(name.length() <= MAX_NAME_LENGTH, EInvalidName);
 
     let mut labels = split_by_dot(name);
     validate_labels(&labels);

@@ -11,9 +11,9 @@ use std::string::String;
 /// the minimum size a subname label can have.
 const MIN_LABEL_SIZE: u8 = 3;
 /// the maximum depth a subname can have -> 8 (+ 2 for TLN, SLN)
-const MAX_SUBDOMAIN_DEPTH: u8 = 10;
+const MAX_SUBNAME_DEPTH: u8 = 10;
 /// Minimum duration for a subname in milliseconds. (1 day)
-const MINIMUM_SUBDOMAIN_DURATION: u64 = 24 * 60 * 60 * 1000;
+const MINIMUM_SUBNAME_DURATION: u64 = 24 * 60 * 60 * 1000;
 
 #[error]
 const EDepthExceedsLimit: vector<u8> =
@@ -39,9 +39,9 @@ public struct SubnameConfig has copy, drop, store {
 public fun default(): SubnameConfig {
     SubnameConfig {
         allowed_tlns: vector[iota_tln()],
-        max_depth: MAX_SUBDOMAIN_DEPTH,
+        max_depth: MAX_SUBNAME_DEPTH,
         min_label_size: MIN_LABEL_SIZE,
-        minimum_duration: MINIMUM_SUBDOMAIN_DURATION,
+        minimum_duration: MINIMUM_SUBNAME_DURATION,
     }
 }
 

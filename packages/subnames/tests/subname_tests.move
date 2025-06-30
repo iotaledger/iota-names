@@ -24,7 +24,7 @@ use iota_names_subnames::subnames::{Self, SubnamesAuth};
 const USER_ADDRESS: address = @0x01;
 const TEST_ADDRESS: address = @0x02;
 
-const MIN_SUBDOMAIN_DURATION: u64 = 24 * 60 * 60 * 1000; // 1 day
+const MIN_SUBNAME_DURATION: u64 = 24 * 60 * 60 * 1000; // 1 day
 
 #[test]
 /// A test scenario
@@ -37,7 +37,7 @@ fun test_multiple_operation_cases() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -50,7 +50,7 @@ fun test_multiple_operation_cases() {
     let another_child = create_node_subname(
         &parent,
         utf8(b"leaf.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -59,7 +59,7 @@ fun test_multiple_operation_cases() {
     let nested = create_node_subname(
         subname_registration::nft(&child),
         utf8(b"nested.node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -159,7 +159,7 @@ fun tries_to_extend_without_permissions() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         false,
         false,
         scenario,
@@ -179,7 +179,7 @@ fun tries_to_extend_with_burned_parent() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -214,7 +214,7 @@ fun tries_to_extend_while_parent_changed() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -244,7 +244,7 @@ fun tries_to_extend_with_too_long_date() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -256,7 +256,7 @@ fun tries_to_extend_with_too_long_date() {
         scenario,
     );
 
-    extend_node_subname(&mut child, MIN_SUBDOMAIN_DURATION + 24 * 60 * 60 * 1000 * 366, scenario);
+    extend_node_subname(&mut child, MIN_SUBNAME_DURATION + 24 * 60 * 60 * 1000 * 366, scenario);
 
     abort 1337
 }
@@ -271,7 +271,7 @@ fun tries_to_extend_with_too_short_date() {
     let mut child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
@@ -297,13 +297,13 @@ fun tries_to_use_expired_subname_to_create_new() {
     let child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        MIN_SUBDOMAIN_DURATION,
+        MIN_SUBNAME_DURATION,
         true,
         true,
         scenario,
     );
 
-    increment_clock(MIN_SUBDOMAIN_DURATION +1, scenario);
+    increment_clock(MIN_SUBNAME_DURATION +1, scenario);
     create_leaf_subname(
         subname_registration::nft(&child),
         utf8(b"node.node.test.iota"),
