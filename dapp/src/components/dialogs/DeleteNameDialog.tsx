@@ -41,15 +41,17 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const updates: NameUpdate[] = [];
 
     if (nft && isExpired) {
-        const nftid = isNameSubName
-            ? (getSubdomainObjectId(subdomainsOwned ?? [], nft.name) ?? '')
+        const nftId = isNameSubName
+            ? getSubdomainObjectId(subdomainsOwned ?? [], nft.name)
             : nft.id;
 
-        updates.push({
-            type: 'delete-name',
-            nft: nftid,
-            isSubname: isNameSubName || false,
-        });
+        if (nftId) {
+            updates.push({
+                type: 'delete-name',
+                nft: nftId,
+                isSubname: isNameSubName || false,
+            });
+        }
     }
     const {
         data: updateNameTransaction,
@@ -71,7 +73,6 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             const transaction = await signAndExecuteTransaction({
                 transaction: updateNameTransaction,
             });
-
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
             });
@@ -81,12 +82,12 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
         },
     });
 
-    const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
-    const disableDeleteButton = isLoadingUpdateNameTransaction || !isExpired;
-
     function closeDialog() {
         setOpen(false);
     }
+
+    const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
+    const disableDeleteButton = isLoadingUpdateNameTransaction || !isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

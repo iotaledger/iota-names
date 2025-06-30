@@ -64,7 +64,6 @@ export function useUpdateNameTransaction({
 }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
-
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [...queryKey.updateName(name, address), updates],
@@ -102,12 +101,6 @@ export function useUpdateNameTransaction({
                             allowTimeExtension: update.allowTimeExtension,
                         });
                         break;
-                    case 'delete-name':
-                        iotaNamesTx.burnExpired({
-                            nft: tx.object(update.nft),
-                            isSubname: update.isSubname,
-                        });
-                        break;
                     case 'new-subdomain':
                         const subnameNft = iotaNamesTx.createSubName({
                             parentNft: tx.object(update.parentNftId),
@@ -117,6 +110,12 @@ export function useUpdateNameTransaction({
                             allowTimeExtension: update.allowTimeExtension,
                         });
                         iotaNamesTx.transaction.transferObjects([subnameNft], address);
+                        break;
+                    case 'delete-name':
+                        iotaNamesTx.burnExpired({
+                            nft: tx.object(update.nft),
+                            isSubname: update.isSubname,
+                        });
                         break;
                 }
             }

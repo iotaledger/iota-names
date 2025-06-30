@@ -76,12 +76,6 @@ export default function MyNamesPage(): JSX.Element {
                                             : '--'
                                     }`}
                                 />
-                                <Button
-                                    text="Manage"
-                                    onClick={() => {
-                                        setUpdateNameDialog(nft.name);
-                                    }}
-                                />
                                 <div className="flex flex-row gap-x-xs">
                                     <Button
                                         text="Manage"
