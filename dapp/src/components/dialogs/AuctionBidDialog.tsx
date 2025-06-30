@@ -82,7 +82,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
         <Dialog open onOpenChange={setOpen}>
             <DialogContent showCloseOnOverlay>
                 <Header
-                    title={auctionMetadata ? `Start Auction for ${name}` : `Bid for ${name}`}
+                    title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
                     titleCentered
                     onClose={() => setOpen(false)}
                     onBack={() => setOpen(false)}
@@ -126,7 +126,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                         type={ButtonType.Primary}
                         disabled={disablePlaceBid}
                         icon={isLoading ? <LoadingIndicator /> : null}
-                        text={auctionMetadata ? 'Start auction' : 'Place bid'}
+                        text={auctionMetadata ? 'Place bid' : 'Start auction'}
                         onClick={handleConfirm}
                     />
                 </div>
