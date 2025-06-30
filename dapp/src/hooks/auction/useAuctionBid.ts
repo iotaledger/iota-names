@@ -9,27 +9,40 @@ import { queryKey } from '@/hooks/queryKey';
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/lib/auction';
 
 import { useAuctionHouse } from './useAuctionHouse';
+import { useGetAuctionMetadata } from './useGetAuctionMetadata';
 
 export interface UseActionBidParams {
     name: string;
     bidNanos: bigint;
-    isNewAuction: boolean;
 }
 
-export function useAuctionBid({ name, bidNanos, isNewAuction }: UseActionBidParams) {
+export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
     const address = account?.address ?? '';
     const { data: auctionHouse } = useAuctionHouse();
+    const { data: auctionMetadata, isLoading: isLoadingAuctionMetadata } =
+        useGetAuctionMetadata(name);
+
+    // Only once its finished loading we check if the bid amount is enough or not, but only if there is an existing auction
+    const enableAuctionBid = !isLoadingAuctionMetadata
+        ? auctionMetadata
+            ? bidNanos >= auctionMetadata.minBidNanos
+            : true
+        : false;
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.placeBid(address || ''), name, bidNanos, isNewAuction],
+        queryKey: [
+            ...queryKey.placeBid(address || ''),
+            name,
+            bidNanos.toString(),
+            auctionMetadata?.raw,
+        ],
         queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
-
-            const transaction = isNewAuction
+            const transaction = !auctionMetadata?.raw
                 ? buildCreateAuctionTransaction(
                       iotaNamesClient.config.auctionPackageId,
                       iotaNamesClient.config.iotaNamesObjectId,
@@ -49,8 +62,8 @@ export function useAuctionBid({ name, bidNanos, isNewAuction }: UseActionBidPara
             await transaction.build({
                 client: iotaClient,
             });
-
             return transaction;
         },
+        enabled: enableAuctionBid,
     });
 }

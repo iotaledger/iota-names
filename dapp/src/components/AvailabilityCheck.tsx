@@ -57,8 +57,11 @@ export function AvailabilityCheck() {
     const isAvailable = nameRecordData?.type === 'available';
     const isAuctionInProgress =
         nameRecordData?.type === 'unavailable' &&
-        auctionMetadata?.value &&
-        new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() > Date.now();
+        auctionMetadata?.endTimestamp &&
+        auctionMetadata.endTimestamp.getTime() > Date.now();
+
+    // User can bid in existing auctions or if there is no auction and the name is not taken
+    const canBid = isAuctionInProgress || isAvailable;
 
     const validationError = useMemo(
         () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
@@ -156,38 +159,29 @@ export function AvailabilityCheck() {
                             )}
                         </div>
                     )}
-
-                    {isAuctionMetadataLoading ? (
-                        <Skeleton />
-                    ) : (
-                        <div className="flex items-center space-x-4">
-                            <div className="text-body-md">
-                                Minimum bid:{' '}
-                                {formatNanosToIota(
-                                    BigInt(
-                                        auctionMetadata?.value.value.current_bid.balance.value || 0,
-                                    ) + NANOS_PER_IOTA,
-                                )}
-                            </div>
-                            {isConnected ? (
-                                <Button
-                                    type={ButtonType.Secondary}
-                                    text="Bid"
-                                    onClick={() => setAuctionDialogOpen(true)}
-                                />
-                            ) : (
-                                <ConnectButton connectText="Connect" />
-                            )}
-                        </div>
-                    )}
                 </div>
             )}
+            {isAuctionMetadataLoading ? (
+                <Skeleton />
+            ) : canBid ? (
+                <div className="flex items-center space-x-4">
+                    <div className="text-body-md">
+                        Minimum bid:{' '}
+                        {formatNanosToIota(auctionMetadata?.minBidNanos || NANOS_PER_IOTA)}
+                    </div>
+                    {isConnected ? (
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Bid"
+                            onClick={() => setAuctionDialogOpen(true)}
+                        />
+                    ) : (
+                        <ConnectButton connectText="Connect" />
+                    )}
+                </div>
+            ) : null}
             {isAuctionBidDialogOpen && (
-                <AuctionBidDialog
-                    name={name}
-                    setOpen={setAuctionDialogOpen}
-                    isNewAuction={!isAuctionInProgress}
-                />
+                <AuctionBidDialog name={name} setOpen={setAuctionDialogOpen} />
             )}
         </div>
     );

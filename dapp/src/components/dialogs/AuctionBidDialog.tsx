@@ -23,11 +23,11 @@ import { useState } from 'react';
 
 import { queryKey } from '@/hooks';
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
+import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
 interface AuctionBidDialogDialogProps {
     name: string;
-    isNewAuction: boolean;
     setOpen: (open: boolean) => void;
 }
 
@@ -39,32 +39,28 @@ function toNano(iota: string) {
     }
 }
 
-export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
+    const { data: auctionMetadata } = useGetAuctionMetadata(name);
+    const minBidNanos = auctionMetadata?.minBidNanos || NANOS_PER_IOTA;
     const [bidAmountValue, setBidAmountValue] = useState(
-        formatNanosToIota(NANOS_PER_IOTA, {
+        formatNanosToIota(minBidNanos, {
             formatRounded: false,
             showIotaSymbol: false,
         }),
     );
 
     const bidNanos = toNano(bidAmountValue);
-    const isBidBelowMinimum = bidNanos < NANOS_PER_IOTA;
-
-    const minBidLabel = formatNanosToIota(NANOS_PER_IOTA, {
-        formatRounded: false,
-        showIotaSymbol: true,
-    });
 
     const {
         data: auctionBidTransaction,
         isLoading: isAuctionBidLoading,
+        isPending: isAuctionBidPending,
         error,
     } = useAuctionBid({
         name,
         bidNanos,
-        isNewAuction,
     });
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -80,14 +76,21 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
         setOpen(false);
     }
 
+    const minBidLabel = formatNanosToIota(minBidNanos, {
+        formatRounded: false,
+        showIotaSymbol: true,
+    });
+    const isBidBelowMinimum = bidNanos < minBidNanos;
+
     const isLoading = isAuctionBidLoading || isSendingTransaction;
-    const disablePlaceBid = isLoading || isBidBelowMinimum;
+    const isPending = isAuctionBidPending;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
 
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent showCloseOnOverlay>
                 <Header
-                    title={isNewAuction ? `Start Auction for ${name}` : `Bid for ${name}`}
+                    title={auctionMetadata ? `Start Auction for ${name}` : `Bid for ${name}`}
                     titleCentered
                     onClose={() => setOpen(false)}
                     onBack={() => setOpen(false)}
@@ -98,7 +101,7 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
                         <Input
                             type={InputType.Number}
                             label="Your bid (IOTA)"
-                            min={Number(NANOS_PER_IOTA)}
+                            min={Number(minBidNanos)}
                             value={bidAmountValue}
                             onChange={({ target: { value } }) => setBidAmountValue(value)}
                             errorMessage={
@@ -131,7 +134,7 @@ export function AuctionBidDialog({ name, isNewAuction, setOpen }: AuctionBidDial
                         type={ButtonType.Primary}
                         disabled={disablePlaceBid}
                         icon={isLoading ? <LoadingIndicator /> : null}
-                        text={isNewAuction ? 'Start auction' : 'Place bid'}
+                        text={auctionMetadata ? 'Start auction' : 'Place bid'}
                         onClick={handleConfirm}
                     />
                 </div>

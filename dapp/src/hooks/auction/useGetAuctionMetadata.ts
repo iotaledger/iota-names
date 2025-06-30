@@ -3,7 +3,7 @@
 
 import { getDomainType } from '@iota/iota-names-sdk';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { fromB64 } from '@iota/iota-sdk/utils';
+import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -72,7 +72,22 @@ export function useGetAuctionMetadata(domainName: string) {
 
             const objectBCS = AuctionFieldBcs.parse(fromB64(auctionBcsB64));
 
-            return objectBCS;
+            const minBidNanos =
+                BigInt(objectBCS?.value.value.current_bid.balance.value || BigInt(0)) +
+                NANOS_PER_IOTA;
+
+            const endTimestamp = new Date(Number(objectBCS.value.value.end_timestamp_ms));
+
+            const currentBid = BigInt(
+                objectBCS?.value.value.current_bid.balance.value || BigInt(0),
+            );
+
+            return {
+                raw: objectBCS,
+                minBidNanos,
+                endTimestamp,
+                currentBid,
+            };
         },
         enabled: !!auctionsTableObjectId && !!domainName,
     });
