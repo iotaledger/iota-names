@@ -75,7 +75,14 @@ pub fn get_domains_for_bidder_address(
     let bidder = bidders::table
         .filter(bidders::address.eq(address))
         .select(Bidder::as_select())
-        .get_result(conn)?;
+        .get_result(conn)
+        .optional()?;
+
+    let bidder = match bidder {
+        Some(bidder) => bidder,
+        // Just return an empty vector if the bidder was not found
+        None => return Ok(vec![]),
+    };
 
     let domains = BidderDomain::belonging_to(&bidder)
         .inner_join(domains::table)
