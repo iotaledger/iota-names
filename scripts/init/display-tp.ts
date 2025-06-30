@@ -5,7 +5,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 export const getImageUrl = (isSubname: boolean, network: string) => {
-    const name = `{${isSubname ? 'nft.' : ''}domain_name}`;
+    const name = `{${isSubname ? 'nft.' : ''}name}`;
     const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
 
     return `https://api-${network}.iota-names.io/nfts/${name}/${expiration}`;
@@ -42,8 +42,8 @@ export const createDisplay = ({
             display,
             txb.pure.vector('string', ['name', 'link', 'image_url', 'description', 'project_url']),
             txb.pure.vector('string', [
-                `{${isSubname ? 'nft.' : ''}domain_name}`,
-                `https://{${isSubname ? 'nft.' : ''}domain_name}.id`,
+                `{${isSubname ? 'nft.' : ''}name}`,
+                `https://{${isSubname ? 'nft.' : ''}name}.id`,
                 getImageUrl(isSubname, network),
                 'IOTA-Names - Sculpt Your Identity',
                 'https://iota-names.io',
