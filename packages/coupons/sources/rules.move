@@ -12,10 +12,10 @@ use iota_names_coupons::range::Range;
 /// Error when you try to use a coupon that isn't valid for these years.
 #[error]
 const EInvalidYears: vector<u8> = b"Coupon is not valid for the given number of years.";
-/// Error when you try to use a coupon which doesn't match the domain's length.
+/// Error when you try to use a coupon which doesn't match the name's length.
 #[error]
-const EInvalidForDomainLength: vector<u8> = b"Coupon is not valid for the given domain length.";
-/// Error when you try to use a domain that has used all its available claims.
+const EInvalidForNameLength: vector<u8> = b"Coupon is not valid for the given name length.";
+/// Error when you try to use a name that has used all its available claims.
 #[error]
 const ENoMoreAvailableClaims: vector<u8> = b"Coupon has been claimed the maximum number of times.";
 /// Error when you try to create a percentage discount coupon with invalid
@@ -110,8 +110,8 @@ public fun has_available_claims(rules: &CouponRules): bool {
 }
 
 /// Ensure that the coupon is valid for the given number of years.
-public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, years: u8) {
-    assert!(is_coupon_valid_for_domain_years(rules, years), EInvalidYears);
+public fun assert_coupon_valid_for_name_years(rules: &CouponRules, years: u8) {
+    assert!(is_coupon_valid_for_name_years(rules, years), EInvalidYears);
 }
 
 // Checks if a target amount of years is valid for claim.
@@ -119,7 +119,7 @@ public fun assert_coupon_valid_for_domain_years(rules: &CouponRules, years: u8) 
 // That means we can create a combination of:
 // 1. Exact years (e.g. 2 years, by passing [2,2])
 // 2. Range of years (e.g. [1,3])
-public fun is_coupon_valid_for_domain_years(rules: &CouponRules, years: u8): bool {
+public fun is_coupon_valid_for_name_years(rules: &CouponRules, years: u8): bool {
     if (rules.years.is_none()) return true;
 
     rules.years.borrow().is_in_range(years)
@@ -131,14 +131,14 @@ public fun assert_is_valid_percentage(amount: u64) {
     assert!(amount <= 100, EInvalidPercentage);
 }
 
-/// Ensure that the coupons is valid for the given domain length.
-/// Throws `EInvalidForDomainLength` error if it has expired.
-public fun assert_coupon_valid_for_domain_length(rules: &CouponRules, length: u8) {
-    assert!(is_coupon_valid_for_domain_length(rules, length), EInvalidForDomainLength)
+/// Ensure that the coupons is valid for the given name length.
+/// Throws `EInvalidForNameLength` error if it has expired.
+public fun assert_coupon_valid_for_name_length(rules: &CouponRules, length: u8) {
+    assert!(is_coupon_valid_for_name_length(rules, length), EInvalidForNameLength)
 }
 
-/// Returns whether the coupons is valid for the given domain length
-public fun is_coupon_valid_for_domain_length(rules: &CouponRules, length: u8): bool {
+/// Returns whether the coupons is valid for the given name length
+public fun is_coupon_valid_for_name_length(rules: &CouponRules, length: u8): bool {
     // If the vec is not set, we pass this rule test.
     if (rules.length.is_none()) return true;
 
@@ -151,7 +151,7 @@ public fun assert_coupon_valid_for_address(rules: &CouponRules, user: address) {
     assert!(is_coupon_valid_for_address(rules, user), EInvalidUser);
 }
 
-/// Check that the domain is valid for the specified address
+/// Check that the name is valid for the specified address
 public fun is_coupon_valid_for_address(rules: &CouponRules, user: address): bool {
     if (rules.user.is_none()) return true;
     rules.user.borrow() == user

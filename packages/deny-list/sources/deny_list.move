@@ -14,10 +14,10 @@ const ENoWordsInList: vector<u8> = b"No names in the passed list.";
 /// A wrapper that holds the reserved and blocked names.
 public struct DenyList has store {
     // The list of reserved names.
-    // Our public SLD registrations will be checking against it.
+    // Our public SLN registrations will be checking against it.
     reserved: Table<String, bool>,
     // The list of blocked names.
-    // Subdomains + registrations will be checking against.
+    // Subnames + registrations will be checking against.
     blocked: Table<String, bool>,
 }
 
