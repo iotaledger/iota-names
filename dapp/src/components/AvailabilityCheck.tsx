@@ -5,6 +5,7 @@
 
 import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNameRecord, usePriceList } from '@/hooks';
@@ -38,8 +39,6 @@ function getValidationError(
 
     return null;
 }
-
-const ONE_IOTA_NANOS = 1_000_000_000;
 
 export function AvailabilityCheck() {
     const { isConnected } = useCurrentWallet();
@@ -94,12 +93,7 @@ export function AvailabilityCheck() {
                 return <Skeleton widthClass="w-32" heightClass="h-6" />;
             }
 
-            const isInProgress =
-                auctionMetadata?.value &&
-                new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() >
-                    Date.now();
-
-            if (isInProgress) {
+            if (isAuctionInProgress) {
                 return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
             } else {
                 return <span className="text-red-700 dark:text-red-200">Unavailable</span>;
@@ -169,9 +163,10 @@ export function AvailabilityCheck() {
                                 <div className="text-body-md">
                                     Minimum bid:{' '}
                                     {formatNanosToIota(
-                                        Number(
+                                        BigInt(
                                             auctionMetadata.value.value.current_bid.balance.value,
-                                        ) + ONE_IOTA_NANOS,
+                                        ) +
+                                            BigInt(1) * NANOS_PER_IOTA,
                                     )}
                                 </div>
                                 {isConnected ? (
