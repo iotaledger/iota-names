@@ -182,10 +182,10 @@ impl IotaNamesWorker {
             IotaNamesEvent::NameRecordAdded(event) => {
                 self.metrics.total_name_records_added.inc();
 
-                let sld_length = event.name.label(1).expect("missing SLD").len();
+                let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&sld_length.to_string()])
+                    .with_label_values(&[&sln_length.to_string()])
                     .inc();
 
                 let depth = event.name.num_labels();
@@ -197,10 +197,10 @@ impl IotaNamesWorker {
             IotaNamesEvent::NameRecordRemoved(event) => {
                 self.metrics.total_name_records_removed.inc();
 
-                let sld_length = event.name.label(1).expect("missing SLD").len();
+                let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&sld_length.to_string()])
+                    .with_label_values(&[&sln_length.to_string()])
                     .dec();
 
                 let depth = event.name.num_labels();
