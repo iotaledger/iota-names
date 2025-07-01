@@ -30,7 +30,7 @@ export function getNamePermissions(nameRecord: NameRecord) {
 /**
  * Get the parent object id of a given subdomain
  */
-export function getParentSubdomainObjectId(
+export function getParentObjectId(
     ownedNames: RegistrationNft[],
     ownedSubdomains: RegistrationNft[],
     name: string,
