@@ -46,7 +46,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         | undefined;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-    const isNameSubName = name ? isSubName(name) : null;
+    const isNameSubName = isSubName(name);
 
     // Create updates
     const updates: NameUpdate[] = [];
