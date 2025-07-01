@@ -23,7 +23,7 @@ import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
-import { getSubdomainObjectId } from '@/lib/utils/names';
+import { getNameObject } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;
@@ -39,6 +39,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const isConnected = !!account?.address;
     if (!isConnected) return null;
 
+    const { data: domainsOwned } = useRegistrationNfts('domain');
     const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const isNameSubName = nft ? isSubName(nft.name) : null;
@@ -48,10 +49,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const updates: NameUpdate[] = [];
 
     if (nft && isExpired) {
-        const nftId = isNameSubName
-            ? getSubdomainObjectId(subdomainsOwned ?? [], nft.name)
-            : nft.id;
-
+        const nftId = getNameObject(domainsOwned ?? [], subdomainsOwned ?? [], nft.name);
         if (nftId) {
             updates.push({
                 type: 'delete-name',
