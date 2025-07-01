@@ -99,12 +99,11 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
             });
-
+        },
+        onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-        },
-        onSuccess: () => {
             closeDialog();
         },
     });
