@@ -32,7 +32,7 @@ public fun reserve_name(
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     let name = name::new(name);
-    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
+    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name); 
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     registry.add_record(name, no_years, clock, ctx)
 }
