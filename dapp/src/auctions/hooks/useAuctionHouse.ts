@@ -7,7 +7,7 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
-import { AuctionHouseBcs } from '../lib/bcs';
+import { AuctionHouseBcs } from '../lib/types/bcs';
 
 interface AuctionHouseData {
     auctionHouseId: string;

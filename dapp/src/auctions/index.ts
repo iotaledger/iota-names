@@ -16,11 +16,5 @@ export type { AuctionDetails } from './hooks/useGetUserAuctions';
 
 export * from './lib/types';
 export * from './lib/utils';
-export {
-    buildCreateAuctionTransaction,
-    buildPlaceBidTransaction,
-    buildClaimDomainTransaction,
-} from './lib/transaction';
-export { createAuctionMetadataQuery } from './lib/metadata';
 
 export { IotaNamesIndexerClient } from './services/IotaNamesIndexerClient';

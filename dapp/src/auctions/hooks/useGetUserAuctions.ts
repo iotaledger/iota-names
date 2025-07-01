@@ -5,8 +5,8 @@ import { useQueries } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
-import { createAuctionMetadataQuery } from '../lib/metadata';
 import { AuctionMetadata } from '../lib/types';
+import { createAuctionMetadataQuery } from '../lib/utils/metadata';
 import { useAuctionHouse } from './useAuctionHouse';
 import { useGetAddressAuctionHistory } from './useGetAddressAuctionHistory';
 
