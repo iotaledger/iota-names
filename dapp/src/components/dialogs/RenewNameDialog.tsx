@@ -112,7 +112,6 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name,
         updates,
         isExpired,
     });

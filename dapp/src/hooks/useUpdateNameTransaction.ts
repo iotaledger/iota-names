@@ -12,7 +12,6 @@ import { queryKey } from './queryKey';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
-    name: string;
     isExpired: boolean;
     updates: NameUpdate[];
 }
@@ -38,6 +37,7 @@ export type NameUpdate =
       }
     | {
           type: 'edit-setup';
+          name: string;
           parentNftId: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
@@ -63,7 +63,6 @@ export type NameUpdate =
 
 export function useUpdateNameTransaction({
     address,
-    name,
     isExpired,
     updates,
 }: UseUpdateNameTransactionOptions) {
@@ -72,7 +71,7 @@ export function useUpdateNameTransaction({
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.updateName(name, address), updates],
+        queryKey: [...queryKey.updateName(address), updates],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
@@ -102,7 +101,7 @@ export function useUpdateNameTransaction({
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
                             parentNft: tx.object(update.parentNftId),
-                            name,
+                            name: update.name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
                         });
@@ -139,7 +138,7 @@ export function useUpdateNameTransaction({
             });
             return iotaNamesTx.transaction;
         },
-        enabled: !!address && !!updates.length && !!name && name.length > 0 && !isExpired,
+        enabled: !!address && !!updates.length && !isExpired,
         gcTime: 0,
     });
 }

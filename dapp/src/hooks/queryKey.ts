@@ -14,7 +14,7 @@ export const queryKey = {
         name,
         address,
     ],
-    updateName: (name: string, address?: string) => [queryKey.all, 'update-name', name, address],
+    updateName: (address?: string) => [queryKey.all, 'update-name', address],
 
     // Address
     defaultName: (address: string) => [queryKey.all, 'default-name', address],
