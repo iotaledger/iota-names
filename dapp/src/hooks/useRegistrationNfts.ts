@@ -51,7 +51,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 const isNameSubName = isSubName(data?.name || '');
                 type NameFields = undefined | { expiration_timestamp_ms?: string };
                 const fields = isNameSubName
-                    ? ((content?.fields as any).nft.fields as NameFields)
+                    ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
                     : (content?.fields as NameFields);
                 return {
                     name: data?.name ?? '',
