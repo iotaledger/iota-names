@@ -85,7 +85,6 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name,
         updates,
         isExpired,
     });
