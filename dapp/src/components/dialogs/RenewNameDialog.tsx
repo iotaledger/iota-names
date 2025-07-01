@@ -20,9 +20,9 @@ import { useState } from 'react';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import {
+    getNameObject,
     getNamePermissions,
     getParentObject,
-    getSubdomainObjectId,
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
@@ -60,7 +60,7 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
 
     // Extend names
     if (nameRecord && editRenewYears && !isExpired && namePermissions?.allowTimeExtension) {
-        const objectId = getSubdomainObjectId(
+        const objectId = getNameObject(
             domainsOwned ?? [],
             subdomainsOwned ?? [],
             nameRecord.nameRecord.name,
@@ -78,7 +78,7 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
 
     // Extend subnames
     if (isNameSubName && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
-        const objectId = getSubdomainObjectId(
+        const objectId = getNameObject(
             domainsOwned ?? [],
             subdomainsOwned ?? [],
             nameRecord.nameRecord.name,

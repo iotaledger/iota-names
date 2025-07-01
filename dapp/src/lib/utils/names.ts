@@ -60,23 +60,16 @@ export function getParentObject(
     const parent = names.find(({ name }) => name === parentName);
     return parent || null;
 }
+
 /**
- * Get object id of a given subdomain
+ * Get object id of a given name or subname
  */
-export function getSubdomainObjectId(
+export function getNameObject(
     ownedNames: RegistrationNft[],
     ownedSubdomains: RegistrationNft[],
     name: string,
 ) {
-    if (!isSubName(name)) {
-        const parentDomain = ownedNames.find(
-            (domain: { name: string | null }) => domain.name === name,
-        );
-        return parentDomain?.id || null;
-    } else {
-        const parentSubdomain = ownedSubdomains.find(
-            (subdomain: { name: string | null }) => subdomain.name === name,
-        );
-        return parentSubdomain?.id || null;
-    }
+    const names = isSubName(name) ? ownedSubdomains : ownedNames;
+    const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
+    return nameObject?.id || null;
 }

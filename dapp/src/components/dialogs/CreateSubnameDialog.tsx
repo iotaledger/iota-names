@@ -25,7 +25,7 @@ import { ChangeEvent, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getSubdomainObjectId, isNameRecordExpired } from '@/lib/utils/names';
+import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 type CreateSubnameProps = {
     name: string;
@@ -59,12 +59,13 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     // Only join names if there user has written anything
     const fullSubdomainName = newSubdomainName.trim() ? newSubdomainName + '.' + name : null;
     const isAvailable = fullSubdomainName
-        ? getSubdomainObjectId([], subdomainsOwned ?? [], fullSubdomainName) === null
+        ? getNameObject([], subdomainsOwned ?? [], fullSubdomainName) === null
         : false;
 
     if (name && newSubdomainName && fullSubdomainName && isAvailable) {
+        // We only need to search in the owned subnames if its a subname
         const nftId = isNameSubName
-            ? getSubdomainObjectId([], subdomainsOwned ?? [], name)
+            ? getNameObject([], subdomainsOwned ?? [], name)
             : nameRecord?.nameRecord.nftId;
 
         if (nftId) {
