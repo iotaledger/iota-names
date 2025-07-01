@@ -10,15 +10,17 @@ export function isNameRecordExpired(nameRecord: NameRecord) {
 }
 
 export function getNamePermissions(nameRecord: NameRecord) {
-    let allowChildCreation = false;
-    let allowTimeExtension = false;
+    const isSubname = isSubName(nameRecord.name);
+    // Names are allowed always
+    let allowChildCreation = !isSubname;
+    let allowTimeExtension = !isSubname;
+    // But subdomains need their permissions checked
     if ('S_AC' in nameRecord.data) {
         allowChildCreation = nameRecord.data.S_AC === '1';
     }
     if ('S_ATE' in nameRecord.data) {
         allowTimeExtension = nameRecord.data.S_ATE === '1';
     }
-
     return {
         allowChildCreation,
         allowTimeExtension,
@@ -45,12 +47,17 @@ export function getParentSubdomainObjectId(
 }
 
 /**
- * Get the root object of a given subdomain
+ * Get the parent object of a given subdomain
  */
-export function getRootObject(ownedNames: RegistrationNft[], name: string) {
+export function getParentObject(
+    ownedNames: RegistrationNft[],
+    ownedSubdomains: RegistrationNft[],
+    name: string,
+) {
     const parts = name.split('.');
-    const parentName = parts.slice(-2).join('.');
-    const parent = ownedNames.find(({ name }) => name === parentName);
+    const parentName = parts.slice(1).join('.');
+    const names = isSubName(parentName) ? ownedSubdomains : ownedNames;
+    const parent = names.find(({ name }) => name === parentName);
     return parent || null;
 }
 /**

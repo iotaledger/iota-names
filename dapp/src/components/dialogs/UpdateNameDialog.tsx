@@ -5,7 +5,6 @@
 
 import {
     Button,
-    ButtonType,
     Card,
     CardAction,
     CardActionType,
@@ -34,12 +33,11 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import {
     getNamePermissions,
     getParentSubdomainObjectId,
-    getRootObject,
-    getSubdomainObjectId,
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
+import { RenewNameDialog } from './RenewNameDialog';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -75,10 +73,10 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
     const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
+
+    // Dialogs
     const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
-    const [renewYears, setRenewYears] = useState<number>();
     const [renewDialogOpen, setRenewDialogOpen] = useState(false);
-    const [renewSubname, setRenewSubname] = useState(false);
 
     // Sync permissions
     useEffect(() => {
@@ -143,37 +141,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     }
 
     if (
-        nameRecord &&
-        renewYears &&
-        !isExpired &&
-        (!isNameSubName || (isNameSubName && editIsAllowingRenew))
-    ) {
-        const objectId = getSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
-            nameRecord.nameRecord.name,
-        );
-        updates.push({
-            type: 'renew-name',
-            nft: objectId ?? '',
-            years: renewYears,
-        });
-    }
-    if (nameRecord && !isExpired && isNameSubName && editIsAllowingRenew && renewSubname) {
-        const objectId = getSubdomainObjectId(
-            domainsOwned.data ?? [],
-            subdomainsOwned.data ?? [],
-            nameRecord.nameRecord.name,
-        );
-        const rootDomain = getRootObject(domainsOwned.data ?? [], nameRecord.nameRecord.name);
-        updates.push({
-            type: 'renew-subname',
-            nft: objectId ?? '',
-            expirationTimestampMs: rootDomain?.expiration_timestamp_ms ?? 0,
-        });
-    }
-
-    if (
         editIsAllowSubnames != namePermissions?.allowChildCreation ||
         editIsAllowingRenew != namePermissions?.allowTimeExtension
     ) {
@@ -187,7 +154,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         if (nameRecord && isNameSubName && parentObjectId) {
             updates.push({
                 type: 'edit-setup',
-                nft: parentObjectId,
+                parentNftId: parentObjectId,
                 allowChildCreation: editIsAllowSubnames,
                 allowTimeExtension: editIsAllowingRenew,
             });
@@ -270,23 +237,12 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }
 
-    const handleCancelRenewName = () => {
-        setRenewYears(0);
-        setRenewDialogOpen(false);
-    };
-
-    const handleConfirmRenewName = async () => {
-        if (!renewYears) {
-            console.error('Renew years required');
-            return;
-        }
-        setRenewDialogOpen(false);
-    };
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
+    const disableRenew = isExpired || !namePermissions?.allowTimeExtension;
 
     return (
         <>
@@ -374,6 +330,24 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onClick={() => setIsAvatarSelectorOpen(true)}
                             />
                         </Card>
+                        <Card type={CardType.Outlined}>
+                            <CardBody
+                                title="Renew"
+                                subtitle={`Renew ${isNameSubName ? 'Subname' : 'Name'}.`}
+                            />
+                            <Button
+                                text="Renew"
+                                onClick={() => setRenewDialogOpen(true)}
+                                disabled={disableRenew} //TODO: add grace period
+                            />
+                        </Card>
+                        {renewDialogOpen && (
+                            <RenewNameDialog
+                                open={renewDialogOpen}
+                                setOpen={setRenewDialogOpen}
+                                name={name}
+                            />
+                        )}
                         {isAvatarSelectorOpen && (
                             <VisualAssetsDialog
                                 setOpen={setIsAvatarSelectorOpen}
@@ -383,72 +357,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 }}
                             />
                         )}
-                        {isNameSubName && editIsAllowingRenew && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody title="Renew subname" subtitle="Renew subdomain." />
-                                <Button
-                                    text="Renew subame"
-                                    onClick={() => {
-                                        setRenewSubname(true);
-                                    }}
-                                    disabled={
-                                        (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
-                                            Date.now() || isExpired
-                                    }
-                                />
-                            </Card>
-                        )}
-                        {!isNameSubName && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody title="Renew name" subtitle="Renew domain." />
-                                <Button
-                                    text="Renew name"
-                                    onClick={() => setRenewDialogOpen(true)}
-                                    disabled={
-                                        (nameRecord?.nameRecord?.expirationTimestampMs ?? 0) <
-                                            Date.now() || isExpired //TODO: add grace period
-                                    }
-                                />
-                            </Card>
-                        )}
-                        {renewDialogOpen && (
-                            <Dialog open={open} onOpenChange={setOpen}>
-                                <DialogContent containerId="overlay-portal-container">
-                                    <Header title="Renew name" titleCentered />
-                                    <DialogBody>
-                                        <div className="flex flex-col items-center gap-y-md">
-                                            <h3 className="text-lg font-semibold mb-4">
-                                                Renew name {nameRecord?.nameRecord?.name}
-                                            </h3>
-                                            <div className="mb-4">
-                                                <Input
-                                                    type={InputType.Text}
-                                                    onChange={(e) => {
-                                                        const val = Number(e.target.value);
-                                                        setRenewYears(isNaN(val) ? 0 : val);
-                                                    }}
-                                                    placeholder="Input renew years"
-                                                />
-                                            </div>
-                                            <div className="flex gap-2 justify-end">
-                                                <Button
-                                                    type={ButtonType.Secondary}
-                                                    text="Cancel"
-                                                    onClick={handleCancelRenewName}
-                                                />
-                                                <Button
-                                                    type={ButtonType.Primary}
-                                                    text="Confirm"
-                                                    onClick={handleConfirmRenewName}
-                                                    disabled={!renewYears || renewYears < 1} //TODO: add not expired
-                                                />
-                                            </div>
-                                        </div>
-                                    </DialogBody>
-                                </DialogContent>
-                            </Dialog>
-                        )}
-
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}

@@ -4,6 +4,7 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import {
     getIotaNamesRegistrationType,
     getIotaSubdomainRegistrationType,
+    isSubName,
 } from '@iota/iota-names-sdk';
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
@@ -47,8 +48,11 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     | Extract<IotaParsedData, { dataType: 'moveObject' }>
                     | undefined
                     | null;
-                const fields = content?.fields as { expiration_timestamp_ms?: string } | undefined;
-
+                const isNameSubName = isSubName(data?.name || '');
+                type NameFields = undefined | { expiration_timestamp_ms?: string };
+                const fields = isNameSubName
+                    ? ((content?.fields as any).nft.fields as NameFields)
+                    : (content?.fields as NameFields);
                 return {
                     name: data?.name ?? '',
                     description: data?.description,

@@ -37,18 +37,18 @@ export type NameUpdate =
       }
     | {
           type: 'edit-setup';
-          nft: string;
+          parentNftId: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
     | {
           type: 'renew-name';
-          nft: string;
+          nftId: string;
           years: number;
       }
     | {
           type: 'renew-subname';
-          nft: string;
+          nftId: string;
           expirationTimestampMs: number;
       };
 
@@ -92,7 +92,7 @@ export function useUpdateNameTransaction({
                         break;
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
-                            parentNft: tx.object(update.nft),
+                            parentNft: tx.object(update.parentNftId),
                             name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
@@ -100,14 +100,14 @@ export function useUpdateNameTransaction({
                         break;
                     case 'renew-name':
                         iotaNamesTx.renew({
-                            nft: update.nft,
+                            nft: update.nftId,
                             years: update.years,
                             coin: tx.gas,
                         });
                         break;
                     case 'renew-subname':
                         iotaNamesTx.extendExpiration({
-                            nft: update.nft,
+                            nft: update.nftId,
                             expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
