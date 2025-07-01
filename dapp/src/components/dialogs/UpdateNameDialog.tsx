@@ -149,11 +149,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         (editIsAllowSubnames != namePermissions?.allowChildCreation ||
             editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
-        const parentObjectId = getParentObjectId(
-            domainsOwned ?? [],
-            subdomainsOwned ?? [],
-            nameRecord.nameRecord.name,
-        );
+        // To edit the setup of a subdomain we need to get its parent
+        // Its parent can be another name or another subdomain
+        const parentObjectId = getParentObjectId(domainsOwned ?? [], subdomainsOwned ?? [], name);
         if (parentObjectId) {
             updates.push({
                 type: 'edit-setup',
@@ -164,11 +162,17 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }
 
-    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord?.nftId) {
-        updates.push({
-            type: 'set-avatar',
-            nftId: avatarNftId,
-        });
+    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
+        const nftId = isNameSubName
+            ? getNameObject(domainsOwned ?? [], subdomainsOwned ?? [], nameRecord.nameRecord.name)
+            : nameRecord.nameRecord.nftId;
+        if (nftId) {
+            updates.push({
+                type: 'set-avatar',
+                nftId,
+                avatarNftId: avatarNftId,
+            });
+        }
     }
 
     const {
@@ -204,6 +208,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
+                    case 'set-avatar':
                     case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
