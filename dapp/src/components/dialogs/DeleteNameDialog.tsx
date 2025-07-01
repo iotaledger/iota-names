@@ -64,7 +64,6 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name: nft.name,
         updates,
         isExpired,
     });
