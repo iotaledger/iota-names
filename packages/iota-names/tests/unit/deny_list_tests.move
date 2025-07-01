@@ -9,7 +9,7 @@ module iota_names::deny_list_tests;
 use iota_names::deny_list::{Self, DenyListAuth};
 use iota::test_scenario::{Self as ts, Scenario};
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::domain;
+use iota_names::name;
 use std::string::{utf8, String};
 
 const ADDR: address = @0x0;
@@ -26,14 +26,14 @@ fun test() {
     deny_list::add_reserved_labels(&mut iota_names, &cap, some_reserved_labels());
     deny_list::add_blocked_labels(&mut iota_names, &cap, some_offensive_labels());
 
-    assert!(deny_list::is_reserved_name(&iota_names, &domain::new(b"test.iota".to_string())), 0);
-    assert!(deny_list::is_reserved_name(&iota_names, &domain::new(b"test2.iota".to_string())), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test.iota".to_string())), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test2.iota".to_string())), 0);
 
-    assert!(deny_list::is_blocked_name(&iota_names, &domain::new(b"badtest.iota".to_string())), 0);
+    assert!(deny_list::is_blocked_name(&iota_names, &name::new(b"badtest.iota".to_string())), 0);
 
-    assert!(!deny_list::is_blocked_name(&iota_names, &domain::new(b"example.iota".to_string())), 0);
+    assert!(!deny_list::is_blocked_name(&iota_names, &name::new(b"example.iota".to_string())), 0);
 
-    assert!(!deny_list::is_reserved_name(&iota_names, &domain::new(b"example.iota".to_string())), 0);
+    assert!(!deny_list::is_reserved_name(&iota_names, &name::new(b"example.iota".to_string())), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -81,11 +81,11 @@ fun remove_blocked_label() {
 
     deny_list::add_blocked_labels(&mut iota_names, &cap, some_offensive_labels());
 
-    assert!(deny_list::is_blocked_name(&iota_names, &domain::new(b"badtest.iota".to_string())), 0);
+    assert!(deny_list::is_blocked_name(&iota_names, &name::new(b"badtest.iota".to_string())), 0);
 
     deny_list::remove_blocked_names(&mut iota_names, &cap, vector[utf8(b"badtest")]);
 
-    assert!(!deny_list::is_blocked_name(&iota_names, &domain::new(b"badtest.iota".to_string())), 0);
+    assert!(!deny_list::is_blocked_name(&iota_names, &name::new(b"badtest.iota".to_string())), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -106,11 +106,11 @@ fun remove_reserved_label() {
 
     let name = utf8(b"test");
 
-    assert!(deny_list::is_reserved_name(&iota_names, &domain::new(b"test.iota".to_string())), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test.iota".to_string())), 0);
 
     deny_list::remove_reserved_labels(&mut iota_names, &cap, vector[name]);
 
-    assert!(!deny_list::is_reserved_name(&iota_names, &domain::new(b"test.iota".to_string())), 0);
+    assert!(!deny_list::is_reserved_name(&iota_names, &name::new(b"test.iota".to_string())), 0);
 
     iota_names::burn_admin_cap_for_testing(cap);
 
@@ -131,7 +131,7 @@ fun tries_to_remove_no_labels() {
 
     let _name = utf8(b"test");
 
-    assert!(deny_list::is_reserved_name(&iota_names, &domain::new(b"test.iota".to_string())), 0);
+    assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test.iota".to_string())), 0);
 
     deny_list::remove_reserved_labels(&mut iota_names, &cap, vector[]);
 

@@ -5,8 +5,8 @@
 module iota_names::deny_list;
 
 use iota::table::{Self, Table};
-use iota_names::domain::Domain;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
+use iota_names::name::Name;
 use std::string::String;
 
 #[error]
@@ -35,7 +35,7 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
 }
 
 /// Check for a reserved name
-public fun is_reserved_name(iota_names: &IotaNames, name: &Domain): bool {
+public fun is_reserved_name(iota_names: &IotaNames, name: &Name): bool {
     let len = name.number_of_levels();
     let mut index = 1;
 
@@ -50,7 +50,7 @@ public fun is_reserved_name(iota_names: &IotaNames, name: &Domain): bool {
 }
 
 /// Checks for a blocked name.
-public fun is_blocked_name(iota_names: &IotaNames, name: &Domain): bool {
+public fun is_blocked_name(iota_names: &IotaNames, name: &Name): bool {
     let len = name.number_of_levels();
     let mut index = 1;
 

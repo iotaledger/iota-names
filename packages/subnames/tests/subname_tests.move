@@ -354,14 +354,14 @@ fun tries_to_create_reserved_leaf_subname() {
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
-    create_leaf_subdomain(&parent, utf8(b"reserved.test.iota"), TEST_ADDRESS, scenario);
+    let parent = create_sln(utf8(b"test.iota"), scenario);
+    create_leaf_subname(&parent, utf8(b"reserved.test.iota"), TEST_ADDRESS, scenario);
 
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EReservedName)]
-fun tries_to_create_denied_node_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EReservedName)]
+fun tries_to_create_denied_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -372,8 +372,8 @@ fun tries_to_create_denied_node_subdomain() {
     ts::return_shared(iota_names);
     ts::return_to_sender(scenario, admin_cap);
 
-    let parent = create_sld_name(utf8(b"test.iota"), scenario);
-    let _child = create_node_subdomain(
+    let parent = create_sln(utf8(b"test.iota"), scenario);
+    let _child = create_node_subname(
         &parent, 
         utf8(b"reserved.test.iota"), 
         1,
@@ -385,8 +385,8 @@ fun tries_to_create_denied_node_subdomain() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subdomains::subdomains::EBlockedName)]
-fun tries_to_create_blocked_leaf_subdomain() {
+#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EBlockedName)]
+fun tries_to_create_blocked_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 

@@ -102,7 +102,7 @@ public fun remove_leaf(
     clock: &Clock,
     subname: String,
 ) {
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
     assert!(!deny_list::is_blocked_name(iota_names, &subname), EBlockedName);
     assert!(!deny_list::is_reserved_name(iota_names, &subname), EReservedName);
 
@@ -136,15 +136,16 @@ public fun new(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     expiration_timestamp_ms: u64,
     allow_creation: bool,
     allow_time_extension: bool,
     ctx: &mut TxContext,
 ): SubnameRegistration {
-    assert!(!deny_list::is_blocked_name(iota_names, subname_name), ENotAllowedName);
-
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
+    assert!(!deny_list::is_blocked_name(iota_names, &subname), EBlockedName);
+    assert!(!deny_list::is_reserved_name(iota_names, &subname), EReservedName);
+    
     // all validation logic for subname creation / management.
     internal_validate_nft_can_manage_subname(iota_names, parent, clock, subname, true);
 
@@ -251,7 +252,7 @@ public fun edit_setup(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     allow_creation: bool,
     allow_time_extension: bool,
 ) {
@@ -259,7 +260,7 @@ public fun edit_setup(
     registry(iota_names).assert_nft_is_authorized(parent, clock);
 
     let parent_name = parent.name();
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
 
     // validate that the subname is valid for the supplied parent
     // (as well as it is valid in label length, total length, depth, etc).
