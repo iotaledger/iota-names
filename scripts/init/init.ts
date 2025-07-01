@@ -41,9 +41,9 @@ export const init = async (
     const client = getClient(network);
     const packageInfo = readPackageInfo(network);
 
-    let namesToReserveFile = './init/names-to-register.csv';
-    if (fs.existsSync(namesToReserveFile)) {
-        const nameAddressPairs = parseCsvFile(namesToReserveFile);
+    let namesToRegisterFile = './init/names-to-register.csv';
+    if (fs.existsSync(namesToRegisterFile)) {
+        const nameAddressPairs = parseCsvFile(namesToRegisterFile);
         const names = Object.keys(nameAddressPairs);
         const nameCount = names.length;
         if (nameCount === 0) {
