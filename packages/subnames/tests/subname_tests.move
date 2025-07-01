@@ -342,7 +342,7 @@ fun tries_to_created_nested_leaf_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EReservedName)]
+#[test, expected_failure(abort_code = ::iota_names::validation::EReservedName)]
 fun tries_to_create_reserved_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -360,7 +360,7 @@ fun tries_to_create_reserved_leaf_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EReservedName)]
+#[test, expected_failure(abort_code = ::iota_names::validation::EReservedName)]
 fun tries_to_create_reserved_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -385,7 +385,7 @@ fun tries_to_create_reserved_node_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EBlockedName)]
+#[test, expected_failure(abort_code = ::iota_names::validation::EBlockedName)]
 fun tries_to_create_blocked_leaf_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -403,7 +403,7 @@ fun tries_to_create_blocked_leaf_subname() {
     abort 1337
 }
 
-#[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EBlockedName)]
+#[test, expected_failure(abort_code = ::iota_names::validation::EBlockedName)]
 fun tries_to_create_blocked_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;

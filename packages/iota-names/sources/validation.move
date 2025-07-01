@@ -10,15 +10,20 @@ use iota_names::iota_names::IotaNames;
 
 #[error]
 const EBlockedName: vector<u8> = b"Name is blocked.";
-
 #[error]
 const EReservedName: vector<u8> = b"Name is reserved.";
+
+/// Validates if a name contains no blocked or reserved segments.
+public fun assert_not_blocked_or_reserved(iota_names: &IotaNames, name: &Name) {
+    assert!(!deny_list::is_blocked_name(iota_names, name), EBlockedName);
+    assert!(!deny_list::is_reserved_name(iota_names, name), EReservedName);
+}
 
 /// Validates if a name is valid for sale according to core config and deny list rules.
 public fun assert_is_valid_for_sale(config: &CoreConfig, iota_names: &IotaNames, name: &Name) {
     // Checks for length, TLN and subname restrictions
     config.assert_is_valid_for_sale(name);
-    
-    assert!(!deny_list::is_blocked_name(iota_names, name), EBlockedName);
-    assert!(!deny_list::is_reserved_name(iota_names, name), EReservedName);
+
+    // Checks whether the name contains any blocked or reserved labels
+    assert_not_blocked_or_reserved(iota_names, name);
 }

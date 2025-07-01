@@ -24,7 +24,7 @@ fun test() {
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
     deny_list::add_reserved_labels(&mut iota_names, &cap, some_reserved_labels());
-    deny_list::add_blocked_labels(&mut iota_names, &cap, some_offensive_labels());
+    deny_list::add_blocked_labels(&mut iota_names, &cap, some_blocked_labels());
 
     assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test.iota".to_string())), 0);
     assert!(deny_list::is_reserved_name(&iota_names, &name::new(b"test2.iota".to_string())), 0);
@@ -42,7 +42,7 @@ fun test() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names::deny_list::ENoLabelsInList)]
-fun test_empty_addition_failure() {
+fun test_empty_addition_reserved_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -79,7 +79,7 @@ fun remove_blocked_label() {
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = iota_names::create_admin_cap_for_testing(scenario.ctx());
 
-    deny_list::add_blocked_labels(&mut iota_names, &cap, some_offensive_labels());
+    deny_list::add_blocked_labels(&mut iota_names, &cap, some_blocked_labels());
 
     assert!(deny_list::is_blocked_name(&iota_names, &name::new(b"badtest.iota".to_string())), 0);
 
@@ -168,7 +168,7 @@ fun some_reserved_labels(): vector<String> {
     vec
 }
 
-fun some_offensive_labels(): vector<String> {
+fun some_blocked_labels(): vector<String> {
     let mut vec: vector<String> = vector::empty();
     vec.push_back(utf8(b"badtest"));
     vec.push_back(utf8(b"badtest2"));

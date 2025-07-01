@@ -34,7 +34,7 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
     );
 }
 
-/// Check for a reserved name
+/// Check for a reserved name.
 public fun is_reserved_name(iota_names: &IotaNames, name: &Name): bool {
     let len = name.number_of_levels();
     let mut index = 1;
