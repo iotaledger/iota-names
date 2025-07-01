@@ -45,10 +45,10 @@ entry fun reserve_names(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    assert!(!names.is_empty(), ENoNamesProvided);
     let sender = sender(ctx);
     let config = *iota_names.get_config<CoreConfig>();
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
-    assert!(!names.is_empty(), ENoNamesProvided);
     while (!names.is_empty()) {
         let name = name::new(names.pop_back());
         config.assert_is_valid_for_sale(&name);

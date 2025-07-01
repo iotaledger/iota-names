@@ -20,6 +20,7 @@ use iota_names::register::RegisterAuth;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
 use iota_names::subname_registration;
+use iota_names::test_init_utils;
 use std::option::{extract, some, none};
 use std::string::{utf8, String};
 
@@ -60,7 +61,7 @@ fun test_init(): Scenario {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut iota_names = scenario.take_shared<IotaNames>();
 
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
 
         test_scenario::return_shared(iota_names);
         scenario.return_to_sender(admin_cap);

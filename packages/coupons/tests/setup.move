@@ -10,7 +10,7 @@ use iota::hash::blake2b256;
 use iota::hex;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names::registry;
+use iota_names::test_init_utils;
 use iota_names_coupons::coupon_house::{Self, CouponsAuth};
 use iota_names_coupons::coupons::Coupons;
 use iota_names_coupons::range;
@@ -49,7 +49,7 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         let mut iota_names = scenario.take_shared<IotaNames>();
         // initialize coupon data.
         coupon_house::setup(&mut iota_names, &admin_cap, scenario.ctx());
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         // authorize TestAuth to CouponHouse.
         coupon_house::authorize<TestAuth>(&admin_cap, &mut iota_names);
         test_scenario::return_to_sender(scenario, admin_cap);

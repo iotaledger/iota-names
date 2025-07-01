@@ -17,6 +17,7 @@ use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::option::{none, some, is_some};
 use std::string::String;
 
@@ -87,7 +88,7 @@ public fun start_auction_and_place_bid(
 ) {
     let name = name::new(name);
 
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
 
     assert!(!self.auctions.contains(name), EAuctionStarted);
 
