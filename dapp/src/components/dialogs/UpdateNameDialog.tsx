@@ -114,7 +114,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
         const nftId = isNameSubName
-            ? (getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name) ?? '')
+            ? getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
         if (nftId) {
             updates.push({
