@@ -43,9 +43,7 @@ export default function MyNamesPage(): JSX.Element {
                                 <Title title={nft.name} size={TitleSize.Small} />
                                 <Button
                                     text="Manage"
-                                    onClick={() => {
-                                        setUpdateNameDialog(nft.name);
-                                    }}
+                                    onClick={() => setUpdateNameDialog(nft.name)}
                                 />
                             </div>
                         </Card>
@@ -65,7 +63,9 @@ export default function MyNamesPage(): JSX.Element {
                                 clickableAction={
                                     <Button
                                         text="Manage"
-                                        onClick={() => setUpdateNameDialog(subdomain.name)}
+                                        onClick={() => {
+                                            setUpdateNameDialog(subdomain.name);
+                                        }}
                                     />
                                 }
                             />
