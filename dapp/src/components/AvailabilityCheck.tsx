@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
+import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
@@ -160,7 +160,7 @@ export function AvailabilityCheck() {
                 </div>
             )}
             {isAuctionLoading ? (
-                <Skeleton widthClass="w-48" heightClass="h-48" isRounded={false} />
+                <p>Loading...</p>
             ) : canBid ? (
                 <div className="flex items-center space-x-4">
                     <div className="text-body-md">
