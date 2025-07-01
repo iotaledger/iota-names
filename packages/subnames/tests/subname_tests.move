@@ -361,7 +361,7 @@ fun tries_to_create_reserved_leaf_subname() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names_subnames::subnames::EReservedName)]
-fun tries_to_create_denied_node_subname() {
+fun tries_to_create_reserved_node_subname() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 

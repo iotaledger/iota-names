@@ -16,7 +16,7 @@ const EReservedName: vector<u8> = b"Name is reserved.";
 
 /// Validates if a name is valid for sale according to core config and deny list rules.
 public fun assert_is_valid_for_sale(config: &CoreConfig, iota_names: &IotaNames, name: &Name) {
-    // Checks for (length, TLN, subname restrictions)
+    // Checks for length, TLN and subname restrictions
     config.assert_is_valid_for_sale(name);
     
     assert!(!deny_list::is_blocked_name(iota_names, name), EBlockedName);

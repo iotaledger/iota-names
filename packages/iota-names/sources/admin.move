@@ -13,7 +13,6 @@ use iota_names::name;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
-use iota_names::validation;
 use std::string::String;
 
 #[error]
@@ -32,7 +31,7 @@ public fun reserve_name(
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     let name = name::new(name);
-    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
+    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     registry.add_record(name, no_years, clock, ctx)
 }
@@ -52,7 +51,7 @@ entry fun reserve_names(
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     while (!names.is_empty()) {
         let name = name::new(names.pop_back());
-        validation::assert_is_valid_for_sale(&config, iota_names, &name);
+        config.assert_is_valid_for_sale(&name);
         let nft = registry.add_record(name, no_years, clock, ctx);
         iota::transfer::public_transfer(nft, sender);
     };
