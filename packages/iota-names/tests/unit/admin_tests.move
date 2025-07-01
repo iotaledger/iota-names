@@ -105,6 +105,68 @@ fun reserve_name_from_deny_list() {
 }
 
 #[test]
+fun reserve_names_from_deny_list() {
+    let ctx = tx_context::dummy();
+    let mut scenario = iota::test_scenario::begin(ctx.sender());
+
+    {
+        let iota_names = iota_names::init_for_testing(scenario.ctx());
+        iota_names.share_for_testing();
+    };
+
+    let names = vector[
+        utf8(b"one.iota"),
+        utf8(b"two.iota"),
+    ];
+    
+    {
+        scenario.next_tx(ctx.sender());
+
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+        let clock = clock::create_for_testing(scenario.ctx());
+        
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
+
+        iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+
+        let reserved_labels = vector[
+            utf8(b"one"),
+            utf8(b"two"),
+        ];
+        deny_list::add_reserved_labels(&mut iota_names, &admin_cap, reserved_labels);
+
+        admin::reserve_names(
+            &admin_cap,
+            &mut iota_names,
+            copy names,
+            1,
+            &clock,
+            scenario.ctx()
+        );
+
+        clock.share_for_testing();
+        scenario.return_to_sender(admin_cap);
+        iota::test_scenario::return_shared(iota_names);
+    };
+
+    {
+        scenario.next_tx(ctx.sender());
+
+        let mut ids = scenario.ids_for_sender<IotaNamesRegistration>();
+        assert_eq(ids.length(), names.length());
+        while (!ids.is_empty()) {
+            let nft = scenario.take_from_sender_by_id<IotaNamesRegistration>(ids.pop_back());
+            assert!(vector::contains(&names, &nft.name_str()));
+            assert_eq(nft.expiration_timestamp_ms(), constants::year_ms());
+            scenario.return_to_sender(nft);
+        };
+    };
+
+    scenario.end();
+}
+
+#[test]
 fun register_multiple() {
     let ctx = tx_context::dummy();
     let mut scenario = iota::test_scenario::begin(ctx.sender());
