@@ -437,7 +437,7 @@ fun test_register_names_empty_list_fails() {
         test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
-        // Try to reserve an empty list of names - this should fail
+        // Try to register an empty list of names - this should fail
         admin::register_names(
             &admin_cap,
             &mut iota_names,
