@@ -94,10 +94,6 @@ export function AvailabilityCheck() {
         } else if (nameRecordData?.type === 'not-priced') {
             return <span className="text-red-700 dark:text-red-200">Not priced</span>;
         } else if (nameRecordData?.type === 'unavailable') {
-            if (isAuctionMetadataLoading) {
-                return <Skeleton widthClass="w-32" heightClass="h-6" />;
-            }
-
             if (isAuctionInProgress) {
                 return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
             } else {
@@ -107,6 +103,8 @@ export function AvailabilityCheck() {
             return null;
         }
     })();
+
+    const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -161,8 +159,8 @@ export function AvailabilityCheck() {
                     )}
                 </div>
             )}
-            {isAuctionMetadataLoading ? (
-                <Skeleton />
+            {isAuctionLoading ? (
+                <Skeleton widthClass="w-48" heightClass="h-48" isRounded={false} />
             ) : canBid ? (
                 <div className="flex items-center space-x-4">
                     <div className="text-body-md">
