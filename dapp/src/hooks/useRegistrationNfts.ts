@@ -29,6 +29,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
     const { iotaNamesClient } = useIotaNamesClient();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
+
     const filter = (() => {
         switch (type) {
             case 'domain':
@@ -41,6 +42,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 };
         }
     })();
+
     return useGetAllOwnedObjects(address, filter, {
         select(data) {
             return data.map((nameRecord) => {
