@@ -3,8 +3,9 @@
 
 import { Button, Card, CardType, KeyValueInfo } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
+
+import { formatNanosToIota } from '@/lib/utils';
 
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
@@ -60,11 +61,6 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
     const timeRemaining = getTimeRemaining(auction.metadata);
     const nextBidAmount = getNextBidAmount(auction.metadata);
 
-    const formatBidAmount = (nanos: bigint) => {
-        const iota = Number(nanos) / Number(NANOS_PER_IOTA);
-        return `${iota.toLocaleString()} IOTA`;
-    };
-
     const handleClaimClick = async () => {
         if (!claimTxData?.transaction) return;
 
@@ -117,7 +113,10 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
                 <div className="space-y-2">
                     <KeyValueInfo
                         keyText="Current Bid"
-                        value={formatBidAmount(currentBid)}
+                        value={formatNanosToIota(currentBid, {
+                            formatRounded: false,
+                            showIotaSymbol: false,
+                        })}
                         fullwidth
                     />
                     <KeyValueInfo
@@ -128,7 +127,10 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
                     {userStatus === 'outbid' && timeRemaining > 0 && (
                         <KeyValueInfo
                             keyText="Next Bid"
-                            value={formatBidAmount(nextBidAmount)}
+                            value={formatNanosToIota(nextBidAmount, {
+                                formatRounded: false,
+                                showIotaSymbol: false,
+                            })}
                             fullwidth
                         />
                     )}
