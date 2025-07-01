@@ -90,7 +90,7 @@ export function AvailabilityCheck() {
             return <span className="text-red-700 dark:text-red-200">Not priced</span>;
         } else if (nameRecordData?.type === 'unavailable') {
             if (isAuctionMetadataLoading) {
-                return <Skeleton widthClass="w-32" heightClass="h-6" />;
+                return <Skeleton className="w-32 h-6" />;
             }
 
             if (isAuctionInProgress) {
