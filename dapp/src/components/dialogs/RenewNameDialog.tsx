@@ -19,6 +19,7 @@ import { useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
 import {
     getNameObject,
     getNamePermissions,
@@ -26,12 +27,13 @@ import {
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
-interface AvatarSelectDialogProps {
+interface RenewDialogProps {
     name: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
 }
-export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps) {
+
+export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
@@ -168,9 +170,7 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
                             </div>
                         ) : null}
                         {!canBeRenewed ? (
-                            <div className="text-yellow-400">
-                                Can't renew this domain for more time.
-                            </div>
+                            <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
