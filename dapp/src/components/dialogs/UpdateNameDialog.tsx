@@ -155,6 +155,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         if (parentObjectId) {
             updates.push({
                 type: 'edit-setup',
+                name,
                 parentNftId: parentObjectId,
                 allowChildCreation: editIsAllowSubnames,
                 allowTimeExtension: editIsAllowingRenew,
@@ -181,7 +182,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name,
         updates,
         isExpired,
     });
