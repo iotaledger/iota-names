@@ -6,7 +6,8 @@ import type { Metadata } from 'next';
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
-import { ConnectionGuard, Navbar } from '@/components';
+import { ConnectionGuard } from '@/components';
+import { Navbar } from '@/components/layout/Navbar';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
 
