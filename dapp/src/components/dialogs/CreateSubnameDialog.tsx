@@ -136,6 +136,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         isExpired ||
         !newSubdomainName.trim() ||
         newSubdomainName.length < MIN_LABEL_SIZE;
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container">

@@ -34,10 +34,7 @@ type DeleteNameDialogProps = {
 export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
-
     const account = useCurrentAccount();
-    const isConnected = !!account?.address;
-    if (!isConnected) return null;
 
     const { data: domainsOwned } = useRegistrationNfts('domain');
     const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
@@ -80,17 +77,11 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
             });
-            for (const update of updates) {
-                switch (update.type) {
-                    case 'delete-name':
-                        queryClient.invalidateQueries({
-                            queryKey: queryKey.ownedObjects(account?.address || ''),
-                        });
-                        break;
-                }
-            }
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
             closeDialog();
         },
     });
