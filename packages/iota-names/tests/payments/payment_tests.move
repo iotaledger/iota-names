@@ -17,7 +17,8 @@ use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration;
 use iota_names::payment::{Self, PaymentIntent, Receipt};
 use iota_names::pricing_config::{Self, PricingConfig};
-use iota_names::registry::{Self, Registry};
+use iota_names::registry::Registry;
+use iota_names::test_init_utils;
 
 /// Authorization witness to call protected functions of `iota_names`.
 public struct PaymentsAuth has drop {}
@@ -333,7 +334,7 @@ public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
     // issuing receipts.
     cap.authorize<PaymentsAuth>(&mut iota_names);
 
-    registry::init_for_testing(&cap, &mut iota_names, ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &cap, ctx);
 
     destroy(cap);
     iota_names

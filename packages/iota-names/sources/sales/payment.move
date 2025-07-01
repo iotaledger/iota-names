@@ -28,6 +28,7 @@ use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::{PricingConfig, RenewalConfig};
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::string::String;
 use std::type_name::{Self, TypeName};
 
@@ -134,7 +135,7 @@ public fun finalize_payment<A: drop, T>(
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentIntent {
     let name = name::new(name);
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
 
     let price = iota_names.get_config<PricingConfig>().calculate_base_price_of_name(name);
 
@@ -185,7 +186,7 @@ public fun register(
     match (receipt) {
         Receipt::Registration { name, years, version } => {
             assert!(version == config.payments_version(), EVersionMismatch);
-            config.assert_is_valid_for_sale(&name); // sanity check. We also check on `init_registration`.
+            validation::assert_is_valid_for_sale(config, iota_names, &name); // sanity check. We also check on `init_registration`.
             iota_names.pkg_registry_mut<Registry>().add_record(name, years, clock, ctx)
         },
         Receipt::Renewal { name: _, years: _, version: _ } => {

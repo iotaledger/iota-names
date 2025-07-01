@@ -17,7 +17,6 @@ export type PackageInfo = {
         };
     };
     couponsPackageId: string;
-    denyListPackageId: string;
     iotaNamesObjectId: string;
     packageId: string;
     paymentsPackageId: string;

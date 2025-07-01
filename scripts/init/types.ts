@@ -4,7 +4,6 @@
 
 export type PackageInfo = {
     IotaNames: IotaNames;
-    DenyList: Package;
     Auction: Auction;
     Coupons: Package;
     Subnames: Package;

@@ -25,7 +25,6 @@
 ///
 module iota_names_subnames::subnames;
 
-use iota_names_deny_list::deny_list;
 use iota::clock::Clock;
 use iota::dynamic_field as df;
 use iota::event;
@@ -36,6 +35,7 @@ use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
 use iota_names::subname_registration::SubnameRegistration;
+use iota_names::validation;
 use std::string::{String, utf8};
 use iota_names_subnames::config::{Self, SubnameConfig};
 
@@ -54,9 +54,6 @@ const ESubnameReplaced: vector<u8> =
 #[error]
 const EParentChanged: vector<u8> =
     b"Parent for a given subname has changed, hence time extension cannot be done.";
-#[error]
-const ENotAllowedName: vector<u8> =
-    b"Checks whether a name is allowed or not (against blocked names list).";
 
 /// Enabled metadata value.
 const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
@@ -73,13 +70,13 @@ public fun new_leaf(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     target: address,
     ctx: &mut TxContext,
 ) {
-    assert!(!deny_list::is_blocked_name(iota_names, subname_name), ENotAllowedName);
-
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
+    validation::assert_not_blocked_or_reserved(iota_names, &subname);
+    
     // all validation logic for subname creation / management.
     internal_validate_nft_can_manage_subname(iota_names, parent, clock, subname, true);
 
@@ -98,9 +95,9 @@ public fun remove_leaf(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
 ) {
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
 
     // All validation logic for subname creation / management.
     // We pass `false` as last argument because even if we don't have create capabilities (anymore),
@@ -132,15 +129,15 @@ public fun new(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     expiration_timestamp_ms: u64,
     allow_creation: bool,
     allow_time_extension: bool,
     ctx: &mut TxContext,
 ): SubnameRegistration {
-    assert!(!deny_list::is_blocked_name(iota_names, subname_name), ENotAllowedName);
-
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
+    validation::assert_not_blocked_or_reserved(iota_names, &subname);
+    
     // all validation logic for subname creation / management.
     internal_validate_nft_can_manage_subname(iota_names, parent, clock, subname, true);
 
@@ -247,7 +244,7 @@ public fun edit_setup(
     iota_names: &mut IotaNames,
     parent: &IotaNamesRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     allow_creation: bool,
     allow_time_extension: bool,
 ) {
@@ -255,7 +252,7 @@ public fun edit_setup(
     registry(iota_names).assert_nft_is_authorized(parent, clock);
 
     let parent_name = parent.name();
-    let subname = name::new(subname_name);
+    let subname = name::new(subname);
 
     // validate that the subname is valid for the supplied parent
     // (as well as it is valid in label length, total length, depth, etc).

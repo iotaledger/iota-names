@@ -30,26 +30,16 @@ dependencies = [
 ]
 
 [[move.package]]
-id = "iota_names_deny_list"
-source = { local = "../deny-list" }
-
-dependencies = [
-  { id = "Iota", name = "Iota" },
-  { id = "iota_names", name = "iota_names" },
-]
-
-[[move.package]]
 id = "iota_names_subnames"
 source = { local = "../subnames" }
 
 dependencies = [
   { id = "Iota", name = "Iota" },
   { id = "iota_names", name = "iota_names" },
-  { id = "iota_names_deny_list", name = "iota_names_deny_list" },
 ]
 
 [move.toolchain-version]
-compiler-version = "1.2.2-rc"
+compiler-version = "1.1.0"
 edition = "2024"
 flavor = "iota"
 
