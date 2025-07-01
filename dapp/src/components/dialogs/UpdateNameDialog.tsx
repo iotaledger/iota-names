@@ -147,11 +147,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     ) {
         // To edit the setup of a subdomain we need to get its parent
         // Its parent can be another name or another subdomain
-        const parentObjectId = getParentObjectId(
-            domainsOwned ?? [],
-            subdomainsOwned ?? [],
-            name,
-        );
+        const parentObjectId = getParentObjectId(domainsOwned ?? [], subdomainsOwned ?? [], name);
         if (parentObjectId) {
             updates.push({
                 type: 'edit-setup',
