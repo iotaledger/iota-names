@@ -72,7 +72,7 @@ public fun add_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labels:
     );
 }
 
-/// Add a list of offensive labels to the list as admin.
+/// Add a list of blocked labels to the list as admin.
 public fun add_blocked_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_add_labels_to_list(
         &mut deny_list_mut(iota_names).blocked,
@@ -80,7 +80,7 @@ public fun add_blocked_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: 
     );
 }
 
-/// Remove a list of labels from the reserved list.
+/// Remove a list of labels from the reserved list as admin.
 public fun remove_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_remove_labels_from_list(
         &mut deny_list_mut(iota_names).reserved,
@@ -88,7 +88,7 @@ public fun remove_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labe
     );
 }
 
-/// Remove a list of labels from the list as admin.
+/// Remove a list of labels from the blocked list as admin.
 public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_remove_labels_from_list(
         &mut deny_list_mut(iota_names).blocked,
@@ -101,7 +101,7 @@ fun deny_list(iota_names: &IotaNames): &DenyList {
     iota_names.registry()
 }
 
-/// Internal helper to get access to the BlockedNames object
+/// Internal helper to get access to the DenyList object
 fun deny_list_mut(iota_names: &mut IotaNames): &mut DenyList {
     iota_names::auth_registry_mut<DenyListAuth, DenyList>(DenyListAuth {}, iota_names)
 }
