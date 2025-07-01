@@ -5,11 +5,10 @@ import { Title, TitleSize } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { useState } from 'react';
 
-import { AuctionBidDialog } from '@/components/dialogs';
-import { AuctionDetails, useGetUserAuctions } from '@/hooks/auction/useGetUserAuctions';
-import { getUserAuctionStatus } from '@/lib/auction/utils';
-
+import { AuctionDetails, useGetUserAuctions } from '../hooks/useGetUserAuctions';
+import { getUserAuctionStatus } from '../lib/utils';
 import { AuctionItem } from './AuctionItem';
+import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 
 export function UserAuctions() {
     const account = useCurrentAccount();

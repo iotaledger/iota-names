@@ -6,9 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
-import { buildClaimDomainTransaction } from '@/lib/auction/transaction';
 import { getGasSummary } from '@/lib/utils/getGasSummary';
 
+import { buildClaimDomainTransaction } from '../lib/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
 
 export function useClaimAuctionTransaction(address: string, domain: string) {

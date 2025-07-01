@@ -21,9 +21,9 @@ import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
+import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { queryKey } from '@/hooks';
-import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
-import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 

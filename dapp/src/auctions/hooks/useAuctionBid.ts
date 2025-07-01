@@ -6,8 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
-import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/lib/auction';
 
+import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '../lib/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
 import { useGetAuctionMetadata } from './useGetAuctionMetadata';
 

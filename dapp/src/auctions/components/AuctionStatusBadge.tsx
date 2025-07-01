@@ -3,7 +3,7 @@
 
 import { Badge, BadgeType } from '@iota/apps-ui-kit';
 
-import { UserAuctionStatus } from '@/lib/auction/utils';
+import { UserAuctionStatus } from '../lib/utils';
 
 interface AuctionStatusBadgeProps {
     status: UserAuctionStatus;

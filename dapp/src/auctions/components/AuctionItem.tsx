@@ -6,16 +6,15 @@ import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit'
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useState } from 'react';
 
-import { useClaimAuctionTransaction } from '@/hooks/auction/useClaimAuctionTransaction';
-import { AuctionDetails } from '@/hooks/auction/useGetUserAuctions';
+import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
+import { AuctionDetails } from '../hooks/useGetUserAuctions';
 import {
     formatTimeRemaining,
     getCurrentBidAmount,
     getNextBidAmount,
     getTimeRemaining,
     getUserAuctionStatus,
-} from '@/lib/auction/utils';
-
+} from '../lib/utils';
 import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {

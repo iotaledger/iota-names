@@ -6,8 +6,8 @@
 import { Button, Card, CardBody, CardType, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
+import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { AvailabilityCheck } from '@/components';
-import { UserAuctions } from '@/components/auction/UserAuctions';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
 import { useRegistrationNfts } from '@/hooks';
