@@ -4,7 +4,7 @@
 'use client';
 
 import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
-import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { useCurrentWallet } from '@iota/dapp-kit';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -13,6 +13,8 @@ import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
+import { NamePurchaseCard } from './name-purchase-card/NamePurchaseCard';
+import { NamePurchaseStatus } from './name-purchase-card/namePurchasedCard.enums';
 
 function normalizeNameInput(name: string) {
     return name.toLowerCase().replace(/\.iota$/i, '');
@@ -82,27 +84,6 @@ export function AvailabilityCheck() {
         setSearchValue('');
         setName('');
     }
-
-    const statusLabel = (() => {
-        if (isAvailable) {
-            return <span className="text-green-700 dark:text-green-200">Available</span>;
-        } else if (nameRecordData?.type === 'not-priced') {
-            return <span className="text-red-700 dark:text-red-200">Not priced</span>;
-        } else if (nameRecordData?.type === 'unavailable') {
-            if (isAuctionMetadataLoading) {
-                return <Skeleton widthClass="w-32" heightClass="h-6" />;
-            }
-
-            if (isAuctionInProgress) {
-                return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
-            } else {
-                return <span className="text-red-700 dark:text-red-200">Unavailable</span>;
-            }
-        } else {
-            return null;
-        }
-    })();
-
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {isPurchaseDialogOpen && isAvailable && (
@@ -113,77 +94,87 @@ export function AvailabilityCheck() {
                     onPurchase={handlePurchase}
                 />
             )}
+            <div className="flex flex-col gap-2xl w-full max-w-[744px]">
+                <div className="flex items-baseline justify-center w-full">
+                    <Input
+                        type={InputType.Text}
+                        placeholder="Check name availability"
+                        value={searchValue}
+                        onChange={({ target: { value } }) => handleInputChange(value)}
+                        errorMessage={errorMessage}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        leadingIcon={
+                            <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
+                        }
+                    />
+                    <Button
+                        size={ButtonSize.Medium}
+                        text="Search"
+                        disabled={!enableSearch}
+                        onClick={handleSearch}
+                    />
+                </div>
+                {nameRecordData && (
+                    <div className="flex flex-col items-center w-full">
+                        <NamePurchaseCard
+                            name={name}
+                            status={
+                                isAvailable
+                                    ? isConnected
+                                        ? NamePurchaseStatus.Connected
+                                        : NamePurchaseStatus.Unconnected
+                                    : NamePurchaseStatus.Unavailable
+                            }
+                            value={
+                                nameRecordData?.type === 'available'
+                                    ? formatNanosToIota(nameRecordData.price)
+                                    : undefined
+                            }
+                            supportingTextValue={
+                                nameRecordData?.type === 'available' ? 'Price' : undefined
+                            }
+                            supportingText={isAuctionInProgress ? 'In auction' : undefined}
+                        >
+                            <Button
+                                type={ButtonType.Secondary}
+                                text="Buy"
+                                onClick={() => setPurchaseDialogOpen(true)}
+                            />
+                        </NamePurchaseCard>
 
-            <div className="flex items-baseline justify-center space-x-4 w-full max-w-xl">
-                <Input
-                    type={InputType.Text}
-                    placeholder="Check name availability"
-                    value={searchValue}
-                    onChange={({ target: { value } }) => handleInputChange(value)}
-                    errorMessage={errorMessage}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    leadingIcon={
-                        <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
-                    }
-                />
-                <Button
-                    size={ButtonSize.Medium}
-                    text="Search"
-                    disabled={!enableSearch}
-                    onClick={handleSearch}
-                />
-            </div>
-
-            {nameRecordData && <div className="text-headline-sm">{statusLabel}</div>}
-
-            {(isAvailable || isAuctionInProgress) && (
-                <div className="flex flex-col items-center space-y-4">
-                    {isAvailable && (
-                        <div className="flex items-center space-x-4">
-                            <div className="text-body-md">
-                                Price: {formatNanosToIota(nameRecordData!.price)}
-                            </div>
-                            {isConnected ? (
-                                <Button
-                                    type={ButtonType.Secondary}
-                                    text="Buy"
-                                    onClick={() => setPurchaseDialogOpen(true)}
-                                />
+                        {isAuctionInProgress &&
+                            (isAuctionMetadataLoading ? (
+                                <Skeleton />
                             ) : (
-                                <ConnectButton connectText="Connect" />
-                            )}
-                        </div>
-                    )}
-
-                    {isAuctionInProgress &&
-                        (isAuctionMetadataLoading ? (
-                            <Skeleton />
-                        ) : (
-                            <div className="flex items-center space-x-4">
-                                <div className="text-body-md">
-                                    Minimum bid:{' '}
-                                    {formatNanosToIota(
+                                <NamePurchaseCard
+                                    name={name}
+                                    status={
+                                        isConnected
+                                            ? NamePurchaseStatus.Connected
+                                            : NamePurchaseStatus.Unconnected
+                                    }
+                                    value={formatNanosToIota(
                                         BigInt(
-                                            auctionMetadata.value.value.current_bid.balance.value,
+                                            auctionMetadata?.value?.value?.current_bid?.balance
+                                                ?.value ?? 0,
                                         ) +
                                             BigInt(1) * NANOS_PER_IOTA,
                                     )}
-                                </div>
-                                {isConnected ? (
+                                    supportingTextValue="Minimum bid"
+                                    supportingText={isAuctionInProgress ? 'In auction' : undefined}
+                                >
                                     <Button
-                                        type={ButtonType.Secondary}
+                                        type={ButtonType.Primary}
                                         text="Bid"
                                         onClick={() =>
                                             console.log('Bid functionality not implemented yet')
                                         }
                                     />
-                                ) : (
-                                    <ConnectButton connectText="Connect" />
-                                )}
-                            </div>
-                        ))}
-                </div>
-            )}
+                                </NamePurchaseCard>
+                            ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
