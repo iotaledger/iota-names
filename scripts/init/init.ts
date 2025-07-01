@@ -7,7 +7,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo, writePackageInfo } from '../package-info/constants';
 import { hasLabelFilesToProcess, processLabelFiles } from '../reserved-names/deny-labels';
-import { parseCsvFile, reserveNames } from '../reserved-names/reserve-names';
+import { parseCsvFile, registerNames } from '../reserved-names/register-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
@@ -51,7 +51,7 @@ export const init = async (
         } else {
             console.log(`Registering ${nameCount} names:`, names);
             const tx = new Transaction();
-            reserveNames(
+            registerNames(
                 tx,
                 names,
                 packageInfo.packageId,

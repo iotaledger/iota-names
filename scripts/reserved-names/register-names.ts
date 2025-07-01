@@ -35,7 +35,7 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
     return nameAddressPairs;
 };
 
-export const reserveNames = (
+export const registerNames = (
     txb: Transaction,
     names: string[],
     iotaNamesPackageId: string,
@@ -54,6 +54,6 @@ export const reserveNames = (
     });
 };
 
-// Run this to see what names would be reserved:
+// Run this to see what names would be registered:
 // const nameAddressPairs = parseCsvFile('./init/names-to-register.csv');
 // console.log(`Registering ${Object.keys(nameAddressPairs).length} names:`, nameAddressPairs);
