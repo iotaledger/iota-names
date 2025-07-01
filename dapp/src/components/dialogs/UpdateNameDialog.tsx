@@ -164,7 +164,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
         const nftId = isNameSubName
-            ? getSubdomainObjectId(subdomainsOwned ?? [], nameRecord.nameRecord.name)
+            ? getNameObject(domainsOwned ?? [], subdomainsOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
         if (nftId) {
             updates.push({
