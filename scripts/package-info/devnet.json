@@ -1,21 +1,22 @@
 {
-    "adminAddress": "0xb98bc58cd2cae4c621b47ed0a3bbed2e1dcb78da60d578625384dad3a231c6fb",
-    "adminCap": "0x84096eeb81f666bc8e7b14803b387617ad92aa796b5f84ddc752a513b273fc34",
-    "auctionPackageId": "0x5e7a300e640f645a4030aeb507c7be16909e6fa9711e7ca2d4397bbd967d5c50",
-    "auctionHouseObjectId": "0x31deb8cbd320867089d52c37fed2d443520aac0fc5a957de1f64f9135b83f42b",
-    "coins": {
-        "IOTA": {
-            "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
-            "metadataId": "0xf7ceb0424ca93f77858c74aebda8bcd5ffe0f32b82ebcc38afb3ba643d03a5f8"
-        }
-    },
-    "iotaNamesObjectId": "0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7",
-    "packageId": "0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f",
-    "paymentsPackageId": "0x882f88d252a650649f490e96e32e53979758fdda645863ca856d83c72d5e0e72",
-    "publisherId": "0xc10d3ab816bdbbb0b04c45b4fafebaad9d739fcd57bfc805120193bc7eeee25f",
-    "registryTableId": "0xef24c78e8c085e29760d37b287fc16647f0f578e8d22f18dd65f655285afad3e",
-    "reverseRegistryTableId": "0x566dc13eafceaf8c3487ee2c41464553839ef4d50937c63741e359c98080c7b6",
-    "subNamesPackageId": "0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925",
-    "tempSubdomainsProxyPackageId": "0x3f2927e8e78a094bb98271fd73e06a3aa056edfecbf32dddb8a65d30de9b8a3f",
-    "upgradeCap": "0x2df3ddd284413138bf28a9cdc61baaebc6f9e6b47d8cb3b35309094b7de4d5a6"
+  "adminAddress": "0x1ca3c38e888493f869ac35346a2041d6cf87b0b935ebba14b35a08811d8a76e4",
+  "adminCap": "0x29d59745f0a470f8d359e3202131a058e1fa4700159119164f91ef585ef40b1b",
+  "auctionPackageId": "0x3263bf636c2f60b04a7bf376b0048c36cc0268afee6abaaaceee765d5ea3f3cf",
+  "auctionHouseObjectId": "0xcb9e1c857825e61211d1ea7507847d8b8145e0a890f3392c56771af2a77c932c",
+  "coins": {
+    "IOTA": {
+      "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
+      "metadataId": "0xf7ceb0424ca93f77858c74aebda8bcd5ffe0f32b82ebcc38afb3ba643d03a5f8"
+    }
+  },
+  "iotaNamesObjectId": "0xa92a67ae8a8c644acfa6dd5a4d8098a20b07b6061cbf36aff8daef3ba892913f",
+  "packageId": "0xe1284870018484a7a12255aebb737b6b98b47d652b842ea2f324499ff163a648",
+  "paymentsPackageId": "0x1efac8bf200acca64b62ce75557cd7232310fc8c4ea90960487d2908055fc94f",
+  "publisherId": "0x545768ec190e828fcb19e1170635946afb6bd65b9714be9a7fb270a76c41d06f",
+  "registryTableId": "0x88fa01b1f2462f2f33b593eb205b88158e1f51594102b9748b73f134388a3f2d",
+  "reverseRegistryTableId": "0x1b3840a267efdc30d11b2b7ad2e574cf8483cd4e06bdf7b39c61ee5717ac3fe6",
+  "couponsPackageId": "0x7add42bba66f170587fb5ead0c411f3356c54f9e0f9d11028a230702eab6ea60",
+  "subNamesPackageId": "0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1",
+  "tempSubnameProxyPackageId": "0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444",
+  "upgradeCap": "0xa2134d26f35ad4ba25614913d0b267117b52626c7a99f106adaa97fb928e12a7"
 }
