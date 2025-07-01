@@ -35,7 +35,7 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
     return nameAddressPairs;
 };
 
-export const reserveDomains = (
+export const reserveNames = (
     txb: Transaction,
     names: string[],
     iotaNamesPackageId: string,
@@ -43,7 +43,7 @@ export const reserveDomains = (
     iotaNamesObjectId: string,
 ) => {
     return txb.moveCall({
-        target: `${iotaNamesPackageId}::admin::reserve_domains`,
+        target: `${iotaNamesPackageId}::admin::register_names`,
         arguments: [
             txb.object(adminCap),
             txb.object(iotaNamesObjectId),

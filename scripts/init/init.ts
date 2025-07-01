@@ -6,8 +6,8 @@ import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo, writePackageInfo } from '../package-info/constants';
-import { addBlockedNames, parseTextFile } from '../reserved-names/block-names';
-import { parseCsvFile, reserveDomains } from '../reserved-names/reserve-names';
+import { hasLabelFilesToProcess, processLabelFiles } from '../reserved-names/deny-labels';
+import { parseCsvFile, reserveNames } from '../reserved-names/reserve-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
@@ -51,7 +51,7 @@ export const init = async (
         } else {
             console.log(`Registering ${nameCount} names:`, names);
             const tx = new Transaction();
-            reserveDomains(
+            reserveNames(
                 tx,
                 names,
                 packageInfo.packageId,
@@ -64,25 +64,21 @@ export const init = async (
         }
     }
 
-    let namesToBlockFile = './init/names-to-block.txt';
-    if (fs.existsSync(namesToBlockFile)) {
-        const namesToBlock = parseTextFile(namesToBlockFile);
-        const blockCount = namesToBlock.length;
-        if (blockCount === 0) {
-            console.log('No names to block');
-        } else {
-            console.log(`Blocking ${blockCount} names`);
-            let tx = new Transaction();
-            addBlockedNames(
-                tx,
-                packageInfo.denyListPackageId,
-                packageInfo.iotaNamesObjectId,
-                packageInfo.adminCap,
-                namesToBlock,
-            );
+    if (hasLabelFilesToProcess()) {
+        const tx = new Transaction();
+        const hasChanges = processLabelFiles(
+            tx,
+            packageInfo.packageId,
+            packageInfo.iotaNamesObjectId,
+            packageInfo.adminCap,
+        );
+
+        if (hasChanges) {
             const result = await signAndExecute(tx, network);
             await client.waitForTransaction({ digest: result.digest });
             console.log(`Transaction digest: ${result.digest}`);
+        } else {
+            console.log('No labels provided to reserve or block');
         }
     }
 

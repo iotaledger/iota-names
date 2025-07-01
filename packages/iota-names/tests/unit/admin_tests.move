@@ -32,7 +32,7 @@ fun try_unauthorized_fail() {
     let clock = clock::create_for_testing(&mut ctx);
     test_init_utils::setup_for_testing(&mut iota_names, &cap, &mut ctx);
 
-    let _nft = admin::reserve_name(
+    let _nft = admin::register_name(
         &cap,
         &mut iota_names,
         utf8(b"test.iota"),
@@ -54,7 +54,7 @@ fun authorized() {
 
     iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
-    let nft = admin::reserve_name(
+    let nft = admin::register_name(
         &cap,
         &mut iota_names,
         utf8(b"test.iota"),
@@ -73,7 +73,7 @@ fun authorized() {
 }
 
 #[test]
-fun reserve_name_from_deny_list() {
+fun register_name_from_deny_list() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = iota_names::init_for_testing(&mut ctx);
     let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
@@ -86,7 +86,7 @@ fun reserve_name_from_deny_list() {
     reserved_labels.push_back(utf8(b"test"));
     deny_list::add_reserved_labels(&mut iota_names, &cap, reserved_labels);
 
-    let nft = admin::reserve_name(
+    let nft = admin::register_name(
         &cap,
         &mut iota_names,
         utf8(b"test.iota"),
@@ -105,7 +105,7 @@ fun reserve_name_from_deny_list() {
 }
 
 #[test]
-fun reserve_names_from_deny_list() {
+fun register_names_from_deny_list() {
     let ctx = tx_context::dummy();
     let mut scenario = iota::test_scenario::begin(ctx.sender());
 
@@ -136,7 +136,7 @@ fun reserve_names_from_deny_list() {
         ];
         deny_list::add_reserved_labels(&mut iota_names, &admin_cap, reserved_labels);
 
-        admin::reserve_names(
+        admin::register_names(
             &admin_cap,
             &mut iota_names,
             copy names,
@@ -194,7 +194,7 @@ fun register_multiple() {
 
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
-        admin::reserve_names(
+        admin::register_names(
             &admin_cap,
             &mut iota_names,
             copy names,
@@ -252,7 +252,7 @@ fun test_admin_remove_existing_records() {
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         // Register names
-        admin::reserve_names(
+        admin::register_names(
             &admin_cap,
             &mut iota_names,
             copy names_to_register,
@@ -351,7 +351,7 @@ fun test_admin_remove_mixed_records() {
         test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
-        admin::reserve_names(
+        admin::register_names(
             &admin_cap,
             &mut iota_names,
             copy existing_names,
@@ -418,7 +418,7 @@ fun test_admin_remove_mixed_records() {
 }
 
 #[test, expected_failure(abort_code = ::iota_names::admin::ENoNamesProvided)]
-fun test_reserve_names_empty_list_fails() {
+fun test_register_names_empty_list_fails() {
     let ctx = tx_context::dummy();
     let mut scenario = iota::test_scenario::begin(ctx.sender());
 
@@ -438,7 +438,7 @@ fun test_reserve_names_empty_list_fails() {
         iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
 
         // Try to reserve an empty list of names - this should fail
-        admin::reserve_names(
+        admin::register_names(
             &admin_cap,
             &mut iota_names,
             vector::empty<std::string::String>(),

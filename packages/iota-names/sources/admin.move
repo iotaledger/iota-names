@@ -22,7 +22,7 @@ const ENoNamesProvided: vector<u8> = b"No names provided";
 public struct AdminAuth has drop {}
 
 /// Reserve a `name` in `IotaNames`.
-public fun reserve_name(
+public fun register_name(
     _: &AdminCap,
     iota_names: &mut IotaNames,
     name: String,
@@ -37,7 +37,7 @@ public fun reserve_name(
 }
 
 /// Reserve a list of names.
-entry fun reserve_names(
+entry fun register_names(
     _: &AdminCap,
     iota_names: &mut IotaNames,
     mut names: vector<String>,
