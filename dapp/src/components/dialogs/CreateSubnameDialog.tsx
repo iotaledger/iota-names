@@ -34,7 +34,7 @@ type CreateSubnameProps = {
 };
 
 export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps) {
-    console.log("name", name)
+    console.log('name', name);
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
@@ -56,8 +56,12 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     const [newSubdomainName, setNewSubdomainName] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+
+    // Only join names if there user has written anything
     const fullSubdomainName = newSubdomainName.trim() ? newSubdomainName + '.' + name : null;
-    const isAvailable = fullSubdomainName ? getSubdomainObjectId([], subdomainsOwned ?? [], fullSubdomainName) === null : false;
+    const isAvailable = fullSubdomainName
+        ? getSubdomainObjectId([], subdomainsOwned ?? [], fullSubdomainName) === null
+        : false;
 
     if (name && newSubdomainName && fullSubdomainName && isAvailable) {
         const nftId = isNameSubName
