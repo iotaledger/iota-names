@@ -341,22 +341,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 disabled={disableRenew} //TODO: add grace period
                             />
                         </Card>
-                        {renewDialogOpen && (
-                            <RenewNameDialog
-                                open={renewDialogOpen}
-                                setOpen={setRenewDialogOpen}
-                                name={name}
-                            />
-                        )}
-                        {isAvatarSelectorOpen && (
-                            <VisualAssetsDialog
-                                setOpen={setIsAvatarSelectorOpen}
-                                onAssetClick={(assetId) => {
-                                    setAvatarNftId(assetId);
-                                    setIsAvatarSelectorOpen(false);
-                                }}
-                            />
-                        )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
@@ -369,6 +353,18 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     </DialogBody>
                 </DialogContent>
             </Dialog>
+            {isAvatarSelectorOpen && (
+                <VisualAssetsDialog
+                    setOpen={setIsAvatarSelectorOpen}
+                    onAssetClick={(assetId) => {
+                        setAvatarNftId(assetId);
+                        setIsAvatarSelectorOpen(false);
+                    }}
+                />
+            )}
+            {renewDialogOpen && (
+                <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
+            )}
         </>
     );
 }

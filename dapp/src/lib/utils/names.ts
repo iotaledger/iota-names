@@ -47,7 +47,7 @@ export function getParentSubdomainObjectId(
 }
 
 /**
- * Get the parent object of a given subdomain
+ * Get the parent object of a given name or subname
  */
 export function getParentObject(
     ownedNames: RegistrationNft[],

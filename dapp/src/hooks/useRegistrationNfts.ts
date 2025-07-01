@@ -23,6 +23,7 @@ export interface RegistrationNft {
 }
 
 type RegistrationNftType = 'domain' | 'subdomain';
+
 export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
