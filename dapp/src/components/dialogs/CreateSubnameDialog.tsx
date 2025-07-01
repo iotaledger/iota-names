@@ -34,7 +34,6 @@ type CreateSubnameProps = {
 };
 
 export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps) {
-    console.log('name', name);
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
