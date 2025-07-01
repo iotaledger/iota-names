@@ -85,7 +85,7 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
             subdomainsOwned ?? [],
             nameRecord.nameRecord.name,
         );
-        // Onlw allow extending the expiration time if its less than its parent
+        // Only allow extending the expiration time if its less than its parent
         if (
             objectId &&
             parentName?.expiration_timestamp_ms &&
