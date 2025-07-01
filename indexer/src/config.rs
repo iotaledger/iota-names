@@ -14,8 +14,8 @@ pub struct IotaNamesExtendedConfig {
     pub auction_package_address: IotaAddress,
     /// Address of the `coupons` package.
     pub coupons_package_address: IotaAddress,
-    /// Address of the `subdomains` package.
-    pub subdomains_package_address: IotaAddress,
+    /// Address of the `subnames` package.
+    pub subnames_package_address: IotaAddress,
     /// ID of the `AuctionHouse` object.
     pub auction_house_id: ObjectID,
     pub iota_names_config: IotaNamesConfig,
@@ -33,14 +33,14 @@ impl IotaNamesExtendedConfig {
     pub fn new(
         auction_package_address: IotaAddress,
         coupons_package_address: IotaAddress,
-        subdomains_package_address: IotaAddress,
+        subnames_package_address: IotaAddress,
         auction_house_id: ObjectID,
         iota_names_config: IotaNamesConfig,
     ) -> Self {
         Self {
             auction_package_address,
             coupons_package_address,
-            subdomains_package_address,
+            subnames_package_address,
             auction_house_id,
             iota_names_config,
         }
@@ -52,7 +52,7 @@ impl IotaNamesExtendedConfig {
         Ok(Self::new(
             std::env::var("IOTA_NAMES_AUCTION_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_COUPONS_PACKAGE_ADDRESS")?.parse()?,
-            std::env::var("IOTA_NAMES_SUBDOMAINS_PACKAGE_ADDRESS")?.parse()?,
+            std::env::var("IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID")?.parse()?,
             iota_names_config,
         ))
@@ -68,20 +68,20 @@ impl IotaNamesExtendedConfig {
         // TODO https://github.com/iotaledger/iota-names/issues/318
         const COUPONS_PACKAGE_ADDRESS: &str =
             "0x0000000000000000000000000000000000000000000000000000000000000000";
-        const SUBDOMAINS_PACKAGE_ADDRESS: &str =
+        const SUBNAMES_PACKAGE_ADDRESS: &str =
             "0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925";
         const AUCTION_HOUSE_ID: &str =
             "0x31deb8cbd320867089d52c37fed2d443520aac0fc5a957de1f64f9135b83f42b";
 
         let auction_package_address = IotaAddress::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
         let coupons_package_address = IotaAddress::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
-        let subdomains_package_address = IotaAddress::from_str(SUBDOMAINS_PACKAGE_ADDRESS).unwrap();
+        let subnames_package_address = IotaAddress::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
         Self::new(
             auction_package_address,
             coupons_package_address,
-            subdomains_package_address,
+            subnames_package_address,
             auction_house_id,
             IotaNamesConfig::devnet(),
         )
@@ -95,6 +95,6 @@ impl IotaNamesExtendedConfig {
             || package_address == self.coupons_package_address
             || package_address == self.iota_names_config.package_address
             || package_address == self.iota_names_config.payments_package_address
-            || package_address == self.subdomains_package_address
+            || package_address == self.subnames_package_address
     }
 }

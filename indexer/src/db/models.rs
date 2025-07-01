@@ -4,8 +4,8 @@
 use diesel::{Associations, Identifiable, Queryable, Selectable};
 
 #[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
-#[diesel(table_name = domains)]
-pub struct Domain {
+#[diesel(table_name = names)]
+pub struct Name {
     pub id: i32,
     pub name: String,
 }
@@ -19,25 +19,25 @@ pub struct Bidder {
 
 #[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
 #[diesel(belongs_to(Bidder))]
-#[diesel(belongs_to(Domain))]
-#[diesel(table_name = bidder_domain)]
-#[diesel(primary_key(bidder_id, domain_id))]
-pub struct BidderDomain {
+#[diesel(belongs_to(Name))]
+#[diesel(table_name = bidder_name)]
+#[diesel(primary_key(bidder_id, name_id))]
+pub struct BidderName {
     pub bidder_id: i32,
-    pub domain_id: i32,
+    pub name_id: i32,
 }
 
 #[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
-#[diesel(belongs_to(Domain))]
-#[diesel(table_name = domain_bids)]
-#[diesel(primary_key(domain_id))]
-pub struct DomainBids {
-    pub domain_id: i32,
+#[diesel(belongs_to(Name))]
+#[diesel(table_name = name_bids)]
+#[diesel(primary_key(name_id))]
+pub struct NameBids {
+    pub name_id: i32,
     pub bids: i32,
 }
 
 diesel::table! {
-    domains (id) {
+    names (id) {
         id -> Int4,
         name -> Text,
     }
@@ -51,21 +51,21 @@ diesel::table! {
 }
 
 diesel::table! {
-    bidder_domain (bidder_id, domain_id) {
+    bidder_name (bidder_id, name_id) {
         bidder_id -> Int4,
-        domain_id -> Int4,
+        name_id -> Int4,
     }
 }
 
 diesel::table! {
-    domain_bids (domain_id) {
-        domain_id -> Int4,
+    name_bids (name_id) {
+        name_id -> Int4,
         bids -> Int4,
     }
 }
 
-diesel::joinable!(bidder_domain -> domains (domain_id));
-diesel::joinable!(bidder_domain -> bidders (bidder_id));
-diesel::joinable!(domain_bids -> domains (domain_id));
+diesel::joinable!(bidder_name -> names (name_id));
+diesel::joinable!(bidder_name -> bidders (bidder_id));
+diesel::joinable!(name_bids -> names (name_id));
 
-diesel::allow_tables_to_appear_in_same_query!(bidders, domains, bidder_domain);
+diesel::allow_tables_to_appear_in_same_query!(bidders, names, bidder_name);

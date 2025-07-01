@@ -17,8 +17,8 @@ pub(crate) struct IotaNamesMetrics {
     pub total_name_records_added: IntCounter,
     pub total_name_records_removed: IntCounter,
     pub iota_names_balance: IntGauge,
-    pub total_node_subdomains: IntGauge,
-    pub total_leaf_subdomains: IntGauge,
+    pub total_node_subnames: IntGauge,
+    pub total_leaf_subnames: IntGauge,
     pub total_auction_started: IntGauge,
     pub total_auction_finalized: IntGauge,
     pub total_target_address: IntGauge,
@@ -56,15 +56,15 @@ impl IotaNamesMetrics {
                 registry,
             )
             .unwrap(),
-            total_node_subdomains: register_int_gauge_with_registry!(
-                "total_node_subdomains",
-                "The total number of node subdomains in the registry",
+            total_node_subnames: register_int_gauge_with_registry!(
+                "total_node_subnames",
+                "The total number of node subnames in the registry",
                 registry,
             )
             .unwrap(),
-            total_leaf_subdomains: register_int_gauge_with_registry!(
-                "total_leaf_subdomains",
-                "The total number of leaf subdomains in the registry",
+            total_leaf_subnames: register_int_gauge_with_registry!(
+                "total_leaf_subnames",
+                "The total number of leaf subnames in the registry",
                 registry,
             )
             .unwrap(),
@@ -122,7 +122,7 @@ impl IotaNamesMetrics {
             .unwrap(),
             auction_final_prices: Histogram::new_in_registry(
                 "auction_final_prices",
-                "The final prices paid for domains in auctions",
+                "The final prices paid for names in auctions",
                 registry,
             ),
             auction_durations: Histogram::new_in_registry(
