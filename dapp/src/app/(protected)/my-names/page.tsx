@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
+import { UserAuctions } from '@/components/UserAuctions';
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
@@ -144,6 +145,9 @@ export default function MyNamesPage(): JSX.Element {
                     })}
                 </div>
             )}
+            <div className="pt-md w-full max-w-md">
+                <UserAuctions />
+            </div>
         </div>
     );
 }

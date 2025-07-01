@@ -8,6 +8,7 @@ export * from './useRegisterNameTransaction';
 export * from './useRegistrationNfts';
 export * from './useTheme';
 export * from './usePriceList';
+export * from './useUserAuctions';
 export * from './queryKey';
 export * from './useGetDefaultName';
 export * from './useUpdateNameTransaction';

@@ -21,6 +21,7 @@ export type NameUpdate =
     | {
           type: 'set-avatar';
           nftId: string;
+          avatarNftId: string;
       }
     | {
           type: 'set-target-address';
@@ -38,7 +39,6 @@ export type NameUpdate =
     | {
           type: 'edit-setup';
           parentNftId: string;
-          name: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
@@ -54,6 +54,16 @@ export type NameUpdate =
           type: 'delete-name';
           nft: string;
           isSubname: boolean;
+      }
+    | {
+          type: 'renew-name';
+          nftId: string;
+          years: number;
+      }
+    | {
+          type: 'renew-subname';
+          nftId: string;
+          expirationTimestampMs: number;
       };
 
 export function useUpdateNameTransaction({
@@ -77,7 +87,7 @@ export function useUpdateNameTransaction({
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
                             key: ALLOWED_METADATA.avatar,
-                            value: update.nftId,
+                            value: update.avatarNftId,
                         });
                         break;
                     case 'set-target-address':
@@ -115,6 +125,19 @@ export function useUpdateNameTransaction({
                         iotaNamesTx.burnExpired({
                             nft: tx.object(update.nft),
                             isSubname: update.isSubname,
+                        });
+                        break;
+                    case 'renew-name':
+                        iotaNamesTx.renew({
+                            nft: update.nftId,
+                            years: update.years,
+                            coin: tx.gas,
+                        });
+                        break;
+                    case 'renew-subname':
+                        iotaNamesTx.extendExpiration({
+                            nft: update.nftId,
+                            expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
                 }

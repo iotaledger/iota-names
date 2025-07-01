@@ -21,7 +21,6 @@ export function getNamePermissions(nameRecord: NameRecord) {
     if ('S_ATE' in nameRecord.data) {
         allowTimeExtension = nameRecord.data.S_ATE === '1';
     }
-
     return {
         allowChildCreation,
         allowTimeExtension,
@@ -46,12 +45,31 @@ export function getParentObjectId(
     const parent = parentNames.find(({ name }) => name === parentName);
     return parent?.id || null;
 }
+
 /**
- * Get object id of a given subdomain
+ * Get the parent object of a given name or subname
  */
-export function getSubdomainObjectId(ownedSubdomains: RegistrationNft[], name: string) {
-    const subdomain = ownedSubdomains.find(
-        (subdomain: { name: string | null }) => subdomain.name === name,
-    );
-    return subdomain?.id || null;
+export function getParentObject(
+    ownedNames: RegistrationNft[],
+    ownedSubdomains: RegistrationNft[],
+    name: string,
+) {
+    const parts = name.split('.');
+    const parentName = parts.slice(1).join('.');
+    const names = isSubName(parentName) ? ownedSubdomains : ownedNames;
+    const parent = names.find(({ name }) => name === parentName);
+    return parent || null;
+}
+
+/**
+ * Get object id of a given name or subname
+ */
+export function getNameObject(
+    ownedNames: RegistrationNft[],
+    ownedSubdomains: RegistrationNft[],
+    name: string,
+) {
+    const names = isSubName(name) ? ownedSubdomains : ownedNames;
+    const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
+    return nameObject?.id || null;
 }
