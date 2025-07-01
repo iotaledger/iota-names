@@ -20,10 +20,10 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubName, MIN_LABEL_SIZE } from '@iota/iota-names-sdk';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
-import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
+import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { getSubdomainObjectId, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -34,6 +34,7 @@ type CreateSubnameProps = {
 };
 
 export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProps) {
+    const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
 
@@ -97,6 +98,10 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
 
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
+            });
+
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
             });
         },
         onSuccess: () => {

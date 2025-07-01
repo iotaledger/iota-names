@@ -207,11 +207,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.nameRecord(name),
                         });
                         break;
-                    case 'new-subdomain':
-                        queryClient.invalidateQueries({
-                            queryKey: queryKey.ownedObjects(account?.address || ''),
-                        });
-                        break;
                 }
             }
         },
