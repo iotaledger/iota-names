@@ -103,8 +103,6 @@ public fun remove_leaf(
     subname: String,
 ) {
     let subname = name::new(subname);
-    assert!(!deny_list::is_blocked_name(iota_names, &subname), EBlockedName);
-    assert!(!deny_list::is_reserved_name(iota_names, &subname), EReservedName);
 
     // All validation logic for subname creation / management.
     // We pass `false` as last argument because even if we don't have create capabilities (anymore),

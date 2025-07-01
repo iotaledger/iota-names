@@ -46,13 +46,13 @@ entry fun reserve_names(
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
+    assert!(!names.is_empty(), ENoNamesProvided);
     let sender = sender(ctx);
     let config = *iota_names.get_config<CoreConfig>();
-    assert!(!names.is_empty(), ENoNamesProvided);
+    let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
     while (!names.is_empty()) {
         let name = name::new(names.pop_back());
         validation::assert_is_valid_for_sale(&config, iota_names, &name);
-        let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
         let nft = registry.add_record(name, no_years, clock, ctx);
         iota::transfer::public_transfer(nft, sender);
     };
