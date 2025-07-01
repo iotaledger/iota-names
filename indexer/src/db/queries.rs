@@ -7,7 +7,7 @@ use diesel::{
     SqliteConnection, delete, insert_into,
 };
 
-use super::models::{Bidder, BidderDomain, Domain, bidder_domain, bidders, domain_bids, domains};
+use super::models::{Bidder, BidderName, Name, bidder_name, bidders, name_bids, names};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -26,49 +26,49 @@ pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Resul
     }
 }
 
-pub fn get_or_create_domain(conn: &mut SqliteConnection, name: &str) -> Result<Domain> {
-    let maybe_domain = insert_into(domains::table)
-        .values(domains::name.eq(name))
+pub fn get_or_create_name(conn: &mut SqliteConnection, name: &str) -> Result<Name> {
+    let maybe_name = insert_into(names::table)
+        .values(names::name.eq(name))
         .on_conflict_do_nothing()
-        .returning(Domain::as_returning())
+        .returning(Name::as_returning())
         .get_result(conn)
         .optional()?;
 
-    match maybe_domain {
-        Some(domain) => Ok(domain),
-        None => domains::table
-            .filter(domains::name.eq(name))
-            .first::<Domain>(conn)
+    match maybe_name {
+        Some(name) => Ok(name),
+        None => names::table
+            .filter(names::name.eq(name))
+            .first::<Name>(conn)
             .map_err(Into::into),
     }
 }
 
-pub fn create_bidder_domain_relationship(
+pub fn create_bidder_name_relationship(
     conn: &mut SqliteConnection,
     bidder_id: i32,
-    domain_id: i32,
+    name_id: i32,
 ) -> Result<()> {
-    insert_into(bidder_domain::table)
+    insert_into(bidder_name::table)
         .values((
-            bidder_domain::bidder_id.eq(bidder_id),
-            bidder_domain::domain_id.eq(domain_id),
+            bidder_name::bidder_id.eq(bidder_id),
+            bidder_name::name_id.eq(name_id),
         ))
         .on_conflict_do_nothing()
         .execute(conn)?;
     Ok(())
 }
 
-pub fn add_bidder_domain_entry(
+pub fn add_bidder_name_entry(
     conn: &mut SqliteConnection,
     bidder_address: &str,
-    domain_name: &str,
+    name_str: &str,
 ) -> Result<()> {
     let bidder = get_or_create_bidder(conn, bidder_address)?;
-    let domain = get_or_create_domain(conn, domain_name)?;
-    create_bidder_domain_relationship(conn, bidder.id, domain.id)
+    let name = get_or_create_name(conn, name_str)?;
+    create_bidder_name_relationship(conn, bidder.id, name.id)
 }
 
-pub fn get_domains_for_bidder_address(
+pub fn get_names_for_bidder_address(
     conn: &mut SqliteConnection,
     address: &str,
 ) -> Result<Vec<String>> {
@@ -77,36 +77,33 @@ pub fn get_domains_for_bidder_address(
         .select(Bidder::as_select())
         .get_result(conn)?;
 
-    let domains = BidderDomain::belonging_to(&bidder)
-        .inner_join(domains::table)
-        .select(Domain::as_select())
+    let names = BidderName::belonging_to(&bidder)
+        .inner_join(names::table)
+        .select(Name::as_select())
         .load(conn)?;
 
-    Ok(domains.into_iter().map(|d| d.name).collect())
+    Ok(names.into_iter().map(|d| d.name).collect())
 }
 
-pub fn upsert_domain_bids_entry(conn: &mut SqliteConnection, domain_name: &str) -> Result<()> {
-    let domain = get_or_create_domain(conn, domain_name)?;
-    insert_into(domain_bids::table)
-        .values((
-            domain_bids::domain_id.eq(domain.id),
-            domain_bids::bids.eq(1),
-        ))
-        .on_conflict(domain_bids::domain_id)
+pub fn upsert_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<()> {
+    let name = get_or_create_name(conn, name_str)?;
+    insert_into(name_bids::table)
+        .values((name_bids::name_id.eq(name.id), name_bids::bids.eq(1)))
+        .on_conflict(name_bids::name_id)
         .do_update()
-        .set(domain_bids::bids.eq(domain_bids::bids + 1))
+        .set(name_bids::bids.eq(name_bids::bids + 1))
         .execute(conn)?;
     Ok(())
 }
 
-pub fn remove_domain_bids_entry(conn: &mut SqliteConnection, domain_name: &str) -> Result<i32> {
-    let domain = get_or_create_domain(conn, domain_name)?;
-    let bid_count = domain_bids::table
-        .find(domain.id)
-        .select(domain_bids::bids)
+pub fn remove_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<i32> {
+    let name = get_or_create_name(conn, name_str)?;
+    let bid_count = name_bids::table
+        .find(name.id)
+        .select(name_bids::bids)
         .first(conn)?;
 
-    delete(domain_bids::table.find(domain.id)).execute(conn)?;
+    delete(name_bids::table.find(name.id)).execute(conn)?;
 
     Ok(bid_count)
 }
