@@ -58,6 +58,7 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
 
     let canBeRenewed = true;
 
+    // Extend names
     if (nameRecord && editRenewYears && !isExpired && namePermissions?.allowTimeExtension) {
         const objectId = getSubdomainObjectId(
             domainsOwned ?? [],
@@ -74,6 +75,8 @@ export function RenewNameDialog({ open, setOpen, name }: AvatarSelectDialogProps
             canBeRenewed = false;
         }
     }
+
+    // Extend subnames
     if (isNameSubName && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
         const objectId = getSubdomainObjectId(
             domainsOwned ?? [],
