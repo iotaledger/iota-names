@@ -32,12 +32,13 @@ import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import {
     getNamePermissions,
-    getParentSubdomainObjectId,
+    getParentObjectId,
     getSubdomainObjectId,
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
 import { VisualAssetsDialog } from './AvatarSelectDialog';
+import { CreateSubnameDialog } from './CreateSubnameDialog';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -74,6 +75,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+    const [subdomainDialogOpen, setSubdomainDialogOpen] = useState(false);
 
     // Sync permissions
     useEffect(() => {
@@ -138,17 +140,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     }
 
     if (
-        editIsAllowSubnames != namePermissions?.allowChildCreation ||
-        editIsAllowingRenew != namePermissions?.allowTimeExtension
+        nameRecord &&
+        isNameSubName &&
+        (editIsAllowSubnames != namePermissions?.allowChildCreation ||
+            editIsAllowingRenew != namePermissions?.allowTimeExtension)
     ) {
         // To edit the setup of a subdomain we need to get its parent
         // Its parent can be another name or another subdomain
-        const parentObjectId = getParentSubdomainObjectId(
+        const parentObjectId = getParentObjectId(
             domainsOwned ?? [],
             subdomainsOwned ?? [],
             name,
         );
-        if (nameRecord && isNameSubName && parentObjectId) {
+        if (parentObjectId) {
             updates.push({
                 type: 'edit-setup',
                 parentNftId: parentObjectId,
@@ -247,6 +251,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
+    const disableAddSubname = isExpired;
 
     return (
         <>
@@ -300,9 +305,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onCheckedChange={handleReverseLookupChange}
                             />
                         </Card>
-                        {updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
-                        ) : null}
+
                         <Card type={CardType.Outlined}>
                             <CardBody title="Avatar NFT" />
                             <CardAction
@@ -336,6 +339,29 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                     />
                                 </Card>
                             </>
+                        ) : null}
+                        {subdomainDialogOpen && nameRecord?.nameRecord.name && (
+                            <CreateSubnameDialog
+                                parent={nameRecord.nameRecord.name}
+                                open={subdomainDialogOpen}
+                                setOpen={setSubdomainDialogOpen}
+                            />
+                        )}
+                        {namePermissions?.allowChildCreation && (
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Add new subname"
+                                    subtitle="Create a new subdomain."
+                                />
+                                <Button
+                                    text="Add subname"
+                                    onClick={() => setSubdomainDialogOpen(true)}
+                                    disabled={disableAddSubname}
+                                />
+                            </Card>
+                        )}
+                        {updateNameError ? (
+                            <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}
