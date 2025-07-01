@@ -3,7 +3,15 @@
 
 'use client';
 
-import { Button, ButtonType, Dialog, DialogBody, DialogContent, Header, LoadingIndicator } from '@iota/apps-ui-kit';
+import {
+    Button,
+    ButtonType,
+    Dialog,
+    DialogBody,
+    DialogContent,
+    Header,
+    LoadingIndicator,
+} from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -49,7 +57,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
-    const { mutateAsync: handlePurchase, error: purchaseError, isPending: isSigning } = useMutation({
+    const {
+        mutateAsync: handlePurchase,
+        error: purchaseError,
+        isPending: isSigning,
+    } = useMutation({
         async mutationFn() {
             if (!registerNameData || nameRecordData?.type !== 'available') return;
             const transactionResult = await signAndExecuteTransaction({
