@@ -14,7 +14,7 @@ export const queryKey = {
         name,
         address,
     ],
-    updateName: (name: string, address?: string) => [queryKey.all, 'update-name', name, address],
+    updateName: (address?: string) => [queryKey.all, 'update-name', address],
 
     // Address
     defaultName: (address: string) => [queryKey.all, 'default-name', address],
@@ -25,10 +25,10 @@ export const queryKey = {
     // Price List
     priceList: () => [queryKey.all, 'price-list'],
 
-    // Auctions indexer
+    // Auctions
     userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
-
-    // Auction claim
+    placeBid: (address: string) => [queryKey.all, 'place-bid', address],
+    auctionMetadata: (name: string) => [queryKey.all, 'auction-metadata', name],
     claimAuction: (domain: string, address?: string) => [
         queryKey.all,
         'claim-auction',

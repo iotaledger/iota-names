@@ -20,7 +20,6 @@ export function useGetAuctionMetadata(domainName: string) {
         auctionsTableObjectId,
         packageId,
         graphQLClient: iotaNamesClient.graphQlClient,
-        throwOnMissing: true,
     });
 
     return useQuery(queryConfig);

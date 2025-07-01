@@ -12,7 +12,6 @@ import { queryKey } from './queryKey';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
-    name: string;
     isExpired: boolean;
     updates: NameUpdate[];
 }
@@ -21,6 +20,7 @@ export type NameUpdate =
     | {
           type: 'set-avatar';
           nftId: string;
+          avatarNftId: string;
       }
     | {
           type: 'set-target-address';
@@ -37,15 +37,32 @@ export type NameUpdate =
       }
     | {
           type: 'edit-setup';
-          parentNftId: string;
           name: string;
+          parentNftId: string;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
+      }
+    | {
+          type: 'new-subdomain';
+          parentNftId: string;
+          subdomainName: string;
+          expirationTimeParent: number;
+          allowChildCreation: boolean;
+          allowTimeExtension: boolean;
+      }
+    | {
+          type: 'renew-name';
+          nftId: string;
+          years: number;
+      }
+    | {
+          type: 'renew-subname';
+          nftId: string;
+          expirationTimestampMs: number;
       };
 
 export function useUpdateNameTransaction({
     address,
-    name,
     isExpired,
     updates,
 }: UseUpdateNameTransactionOptions) {
@@ -54,7 +71,7 @@ export function useUpdateNameTransaction({
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.updateName(name, address), updates],
+        queryKey: [...queryKey.updateName(address), updates],
         queryFn: async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
@@ -65,7 +82,7 @@ export function useUpdateNameTransaction({
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
                             key: ALLOWED_METADATA.avatar,
-                            value: update.nftId,
+                            value: update.avatarNftId,
                         });
                         break;
                     case 'set-target-address':
@@ -84,9 +101,32 @@ export function useUpdateNameTransaction({
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
                             parentNft: tx.object(update.parentNftId),
-                            name,
+                            name: update.name,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
+                        });
+                        break;
+                    case 'new-subdomain':
+                        const subnameNft = iotaNamesTx.createSubName({
+                            parentNft: tx.object(update.parentNftId),
+                            name: update.subdomainName,
+                            expirationTimestampMs: update.expirationTimeParent,
+                            allowChildCreation: update.allowChildCreation,
+                            allowTimeExtension: update.allowTimeExtension,
+                        });
+                        iotaNamesTx.transaction.transferObjects([subnameNft], address);
+                        break;
+                    case 'renew-name':
+                        iotaNamesTx.renew({
+                            nft: update.nftId,
+                            years: update.years,
+                            coin: tx.gas,
+                        });
+                        break;
+                    case 'renew-subname':
+                        iotaNamesTx.extendExpiration({
+                            nft: update.nftId,
+                            expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
                 }
@@ -98,7 +138,7 @@ export function useUpdateNameTransaction({
             });
             return iotaNamesTx.transaction;
         },
-        enabled: !!address && !!updates.length && !!name && name.length > 0 && !isExpired,
+        enabled: !!address && !!updates.length && !isExpired,
         gcTime: 0,
     });
 }

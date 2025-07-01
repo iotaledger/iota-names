@@ -4,6 +4,7 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import {
     getIotaNamesRegistrationType,
     getIotaSubdomainRegistrationType,
+    isSubName,
 } from '@iota/iota-names-sdk';
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
@@ -41,6 +42,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 };
         }
     })();
+
     return useGetAllOwnedObjects(address, filter, {
         select(data) {
             return data.map((nameRecord) => {
@@ -49,14 +51,18 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     | Extract<IotaParsedData, { dataType: 'moveObject' }>
                     | undefined
                     | null;
-                const fields = content?.fields as { expiration_timestamp_ms?: string } | undefined;
+                const isNameSubName = isSubName(data?.name || '');
+                type NameFields = undefined | { expiration_timestamp_ms?: string };
+                const fields = isNameSubName
+                    ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
+                    : (content?.fields as NameFields);
                 return {
                     name: data?.name ?? '',
                     description: data?.description,
                     image_url: data?.image_url,
                     link: data?.link,
-                    project_url: data?.project_url,
                     expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
+                    project_url: data?.project_url,
                     id: nameRecord.objectId,
                 };
             });

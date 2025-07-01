@@ -141,8 +141,6 @@ export function UserAuctions() {
             {bidDialogState && (
                 <AuctionBidDialog
                     name={bidDialogState.domain}
-                    minBidNanos={bidDialogState.bidAmount}
-                    isNewAuction={false}
                     setOpen={(open) => {
                         if (!open) setBidDialogState(null);
                     }}

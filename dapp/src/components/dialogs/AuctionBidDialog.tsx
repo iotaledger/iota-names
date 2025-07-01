@@ -15,74 +15,95 @@ import {
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
-import { useMemo, useState } from 'react';
+import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
+import { queryKey } from '@/hooks';
 import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
+import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
+import { toNanos } from '@/lib/utils/amount';
 
-interface AuctionBidDialogProps {
+interface AuctionBidDialogDialogProps {
     name: string;
-    minBidNanos: bigint;
-    isNewAuction: boolean;
     setOpen: (open: boolean) => void;
 }
 
-const ONE_IOTA_NANOS = 1_000_000_000;
-
-function parseIotaToNanos(iotas: string | number): bigint {
-    const asNumber = typeof iotas === 'number' ? iotas : Number(iotas);
-    return BigInt(Math.round(asNumber * ONE_IOTA_NANOS));
-}
-
-export function AuctionBidDialog({
-    name,
-    minBidNanos,
-    isNewAuction,
-    setOpen,
-}: AuctionBidDialogProps) {
-    const [initialBidAmount, setInitialBidAmount] = useState(
+export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
+    const iotaClient = useIotaClient();
+    const account = useCurrentAccount();
+    const queryClient = useQueryClient();
+    const { data: auctionMetadata } = useGetAuctionMetadata(name);
+    const minBidNanos = auctionMetadata?.minBidNanos || NANOS_PER_IOTA;
+    const [bidAmountValue, setBidAmountValue] = useState(
         formatNanosToIota(minBidNanos, {
             formatRounded: false,
             showIotaSymbol: false,
         }),
     );
 
-    const IotaBid = Number(initialBidAmount) || 0;
-    const bidAmountInNanos = parseIotaToNanos(initialBidAmount);
-    const minimumBidInIota = Number(minBidNanos) / ONE_IOTA_NANOS;
-    const isBidBelowMinimum = IotaBid < minimumBidInIota;
+    const bidNanos = toNanos(bidAmountValue);
 
-    const minBidLabel = useMemo(
-        () =>
-            formatNanosToIota(minBidNanos, {
-                formatRounded: false,
-                showIotaSymbol: true,
-            }),
-        [minBidNanos],
-    );
+    const {
+        data: auctionBidTransaction,
+        isLoading: isAuctionBidLoading,
+        isPending: isAuctionBidPending,
+        error,
+    } = useAuctionBid({
+        name,
+        bidNanos: bidNanos ?? BigInt(0),
+    });
+    const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
+        useSignAndExecuteTransaction();
 
-    const { mutate: createBid, isPending, error } = useAuctionBid();
+    const { mutateAsync: handleConfirm, isPending: isSigningTransaction } = useMutation({
+        async mutationFn(auctionBidTransaction: Transaction) {
+            const transactionResult = await signAndExecuteTransaction({
+                transaction: auctionBidTransaction,
+            });
 
-    const handleConfirm = () => {
-        createBid(
-            {
-                name,
-                bidNanos: bidAmountInNanos,
-                isNewAuction,
-            },
-            {
-                onSuccess: () => {
-                    setOpen(false);
-                },
-            },
-        );
-    };
+            await iotaClient.waitForTransaction({
+                digest: transactionResult.digest,
+            });
+        },
+        onSuccess() {
+            queryClient.invalidateQueries({
+                queryKey: queryKey.userAuctionHistory(account?.address),
+            });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+            setOpen(false);
+        },
+    });
+
+    const minBidLabel = formatNanosToIota(minBidNanos, {
+        formatRounded: false,
+        showIotaSymbol: true,
+    });
+    const isBidAboveDecimals = bidNanos === null;
+    const isBidBelowMinimum = (bidNanos || BigInt(0)) < minBidNanos;
+
+    const isLoading = isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
+    const isPending = isAuctionBidPending;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
+
+    const errorMessage = (() => {
+        if (isBidAboveDecimals) {
+            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
+        } else if (isBidBelowMinimum) {
+            return `Bid must be ≥ ${minBidLabel}`;
+        } else if (error) {
+            return error.message;
+        }
+    })();
 
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent showCloseOnOverlay>
                 <Header
-                    title={isNewAuction ? `Start Auction for ${name}` : `Bid for ${name}`}
+                    title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
                     titleCentered
                     onClose={() => setOpen(false)}
                     onBack={() => setOpen(false)}
@@ -93,16 +114,10 @@ export function AuctionBidDialog({
                         <Input
                             type={InputType.Number}
                             label="Your bid (IOTA)"
-                            min={minimumBidInIota}
-                            value={initialBidAmount}
-                            onChange={({ target: { value } }) => setInitialBidAmount(value)}
-                            errorMessage={
-                                isBidBelowMinimum
-                                    ? `Bid must be ≥ ${minBidLabel}`
-                                    : error
-                                      ? error.message
-                                      : undefined
-                            }
+                            min={Number(minBidNanos)}
+                            value={bidAmountValue}
+                            onChange={({ target: { value } }) => setBidAmountValue(value)}
+                            errorMessage={errorMessage}
                         />
 
                         <div className="flex items-center justify-between">
@@ -124,10 +139,14 @@ export function AuctionBidDialog({
                     <Button
                         size={ButtonSize.Small}
                         type={ButtonType.Primary}
-                        disabled={isPending || isBidBelowMinimum}
-                        icon={isPending ? <LoadingIndicator /> : null}
-                        text={isNewAuction ? 'Start auction' : 'Place bid'}
-                        onClick={handleConfirm}
+                        disabled={disablePlaceBid}
+                        icon={isLoading ? <LoadingIndicator /> : null}
+                        text={auctionMetadata ? 'Place bid' : 'Start auction'}
+                        onClick={() => {
+                            if (auctionBidTransaction) {
+                                handleConfirm(auctionBidTransaction);
+                            }
+                        }}
                     />
                 </div>
             </DialogContent>

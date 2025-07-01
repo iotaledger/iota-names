@@ -18,7 +18,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
     const allNetworks = getAllNetworks();
     // devnet only atm
-    const defaultNetwork = 'devnet';
+    const defaultNetwork = 'localnet';
 
     function handleNetworkChange() {
         queryClient.resetQueries();

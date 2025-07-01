@@ -71,25 +71,16 @@ export async function fetchAuctionMetadata({
  */
 export function parseAuctionDataBcs(
     data: Awaited<ReturnType<typeof fetchAuctionMetadata>>,
-    options: { throwOnMissing?: boolean } = {},
 ): ReturnType<typeof AuctionFieldBcs.parse> | null {
     const auctionBcsB64 = data?.object?.asMoveObject?.contents?.bcs;
 
     if (!auctionBcsB64) {
-        if (options.throwOnMissing) {
-            throw new Error('Auction object not found');
-        }
         return null;
     }
 
     try {
-        const objectBCS = AuctionFieldBcs.parse(fromB64(auctionBcsB64));
-
-        return objectBCS;
+        return AuctionFieldBcs.parse(fromB64(auctionBcsB64));
     } catch (error) {
-        if (options.throwOnMissing) {
-            throw error;
-        }
         return null;
     }
 }
@@ -99,7 +90,6 @@ interface CreateAuctionMetadataQueryParams {
     auctionsTableObjectId: string | undefined;
     packageId: string;
     graphQLClient: IotaGraphQLClient;
-    throwOnMissing?: boolean;
 }
 
 /**
@@ -110,7 +100,6 @@ export function createAuctionMetadataQuery({
     auctionsTableObjectId,
     packageId,
     graphQLClient,
-    throwOnMissing = false,
 }: CreateAuctionMetadataQueryParams) {
     return {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
@@ -130,7 +119,7 @@ export function createAuctionMetadataQuery({
         select: (
             data: Awaited<ReturnType<typeof fetchAuctionMetadata>>,
         ): AuctionMetadata | null => {
-            const auctionMetadataBcs = parseAuctionDataBcs(data, { throwOnMissing });
+            const auctionMetadataBcs = parseAuctionDataBcs(data);
             return normalizeAuctionData(auctionMetadataBcs);
         },
         enabled: !!auctionsTableObjectId && !!domainName,

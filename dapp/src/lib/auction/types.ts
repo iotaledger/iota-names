@@ -1,16 +1,19 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+
 import { AuctionFieldBcs } from './bcs';
 
 export interface AuctionMetadata {
     domainName: string;
-    startTimestampMs: number;
-    endTimestampMs: number;
+    startTimestamp: Date;
+    endTimestamp: Date;
     winner: string;
     currentBidNanos: bigint;
+    minBidNanos: bigint;
     nftId: string;
-    nftExpirationMs: number;
+    nftExpiration: Date;
 }
 
 /**
@@ -28,14 +31,18 @@ export function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetada
 
     const auction = rawData.value.value;
 
+    const currentBidNanos = BigInt(auction.current_bid.balance.value || BigInt(0));
+    const minBidNanos = currentBidNanos + NANOS_PER_IOTA;
+
     return {
         domainName: auction.nft.domain_name,
-        startTimestampMs: Number(auction.start_timestamp_ms),
-        endTimestampMs: Number(auction.end_timestamp_ms),
+        startTimestamp: new Date(Number(auction.start_timestamp_ms)),
+        endTimestamp: new Date(Number(auction.end_timestamp_ms)),
         winner: auction.winner,
-        currentBidNanos: BigInt(auction.current_bid.balance.value),
+        currentBidNanos,
+        minBidNanos,
         nftId: auction.nft.id,
-        nftExpirationMs: Number(auction.nft.expiration_timestamp_ms),
+        nftExpiration: new Date(Number(auction.nft.expiration_timestamp_ms)),
     };
 }
 

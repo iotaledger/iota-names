@@ -69,14 +69,14 @@ export function isAuctionActive(auction: AuctionMetadata | null): boolean {
     if (!auction) return false;
 
     const now = Date.now();
-    return now < auction.endTimestampMs;
+    return now < auction.endTimestamp.getTime();
 }
 
 export function isAuctionEnded(auction: AuctionMetadata | null): boolean {
     if (!auction) return false;
 
     const now = Date.now();
-    return now >= auction.endTimestampMs;
+    return now >= auction.endTimestamp.getTime();
 }
 
 export function getAuctionStatus(auction: AuctionMetadata | null): AuctionStatus {
@@ -125,7 +125,7 @@ export function getTimeRemaining(auction: AuctionMetadata | null): number {
     if (!auction) return 0;
 
     const now = Date.now();
-    return Math.max(0, auction.endTimestampMs - now);
+    return Math.max(0, auction.endTimestamp.getTime() - now);
 }
 
 export function formatTimeRemaining(milliseconds: number): string {

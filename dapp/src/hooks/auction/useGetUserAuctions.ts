@@ -36,7 +36,6 @@ export function useGetUserAuctions() {
                 auctionsTableObjectId,
                 packageId,
                 graphQLClient: iotaNamesClient.graphQlClient,
-                throwOnMissing: false,
             }),
         ),
         combine: (results) => {

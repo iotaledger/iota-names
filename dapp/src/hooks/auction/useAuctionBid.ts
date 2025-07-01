@@ -1,35 +1,43 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrentAccount, useIotaClient } from '@iota/dapp-kit';
+import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/lib/auction';
 
 import { useAuctionHouse } from './useAuctionHouse';
+import { useGetAuctionMetadata } from './useGetAuctionMetadata';
 
-interface BidArgs {
+export interface UseActionBidParams {
     name: string;
     bidNanos: bigint;
-    isNewAuction: boolean;
 }
 
-export function useAuctionBid() {
-    const qc = useQueryClient();
+export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
     const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
+    const iotaClient = useIotaClient();
     const address = account?.address ?? '';
     const { data: auctionHouse } = useAuctionHouse();
+    const { data: auctionMetadata, isLoading: isLoadingAuctionMetadata } =
+        useGetAuctionMetadata(name);
 
-    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+    // Only once its finished loading we check if the bid amount is enough or not, but only if there is an existing auction
+    const enableAuctionBid = !isLoadingAuctionMetadata
+        ? auctionMetadata
+            ? bidNanos >= auctionMetadata.minBidNanos
+            : true
+        : false;
 
-    return useMutation({
-        mutationFn: async ({ name, bidNanos, isNewAuction }: BidArgs) => {
+    return useQuery({
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: [...queryKey.placeBid(address || ''), name, bidNanos.toString()],
+        queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
-
-            const tx = isNewAuction
+            const transaction = !auctionMetadata
                 ? buildCreateAuctionTransaction(
                       iotaNamesClient.config.auctionPackageId,
                       iotaNamesClient.config.iotaNamesObjectId,
@@ -46,17 +54,11 @@ export function useAuctionBid() {
                       name,
                   );
 
-            await signAndExecuteTransaction({
-                transaction: tx,
+            await transaction.build({
+                client: iotaClient,
             });
-            return { name };
+            return transaction;
         },
-        onSuccess: (_, { name }) => {
-            // Invalidate relevant queries to refresh data
-            qc.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
-            qc.invalidateQueries({ queryKey: ['auctionHouse'] });
-            qc.invalidateQueries({ queryKey: ['user-auctions'] });
-            qc.invalidateQueries({ queryKey: ['auction-metadata'] });
-        },
+        enabled: enableAuctionBid,
     });
 }
