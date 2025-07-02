@@ -31,7 +31,6 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />
             </div>
-
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                 {domains?.map((nft) => (
                     <div key={nft.name}>
@@ -53,26 +52,24 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
-            {subdomains?.length && (
-                <div className="flex flex-col gap-y-sm items-center">
-                    {subdomains.map((subdomain) => (
-                        <Card key={subdomain.name} type={CardType.Filled}>
-                            <CardBody
-                                title={subdomain.name}
-                                subtitle={subdomain.name}
-                                clickableAction={
-                                    <Button
-                                        text="Manage"
-                                        onClick={() => {
-                                            setUpdateNameDialog(subdomain.name);
-                                        }}
-                                    />
-                                }
-                            />
-                        </Card>
-                    ))}
-                </div>
-            )}
+            <div className="flex flex-col gap-y-sm items-center">
+                {subdomains?.map((subdomain) => (
+                    <Card key={subdomain.name} type={CardType.Filled}>
+                        <CardBody
+                            title={subdomain.name}
+                            subtitle={subdomain.name}
+                            clickableAction={
+                                <Button
+                                    text="Manage"
+                                    onClick={() => {
+                                        setUpdateNameDialog(subdomain.name);
+                                    }}
+                                />
+                            }
+                        />
+                    </Card>
+                ))}
+            </div>
             <div className="pt-md w-full max-w-md">
                 <UserAuctions />
             </div>

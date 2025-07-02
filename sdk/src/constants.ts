@@ -34,5 +34,25 @@ export const packages = {
         reverseRegistryTableId:
             '0x566dc13eafceaf8c3487ee2c41464553839ef4d50937c63741e359c98080c7b6',
     },
+    localnet: {
+        auctionPackageId: '0x81f18a035222cf931be54156e8e013ac461356cd365c060e88f284e6bc2e045f',
+        auctionHouseObjectId: '0x3b11f034089c9f3c0d792af60626c66ff643ec3079c7add47e4f85d53a49800f',
+        packageId: '0x66e04dfa5b7319346a3571582482291f99126db413f57d2b035437e6846feacc',
+        iotaNamesObjectId: '0x95370776e0278f5ac008550e9823029bbdfdcb12a5647dc944fd6787682b1abf',
+        subNamesPackageId: '0xae6cd478658ea8688ddd4b5c59f76e36878fb4ba479104760f2eb534332556e0',
+        tempSubdomainsProxyPackageId:
+            '0x6d884db51838312bfc39a2af664931c52b3a3143374c4a514b882cf2ee32c2c1',
+        payments: {
+            packageId: '0x657606371605bf9df58c3d00bec733ccc9ef2f1a80eb59c789f5aba8f214eb11',
+        },
+        coins: {
+            IOTA: {
+                type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
+            },
+        },
+        registryTableId: '0x2a57d1d46471c530dfb07889fb67d1269f0dbe74fa4ba04805bc6bcd450ab450',
+        reverseRegistryTableId:
+            '0x3343c8780df3e8af0cff93a2ea225d5f27eca87462c19ebc92b22d6d3cf74084',
+    },
     // TODO: Support Mainnet and Testnet
 };
