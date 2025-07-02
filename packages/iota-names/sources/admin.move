@@ -21,8 +21,8 @@ const ENoNamesProvided: vector<u8> = b"No names provided";
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AdminAuth has drop {}
 
-/// Reserve a `name` in `IotaNames`.
-public fun reserve_name(
+/// Register a `name` in `IotaNames`.
+public fun register_name(
     _: &AdminCap,
     iota_names: &mut IotaNames,
     name: String,
@@ -36,8 +36,8 @@ public fun reserve_name(
     registry.add_record(name, no_years, clock, ctx)
 }
 
-/// Reserve a list of names.
-entry fun reserve_names(
+/// Register a list of names.
+entry fun register_names(
     _: &AdminCap,
     iota_names: &mut IotaNames,
     mut names: vector<String>,
