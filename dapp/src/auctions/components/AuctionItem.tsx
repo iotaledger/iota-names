@@ -62,9 +62,9 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         return (
             <Card type={CardType.Filled}>
                 <div className="animate-pulse space-y-3">
-                    <div className="h-4 bg-gray-200 rounded dark:bg-gray-700 w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded dark:bg-gray-700 w-1/2"></div>
-                    <div className="h-3 bg-gray-200 rounded dark:bg-gray-700 w-full"></div>
+                    <div className="h-4 rounded bg-gray-700 w-3/4"></div>
+                    <div className="h-3 rounded bg-gray-700 w-1/2"></div>
+                    <div className="h-3 rounded bg-gray-700 w-full"></div>
                 </div>
             </Card>
         );
@@ -73,7 +73,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     if (auction.error || !auction.metadata) {
         return (
             <Card type={CardType.Filled}>
-                <div className="text-red-600 dark:text-red-400">
+                <div className="text-red-400">
                     <p className="font-medium">{auction.domain}</p>
                     <p className="text-sm">Failed to load auction data</p>
                 </div>
