@@ -284,6 +284,45 @@ fun try_renewal_process_longer_than_max_years() {
 }
 
 #[test]
+fun test_base_amount() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let name = b"test.iota".to_string();
+
+    // Create a payment intent to test various functions
+    let mut intent = payment::init_registration(&mut iota_names, name);
+    
+    // Test request_base_amount() function
+    let base_amount = intent.request_base_amount();
+    assert_eq(base_amount, 100);
+    
+    // Test request_data_mut() function with authorized app
+    let request_data_mut = intent.request_data_mut(&iota_names, PaymentsAuth {});
+    
+    // Test base_amount_mut() function
+    let base_amount_mut_ref = request_data_mut.base_amount_mut();
+    *base_amount_mut_ref = 150; // Modify the base amount
+    
+    // Test metadata() function
+    let metadata_ref = request_data_mut.metadata();
+    assert_eq(metadata_ref.size(), 0); // Should be empty initially
+    
+    // Test metadata_mut() function
+    let metadata_mut_ref = request_data_mut.metadata_mut();
+    metadata_mut_ref.insert(b"discount".to_string(), b"10%".to_string());
+    
+    // Verify the metadata was updated
+    assert_eq(request_data_mut.metadata().size(), 1);
+    
+    // Verify the base amount was updated
+    assert_eq(intent.request_base_amount(), 150);
+    
+    // Clean up
+    destroy(intent);
+    destroy(iota_names);
+}
+
+#[test]
 fun test_calculate_total_after_discount() {
     let mut ctx = tx_context::dummy();
     let mut iota_names = setup_iota_names(&mut ctx);
