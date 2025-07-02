@@ -277,6 +277,12 @@ impl IotaNamesMetrics {
             renewal_years_distribution,
             counter
         );
+        restore_vector_metric!(
+            "auction_bid_count_distribution",
+            "bid_count",
+            auction_bid_count_distribution,
+            gauge
+        );
 
         Ok(())
     }
@@ -312,6 +318,11 @@ impl IotaNamesMetrics {
                             }
                             "user_data_distribution" => {
                                 self.user_data_distribution
+                                    .with_label_values(&[label_value])
+                                    .set(value);
+                            }
+                            "auction_bid_count_distribution" => {
+                                self.auction_bid_count_distribution
                                     .with_label_values(&[label_value])
                                     .set(value);
                             }
