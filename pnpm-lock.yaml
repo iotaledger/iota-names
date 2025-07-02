@@ -106,8 +106,8 @@ importers:
         specifier: ^0.3.1
         version: 0.3.1
       '@iota/apps-ui-kit':
-        specifier: 0.0.0-experimental-names-20250702081301
-        version: 0.0.0-experimental-names-20250702081301(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.0.0-experimental-names-20250702132502
+        version: 0.0.0-experimental-names-20250702132502(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
@@ -1424,8 +1424,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702081301':
-    resolution: {integrity: sha512-v0Fx1DiDkujHLOa5MyyASkP6I4eQx6c6xTu8iv1hiMo1Z/1LLni8F0j90C/CC45nIvXqxAedz74KslIcOosDlQ==}
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702132502':
+    resolution: {integrity: sha512-NFJ9Ok9GxHxPsY3e6OfG970aTmuRLiuhqQmSGHchKlrQA/J0uP0esdx5s1Un7dsOXJwS0LXoC2MVBFZ+McFJlQ==}
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
@@ -7400,7 +7400,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702081301(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702132502(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@fontsource-variable/roboto-flex': 5.2.6
       '@fontsource/inter': 5.2.6
