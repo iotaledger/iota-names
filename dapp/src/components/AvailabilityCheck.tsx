@@ -153,7 +153,7 @@ export function AvailabilityCheck() {
                                           })
                                         : undefined
                                 }
-                                supportingTextValue={isAvailable ? 'Price' : undefined}
+                                supportingTextValue={isAvailable ? 'Minimum bid' : undefined}
                                 supportingText={supportingText}
                             >
                                 {isUnavailable ? null : isConnected ? (
@@ -183,7 +183,7 @@ export function AvailabilityCheck() {
                             >
                                 {isConnected ? (
                                     <Button
-                                        type={ButtonType.Secondary}
+                                        type={ButtonType.Primary}
                                         text="Bid"
                                         onClick={() => setAuctionDialogOpen(true)}
                                     />
