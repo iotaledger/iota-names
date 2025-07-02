@@ -29,11 +29,10 @@ Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache
 docker compose -f indexer/docker/docker-compose.yml up
 ```
 
-Reset the prometheus database if you want to start fresh:
+To reset all databases:
 
 ```bash
-docker compose -f indexer/docker/docker-compose.yml down
-docker volume rm iota-names-indexer_prometheus_data
+docker compose -f indexer/docker/docker-compose.yml down -v
 ```
 
 The following endpoints will be available:
