@@ -25,21 +25,20 @@ import { ChangeEvent, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getSubdomainObjectId, isNameRecordExpired } from '@/lib/utils/names';
+import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 type CreateSubnameProps = {
-    parent: string;
+    name: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProps) {
+export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-
-    const subdomainsOwned = useRegistrationNfts('subdomain').data || [];
-    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(parent);
+    const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
+    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -47,7 +46,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         | undefined;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-    const isNameSubName = parent ? isSubName(parent) : null;
+    const isNameSubName = isSubName(name);
 
     // Create updates
     const updates: NameUpdate[] = [];
@@ -56,19 +55,24 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
     const [newSubdomainName, setNewSubdomainName] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
-    const fullSubdomainName = newSubdomainName.trim() ? newSubdomainName + '.' + parent : '';
-    const isAvailable = getSubdomainObjectId(subdomainsOwned, fullSubdomainName) === null;
 
-    if (parent && newSubdomainName && fullSubdomainName && isAvailable) {
-        const parentNftId = isNameSubName
-            ? getSubdomainObjectId(subdomainsOwned, parent)
+    // Only join names if there user has written anything
+    const fullSubdomainName = newSubdomainName.trim() ? newSubdomainName + '.' + name : null;
+    const isAvailable = fullSubdomainName
+        ? getNameObject([], subdomainsOwned ?? [], fullSubdomainName) === null
+        : false;
+
+    if (name && newSubdomainName && fullSubdomainName && isAvailable) {
+        // We only need to search in the owned subnames if its a subname
+        const nftId = isNameSubName
+            ? getNameObject([], subdomainsOwned ?? [], name)
             : nameRecord?.nameRecord.nftId;
 
-        if (parentNftId) {
+        if (nftId) {
             updates.push({
                 type: 'new-subdomain',
                 subdomainName: fullSubdomainName,
-                parentNftId: parentNftId ?? '',
+                parentNftId: nftId,
                 expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
                 allowChildCreation: editIsAllowSubnames,
                 allowTimeExtension: editIsAllowingRenew,
@@ -81,7 +85,6 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name: parent,
         updates,
         isExpired,
     });
@@ -140,7 +143,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                 <Header title="Add subname" titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
-                        <h3 className="text-lg font-semibold mb-4">Add subdomain to {parent}</h3>
+                        <h3 className="text-lg font-semibold mb-4">Add subdomain to {name}</h3>
                         <div className="mb-4">
                             <label className="block text-sm font-medium mb-2">
                                 Subdomain name:
@@ -179,7 +182,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                                 </p>
                             )}
                         </div>
-                        {!isAvailable ? (
+                        {!isAvailable && fullSubdomainName ? (
                             <div className="text-red-500 mb-4">This subdomain is not available</div>
                         ) : null}
                         {updateNameError ? (
