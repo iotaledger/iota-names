@@ -179,7 +179,7 @@ export function AvailabilityCheck() {
                 </div>
             ) : null}
             {isAuctionBidDialogOpen && (
-                <AuctionBidDialog name={name} setOpen={setAuctionDialogOpen} />
+                <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
             )}
         </div>
     );

@@ -13,10 +13,7 @@ import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 export function UserAuctions() {
     const account = useCurrentAccount();
     const { data: auctionDetails, isLoading, error } = useGetUserAuctions();
-    const [bidDialogState, setBidDialogState] = useState<{
-        domain: string;
-        bidAmount: bigint;
-    } | null>(null);
+    const [bidDialogName, setBidDialogName] = useState<string | null>(null);
 
     if (isLoading) {
         return (
@@ -78,8 +75,8 @@ export function UserAuctions() {
         },
     );
 
-    const handleBidClick = (domain: string, bidAmount: bigint) => {
-        setBidDialogState({ domain, bidAmount });
+    const handleBidClick = (targetName: string) => {
+        setBidDialogName(targetName);
     };
 
     return (
@@ -137,11 +134,11 @@ export function UserAuctions() {
                 </div>
             )}
 
-            {bidDialogState && (
+            {bidDialogName && (
                 <AuctionBidDialog
-                    name={bidDialogState.domain}
-                    setOpen={(open) => {
-                        if (!open) setBidDialogState(null);
+                    name={bidDialogName}
+                    closeDialog={() => {
+                        setBidDialogName(null);
                     }}
                 />
             )}

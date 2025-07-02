@@ -22,7 +22,7 @@ import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {
     auction: AuctionDetails;
-    onBidClick?: (domain: string, bidAmount: bigint) => void;
+    onBidClick?: (targetName: string) => void;
 }
 
 export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
@@ -103,7 +103,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
                     text="Bid Again"
                     onClick={() => {
                         if (onBidClick) {
-                            onBidClick(auction.domain, nextBidAmount);
+                            onBidClick(auction.domain);
                         }
                     }}
                 />

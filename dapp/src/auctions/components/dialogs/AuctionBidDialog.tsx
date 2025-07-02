@@ -29,10 +29,10 @@ import { toNanos } from '@/lib/utils/amount';
 
 interface AuctionBidDialogDialogProps {
     name: string;
-    setOpen: (open: boolean) => void;
+    closeDialog: () => void;
 }
 
-export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
@@ -74,7 +74,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
-            setOpen(false);
+            closeDialog();
         },
     });
 
@@ -100,13 +100,13 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
     })();
 
     return (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog open onOpenChange={closeDialog}>
             <DialogContent showCloseOnOverlay>
                 <Header
                     title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
                     titleCentered
-                    onClose={() => setOpen(false)}
-                    onBack={() => setOpen(false)}
+                    onClose={() => closeDialog()}
+                    onBack={() => closeDialog()}
                 />
 
                 <DialogBody>
@@ -134,7 +134,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                         size={ButtonSize.Small}
                         type={ButtonType.Outlined}
                         text="Cancel"
-                        onClick={() => setOpen(false)}
+                        onClick={() => closeDialog()}
                     />
                     <Button
                         size={ButtonSize.Small}
