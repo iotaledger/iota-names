@@ -101,7 +101,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canPay =
         isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
 
-    const hasErrors = registerNameError || coinBalanceError;
+    const hasErrors = registerNameError || coinBalanceError || purchaseError;
 
     const isLoading = isNameRecordLoading || isRegisterNameLoading || isSigning;
 
