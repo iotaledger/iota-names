@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Card, CardType, KeyValueInfo } from '@iota/apps-ui-kit';
+import { Button, Card, CardType, KeyValueInfo, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -31,10 +31,8 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
 
-    const { data: claimTxData } = useClaimAuctionTransaction(
-        account?.address || '',
-        auction.domain,
-    );
+    const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
+        useClaimAuctionTransaction(account?.address || '', auction.domain);
 
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
@@ -89,15 +87,18 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
 
     const renderActionButton = () => {
         if (auctionStatus === 'claimable') {
+            const isClaimLoading = isSigningClaimTransaction || isClaimTransactionLoading;
+
             return (
                 <Button
                     text={isSigningClaimTransaction ? 'Claiming...' : 'Claim'}
+                    icon={isClaimLoading ? <LoadingIndicator /> : null}
                     onClick={() => {
-                        if (claimTxData?.transaction) {
-                            handleClaim(claimTxData.transaction);
+                        if (claimTransaction?.transaction) {
+                            handleClaim(claimTransaction.transaction);
                         }
                     }}
-                    disabled={isSigningClaimTransaction || !claimTxData?.transaction}
+                    disabled={isSigningClaimTransaction || !claimTransaction?.transaction}
                 />
             );
         }
