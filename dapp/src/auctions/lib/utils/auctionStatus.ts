@@ -3,7 +3,7 @@
 
 import { AuctionMetadata } from '../types/metadata';
 
-export type AuctionStatus = 'active' | 'ended' | 'not_found';
+type AuctionMetadataStatus = 'active' | 'ended' | 'not_found';
 
 export type UserAuctionStatus =
     | 'top_bidder'
@@ -11,46 +11,46 @@ export type UserAuctionStatus =
     | 'winner'
     | 'lost'
     | 'claimable'
+    | 'claimed'
     | 'unknown';
 
-function isAuctionActive(auction: AuctionMetadata | null): boolean {
-    if (!auction) return false;
+function isAuctionActive(auctionMetadata: AuctionMetadata | null): boolean {
+    if (!auctionMetadata) return false;
 
     const now = Date.now();
-    return now < auction.endTimestamp.getTime();
+    return now < auctionMetadata.endTimestamp.getTime();
 }
 
-function getAuctionStatus(auction: AuctionMetadata | null): AuctionStatus {
-    if (!auction) return 'not_found';
+function getAuctionMetadataStatus(auctionMetadata: AuctionMetadata | null): AuctionMetadataStatus {
+    if (!auctionMetadata) return 'not_found';
 
-    if (isAuctionActive(auction)) return 'active';
+    if (isAuctionActive(auctionMetadata)) return 'active';
     return 'ended';
 }
 
-function isUserWinner(auction: AuctionMetadata | null, userAddress: string): boolean {
-    if (!auction || !userAddress) return false;
+function isUserWinner(auctionMetadata: AuctionMetadata | null, userAddress: string): boolean {
+    if (!auctionMetadata) return false;
 
-    return auction.winner === userAddress;
+    return auctionMetadata.winner === userAddress;
 }
 
 export function getUserAuctionStatus(
-    auction: AuctionMetadata | null,
+    auctionMetadata: AuctionMetadata | null,
     userAddress: string,
 ): UserAuctionStatus {
-    if (!auction || !userAddress) return 'unknown';
+    const isWinner = isUserWinner(auctionMetadata, userAddress);
+    const auctionMetadataStatus = getAuctionMetadataStatus(auctionMetadata);
 
-    const isWinner = isUserWinner(auction, userAddress);
-    const auctionStatus = getAuctionStatus(auction);
-
-    if (auctionStatus === 'active') {
+    if (auctionMetadataStatus === 'active') {
         return isWinner ? 'top_bidder' : 'outbid';
-    } else if (auctionStatus === 'ended') {
+    } else if (auctionMetadataStatus === 'ended') {
         if (isWinner) {
-            // TODO: Do we need to check if it was already claimed ?
             return 'claimable';
         } else {
             return 'lost';
         }
+    } else if (auctionMetadataStatus === 'not_found') {
+        return 'claimed';
     }
 
     return 'unknown';

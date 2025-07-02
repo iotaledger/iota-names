@@ -6,16 +6,21 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import { useState } from 'react';
 
 import { AuctionDetails, useGetUserAuctions } from '../hooks/useGetUserAuctions';
-import { getUserAuctionStatus } from '../lib/utils';
+import { getUserAuctionStatus, UserAuctionStatus } from '../lib/utils';
 import { AuctionItem } from './AuctionItem';
 import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
+
+type AuctionGroup = {
+    details: AuctionDetails;
+    status: UserAuctionStatus;
+}[];
 
 export function UserAuctions() {
     const account = useCurrentAccount();
     const { data: auctionDetails, isLoading, error } = useGetUserAuctions();
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
 
-    if (isLoading) {
+    if (isLoading || !account) {
         return (
             <div className="w-full space-y-4">
                 <Title title="My Auctions" size={TitleSize.Small} />
@@ -55,23 +60,23 @@ export function UserAuctions() {
     }
 
     const groupedAuctions = auctionDetails.reduce(
-        (groups, auction) => {
-            const status = getUserAuctionStatus(auction.metadata, account?.address || '');
+        (groups, auctionDetails) => {
+            const status = getUserAuctionStatus(auctionDetails.metadata, account.address);
 
             if (status === 'top_bidder' || status === 'outbid') {
-                groups.active.push(auction);
+                groups.active.push({ details: auctionDetails, status });
             } else if (status === 'claimable' || status === 'winner') {
-                groups.claimable.push(auction);
+                groups.claimable.push({ details: auctionDetails, status });
             } else if (status === 'lost') {
-                groups.lost.push(auction);
+                groups.lost.push({ details: auctionDetails, status });
             }
 
             return groups;
         },
         {
-            active: [] as AuctionDetails[],
-            claimable: [] as AuctionDetails[],
-            lost: [] as AuctionDetails[],
+            active: [] as AuctionGroup,
+            claimable: [] as AuctionGroup,
+            lost: [] as AuctionGroup,
         },
     );
 
@@ -89,10 +94,11 @@ export function UserAuctions() {
                         Active Auctions ({groupedAuctions.active.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                        {groupedAuctions.active.map((auction) => (
+                        {groupedAuctions.active.map((auctionGroup) => (
                             <AuctionItem
-                                key={auction.domain}
-                                auction={auction}
+                                key={auctionGroup.details.domain}
+                                auction={auctionGroup.details}
+                                auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}
                             />
                         ))}
@@ -106,10 +112,11 @@ export function UserAuctions() {
                         Won Auctions ({groupedAuctions.claimable.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                        {groupedAuctions.claimable.map((auction) => (
+                        {groupedAuctions.claimable.map((auctionGroup) => (
                             <AuctionItem
-                                key={auction.domain}
-                                auction={auction}
+                                key={auctionGroup.details.domain}
+                                auction={auctionGroup.details}
+                                auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}
                             />
                         ))}
@@ -123,10 +130,11 @@ export function UserAuctions() {
                         Lost Auctions ({groupedAuctions.lost.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                        {groupedAuctions.lost.map((auction) => (
+                        {groupedAuctions.lost.map((auctionGroup) => (
                             <AuctionItem
-                                key={auction.domain}
-                                auction={auction}
+                                key={auctionGroup.details.domain}
+                                auction={auctionGroup.details}
+                                auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}
                             />
                         ))}

@@ -16,16 +16,17 @@ import {
     getCurrentBidAmount,
     getNextBidAmount,
     getTimeRemaining,
-    getUserAuctionStatus,
+    UserAuctionStatus,
 } from '../lib/utils';
 import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {
     auction: AuctionDetails;
+    auctionStatus: UserAuctionStatus;
     onBidClick?: (targetName: string) => void;
 }
 
-export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
+export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -82,13 +83,12 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
         );
     }
 
-    const userStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
     const currentBid = getCurrentBidAmount(auction.metadata);
     const timeRemaining = getTimeRemaining(auction.metadata);
     const nextBidAmount = getNextBidAmount(auction.metadata);
 
     const renderActionButton = () => {
-        if (userStatus === 'claimable') {
+        if (auctionStatus === 'claimable') {
             return (
                 <Button
                     text={isSigningClaimTransaction ? 'Claiming...' : 'Claim'}
@@ -102,7 +102,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
             );
         }
 
-        if (userStatus === 'outbid' && timeRemaining > 0) {
+        if (auctionStatus === 'outbid' && timeRemaining > 0) {
             return (
                 <Button
                     text="Bid Again"
@@ -123,7 +123,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h3 className="font-medium text-lg">{auction.domain}</h3>
-                    <AuctionStatusBadge status={userStatus} />
+                    <AuctionStatusBadge status={auctionStatus} />
                 </div>
 
                 <div className="space-y-2">
@@ -140,7 +140,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
                         value={formatTimeRemaining(timeRemaining)}
                         fullwidth
                     />
-                    {userStatus === 'outbid' && timeRemaining > 0 && (
+                    {auctionStatus === 'outbid' && timeRemaining > 0 && (
                         <KeyValueInfo
                             keyText="Next Bid"
                             value={formatNanosToIota(nextBidAmount, {
