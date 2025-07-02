@@ -8,12 +8,12 @@ export function UserAuctions() {
 
     if (isLoading) {
         return (
-            <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-700">
+            <div className="rounded-lg border p-6 border-gray-700">
                 <h3 className="mb-4 text-lg font-semibold">My Auctions</h3>
                 <div className="animate-pulse space-y-2">
-                    <div className="h-4 bg-gray-200 rounded dark:bg-gray-700"></div>
-                    <div className="h-4 bg-gray-200 rounded dark:bg-gray-700"></div>
-                    <div className="h-4 bg-gray-200 rounded dark:bg-gray-700"></div>
+                    <div className="h-4 rounded bg-gray-700"></div>
+                    <div className="h-4 rounded bg-gray-700"></div>
+                    <div className="h-4 rounded bg-gray-700"></div>
                 </div>
             </div>
         );
@@ -21,33 +21,27 @@ export function UserAuctions() {
 
     if (error) {
         return (
-            <div className="rounded-lg border border-red-200 p-6 dark:border-red-800">
+            <div className="rounded-lg border p-6 border-red-800">
                 <h3 className="mb-4 text-lg font-semibold">My Auctions</h3>
-                <p className="text-red-600 dark:text-red-400">
-                    Failed to load auctions. Please try again later.
-                </p>
+                <p className="text-red-400">Failed to load auctions. Please try again later.</p>
             </div>
         );
     }
 
     return (
-        <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-700">
+        <div className="rounded-lg border p-6 border-gray-700">
             <h3 className="mb-4 text-lg font-semibold">My Auctions</h3>
             {!auctions || auctions.length === 0 ? (
-                <p className="text-gray-600 dark:text-gray-400">
-                    You haven't participated in any auctions yet.
-                </p>
+                <p className=" text-gray-400">You haven't participated in any auctions yet.</p>
             ) : (
                 <div className="space-y-2">
                     {auctions.map((domain) => (
                         <div
                             key={domain}
-                            className="flex items-center justify-between rounded-md bg-gray-50 p-3 dark:bg-gray-800"
+                            className="flex items-center justify-between rounded-md p-3 bg-gray-800"
                         >
                             <span className="font-medium">{domain}</span>
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                                Auction participant
-                            </span>
+                            <span className="text-sm text-gray-400">Auction participant</span>
                         </div>
                     ))}
                 </div>
