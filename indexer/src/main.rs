@@ -42,9 +42,12 @@ enum Command {
     Start {
         #[clap(flatten)]
         connection_pool_config: DbConnectionPoolConfig,
-        /// The URL of an IOTA node to get data from.
+        /// The URL of an IOTA node with JSON API.
         #[arg(long, default_value = "http://localhost:9000")]
         node_url: String,
+        /// The URL of an IOTA node with REST API enabled or a historical store.
+        #[arg(long, default_value = "http://localhost:9000")]
+        checkpoint_url: String,
         /// The number of workers to spawn in parallel.
         #[arg(long, default_value_t = 1)]
         num_workers: usize,
@@ -63,6 +66,7 @@ impl Command {
             Command::Start {
                 connection_pool_config,
                 node_url,
+                checkpoint_url,
                 num_workers,
                 api_port,
                 prometheus_url,
@@ -109,7 +113,7 @@ impl Command {
                     )?;
 
                     tokio::select! {
-                        res = run_iota_names_reader(worker, &node_url, &registry, num_workers) => res,
+                        res = run_iota_names_reader(worker, &node_url, &checkpoint_url, &registry, num_workers) => res,
                         _ = handle.cancelled() => Ok(()),
                     }
                 });
