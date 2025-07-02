@@ -53,7 +53,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: NetworkId) => {
     const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
         6n * NANOS_PER_IOTA,
     ]);
-    // register test.iota for 2 years.
+    // register random name like mclsl9pbdg8324x154cmclsl9pbdg8324x154c.iota for 2 years.
     const nft = iotaNamesTx.register({
         domain: uniqueName,
         years: 2,
