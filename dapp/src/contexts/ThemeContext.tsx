@@ -14,7 +14,7 @@ export interface ThemeContextType {
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
-    theme: Theme.Light,
+    theme: Theme.Names,
     themePreference: ThemePreference.System,
     setThemePreference: () => {},
 });

@@ -6,9 +6,9 @@
 import { Button, ButtonType, Card, CardType, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
+import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
-import { UserAuctions } from '@/components/UserAuctions';
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
@@ -145,7 +145,7 @@ export default function MyNamesPage(): JSX.Element {
                     })}
                 </div>
             )}
-            <div className="pt-md w-full max-w-md">
+            <div className="pt-md w-full">
                 <UserAuctions />
             </div>
         </div>
