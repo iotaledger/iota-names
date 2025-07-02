@@ -34,11 +34,9 @@ function getValidationError(
     if (!IOTA_NAME_REGEX.test(name)) {
         return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
     }
-
     if (name.length < minLength || name.length > maxLength) {
         return `Name must be ${minLength}-${maxLength} characters long`;
     }
-
     return null;
 }
 
@@ -55,10 +53,24 @@ export function AvailabilityCheck() {
         useGetAuctionMetadata(name);
 
     const isAvailable = nameRecordData?.type === 'available';
+    const isNotPriced = nameRecordData?.type === 'not-priced';
+    const isUnavailable = nameRecordData?.type === 'unavailable';
     const isAuctionInProgress =
-        nameRecordData?.type === 'unavailable' &&
+        isUnavailable &&
         auctionMetadata?.value &&
         new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() > Date.now();
+
+    const status: NamePurchaseStatus = useMemo(() => {
+        if (isAvailable) {
+            return isConnected ? NamePurchaseStatus.Connected : NamePurchaseStatus.Unconnected;
+        } else if (isNotPriced) {
+            return NamePurchaseStatus.NotPriced;
+        } else if (isAuctionInProgress) {
+            return NamePurchaseStatus.InAuction;
+        } else {
+            return NamePurchaseStatus.Unavailable;
+        }
+    }, [isAvailable, isConnected, isNotPriced, isAuctionInProgress]);
 
     const validationError = useMemo(
         () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
@@ -84,6 +96,13 @@ export function AvailabilityCheck() {
         setSearchValue('');
         setName('');
     }
+    const supportingText = useMemo(() => {
+        if (isUnavailable) {
+            return isAuctionInProgress ? 'In auction' : 'Name is already taken.';
+        }
+        return undefined;
+    }, [isUnavailable, isAuctionInProgress]);
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {isPurchaseDialogOpen && isAvailable && (
@@ -115,25 +134,15 @@ export function AvailabilityCheck() {
                     />
                 </div>
                 {nameRecordData && (
-                    <div className="flex flex-col items-center w-full">
+                    <div className="flex flex-col items-center space-y-4 w-full">
                         <NamePurchaseCard
                             name={name}
-                            status={
-                                isAvailable
-                                    ? isConnected
-                                        ? NamePurchaseStatus.Connected
-                                        : NamePurchaseStatus.Unconnected
-                                    : NamePurchaseStatus.Unavailable
-                            }
+                            status={status}
                             value={
-                                nameRecordData?.type === 'available'
-                                    ? formatNanosToIota(nameRecordData.price)
-                                    : undefined
+                                isAvailable ? formatNanosToIota(nameRecordData.price) : undefined
                             }
-                            supportingTextValue={
-                                nameRecordData?.type === 'available' ? 'Price' : undefined
-                            }
-                            supportingText={isAuctionInProgress ? 'In auction' : undefined}
+                            supportingTextValue={isAvailable ? 'Price' : undefined}
+                            supportingText={supportingText}
                         >
                             <Button
                                 type={ButtonType.Secondary}
@@ -148,11 +157,7 @@ export function AvailabilityCheck() {
                             ) : (
                                 <NamePurchaseCard
                                     name={name}
-                                    status={
-                                        isConnected
-                                            ? NamePurchaseStatus.Connected
-                                            : NamePurchaseStatus.Unconnected
-                                    }
+                                    status={status}
                                     value={formatNanosToIota(
                                         BigInt(
                                             auctionMetadata?.value?.value?.current_bid?.balance
@@ -161,7 +166,7 @@ export function AvailabilityCheck() {
                                             BigInt(1) * NANOS_PER_IOTA,
                                     )}
                                     supportingTextValue="Minimum bid"
-                                    supportingText={isAuctionInProgress ? 'In auction' : undefined}
+                                    supportingText={supportingText}
                                 >
                                     <Button
                                         type={ButtonType.Primary}

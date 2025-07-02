@@ -5,7 +5,6 @@ import { ConnectButton } from '@iota/dapp-kit';
 import clsx from 'clsx';
 
 import { NamePurchaseStatus } from './namePurchasedCard.enums';
-import { STATUS_COLORS, STATUS_LABELS } from './namesPurchaseCard.classes';
 
 interface NamePurchaseCardProps {
     /**
@@ -29,7 +28,7 @@ interface NamePurchaseCardProps {
      */
     status: NamePurchaseStatus;
     /**
-     * multiple links
+     * buttons
      */
     children?: React.ReactNode;
 }
@@ -44,33 +43,42 @@ export function NamePurchaseCard({
 }: NamePurchaseCardProps): React.JSX.Element {
     const bgCard =
         status === NamePurchaseStatus.Unavailable ? 'bg-names-error-20' : 'bg-names-neutral-10';
-    const nameColor =
+    const textColorStatus =
         status === NamePurchaseStatus.Unavailable
             ? 'text-names-error-80'
             : 'text-names-tertiary-80';
-
+    const textStatus = status === NamePurchaseStatus.Unavailable ? 'Unavailable' : 'Available';
     return (
         <div
             className={clsx(
-                'group flex h-auto w-full flex-col justify-between rounded-2xl p-md--rs space-y-4',
+                'group flex h-full w-full flex-col justify-between rounded-2xl p-md--rs space-y-4',
                 bgCard,
             )}
         >
             <div className="flex text-headline-md gap-1">
                 <span className="text-names-neutral-50">@</span>
-                <h2 className={clsx(nameColor)}>{name}</h2>
+                <h2 className={clsx(textColorStatus)}>{name}</h2>
             </div>
             <div className="flex justify-between space-x-4 h-auto w-full max-w-[744px]">
-                <div className="flex flex-row gap-2 text-body-md">
-                    <div className={clsx('text-body-sm', STATUS_COLORS[status])}>
-                        {STATUS_LABELS[status]}
-                    </div>
-                    {supportingText && <p className="text-names-neutral-70">{supportingText}</p>}
+                <div className="flex flex-row gap-2 text-body-md items-center">
+                    <div className={clsx('text-body-sm', textColorStatus)}>{textStatus}</div>
+                    {supportingText && (
+                        <p
+                            className={clsx(
+                                'text-names-neutral-70 transition-opacity duration-100',
+                                status === NamePurchaseStatus.Unavailable
+                                    ? 'opacity-0 group-hover:opacity-100'
+                                    : 'opacity-100',
+                            )}
+                        >
+                            {supportingText}
+                        </p>
+                    )}
                 </div>
-                <div className="flex flex-row gap-4 items-end group">
+                <div className="flex flex-row gap-md group">
                     <div className="flex flex-col">
                         {value && (
-                            <div className="flex flex-col items-center">
+                            <div className="flex flex-col items-start">
                                 <p className="text-body-lg text-names-neutral-92">{value}</p>
                                 {supportingTextValue && (
                                     <p className="text-label-sm text-names-neutral-70">
@@ -81,7 +89,7 @@ export function NamePurchaseCard({
                         )}
                     </div>
 
-                    <div className="hidden group-hover:flex transition-opacity duration-300">
+                    <div className=" group-hover:flex transition-opacity duration-100 w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
                         {status === NamePurchaseStatus.Connected && children}
                         {status === NamePurchaseStatus.Unconnected && (
                             <ConnectButton connectText="Connect Wallet" />
