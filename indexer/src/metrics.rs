@@ -157,6 +157,216 @@ impl IotaNamesMetrics {
             .unwrap(),
         }
     }
+
+    /// Restore metrics from Prometheus by querying the latest values
+    pub async fn restore_from_prometheus(&self, prometheus_url: &str) -> anyhow::Result<()> {
+        let client = reqwest::Client::new();
+
+        // Macro to restore simple metrics
+        macro_rules! restore_metric {
+            ($metric_name:literal, $field:ident, counter) => {
+                if let Ok(value) = self
+                    .query_metric_value(&client, prometheus_url, $metric_name)
+                    .await
+                {
+                    self.$field.inc_by(value as u64);
+                }
+            };
+            ($metric_name:literal, $field:ident, gauge) => {
+                if let Ok(value) = self
+                    .query_metric_value(&client, prometheus_url, $metric_name)
+                    .await
+                {
+                    self.$field.set(value);
+                }
+            };
+        }
+
+        // Restore simple counters and gauges
+        restore_metric!(
+            "total_name_records_added",
+            total_name_records_added,
+            counter
+        );
+        restore_metric!(
+            "total_name_records_removed",
+            total_name_records_removed,
+            counter
+        );
+        restore_metric!("iota_names_balance", iota_names_balance, gauge);
+        restore_metric!("total_node_subnames", total_node_subnames, gauge);
+        restore_metric!("total_leaf_subnames", total_leaf_subnames, gauge);
+        restore_metric!("total_auction_started", total_auction_started, gauge);
+        restore_metric!("total_auction_finalized", total_auction_finalized, gauge);
+        restore_metric!("total_target_address", total_target_address, gauge);
+        restore_metric!("total_default_name", total_default_name, gauge);
+        restore_metric!("auction_house_balance", auction_house_balance, gauge);
+        restore_metric!(
+            "total_percentage_discount",
+            total_percentage_discount,
+            gauge
+        );
+        restore_metric!("total_fixed_discount", total_fixed_discount, gauge);
+
+        // Restore vector metrics
+        self.restore_labeled_metrics(&client, prometheus_url)
+            .await?;
+
+        info!("Successfully restored metrics from Prometheus");
+        Ok(())
+    }
+
+    async fn query_metric_value(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+    ) -> anyhow::Result<i64> {
+        let query = format!("{prometheus_url}/api/v1/query?query={metric_name}");
+        let response: serde_json::Value = client.get(&query).send().await?.json().await?;
+
+        if let Some(result) = response["data"]["result"].as_array() {
+            if let Some(first_result) = result.first() {
+                if let Some(value_str) = first_result["value"][1].as_str() {
+                    return Ok(value_str.parse::<f64>()? as i64);
+                }
+            }
+        }
+        Ok(0)
+    }
+
+    async fn restore_labeled_metrics(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+    ) -> anyhow::Result<()> {
+        // Macro to restore vector metrics
+        macro_rules! restore_vector_metric {
+            ($metric_name:literal, $label_key:literal, $field:ident, gauge) => {
+                self.restore_and_set_gauge_vector(
+                    client,
+                    prometheus_url,
+                    $metric_name,
+                    $label_key,
+                    &self.$field,
+                )
+                .await?;
+            };
+            ($metric_name:literal, $label_key:literal, $field:ident, counter) => {
+                self.restore_and_set_counter_vector(
+                    client,
+                    prometheus_url,
+                    $metric_name,
+                    $label_key,
+                    &self.$field,
+                )
+                .await?;
+            };
+        }
+
+        // Restore vector metrics
+        restore_vector_metric!(
+            "name_length_distribution",
+            "length",
+            name_length_distribution,
+            gauge
+        );
+        restore_vector_metric!(
+            "name_depth_distribution",
+            "depth",
+            name_depth_distribution,
+            gauge
+        );
+        restore_vector_metric!(
+            "user_data_distribution",
+            "depth",
+            user_data_distribution,
+            gauge
+        );
+        restore_vector_metric!(
+            "renewal_years_distribution",
+            "years",
+            renewal_years_distribution,
+            counter
+        );
+        restore_vector_metric!(
+            "auction_bid_count_distribution",
+            "bid_count",
+            auction_bid_count_distribution,
+            gauge
+        );
+
+        Ok(())
+    }
+
+    async fn restore_and_set_gauge_vector(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+        label_key: &str,
+        gauge_vec: &IntGaugeVec,
+    ) -> anyhow::Result<()> {
+        let values = self
+            .query_vector_metric_values(client, prometheus_url, metric_name, label_key)
+            .await?;
+
+        for (label_value, value) in values {
+            gauge_vec.with_label_values(&[&label_value]).set(value);
+        }
+
+        Ok(())
+    }
+
+    async fn restore_and_set_counter_vector(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+        label_key: &str,
+        counter_vec: &IntCounterVec,
+    ) -> anyhow::Result<()> {
+        let values = self
+            .query_vector_metric_values(client, prometheus_url, metric_name, label_key)
+            .await?;
+
+        for (label_value, value) in values {
+            counter_vec
+                .with_label_values(&[&label_value])
+                .inc_by(value as u64);
+        }
+
+        Ok(())
+    }
+
+    async fn query_vector_metric_values(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+        label_key: &str,
+    ) -> anyhow::Result<Vec<(String, i64)>> {
+        let query = format!("{prometheus_url}/api/v1/query?query={metric_name}");
+        let response: serde_json::Value = client.get(&query).send().await?.json().await?;
+
+        let mut results = Vec::new();
+
+        if let Some(data) = response["data"]["result"].as_array() {
+            for result in data {
+                if let (Some(labels), Some(value_str)) =
+                    (result["metric"].as_object(), result["value"][1].as_str())
+                {
+                    let value = value_str.parse::<f64>()? as i64;
+
+                    if let Some(label_value) = labels.get(label_key).and_then(|v| v.as_str()) {
+                        results.push((label_value.to_string(), value));
+                    }
+                }
+            }
+        }
+
+        Ok(results)
+    }
 }
 
 pub(crate) struct PrometheusServer {
