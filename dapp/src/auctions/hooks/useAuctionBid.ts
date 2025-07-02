@@ -32,12 +32,19 @@ export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
             : true
         : false;
 
+    const isAuctionPresent = !!auctionMetadata;
+
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.placeBid(address || ''), name, bidNanos.toString()],
+        queryKey: [
+            ...queryKey.placeBid(address || ''),
+            name,
+            bidNanos.toString(),
+            isAuctionPresent,
+        ],
         queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
-            const transaction = !auctionMetadata
+            const transaction = !isAuctionPresent
                 ? buildCreateAuctionTransaction(
                       iotaNamesClient.config.auctionPackageId,
                       iotaNamesClient.config.iotaNamesObjectId,
