@@ -6,7 +6,8 @@ import fs from 'fs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { readPackageInfo, writePackageInfo } from '../package-info/constants';
-import { parseCsvFile, reserveDomains } from '../reserved-names/reserve-names';
+import { hasLabelFilesToProcess, processLabelFiles } from '../reserved-names/deny-labels';
+import { parseCsvFile, registerNames } from '../reserved-names/register-names';
 import { getClient, getIotaNamesAdminObjects, signAndExecute } from '../utils/utils';
 import { publishPackages } from './publish';
 import { setup } from './setup';
@@ -40,9 +41,9 @@ export const init = async (
     const client = getClient(network);
     const packageInfo = readPackageInfo(network);
 
-    let namesToReserveFile = './init/names-to-register.csv';
-    if (fs.existsSync(namesToReserveFile)) {
-        const nameAddressPairs = parseCsvFile(namesToReserveFile);
+    let namesToRegisterFile = './init/names-to-register.csv';
+    if (fs.existsSync(namesToRegisterFile)) {
+        const nameAddressPairs = parseCsvFile(namesToRegisterFile);
         const names = Object.keys(nameAddressPairs);
         const nameCount = names.length;
         if (nameCount === 0) {
@@ -50,7 +51,7 @@ export const init = async (
         } else {
             console.log(`Registering ${nameCount} names:`, names);
             const tx = new Transaction();
-            reserveDomains(
+            registerNames(
                 tx,
                 names,
                 packageInfo.packageId,
@@ -60,6 +61,24 @@ export const init = async (
             const result = await signAndExecute(tx, network);
             await client.waitForTransaction({ digest: result.digest });
             console.log(`Transaction digest: ${result.digest}`);
+        }
+    }
+
+    if (hasLabelFilesToProcess()) {
+        const tx = new Transaction();
+        const hasChanges = processLabelFiles(
+            tx,
+            packageInfo.packageId,
+            packageInfo.iotaNamesObjectId,
+            packageInfo.adminCap,
+        );
+
+        if (hasChanges) {
+            const result = await signAndExecute(tx, network);
+            await client.waitForTransaction({ digest: result.digest });
+            console.log(`Transaction digest: ${result.digest}`);
+        } else {
+            console.log('No labels provided to reserve or block');
         }
     }
 
