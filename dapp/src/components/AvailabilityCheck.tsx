@@ -193,6 +193,7 @@ export function AvailabilityCheck() {
                             </NamePurchaseCard>
                         ) : null}
                     </div>
+                )}
 
                 {isAuctionBidDialogOpen && (
                     <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
