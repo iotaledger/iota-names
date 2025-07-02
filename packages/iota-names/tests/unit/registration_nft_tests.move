@@ -61,6 +61,22 @@ fun test_update_values() {
     burn(nft);
 }
 
+#[test]
+fun test_uid_access() {
+    let mut ctx = tx_context::dummy();
+    let clock = clock::create_for_testing(&mut ctx);
+    let mut nft = new(utf8(b"test.iota"), 1, &clock, &mut ctx);
+
+    // Test uid() function - read-only access
+    let _uid_ref = nft.uid();
+    
+    // Test uid_mut() function - mutable access
+    let _uid_mut_ref = nft.uid_mut();
+
+    burn(nft);
+    clock.destroy_for_testing();
+}
+
 // === Helpers ===
 
 fun new(
