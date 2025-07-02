@@ -194,8 +194,8 @@ impl IotaNamesMetrics {
             counter
         );
         restore_metric!("iota_names_balance", iota_names_balance, gauge);
-        restore_metric!("total_node_subdomains", total_node_subdomains, gauge);
-        restore_metric!("total_leaf_subdomains", total_leaf_subdomains, gauge);
+        restore_metric!("total_node_subnames", total_node_subnames, gauge);
+        restore_metric!("total_leaf_subnames", total_leaf_subnames, gauge);
         restore_metric!("total_auction_started", total_auction_started, gauge);
         restore_metric!("total_auction_finalized", total_auction_finalized, gauge);
         restore_metric!("total_target_address", total_target_address, gauge);
