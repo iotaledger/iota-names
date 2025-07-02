@@ -6,6 +6,8 @@ import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
+import { queryKey } from '@/hooks';
+
 import { AuctionFieldBcs } from '../types/bcs';
 import { AuctionMetadata, RawAuctionMetadata } from '../types/metadata';
 import { deriveAuctionDynamicFieldId } from './dynamicField';
@@ -129,7 +131,7 @@ export function createAuctionMetadataQuery({
 }: CreateAuctionMetadataQueryParams) {
     return {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: ['auction-metadata', packageId, auctionsTableObjectId, domainName],
+        queryKey: [queryKey.auctionMetadata(domainName), packageId, auctionsTableObjectId],
         queryFn: async () => {
             if (!auctionsTableObjectId) {
                 return null;

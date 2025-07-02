@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button, Card, CardType, KeyValueInfo } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { useState } from 'react';
+import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { Transaction } from '@iota/iota-sdk/transactions';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKey } from '@/hooks/queryKey';
 import { formatNanosToIota } from '@/lib/utils';
 
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
@@ -24,14 +26,33 @@ interface AuctionItemProps {
 }
 
 export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
+    const iotaClient = useIotaClient();
+    const queryClient = useQueryClient();
     const account = useCurrentAccount();
-    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-    const [isClaimLoading, setIsClaimLoading] = useState(false);
 
     const { data: claimTxData } = useClaimAuctionTransaction(
         account?.address || '',
         auction.domain,
     );
+
+    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+    const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
+        async mutationFn(claimAuctionTransaction: Transaction) {
+            const transactionResult = await signAndExecuteTransaction({
+                transaction: claimAuctionTransaction,
+            });
+
+            await iotaClient.waitForTransaction({
+                digest: transactionResult.digest,
+            });
+        },
+        onSuccess() {
+            queryClient.invalidateQueries({
+                queryKey: queryKey.userAuctionHistory(account?.address),
+            });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.domain) });
+        },
+    });
 
     if (!auction.metadata || auction.isLoading) {
         return (
@@ -61,40 +82,32 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
     const timeRemaining = getTimeRemaining(auction.metadata);
     const nextBidAmount = getNextBidAmount(auction.metadata);
 
-    const handleClaimClick = async () => {
-        if (!claimTxData?.transaction) return;
-
-        setIsClaimLoading(true);
-        try {
-            await signAndExecuteTransaction({
-                transaction: claimTxData.transaction,
-            });
-        } catch (error) {
-            console.error('Failed to claim auction:', error);
-        } finally {
-            setIsClaimLoading(false);
-        }
-    };
-
-    const handleBidClick = () => {
-        if (onBidClick) {
-            onBidClick(auction.domain, nextBidAmount);
-        }
-    };
-
     const renderActionButton = () => {
         if (userStatus === 'claimable') {
             return (
                 <Button
-                    text={isClaimLoading ? 'Claiming...' : 'Claim'}
-                    onClick={handleClaimClick}
-                    disabled={isClaimLoading || !claimTxData?.transaction}
+                    text={isSigningClaimTransaction ? 'Claiming...' : 'Claim'}
+                    onClick={() => {
+                        if (claimTxData?.transaction) {
+                            handleClaim(claimTxData.transaction);
+                        }
+                    }}
+                    disabled={isSigningClaimTransaction || !claimTxData?.transaction}
                 />
             );
         }
 
         if (userStatus === 'outbid' && timeRemaining > 0) {
-            return <Button text="Bid Again" onClick={handleBidClick} />;
+            return (
+                <Button
+                    text="Bid Again"
+                    onClick={() => {
+                        if (onBidClick) {
+                            onBidClick(auction.domain, nextBidAmount);
+                        }
+                    }}
+                />
+            );
         }
 
         return null;
