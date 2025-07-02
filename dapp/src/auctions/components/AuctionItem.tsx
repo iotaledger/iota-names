@@ -103,13 +103,11 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
     return (
         <Card type={CardType.Filled}>
             <div className="space-y-3">
-                {/* Domain name and status */}
                 <div className="flex items-center justify-between">
                     <h3 className="font-medium text-lg">{auction.domain}</h3>
                     <AuctionStatusBadge status={userStatus} />
                 </div>
 
-                {/* Auction details */}
                 <div className="space-y-2">
                     <KeyValueInfo
                         keyText="Current Bid"
