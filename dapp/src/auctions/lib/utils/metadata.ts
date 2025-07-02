@@ -131,7 +131,7 @@ export function createAuctionMetadataQuery({
 }: CreateAuctionMetadataQueryParams) {
     return {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [queryKey.auctionMetadata(domainName), packageId, auctionsTableObjectId],
+        queryKey: [...queryKey.auctionMetadata(domainName), packageId, auctionsTableObjectId],
         queryFn: async () => {
             if (!auctionsTableObjectId) {
                 return null;

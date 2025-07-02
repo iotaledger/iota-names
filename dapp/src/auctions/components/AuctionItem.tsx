@@ -50,7 +50,12 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
+            // Invalidate auction so that it is detected as claimed
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.domain) });
+            // Refresh owned names so the claimed name appears
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
         },
     });
 
