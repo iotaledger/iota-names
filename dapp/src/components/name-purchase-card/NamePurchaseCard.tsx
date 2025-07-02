@@ -1,7 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { ConnectButton } from '@iota/dapp-kit';
 import clsx from 'clsx';
 
 import { NamePurchaseStatus } from './namePurchasedCard.enums';
@@ -58,7 +57,7 @@ export function NamePurchaseCard({
     return (
         <div
             className={clsx(
-                'group relative h-full w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
+                'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
                 status !== NamePurchaseStatus.Unavailable && 'hover:bg-names-primary-30',
             )}
         >
@@ -106,10 +105,7 @@ export function NamePurchaseCard({
                         </div>
 
                         <div className=" group-hover:flex transition-opacity duration-100 w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
-                            {status === NamePurchaseStatus.Connected && children}
-                            {status === NamePurchaseStatus.Unconnected && (
-                                <ConnectButton connectText="Connect Wallet" />
-                            )}
+                            {children}
                         </div>
                     </div>
                 </div>

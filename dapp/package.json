@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@iota/apps-ui-icons": "^0.3.1",
-        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250702081301",
+        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250702132502",
         "@iota/dapp-kit": "0.0.0-experimental-20250620081851",
         "@iota/graphql-transport": "0.0.0-experimental-20250620081851",
         "@iota/iota-names-sdk": "workspace:^",

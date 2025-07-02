@@ -3,8 +3,8 @@
 
 'use client';
 
-import { Button, ButtonSize, ButtonType, Input, InputType, Skeleton } from '@iota/apps-ui-kit';
-import { useCurrentWallet } from '@iota/dapp-kit';
+import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
+import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -12,6 +12,7 @@ import { useNameRecord, usePriceList } from '@/hooks';
 import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
+import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './name-purchase-card/NamePurchaseCard';
 import { NamePurchaseStatus } from './name-purchase-card/namePurchasedCard.enums';
@@ -45,6 +46,7 @@ export function AvailabilityCheck() {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
 
     const { data: nameRecordData, error } = useNameRecord(name);
     const { data: priceList } = usePriceList();
@@ -57,8 +59,11 @@ export function AvailabilityCheck() {
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isAuctionInProgress =
         isUnavailable &&
-        auctionMetadata?.value &&
-        new Date(Number(auctionMetadata.value.value.end_timestamp_ms)).getTime() > Date.now();
+        auctionMetadata?.endTimestamp &&
+        auctionMetadata.endTimestamp.getTime() > Date.now();
+
+    // User can bid in existing auctions or if there is no auction and the name is not taken
+    const canBid = isAuctionInProgress || isAvailable;
 
     const status: NamePurchaseStatus = useMemo(() => {
         if (isAvailable) {
@@ -103,6 +108,8 @@ export function AvailabilityCheck() {
         return undefined;
     }, [isUnavailable, isAuctionInProgress]);
 
+    const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {isPurchaseDialogOpen && isAvailable && (
@@ -135,54 +142,61 @@ export function AvailabilityCheck() {
                 </div>
                 {nameRecordData && (
                     <div className="flex flex-col items-center space-y-4 w-full">
-                        <NamePurchaseCard
-                            name={name}
-                            status={status}
-                            value={
-                                isAvailable
-                                    ? formatNanosToIota(nameRecordData.price, {
-                                          showIotaSymbol: false,
-                                      })
-                                    : undefined
-                            }
-                            supportingTextValue={isAvailable ? 'Price' : undefined}
-                            supportingText={supportingText}
-                        >
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Buy"
-                                onClick={() => setPurchaseDialogOpen(true)}
-                            />
-                        </NamePurchaseCard>
-
-                        {isAuctionInProgress &&
-                            (isAuctionMetadataLoading ? (
-                                <Skeleton />
-                            ) : (
-                                <NamePurchaseCard
-                                    name={name}
-                                    status={status}
-                                    value={formatNanosToIota(
-                                        BigInt(
-                                            auctionMetadata?.value?.value?.current_bid?.balance
-                                                ?.value ?? 0,
-                                        ) +
-                                            BigInt(1) * NANOS_PER_IOTA,
-                                        { showIotaSymbol: false },
-                                    )}
-                                    supportingTextValue="Minimum bid"
-                                    supportingText={supportingText}
-                                >
+                        {!isAuctionInProgress && (
+                            <NamePurchaseCard
+                                name={name}
+                                status={status}
+                                value={
+                                    isAvailable
+                                        ? formatNanosToIota(nameRecordData.price, {
+                                              showIotaSymbol: false,
+                                          })
+                                        : undefined
+                                }
+                                supportingTextValue={isAvailable ? 'Price' : undefined}
+                                supportingText={supportingText}
+                            >
+                                {isUnavailable ? null : isConnected ? (
                                     <Button
-                                        type={ButtonType.Primary}
-                                        text="Bid"
-                                        onClick={() =>
-                                            console.log('Bid functionality not implemented yet')
-                                        }
+                                        type={ButtonType.Secondary}
+                                        text="Buy"
+                                        onClick={() => setPurchaseDialogOpen(true)}
                                     />
-                                </NamePurchaseCard>
-                            ))}
+                                ) : (
+                                    <ConnectButton connectText="Connect" />
+                                )}
+                            </NamePurchaseCard>
+                        )}
+
+                        {isAuctionLoading ? (
+                            <p>Loading...</p>
+                        ) : canBid ? (
+                            <NamePurchaseCard
+                                name={name}
+                                status={status}
+                                value={formatNanosToIota(
+                                    auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
+                                    { showIotaSymbol: false },
+                                )}
+                                supportingTextValue="Minimum bid"
+                                supportingText={supportingText}
+                            >
+                                {isConnected ? (
+                                    <Button
+                                        type={ButtonType.Secondary}
+                                        text="Bid"
+                                        onClick={() => setAuctionDialogOpen(true)}
+                                    />
+                                ) : (
+                                    <ConnectButton connectText="Connect" />
+                                )}
+                            </NamePurchaseCard>
+                        ) : null}
                     </div>
+                )}
+
+                {isAuctionBidDialogOpen && (
+                    <AuctionBidDialog name={name} setOpen={setAuctionDialogOpen} />
                 )}
             </div>
         </div>
