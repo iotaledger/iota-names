@@ -24,7 +24,7 @@ import {
     getNameObject,
     getNamePermissions,
     getParentObject,
-    isNameRecordExpired,
+    isNameRecordExpiredWithGracePeriod,
 } from '@/lib/utils/names';
 
 interface RenewDialogProps {
@@ -45,7 +45,9 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         | undefined;
 
     const isNameSubName = nameRecord?.nameRecord ? isSubName(nameRecord.nameRecord.name) : null;
-    const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
+    const isExpired = nameRecord?.nameRecord
+        ? isNameRecordExpiredWithGracePeriod(nameRecord?.nameRecord)
+        : false;
     const namePermissions = nameRecord?.nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : null;

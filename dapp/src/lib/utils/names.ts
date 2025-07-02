@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isSubName, NameRecord } from '@iota/iota-names-sdk';
+import { GRACE_PERIOD_MS, isSubName, NameRecord } from '@iota/iota-names-sdk';
 
 import { RegistrationNft } from '@/hooks';
 
@@ -9,6 +9,9 @@ export function isNameRecordExpired(nameRecord: NameRecord) {
     return nameRecord.expirationTimestampMs < Date.now();
 }
 
+export function isNameRecordExpiredWithGracePeriod(nameRecord: NameRecord) {
+    return nameRecord.expirationTimestampMs < Date.now() + GRACE_PERIOD_MS;
+}
 export function getNamePermissions(nameRecord: NameRecord) {
     const isSubname = isSubName(nameRecord.name);
     // Names are allowed always
