@@ -106,8 +106,8 @@ importers:
         specifier: ^0.3.1
         version: 0.3.1
       '@iota/apps-ui-kit':
-        specifier: 0.0.0-experimental-names-20250702132502
-        version: 0.0.0-experimental-names-20250702132502(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.0.0-experimental-names-20250702173601
+        version: 0.0.0-experimental-names-20250702173601(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
@@ -1427,8 +1427,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702132502':
-    resolution: {integrity: sha512-NFJ9Ok9GxHxPsY3e6OfG970aTmuRLiuhqQmSGHchKlrQA/J0uP0esdx5s1Un7dsOXJwS0LXoC2MVBFZ+McFJlQ==}
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702173601':
+    resolution: {integrity: sha512-1EHdEGnNO2rtVKRlhVkzJeaq1uo25E78qgFYK1cEsedXm78Va/fXKgjQAkKECRrrgVPYc52tUYMGJicqeZQijg==}
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
@@ -5077,7 +5077,7 @@ packages:
   postcss-prefix-selector@1.16.1:
     resolution: {integrity: sha512-Umxu+FvKMwlY6TyDzGFoSUnzW+NOfMBLyC1tAkIjgX+Z/qGspJeRjVC903D7mx7TuBpJlwti2ibXtWuA7fKMeQ==}
     peerDependencies:
-      postcss: '>4 <9'
+      postcss: '>=8.4.31'
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
@@ -7403,7 +7403,7 @@ snapshots:
     dependencies:
       react: 18.3.1
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702132502(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702173601(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@fontsource-variable/roboto-flex': 5.2.6
       '@fontsource/inter': 5.2.6
@@ -9720,7 +9720,7 @@ snapshots:
       stable-hash: 0.0.5
       tinyglobby: 0.2.12
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 

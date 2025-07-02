@@ -6,7 +6,8 @@ import { fromB64 } from '@iota/iota-sdk/utils';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
-import { AuctionHouseBcs } from '@/lib/auction';
+
+import { AuctionHouseBcs } from '../lib/types/bcs';
 
 interface AuctionHouseData {
     auctionHouseId: string;

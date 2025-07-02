@@ -20,7 +20,7 @@ export function Navbar() {
                             <Link
                                 key={route.path}
                                 href={route.path}
-                                className="text-label-md hover:text-primary-20 hover:dark:text-primary-80"
+                                className="text-label-md hover:text-iota-primary-80"
                                 data-testid={`${route.id}-link`}
                             >
                                 {route.title}

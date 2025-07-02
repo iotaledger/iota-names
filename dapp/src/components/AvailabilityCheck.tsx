@@ -8,11 +8,11 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
+import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
+import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
-import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
-import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './name-purchase-card/NamePurchaseCard';
 import { NamePurchaseStatus } from './name-purchase-card/namePurchasedCard.enums';
@@ -193,10 +193,9 @@ export function AvailabilityCheck() {
                             </NamePurchaseCard>
                         ) : null}
                     </div>
-                )}
 
                 {isAuctionBidDialogOpen && (
-                    <AuctionBidDialog name={name} setOpen={setAuctionDialogOpen} />
+                    <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
                 )}
             </div>
         </div>
