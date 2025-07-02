@@ -93,5 +93,3 @@ export const processLabelFiles = (
 
     return hasLabels;
 };
-
-parseTextFile("test.txt")
