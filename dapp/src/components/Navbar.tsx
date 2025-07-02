@@ -8,8 +8,6 @@ import Link from 'next/link';
 
 import { PROTECTED_ROUTES } from '@/lib/constants';
 
-import { ThemeSwitcher } from './ThemeSwitcher';
-
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     return (
@@ -29,7 +27,6 @@ export function Navbar() {
                             </Link>
                         ))}
                     <div className="flex items-center space-x-2">
-                        <ThemeSwitcher />
                         <ConnectButton connectText="Connect" />
                     </div>
                 </div>
