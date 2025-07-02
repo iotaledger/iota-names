@@ -344,3 +344,100 @@ fun derive_parent() {
 
     assert!(parent(&child).extract() == parent, 0);
 }
+
+#[test]
+fun test_parent_edge_cases() {
+    // Test with a 2-level name - should return none
+    let two_level_name = new(utf8(b"test.iota"));
+    assert!(parent(&two_level_name).is_none());
+    
+    // Test with a 3-level name (subname) - should return parent
+    let three_level_name = new(utf8(b"sub.test.iota"));
+    let mut parent_result = parent(&three_level_name);
+    assert!(parent_result.is_some());
+    let parent_name = parent_result.extract();
+    assert_eq(parent_name.to_string(), utf8(b"test.iota"));
+    
+    // Test with a 4-level name (deep subname)
+    let four_level_name = new(utf8(b"deep.sub.test.iota"));
+    let mut parent_result = parent(&four_level_name);
+    assert!(parent_result.is_some());
+    let parent_name = parent_result.extract();
+    assert_eq(parent_name.to_string(), utf8(b"sub.test.iota"));
+}
+
+#[test]
+fun test_is_parent_of_edge_cases() {
+    let parent = new(utf8(b"parent.iota"));
+    let child = new(utf8(b"child.parent.iota"));
+    let not_child = new(utf8(b"other.test.iota"));
+    let same_level = new(utf8(b"sibling.iota"));
+    
+    // Test valid parent-child relationship
+    assert!(is_parent_of(&parent, &child));
+    
+    // Test invalid relationships
+    assert!(!is_parent_of(&parent, &not_child)); // Different parent
+    assert!(!is_parent_of(&parent, &same_level)); // Same level
+    assert!(!is_parent_of(&child, &parent)); // Reverse relationship
+    
+    // Test with deep hierarchy
+    let grandparent = new(utf8(b"grandparent.iota"));
+    let deep_child = new(utf8(b"deep.child.parent.iota"));
+    assert!(!is_parent_of(&grandparent, &deep_child)); // Not direct parent
+    assert!(is_parent_of(&child, &deep_child)); // Direct parent
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_empty_vector() {
+    // Test with empty label vector - should fail
+    new(utf8(b""));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_invalid_characters() {
+    new(utf8(b"test@.iota"));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_hyphen_at_start() {
+    new(utf8(b"-test.iota"));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_hyphen_at_end() {
+    new(utf8(b"test-.iota"));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_too_long() {
+    let long_label = b"64chars64chars64chars64chars64chars64chars64chars64chars64chars6";
+    let mut long_name = vector::empty<u8>();
+    vector::append(&mut long_name, long_label);
+    vector::append(&mut long_name, b".iota");
+    new(utf8(long_name));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_labels_too_short() {
+    new(utf8(b".iota"));
+}
+
+#[test]
+fun test_new_edge_cases() {
+    // Test with minimum valid length
+    let min_name = new(utf8(b"1.iota"));
+    assert_eq(*min_name.label(1), utf8(b"1"));
+    
+    // Test with maximum valid length
+    let max_label = b"63chars63chars63chars63chars63chars63chars63chars63chars63chars";
+    let mut max_name_bytes = vector::empty<u8>();
+    vector::append(&mut max_name_bytes, max_label);
+    vector::append(&mut max_name_bytes, b".iota");
+    let max_name = new(utf8(max_name_bytes));
+    assert_eq(*max_name.label(1), utf8(max_label));
+    
+    // Test with valid hyphen in middle
+    let hyphen_name = new(utf8(b"test-name.iota"));
+    assert_eq(*hyphen_name.label(1), utf8(b"test-name"));
+}
