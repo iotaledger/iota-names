@@ -18,9 +18,6 @@ export const parseTextFile = (filePath: string): string[] => {
         .split(',')
         .map((label) => label.trim())
         .filter((label) => {
-            if (label.length === 0) {
-                return false;
-            }
             if (!LABEL_REGEX.test(label)) {
                 throw new Error(`Invalid label provided: "${label}"`);
             }
@@ -96,3 +93,5 @@ export const processLabelFiles = (
 
     return hasLabels;
 };
+
+parseTextFile("test.txt")
