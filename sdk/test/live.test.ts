@@ -2,7 +2,9 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
+import { e2eLiveNetworkDryRunFlow } from './pre-built';
 
 describe('it should work on live networks', () => {
     // TODO: enable when it's deployed on mainnet
@@ -15,5 +17,9 @@ describe('it should work on live networks', () => {
     // 	const res = await e2eLiveNetworkDryRunFlow('testnet');
     // 	expect(res.effects.status.status).toEqual('success');
     // });
+    it('should work on devnet', async () => {
+        const res = await e2eLiveNetworkDryRunFlow('devnet');
+        expect(res.effects.status.status).toEqual('success');
+    });
     it('TODO: should work on testnet', async () => {});
 });

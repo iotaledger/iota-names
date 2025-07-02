@@ -2,13 +2,12 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Network } from '@iota/iota-sdk/dist/cjs/client/network.js';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import type {
     TransactionObjectArgument,
     TransactionObjectInput,
 } from '@iota/iota-sdk/transactions';
-
-import { packages } from './constants.js';
 
 // Interfaces
 // -----------------
@@ -43,8 +42,6 @@ export interface NameRecord {
 
 // Types
 // -----------------
-
-export type Network = keyof typeof packages;
 
 export type VersionedPackageId = {
     latest: string;
