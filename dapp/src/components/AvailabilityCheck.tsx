@@ -5,11 +5,14 @@
 
 import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useNameRecord, usePriceList } from '@/hooks';
+import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 
+import { AuctionBidDialog } from './dialogs/AuctionBidDialog';
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 
 function normalizeNameInput(name: string) {
@@ -43,20 +46,36 @@ export function AvailabilityCheck() {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
 
-    const { data, error } = useNameRecord(name);
+    const { data: nameRecordData, error } = useNameRecord(name);
     const { data: priceList } = usePriceList();
+
+    const { data: auctionMetadata, isLoading: isAuctionMetadataLoading } =
+        useGetAuctionMetadata(name);
+
+    const isAvailable = nameRecordData?.type === 'available';
+    const isAuctionInProgress =
+        nameRecordData?.type === 'unavailable' &&
+        auctionMetadata?.endTimestamp &&
+        auctionMetadata.endTimestamp.getTime() > Date.now();
+
+    // User can bid in existing auctions or if there is no auction and the name is not taken
+    const canBid = isAuctionInProgress || isAvailable;
 
     const validationError = useMemo(
         () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
         [searchValue, priceList],
     );
 
+    const errorMessage = error?.message ?? validationError ?? '';
+    const enableSearch = Boolean(searchValue) && !errorMessage;
+
     const handleSearch = useCallback(() => {
         if (searchValue) setName(`${searchValue}.iota`);
     }, [searchValue]);
 
-    function handleChange(inputValue: string) {
+    function handleInputChange(inputValue: string) {
         setSearchValue(normalizeNameInput(inputValue));
         if (name) {
             setName('');
@@ -69,13 +88,27 @@ export function AvailabilityCheck() {
         setName('');
     }
 
-    const errorMessage = error?.message ?? validationError ?? '';
-    const canBuy = data?.type === 'available';
-    const enableSearch = Boolean(searchValue) && !errorMessage;
+    const statusLabel = (() => {
+        if (isAvailable) {
+            return <span className="text-green-700 dark:text-green-200">Available</span>;
+        } else if (nameRecordData?.type === 'not-priced') {
+            return <span className="text-red-700 dark:text-red-200">Not priced</span>;
+        } else if (nameRecordData?.type === 'unavailable') {
+            if (isAuctionInProgress) {
+                return <span className="text-orange-600 dark:text-orange-300">In auction</span>;
+            } else {
+                return <span className="text-red-700 dark:text-red-200">Unavailable</span>;
+            }
+        } else {
+            return null;
+        }
+    })();
+
+    const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
-            {isPurchaseDialogOpen && canBuy && (
+            {isPurchaseDialogOpen && isAvailable && (
                 <PurchaseNameDialog
                     name={name}
                     open={isPurchaseDialogOpen}
@@ -89,14 +122,13 @@ export function AvailabilityCheck() {
                     type={InputType.Text}
                     placeholder="Check name availability"
                     value={searchValue}
-                    onChange={({ target: { value } }) => handleChange(value)}
+                    onChange={({ target: { value } }) => handleInputChange(value)}
                     errorMessage={errorMessage}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                     leadingIcon={
                         <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
                     }
                 />
-
                 <Button
                     size={ButtonSize.Medium}
                     text="Search"
@@ -105,31 +137,49 @@ export function AvailabilityCheck() {
                 />
             </div>
 
-            {data !== null && (
-                <div className="text-headline-sm">
-                    {data?.type == 'available' ? (
-                        <span className="text-green-700 dark:text-green-200">Available</span>
-                    ) : data?.type == 'unavailable' ? (
-                        <span className="text-red-700 dark:text-red-200">Unavailable</span>
-                    ) : data?.type == 'not-priced' ? (
-                        <span className="text-red-700 dark:text-red-200">Not priced</span>
-                    ) : null}
+            {nameRecordData && <div className="text-headline-sm">{statusLabel}</div>}
+
+            {isAvailable && (
+                <div className="flex flex-col items-center space-y-4">
+                    {isAvailable && (
+                        <div className="flex items-center space-x-4">
+                            <div className="text-body-md">
+                                Price: {formatNanosToIota(nameRecordData!.price)}
+                            </div>
+                            {isConnected ? (
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Buy"
+                                    onClick={() => setPurchaseDialogOpen(true)}
+                                />
+                            ) : (
+                                <ConnectButton connectText="Connect" />
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
-
-            {canBuy && (
+            {isAuctionLoading ? (
+                <p>Loading...</p>
+            ) : canBid ? (
                 <div className="flex items-center space-x-4">
-                    <div className="text-body-md">Price: {formatNanosToIota(data.price)}</div>
+                    <div className="text-body-md">
+                        Minimum bid:{' '}
+                        {formatNanosToIota(auctionMetadata?.minBidNanos || NANOS_PER_IOTA)}
+                    </div>
                     {isConnected ? (
                         <Button
                             type={ButtonType.Secondary}
-                            text="Buy"
-                            onClick={() => setPurchaseDialogOpen(true)}
+                            text="Bid"
+                            onClick={() => setAuctionDialogOpen(true)}
                         />
                     ) : (
                         <ConnectButton connectText="Connect" />
                     )}
                 </div>
+            ) : null}
+            {isAuctionBidDialogOpen && (
+                <AuctionBidDialog name={name} setOpen={setAuctionDialogOpen} />
             )}
         </div>
     );

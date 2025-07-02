@@ -52,13 +52,13 @@ GET /health
 
 Returns `OK` if the server is running.
 
-### Get Domains for an Address
+### Get Names for an Address
 
 ```
 GET /auctions/{address}
 ```
 
-Returns all domains that a specific address has bid on.
+Returns all names that a specific address has bid on.
 
 **Parameters:**
 

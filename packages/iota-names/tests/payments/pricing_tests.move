@@ -6,7 +6,7 @@
 module iota_names::pricing_config_tests;
 
 use iota_names::pricing_config;
-use iota_names::domain;
+use iota_names::name;
 
 #[test]
 fun test_e2e() {
@@ -115,7 +115,7 @@ fun test_price_not_set() {
 }
 
 #[test]
-fun test_calculate_base_price_of_domain() {
+fun test_calculate_base_price_of_name() {
     let ranges = vector[
         pricing_config::new_range(vector[1, 10]),
         pricing_config::new_range(vector[11, 20]),
@@ -127,34 +127,34 @@ fun test_calculate_base_price_of_domain() {
         vector[10, 20, 30],
     );
 
-    let domain_short = domain::new(b"5char.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_short) == 10);
+    let name_short = name::new(b"5char.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_short) == 10);
 
-    let domain_medium = domain::new(b"15char-----name.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_medium) == 20);
+    let name_medium = name::new(b"15char-----name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_medium) == 20);
 
     // Test boundary values
-    let domain_boundary_0 = domain::new(b"1.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_0) == 10);
+    let name_boundary_0 = name::new(b"1.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_boundary_0) == 10);
 
-    let domain_boundary_1 = domain::new(b"10charname.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_1) == 10);
+    let name_boundary_1 = name::new(b"10charname.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_boundary_1) == 10);
 
-    let domain_boundary_2 = domain::new(b"11char-name.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_2) == 20);
+    let name_boundary_2 = name::new(b"11char-name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_boundary_2) == 20);
 
-    let domain_boundary_3 = domain::new(b"21char-----------name.iota".to_string());
-    assert!(pricing_config.calculate_base_price_of_domain(domain_boundary_3) == 30);
+    let name_boundary_3 = name::new(b"21char-----------name.iota".to_string());
+    assert!(pricing_config.calculate_base_price_of_name(name_boundary_3) == 30);
 }
 
 #[test, expected_failure(abort_code = ::iota_names::pricing_config::EPriceNotSet)]
-fun test_calculate_base_price_of_domain_price_not_set() {
+fun test_calculate_base_price_if_name_price_not_set() {
     let ranges = vector[pricing_config::new_range(vector[1, 10])];
     let pricing = pricing_config::new(ranges, vector[10]);
     
-    // Test domain with length outside configured range
-    let domain_out_of_range = domain::new(b"15-out-of-range.iota".to_string());
-    pricing.calculate_base_price_of_domain(domain_out_of_range);
+    // Test name with length outside configured range
+    let name_out_of_range = name::new(b"15-out-of-range.iota".to_string());
+    pricing.calculate_base_price_of_name(name_out_of_range);
 }
 
 #[test]

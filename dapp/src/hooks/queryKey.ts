@@ -24,4 +24,9 @@ export const queryKey = {
 
     // Price List
     priceList: () => [queryKey.all, 'price-list'],
+
+    // Auctions
+    userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
+    placeBid: (address: string) => [queryKey.all, 'place-bid', address],
+    auctionMetadata: (name: string) => [queryKey.all, 'auction-metadata', name],
 };

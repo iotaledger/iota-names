@@ -4,12 +4,11 @@
 
 export type PackageInfo = {
     IotaNames: IotaNames;
-    DenyList: Package;
     Auction: Auction;
     Coupons: Package;
-    Subdomains: Package;
+    Subnames: Package;
     Payments: Package;
-    TempSubdomainProxy: Package;
+    TempSubnameProxy: Package;
 };
 
 export type Package = {

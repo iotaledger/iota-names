@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const MAX_U64 = BigInt('18446744073709551615');
+export const MIN_LABEL_SIZE = 3;
 
 /**
  * Allowed keys for metadata.

@@ -12,15 +12,16 @@ use iota::event;
 use iota::iota::IOTA;
 use iota::linked_table::{Self, LinkedTable};
 use iota_names::core_config::CoreConfig;
-use iota_names::domain::{Self, Domain};
+use iota_names::name::{Self, Name};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::option::{none, some, is_some};
 use std::string::String;
 
-/// One year is the default duration for a domain.
+/// One year is the default duration for a name.
 const DEFAULT_DURATION: u8 = 1;
 /// The auction bidding period is 1 hour.
 const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
@@ -54,13 +55,13 @@ public struct AuctionAuth has drop {}
 public struct AuctionHouse has key, store {
     id: UID,
     balance: Balance<IOTA>,
-    auctions: LinkedTable<Domain, Auction>,
+    auctions: LinkedTable<Name, Auction>,
 }
 
 /// The Auction application.
 #[allow(lint(coin_field))]
 public struct Auction has store {
-    domain: Domain,
+    name: Name,
     start_timestamp_ms: u64,
     end_timestamp_ms: u64,
     current_bidder: address,
@@ -80,28 +81,28 @@ fun init(ctx: &mut TxContext) {
 public fun start_auction_and_place_bid(
     self: &mut AuctionHouse,
     iota_names: &mut IotaNames,
-    domain_name: String,
+    name: String,
     bid: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    let domain = domain::new(domain_name);
+    let name = name::new(name);
 
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
 
-    assert!(!self.auctions.contains(domain), EAuctionStarted);
+    assert!(!self.auctions.contains(name), EAuctionStarted);
 
     let min_price = iota_names
         .get_config<PricingConfig>()
-        .calculate_base_price(domain.sld().length());
+        .calculate_base_price(name.sln().length());
     assert!(bid.value() >= min_price, EInitialBidTooLow);
 
     let registry = iota_names::auth_registry_mut<AuctionAuth, Registry>(AuctionAuth {}, iota_names);
-    let nft = registry.add_record(domain, DEFAULT_DURATION, clock, ctx);
+    let nft = registry.add_record(name, DEFAULT_DURATION, clock, ctx);
     let starting_bid = bid.value();
 
     let auction = Auction {
-        domain,
+        name,
         start_timestamp_ms: clock.timestamp_ms(),
         end_timestamp_ms: clock.timestamp_ms() + AUCTION_BIDDING_PERIOD_MS,
         current_bidder: ctx.sender(),
@@ -110,43 +111,43 @@ public fun start_auction_and_place_bid(
     };
 
     event::emit(AuctionStartedEvent {
-        domain,
+        name,
         start_timestamp_ms: auction.start_timestamp_ms,
         end_timestamp_ms: auction.end_timestamp_ms,
         starting_bid,
         bidder: auction.current_bidder,
     });
 
-    self.auctions.push_front(domain, auction)
+    self.auctions.push_front(name, auction)
 }
 
 /// #### Notice
 /// Bidders use this function to place a new bid.
 ///
 /// Panics
-/// Panics if `domain` is invalid
-/// or there isn't an auction for `domain`
+/// Panics if `name` is invalid
+/// or there isn't an auction for `name`
 /// or `bid` is too low,
 public fun place_bid(
     self: &mut AuctionHouse,
-    domain_name: String,
+    name: String,
     bid: Coin<IOTA>,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    let domain = domain::new(domain_name);
+    let name = name::new(name);
     let bidder = ctx.sender();
 
-    assert!(self.auctions.contains(domain), EAuctionNotStarted);
+    assert!(self.auctions.contains(name), EAuctionNotStarted);
 
     let Auction {
-        domain,
+        name,
         start_timestamp_ms,
         mut end_timestamp_ms,
         current_bidder,
         current_bid,
         nft,
-    } = self.auctions.remove(domain);
+    } = self.auctions.remove(name);
 
     // Ensure that the auction is not over
     assert!(clock.timestamp_ms() <= end_timestamp_ms, EAuctionEnded);
@@ -161,7 +162,7 @@ public fun place_bid(
     iota::transfer::public_transfer(current_bid, current_bidder);
 
     event::emit(AuctionBidEvent {
-        domain,
+        name,
         bid: bid_amount,
         bidder,
     });
@@ -182,14 +183,14 @@ public fun place_bid(
             end_timestamp_ms = new_end_timestamp_ms;
 
             event::emit(AuctionExtendedEvent {
-                domain,
+                name,
                 end_timestamp_ms: end_timestamp_ms,
             });
         }
     };
 
     let auction = Auction {
-        domain,
+        name,
         start_timestamp_ms,
         end_timestamp_ms,
         current_bidder: tx_context::sender(ctx),
@@ -197,7 +198,7 @@ public fun place_bid(
         nft,
     };
 
-    self.auctions.push_front(domain, auction);
+    self.auctions.push_front(name, auction);
 }
 
 /// #### Notice
@@ -207,20 +208,20 @@ public fun place_bid(
 /// sender is not the winner
 public fun claim(
     self: &mut AuctionHouse,
-    domain_name: String,
+    name: String,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
-    let domain = domain::new(domain_name);
+    let name = name::new(name);
 
     let Auction {
-        domain: _,
+        name: _,
         start_timestamp_ms,
         end_timestamp_ms,
         current_bidder,
         current_bid,
         nft,
-    } = self.auctions.remove(domain);
+    } = self.auctions.remove(name);
 
     // Ensure that the auction is over
     assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
@@ -229,7 +230,7 @@ public fun claim(
     assert!(ctx.sender() == current_bidder, ENotWinner);
 
     event::emit(AuctionFinalizedEvent {
-        domain,
+        name,
         start_timestamp_ms,
         end_timestamp_ms,
         winning_bid: coin::value(&current_bid),
@@ -248,18 +249,18 @@ public fun claim(
 /// Get metadata of an auction
 ///
 /// #### Params
-/// The domain name being auctioned.
+/// The name being auctioned.
 ///
 /// #### Return
 /// (`start_timestamp_ms`, `end_timestamp_ms`, `current_bidder`, `highest_amount`)
 public fun get_auction_metadata(
     self: &AuctionHouse,
-    domain_name: String,
+    name: String,
 ): (Option<u64>, Option<u64>, Option<address>, Option<u64>) {
-    let domain = domain::new(domain_name);
+    let name = name::new(name);
 
-    if (self.auctions.contains(domain)) {
-        let auction = &self.auctions[domain];
+    if (self.auctions.contains(name)) {
+        let auction = &self.auctions[name];
         let highest_amount = auction.current_bid.value();
         return (
             some(auction.start_timestamp_ms),
@@ -274,12 +275,12 @@ public fun get_auction_metadata(
 /// Collect the bid amount into the auction house balance without moving the NFT out of the auction.
 public fun collect_winning_auction_fund(
     self: &mut AuctionHouse,
-    domain_name: String,
+    name: String,
     clock: &Clock,
     ctx: &mut TxContext,
 ) {
-    let domain = domain::new(domain_name);
-    let auction = &mut self.auctions[domain];
+    let name = name::new(name);
+    let auction = &mut self.auctions[name];
     // Ensure that the auction is over
     assert!(clock.timestamp_ms() > auction.end_timestamp_ms, EAuctionNotEnded);
 
@@ -310,33 +311,33 @@ public fun admin_withdraw_funds(
 public fun admin_finalize_auction(
     admin: &AdminCap,
     self: &mut AuctionHouse,
-    domain: String,
+    name: String,
     clock: &Clock,
 ) {
-    let domain = domain::new(domain);
-    admin_finalize_auction_internal(admin, self, domain, clock);
+    let name = name::new(name);
+    admin_finalize_auction_internal(admin, self, name, clock);
 }
 
 fun admin_finalize_auction_internal(
     _: &AdminCap,
     self: &mut AuctionHouse,
-    domain: Domain,
+    name: Name,
     clock: &Clock,
 ) {
     let Auction {
-        domain: _,
+        name: _,
         start_timestamp_ms,
         end_timestamp_ms,
         current_bidder,
         current_bid,
         nft,
-    } = self.auctions.remove(domain);
+    } = self.auctions.remove(name);
 
     // Ensure that the auction is over
     assert!(clock.timestamp_ms() > end_timestamp_ms, EAuctionNotEnded);
 
     event::emit(AuctionFinalizedEvent {
-        domain,
+        name,
         start_timestamp_ms,
         end_timestamp_ms,
         winning_bid: coin::value(&current_bid),
@@ -359,25 +360,25 @@ public fun admin_try_finalize_auctions(
     mut operation_limit: u64,
     clock: &Clock,
 ) {
-    let mut next_domain = *self.auctions.back();
+    let mut next_name = *self.auctions.back();
 
-    while (is_some(&next_domain)) {
+    while (is_some(&next_name)) {
         if (operation_limit == 0) {
             return
         };
         operation_limit = operation_limit - 1;
 
-        let domain = option::extract(&mut next_domain);
-        next_domain = *self.auctions.prev(domain);
+        let name = option::extract(&mut next_name);
+        next_name = *self.auctions.prev(name);
 
-        let auction = &self.auctions[domain];
+        let auction = &self.auctions[name];
 
         // If the auction has ended, then try to finalize it
         if (clock.timestamp_ms() > auction.end_timestamp_ms) {
             admin_finalize_auction_internal(
                 admin,
                 self,
-                domain,
+                name,
                 clock,
             );
         };
@@ -387,7 +388,7 @@ public fun admin_try_finalize_auctions(
 // === Events ===
 
 public struct AuctionStartedEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     start_timestamp_ms: u64,
     end_timestamp_ms: u64,
     starting_bid: u64,
@@ -395,7 +396,7 @@ public struct AuctionStartedEvent has copy, drop {
 }
 
 public struct AuctionFinalizedEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     start_timestamp_ms: u64,
     end_timestamp_ms: u64,
     winning_bid: u64,
@@ -403,13 +404,13 @@ public struct AuctionFinalizedEvent has copy, drop {
 }
 
 public struct AuctionBidEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     bid: u64,
     bidder: address,
 }
 
 public struct AuctionExtendedEvent has copy, drop {
-    domain: Domain,
+    name: Name,
     end_timestamp_ms: u64,
 }
 
