@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
-import { IotaNamesIndexerClient } from '@/services/IotaNamesIndexerClient';
+import { IotaNamesIndexerClient } from '@/auctions/services/IotaNamesIndexerClient';
 
 export const IotaNamesIndexerClientContext = createContext<IotaNamesIndexerClient | null>(null);
 

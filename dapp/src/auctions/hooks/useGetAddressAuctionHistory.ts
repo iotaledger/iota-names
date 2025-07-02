@@ -5,10 +5,9 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesIndexerClientContext } from '@/contexts';
+import { queryKey } from '@/hooks/queryKey';
 
-import { queryKey } from './queryKey';
-
-export function useUserAuctions() {
+export function useGetAddressAuctionHistory() {
     const account = useCurrentAccount();
     const indexerClient = useIotaNamesIndexerClientContext();
 

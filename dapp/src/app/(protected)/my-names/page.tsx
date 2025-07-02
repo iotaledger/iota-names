@@ -6,10 +6,10 @@
 import { Button, Card, CardBody, CardType, Title, TitleSize } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
+import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { AvailabilityCheck } from '@/components';
 import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
-import { UserAuctions } from '@/components/UserAuctions';
 import { useRegistrationNfts } from '@/hooks';
 
 export default function MyNamesPage(): JSX.Element {
@@ -73,7 +73,7 @@ export default function MyNamesPage(): JSX.Element {
                     ))}
                 </div>
             )}
-            <div className="pt-md w-full max-w-md">
+            <div className="pt-md w-full">
                 <UserAuctions />
             </div>
         </div>
