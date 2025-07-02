@@ -139,7 +139,11 @@ export function AvailabilityCheck() {
                             name={name}
                             status={status}
                             value={
-                                isAvailable ? formatNanosToIota(nameRecordData.price) : undefined
+                                isAvailable
+                                    ? formatNanosToIota(nameRecordData.price, {
+                                          showIotaSymbol: false,
+                                      })
+                                    : undefined
                             }
                             supportingTextValue={isAvailable ? 'Price' : undefined}
                             supportingText={supportingText}
@@ -164,6 +168,7 @@ export function AvailabilityCheck() {
                                                 ?.value ?? 0,
                                         ) +
                                             BigInt(1) * NANOS_PER_IOTA,
+                                        { showIotaSymbol: false },
                                     )}
                                     supportingTextValue="Minimum bid"
                                     supportingText={supportingText}
