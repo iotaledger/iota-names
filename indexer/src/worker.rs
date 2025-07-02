@@ -32,7 +32,6 @@ use move_core_types::{
     language_storage::StructTag,
 };
 use prometheus::Registry;
-use serde_json;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, warn};
 
