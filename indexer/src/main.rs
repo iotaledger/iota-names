@@ -14,7 +14,7 @@ use anyhow::Result;
 use clap::Parser;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 use tracing_subscriber::{
     EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
 };
@@ -75,7 +75,7 @@ impl Command {
 
                 // Try to restore metrics from Prometheus
                 if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
-                    info!("Could not restore metrics from Prometheus ({e}), starting fresh");
+                    warn!("Could not restore all metrics from Prometheus ({e})");
                 } else {
                     info!("Successfully restored metrics from Prometheus");
                 }
