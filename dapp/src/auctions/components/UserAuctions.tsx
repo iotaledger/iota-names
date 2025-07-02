@@ -25,9 +25,9 @@ export function UserAuctions() {
             <div className="w-full space-y-4">
                 <Title title="My Auctions" size={TitleSize.Small} />
                 <div className="animate-pulse space-y-4">
-                    <div className="h-32 bg-gray-200 rounded-lg dark:bg-gray-700"></div>
-                    <div className="h-32 bg-gray-200 rounded-lg dark:bg-gray-700"></div>
-                    <div className="h-32 bg-gray-200 rounded-lg dark:bg-gray-700"></div>
+                    <div className="h-32 rounded-lg bg-gray-700"></div>
+                    <div className="h-32 rounded-lg bg-gray-700"></div>
+                    <div className="h-32 rounded-lg bg-gray-700"></div>
                 </div>
             </div>
         );
@@ -37,10 +37,8 @@ export function UserAuctions() {
         return (
             <div className="w-full space-y-4">
                 <Title title="My Auctions" size={TitleSize.Small} />
-                <div className="rounded-lg border border-red-200 p-6 dark:border-red-800">
-                    <p className="text-red-600 dark:text-red-400">
-                        Failed to load auctions. Please try again later.
-                    </p>
+                <div className="rounded-lg border p-6 border-red-800">
+                    <p className="text-red-400">Failed to load auctions. Please try again later.</p>
                 </div>
             </div>
         );
@@ -50,10 +48,8 @@ export function UserAuctions() {
         return (
             <div className="w-full space-y-4">
                 <Title title="My Auctions" size={TitleSize.Small} />
-                <div className="rounded-lg border border-gray-200 p-6 dark:border-gray-700">
-                    <p className="text-gray-600 dark:text-gray-400">
-                        You haven't participated in any auctions yet.
-                    </p>
+                <div className="rounded-lg border p-6 border-gray-700">
+                    <p className="text-gray-400">You haven't participated in any auctions yet.</p>
                 </div>
             </div>
         );
@@ -90,7 +86,7 @@ export function UserAuctions() {
 
             {groupedAuctions.active.length > 0 && (
                 <div className="space-y-3">
-                    <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">
+                    <h4 className="text-md font-medium text-gray-100">
                         Active Auctions ({groupedAuctions.active.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -108,7 +104,7 @@ export function UserAuctions() {
 
             {groupedAuctions.claimable.length > 0 && (
                 <div className="space-y-3">
-                    <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">
+                    <h4 className="text-md font-medium text-gray-100">
                         Won Auctions ({groupedAuctions.claimable.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -126,7 +122,7 @@ export function UserAuctions() {
 
             {groupedAuctions.lost.length > 0 && (
                 <div className="space-y-3">
-                    <h4 className="text-md font-medium text-gray-900 dark:text-gray-100">
+                    <h4 className="text-md font-medium text-gray-100">
                         Lost Auctions ({groupedAuctions.lost.length})
                     </h4>
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
