@@ -454,3 +454,42 @@ fun test_register_names_empty_list_fails() {
 
     scenario.end();
 }
+
+#[test, expected_failure(abort_code = ::iota_names::admin::ENoNamesProvided)]
+fun test_admin_remove_empty_records() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, admin_cap) = iota_names::new_for_testing(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, &mut ctx);
+    iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+
+    // Test removing records with empty vector
+    let empty_names: vector<String> = vector::empty();
+    admin::admin_remove_records(&admin_cap, &mut iota_names, empty_names);
+
+    // Clean up
+    clock.destroy_for_testing();
+    iota_names.share_for_testing();
+    iota_names::burn_admin_cap_for_testing(admin_cap);
+}
+
+#[test]
+fun test_admin_remove_missing_records() {
+    let mut ctx = tx_context::dummy();
+    let (mut iota_names, admin_cap) = iota_names::new_for_testing(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, &mut ctx);
+    iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+
+    // Test removing non-existent records
+    let non_existent_names = vector[
+        utf8(b"nonexistent1.iota"),
+        utf8(b"nonexistent2.iota"),
+    ];
+    admin::admin_remove_records(&admin_cap, &mut iota_names, non_existent_names);
+
+    // Clean up
+    clock.destroy_for_testing();
+    iota_names.share_for_testing();
+    iota_names::burn_admin_cap_for_testing(admin_cap);
+}
