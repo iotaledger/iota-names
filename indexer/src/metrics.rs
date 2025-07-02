@@ -243,12 +243,24 @@ impl IotaNamesMetrics {
         // Macro to restore vector metrics
         macro_rules! restore_vector_metric {
             ($metric_name:literal, $label_key:literal, $field:ident, gauge) => {
-                self.restore_gauge_vector(client, prometheus_url, $metric_name, $label_key)
-                    .await?;
+                self.restore_and_set_gauge_vector(
+                    client,
+                    prometheus_url,
+                    $metric_name,
+                    $label_key,
+                    &self.$field,
+                )
+                .await?;
             };
             ($metric_name:literal, $label_key:literal, $field:ident, counter) => {
-                self.restore_counter_vector(client, prometheus_url, $metric_name, $label_key)
-                    .await?;
+                self.restore_and_set_counter_vector(
+                    client,
+                    prometheus_url,
+                    $metric_name,
+                    $label_key,
+                    &self.$field,
+                )
+                .await?;
             };
         }
 
@@ -287,82 +299,73 @@ impl IotaNamesMetrics {
         Ok(())
     }
 
-    async fn restore_gauge_vector(
+    async fn restore_and_set_gauge_vector(
         &self,
         client: &reqwest::Client,
         prometheus_url: &str,
         metric_name: &str,
         label_key: &str,
+        gauge_vec: &IntGaugeVec,
     ) -> anyhow::Result<()> {
+        let values = self
+            .query_vector_metric_values(client, prometheus_url, metric_name, label_key)
+            .await?;
+
+        for (label_value, value) in values {
+            gauge_vec.with_label_values(&[&label_value]).set(value);
+        }
+
+        Ok(())
+    }
+
+    async fn restore_and_set_counter_vector(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+        label_key: &str,
+        counter_vec: &IntCounterVec,
+    ) -> anyhow::Result<()> {
+        let values = self
+            .query_vector_metric_values(client, prometheus_url, metric_name, label_key)
+            .await?;
+
+        for (label_value, value) in values {
+            counter_vec
+                .with_label_values(&[&label_value])
+                .inc_by(value as u64);
+        }
+
+        Ok(())
+    }
+
+    async fn query_vector_metric_values(
+        &self,
+        client: &reqwest::Client,
+        prometheus_url: &str,
+        metric_name: &str,
+        label_key: &str,
+    ) -> anyhow::Result<Vec<(String, i64)>> {
         let query = format!("{prometheus_url}/api/v1/query?query={metric_name}");
         let response: serde_json::Value = client.get(&query).send().await?.json().await?;
 
-        if let Some(results) = response["data"]["result"].as_array() {
-            for result in results {
+        let mut results = Vec::new();
+
+        if let Some(data) = response["data"]["result"].as_array() {
+            for result in data {
                 if let (Some(labels), Some(value_str)) =
                     (result["metric"].as_object(), result["value"][1].as_str())
                 {
                     let value = value_str.parse::<f64>()? as i64;
 
                     if let Some(label_value) = labels.get(label_key).and_then(|v| v.as_str()) {
-                        match metric_name {
-                            "name_length_distribution" => {
-                                self.name_length_distribution
-                                    .with_label_values(&[label_value])
-                                    .set(value);
-                            }
-                            "name_depth_distribution" => {
-                                self.name_depth_distribution
-                                    .with_label_values(&[label_value])
-                                    .set(value);
-                            }
-                            "user_data_distribution" => {
-                                self.user_data_distribution
-                                    .with_label_values(&[label_value])
-                                    .set(value);
-                            }
-                            "auction_bid_count_distribution" => {
-                                self.auction_bid_count_distribution
-                                    .with_label_values(&[label_value])
-                                    .set(value);
-                            }
-                            _ => {}
-                        }
+                        results.push((label_value.to_string(), value));
                     }
                 }
             }
         }
-        Ok(())
-    }
 
-    async fn restore_counter_vector(
-        &self,
-        client: &reqwest::Client,
-        prometheus_url: &str,
-        metric_name: &str,
-        label_key: &str,
-    ) -> anyhow::Result<()> {
-        let query = format!("{prometheus_url}/api/v1/query?query={metric_name}");
-        let response: serde_json::Value = client.get(&query).send().await?.json().await?;
-
-        if let Some(results) = response["data"]["result"].as_array() {
-            for result in results {
-                if let (Some(labels), Some(value_str)) =
-                    (result["metric"].as_object(), result["value"][1].as_str())
-                {
-                    let value = value_str.parse::<f64>()? as u64;
-
-                    if let Some(label_value) = labels.get(label_key).and_then(|v| v.as_str()) {
-                        if metric_name == "renewal_years_distribution" {
-                            self.renewal_years_distribution
-                                .with_label_values(&[label_value])
-                                .inc_by(value);
-                        }
-                    }
-                }
-            }
-        }
-        Ok(())
+        Ok(results)
     }
 }
 

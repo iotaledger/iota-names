@@ -49,7 +49,7 @@ pub(crate) async fn run_iota_names_reader(
     registry: &Registry,
     concurrency: usize,
 ) -> anyhow::Result<()> {
-    let progress_store = FileProgressStore::new("/data/progress_store").await?;
+    let progress_store = FileProgressStore::new("./data/progress_store").await?;
 
     let mut executor = IndexerExecutor::new(
         progress_store,
