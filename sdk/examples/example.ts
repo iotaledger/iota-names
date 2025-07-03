@@ -12,7 +12,7 @@ import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
 (async () => {
-    const domain = `cool-domain-${Math.floor(Math.random() * 10000000)}.iota`;
+    const name = `cool-name-${Math.floor(Math.random() * 10000000)}.iota`;
 
     const network = 'devnet';
 
@@ -41,17 +41,14 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
         network,
     });
 
-    console.log(
-        '[Domain Record (null if available)]: ',
-        await iotaNamesClient.getNameRecord(domain),
-    );
+    console.log('[Name Record (null if available)]: ', await iotaNamesClient.getNameRecord(name));
 
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
 
     const nft = iotaNamesTx.register({
-        domain,
+        name,
         years: 1,
         coin,
     });
@@ -85,5 +82,5 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     });
 
     console.log('[Transaction response]:', transactionBlockResponse);
-    console.log(`[IotaNames]: You own '${domain}'`);
+    console.log(`[IotaNames]: You own '${name}'`);
 })();
