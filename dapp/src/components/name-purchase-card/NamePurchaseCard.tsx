@@ -3,7 +3,7 @@
 
 import clsx from 'clsx';
 
-import { NamePurchaseStatus } from './namePurchasedCard.enums';
+// import { NamePurchaseStatus } from './namePurchasedCard.enums';
 
 interface NamePurchaseCardProps {
     /**
@@ -27,9 +27,9 @@ interface NamePurchaseCardProps {
      */
     supportingTextValue?: string;
     /**
-     * Name status
+     *  Name is unavailable
      */
-    status: NamePurchaseStatus;
+    isUnavailable: boolean;
     /**
      * Action buttons
      */
@@ -41,24 +41,20 @@ export function NamePurchaseCard({
     supportingText,
     value,
     supportingTextValue,
-    status,
+    isUnavailable,
     children,
     currency,
 }: NamePurchaseCardProps): React.JSX.Element {
-    const bgCard =
-        status === NamePurchaseStatus.Unavailable ? 'bg-names-error-20' : 'bg-names-neutral-10';
-    const textColorStatus =
-        status === NamePurchaseStatus.Unavailable
-            ? 'text-names-error-80'
-            : 'text-names-tertiary-80';
-    const textStatus = status === NamePurchaseStatus.Unavailable ? 'Unavailable' : 'Available';
+    const bgCard = isUnavailable ? 'bg-names-error-20' : 'bg-names-neutral-10';
+    const textColorStatus = isUnavailable ? 'text-names-error-80' : 'text-names-tertiary-80';
+    const textStatus = isUnavailable ? 'Unavailable' : 'Available';
     const hasCurrency = currency ?? 'IOTA';
 
     return (
         <div
             className={clsx(
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
-                status !== NamePurchaseStatus.Unavailable && 'hover:bg-names-gradient-primary',
+                !isUnavailable && 'hover:bg-names-gradient-primary',
             )}
         >
             <div
@@ -78,7 +74,7 @@ export function NamePurchaseCard({
                             <p
                                 className={clsx(
                                     'text-names-neutral-70 transition-opacity duration-100',
-                                    status === NamePurchaseStatus.Unavailable
+                                    isUnavailable
                                         ? 'opacity-0 group-hover:opacity-100'
                                         : 'opacity-100',
                                 )}

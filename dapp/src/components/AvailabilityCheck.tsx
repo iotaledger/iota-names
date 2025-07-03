@@ -15,7 +15,6 @@ import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './name-purchase-card/NamePurchaseCard';
-import { NamePurchaseStatus } from './name-purchase-card/namePurchasedCard.enums';
 
 function normalizeNameInput(name: string) {
     return name.toLowerCase().replace(/\.iota$/i, '');
@@ -55,7 +54,6 @@ export function AvailabilityCheck() {
         useGetAuctionMetadata(name);
 
     const isAvailable = nameRecordData?.type === 'available';
-    const isNotPriced = nameRecordData?.type === 'not-priced';
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isAuctionInProgress =
         isUnavailable &&
@@ -64,18 +62,6 @@ export function AvailabilityCheck() {
 
     // User can bid in existing auctions or if there is no auction and the name is not taken
     const canBid = isAuctionInProgress || isAvailable;
-
-    const status: NamePurchaseStatus = useMemo(() => {
-        if (isAvailable) {
-            return isConnected ? NamePurchaseStatus.Connected : NamePurchaseStatus.Unconnected;
-        } else if (isNotPriced) {
-            return NamePurchaseStatus.NotPriced;
-        } else if (isAuctionInProgress) {
-            return NamePurchaseStatus.InAuction;
-        } else {
-            return NamePurchaseStatus.Unavailable;
-        }
-    }, [isAvailable, isConnected, isNotPriced, isAuctionInProgress]);
 
     const validationError = useMemo(
         () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
@@ -101,12 +87,12 @@ export function AvailabilityCheck() {
         setSearchValue('');
         setName('');
     }
-    const supportingText = useMemo(() => {
-        if (isUnavailable) {
-            return isAuctionInProgress ? 'In auction' : 'Name is already taken.';
-        }
-        return undefined;
-    }, [isUnavailable, isAuctionInProgress]);
+    const supportingText =
+        isUnavailable && !isAuctionInProgress
+            ? 'Name is already taken.'
+            : isAuctionInProgress
+              ? 'In auction'
+              : undefined;
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
 
@@ -145,7 +131,7 @@ export function AvailabilityCheck() {
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
                                 name={name}
-                                status={status}
+                                isUnavailable={isUnavailable && !isAuctionInProgress}
                                 value={
                                     isAvailable
                                         ? formatNanosToIota(nameRecordData.price, {
@@ -173,7 +159,7 @@ export function AvailabilityCheck() {
                         ) : canBid ? (
                             <NamePurchaseCard
                                 name={name}
-                                status={status}
+                                isUnavailable={isUnavailable && !isAuctionInProgress}
                                 value={formatNanosToIota(
                                     auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
                                     { showIotaSymbol: false },
