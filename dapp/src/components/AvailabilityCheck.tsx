@@ -153,7 +153,7 @@ export function AvailabilityCheck() {
                                           })
                                         : undefined
                                 }
-                                supportingTextValue={isAvailable ? 'Minimum bid' : undefined}
+                                supportingTextValue={isAvailable ? 'Price' : undefined}
                                 supportingText={supportingText}
                             >
                                 {isUnavailable ? null : isConnected ? (
