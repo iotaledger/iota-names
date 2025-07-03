@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getNetwork, IotaClient, Network, NetworkId } from '@iota/iota-sdk/client';
+import { getNetwork, IotaClient, Network } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA, normalizeIotaAddress } from '@iota/iota-sdk/utils';
@@ -10,7 +10,7 @@ import { expect } from 'vitest';
 
 import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
 
-export const e2eLiveNetworkDryRunFlow = async (network_id: NetworkId) => {
+export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     let network = getNetwork(network_id);
     const client = new IotaClient({ url: network.url });
     let graphQlClient = new IotaGraphQLClient({
