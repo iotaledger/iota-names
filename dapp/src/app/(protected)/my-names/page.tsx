@@ -102,15 +102,15 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My subnames" />
             </div>
             {subdomains?.length && (
-                <div className="flex flex-col gap-y-sm items-center">
+                <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                     {subdomains.map((subdomain) => {
                         const isSubdomainRemovable =
                             subdomain.isExpired && !namesWithChildren.has(subdomain.name);
                         return (
                             <div key={subdomain.name}>
                                 <Card key={subdomain.name} type={CardType.Filled}>
-                                    <div className="flex flex-col  gap-y-sm w-full">
-                                        <div className="w-full h-40 object-cover">
+                                    <div className="flex flex-col items-center gap-y-sm">
+                                        <div className="w-40 h-40 object-cover">
                                             <AvatarDisplay registration={subdomain} />
                                         </div>
                                         <Title
