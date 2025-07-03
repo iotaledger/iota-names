@@ -40,8 +40,8 @@ const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
 const SECOND_ADDRESS: address = @0xB002;
 const DOMAIN_NAME: vector<u8> = b"abc.iota";
-const AVATAR: vector<u8> = b"avatar";
-const CONTENT_HASH: vector<u8> = b"content_hash";
+const DATA_KEY_AVATAR: vector<u8> = b"avatar";
+const DATA_KEY_IPFS: vector<u8> = b"ipfs";
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
 
 fun test_init(): Scenario {
@@ -423,25 +423,25 @@ fun test_set_user_data() {
     set_user_data_util(
         scenario,
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value_avatar".to_string(),
         0,
     );
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
     assert_eq(data.size(), 1);
-    assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
+    assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
 
     set_user_data_util(
         scenario,
         FIRST_ADDRESS,
-        utf8(CONTENT_HASH),
-        b"value_content_hash".to_string(),
+        utf8(DATA_KEY_IPFS),
+        b"value_ipfs".to_string(),
         0,
     );
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
     assert_eq(data.size(), 2);
-    assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
-    assert_eq(*data.get(&utf8(CONTENT_HASH)), b"value_content_hash".to_string());
+    assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
+    assert_eq(*data.get(&utf8(DATA_KEY_IPFS)), b"value_ipfs".to_string());
 
     scenario_val.end();
 }
@@ -472,7 +472,7 @@ fun test_set_user_data_aborts_if_nft_expired() {
     set_user_data_util(
         scenario,
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value".to_string(),
         2 * year_ms(),
     );
@@ -490,7 +490,7 @@ fun test_set_user_data_aborts_if_nft_expired_2() {
     set_user_data_util(
         scenario,
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value".to_string(),
         0,
     );
@@ -508,13 +508,13 @@ fun test_set_user_data_works_if_domain_is_registered_again() {
     set_user_data_util(
         scenario,
         SECOND_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value".to_string(),
         0,
     );
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
     assert_eq(data.size(), 1);
-    assert_eq(*data.get(&AVATAR.to_string()), b"value".to_string());
+    assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value".to_string());
 
     scenario_val.end();
 }
@@ -528,7 +528,7 @@ fun test_set_user_data_aborts_if_controller_is_deauthorized() {
     scenario.deauthorize_util();
     scenario.set_user_data_util(
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value_avatar".to_string(),
         0,
     );
@@ -544,30 +544,30 @@ fun test_unset_user_data() {
 
     scenario.set_user_data_util(
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value_avatar".to_string(),
         0,
     );
-    scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 0);
+    scenario.unset_user_data_util(FIRST_ADDRESS, DATA_KEY_AVATAR.to_string(), 0);
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
     assert_eq(data.size(), 0);
 
     scenario.set_user_data_util(
         FIRST_ADDRESS,
-        utf8(CONTENT_HASH),
-        b"value_content_hash".to_string(),
+        utf8(DATA_KEY_IPFS),
+        b"value_ipfs".to_string(),
         0,
     );
     scenario.set_user_data_util(
         FIRST_ADDRESS,
-        AVATAR.to_string(),
+        DATA_KEY_AVATAR.to_string(),
         b"value_avatar".to_string(),
         0,
     );
-    scenario.unset_user_data_util(FIRST_ADDRESS, utf8(CONTENT_HASH), 0);
+    scenario.unset_user_data_util(FIRST_ADDRESS, utf8(DATA_KEY_IPFS), 0);
     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
     assert_eq(data.size(), 1);
-    assert_eq(*data.get(&AVATAR.to_string()), b"value_avatar".to_string());
+    assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
 
     scenario_val.end();
 }
@@ -578,7 +578,7 @@ fun test_unset_user_data_works_if_key_not_exists() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 0);
+    scenario.unset_user_data_util(FIRST_ADDRESS, DATA_KEY_AVATAR.to_string(), 0);
 
     scenario_val.end();
 }
@@ -589,7 +589,7 @@ fun test_unset_user_data_aborts_if_nft_expired() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 2 * year_ms());
+    scenario.unset_user_data_util(FIRST_ADDRESS, DATA_KEY_AVATAR.to_string(), 2 * year_ms());
 
     scenario_val.end();
 }
@@ -601,7 +601,7 @@ fun test_unset_user_data_works_if_controller_is_deauthorized() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.deauthorize_util();
-    scenario.unset_user_data_util(FIRST_ADDRESS, AVATAR.to_string(), 0);
+    scenario.unset_user_data_util(FIRST_ADDRESS, DATA_KEY_AVATAR.to_string(), 0);
 
     scenario_val.end();
 }
