@@ -42,19 +42,21 @@ export default function MyNamesPage(): JSX.Element {
         {
             onClick: () => setUpdateNameDialog(nft.name),
             children: (
-                <div className="flex flex-row gap-xxs">
+                <div className="flex flex-row gap-xxs items-center justify-center">
                     <Settings /> Manage
                 </div>
             ),
+            hideBottomBorder: true,
         },
         {
             onClick: () => setDeleteNameDialog(nft),
             children: (
-                <div className="flex flex-row gap-xxs">
+                <div className="flex flex-row gap-xxs items-center justify-center">
                     <Warning /> Delete
                 </div>
             ),
             isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
+            hideBottomBorder: true,
         },
     ];
 
