@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Theme } from '../enums';
+'use client';
 
-export const APP_STATIC_THEME = Theme.Names;
+import { UIKitTheme } from '@iota/apps-ui-kit';
+
+export const APP_STATIC_THEME = UIKitTheme.Names;

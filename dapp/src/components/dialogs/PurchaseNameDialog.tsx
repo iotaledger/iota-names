@@ -92,21 +92,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
                         <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Name:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Name:</span>
                             <span className="text-body-md font-mono">{name}</span>
                         </div>
                         <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Registration time:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Registration time:</span>
                             <span className="text-body-md font-mono">1 year</span>
                         </div>
                         <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Price:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Price:</span>
                             <span className="text-body-md font-mono">
                                 {!isLoading && canPay
                                     ? formatNanosToIota(nameRecordData.price, {
@@ -117,9 +111,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         </div>
 
                         <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Gas:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Gas:</span>
                             <span className="text-body-md font-mono">
                                 {!isLoading
                                     ? formatNanosToIota(totalGas, { formatRounded: false })
@@ -128,7 +120,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         </div>
 
                         <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
+                            <span className="text-body-md text-neutral-60">
                                 Total price (Name + gas):
                             </span>
                             <span className="text-body-md font-mono">
@@ -155,22 +147,20 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             />
                         </div>
                         {!hasEnoughGas && (
-                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
+                            <div className="text-center text-red-400 text-sm">
                                 {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
                             </div>
                         )}
                         {purchaseError && (
-                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
-                                {purchaseError}
-                            </div>
+                            <div className="text-center text-red-400 text-sm">{purchaseError}</div>
                         )}
                         {nameRecordError && (
-                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
+                            <div className="text-center text-red-400 text-sm">
                                 {nameRecordError.message}
                             </div>
                         )}
                         {hasEnoughGas && registerNameError && (
-                            <div className="text-center text-red-600 dark:text-red-400 text-sm">
+                            <div className="text-center text-red-400 text-sm">
                                 {registerNameError.message}
                             </div>
                         )}
