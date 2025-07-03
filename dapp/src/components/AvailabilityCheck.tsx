@@ -14,7 +14,7 @@ import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from './name-purchase-card/NamePurchaseCard';
+import { NamePurchaseCard } from './NamePurchaseCard';
 
 function normalizeNameInput(name: string) {
     return name.toLowerCase().replace(/\.iota$/i, '');
@@ -131,7 +131,7 @@ export function AvailabilityCheck() {
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
                                 name={name}
-                                isUnavailable={isUnavailable && !isAuctionInProgress}
+                                isAvailable={!!(!isUnavailable || isAuctionInProgress)}
                                 value={
                                     isAvailable
                                         ? formatNanosToIota(nameRecordData.price, {
@@ -159,7 +159,7 @@ export function AvailabilityCheck() {
                         ) : canBid ? (
                             <NamePurchaseCard
                                 name={name}
-                                isUnavailable={isUnavailable && !isAuctionInProgress}
+                                isAvailable={!!(!isUnavailable || isAuctionInProgress)}
                                 value={formatNanosToIota(
                                     auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
                                     { showIotaSymbol: false },

@@ -25,9 +25,9 @@ interface NamePurchaseCardProps {
      */
     supportingTextValue?: string;
     /**
-     *  Name is unavailable
+     *  Name is available
      */
-    isUnavailable: boolean;
+    isAvailable: boolean;
     /**
      * Action buttons
      */
@@ -39,20 +39,20 @@ export function NamePurchaseCard({
     supportingText,
     value,
     supportingTextValue,
-    isUnavailable,
+    isAvailable,
     children,
     currency,
 }: NamePurchaseCardProps): React.JSX.Element {
-    const bgCard = isUnavailable ? 'bg-names-error-20' : 'bg-names-neutral-10';
-    const textColorStatus = isUnavailable ? 'text-names-error-80' : 'text-names-tertiary-80';
-    const textStatus = isUnavailable ? 'Unavailable' : 'Available';
+    const bgCard = isAvailable ? 'bg-names-neutral-10' : 'bg-names-error-20';
+    const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
+    const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const hasCurrency = currency ?? 'IOTA';
 
     return (
         <div
             className={clsx(
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
-                !isUnavailable && 'hover:bg-names-gradient-primary',
+                isAvailable && 'hover:bg-names-gradient-primary',
             )}
         >
             <div
@@ -72,9 +72,9 @@ export function NamePurchaseCard({
                             <p
                                 className={clsx(
                                     'text-names-neutral-70 transition-opacity duration-100',
-                                    isUnavailable
-                                        ? 'opacity-0 group-hover:opacity-100'
-                                        : 'opacity-100',
+                                    isAvailable
+                                        ? 'opacity-100'
+                                        : 'opacity-0 group-hover:opacity-100',
                                 )}
                             >
                                 {supportingText}
