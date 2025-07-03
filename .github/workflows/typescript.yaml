@@ -113,5 +113,7 @@ jobs:
           pnpm ts-node tests/register-name.ts
           sleep 5
 
+          cat ./package-info/localnet.json
+
           cd ../sdk
           VITE_IOTA_BIN="iota" pnpm test:e2e
