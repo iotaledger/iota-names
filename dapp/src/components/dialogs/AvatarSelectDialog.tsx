@@ -26,7 +26,7 @@ export function VisualAssetsDialog({ setOpen, onAssetClick }: AvatarSelectDialog
 
     return (
         <Dialog open onOpenChange={setOpen}>
-            <DialogContent showCloseOnOverlay customWidth="w-full max-w-[60vw]">
+            <DialogContent customWidth="w-full max-w-[60vw]">
                 <Header
                     title="Select NFT to use as Alias"
                     titleCentered

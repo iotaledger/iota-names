@@ -121,9 +121,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                         />
 
                         <div className="flex items-center justify-between">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Minimum bid:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Minimum bid:</span>
                             <span className="text-body-md">{minBidLabel}</span>
                         </div>
                     </div>

@@ -93,13 +93,13 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         // Only allow extending the expiration time if its less than its parent
         if (
             objectId &&
-            parentName?.expiration_timestamp_ms &&
-            nameRecord.nameRecord.expirationTimestampMs < parentName?.expiration_timestamp_ms
+            parentName?.expirationTimestampMs &&
+            nameRecord.nameRecord.expirationTimestampMs < parentName?.expirationTimestampMs
         ) {
             updates.push({
                 type: 'renew-subname',
                 nftId: objectId,
-                expirationTimestampMs: parentName.expiration_timestamp_ms,
+                expirationTimestampMs: parentName.expirationTimestampMs,
             });
         } else {
             canBeRenewed = false;
@@ -113,7 +113,6 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
-        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =

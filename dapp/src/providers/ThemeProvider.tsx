@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 'use client';
 
+import { UIKitTheme } from '@iota/apps-ui-kit';
 import { useEffect, useState } from 'react';
 
 import { ThemeContext } from '@/contexts';
 
-import { Theme, ThemePreference } from '../lib/enums';
+import { ThemePreference } from '../lib/enums';
 
 interface ThemeProviderProps {
     appId?: string;
-    staticTheme?: Theme;
+    staticTheme?: UIKitTheme;
 }
 
 export function ThemeProvider({
@@ -21,7 +22,9 @@ export function ThemeProvider({
     const storageKey = `theme_${appId}`;
 
     const getSystemTheme = () => {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? Theme.Dark : Theme.Light;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? UIKitTheme.Dark
+            : UIKitTheme.Light;
     };
 
     const getThemePreference = () => {
@@ -29,7 +32,7 @@ export function ThemeProvider({
         return storedTheme ? storedTheme : ThemePreference.System;
     };
 
-    const [systemTheme, setSystemTheme] = useState<Theme>(staticTheme ?? Theme.Light);
+    const [systemTheme, setSystemTheme] = useState<UIKitTheme>(staticTheme ?? UIKitTheme.Light);
     const [themePreference, setThemePreference] = useState<ThemePreference>(ThemePreference.System);
     const [isLoadingPreference, setIsLoadingPreference] = useState(true);
 
@@ -73,13 +76,13 @@ export function ThemeProvider({
 
         switch (themePreference) {
             case ThemePreference.Dark:
-                return Theme.Dark;
+                return UIKitTheme.Dark;
             case ThemePreference.Light:
-                return Theme.Light;
+                return UIKitTheme.Light;
             case ThemePreference.System:
                 return systemTheme;
             case ThemePreference.Names:
-                return Theme.Names;
+                return UIKitTheme.Names;
         }
     })();
 
@@ -88,9 +91,9 @@ export function ThemeProvider({
         if (staticTheme) return;
 
         const documentElement = document.documentElement.classList;
-        documentElement.toggle(Theme.Dark, theme === Theme.Dark);
-        documentElement.toggle(Theme.Light, theme === Theme.Light);
-        documentElement.toggle(Theme.Names, theme === Theme.Names);
+        documentElement.toggle(UIKitTheme.Dark, theme === UIKitTheme.Dark);
+        documentElement.toggle(UIKitTheme.Light, theme === UIKitTheme.Light);
+        documentElement.toggle(UIKitTheme.Names, theme === UIKitTheme.Names);
     }, [theme]);
 
     return (
