@@ -2,3 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './PurchaseNameDialog';
+export * from './UpdateNameDialog';
+export * from './DeleteNameDialog';

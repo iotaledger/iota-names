@@ -9,27 +9,16 @@ import {
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/contexts';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
-export interface RegistrationNft {
-    name: string;
-    description?: string;
-    image_url?: string;
-    link?: string;
-    project_url?: string;
-    expiration_timestamp_ms: number;
-    id: string;
-}
-
 type RegistrationNftType = 'domain' | 'subdomain';
-
 export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
-    const account = useCurrentAccount();
     const { iotaNamesClient } = useIotaNamesClient();
+    const account = useCurrentAccount();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
-
     const filter = (() => {
         switch (type) {
             case 'domain':
@@ -59,12 +48,16 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                 return {
                     name: data?.name ?? '',
                     description: data?.description,
-                    image_url: data?.image_url,
+                    imageUrl: data?.image_url,
                     link: data?.link,
-                    expiration_timestamp_ms: Number(fields?.expiration_timestamp_ms ?? ''),
-                    project_url: data?.project_url,
+                    projectUrl: data?.project_url,
+                    isExpired:
+                        !!fields?.expiration_timestamp_ms &&
+                        Number(fields?.expiration_timestamp_ms) < Date.now(),
+                    expirationTimestampMs: Number(fields?.expiration_timestamp_ms ?? ''),
                     id: nameRecord.objectId,
-                };
+                    isSubdomain: type === 'subdomain',
+                } satisfies RegistrationNft;
             });
         },
     });
