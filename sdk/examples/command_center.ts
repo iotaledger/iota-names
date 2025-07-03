@@ -18,7 +18,7 @@ const name = process.argv[3] || 'rustisbetterthanjs.iota';
 
 (async () => {
     if (!isValidIotaName(name)) {
-        throw new Error('Invalid iota name name!');
+        throw new Error('Invalid iota name!');
     }
 
     const keypair = Ed25519Keypair.deriveKeypair(

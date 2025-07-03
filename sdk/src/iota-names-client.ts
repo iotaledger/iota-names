@@ -260,8 +260,8 @@ export class IotaNamesClient {
     }
 
     /**
-     * Calculates the registration or renewal price for an SLD (Second Level Name).
-     * It expects a name name, the number of years and a `IotaNamesPriceList` object,
+     * Calculates the registration or renewal price for an SLN (Second Level Name).
+     * It expects a name, the number of years and a `IotaNamesPriceList` object,
      * as returned from `iotaNamesClient.getPriceList()` function, or `iotaNames.getRenewalPriceList()` function.
      *
      * It throws an error:
