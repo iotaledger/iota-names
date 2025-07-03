@@ -183,7 +183,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
-        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =

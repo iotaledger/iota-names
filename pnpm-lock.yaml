@@ -106,8 +106,8 @@ importers:
         specifier: ^0.3.1
         version: 0.3.1
       '@iota/apps-ui-kit':
-        specifier: ^0.6.0
-        version: 0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)
+        specifier: 0.0.0-experimental-names-20250702173601
+        version: 0.0.0-experimental-names-20250702173601(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
@@ -1353,8 +1353,11 @@ packages:
   '@floating-ui/utils@0.2.9':
     resolution: {integrity: sha512-MDWhGtE+eHw5JW7lq4qhc5yRLS11ERl1c7Z6Xd0a58DozHES6EnNNwUWbMiG4J9Cgj053Bhk8zvlhFYKVhULwg==}
 
-  '@fontsource/inter@5.2.5':
-    resolution: {integrity: sha512-kbsPKj0S4p44JdYRFiW78Td8Ge2sBVxi/PIBwmih+RpSXUdvS9nbs1HIiuUSPtRMi14CqLEZ/fbk7dj7vni1Sg==}
+  '@fontsource-variable/roboto-flex@5.2.6':
+    resolution: {integrity: sha512-8jUDGkb6gRUexJkdUz1GThB9fshF7ENe/vVmtf+nz2MxQZZsrrYT92tST3xM+xf/BnoqL6yRkGdv9zNITiyYCw==}
+
+  '@fontsource/inter@5.2.6':
+    resolution: {integrity: sha512-CZs9S1CrjD0jPwsNy9W6j0BhsmRSQrgwlTNkgQXTsAeDRM42LBRLo3eo9gCzfH4GvV7zpyf78Ozfl773826csw==}
 
   '@gql.tada/cli-utils@1.6.3':
     resolution: {integrity: sha512-jFFSY8OxYeBxdKi58UzeMXG1tdm4FVjXa8WHIi66Gzu9JWtCE6mqom3a8xkmSw+mVaybFW5EN2WXf1WztJVNyQ==}
@@ -1416,8 +1419,16 @@ packages:
   '@iota/apps-ui-icons@0.3.1':
     resolution: {integrity: sha512-E/qjkMQpjO01EmLzMNTCKnLaEfG/8uEhvCJwZhpN+Fl8CeOk8xMRPOHjf77XgSU2MOnEVRXMg3bgSGfGldDhcA==}
 
-  '@iota/apps-ui-kit@0.6.0':
-    resolution: {integrity: sha512-b2NUvE+R7oXil3g61KGTlKRkndUt3C3F466g6/U09c3xJNH+aew7vLJehtwhzKjdeLWKRqYkZ3cDnTlr6puu6g==}
+  '@iota/apps-ui-icons@0.4.0':
+    resolution: {integrity: sha512-7AW2d9WaxQUy91VkTHTae8NLZOUSwPh8cfuXNtp1DaTUiFOzVUTS++/tDrRhr1/eZcSpc0Oyavmr4dyF1kaHTQ==}
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702173601':
+    resolution: {integrity: sha512-1EHdEGnNO2rtVKRlhVkzJeaq1uo25E78qgFYK1cEsedXm78Va/fXKgjQAkKECRrrgVPYc52tUYMGJicqeZQijg==}
+    peerDependencies:
+      react: ^18 || ^19
+      react-dom: ^18 || ^19
 
   '@iota/bcs@0.2.1':
     resolution: {integrity: sha512-T+iv5gZhUZP7BiDY7+Ir4MA2rYmyGNZA2b+nxjv219Fp8klFt+l38OWA+1RgJXrCmzuZ+M4hbMAeHhHziURX6Q==}
@@ -5063,7 +5074,7 @@ packages:
   postcss-prefix-selector@1.16.1:
     resolution: {integrity: sha512-Umxu+FvKMwlY6TyDzGFoSUnzW+NOfMBLyC1tAkIjgX+Z/qGspJeRjVC903D7mx7TuBpJlwti2ibXtWuA7fKMeQ==}
     peerDependencies:
-      postcss: '>4 <9'
+      postcss: '>=8.4.31'
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
@@ -7330,7 +7341,9 @@ snapshots:
 
   '@floating-ui/utils@0.2.9': {}
 
-  '@fontsource/inter@5.2.5': {}
+  '@fontsource-variable/roboto-flex@5.2.6': {}
+
+  '@fontsource/inter@5.2.6': {}
 
   '@gql.tada/cli-utils@1.6.3(@0no-co/graphqlsp@1.12.16(graphql@16.11.0)(typescript@5.8.3))(graphql@16.11.0)(typescript@5.8.3)':
     dependencies:
@@ -7383,10 +7396,15 @@ snapshots:
 
   '@iota/apps-ui-icons@0.3.1': {}
 
-  '@iota/apps-ui-kit@0.6.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)':
+  '@iota/apps-ui-icons@0.4.0(react@18.3.1)':
     dependencies:
-      '@fontsource/inter': 5.2.5
-      '@iota/apps-ui-icons': 0.3.1
+      react: 18.3.1
+
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250702173601(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@fontsource-variable/roboto-flex': 5.2.6
+      '@fontsource/inter': 5.2.6
+      '@iota/apps-ui-icons': 0.4.0(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-visually-hidden': 1.2.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
@@ -9699,7 +9717,7 @@ snapshots:
       stable-hash: 0.0.5
       tinyglobby: 0.2.12
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.27.0(eslint@8.57.1)(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.9.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 

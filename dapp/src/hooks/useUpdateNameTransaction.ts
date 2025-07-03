@@ -12,7 +12,6 @@ import { queryKey } from './queryKey';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
-    isExpired: boolean;
     updates: NameUpdate[];
 }
 
@@ -51,6 +50,11 @@ export type NameUpdate =
           allowTimeExtension: boolean;
       }
     | {
+          type: 'delete-name';
+          nft: string;
+          isSubname: boolean;
+      }
+    | {
           type: 'renew-name';
           nftId: string;
           years: number;
@@ -61,14 +65,9 @@ export type NameUpdate =
           expirationTimestampMs: number;
       };
 
-export function useUpdateNameTransaction({
-    address,
-    isExpired,
-    updates,
-}: UseUpdateNameTransactionOptions) {
+export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
-
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [...queryKey.updateName(address), updates],
@@ -116,6 +115,12 @@ export function useUpdateNameTransaction({
                         });
                         iotaNamesTx.transaction.transferObjects([subnameNft], address);
                         break;
+                    case 'delete-name':
+                        iotaNamesTx.burnExpired({
+                            nft: tx.object(update.nft),
+                            isSubname: update.isSubname,
+                        });
+                        break;
                     case 'renew-name':
                         iotaNamesTx.renew({
                             nft: update.nftId,
@@ -138,7 +143,7 @@ export function useUpdateNameTransaction({
             });
             return iotaNamesTx.transaction;
         },
-        enabled: !!address && !!updates.length && !isExpired,
+        enabled: !!address && !!updates.length,
         gcTime: 0,
     });
 }

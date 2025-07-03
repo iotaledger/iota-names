@@ -3,7 +3,5 @@
 
 export * from './ConnectionGuard';
 export * from './AvailabilityCheck';
-export * from './ThemeSwitcher';
-export * from './Navbar';
 
 export * from './dialogs';

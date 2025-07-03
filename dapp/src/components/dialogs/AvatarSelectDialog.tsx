@@ -26,7 +26,7 @@ export function VisualAssetsDialog({ setOpen, onAssetClick }: AvatarSelectDialog
 
     return (
         <Dialog open onOpenChange={setOpen}>
-            <DialogContent showCloseOnOverlay customWidth="w-full max-w-[60vw]">
+            <DialogContent customWidth="w-full max-w-[60vw]">
                 <Header
                     title="Select NFT to use as Alias"
                     titleCentered
@@ -46,7 +46,7 @@ export function VisualAssetsDialog({ setOpen, onAssetClick }: AvatarSelectDialog
                             ) : (
                                 visualAssets.map((asset) => (
                                     <VisualAssetCard
-                                        assetSrc={asset.display?.data?.image_url || ''}
+                                        src={asset.display?.data?.image_url || ''}
                                         altText={asset.display?.data?.name || 'NFT'}
                                         key={asset.objectId}
                                         isHoverable

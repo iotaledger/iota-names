@@ -5,7 +5,7 @@ import { bcs } from '@iota/iota-sdk/bcs';
 import { blake2b } from '@noble/hashes/blake2';
 import { bytesToHex } from '@noble/hashes/utils';
 
-import { DomainBcs } from './bcs';
+import { DomainBcs } from '../types/bcs';
 
 /**
  * Derives an auction dynamic field object ID.
@@ -39,16 +39,4 @@ export function deriveAuctionDynamicFieldId(
     const hash = blake2b(input, { dkLen: 32 });
 
     return `0x${bytesToHex(hash)}`;
-}
-
-/**
- * Helper function to create a domain object from a domain name string
- * Note: The labels are stored in reverse order according to Domain struct
- * https://github.com/iotaledger/iota/blob/797355f33d982eb90b59542c4bceb0b1c6f8145f/crates/iota-names/src/domain.rs#L19
- * @param domainName - Domain name like "rust.iota"
- * @returns Domain object with labels in reverse order
- */
-export function createDomainFromName(domainName: string): { labels: string[] } {
-    const labels = domainName.split('.');
-    return { labels: labels.reverse() };
 }

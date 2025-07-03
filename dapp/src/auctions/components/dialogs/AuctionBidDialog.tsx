@@ -21,18 +21,18 @@ import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
+import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { queryKey } from '@/hooks';
-import { useAuctionBid } from '@/hooks/auction/useAuctionBid';
-import { useGetAuctionMetadata } from '@/hooks/auction/useGetAuctionMetadata';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 
 interface AuctionBidDialogDialogProps {
     name: string;
-    setOpen: (open: boolean) => void;
+    closeDialog: () => void;
 }
 
-export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
@@ -74,7 +74,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
-            setOpen(false);
+            closeDialog();
         },
     });
 
@@ -100,13 +100,13 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
     })();
 
     return (
-        <Dialog open onOpenChange={setOpen}>
+        <Dialog open onOpenChange={closeDialog}>
             <DialogContent showCloseOnOverlay>
                 <Header
                     title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
                     titleCentered
-                    onClose={() => setOpen(false)}
-                    onBack={() => setOpen(false)}
+                    onClose={() => closeDialog()}
+                    onBack={() => closeDialog()}
                 />
 
                 <DialogBody>
@@ -121,9 +121,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                         />
 
                         <div className="flex items-center justify-between">
-                            <span className="text-body-md text-neutral-40 dark:text-neutral-60">
-                                Minimum bid:
-                            </span>
+                            <span className="text-body-md text-neutral-60">Minimum bid:</span>
                             <span className="text-body-md">{minBidLabel}</span>
                         </div>
                     </div>
@@ -134,7 +132,7 @@ export function AuctionBidDialog({ name, setOpen }: AuctionBidDialogDialogProps)
                         size={ButtonSize.Small}
                         type={ButtonType.Outlined}
                         text="Cancel"
-                        onClick={() => setOpen(false)}
+                        onClick={() => closeDialog()}
                     />
                     <Button
                         size={ButtonSize.Small}
