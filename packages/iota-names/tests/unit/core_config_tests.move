@@ -8,7 +8,7 @@ module iota_names::core_config_tests;
 use iota::test_utils::assert_eq;
 use iota::vec_map;
 use iota_names::constants;
-use iota_names::core_config::{Self, CoreConfig};
+use iota_names::core_config::{Self, CoreConfig, valid_user_data_key};
 use iota_names::domain;
 
 #[test]
@@ -19,6 +19,7 @@ fun test_config_creation_and_field_access() {
         constants::payments_version!(),
         1,
         vector[constants::iota_tld()],
+        valid_user_data_key(),
         vec_map::empty(),
     );
 
@@ -46,6 +47,7 @@ fun custom_config_valid_length() {
         constants::payments_version!(),
         5,
         vector[constants::iota_tld()],
+        valid_user_data_key(),
         vec_map::empty(),
     );
     config.assert_is_valid_for_sale(&domain::new(b"0.iota".to_string()));
@@ -84,6 +86,7 @@ fun custom_config(min: u8, max: u8): CoreConfig {
         constants::payments_version!(),
         5,
         vector[constants::iota_tld()],
+        valid_user_data_key(),
         vec_map::empty(),
     )
 }

@@ -13,7 +13,7 @@ module iota_names::core_config;
 use iota::vec_map::VecMap;
 use iota::vec_set::{Self, VecSet};
 use iota_names::domain::Domain;
-use std::string::String;
+use std::string::{String, utf8};
 
 #[error]
 const EInvalidLength: vector<u8> = b"Invalid length for the label part of the domain.";
@@ -105,6 +105,27 @@ public fun default(): CoreConfig {
         iota_names::constants::payments_version!(),
         5,
         vector[iota_names::constants::iota_tld()],
+        valid_user_data_key(),
         iota::vec_map::empty(),
     )
+}
+
+#[test_only]
+public fun valid_user_data_key() : vector<String> {
+    vector[
+        utf8(b"avatar"),
+        utf8(b"twitter/x"),
+        utf8(b"discord"),
+        utf8(b"github"),
+        utf8(b"email"),
+        utf8(b"btc"),
+        utf8(b"eth"),
+        utf8(b"ltc"),
+        utf8(b"doge"),
+        utf8(b"sol"),
+        utf8(b"sui"),
+        utf8(b"website"),
+        utf8(b"ipfs"),
+        utf8(b"arweave"),
+    ]
 }
