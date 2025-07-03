@@ -6,7 +6,7 @@ import type { Transaction } from '@iota/iota-sdk/transactions';
 
 import { normalizeIotaName } from './utils';
 
-export function isSubName(name: string): boolean {
+export function isSubname(name: string): boolean {
     return normalizeIotaName(name, 'dot').split('.').length > 2;
 }
 
@@ -15,7 +15,7 @@ export function isSubName(name: string): boolean {
  * A nested subname is a subname that is a subname of another subname.
  * @param name The name to check (e.g test.example.sub.iota)
  */
-export function isNestedSubName(name: string): boolean {
+export function isNestedSubname(name: string): boolean {
     return normalizeIotaName(name, 'dot').split('.').length > 3;
 }
 

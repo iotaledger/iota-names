@@ -11,7 +11,7 @@ import type {
 import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants';
-import { isNestedSubName, isSubName } from './helpers';
+import { isNestedSubname, isSubname } from './helpers';
 import type { IotaNamesClient } from './iota-names-client';
 import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
 import { isValidIotaName, normalizeIotaName } from './utils';
@@ -153,7 +153,7 @@ export class IotaNamesTransaction {
     /**
      * Creates a subname.
      */
-    createSubName({
+    createSubname({
         parentNft,
         name,
         expirationTimestampMs,
@@ -167,7 +167,7 @@ export class IotaNamesTransaction {
         allowTimeExtension: boolean;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubname = isNestedSubName(name);
+        const isParentSubname = isNestedSubname(name);
         if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IotaNames Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
@@ -198,7 +198,7 @@ export class IotaNamesTransaction {
      * Parent can be a `IotaNamesRegistration` or a `SubnameRegistration` object.
      * Can be passed in as an ID or a TransactionArgument.
      */
-    createLeafSubName({
+    createLeafSubname({
         parentNft,
         name,
         targetAddress,
@@ -208,7 +208,7 @@ export class IotaNamesTransaction {
         targetAddress: string;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubname = isNestedSubName(name);
+        const isParentSubname = isNestedSubname(name);
         if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
@@ -235,8 +235,8 @@ export class IotaNamesTransaction {
      */
     removeLeafSubName({ parentNft, name }: { parentNft: TransactionObjectInput; name: string }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubname = isNestedSubName(name);
-        if (!isSubName(name)) throw new Error('This can only be invoked for subnames');
+        const isParentSubname = isNestedSubname(name);
+        if (!isSubname(name)) throw new Error('This can only be invoked for subnames');
         if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
@@ -330,7 +330,7 @@ export class IotaNamesTransaction {
         allowTimeExtension: boolean;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubname = isNestedSubName(name);
+        const isParentSubname = isNestedSubname(name);
         if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!isParentSubname && !this.iotaNamesClient.config.subNamesPackageId)

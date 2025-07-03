@@ -13,7 +13,7 @@ import {
     getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
-    isSubName,
+    isSubname,
     validateYears,
 } from './helpers.js';
 import type {
@@ -283,7 +283,7 @@ export class IotaNamesClient {
         }
         validateYears(years);
 
-        if (isSubName(name)) {
+        if (isSubname(name)) {
             throw new Error('Subnames do not have a registration fee');
         }
 
