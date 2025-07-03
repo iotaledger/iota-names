@@ -3,8 +3,6 @@
 
 import clsx from 'clsx';
 
-// import { NamePurchaseStatus } from './namePurchasedCard.enums';
-
 interface NamePurchaseCardProps {
     /**
      * The name search
