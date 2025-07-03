@@ -45,7 +45,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (nft && isExpired) {
+    if (nft.isExpired) {
         const nftId = getNameObject(domainsOwned ?? [], subdomainsOwned ?? [], nft.name);
         if (nftId) {
             updates.push({
@@ -55,6 +55,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             });
         }
     }
+
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -62,7 +63,6 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
-        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =

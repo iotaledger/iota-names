@@ -53,12 +53,13 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />
             </div>
-            <div className="flex flex-col gap-y-sm items-center w-1/2">
+            <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                 {domains?.map((nft) => {
                     const isNftDeletable = nft.isExpired && !namesWithChildren.has(nft.name);
                     return (
                         <Card key={nft.name} type={CardType.Filled}>
-                            <div className="flex flex-col  gap-y-sm w-full">
+                            <div className="flex flex-col items-center gap-y-sm">
+                                <div className="w-40 h-40 object-cover"></div>
                                 <div className="w-full h-40 object-cover">
                                     <AvatarDisplay registration={nft} />
                                 </div>

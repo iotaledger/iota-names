@@ -12,7 +12,6 @@ import { queryKey } from './queryKey';
 
 interface UseUpdateNameTransactionOptions {
     address: string;
-    isExpired: boolean;
     updates: NameUpdate[];
 }
 
@@ -66,11 +65,7 @@ export type NameUpdate =
           expirationTimestampMs: number;
       };
 
-export function useUpdateNameTransaction({
-    address,
-    isExpired,
-    updates,
-}: UseUpdateNameTransactionOptions) {
+export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
     return useQuery({
