@@ -9,8 +9,20 @@ export const MIN_LABEL_SIZE = 3;
  * Allowed keys for metadata.
  */
 export const ALLOWED_METADATA = {
-    contentHash: 'content_hash',
     avatar: 'avatar',
+    twitterX: 'twitter/x',
+    discord: 'discord',
+    github: 'github',
+    email: 'email',
+    btc: 'btc',
+    eth: 'eth',
+    ltc: 'ltc',
+    doge: 'doge',
+    sol: 'sol',
+    sui: 'sui',
+    website: 'website',
+    ipfs: 'ipfs',
+    arweave: 'arweave',
 };
 
 export const packages = {
