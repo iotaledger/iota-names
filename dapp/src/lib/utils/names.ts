@@ -3,7 +3,7 @@
 
 import { isSubName, NameRecord } from '@iota/iota-names-sdk';
 
-import { RegistrationNft } from '@/hooks';
+import { RegistrationNft } from '../interfaces/registration.interfaces';
 
 export function isNameRecordExpired(nameRecord: NameRecord) {
     return nameRecord.expirationTimestampMs < Date.now();
