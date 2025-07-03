@@ -3,51 +3,68 @@
 
 'use client';
 
-import { Search, Suggestion } from '@iota/apps-ui-kit';
-import { useEffect, useState } from 'react';
+import { ListItem, Search, SearchBarType, Suggestion } from '@iota/apps-ui-kit';
+import clsx from 'clsx';
+import { useState } from 'react';
 
 export default function SearchBox() {
     const [searchValue, setSearchValue] = useState('');
     const [filteredSuggestions, setFilteredSuggestions] = useState<Suggestion[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
 
     const allSuggestions: Suggestion[] = [
-        { id: '1', label: 'IOTA' },
-        { id: '2', label: 'Shimmer' },
-        { id: '3', label: 'Tangle' },
+        { id: '1', label: 'Daiki', supportingText: 'Caption' },
+        { id: '2', label: 'Iota' },
+        { id: '3', label: 'Pepe' },
+        { id: '4', label: 'Gon' },
     ];
 
-    useEffect(() => {
-        if (searchValue.length === 0) {
-            setFilteredSuggestions([]);
-            return;
-        }
-
-        setIsLoading(true);
-        const timeout = setTimeout(() => {
-            const results = allSuggestions.filter((s) =>
-                s.label.toLowerCase().includes(searchValue.toLowerCase()),
-            );
-            setFilteredSuggestions(results);
-            setIsLoading(false);
-        }, 300); // Simulate debounce + fetch delay
-
-        return () => clearTimeout(timeout);
-    }, [searchValue]);
+    const handleSearchValueChange = (value: string) => {
+        setSearchValue(value);
+        const filtered =
+            allSuggestions.filter((suggestion) =>
+                suggestion.label.toLowerCase().includes(value.toLowerCase()),
+            ) || [];
+        setFilteredSuggestions(filtered);
+    };
 
     const handleSuggestionClick = (suggestion: Suggestion) => {
-        alert(`You selected: ${suggestion.label}`);
+        setSearchValue(suggestion.label);
+        setFilteredSuggestions([]);
     };
 
     return (
-        <Search
-            searchValue={searchValue}
-            onSearchValueChange={setSearchValue}
-            suggestions={filteredSuggestions}
-            onSuggestionClick={handleSuggestionClick}
-            placeholder="Search something..."
-            isLoading={isLoading}
-            renderSuggestion={(sug, i) => <div className="text-body-md text-left">{sug.label}</div>}
-        />
+        <div className="max-w-[360px] h-full w-full">
+            <Search
+                searchValue={searchValue}
+                suggestions={filteredSuggestions}
+                onSearchValueChange={handleSearchValueChange}
+                onSuggestionClick={handleSuggestionClick}
+                renderSuggestion={(suggestion) => (
+                    <ListItem
+                        key={suggestion.id}
+                        showRightIcon={false}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        hideBottomBorder
+                    >
+                        <div
+                            className={clsx(
+                                'flex w-full flex-row items-center gap-xs',
+                                suggestion.supportingText ? 'justify-between' : 'justify-start',
+                            )}
+                        >
+                            <span className="text-body-lg text-names-neutral-92">
+                                {suggestion.label}
+                            </span>
+                            <span className="text-body-md text-names-neutral-60">
+                                {suggestion.supportingText}
+                            </span>
+                        </div>
+                    </ListItem>
+                )}
+                placeholder={'Search for your IOTA name'}
+                isLoading={false}
+                type={SearchBarType.Filled}
+            />
+        </div>
     );
 }
