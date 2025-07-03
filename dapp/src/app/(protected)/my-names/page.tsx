@@ -57,42 +57,44 @@ export default function MyNamesPage(): JSX.Element {
                 {domains?.map((nft) => {
                     const isNftDeletable = nft.isExpired && !namesWithChildren.has(nft.name);
                     return (
-                        <Card key={nft.name} type={CardType.Filled}>
-                            <div className="flex flex-col items-center gap-y-sm">
-                                <div className="w-40 h-40 object-cover">
-                                    <AvatarDisplay registration={nft} />
-                                </div>
-                                <Title
-                                    title={nft.name}
-                                    size={TitleSize.Small}
-                                    subtitle={`Expiration Date: ${
-                                        nft?.expirationTimestampMs
-                                            ? new Date(
-                                                  nft.expirationTimestampMs,
-                                              ).toLocaleDateString('en-US', {
-                                                  year: 'numeric',
-                                                  month: 'short',
-                                                  day: 'numeric',
-                                              })
-                                            : '--'
-                                    }`}
-                                />
-                                <div className="flex flex-row gap-x-xs">
-                                    <Button
-                                        text="Manage"
-                                        fullWidth
-                                        onClick={() => setUpdateNameDialog(nft.name)}
+                        <div key={nft.name}>
+                            <Card type={CardType.Filled}>
+                                <div className="flex flex-col items-center gap-y-sm">
+                                    <div className="w-40 h-40 object-cover">
+                                        <AvatarDisplay registration={nft} />
+                                    </div>
+                                    <Title
+                                        title={nft.name}
+                                        size={TitleSize.Small}
+                                        subtitle={`Expiration Date: ${
+                                            nft?.expirationTimestampMs
+                                                ? new Date(
+                                                      nft.expirationTimestampMs,
+                                                  ).toLocaleDateString('en-US', {
+                                                      year: 'numeric',
+                                                      month: 'short',
+                                                      day: 'numeric',
+                                                  })
+                                                : '--'
+                                        }`}
                                     />
-                                    {isNftDeletable ? (
+                                    <div className="flex flex-row gap-x-xs">
                                         <Button
-                                            text="Delete"
-                                            type={ButtonType.Destructive}
-                                            onClick={() => setDeleteNameDialog(nft)}
+                                            text="Manage"
+                                            fullWidth
+                                            onClick={() => setUpdateNameDialog(nft.name)}
                                         />
-                                    ) : null}
+                                        {isNftDeletable ? (
+                                            <Button
+                                                text="Delete"
+                                                type={ButtonType.Destructive}
+                                                onClick={() => setDeleteNameDialog(nft)}
+                                            />
+                                        ) : null}
+                                    </div>
                                 </div>
-                            </div>
-                        </Card>
+                            </Card>
+                        </div>
                     );
                 })}
             </div>
@@ -100,7 +102,7 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My subnames" />
             </div>
             {subdomains?.length && (
-                <div className="flex flex-col gap-y-sm items-center w-1/2">
+                <div className="flex flex-col gap-y-sm items-center">
                     {subdomains.map((subdomain) => {
                         const isSubdomainRemovable =
                             subdomain.isExpired && !namesWithChildren.has(subdomain.name);
