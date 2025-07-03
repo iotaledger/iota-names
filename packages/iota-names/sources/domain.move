@@ -12,6 +12,8 @@ module iota_names::domain;
 use std::string::{Self, String, utf8};
 
 #[error]
+const EMaximumDomainLengthExceeded: vector<u8> = b"Maximum domain length exceeded.";
+#[error]
 const EInvalidDomain: vector<u8> = b"Invalid domain.";
 
 /// The maximum length of a full domain
@@ -34,7 +36,7 @@ public struct Domain has copy, drop, store {
 
 // Construct a `Domain` by parsing and validating the provided string
 public fun new(domain: String): Domain {
-    assert!(domain.length() <= MAX_DOMAIN_LENGTH, EInvalidDomain);
+    assert!(domain.length() <= MAX_DOMAIN_LENGTH, EMaximumDomainLengthExceeded);
 
     let mut labels = split_by_dot(domain);
     validate_labels(&labels);
@@ -148,15 +150,15 @@ fun is_valid_label(label: &String): bool {
     let label_bytes = label.as_bytes();
     let mut index = 0;
 
-    if (!(len >= MIN_LABEL_LENGTH && len <= MAX_LABEL_LENGTH)) {
+    if (len < MIN_LABEL_LENGTH || len > MAX_LABEL_LENGTH) {
         return false
     };
 
     while (index < len) {
         let character = label_bytes[index];
         let is_valid_character =
-            (0x61 <= character && character <= 0x7A)                   // a-z
-                || (0x30 <= character && character <= 0x39)                // 0-9
+            (0x61 <= character && character <= 0x7A)                      // a-z
+                || (0x30 <= character && character <= 0x39)               // 0-9
                 || (character == 0x2D && index != 0 && index != len - 1); // '-' not at beginning or end
 
         if (!is_valid_character) {
@@ -251,11 +253,13 @@ fun expect_valid_label(label: vector<u8>, is_valid: bool) {
 #[test]
 fun test_valid_labels() {
     expect_valid_label(b"", false);
-    expect_valid_label(b"-", false);
+    expect_valid_label(b"0000000000000000000000000000000000000000000000000000000000000000", false);
+    
+    expect_valid_label(b"abcdefghijklmnopqrstuvxyz-0123456789", true);
+
     expect_valid_label(b"-aaa", false);
     expect_valid_label(b"aaa-", false);
-    expect_valid_label(b"a-a", true);
-    expect_valid_label(b"abcdefghijklmnopqrstuvxyz-0123456789", true);
+    expect_valid_label(b"a&a", false);
 }
 
 #[test_only]
@@ -342,5 +346,12 @@ fun derive_parent() {
     let parent = new(utf8(b"parent.iota"));
     let child = new(utf8(b"child.parent.iota"));
 
-    assert!(parent(&child).extract() == parent, 0);
+    assert_eq(parent(&parent), option::none());
+    assert_eq(parent(&child), option::some(parent));
+}
+
+#[test, expected_failure(abort_code = EMaximumDomainLengthExceeded)]
+fun maximum_domain_length_exceeded() {
+    let name = utf8(b"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.iota");
+    let _domain = new(name);
 }
