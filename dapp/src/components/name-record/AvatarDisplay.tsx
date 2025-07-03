@@ -1,20 +1,28 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { useState } from 'react';
+
 import { useNameRecord } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
-import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
+import type { NftDisplayProps } from '@/lib/types/components';
 
-interface AvatarDisplayProps {
-    registration: RegistrationNft;
+import { NameCardDisplay } from '../name-card/NameCardDisplay';
+
+const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
+
+interface AvatarDisplayProps extends NftDisplayProps {
+    button?: React.ReactNode;
 }
 
-export function AvatarDisplay({ registration }: AvatarDisplayProps) {
+export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDisplayProps) {
+    const [showPlaceholder, setShowPlaceholder] = useState(false);
+
     const {
         data,
         isLoading: isLoadingRegistration,
         isError: isErrorRegistration,
-    } = useNameRecord(registration.name);
+    } = useNameRecord(registrationNft.name);
 
     const avatarId = data?.type === 'unavailable' ? data?.nameRecord.avatar : null;
 
@@ -24,22 +32,23 @@ export function AvatarDisplay({ registration }: AvatarDisplayProps) {
         isError: isErrorAvatarObject,
     } = useGetObject({ id: avatarId ?? '', options: { showDisplay: true, showContent: true } });
 
+    const fallbackImage = showPlaceholder
+        ? PLACEHOLDER_DISPLAY
+        : registrationNft?.imageUrl || PLACEHOLDER_DISPLAY;
+
     const mediaUrl =
         isLoadingAvatarObject || isLoadingRegistration || isErrorAvatarObject || isErrorRegistration
-            ? registration.imageUrl
-            : avatarObject?.display?.data?.image_url || registration.imageUrl;
+            ? fallbackImage
+            : avatarObject?.display?.data?.image_url || fallbackImage;
 
-    return mediaUrl && avatarObject ? (
-        <img
+    return (
+        <NameCardDisplay
+            size={size}
             src={mediaUrl}
-            alt={registration.name}
-            className="w-full h-full object-cover rounded-lg"
+            alt={registrationNft.name}
+            badge={badge}
+            button={button}
+            onError={() => setShowPlaceholder(true)}
         />
-    ) : (
-        <div className="w-full h-full bg-neutral-30/20 rounded-lg flex items-end justify-end">
-            <small className="text-neutral-50 m-xs">
-                {registration.name} - No avatar available
-            </small>
-        </div>
     );
 }

@@ -7,7 +7,9 @@ import cx from 'clsx';
 import Link from 'next/link';
 
 import { SvgSubnames } from '../svgs/SvgSubnames';
-import { INDICATOR_CLASSES } from './helpers';
+
+const INDICATOR_CLASSES =
+    'state-layer relative cursor-pointer p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs text-names-neutral-70 text-label-md w-max';
 
 interface ExpiryDateIndicatorProps {
     expiration: number;

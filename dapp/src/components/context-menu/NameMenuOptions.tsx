@@ -4,7 +4,7 @@
 import { Settings } from '@iota/apps-ui-icons';
 import { ListItem } from '@iota/apps-ui-kit';
 
-import { RegistrationNft } from '@/hooks';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 interface NameMenuOptionsProps {
     name: RegistrationNft;

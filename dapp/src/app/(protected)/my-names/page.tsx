@@ -11,7 +11,7 @@ import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
-import { SubnameCountIndicator } from '@/components/name-card/NameCardBodyIndicators';
+import { SubnameCountIndicator } from '@/components/name-card/NameCardIndicators';
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { MenuListItem } from '@/lib/types/components';
@@ -92,9 +92,8 @@ export default function MyNamesPage(): JSX.Element {
                     return (
                         <NameCard
                             key={nft.name}
-                            name={name}
-                            expiration={nft.expirationTimestampMs}
-                            badge={<Badge type={BadgeType.PrimarySoft} label="Placeholder" />}
+                            registrationNft={nft}
+                            badge={<Badge type={BadgeType.Neutral} label="Placeholder" />}
                             menuOptions={renderMenuOptions(nft)}
                         >
                             <NameCardBody title={`@${name}`}>
@@ -131,10 +130,8 @@ export default function MyNamesPage(): JSX.Element {
                         return (
                             <NameCard
                                 key={subdomain.name}
-                                name={name}
-                                subname={subnamePart}
-                                expiration={subdomain.expirationTimestampMs}
-                                badge={<Badge type={BadgeType.PrimarySoft} label="Placeholder" />}
+                                registrationNft={subdomain}
+                                badge={<Badge type={BadgeType.Neutral} label="Placeholder" />}
                                 menuOptions={renderMenuOptions(subdomain)}
                             >
                                 <NameCardBody title={`${subnamePart}@${name}`}>
