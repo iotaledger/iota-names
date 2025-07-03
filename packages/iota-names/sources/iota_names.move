@@ -169,6 +169,11 @@ public fun get_config<Config: store + drop>(self: &IotaNames): &Config {
     self.id.borrow(ConfigKey<Config> {})
 }
 
+/// Mutably borrow configuration object. Write mode for admin.
+public fun get_config_mut<Config: store + drop>( _: &AdminCap, self: &mut IotaNames): &mut Config {
+    self.id.borrow_mut(ConfigKey<Config> {})
+}
+
 /// Get the configuration object for editing. The admin should put it back
 /// after editing (no extra check performed). Can be used to swap
 /// configuration since the `T` has `drop`. Eg nothing is stopping the admin

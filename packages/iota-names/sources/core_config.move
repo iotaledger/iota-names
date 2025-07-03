@@ -86,6 +86,10 @@ public fun is_valid_user_data_key(config: &CoreConfig, user_data_key: &String): 
     config.valid_user_data_keys.contains(user_data_key)
 }
 
+public fun add_user_data_key(config: &mut CoreConfig, user_data_key: String) {
+    config.valid_user_data_keys.insert(user_data_key)
+}
+
 public fun assert_is_valid_for_sale(config: &CoreConfig, domain: &Domain) {
     assert!(!domain.is_subdomain(), ESubnameNotSupported);
     assert!(config.is_valid_tld(domain.tld()), EInvalidTld);
