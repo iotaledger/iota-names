@@ -19,13 +19,13 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubName, MIN_LABEL_SIZE } from '@iota/iota-names-sdk';
+import { isSubname, MIN_LABEL_SIZE } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getSubdomainObjectId, isNameRecordExpired } from '@/lib/utils/names';
+import { getSubnameObjectId, isNameRecordExpired } from '@/lib/utils/names';
 
 type CreateSubnameProps = {
     parent: string;
@@ -38,7 +38,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
 
-    const subdomainsOwned = useRegistrationNfts('subdomain').data || [];
+    const subnamesOwned = useRegistrationNfts('subname').data || [];
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(parent);
 
     // We are sure that only owned names are passed here
@@ -47,27 +47,27 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         | undefined;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-    const isNameSubName = parent ? isSubName(parent) : null;
+    const isNameSubname = parent ? isSubname(parent) : null;
 
     // Create updates
     const updates: NameUpdate[] = [];
 
     // Editable values
-    const [newSubdomainName, setNewSubdomainName] = useState('');
+    const [newSubname, setNewSubname] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
-    const fullSubdomainName = newSubdomainName.trim() ? newSubdomainName + '.' + parent : '';
-    const isAvailable = getSubdomainObjectId(subdomainsOwned, fullSubdomainName) === null;
+    const fullSubname = newSubname.trim() ? newSubname + '.' + parent : '';
+    const isAvailable = getSubnameObjectId(subnamesOwned, fullSubname) === null;
 
-    if (parent && newSubdomainName && fullSubdomainName && isAvailable) {
-        const parentNftId = isNameSubName
-            ? getSubdomainObjectId(subdomainsOwned, parent)
+    if (parent && newSubname && fullSubname && isAvailable) {
+        const parentNftId = isNameSubname
+            ? getSubnameObjectId(subnamesOwned, parent)
             : nameRecord?.nameRecord.nftId;
 
         if (parentNftId) {
             updates.push({
-                type: 'new-subdomain',
-                subdomainName: fullSubdomainName,
+                type: 'new-subname',
+                subname: fullSubname,
                 parentNftId: parentNftId ?? '',
                 expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
                 allowChildCreation: editIsAllowSubnames,
@@ -112,7 +112,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         setOpen(false);
     }
     const handleCancelAddSubname = () => {
-        setNewSubdomainName('');
+        setNewSubname('');
         closeDialog();
     };
 
@@ -131,8 +131,8 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
         updates.length === 0 ||
         isLoading ||
         isExpired ||
-        !newSubdomainName.trim() ||
-        newSubdomainName.length < MIN_LABEL_SIZE;
+        !newSubname.trim() ||
+        newSubname.length < MIN_LABEL_SIZE;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -140,16 +140,14 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                 <Header title="Add subname" titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
-                        <h3 className="text-lg font-semibold mb-4">Add subdomain to {parent}</h3>
+                        <h3 className="text-lg font-semibold mb-4">Add subname to {parent}</h3>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">
-                                Subdomain name:
-                            </label>
+                            <label className="block text-sm font-medium mb-2">Subname:</label>
                             <Input
                                 type={InputType.Text}
-                                value={newSubdomainName}
-                                onChange={(e) => setNewSubdomainName(e.target.value)}
-                                placeholder="Input subdomain name"
+                                value={newSubname}
+                                onChange={(e) => setNewSubname(e.target.value)}
+                                placeholder="Input subname"
                             />
                             <Card type={CardType.Outlined}>
                                 <CardBody
@@ -165,7 +163,7 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                             <Card type={CardType.Outlined}>
                                 <CardBody
                                     title="Set allow subname"
-                                    subtitle="Allow creating subdomains."
+                                    subtitle="Allow creating subnames."
                                 />
                                 <Checkbox
                                     isChecked={editIsAllowSubnames}
@@ -173,14 +171,12 @@ export function CreateSubnameDialog({ parent, open, setOpen }: CreateSubnameProp
                                     onCheckedChange={handleAllowSubnameChange}
                                 />
                             </Card>
-                            {newSubdomainName && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Preview: {fullSubdomainName}
-                                </p>
+                            {newSubname && (
+                                <p className="text-sm text-gray-600 mt-1">Preview: {fullSubname}</p>
                             )}
                         </div>
                         {!isAvailable ? (
-                            <div className="text-red-500 mb-4">This subdomain is not available</div>
+                            <div className="text-red-500 mb-4">This subname is not available</div>
                         ) : null}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>

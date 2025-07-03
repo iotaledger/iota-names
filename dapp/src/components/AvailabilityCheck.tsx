@@ -28,7 +28,7 @@ function getValidationError(
     if (!name) return null;
 
     if (name.includes('.')) {
-        return 'No subdomains allowed';
+        return 'No subnames allowed';
     }
     if (!IOTA_NAME_REGEX.test(name)) {
         return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
