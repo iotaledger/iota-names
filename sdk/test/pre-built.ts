@@ -77,7 +77,7 @@
 //         value: '0x1',
 //     });
 
-//     const subNft = iotaNamesTx.createSubName({
+//     const subNft = iotaNamesTx.createSubname({
 //         parentNft: nft,
 //         name: 'node.' + uniqueName,
 //         expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -86,20 +86,20 @@
 //     });
 
 //     // create/remove some leaf names as an NFT
-//     iotaNamesTx.createLeafSubName({
+//     iotaNamesTx.createLeafSubname({
 //         parentNft: nft,
 //         name: 'leaf.' + uniqueName,
 //         targetAddress: sender,
 //     });
-//     iotaNamesTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
+//     iotaNamesTx.removeLeafSubname({ parentNft: nft, name: 'leaf.' + uniqueName });
 
 //     // do it for sub nft too
-//     iotaNamesTx.createLeafSubName({
+//     iotaNamesTx.createLeafSubname({
 //         parentNft: subNft,
 //         name: 'leaf.node.' + uniqueName,
 //         targetAddress: sender,
 //     });
-//     iotaNamesTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+//     iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
 
 //     // extend expiration a bit further for the subNft
 //     iotaNamesTx.extendExpiration({
@@ -115,7 +115,7 @@
 //     });
 
 //     // let's go 2 levels deep and edit setups!
-//     const moreNestedNft = iotaNamesTx.createSubName({
+//     const moreNestedNft = iotaNamesTx.createSubname({
 //         parentNft: subNft,
 //         name: 'more.node.' + uniqueName,
 //         allowChildCreation: true,

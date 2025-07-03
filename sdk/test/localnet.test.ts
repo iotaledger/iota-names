@@ -127,7 +127,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create a subname
-    const subNft = iotaNamesTx.createSubName({
+    const subNft = iotaNamesTx.createSubname({
         parentNft: nft,
         name: 'node.' + uniqueName,
         allowChildCreation: true,
@@ -136,19 +136,19 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create leaf subnames and then remove them
-    iotaNamesTx.createLeafSubName({
+    iotaNamesTx.createLeafSubname({
         parentNft: nft,
         name: 'leaf.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: nft, name: 'leaf.' + uniqueName });
 
-    iotaNamesTx.createLeafSubName({
+    iotaNamesTx.createLeafSubname({
         parentNft: subNft,
         name: 'leaf.node.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
 
     // Extend expiration for subNft
     iotaNamesTx.extendExpiration({
@@ -165,7 +165,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create another level of nesting
-    const moreNestedNft = iotaNamesTx.createSubName({
+    const moreNestedNft = iotaNamesTx.createSubname({
         parentNft: subNft,
         name: 'more.node.' + uniqueName,
         allowChildCreation: true,
@@ -389,7 +389,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -433,13 +433,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 coin: coinInput,
             });
 
-            iotaNamesTx.createLeafSubName({
+            iotaNamesTx.createLeafSubname({
                 parentNft,
                 name: leafName,
                 targetAddress: toolbox.address(),
             });
 
-            iotaNamesTx.removeLeafSubName({
+            iotaNamesTx.removeLeafSubname({
                 parentNft,
                 name: leafName,
             });
@@ -474,7 +474,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -517,7 +517,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -565,7 +565,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             });
 
             // Create first level subname: level1.root-{timestamp}.iota
-            const level1Nft = iotaNamesTx.createSubName({
+            const level1Nft = iotaNamesTx.createSubname({
                 parentNft: rootNft,
                 name: `level1.${rootName}`,
                 allowChildCreation: true,
@@ -574,7 +574,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             });
 
             // Create second level subname: level2.level1.root-{timestamp}.iota
-            const level2Nft = iotaNamesTx.createSubName({
+            const level2Nft = iotaNamesTx.createSubname({
                 parentNft: level1Nft,
                 name: `level2.level1.${rootName}`,
                 allowChildCreation: false,

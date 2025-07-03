@@ -233,7 +233,7 @@ export class IotaNamesTransaction {
     /**
      * Removes a leaf subname.
      */
-    removeLeafSubName({ parentNft, name }: { parentNft: TransactionObjectInput; name: string }) {
+    removeLeafSubname({ parentNft, name }: { parentNft: TransactionObjectInput; name: string }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
         const isParentSubname = isNestedSubname(name);
         if (!isSubname(name)) throw new Error('This can only be invoked for subnames');
