@@ -19,31 +19,39 @@ export function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 backdrop-blur-lg">
-            <div className="container flex justify-between pt-5 pb-3.5 items-center">
-                <div className="flex flex-row gap-x-lg items-center">
-                    <Link href="/" aria-label="Go to homepage">
-                        <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
-                    </Link>
-                    <div className="text-names-neutral-70 text-body-md">
-                        {isConnected &&
-                            PROTECTED_ROUTES.map((route) => (
-                                <Link
-                                    key={route.path}
-                                    href={route.path}
-                                    className="text-label-md hover:text-names-primary-80"
-                                    data-testid={`${route.id}-link`}
-                                >
-                                    {route.title}
-                                </Link>
-                            ))}
+            <div className="container pt-5 pb-3.5 flex flex-col gap-y-3">
+                <div className="flex flex-row justify-between items-center gap-x-4">
+                    <div className="flex flex-row gap-x-lg items-center">
+                        <Link href="/" aria-label="Go to homepage">
+                            <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
+                        </Link>
+                        {isConnected && (
+                            <div className="flex gap-x-md text-names-neutral-70 text-body-md">
+                                {PROTECTED_ROUTES.map((route) => (
+                                    <Link
+                                        key={route.path}
+                                        href={route.path}
+                                        className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
+                                        data-testid={`${route.id}-link`}
+                                    >
+                                        {route.title}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </div>
+                    {isConnected && isOnMyNamesPage && (
+                        <div className="hidden md:flex w-full justify-center">
+                            <SearchBox />
+                        </div>
+                    )}
+                    <ConnectButton connectText="Connect" />
                 </div>
-                {isConnected && isOnMyNamesPage && <SearchBox />}
-                <div className="flex flex-row gap-x-sm items-center">
-                    <div className="flex items-center space-x-2">
-                        <ConnectButton connectText="Connect" />
+                {isConnected && isOnMyNamesPage && (
+                    <div className="flex md:hidden w-full justify-center">
+                        <SearchBox />
                     </div>
-                </div>
+                )}
             </div>
         </nav>
     );

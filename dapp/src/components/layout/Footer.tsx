@@ -1,7 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-'use client';
-
 import Link from 'next/link';
 
 import { FOOTER_EXTERNAL_LINKS, FOOTER_USE_CONDITIONS_LINKS } from '@/lib/constants';
