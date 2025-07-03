@@ -7,14 +7,14 @@ export { IotaNamesTransaction } from './iota-names-transaction';
 export type { Network, IotaNamesClientConfig, NameRecord } from './types';
 export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants';
 export {
-    isSubName,
-    isNestedSubName,
+    isSubname,
+    isNestedSubname,
     validateYears,
     getConfigType,
-    getDomainType,
+    getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
     getIotaNamesRegistrationType,
-    getIotaSubdomainRegistrationType,
+    getIotaSubnameRegistrationType,
 } from './helpers';
 export { isValidIotaName } from './utils';

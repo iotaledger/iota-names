@@ -7,6 +7,6 @@ export const PricingConfigBcs = bcs.struct('PricingConfig', {
     dummy_field: bcs.bool(),
 });
 
-export const DomainBcs = bcs.struct('Domain', {
+export const NameBcs = bcs.struct('Name', {
     labels: bcs.vector(bcs.string()),
 });
