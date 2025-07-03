@@ -1,18 +1,18 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getDomainType } from '@iota/iota-names-sdk';
+import { getNameType } from '@iota/iota-names-sdk';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
-import { AuctionFieldBcs, createDomainFromName, deriveAuctionDynamicFieldId } from '@/lib/auction';
+import { AuctionFieldBcs, createNameObject, deriveAuctionDynamicFieldId } from '@/lib/auction';
 
 import { queryKey } from '../queryKey';
 import { useAuctionHouse } from './useAuctionHouse';
 
-export function useGetAuctionMetadata(domainName: string) {
+export function useGetAuctionMetadata(name: string) {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: auctionHouseData } = useAuctionHouse();
 
@@ -20,19 +20,19 @@ export function useGetAuctionMetadata(domainName: string) {
     const { packageId } = iotaNamesClient.config;
 
     return useQuery({
-        queryKey: [...queryKey.auctionMetadata(domainName), packageId, auctionsTableObjectId],
+        queryKey: [...queryKey.auctionMetadata(name), packageId, auctionsTableObjectId],
         async queryFn() {
-            if (!auctionsTableObjectId || !domainName) {
+            if (!auctionsTableObjectId || !name) {
                 return null;
             }
 
-            const domain = createDomainFromName(domainName);
-            const domainTypeTag = getDomainType(packageId);
+            const nameObject = createNameObject(name);
+            const nameTypeTag = getNameType(packageId);
 
             const targetAuctionObjectId = deriveAuctionDynamicFieldId(
                 auctionsTableObjectId,
-                domainTypeTag,
-                domain,
+                nameTypeTag,
+                nameObject,
             );
 
             const auctionObjectResponse = await iotaNamesClient.graphQlClient.query<{
@@ -86,6 +86,6 @@ export function useGetAuctionMetadata(domainName: string) {
                 currentBid,
             };
         },
-        enabled: !!auctionsTableObjectId && !!domainName,
+        enabled: !!auctionsTableObjectId && !!name,
     });
 }

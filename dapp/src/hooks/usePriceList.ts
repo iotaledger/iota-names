@@ -14,9 +14,9 @@ export function usePriceList() {
         queryKey: [...queryKey.priceList()],
         queryFn: async () => {
             const priceList = await iotaNamesClient.getPriceList();
-            const domainLengthRanges = Array.from(priceList.keys()) as [number, number][];
-            const minLength = Math.min(...domainLengthRanges.map(([from]) => from));
-            const maxLength = Math.max(...domainLengthRanges.map(([, to]) => to));
+            const nameLengthRanges = Array.from(priceList.keys()) as [number, number][];
+            const minLength = Math.min(...nameLengthRanges.map(([from]) => from));
+            const maxLength = Math.max(...nameLengthRanges.map(([, to]) => to));
 
             return { priceList, minLength, maxLength };
         },

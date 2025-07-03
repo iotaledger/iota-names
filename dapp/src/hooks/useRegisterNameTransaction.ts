@@ -28,7 +28,7 @@ export function useRegisterNameTransaction(
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
             const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [price]);
             const nft = iotaNamesTx.register({
-                domain: name,
+                name: name,
                 years,
                 coin,
             });

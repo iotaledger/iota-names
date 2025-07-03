@@ -5,34 +5,34 @@ import { bcs } from '@iota/iota-sdk/bcs';
 import { blake2b } from '@noble/hashes/blake2';
 import { bytesToHex } from '@noble/hashes/utils';
 
-import { DomainBcs } from './bcs';
+import { NameBcs } from './bcs';
 
 /**
  * Derives an auction dynamic field object ID.
  * Based on https://github.com/iotaledger/iota/blob/797355f33d982eb90b59542c4bceb0b1c6f8145f/crates/iota/src/name_commands.rs#L2086
  * @param parentObjectId - The parent object ID (the ID of the 'auction' LinkedTable field in the AuctionHouse struct).
- * @param tag - The Domain type tag as a string (e.g., "0x123::domain::Domain")
- * @param domain - The domain name object.
+ * @param tag - The Name type tag as a string (e.g., "0x123::name::Name")
+ * @param name - The name object.
  * @returns The derived object ID as a hex string
  */
 export function deriveAuctionDynamicFieldId(
     parentObjectId: string,
     tag: string,
-    domain: { labels: string[] },
+    name: { labels: string[] },
 ): string {
-    const domainBcsBytes = DomainBcs.serialize(domain).toBytes();
+    const nameBcsBytes = NameBcs.serialize(name).toBytes();
     const typeTagBytes = bcs.TypeTag.serialize(tag).toBytes();
 
-    const domainBcsBytesLen = new Uint8Array(8);
-    const view = new DataView(domainBcsBytesLen.buffer);
-    view.setUint32(0, domainBcsBytes.length, true); // little-endian
+    const nameBcsBytesLen = new Uint8Array(8);
+    const view = new DataView(nameBcsBytesLen.buffer);
+    view.setUint32(0, nameBcsBytes.length, true); // little-endian
 
     const input = new Uint8Array([
         // HashingIntentScope::ChildObjectId
         0xf0,
         ...bcs.Address.serialize(parentObjectId).toBytes(),
-        ...domainBcsBytesLen,
-        ...domainBcsBytes,
+        ...nameBcsBytesLen,
+        ...nameBcsBytes,
         ...typeTagBytes,
     ]);
 
@@ -42,13 +42,13 @@ export function deriveAuctionDynamicFieldId(
 }
 
 /**
- * Helper function to create a domain object from a domain name string
- * Note: The labels are stored in reverse order according to Domain struct
- * https://github.com/iotaledger/iota/blob/797355f33d982eb90b59542c4bceb0b1c6f8145f/crates/iota-names/src/domain.rs#L19
- * @param domainName - Domain name like "rust.iota"
- * @returns Domain object with labels in reverse order
+ * Helper function to create a name object from a name string
+ * Note: The labels are stored in reverse order according to Name struct
+ * https://github.com/iotaledger/iota/blob/797355f33d982eb90b59542c4bceb0b1c6f8145f/crates/iota-names/src/name.rs#L19
+ * @param name - Name like "rust.iota"
+ * @returns Name object with labels in reverse order
  */
-export function createDomainFromName(domainName: string): { labels: string[] } {
-    const labels = domainName.split('.');
+export function createNameObject(name: string): { labels: string[] } {
+    const labels = name.split('.');
     return { labels: labels.reverse() };
 }
