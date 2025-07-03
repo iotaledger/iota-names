@@ -86,7 +86,6 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
-        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =

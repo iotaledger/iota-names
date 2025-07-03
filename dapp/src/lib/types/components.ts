@@ -3,4 +3,6 @@
 
 import type { ListItem } from '@iota/apps-ui-kit';
 
-export type MenuListItem = React.ComponentProps<typeof ListItem>;
+export type MenuListItem = React.ComponentProps<typeof ListItem> & {
+    isHidden?: boolean;
+};

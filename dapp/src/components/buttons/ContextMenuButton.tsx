@@ -1,5 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+'use client';
 
 import { Dropdown, ListItem } from '@iota/apps-ui-kit';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -91,9 +92,11 @@ export function ContextMenuButton({ icon, options, className }: ContextMenuButto
                         }}
                     >
                         <Dropdown>
-                            {options.map((item, index) => (
-                                <ListItem key={index} {...item} />
-                            ))}
+                            {options
+                                .filter((option) => !option.isHidden)
+                                .map((item, index) => (
+                                    <ListItem key={index} {...item} />
+                                ))}
                         </Dropdown>
                     </div>,
                     document.body,

@@ -3,25 +3,40 @@
 
 'use client';
 
-import { Settings } from '@iota/apps-ui-icons';
+import { Settings, Warning } from '@iota/apps-ui-icons';
 import { Badge, BadgeType, Button, ButtonType, Title } from '@iota/apps-ui-kit';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
-import { AvailabilityCheck } from '@/components';
-import { UpdateNameDialog } from '@/components/dialogs/UpdateNameDialog';
+import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { SubnameCountIndicator } from '@/components/name-card/NameCardBodyIndicators';
-import { RegistrationNft, useRegistrationNfts } from '@/hooks';
+import { useRegistrationNfts } from '@/hooks';
+import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { MenuListItem } from '@/lib/types/components';
 import { removeSuffixFromName, splitNameInParts } from '@/lib/utils/format/formatNames';
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+    const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
 
     const { data: domains } = useRegistrationNfts('domain');
     const { data: subdomains } = useRegistrationNfts('subdomain');
+
+    const namesWithChildren = useMemo(() => {
+        const parents = new Set<string>();
+
+        [...(domains ?? []), ...(subdomains ?? [])].forEach(({ name }) => {
+            const firstDot = name.indexOf('.');
+            if (firstDot !== -1) {
+                const parentName = name.slice(firstDot + 1);
+                parents.add(parentName);
+            }
+        });
+
+        return parents;
+    }, [domains, subdomains]);
 
     const renderMenuOptions = (nft: RegistrationNft): MenuListItem[] => [
         {
@@ -31,6 +46,15 @@ export default function MyNamesPage(): JSX.Element {
                     <Settings /> Manage
                 </div>
             ),
+        },
+        {
+            onClick: () => setDeleteNameDialog(nft),
+            children: (
+                <div className="flex flex-row gap-xxs">
+                    <Warning /> Delete
+                </div>
+            ),
+            isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
         },
     ];
 
@@ -44,11 +68,18 @@ export default function MyNamesPage(): JSX.Element {
                     setOpen={() => setUpdateNameDialog(null)}
                 />
             ) : null}
+            {deleteNameDialog ? (
+                <DeleteNameDialog
+                    nft={deleteNameDialog}
+                    open
+                    setOpen={() => setDeleteNameDialog(null)}
+                />
+            ) : null}
             <div className="pt-md">
                 <Title title="My names" testId="my-names-page" />
             </div>
 
-            <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
+            <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                 {domains?.map((nft) => {
                     const name = removeSuffixFromName(nft.name);
 
@@ -60,7 +91,7 @@ export default function MyNamesPage(): JSX.Element {
                         <NameCard
                             key={nft.name}
                             name={name}
-                            expiration={nft.expiration_timestamp_ms}
+                            expiration={nft.expirationTimestampMs}
                             badge={<Badge type={BadgeType.PrimarySoft} label="Placeholder" />}
                             menuOptions={renderMenuOptions(nft)}
                         >
@@ -83,6 +114,7 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
+
             {subdomains?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
                     {subdomains.map((subdomain) => {
@@ -99,7 +131,7 @@ export default function MyNamesPage(): JSX.Element {
                                 key={subdomain.name}
                                 name={name}
                                 subname={subnamePart}
-                                expiration={subdomain.expiration_timestamp_ms}
+                                expiration={subdomain.expirationTimestampMs}
                                 badge={<Badge type={BadgeType.PrimarySoft} label="Placeholder" />}
                                 menuOptions={renderMenuOptions(subdomain)}
                             >
