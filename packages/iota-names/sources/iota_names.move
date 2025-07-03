@@ -170,7 +170,7 @@ public fun get_config<Config: store + drop>(self: &IotaNames): &Config {
 }
 
 /// Mutably borrow configuration object. Write mode for admin.
-public fun get_config_mut<Config: store + drop>( _: &AdminCap, self: &mut IotaNames): &mut Config {
+public fun get_config_mut<Config: store + drop>(_: &AdminCap, self: &mut IotaNames): &mut Config {
     self.id.borrow_mut(ConfigKey<Config> {})
 }
 

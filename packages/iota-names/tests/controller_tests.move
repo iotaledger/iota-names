@@ -11,6 +11,7 @@ use iota::iota::IOTA;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota::test_utils::{assert_eq, destroy};
 use iota::vec_map::VecMap;
+use iota_names::core_config::CoreConfig;
 use iota_names::constants::year_ms;
 use iota_names::controller::{Self, ControllerAuth};
 use iota_names::domain::{Self, Domain};
@@ -159,6 +160,25 @@ public fun set_user_data_util(
     test_scenario::return_shared(clock);
     test_scenario::return_shared(iota_names);
     scenario.return_to_sender(nft);
+}
+
+public fun add_user_data_util(
+    scenario: &mut Scenario,
+    key: String,
+    clock_tick: u64,
+) {
+    scenario.next_tx(IOTA_NAMES_ADDRESS);
+    let admin_cap = scenario.take_from_sender<AdminCap>();
+    let mut iota_names = scenario.take_shared<IotaNames>();
+    let mut clock = scenario.take_shared<Clock>();
+
+    clock.increment_for_testing(clock_tick);
+    let config = iota_names::get_config_mut<CoreConfig>(&admin_cap, &mut iota_names);
+    config.add_user_data_key(key);
+
+    test_scenario::return_shared(clock);
+    test_scenario::return_shared(iota_names);
+    scenario.return_to_sender(admin_cap);
 }
 
 public fun unset_user_data_util(
@@ -463,6 +483,32 @@ fun test_set_user_data_aborts_if_key_is_unsupported() {
     scenario_val.end();
 }
 
+#[test]
+fun test_set_user_data_admin_add() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+
+    scenario.setup(FIRST_ADDRESS, 0);
+
+    add_user_data_util(scenario, b"key".to_string(), 0);
+
+    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    assert_eq(data.size(), 0);
+    set_user_data_util(
+        scenario,
+        FIRST_ADDRESS,
+        b"key".to_string(),
+        b"value".to_string(),
+        0,
+    );
+
+    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    assert_eq(data.size(), 1);
+    assert_eq(*data.get(&b"key".to_string()), b"value".to_string());
+
+    scenario_val.end();
+}
+
 #[test, expected_failure(abort_code = registry::ERecordExpired)]
 fun test_set_user_data_aborts_if_nft_expired() {
     let mut scenario_val = test_init();
@@ -702,3 +748,60 @@ fun test_reverse_reset_when_target_address_changes() {
     destroy(uid);
     scenario_val.end();
 }
+
+// #[test]
+// fun test_user_data_keys_admin() {
+//     let mut scenario_val = test_scenario::begin(IOTA_NAMES_ADDRESS);
+//     let scenario = &mut scenario_val;
+//     {
+//         let mut iota_names = iota_names::init_for_testing(scenario.ctx());
+//         iota_names.authorize_for_testing<RegisterAuth>();
+//         iota_names.authorize_for_testing<ControllerAuth>();
+//         iota_names.share_for_testing();
+//         let clock = clock::create_for_testing(scenario.ctx());
+//         clock.share_for_testing();
+//     };
+//     {
+//         scenario.next_tx(IOTA_NAMES_ADDRESS);
+//         let admin_cap = scenario.take_from_sender<AdminCap>();
+//         let mut iota_names = scenario.take_shared<IotaNames>();
+
+//         registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+
+//         test_scenario::return_shared(iota_names);
+//         scenario.return_to_sender(admin_cap);
+//     };
+
+
+//     scenario.setup(FIRST_ADDRESS, 0);
+
+//     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+//     assert_eq(data.size(), 0);
+//     set_user_data_util(
+//         scenario,
+//         FIRST_ADDRESS,
+//         DATA_KEY_AVATAR.to_string(),
+//         b"value_avatar".to_string(),
+//         0,
+//     );
+//     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+//     assert_eq(data.size(), 1);
+//     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
+
+//     set_user_data_util(
+//         scenario,
+//         FIRST_ADDRESS,
+//         utf8(DATA_KEY_IPFS),
+//         b"value_ipfs".to_string(),
+//         0,
+//     );
+//     let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+//     assert_eq(data.size(), 2);
+//     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
+//     assert_eq(*data.get(&utf8(DATA_KEY_IPFS)), b"value_ipfs".to_string());
+
+//     scenario_val.end();
+
+
+//     scenario_val.end();
+// }
