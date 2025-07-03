@@ -40,13 +40,13 @@ services:
       - "host.docker.internal:host-gateway"
     command:
       - "start"
+      - "--prometheus-url=http://prometheus:9090"
       # Localnet values:
       # - "--node-url=http://host.docker.internal:9000"
       # - "--checkpoint-url=http://host.docker.internal:9000"
       # Devnet values:
       - "--node-url=https://api.devnet.iota.cafe"
       - "--checkpoint-url=https://checkpoints.devnet.iota.cafe"
-      - "--prometheus-url=http://prometheus:9090"
 
   prometheus:
     image: prom/prometheus:latest
