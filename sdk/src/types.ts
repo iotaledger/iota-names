@@ -22,7 +22,7 @@ export interface PackageInfo {
     packageId: string;
     iotaNamesObjectId: string;
     subNamesPackageId: string;
-    tempSubnamesProxyPackageId: string;
+    tempSubnameProxyPackageId: string;
     payments: {
         packageId: string;
     };

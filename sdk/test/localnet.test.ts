@@ -40,7 +40,7 @@ export function loadLocalnetConfig(): PackageInfo {
             registryTableId: localnetConfig.registryTableId,
             reverseRegistryTableId: localnetConfig.reverseRegistryTableId,
             subNamesPackageId: localnetConfig.subNamesPackageId,
-            tempSubnamesProxyPackageId: localnetConfig.tempSubnamesProxyPackageId,
+            tempSubnameProxyPackageId: localnetConfig.tempSubnameProxyPackageId,
         };
     } catch (error) {
         throw new Error(

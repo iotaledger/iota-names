@@ -172,12 +172,12 @@ export class IotaNamesTransaction {
             throw new Error('IotaNames Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         const subNft = this.transaction.moveCall({
             target: isParentSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::new`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new`
                 : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::new`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
@@ -213,12 +213,12 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
             target: isParentSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::new_leaf`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new_leaf`
                 : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::new_leaf`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
@@ -241,12 +241,12 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
             target: isParentSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::remove_leaf`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::remove_leaf`
                 : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::remove_leaf`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
@@ -269,12 +269,12 @@ export class IotaNamesTransaction {
         address?: string;
         isSubname?: boolean;
     }) {
-        if (isSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
             target: isSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::set_target_address`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_target_address`
                 : `${this.iotaNamesClient.config.packageId}::controller::set_target_address`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
@@ -335,12 +335,12 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
         if (!isParentSubname && !this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
             target: isParentSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::edit_setup`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::edit_setup`
                 : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::edit_setup`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
@@ -394,14 +394,14 @@ export class IotaNamesTransaction {
     }) {
         if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
-        if (isSubname && !this.iotaNamesClient.config.tempSubnamesProxyPackageId)
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
 
         this.transaction.moveCall({
             target: isSubname
-                ? `${this.iotaNamesClient.config.tempSubnamesProxyPackageId}::subname_proxy::set_user_data`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_user_data`
                 : `${this.iotaNamesClient.config.packageId}::controller::set_user_data`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),

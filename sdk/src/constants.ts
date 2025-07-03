@@ -20,7 +20,7 @@ export const packages = {
         packageId: '0x3ec4826f1d6e0d9f00680b2e9a7a41f03788ee610b3d11c24f41ab0ae71da39f',
         iotaNamesObjectId: '0x54a8a67fad7aa279429e08824e03481dd8b268779353d299d7f8edaa8b8c13b7',
         subNamesPackageId: '0x2e541b250f53d45e9b4cb866be2ab3d8815015a249a094e63b196cc184278925',
-        tempSubnamesProxyPackageId:
+        tempSubnameProxyPackageId:
             '0x3f2927e8e78a094bb98271fd73e06a3aa056edfecbf32dddb8a65d30de9b8a3f',
         payments: {
             packageId: '0x882f88d252a650649f490e96e32e53979758fdda645863ca856d83c72d5e0e72',
