@@ -107,42 +107,44 @@ export default function MyNamesPage(): JSX.Element {
                         const isSubdomainRemovable =
                             subdomain.isExpired && !namesWithChildren.has(subdomain.name);
                         return (
-                            <Card key={subdomain.name} type={CardType.Filled}>
-                                <div className="flex flex-col  gap-y-sm w-full">
-                                    <div className="w-full h-40 object-cover">
-                                        <AvatarDisplay registration={subdomain} />
-                                    </div>
-                                    <Title
-                                        title={subdomain.name}
-                                        size={TitleSize.Small}
-                                        subtitle={`Expiration Date: ${
-                                            subdomain?.expirationTimestampMs
-                                                ? new Date(
-                                                      subdomain.expirationTimestampMs,
-                                                  ).toLocaleDateString('en-US', {
-                                                      year: 'numeric',
-                                                      month: 'short',
-                                                      day: 'numeric',
-                                                  })
-                                                : '--'
-                                        }`}
-                                    />
-                                    <div className="flex flex-row gap-x-xs">
-                                        <Button
-                                            text="Manage"
-                                            fullWidth
-                                            onClick={() => setUpdateNameDialog(subdomain.name)}
+                            <div key={subdomain.name}>
+                                <Card key={subdomain.name} type={CardType.Filled}>
+                                    <div className="flex flex-col  gap-y-sm w-full">
+                                        <div className="w-full h-40 object-cover">
+                                            <AvatarDisplay registration={subdomain} />
+                                        </div>
+                                        <Title
+                                            title={subdomain.name}
+                                            size={TitleSize.Small}
+                                            subtitle={`Expiration Date: ${
+                                                subdomain?.expirationTimestampMs
+                                                    ? new Date(
+                                                          subdomain.expirationTimestampMs,
+                                                      ).toLocaleDateString('en-US', {
+                                                          year: 'numeric',
+                                                          month: 'short',
+                                                          day: 'numeric',
+                                                      })
+                                                    : '--'
+                                            }`}
                                         />
-                                        {isSubdomainRemovable ? (
+                                        <div className="flex flex-row gap-x-xs">
                                             <Button
-                                                text="Delete"
-                                                type={ButtonType.Destructive}
-                                                onClick={() => setDeleteNameDialog(subdomain)}
+                                                text="Manage"
+                                                fullWidth
+                                                onClick={() => setUpdateNameDialog(subdomain.name)}
                                             />
-                                        ) : null}
+                                            {isSubdomainRemovable ? (
+                                                <Button
+                                                    text="Delete"
+                                                    type={ButtonType.Destructive}
+                                                    onClick={() => setDeleteNameDialog(subdomain)}
+                                                />
+                                            ) : null}
+                                        </div>
                                     </div>
-                                </div>
-                            </Card>
+                                </Card>
+                            </div>
                         );
                     })}
                 </div>
