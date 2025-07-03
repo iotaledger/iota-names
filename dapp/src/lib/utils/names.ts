@@ -12,6 +12,7 @@ export function isNameRecordExpired(nameRecord: NameRecord) {
 export function isGracePeriodExpired(nameRecord: NameRecord) {
     return nameRecord.expirationTimestampMs + GRACE_PERIOD_MS < Date.now();
 }
+
 export function getNamePermissions(nameRecord: NameRecord) {
     const isSubname = isSubName(nameRecord.name);
     // Names are allowed always
