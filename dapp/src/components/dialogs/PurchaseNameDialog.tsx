@@ -176,7 +176,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         )}
                         {purchaseError && (
                             <div className="text-center text-red-400 text-sm">
-                              {purchaseError.message}
+                                {purchaseError.message}
                             </div>
                         )}
                         {nameRecordError && (
