@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isSubName, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 
 import { RegistrationNft } from '@/hooks';
 
@@ -10,11 +10,11 @@ export function isNameRecordExpired(nameRecord: NameRecord) {
 }
 
 export function getNamePermissions(nameRecord: NameRecord) {
-    const isSubname = isSubName(nameRecord.name);
+    const isNameSubname = isSubname(nameRecord.name);
     // Names are allowed always
-    let allowChildCreation = !isSubname;
-    let allowTimeExtension = !isSubname;
-    // But subdomains need their permissions checked
+    let allowChildCreation = !isNameSubname;
+    let allowTimeExtension = !isNameSubname;
+    // But subnames need their permissions checked
     if ('S_AC' in nameRecord.data) {
         allowChildCreation = nameRecord.data.S_AC === '1';
     }
@@ -29,30 +29,28 @@ export function getNamePermissions(nameRecord: NameRecord) {
 }
 
 /**
- * Get the parent object id of a given subdomain
+ * Get the parent object id of a given subname
  */
 export function getParentObjectId(
     ownedNames: RegistrationNft[],
-    ownedSubdomains: RegistrationNft[],
+    ownedSubnames: RegistrationNft[],
     name: string,
 ) {
     const parts = name.split('.');
     const parentName = parts.slice(1).join('.');
     const parentParts = parentName?.split('.').length;
 
-    // 2 parts domains are names, the rest are subdomains
-    const parentNames = parentParts === 2 ? ownedNames : ownedSubdomains;
+    // 2 parts names are names, the rest are subnames
+    const parentNames = parentParts === 2 ? ownedNames : ownedSubnames;
 
     const parent = parentNames.find(({ name }) => name === parentName);
     return parent?.id || null;
 }
 
 /**
- * Get object id of a given subdomain
+ * Get object id of a given subname
  */
-export function getSubdomainObjectId(ownedSubdomains: RegistrationNft[], name: string) {
-    const subdomain = ownedSubdomains.find(
-        (subdomain: { name: string | null }) => subdomain.name === name,
-    );
-    return subdomain?.id || null;
+export function getSubnameObjectId(ownedSubnames: RegistrationNft[], name: string) {
+    const subname = ownedSubnames.find((subname: { name: string | null }) => subname.name === name);
+    return subname?.id || null;
 }

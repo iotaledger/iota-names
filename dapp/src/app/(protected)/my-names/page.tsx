@@ -15,8 +15,8 @@ import { useRegistrationNfts } from '@/hooks';
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
 
-    const { data: domains } = useRegistrationNfts('domain');
-    const { data: subdomains } = useRegistrationNfts('subdomain');
+    const { data: names } = useRegistrationNfts('name');
+    const { data: subnames } = useRegistrationNfts('subname');
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -33,7 +33,7 @@ export default function MyNamesPage(): JSX.Element {
             </div>
 
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
-                {domains?.map((nft) => (
+                {names?.map((nft) => (
                     <div key={nft.name}>
                         <Card type={CardType.Filled}>
                             <div className="flex flex-col items-center gap-y-sm">
@@ -53,18 +53,18 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
-            {subdomains?.length && (
+            {subnames?.length && (
                 <div className="flex flex-col gap-y-sm items-center">
-                    {subdomains.map((subdomain) => (
-                        <Card key={subdomain.name} type={CardType.Filled}>
+                    {subnames.map((subname) => (
+                        <Card key={subname.name} type={CardType.Filled}>
                             <CardBody
-                                title={subdomain.name}
-                                subtitle={subdomain.name}
+                                title={subname.name}
+                                subtitle={subname.name}
                                 clickableAction={
                                     <Button
                                         text="Manage"
                                         onClick={() => {
-                                            setUpdateNameDialog(subdomain.name);
+                                            setUpdateNameDialog(subname.name);
                                         }}
                                     />
                                 }

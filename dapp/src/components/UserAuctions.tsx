@@ -39,12 +39,12 @@ export function UserAuctions() {
                 </p>
             ) : (
                 <div className="space-y-2">
-                    {auctions.map((domain) => (
+                    {auctions.map((name) => (
                         <div
-                            key={domain}
+                            key={name}
                             className="flex items-center justify-between rounded-md bg-gray-50 p-3 dark:bg-gray-800"
                         >
-                            <span className="font-medium">{domain}</span>
+                            <span className="font-medium">{name}</span>
                             <span className="text-sm text-gray-600 dark:text-gray-400">
                                 Auction participant
                             </span>

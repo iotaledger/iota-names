@@ -28,18 +28,17 @@ async function main() {
 main();
 
 // A {name: address} map
-const domains: Record<string, string> = {};
+const names: Record<string, string> = {};
 // A {recipient, uniqueObjectIds} map
 const recipients: Record<string, Set<string>> = {};
 
 type TransferObject = {
-    name: string;
     address: string;
-    domain: string;
-    domainObjectId?: string;
+    name: string;
+    nameObjectId?: string;
 };
 
-type DomainData = {
+type NameData = {
     objectId: string;
     name: string;
 };
@@ -50,15 +49,15 @@ const parseOwnedNamesObjects = () => {
         fs.readFileSync('./reserved-names/owned-names.json').toString(),
     ) as IotaObjectResponse[];
 
-    const names: DomainData[] = ownedNamesObjects.map(({ data }) => ({
+    const namesObjects: NameData[] = ownedNamesObjects.map(({ data }) => ({
         objectId: data?.objectId || '',
         //@ts-ignore-next-line
-        name: data?.content!.fields!.domain_name || '',
+        name: data?.content!.fields!.name_name || '',
     }));
 
     // Map the names as `name: address`.
-    for (let name of names) {
-        domains[name.name] = name.objectId;
+    for (let name of namesObjects) {
+        names[name.name] = name.objectId;
     }
 };
 
@@ -70,31 +69,31 @@ const parseCsvFile = (fileName: string) => {
         .map((x) => x.split(','))
         .filter((x) => !!x && !!x[0])
         .map(
-            ([domain, address]) =>
+            ([name, address]) =>
                 ({
                     address,
-                    domain: domain.toLowerCase(),
+                    name: name.toLowerCase(),
                 }) as TransferObject,
         )
         .filter((x) => {
             const isValid = isValidIotaAddress(x.address);
-            if (!isValid) console.warn(`Invalid address: ${x.address} | ${x.name} | ${x.domain}`);
+            if (!isValid) console.warn(`Invalid address: ${x.address} | ${x.name}`);
             return isValid;
         })
         .map((x) => {
-            x.domain = x.domain.endsWith('.iota') ? x.domain : `${x.domain}.iota`;
+            x.name = x.name.endsWith('.iota') ? x.name : `${x.name}.iota`;
             return x;
         })
         .map((x) => {
-            if (!domains[x.domain]) console.warn(`Couldn't find objectId for name ${x.domain}`);
-            x.domainObjectId = domains[x.domain];
+            if (!names[x.name]) console.warn(`Couldn't find objectId for name ${x.name}`);
+            x.nameObjectId = names[x.name];
             return x;
-            // lets find the objectId for that domain.
+            // lets find the objectId for that name.
         })
         .forEach((recipient) => {
-            if (!recipients[recipient.address] && recipient.domainObjectId) {
+            if (!recipients[recipient.address] && recipient.nameObjectId) {
                 recipients[recipient.address] = new Set();
-                recipients[recipient.address].add(recipient.domainObjectId);
+                recipients[recipient.address].add(recipient.nameObjectId);
             }
         });
 

@@ -21,7 +21,7 @@ export interface PackageInfo {
     packageId: string;
     iotaNamesObjectId: string;
     subNamesPackageId: string;
-    tempSubdomainsProxyPackageId: string;
+    tempSubnameProxyPackageId: string;
     payments: {
         packageId: string;
     };
@@ -56,7 +56,7 @@ export type BaseParams = {
 };
 
 export type RegistrationParams = BaseParams & {
-    domain: string;
+    name: string;
 };
 
 export type RenewalParams = BaseParams & {
