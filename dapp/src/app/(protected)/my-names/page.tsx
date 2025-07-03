@@ -59,8 +59,7 @@ export default function MyNamesPage(): JSX.Element {
                     return (
                         <Card key={nft.name} type={CardType.Filled}>
                             <div className="flex flex-col items-center gap-y-sm">
-                                <div className="w-40 h-40 object-cover"></div>
-                                <div className="w-full h-40 object-cover">
+                                <div className="w-40 h-40 object-cover">
                                     <AvatarDisplay registration={nft} />
                                 </div>
                                 <Title
