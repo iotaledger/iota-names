@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 export { default as X } from './X';
 export { default as NamesLogoBranded } from './NamesLogoBranded';
+export { default as NamesLogoWeb } from './NamesLogoWeb';

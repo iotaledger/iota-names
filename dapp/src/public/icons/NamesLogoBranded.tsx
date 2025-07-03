@@ -7,8 +7,8 @@ export default function SvgNamesLogoBranded(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="15"
-            height="24"
+            width="1em"
+            height="1em"
             fill="none"
             viewBox="0 0 15 24"
             {...props}
