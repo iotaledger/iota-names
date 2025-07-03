@@ -4,7 +4,6 @@
 'use client';
 
 import { ListItem, Search, SearchBarType, Suggestion } from '@iota/apps-ui-kit';
-import clsx from 'clsx';
 import { useState } from 'react';
 
 export default function SearchBox() {
@@ -46,12 +45,7 @@ export default function SearchBox() {
                         onClick={() => handleSuggestionClick(suggestion)}
                         hideBottomBorder
                     >
-                        <div
-                            className={clsx(
-                                'flex w-full flex-row items-center gap-xs',
-                                suggestion.supportingText ? 'justify-between' : 'justify-start',
-                            )}
-                        >
+                        <div className="flex w-full flex-row items-center gap-xs">
                             <span className="text-body-lg text-names-neutral-92">
                                 {suggestion.label}
                             </span>
