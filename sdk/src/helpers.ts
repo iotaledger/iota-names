@@ -12,7 +12,7 @@ export function isSubName(name: string): boolean {
 
 /**
  * Checks if a name is a nested subname.
- * A nested subdomain is a subdomain that is a subdomain of another subdomain.
+ * A nested subname is a subname that is a subname of another subname.
  * @param name The name to check (e.g test.example.sub.iota)
  */
 export function isNestedSubName(name: string): boolean {
@@ -37,8 +37,8 @@ export function getConfigType(iotaNamesPackageV1: string, innerType: string): st
     return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 }
 
-export function getDomainType(iotaNamesPackageV1: string): string {
-    return `${iotaNamesPackageV1}::domain::Domain`;
+export function getNameType(iotaNamesPackageV1: string): string {
+    return `${iotaNamesPackageV1}::name::Name`;
 }
 
 export function getPricelistConfigType(iotaNamesPackageId: string): string {
@@ -53,6 +53,6 @@ export function getIotaNamesRegistrationType(iotaNamesPackageId: string): string
     return `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
 }
 
-export function getIotaSubdomainRegistrationType(iotaNamesPackageId: string): string {
-    return `${iotaNamesPackageId}::subdomain_registration::SubdomainRegistration`;
+export function getIotaSubnameRegistrationType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::subname_registration::SubnameRegistration`;
 }

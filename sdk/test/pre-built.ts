@@ -50,7 +50,7 @@
 //     ]);
 //     // register test.iota for 2 years.
 //     const nft = iotaNamesTx.register({
-//         domain: uniqueName,
+//         name: uniqueName,
 //         years: 2,
 //         coinConfig: iotaNamesClient.config.coins.IOTA,
 //         coin: coinInput,

@@ -11,10 +11,10 @@ export {
     isNestedSubName,
     validateYears,
     getConfigType,
-    getDomainType,
+    getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
     getIotaNamesRegistrationType,
-    getIotaSubdomainRegistrationType,
+    getIotaSubnameRegistrationType,
 } from './helpers';
 export { isValidIotaName } from './utils';

@@ -21,8 +21,8 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
     let parts;
 
     if (NAME_REGEX.test(lowerCase)) {
-        let [path, domain] = lowerCase.split('@');
-        parts = [...(path ? path.split('.') : []), domain];
+        let [path, name] = lowerCase.split('@');
+        parts = [...(path ? path.split('.') : []), name];
     } else if (DOMAIN_REGEX.test(lowerCase)) {
         parts = lowerCase.split('.').slice(0, -1);
     } else {
