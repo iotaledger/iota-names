@@ -23,6 +23,10 @@ docker compose -f indexer/docker/docker-compose.yml build --build-arg CACHEBUST=
 
 Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.
 
+### Modify the docker-compose file
+
+Update the `docker-compose.yml` file to use the commented `# Localnet values:`" instead of devnet for the start command of the iota-names-indexer.
+
 ### Start the indexer
 
 ```bash
