@@ -8,7 +8,7 @@ import { useIotaNamesClient } from '@/contexts';
 import { createAuctionMetadataQuery } from '../lib/utils/metadata';
 import { useAuctionHouse } from './useAuctionHouse';
 
-export function useGetAuctionMetadata(domainName: string) {
+export function useGetAuctionMetadata(name: string) {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: auctionHouseData } = useAuctionHouse();
 
@@ -16,7 +16,7 @@ export function useGetAuctionMetadata(domainName: string) {
     const { packageId } = iotaNamesClient.config;
 
     const queryConfig = createAuctionMetadataQuery({
-        domainName,
+        name,
         auctionsTableObjectId,
         packageId,
         graphQLClient: iotaNamesClient.graphQlClient,

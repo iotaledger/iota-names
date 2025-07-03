@@ -42,9 +42,9 @@ export type NameUpdate =
           allowTimeExtension: boolean;
       }
     | {
-          type: 'new-subdomain';
+          type: 'new-subname';
           parentNftId: string;
-          subdomainName: string;
+          subname: string;
           expirationTimeParent: number;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
@@ -105,10 +105,10 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             allowTimeExtension: update.allowTimeExtension,
                         });
                         break;
-                    case 'new-subdomain':
-                        const subnameNft = iotaNamesTx.createSubName({
+                    case 'new-subname':
+                        const subnameNft = iotaNamesTx.createSubname({
                             parentNft: tx.object(update.parentNftId),
-                            name: update.subdomainName,
+                            name: update.subname,
                             expirationTimestampMs: update.expirationTimeParent,
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
