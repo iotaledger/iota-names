@@ -58,7 +58,7 @@ export function NamePurchaseCard({
         <div
             className={clsx(
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
-                status !== NamePurchaseStatus.Unavailable && 'hover:bg-names-primary-30',
+                status !== NamePurchaseStatus.Unavailable && 'hover:bg-names-gradient-primary',
             )}
         >
             <div
