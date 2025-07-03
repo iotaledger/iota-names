@@ -3,20 +3,16 @@
 
 interface NameCardBodyProps {
     title: string;
-    cta?: React.ReactNode;
 }
 
-export function NameCardBody({ title, cta, children }: React.PropsWithChildren<NameCardBodyProps>) {
+export function NameCardBody({ title, children }: React.PropsWithChildren<NameCardBodyProps>) {
     return (
-        <div className="p-md flex flex-col gap-y-md">
-            <div className="flex flex-col gap-y-xs">
-                <h4 className="text-names-neutral-92 text-title-md text-ellipsis overflow-hidden">
-                    {title}
-                </h4>
+        <div className="p-md flex flex-col gap-y-xs">
+            <h4 className="text-names-neutral-92 text-title-md text-ellipsis overflow-hidden">
+                {title}
+            </h4>
 
-                {children}
-            </div>
-            {cta}
+            <div className="flex flex-col gap-y-md">{children}</div>
         </div>
     );
 }

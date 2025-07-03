@@ -1,7 +1,9 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export function NameGradient() {
+import { SVGProps } from 'react';
+
+export function NameDisplayGradient(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -9,6 +11,7 @@ export function NameGradient() {
             height="220"
             viewBox="0 0 220 220"
             fill="none"
+            {...props}
         >
             <g clipPath="url(#paint0_angular_11012_3982_clip_path)">
                 <g transform="matrix(0.2645 0.26825 -0.26825 0.2645 113.75 110)">

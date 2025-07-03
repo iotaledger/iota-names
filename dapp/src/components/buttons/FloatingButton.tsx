@@ -10,7 +10,7 @@ interface FloatingButtonProps {
 export function FloatingButton({ icon, onClick }: FloatingButtonProps) {
     return (
         <ButtonUnstyled
-            className="absolute right-2 top-2 h-9 w-9 cursor-pointer rounded-full p-xs opacity-0 transition-opacity duration-300 bg-iota-primary-30 group-hover:opacity-100 [&_svg]:h-5 [&_svg]:w-5 text-iota-neutral-100"
+            className="h-9 w-9 rounded-full p-xs bg-iota-primary-30 hover:bg-opacity-80 transition-colors duration-150 [&_svg]:h-5 [&_svg]:w-5 text-iota-neutral-100"
             onClick={onClick}
         >
             {icon}

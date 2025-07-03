@@ -1,20 +1,27 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import { MoreHoriz } from '@iota/apps-ui-icons';
 
-import { NameNftDisplay, type NameNftDisplayProps } from './NameNFTDisplay';
+import { MenuListItem } from '@/lib/types/components';
 
-interface NameCardProps extends NameNftDisplayProps {
-    header?: React.ReactNode;
+import { ContextMenuButton } from '../buttons/ContextMenuButton';
+import { NameCardSize } from './helpers/enums';
+import { CommonNameCardProps } from './helpers/interfaces';
+import { NameNftDisplay } from './NameNftDisplay';
+
+interface NameCardProps extends CommonNameCardProps {
+    menuOptions?: MenuListItem[];
 }
 
 export function NameCard({
     name,
     subname,
-    image,
     expiration,
-    header,
+    image,
+    badge,
+    size = NameCardSize.Medium,
+    menuOptions,
     children,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
@@ -24,7 +31,9 @@ export function NameCard({
                 subname={subname}
                 expiration={expiration}
                 image={image}
-                header={header}
+                size={size}
+                badge={badge}
+                button={<ContextMenuButton icon={<MoreHoriz />} options={menuOptions ?? []} />}
             />
 
             {children}
