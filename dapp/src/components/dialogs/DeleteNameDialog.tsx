@@ -40,7 +40,6 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
 
     const isNameSubName = nft ? isSubName(nft.name) : null;
-    const isExpired = nft.isExpired || false;
 
     // Create updates
     const updates: NameUpdate[] = [];
@@ -91,7 +90,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     }
 
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
-    const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !isExpired;
+    const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !nft.isExpired;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -99,7 +98,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
                 <Header title={`Delete ${nft.name}`} onClose={closeDialog} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col gap-y-md">
-                        {isExpired && !isLoading ? (
+                        {nft.isExpired && !isLoading ? (
                             <InfoBox
                                 title={`${nft.name} is expired`}
                                 supportingText="This name is expired and can be deleted."
