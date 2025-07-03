@@ -36,6 +36,8 @@ public struct CoreConfig has copy, drop, store {
     payments_version: u8,
     /// Maximum number of years available for a domain.
     max_years: u8,
+    /// List of valid user data keys.
+    valid_user_data_keys: VecSet<String>,
     // Extra fields for future use.
     extra: VecMap<String, String>,
 }
@@ -46,6 +48,7 @@ public fun new(
     payments_version: u8,
     max_years: u8,
     valid_tlds: vector<String>,
+    valid_user_data_keys: vector<String>,
     extra: VecMap<String, String>,
 ): CoreConfig {
     CoreConfig {
@@ -54,6 +57,7 @@ public fun new(
         payments_version,
         max_years,
         valid_tlds: vec_set::from_keys(valid_tlds),
+        valid_user_data_keys: vec_set::from_keys(valid_user_data_keys),
         extra,
     }
 }
@@ -76,6 +80,10 @@ public fun payments_version(config: &CoreConfig): u8 {
 
 public fun max_years(config: &CoreConfig): u8 {
     config.max_years
+}
+
+public fun is_valid_user_data_key(config: &CoreConfig, user_data_key: &String): bool {
+    config.valid_user_data_keys.contains(user_data_key)
 }
 
 public fun assert_is_valid_for_sale(config: &CoreConfig, domain: &Domain) {
