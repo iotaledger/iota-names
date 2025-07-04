@@ -52,7 +52,7 @@ const parseOwnedNamesObjects = () => {
     const namesObjects: NameData[] = ownedNamesObjects.map(({ data }) => ({
         objectId: data?.objectId || '',
         //@ts-ignore-next-line
-        name: data?.content!.fields!.name_name || '',
+        name: data?.content!.fields!.name_str || '',
     }));
 
     // Map the names as `name: address`.
