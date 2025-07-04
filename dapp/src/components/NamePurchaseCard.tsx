@@ -4,71 +4,49 @@
 import clsx from 'clsx';
 
 interface NamePurchaseCardProps {
-    /**
-     * The name search
-     */
     name: string;
-    /**
-     * Optional status message
-     */
-    supportingText?: string;
-    /**
-     * The price of the name
-     */
-    value?: string;
-    /**
-     * Currency symbol
-     */
-    currency?: string;
-    /**
-     * Supporting text of value
-     */
-    supportingTextValue?: string;
-    /**
-     *  Name is available
-     */
+    statusMessage?: string;
+    price?: string;
+    priceSymbol?: string;
+    priceSupportingText?: string;
     isAvailable: boolean;
-    /**
-     * Action buttons
-     */
-    children?: React.ReactNode;
 }
 
 export function NamePurchaseCard({
     name,
-    supportingText,
-    value,
-    supportingTextValue,
+    statusMessage,
+    price,
+    priceSupportingText,
     isAvailable,
+    priceSymbol,
     children,
-    currency,
-}: NamePurchaseCardProps): React.JSX.Element {
+}: React.PropsWithChildren<NamePurchaseCardProps>): React.JSX.Element {
     const bgCard = isAvailable ? 'bg-names-neutral-10' : 'bg-names-error-20';
     const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
-    const hasCurrency = currency ?? 'IOTA';
+    const defaultPriceSymbol = priceSymbol ?? 'IOTA';
 
     return (
         <div
             className={clsx(
-                'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] space-y-4',
+                'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] gap-y-sm',
                 isAvailable && 'hover:bg-names-gradient-primary',
             )}
         >
             <div
                 className={clsx(
-                    'group flex h-full w-full flex-col justify-between rounded-[calc(1rem-1px)] p-md--rs space-y-4',
+                    'group flex h-full w-full flex-col justify-between rounded-[15px] p-md--rs gap-y-sm',
                     bgCard,
                 )}
             >
-                <div className="flex text-headline-md gap-1">
+                <div className="flex text-headline-md gap-xxs">
                     <span className="text-names-neutral-50">@</span>
                     <h2 className={clsx(textColorStatus)}>{name}</h2>
                 </div>
-                <div className="flex justify-between space-x-4 h-auto w-full max-w-[744px]">
-                    <div className="flex flex-row gap-2 text-body-md items-center">
-                        <div className={clsx('text-body-sm', textColorStatus)}>{textStatus}</div>
-                        {supportingText && (
+                <div className="flex justify-between space-x-4 h-auto w-full">
+                    <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
+                        <div className={clsx('text-body-md', textColorStatus)}>{textStatus}</div>
+                        {statusMessage && (
                             <p
                                 className={clsx(
                                     'text-names-neutral-70 transition-opacity duration-100',
@@ -77,27 +55,27 @@ export function NamePurchaseCard({
                                         : 'opacity-0 group-hover:opacity-100',
                                 )}
                             >
-                                {supportingText}
+                                {statusMessage}
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-row gap-md group">
-                        <div className="flex flex-col">
-                            {value && (
-                                <div className="flex flex-col items-start">
-                                    <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-1">
-                                        {value}
-                                        <span className="text-names-neutral-70">{hasCurrency}</span>
+                    <div className="flex flex-row gap-md">
+                        {price && (
+                            <div className="flex flex-col items-start">
+                                <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
+                                    {price}
+                                    <span className="text-names-neutral-70">
+                                        {defaultPriceSymbol}
+                                    </span>
+                                </p>
+                                {priceSupportingText && (
+                                    <p className="text-label-sm text-names-neutral-70">
+                                        {priceSupportingText}
                                     </p>
-                                    {supportingTextValue && (
-                                        <p className="text-label-sm text-names-neutral-70">
-                                            {supportingTextValue}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        <div className="group-hover:flex transition-opacity duration-100 w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
+                                )}
+                            </div>
+                        )}
+                        <div className="flex transition-opacity duration-100 w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
                             {children}
                         </div>
                     </div>

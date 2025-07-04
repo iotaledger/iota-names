@@ -87,7 +87,7 @@ export function AvailabilityCheck() {
         setSearchValue('');
         setName('');
     }
-    const supportingText =
+    const statusMessage =
         isUnavailable && !isAuctionInProgress
             ? 'Name is already taken.'
             : isAuctionInProgress
@@ -95,6 +95,7 @@ export function AvailabilityCheck() {
               : undefined;
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
+    const cleanName = normalizeNameInput(name);
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
@@ -130,17 +131,17 @@ export function AvailabilityCheck() {
                     <div className="flex flex-col items-center space-y-4 w-full">
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
-                                name={name}
+                                name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                value={
+                                price={
                                     isAvailable
                                         ? formatNanosToIota(nameRecordData.price, {
                                               showIotaSymbol: false,
                                           })
                                         : undefined
                                 }
-                                supportingTextValue={isAvailable ? 'Price' : undefined}
-                                supportingText={supportingText}
+                                priceSupportingText={isAvailable ? 'Price' : undefined}
+                                statusMessage={statusMessage}
                             >
                                 {isUnavailable ? null : isConnected ? (
                                     <Button
@@ -158,14 +159,14 @@ export function AvailabilityCheck() {
                             <p>Loading...</p>
                         ) : canBid ? (
                             <NamePurchaseCard
-                                name={name}
+                                name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                value={formatNanosToIota(
+                                price={formatNanosToIota(
                                     auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
                                     { showIotaSymbol: false },
                                 )}
-                                supportingTextValue="Minimum bid"
-                                supportingText={supportingText}
+                                priceSupportingText="Minimum bid"
+                                statusMessage={statusMessage}
                             >
                                 {isConnected ? (
                                     <Button
