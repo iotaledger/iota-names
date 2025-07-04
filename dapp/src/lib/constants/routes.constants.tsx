@@ -6,17 +6,18 @@ import { Discord } from '@iota/apps-ui-icons';
 import { X } from '@/public/icons';
 
 import { ProtectedRouteTitle } from '../enums';
-import type { PublicRoute, Route } from '../interfaces';
+import type { Route } from '../interfaces';
 
 export const MY_NAMES_ROUTE: Route = {
     title: ProtectedRouteTitle.MyNames,
     path: '/my-names',
     id: 'my-names',
+    isProtected: true,
 };
 
 export const PROTECTED_ROUTES = [MY_NAMES_ROUTE] as const satisfies Route[];
 
-export const CONNECT_ROUTE: PublicRoute = {
+export const CONNECT_ROUTE: Route = {
     path: '/',
 };
 

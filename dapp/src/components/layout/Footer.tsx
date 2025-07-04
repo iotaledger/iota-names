@@ -12,11 +12,11 @@ export function Footer() {
             <div className="container flex flex-col sm:flex-row justify-between items-center gap-y-lg">
                 <div className="flex items-center gap-sm">
                     <NamesLogoBranded className="w-[14.71px] h-[22.97px]" />
-                    <span className="text-iota-neutral-70 text-label-sm tracking-normal">
+                    <span className="text-names-neutral-70 text-label-sm tracking-normal">
                         © {COPYRIGHT_YEAR} IOTA Names. All Rights Reserved.
                     </span>
                 </div>
-                <div className="flex flex-row gap-md items-center text-iota-neutral-70 text-body-md">
+                <div className="flex flex-row gap-md items-center text-names-neutral-70 text-body-md">
                     {FOOTER_USE_CONDITIONS_LINKS.map(({ path, title }) => (
                         <Link
                             key={title}
@@ -27,8 +27,8 @@ export function Footer() {
                         </Link>
                     ))}
                     {FOOTER_EXTERNAL_LINKS.map(({ path, icon }, index) => (
-                        <div className="[&_svg]:h-6 [&_svg]:w-6">
-                            <Link key={index} href={path} target="_blank" rel="noopener noreferrer">
+                        <div key={index} className="[&_svg]:h-6 [&_svg]:w-6">
+                            <Link href={path} target="_blank" rel="noopener noreferrer">
                                 {icon}
                             </Link>
                         </div>

@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
 import { NamesLogoWeb } from '@/public/icons';
 
-import SearchBox from '../Searchbox';
+import { SearchBox } from '../Searchbox';
 
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
@@ -19,8 +19,8 @@ export function Navbar() {
 
     return (
         <nav className="sticky top-0 z-50 backdrop-blur-lg">
-            <div className="container pt-5 pb-3.5 flex flex-col gap-y-3">
-                <div className="flex flex-row justify-between items-center gap-x-4">
+            <div className="container py-md flex flex-col gap-y-sm">
+                <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">
                         <Link href="/" aria-label="Go to homepage">
                             <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
@@ -41,14 +41,14 @@ export function Navbar() {
                         )}
                     </div>
                     {isConnected && isOnMyNamesPage && (
-                        <div className="hidden md:flex w-full justify-center">
+                        <div className="hidden md:flex justify-center max-w-[360px] w-full">
                             <SearchBox />
                         </div>
                     )}
                     <ConnectButton connectText="Connect" />
                 </div>
                 {isConnected && isOnMyNamesPage && (
-                    <div className="flex md:hidden w-full justify-center">
+                    <div className="flex md:hidden w-full max-w-[360px] justify-center mx-auto">
                         <SearchBox />
                     </div>
                 )}

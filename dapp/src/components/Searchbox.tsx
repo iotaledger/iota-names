@@ -6,7 +6,7 @@
 import { ListItem, Search, SearchBarType, Suggestion } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
-export default function SearchBox() {
+export function SearchBox() {
     const [searchValue, setSearchValue] = useState('');
     const [filteredSuggestions, setFilteredSuggestions] = useState<Suggestion[]>([]);
 
@@ -32,7 +32,7 @@ export default function SearchBox() {
     };
 
     return (
-        <div className="max-w-[360px] h-full w-full">
+        <div className="w-full">
             <Search
                 searchValue={searchValue}
                 suggestions={filteredSuggestions}
