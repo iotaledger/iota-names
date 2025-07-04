@@ -26,7 +26,7 @@ public fun new(
     iota_names: &mut IotaNames,
     subname: &SubnameRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     expiration_timestamp_ms: u64,
     allow_creation: bool,
     allow_time_extension: bool,
@@ -36,7 +36,7 @@ public fun new(
         iota_names,
         subname.nft(),
         clock,
-        subname_name,
+        subname,
         expiration_timestamp_ms,
         allow_creation,
         allow_time_extension,
@@ -48,7 +48,7 @@ public fun new_leaf(
     iota_names: &mut IotaNames,
     subname: &SubnameRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     target: address,
     ctx: &mut TxContext,
 ) {
@@ -56,7 +56,7 @@ public fun new_leaf(
         iota_names,
         subname.nft(),
         clock,
-        subname_name,
+        subname,
         target,
         ctx,
     );
@@ -66,13 +66,13 @@ public fun remove_leaf(
     iota_names: &mut IotaNames,
     subname: &SubnameRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
 ) {
     subnames::remove_leaf(
         iota_names,
         subname.nft(),
         clock,
-        subname_name,
+        subname,
     );
 }
 
@@ -80,7 +80,7 @@ public fun edit_setup(
     iota_names: &mut IotaNames,
     parent: &SubnameRegistration,
     clock: &Clock,
-    subname_name: String,
+    subname: String,
     allow_creation: bool,
     allow_time_extension: bool,
 ) {
@@ -88,7 +88,7 @@ public fun edit_setup(
         iota_names,
         parent.nft(),
         clock,
-        subname_name,
+        subname,
         allow_creation,
         allow_time_extension,
     );
