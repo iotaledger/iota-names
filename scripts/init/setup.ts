@@ -29,7 +29,6 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
                 metadataId: await getCoinMetadataId(network, iotaCoinType),
             },
         },
-        denyListPackageId: packageInfo.DenyList.packageId,
         iotaNamesObjectId: packageInfo.IotaNames.objectId,
         packageId: packageInfo.IotaNames.packageId,
         paymentsPackageId: packageInfo.Payments.packageId,
@@ -37,8 +36,8 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         registryTableId: '',
         reverseRegistryTableId: '',
         couponsPackageId: packageInfo.Coupons.packageId,
-        subNamesPackageId: packageInfo.Subdomains.packageId,
-        tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+        subNamesPackageId: packageInfo.Subnames.packageId,
+        tempSubnameProxyPackageId: packageInfo.TempSubnameProxy.packageId,
         upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);
@@ -48,39 +47,28 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 
     const txb = new Transaction();
 
-    // authorize admin module
-    authorize({
-        txb,
-        adminCap: packageInfo.IotaNames.adminCap,
-        iotaNamesObjectId: packageInfo.IotaNames.objectId,
-        type: `${packageInfo.IotaNames.packageId}::admin::AdminAuth`,
-        iotaNamesPackageId: packageInfo.IotaNames.packageId,
-    });
     for (const [key, pkg] of Object.entries(packageInfo)) {
         const data = packages[key as keyof typeof packages];
-        if (data && 'authorizationType' in data) {
-            authorize({
-                txb,
-                adminCap: packageInfo.IotaNames.adminCap,
-                iotaNamesObjectId: packageInfo.IotaNames.objectId,
-                type: data.authorizationType(pkg.packageId),
-                iotaNamesPackageId: packageInfo.IotaNames.packageId,
-            });
+        if (data && 'authorizationTypes' in data) {
+            const authTypes = data.authorizationTypes(pkg.packageId);
+            for (const authType of authTypes) {
+                authorize({
+                    txb,
+                    adminCap: packageInfo.IotaNames.adminCap,
+                    iotaNamesObjectId: packageInfo.IotaNames.objectId,
+                    type: authType,
+                    iotaNamesPackageId: packageInfo.IotaNames.packageId,
+                });
+            }
         }
     }
     // Call setup functions for our packages.
-    packages.Subdomains.setupFunction(
+    packages.Subnames.setupFunction(
         txb,
-        packageInfo.Subdomains.packageId,
+        packageInfo.Subnames.packageId,
         packageInfo.IotaNames.adminCap,
         packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.packageId,
-    );
-    packages.DenyList.setupFunction(
-        txb,
-        packageInfo.DenyList.packageId,
-        packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.objectId,
     );
     packages.IotaNames.setupFunction(
         txb,

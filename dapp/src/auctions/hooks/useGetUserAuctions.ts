@@ -11,7 +11,7 @@ import { useAuctionHouse } from './useAuctionHouse';
 import { useGetAddressAuctionHistory } from './useGetAddressAuctionHistory';
 
 export interface AuctionDetails {
-    domain: string;
+    name: string;
     metadata: AuctionMetadata | null;
     isLoading: boolean;
     error: boolean;
@@ -21,28 +21,28 @@ export function useGetUserAuctions() {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: auctionHouseData } = useAuctionHouse();
     const {
-        data: userAuctionDomains = [],
-        isLoading: isLoadingDomains,
-        error: domainsError,
+        data: userAuctionNames = [],
+        isLoading: isLoadingNames,
+        error: namesError,
     } = useGetAddressAuctionHistory();
 
     const { auctionsTableObjectId } = auctionHouseData || {};
     const { packageId } = iotaNamesClient.config;
 
     const combinedResult = useQueries({
-        queries: userAuctionDomains.map((domainName) =>
+        queries: userAuctionNames.map((name) =>
             createAuctionMetadataQuery({
-                domainName,
+                name,
                 auctionsTableObjectId,
                 packageId,
                 graphQLClient: iotaNamesClient.graphQlClient,
             }),
         ),
         combine: (results) => {
-            const auctionDetails: AuctionDetails[] = userAuctionDomains.map((domain, index) => {
+            const auctionDetails: AuctionDetails[] = userAuctionNames.map((name, index) => {
                 const result = results[index];
                 return {
-                    domain,
+                    name,
                     metadata: result.data || null,
                     isLoading: result.isLoading,
                     error: !!result.error,
@@ -51,9 +51,9 @@ export function useGetUserAuctions() {
 
             return {
                 data: auctionDetails,
-                isLoading: isLoadingDomains || results.some((result) => result.isLoading),
-                error: !!domainsError || results.some((result) => result.error),
-                userAuctionDomains,
+                isLoading: isLoadingNames || results.some((result) => result.isLoading),
+                error: !!namesError || results.some((result) => result.error),
+                userAuctionNames,
             };
         },
     });

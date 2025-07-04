@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_names::{domain::Domain, registry::NameRecord};
+use iota_names::{name::Name, registry::NameRecord};
 use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
 use serde::{Deserialize, Serialize};
 
@@ -24,11 +24,11 @@ pub(crate) enum IotaNamesEvent {
     UserDataSet(UserDataSetEvent),
     UserDataUnset(UserDataUnsetEvent),
     Transaction(TransactionEvent),
-    // `subdomains`
-    NodeSubdomainCreated(NodeSubdomainCreatedEvent),
-    NodeSubdomainBurned(NodeSubdomainBurnedEvent),
-    LeafSubdomainCreated(LeafSubdomainCreatedEvent),
-    LeafSubdomainRemoved(LeafSubdomainRemovedEvent),
+    // `subnames`
+    NodeSubnameCreated(NodeSubnameCreatedEvent),
+    NodeSubnameBurned(NodeSubnameBurnedEvent),
+    LeafSubnameCreated(LeafSubnameCreatedEvent),
+    LeafSubnameRemoved(LeafSubnameRemovedEvent),
 }
 
 impl IotaNamesEvent {
@@ -59,18 +59,16 @@ impl IotaNamesEvent {
             "UserDataSetEvent" => Self::UserDataSet(bcs::from_bytes(&event.contents)?),
             "UserDataUnsetEvent" => Self::UserDataUnset(bcs::from_bytes(&event.contents)?),
             "TransactionEvent" => Self::Transaction(bcs::from_bytes(&event.contents)?),
-            // `subdomains`
-            "NodeSubdomainCreatedEvent" => {
-                Self::NodeSubdomainCreated(bcs::from_bytes(&event.contents)?)
+            // `subnames`
+            "NodeSubnameCreatedEvent" => {
+                Self::NodeSubnameCreated(bcs::from_bytes(&event.contents)?)
             }
-            "NodeSubdomainBurnedEvent" => {
-                Self::NodeSubdomainBurned(bcs::from_bytes(&event.contents)?)
+            "NodeSubnameBurnedEvent" => Self::NodeSubnameBurned(bcs::from_bytes(&event.contents)?),
+            "LeafSubnameCreatedEvent" => {
+                Self::LeafSubnameCreated(bcs::from_bytes(&event.contents)?)
             }
-            "LeafSubdomainCreatedEvent" => {
-                Self::LeafSubdomainCreated(bcs::from_bytes(&event.contents)?)
-            }
-            "LeafSubdomainRemovedEvent" => {
-                Self::LeafSubdomainRemoved(bcs::from_bytes(&event.contents)?)
+            "LeafSubnameRemovedEvent" => {
+                Self::LeafSubnameRemoved(bcs::from_bytes(&event.contents)?)
             }
             _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
         }))
@@ -81,7 +79,7 @@ impl IotaNamesEvent {
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionStartedEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub start_timestamp_ms: u64,
     pub end_timestamp_ms: u64,
     pub starting_bid: u64,
@@ -90,20 +88,20 @@ pub(crate) struct AuctionStartedEvent {
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionBidEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub bid: u64,
     pub bidder: IotaAddress,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionExtendedEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub end_timestamp_ms: u64,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct AuctionFinalizedEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub start_timestamp_ms: u64,
     pub end_timestamp_ms: u64,
     pub winning_bid: u64,
@@ -129,31 +127,31 @@ pub struct CouponAppliedEvent {
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct NameRecordAddedEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub name_record: NameRecord,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct NameRecordRemovedEvent {
-    pub domain: Domain,
+    pub name: Name,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct TargetAddressSetEvent {
-    pub domain: Domain,
+    pub name: Name,
     pub target_address: Option<IotaAddress>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ReverseLookupSetEvent {
     pub default_address: IotaAddress,
-    pub default_name: Domain,
+    pub default_name: Name,
 }
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct ReverseLookupUnsetEvent {
     pub default_address: IotaAddress,
-    pub default_name: Domain,
+    pub default_name: Name,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -171,7 +169,7 @@ pub(crate) struct UserDataUnsetEvent {
 #[derive(Serialize, Deserialize)]
 pub(crate) struct TransactionEvent {
     pub app: String,
-    pub domain: Domain,
+    pub name: Name,
     pub years: u8,
     pub request_data_version: u8,
     pub base_amount: u64,
@@ -181,28 +179,28 @@ pub(crate) struct TransactionEvent {
     pub currency_amount: u64,
 }
 
-// `subdomains`
+// `subnames`
 
 #[derive(Serialize, Deserialize)]
-pub struct NodeSubdomainCreatedEvent {
-    pub domain: Domain,
+pub struct NodeSubnameCreatedEvent {
+    pub name: Name,
     pub expiration_timestamp_ms: u64,
     pub allow_creation: bool,
     pub allow_time_extension: bool,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct NodeSubdomainBurnedEvent {
-    pub domain: Domain,
+pub struct NodeSubnameBurnedEvent {
+    pub name: Name,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct LeafSubdomainCreatedEvent {
-    pub domain: Domain,
+pub struct LeafSubnameCreatedEvent {
+    pub name: Name,
     pub target: IotaAddress,
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct LeafSubdomainRemovedEvent {
-    pub domain: Domain,
+pub struct LeafSubnameRemovedEvent {
+    pub name: Name,
 }

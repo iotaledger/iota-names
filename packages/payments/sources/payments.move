@@ -37,7 +37,7 @@ public struct CoinTypeData has copy, drop, store {
 }
 
 /// This has to be called with our base payment currency.
-/// The payment has to be equal to the base price of the domain.
+/// The payment has to be equal to the base price of the name.
 /// We do not need to check the price feed for the base currency.
 public fun handle_base_payment<T>(
     iota_names: &mut IotaNames,

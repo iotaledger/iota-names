@@ -16,7 +16,7 @@ module iota_names::iota_names_registration;
 
 use iota::clock::{timestamp_ms, Clock};
 use iota_names::constants;
-use iota_names::domain::Domain;
+use iota_names::name::Name;
 use std::string::String;
 
 /* friend iota_names::registry; */
@@ -24,10 +24,10 @@ use std::string::String;
 /// The main access point for the user.
 public struct IotaNamesRegistration has key, store {
     id: UID,
-    /// The parsed domain.
-    domain: Domain,
-    /// The domain name that the NFT is for.
-    domain_name: String,
+    /// The parsed name.
+    name: Name,
+    /// The name that the NFT is for.
+    name_str: String,
     /// Timestamp in milliseconds when this NFT expires.
     expiration_timestamp_ms: u64,
 }
@@ -37,15 +37,15 @@ public struct IotaNamesRegistration has key, store {
 /// Creates a new `IotaNamesRegistration`.
 /// Can only be called by the `registry` module.
 public(package) fun new(
-    domain: Domain,
+    name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
     IotaNamesRegistration {
         id: object::new(ctx),
-        domain_name: domain.to_string(),
-        domain,
+        name,
+        name_str: name.to_string(),
         expiration_timestamp_ms: timestamp_ms(clock) + ((no_years as u64) * constants::year_ms()),
     }
 }
@@ -64,8 +64,8 @@ public(package) fun set_expiration_timestamp_ms(
 public(package) fun burn(self: IotaNamesRegistration) {
     let IotaNamesRegistration {
         id,
-        domain: _,
-        domain_name: _,
+        name: _,
+        name_str: _,
         expiration_timestamp_ms: _,
     } = self;
 
@@ -89,11 +89,11 @@ public fun has_expired_past_grace_period(self: &IotaNamesRegistration, clock: &C
 
 // === Getters ===
 
-/// Get the `domain` field of the `IotaNamesRegistration`.
-public fun domain(self: &IotaNamesRegistration): Domain { self.domain }
+/// Get the `name` field of the `IotaNamesRegistration`.
+public fun name(self: &IotaNamesRegistration): Name { self.name }
 
-/// Get the `domain_name` field of the `IotaNamesRegistration`.
-public fun domain_name(self: &IotaNamesRegistration): String { self.domain_name }
+/// Get the `name_str` field of the `IotaNamesRegistration`.
+public fun name_str(self: &IotaNamesRegistration): String { self.name_str }
 
 /// Get the `expiration_timestamp_ms` field of the `IotaNamesRegistration`.
 public fun expiration_timestamp_ms(self: &IotaNamesRegistration): u64 {
@@ -110,12 +110,12 @@ public fun uid_mut(self: &mut IotaNamesRegistration): &mut UID { &mut self.id }
 
 #[test_only]
 public fun new_for_testing(
-    domain: Domain,
+    name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
 ): IotaNamesRegistration {
-    new(domain, no_years, clock, ctx)
+    new(name, no_years, clock, ctx)
 }
 
 #[test_only]
@@ -130,8 +130,8 @@ public fun set_expiration_timestamp_ms_for_testing(
 public fun burn_for_testing(nft: IotaNamesRegistration) {
     let IotaNamesRegistration {
         id,
-        domain: _,
-        domain_name: _,
+        name: _,
+        name_str: _,
         expiration_timestamp_ms: _,
     } = nft;
 

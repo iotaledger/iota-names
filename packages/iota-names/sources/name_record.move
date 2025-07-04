@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Provides the records which are stored for each domain in the `Registry`.
+/// Provides the records which are stored for each name in the `Registry`.
 module iota_names::name_record;
 
 use iota::clock::{timestamp_ms, Clock};
@@ -15,14 +15,14 @@ public struct NameRecord has copy, drop, store {
     /// The ID of the `IotaNamesRegistration` assigned to this record.
     ///
     /// The owner of the corresponding `IotaNamesRegistration` has the rights to
-    /// be able to change and adjust the `target_address` of this domain.
+    /// be able to change and adjust the `target_address` of this name.
     ///
     /// It is possible that the ID changes if the record expires and is
     /// purchased by someone else.
     nft_id: ID,
     /// Timestamp in milliseconds when the record expires.
     expiration_timestamp_ms: u64,
-    /// The target address that this domain points to
+    /// The target address that this name points to
     target_address: Option<address>,
     /// Additional data which may be stored in a record
     data: VecMap<String, String>,
@@ -56,10 +56,10 @@ public fun new_leaf(parent_id: ID, target_address: Option<address>): NameRecord 
 ///
 /// Here's a meta example of how a PTB would look like:
 /// ```
-/// let record = moveCall('data', [domain_name]);
+/// let record = moveCall('data', [name]);
 /// moveCall('vec_map::insert', [record.data, key, value]);
 /// moveCall('vec_map::remove', [record.data, other_key]);
-/// moveCall('set_data', [domain_name, record.data]);
+/// moveCall('set_data', [name, record.data]);
 /// ```
 public fun set_data(self: &mut NameRecord, data: VecMap<String, String>) {
     self.data = data;
