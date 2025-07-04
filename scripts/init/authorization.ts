@@ -4,6 +4,8 @@
 
 import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
 
+import { ALLOWED_METADATA } from '../../sdk/src/constants';
+
 /**
  * A helper to authorize any app in the IotaNames object.
  */
@@ -162,22 +164,7 @@ export const addCoreConfig = ({
             txb.pure.u8(1),
             txb.pure.u8(5),
             txb.pure.vector('string', ['iota']),
-            txb.pure.vector('string', [
-                'avatar',
-                'twitter/x',
-                'discord',
-                'github',
-                'email',
-                'btc',
-                'eth',
-                'ltc',
-                'doge',
-                'sol',
-                'sui',
-                'website',
-                'ipfs',
-                'arweave',
-            ]),
+            txb.pure.vector('string', Object.values(ALLOWED_METADATA)),
             txb.moveCall({
                 target: '0x2::vec_map::empty',
                 typeArguments: ['0x1::string::String', '0x1::string::String'],
