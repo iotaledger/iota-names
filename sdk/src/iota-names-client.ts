@@ -34,7 +34,7 @@ export class IotaNamesClient {
         this.graphQlClient = config.graphQlClient;
 
         if ('network' in config) {
-            this.config = packages[config.network];
+            this.config = packages[config.network as keyof typeof packages];
         } else {
             this.config = config.packageInfo;
         }
