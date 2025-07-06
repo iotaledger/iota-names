@@ -2,41 +2,41 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A `temporary` proxy used to proxy subdomain requests
+/// A `temporary` proxy used to proxy subname requests
 /// because we can't use references in a PTB.
 ///
 /// Module has no tests as it's a plain proxy for other function calls.
 /// All validation happens on those functions.
 ///
 /// This package will stop being used when we've implemented references in PTBs.
-module iota_names_temp_subdomain_proxy::subdomain_proxy;
+module iota_names_temp_subname_proxy::subname_proxy;
 
 use iota::clock::Clock;
 use iota_names::controller;
 use iota_names::iota_names::IotaNames;
-use iota_names::subdomain_registration::SubdomainRegistration;
+use iota_names::subname_registration::SubnameRegistration;
 use std::string::String;
-use iota_names_subdomains::subdomains;
+use iota_names_subnames::subnames;
 
 /// Struct to authenticate this module in the IOTA-Names object, so it can be fetched dynamically by the CLI.
 /// It's not required for the functionality of this module.
-public struct SubdomainProxyAuth has drop {}
+public struct SubnameProxyAuth has drop {}
 
 public fun new(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     clock: &Clock,
-    subdomain_name: String,
+    subname_str: String,
     expiration_timestamp_ms: u64,
     allow_creation: bool,
     allow_time_extension: bool,
     ctx: &mut TxContext,
-): SubdomainRegistration {
-    subdomains::new(
+): SubnameRegistration {
+    subnames::new(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         clock,
-        subdomain_name,
+        subname_str,
         expiration_timestamp_ms,
         allow_creation,
         allow_time_extension,
@@ -46,17 +46,17 @@ public fun new(
 
 public fun new_leaf(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     clock: &Clock,
-    subdomain_name: String,
+    subname_str: String,
     target: address,
     ctx: &mut TxContext,
 ) {
-    subdomains::new_leaf(
+    subnames::new_leaf(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         clock,
-        subdomain_name,
+        subname_str,
         target,
         ctx,
     );
@@ -64,31 +64,31 @@ public fun new_leaf(
 
 public fun remove_leaf(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     clock: &Clock,
-    subdomain_name: String,
+    subname_str: String,
 ) {
-    subdomains::remove_leaf(
+    subnames::remove_leaf(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         clock,
-        subdomain_name,
+        subname_str,
     );
 }
 
 public fun edit_setup(
     iota_names: &mut IotaNames,
-    parent: &SubdomainRegistration,
+    parent: &SubnameRegistration,
     clock: &Clock,
-    subdomain_name: String,
+    subname: String,
     allow_creation: bool,
     allow_time_extension: bool,
 ) {
-    subdomains::edit_setup(
+    subnames::edit_setup(
         iota_names,
         parent.nft(),
         clock,
-        subdomain_name,
+        subname,
         allow_creation,
         allow_time_extension,
     );
@@ -96,13 +96,13 @@ public fun edit_setup(
 
 public fun set_target_address(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
     controller::set_target_address(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         new_target,
         clock,
     );
@@ -110,14 +110,14 @@ public fun set_target_address(
 
 public fun set_user_data(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     key: String,
     value: String,
     clock: &Clock,
 ) {
     controller::set_user_data(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         key,
         value,
         clock,
@@ -126,13 +126,13 @@ public fun set_user_data(
 
 public fun unset_user_data(
     iota_names: &mut IotaNames,
-    subdomain: &SubdomainRegistration,
+    subname: &SubnameRegistration,
     key: String,
     clock: &Clock,
 ) {
     controller::unset_user_data(
         iota_names,
-        subdomain.nft(),
+        subname.nft(),
         key,
         clock,
     );

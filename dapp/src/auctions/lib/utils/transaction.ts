@@ -10,7 +10,7 @@ export function buildCreateAuctionTransaction(
     auctionHouseId: string,
     senderAddress: string,
     bidAmountNanos: bigint,
-    targetDomain: string,
+    targetName: string,
 ) {
     const transaction = new Transaction();
 
@@ -22,7 +22,7 @@ export function buildCreateAuctionTransaction(
         arguments: [
             transaction.object(auctionHouseId),
             transaction.object(iotaNames),
-            transaction.pure.string(targetDomain),
+            transaction.pure.string(targetName),
             coin,
             transaction.object(IOTA_CLOCK_OBJECT_ID),
         ],
@@ -36,7 +36,7 @@ export function buildPlaceBidTransaction(
     auctionHouseId: string,
     senderAddress: string,
     bidAmountNanos: bigint,
-    targetDomain: string,
+    targetName: string,
 ) {
     const transaction = new Transaction();
 
@@ -47,7 +47,7 @@ export function buildPlaceBidTransaction(
         target: `${auctionPackageId}::auction::place_bid`,
         arguments: [
             transaction.object(auctionHouseId),
-            transaction.pure.string(targetDomain),
+            transaction.pure.string(targetName),
             coin,
             transaction.object(IOTA_CLOCK_OBJECT_ID),
         ],
@@ -56,11 +56,11 @@ export function buildPlaceBidTransaction(
     return transaction;
 }
 
-export function buildClaimDomainTransaction(
+export function buildClaimNameTransaction(
     auctionPackageId: string,
     auctionHouseId: string,
     senderAddress: string,
-    targetDomain: string,
+    targetName: string,
 ) {
     const transaction = new Transaction();
 
@@ -70,7 +70,7 @@ export function buildClaimDomainTransaction(
         target: `${auctionPackageId}::auction::claim`,
         arguments: [
             transaction.object(auctionHouseId),
-            transaction.pure.string(targetDomain),
+            transaction.pure.string(targetName),
             transaction.object(IOTA_CLOCK_OBJECT_ID),
         ],
     });

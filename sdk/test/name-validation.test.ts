@@ -55,7 +55,7 @@ describe('Name validation', () => {
         expect(isValidIotaName('test')).toBe(false);
     });
 
-    test('should be valid with only domain at-style', () => {
+    test('should be valid with only name at-style', () => {
         expect(isValidIotaName('@test')).toBe(true);
     });
 

@@ -10,7 +10,7 @@
 /// IotaNames, they're named with a prefix `auth_*`. Once authorized, application can
 /// get mutable access to the `Registry` and add to the application `Balance`.
 ///
-/// At any moment any of the applications can be deathorized by the Admin
+/// At any moment any of the applications can be deauthorized by the Admin
 /// making it impossible for the deauthorized module to access the registry.
 /// ---
 /// Package Upgrades in mind:

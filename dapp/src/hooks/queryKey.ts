@@ -29,10 +29,10 @@ export const queryKey = {
     userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
     placeBid: (address: string) => [queryKey.all, 'place-bid', address],
     auctionMetadata: (name: string) => [queryKey.all, 'auction-metadata', name],
-    claimAuction: (domain: string, address?: string) => [
+    claimAuction: (name: string, address?: string) => [
         queryKey.all,
         'claim-auction',
-        domain,
+        name,
         address,
     ],
 };

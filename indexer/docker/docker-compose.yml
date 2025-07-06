@@ -23,6 +23,8 @@ services:
         max_attempts: 3
     networks:
       - indexer-metrics-net
+    volumes:
+      - indexer_progress:/data
     environment:
       - RUST_LOG=info,iota_names_indexer=debug,iota_data_ingestion_core=off
       - IOTA_NAMES_PACKAGE_ADDRESS=${IOTA_NAMES_PACKAGE_ADDRESS}
@@ -32,13 +34,19 @@ services:
       - IOTA_NAMES_REVERSE_REGISTRY_ID=${IOTA_NAMES_REVERSE_REGISTRY_ID}
       - IOTA_NAMES_AUCTION_PACKAGE_ADDRESS=${IOTA_NAMES_AUCTION_PACKAGE_ADDRESS}
       - IOTA_NAMES_COUPONS_PACKAGE_ADDRESS=${IOTA_NAMES_COUPONS_PACKAGE_ADDRESS}
-      - IOTA_NAMES_SUBDOMAINS_PACKAGE_ADDRESS=${IOTA_NAMES_SUBDOMAINS_PACKAGE_ADDRESS}
+      - IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS=${IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS}
       - IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID=${IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command:
       - "start"
-      - "--node-url=http://host.docker.internal:9000"
+      - "--prometheus-url=http://prometheus:9090"
+      # Localnet values:
+      # - "--node-url=http://host.docker.internal:9000"
+      # - "--checkpoint-url=http://host.docker.internal:9000"
+      # Devnet values:
+      - "--node-url=https://api.devnet.iota.cafe"
+      - "--checkpoint-url=https://checkpoints.devnet.iota.cafe"
 
   prometheus:
     image: prom/prometheus:latest
@@ -72,6 +80,7 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+  indexer_progress:
 
 networks:
   indexer-metrics-net:

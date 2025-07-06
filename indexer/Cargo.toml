@@ -18,6 +18,7 @@ diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15"
 futures = "0.3"
 prometheus = "0.14"
+reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 tokio = "=1.44.2"
@@ -29,8 +30,10 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["s
 bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version" }
 iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core" }
 iota-json = { git = "https://github.com/iotaledger/iota", package = "iota-json" }
+iota-json-rpc-types = { git = "https://github.com/iotaledger/iota", package = "iota-json-rpc-types" }
 iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-metrics" }
 iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
+iota-sdk = { git = "https://github.com/iotaledger/iota", package = "iota-sdk" }
 iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types" }
 move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types" }
 

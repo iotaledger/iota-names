@@ -32,7 +32,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     const account = useCurrentAccount();
 
     const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
-        useClaimAuctionTransaction(account?.address || '', auction.domain);
+        useClaimAuctionTransaction(account?.address || '', auction.name);
 
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
@@ -50,7 +50,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             // Invalidate auction so that it is detected as claimed
-            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.domain) });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.name) });
             // Refresh owned names so the claimed name appears
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
@@ -74,7 +74,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         return (
             <Card type={CardType.Filled}>
                 <div className="text-red-400">
-                    <p className="font-medium">{auction.domain}</p>
+                    <p className="font-medium">{auction.name}</p>
                     <p className="text-sm">Failed to load auction data</p>
                 </div>
             </Card>
@@ -109,7 +109,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                     text="Bid Again"
                     onClick={() => {
                         if (onBidClick) {
-                            onBidClick(auction.domain);
+                            onBidClick(auction.name);
                         }
                     }}
                 />
@@ -123,7 +123,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         <Card type={CardType.Filled}>
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-lg">{auction.domain}</h3>
+                    <h3 className="font-medium text-lg">{auction.name}</h3>
                     <AuctionStatusBadge status={auctionStatus} />
                 </div>
 

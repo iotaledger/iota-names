@@ -14,13 +14,14 @@ use iota::vec_map::VecMap;
 use iota_names::core_config::CoreConfig;
 use iota_names::constants::year_ms;
 use iota_names::controller::{Self, ControllerAuth};
-use iota_names::domain::{Self, Domain};
+use iota_names::name::{Self, Name};
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
 use iota_names::register::RegisterAuth;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
-use iota_names::subdomain_registration;
+use iota_names::subname_registration;
+use iota_names::test_init_utils;
 use std::option::{extract, some, none};
 use std::string::{utf8, String};
 
@@ -40,7 +41,7 @@ use fun unset_object_reverse_lookup_util as Scenario.unset_object_reverse_lookup
 const IOTA_NAMES_ADDRESS: address = @0xA001;
 const FIRST_ADDRESS: address = @0xB001;
 const SECOND_ADDRESS: address = @0xB002;
-const DOMAIN_NAME: vector<u8> = b"abc.iota";
+const NAME: vector<u8> = b"abc.iota";
 const DATA_KEY_AVATAR: vector<u8> = b"avatar";
 const DATA_KEY_IPFS: vector<u8> = b"ipfs";
 const NANOS_PER_IOTA: u64 = 1_000_000_000;
@@ -61,7 +62,7 @@ fun test_init(): Scenario {
         let admin_cap = scenario.take_from_sender<AdminCap>();
         let mut iota_names = scenario.take_shared<IotaNames>();
 
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
 
         test_scenario::return_shared(iota_names);
         scenario.return_to_sender(admin_cap);
@@ -72,7 +73,7 @@ fun test_init(): Scenario {
 fun setup(scenario: &mut Scenario, sender: address, clock_tick: u64) {
     let nft = register_util<IOTA>(
         scenario,
-        DOMAIN_NAME.to_string(),
+        NAME.to_string(),
         1,
         1200 * NANOS_PER_IOTA,
         clock_tick,
@@ -99,11 +100,11 @@ public fun set_target_address_util(
     test_scenario::return_shared(iota_names);
 }
 
-public fun set_reverse_lookup_util(scenario: &mut Scenario, sender: address, domain_name: String) {
+public fun set_reverse_lookup_util(scenario: &mut Scenario, sender: address, name: String,) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    controller::set_reverse_lookup(&mut iota_names, domain_name, ctx(scenario));
+    controller::set_reverse_lookup(&mut iota_names, name, ctx(scenario));
 
     test_scenario::return_shared(iota_names);
 }
@@ -112,12 +113,12 @@ public fun set_object_reverse_lookup_util(
     scenario: &mut Scenario,
     id: &mut UID,
     sender: address,
-    domain_name: String,
+    name: String,
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    controller::set_object_reverse_lookup(&mut iota_names, id, domain_name);
+    controller::set_object_reverse_lookup(&mut iota_names, id, name);
     test_scenario::return_shared(iota_names);
 }
 
@@ -202,25 +203,25 @@ public fun unset_user_data_util(
 
 fun lookup_util(
     scenario: &mut Scenario,
-    domain_name: String,
+    name: String,
     expected_target_addr: Option<address>,
 ) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let iota_names = scenario.take_shared<IotaNames>();
 
     let registry = iota_names.registry<Registry>();
-    let record = extract(&mut lookup(registry, domain::new(domain_name)));
+    let record = extract(&mut lookup(registry, name::new(name)));
     assert_eq(record.target_address(), expected_target_addr);
 
     test_scenario::return_shared(iota_names);
 }
 
-fun get_user_data(scenario: &mut Scenario, domain_name: String): VecMap<String, String> {
+fun get_user_data(scenario: &mut Scenario, name: String,): VecMap<String, String> {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let iota_names = scenario.take_shared<IotaNames>();
 
     let registry = iota_names.registry<Registry>();
-    let record = extract(&mut lookup(registry, domain::new(domain_name)));
+    let record = extract(&mut lookup(registry, name::new(name)));
     let data = *record.data();
     test_scenario::return_shared(iota_names);
 
@@ -230,14 +231,14 @@ fun get_user_data(scenario: &mut Scenario, domain_name: String): VecMap<String, 
 fun reverse_lookup_util(
     scenario: &mut Scenario,
     addr: address,
-    expected_domain_name: Option<Domain>,
+    expected_name: Option<Name>,
 ) {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let iota_names = scenario.take_shared<IotaNames>();
 
     let registry = iota_names.registry<Registry>();
-    let domain_name = registry.reverse_lookup(addr);
-    assert_eq(domain_name, expected_domain_name);
+    let name = registry.reverse_lookup(addr);
+    assert_eq(name, expected_name);
 
     test_scenario::return_shared(iota_names);
 }
@@ -260,11 +261,11 @@ fun test_set_target_address() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(SECOND_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(SECOND_ADDRESS));
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(FIRST_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(FIRST_ADDRESS));
     scenario.set_target_address_util(FIRST_ADDRESS, none(), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), none());
+    scenario.lookup_util(NAME.to_string(), none());
 
     scenario_val.end();
 }
@@ -297,14 +298,14 @@ fun test_set_target_address_aborts_if_nft_expired_2() {
 }
 
 #[test]
-fun test_set_target_address_works_if_domain_is_registered_again() {
+fun test_set_target_address_works_if_name_is_registered_again() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
     scenario.setup(SECOND_ADDRESS, 2 * year_ms());
 
     scenario.set_target_address_util(SECOND_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(SECOND_ADDRESS));
+    scenario.lookup_util(NAME.to_string(), some(SECOND_ADDRESS));
 
     scenario_val.end();
 }
@@ -329,21 +330,21 @@ fun test_set_reverse_lookup() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         SECOND_ADDRESS,
-        some(domain::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(FIRST_ADDRESS, none());
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(FIRST_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(FIRST_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         FIRST_ADDRESS,
-        some(domain::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
 
@@ -357,7 +358,7 @@ fun test_set_reverse_lookup_aborts_if_target_address_not_set() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -370,7 +371,7 @@ fun test_set_reverse_lookup_aborts_if_target_address_not_match() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -383,7 +384,7 @@ fun test_set_reverse_lookup_aborts_if_controller_is_deauthorized() {
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
     scenario.deauthorize_util();
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
 
     scenario_val.end();
 }
@@ -395,11 +396,11 @@ fun test_unset_reverse_lookup() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     reverse_lookup_util(
         scenario,
         SECOND_ADDRESS,
-        some(domain::new(DOMAIN_NAME.to_string())),
+        some(name::new(NAME.to_string())),
     );
     scenario.unset_reverse_lookup_util(SECOND_ADDRESS);
     scenario.reverse_lookup_util(SECOND_ADDRESS, none());
@@ -414,7 +415,7 @@ fun test_unset_reverse_lookup_if_controller_is_deauthorized() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(SECOND_ADDRESS), 0);
-    scenario.set_reverse_lookup_util(SECOND_ADDRESS, DOMAIN_NAME.to_string());
+    scenario.set_reverse_lookup_util(SECOND_ADDRESS, NAME.to_string());
     scenario.deauthorize_util();
     scenario.unset_reverse_lookup_util(SECOND_ADDRESS);
 
@@ -438,7 +439,7 @@ fun test_set_user_data() {
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
 
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
     set_user_data_util(
         scenario,
@@ -447,7 +448,7 @@ fun test_set_user_data() {
         b"value_avatar".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
 
@@ -458,7 +459,7 @@ fun test_set_user_data() {
         b"value_ipfs".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 2);
     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
     assert_eq(*data.get(&utf8(DATA_KEY_IPFS)), b"value_ipfs".to_string());
@@ -545,7 +546,7 @@ fun test_set_user_data_aborts_if_nft_expired_2() {
 }
 
 #[test]
-fun test_set_user_data_works_if_domain_is_registered_again() {
+fun test_set_user_data_works_if_name_is_registered_again() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
     scenario.setup(FIRST_ADDRESS, 0);
@@ -558,7 +559,7 @@ fun test_set_user_data_works_if_domain_is_registered_again() {
         b"value".to_string(),
         0,
     );
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value".to_string());
 
@@ -595,7 +596,7 @@ fun test_unset_user_data() {
         0,
     );
     scenario.unset_user_data_util(FIRST_ADDRESS, DATA_KEY_AVATAR.to_string(), 0);
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
 
     scenario.set_user_data_util(
@@ -611,7 +612,7 @@ fun test_unset_user_data() {
         0,
     );
     scenario.unset_user_data_util(FIRST_ADDRESS, utf8(DATA_KEY_IPFS), 0);
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
 
@@ -663,7 +664,7 @@ fun test_burn_expired() {
     let mut iota_names = scenario.take_shared<IotaNames>();
 
     let ns_registration = iota_names_registration::new_for_testing(
-        domain::new(b"test.iota".to_string()),
+        name::new(b"test.iota".to_string()),
         1,
         &clock,
         scenario.ctx(),
@@ -689,13 +690,13 @@ fun test_burn_subname_expired() {
     let mut iota_names = scenario.take_shared<IotaNames>();
 
     let ns_registration = iota_names_registration::new_for_testing(
-        domain::new(b"inner.test.iota".to_string()),
+        name::new(b"inner.test.iota".to_string()),
         1,
         &clock,
         scenario.ctx(),
     );
 
-    let subname = subdomain_registration::new(ns_registration, &clock, scenario.ctx());
+    let subname = subname_registration::new(ns_registration, &clock, scenario.ctx());
 
     clock.increment_for_testing(year_ms() * 2);
     controller::burn_expired_subname(&mut iota_names, subname, &clock);
@@ -716,9 +717,9 @@ fun test_object_reverse_lookup() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(uid.to_address()), 0);
-    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, DOMAIN_NAME.to_string());
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(uid.to_address()));
-    scenario.reverse_lookup_util(uid.to_address(), some(domain::new(DOMAIN_NAME.to_string())));
+    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, NAME.to_string());
+    scenario.lookup_util(NAME.to_string(), some(uid.to_address()));
+    scenario.reverse_lookup_util(uid.to_address(), some(name::new(NAME.to_string())));
 
     // now let's remove this reverse lookup
     scenario.unset_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS);
@@ -738,9 +739,9 @@ fun test_reverse_reset_when_target_address_changes() {
     scenario.setup(FIRST_ADDRESS, 0);
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(uid.to_address()), 0);
-    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, DOMAIN_NAME.to_string());
-    scenario.lookup_util(DOMAIN_NAME.to_string(), some(uid.to_address()));
-    scenario.reverse_lookup_util(uid.to_address(), some(domain::new(DOMAIN_NAME.to_string())));
+    scenario.set_object_reverse_lookup_util(&mut uid, FIRST_ADDRESS, NAME.to_string());
+    scenario.lookup_util(NAME.to_string(), some(uid.to_address()));
+    scenario.reverse_lookup_util(uid.to_address(), some(name::new(NAME.to_string())));
 
     scenario.set_target_address_util(FIRST_ADDRESS, some(FIRST_ADDRESS), 0);
     scenario.reverse_lookup_util(uid.to_address(), none());

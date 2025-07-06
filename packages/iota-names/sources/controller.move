@@ -7,12 +7,12 @@ module iota_names::controller;
 use iota::event;
 use iota::clock::Clock;
 use iota::tx_context::sender;
-use iota_names::domain;
+use iota_names::name;
 use iota_names::core_config::CoreConfig;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
-use iota_names::subdomain_registration::SubdomainRegistration;
+use iota_names::subname_registration::SubnameRegistration;
 use std::string::String;
 
 use fun registry_mut as IotaNames.registry_mut;
@@ -33,7 +33,7 @@ public struct UserDataUnsetEvent has copy, drop {
     key: String,
 }
 
-/// Set the target address of a domain.
+/// Set the target address of a name.
 public fun set_target_address(
     iota_names: &mut IotaNames,
     nft: &IotaNamesRegistration,
@@ -43,20 +43,20 @@ public fun set_target_address(
     let registry = iota_names.registry_mut();
     registry.assert_nft_is_authorized(nft, clock);
 
-    let domain = nft.domain();
-    registry.set_target_address(domain, new_target);
+    let name = nft.name();
+    registry.set_target_address(name, new_target);
 }
 
-/// Set the reverse lookup address for the domain
+/// Set the reverse lookup address for the name
 public fun set_reverse_lookup(
     iota_names: &mut IotaNames,
-    domain_name: String,
+    name: String,
     ctx: &mut TxContext,
 ) {
-    iota_names.registry_mut().set_reverse_lookup(ctx.sender(), domain::new(domain_name));
+    iota_names.registry_mut().set_reverse_lookup(ctx.sender(), name::new(name));
 }
 
-/// User-facing function - unset the reverse lookup address for the domain.
+/// User-facing function - unset the reverse lookup address for the name.
 public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &mut TxContext) {
     iota_names.registry_mut().unset_reverse_lookup(ctx.sender());
 }
@@ -66,9 +66,9 @@ public fun unset_reverse_lookup(iota_names: &mut IotaNames, ctx: &mut TxContext)
 public fun set_object_reverse_lookup(
     iota_names: &mut IotaNames,
     obj: &mut UID,
-    domain_name: String,
+    name: String,
 ) {
-    iota_names.registry_mut().set_reverse_lookup(obj.to_address(), domain::new(domain_name));
+    iota_names.registry_mut().set_reverse_lookup(obj.to_address(), name::new(name));
 }
 
 /// Allows unsetting the reverse lookup address for an object.
@@ -89,8 +89,8 @@ public fun set_user_data(
     assert!(config.is_valid_user_data_key(&key), EUnsupportedKey);
     
     let registry = iota_names.registry_mut();
-    let mut data = *registry.get_data(nft.domain());
-    let domain = nft.domain();
+    let mut data = *registry.get_data(nft.name());
+    let name = nft.name();
 
     registry.assert_nft_is_authorized(nft, clock);
 
@@ -107,7 +107,7 @@ public fun set_user_data(
     });
 
     data.insert(key, value);
-    registry.set_data(domain, data);
+    registry.set_data(name, data);
 }
 
 /// User-facing function - remove a key from the name record's data.
@@ -118,8 +118,8 @@ public fun unset_user_data(
     clock: &Clock,
 ) {
     let registry = iota_names.registry_mut();
-    let mut data = *registry.get_data(nft.domain());
-    let domain = nft.domain();
+    let mut data = *registry.get_data(nft.name());
+    let name = nft.name();
 
     registry.assert_nft_is_authorized(nft, clock);
 
@@ -130,7 +130,7 @@ public fun unset_user_data(
         data.remove(&key);
     };
 
-    registry.set_data(domain, data);
+    registry.set_data(name, data);
 }
 
 public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, clock: &Clock) {
@@ -139,10 +139,10 @@ public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, 
 
 public fun burn_expired_subname(
     iota_names: &mut IotaNames,
-    nft: SubdomainRegistration,
+    nft: SubnameRegistration,
     clock: &Clock,
 ) {
-    iota_names.registry_mut().burn_subdomain_object(nft, clock);
+    iota_names.registry_mut().burn_subname_object(nft, clock);
 }
 
 /// Get a mutable reference to the registry, if the app is authorized.
