@@ -39,7 +39,7 @@ export function loadLocalnetConfig(): PackageInfo {
             },
             registryTableId: localnetConfig.registryTableId,
             reverseRegistryTableId: localnetConfig.reverseRegistryTableId,
-            subNamesPackageId: localnetConfig.subNamesPackageId,
+            subnamesPackageId: localnetConfig.subnamesPackageId,
             tempSubnameProxyPackageId: localnetConfig.tempSubnameProxyPackageId,
         };
     } catch (error) {
@@ -376,7 +376,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const iotaNamesTx = new IotaNamesTransaction(client, tx);
 
             const parentName = `parent-${Date.now()}.iota`;
-            const subName = `sub.${parentName}`;
+            const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
                 10n * NANOS_PER_IOTA,
@@ -391,7 +391,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const subNft = iotaNamesTx.createSubname({
                 parentNft,
-                name: subName,
+                name: subname,
                 allowChildCreation: true,
                 allowTimeExtension: true,
                 expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -461,7 +461,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const iotaNamesTx = new IotaNamesTransaction(client, tx);
 
             const parentName = `extend-${Date.now()}.iota`;
-            const subName = `sub.${parentName}`;
+            const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
                 10n * NANOS_PER_IOTA,
@@ -476,7 +476,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const subNft = iotaNamesTx.createSubname({
                 parentNft,
-                name: subName,
+                name: subname,
                 allowChildCreation: true,
                 allowTimeExtension: true,
                 expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -504,7 +504,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const iotaNamesTx = new IotaNamesTransaction(client, tx);
 
             const parentName = `perms-${Date.now()}.iota`;
-            const subName = `sub.${parentName}`;
+            const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
                 10n * NANOS_PER_IOTA,
@@ -519,7 +519,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const subNft = iotaNamesTx.createSubname({
                 parentNft,
-                name: subName,
+                name: subname,
                 allowChildCreation: true,
                 allowTimeExtension: true,
                 expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -527,7 +527,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             iotaNamesTx.editSetup({
                 parentNft,
-                name: subName,
+                name: subname,
                 allowChildCreation: false,
                 allowTimeExtension: false,
             });

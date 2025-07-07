@@ -72,7 +72,7 @@ export const publishPackages = async (network: string, isCiJob = false, configPa
                     v1: data.IotaNames.packageId,
                 },
                 iotaNamesObjectId: data.IotaNames.objectId,
-                subNamesPackageId: data.Subnames.packageId,
+                subnamesPackageId: data.Subnames.packageId,
                 tempSubNamesProxyPackageId: data.TempSubnameProxy.packageId,
                 paymentsPackageId: data.Payments.packageId,
             },
