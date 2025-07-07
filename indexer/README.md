@@ -23,17 +23,20 @@ docker compose -f indexer/docker/docker-compose.yml build --build-arg CACHEBUST=
 
 Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache` to force a full rebuild.
 
+### Modify the docker-compose file
+
+Update the `docker-compose.yml` file to use the commented `# Localnet values:`" instead of devnet for the start command of the iota-names-indexer.
+
 ### Start the indexer
 
 ```bash
 docker compose -f indexer/docker/docker-compose.yml up
 ```
 
-Reset the prometheus database if you want to start fresh:
+To reset all databases:
 
 ```bash
-docker compose -f indexer/docker/docker-compose.yml down
-docker volume rm iota-names-indexer_prometheus_data
+docker compose -f indexer/docker/docker-compose.yml down -v
 ```
 
 The following endpoints will be available:
@@ -53,13 +56,13 @@ GET /health
 
 Returns `OK` if the server is running.
 
-### Get Domains for an Address
+### Get Names for an Address
 
 ```
 GET /auctions/{address}
 ```
 
-Returns all domains that a specific address has bid on.
+Returns all names that a specific address has bid on.
 
 **Parameters:**
 

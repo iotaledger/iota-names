@@ -11,8 +11,8 @@ module iota_names::constants;
 
 use std::string::String;
 
-/// Top level domain for IOTA.
-const IOTA_TLD: vector<u8> = b"iota";
+/// Top level name for IOTA.
+const IOTA_TLN: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
 const YEAR_MS: u64 = 365 * 24 * 60 * 60 * 1000;
 /// 30 day Grace period in milliseconds.
@@ -22,34 +22,34 @@ const GRACE_PERIOD_MS: u64 = 30 * 24 * 60 * 60 * 1000;
 /// expiration.
 const LEAF_EXPIRATION_TIMESTAMP: u64 = 0;
 
-/// Subdomain constants
+/// Subname constants
 ///
-/// These constants are the core of the subdomain functionality.
-/// Even if we decide to change the subdomain module, these can
+/// These constants are the core of the subname functionality.
+/// Even if we decide to change the subname module, these can
 /// be re-used. They're added as metadata on NameRecord.
 ///
-/// Whether a parent name can create child names. (name -> subdomain)
+/// Whether a parent name can create child names. (name -> subname)
 const ALLOW_CREATION: vector<u8> = b"S_AC";
 /// Whether a child-name can auto-renew (if the parent hasn't changed).
 const ALLOW_TIME_EXTENSION: vector<u8> = b"S_ATE";
 
 // === Public functions ===
 
-/// Top level domain for IOTA as a String.
-public fun iota_tld(): String { IOTA_TLD.to_string() }
+/// Top level name for IOTA as a String.
+public fun iota_tln(): String { IOTA_TLN.to_string() }
 
 /// The amount of milliseconds in a year.
 public fun year_ms(): u64 { YEAR_MS }
 
-/// Grace period in milliseconds after which the domain expires.
+/// Grace period in milliseconds after which the name expires.
 public fun grace_period_ms(): u64 { GRACE_PERIOD_MS }
 
-/// Subdomain constants
-/// The NameRecord key that a subdomain can create child names.
-public fun subdomain_allow_creation_key(): String { ALLOW_CREATION.to_string() }
+/// Subname constants
+/// The NameRecord key that a subname can create child names.
+public fun subname_allow_creation_key(): String { ALLOW_CREATION.to_string() }
 
-/// The NameRecord key that a subdomain can self-renew.
-public fun subdomain_allow_extension_key(): String {
+/// The NameRecord key that a subname can self-renew.
+public fun subname_allow_extension_key(): String {
     ALLOW_TIME_EXTENSION.to_string()
 }
 

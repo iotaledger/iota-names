@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getDomainType } from '@iota/iota-names-sdk';
+import { getNameType } from '@iota/iota-names-sdk';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
@@ -11,32 +11,32 @@ import { queryKey } from '@/hooks';
 import { AuctionFieldBcs } from '../types/bcs';
 import { AuctionMetadata, RawAuctionMetadata } from '../types/metadata';
 import { deriveAuctionDynamicFieldId } from './dynamicField';
-import { createDomainFromName } from './name';
+import { createNameObject } from './name';
 
 interface FetchAuctionMetadataParams {
-    domainName: string;
+    name: string;
     auctionsTableObjectId: string;
     packageId: string;
     graphQLClient: IotaGraphQLClient;
 }
 
 export async function fetchAuctionMetadata({
-    domainName,
+    name,
     auctionsTableObjectId,
     packageId,
     graphQLClient,
 }: FetchAuctionMetadataParams) {
-    if (!auctionsTableObjectId || !domainName) {
+    if (!auctionsTableObjectId || !name) {
         return null;
     }
 
-    const domain = createDomainFromName(domainName);
-    const domainTypeTag = getDomainType(packageId);
+    const nameObject = createNameObject(name);
+    const nameTypeTag = getNameType(packageId);
 
     const targetAuctionObjectId = deriveAuctionDynamicFieldId(
         auctionsTableObjectId,
-        domainTypeTag,
-        domain,
+        nameTypeTag,
+        nameObject,
     );
 
     const auctionObjectResponse = await graphQLClient.query<{
@@ -83,7 +83,7 @@ function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | nu
     const minBidNanos = currentBidNanos + NANOS_PER_IOTA;
 
     return {
-        domainName: auction.nft.domain_name,
+        name: auction.nft.name_str,
         startTimestamp: new Date(Number(auction.start_timestamp_ms)),
         endTimestamp: new Date(Number(auction.end_timestamp_ms)),
         winner: auction.winner,
@@ -114,7 +114,7 @@ function parseAuctionDataBcs(
 }
 
 interface CreateAuctionMetadataQueryParams {
-    domainName: string;
+    name: string;
     auctionsTableObjectId: string | undefined;
     packageId: string;
     graphQLClient: IotaGraphQLClient;
@@ -124,21 +124,21 @@ interface CreateAuctionMetadataQueryParams {
  * Creates a React Query configuration object for fetching auction metadata
  */
 export function createAuctionMetadataQuery({
-    domainName,
+    name,
     auctionsTableObjectId,
     packageId,
     graphQLClient,
 }: CreateAuctionMetadataQueryParams) {
     return {
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.auctionMetadata(domainName), packageId, auctionsTableObjectId],
+        queryKey: [...queryKey.auctionMetadata(name), packageId, auctionsTableObjectId],
         queryFn: async () => {
             if (!auctionsTableObjectId) {
                 return null;
             }
 
             return fetchAuctionMetadata({
-                domainName,
+                name,
                 auctionsTableObjectId,
                 packageId,
                 graphQLClient,
@@ -150,6 +150,6 @@ export function createAuctionMetadataQuery({
             const auctionMetadataBcs = parseAuctionDataBcs(data);
             return normalizeAuctionData(auctionMetadataBcs);
         },
-        enabled: !!auctionsTableObjectId && !!domainName,
+        enabled: !!auctionsTableObjectId && !!name,
     };
 }

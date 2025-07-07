@@ -3,7 +3,7 @@
 
 use std::{panic::AssertUnwindSafe, path::PathBuf, str::FromStr, sync::Arc};
 
-use anyhow::{Result, anyhow};
+use anyhow::{Result, anyhow, bail};
 use async_trait::async_trait;
 use diesel::Connection;
 use futures::FutureExt;
@@ -12,7 +12,9 @@ use iota_data_ingestion_core::{
     reader::v2::{CheckpointReaderConfig, RemoteUrl},
 };
 use iota_json::IotaJsonValue;
-use iota_names::domain::Domain;
+use iota_json_rpc_types::{IotaObjectDataOptions, IotaTransactionBlockResponseOptions};
+use iota_names::name::Name;
+use iota_sdk::IotaClientBuilder;
 use iota_types::{
     Identifier, TypeTag,
     balance::Balance,
@@ -38,7 +40,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{
         pool::DbConnectionPool,
-        queries::{add_bidder_domain_entry, remove_domain_bids_entry, upsert_domain_bids_entry},
+        queries::{add_bidder_name_entry, remove_name_bids_entry, upsert_name_bids_entry},
     },
     events::{CouponKind, IotaNamesEvent},
 };
@@ -46,10 +48,14 @@ use crate::{
 pub(crate) async fn run_iota_names_reader(
     worker: IotaNamesWorker,
     node_url: &str,
+    checkpoint_url: &str,
     registry: &Registry,
     concurrency: usize,
 ) -> anyhow::Result<()> {
-    let progress_store = FileProgressStore::new("./progress_store").await?;
+    let progress_store_path = "./data/progress_store";
+    initialize_progress_store(&worker, node_url, progress_store_path).await?;
+
+    let progress_store = FileProgressStore::new(progress_store_path).await?;
 
     let mut executor = IndexerExecutor::new(
         progress_store,
@@ -65,14 +71,14 @@ pub(crate) async fn run_iota_names_reader(
     );
     executor.register(worker_pool).await?;
 
-    info!("Connecting to node at {node_url}");
+    info!("Connecting to {checkpoint_url} to sync checkpoints");
     // Localnet does not support remote store, so we use the REST API
-    if node_url.contains("localhost") || node_url.contains("host.docker.internal") {
+    if checkpoint_url.contains("localhost") || checkpoint_url.contains("host.docker.internal") {
         executor
             .run(
                 // path to a local directory where checkpoints are stored.
-                PathBuf::from("./chk"),
-                Some(format!("{node_url}/api/v1")),
+                PathBuf::from("./data/chk"),
+                Some(format!("{checkpoint_url}/api/v1")),
                 // optional remote store access options.
                 vec![],
                 ReaderOptions::default(),
@@ -81,9 +87,10 @@ pub(crate) async fn run_iota_names_reader(
     } else {
         let config = CheckpointReaderConfig {
             remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
-                historical_url: node_url.to_string(),
-                live_url: Some(format!("{node_url}/ingestion/live")),
+                historical_url: checkpoint_url.to_string(),
+                live_url: Some(format!("{checkpoint_url}/ingestion/live")),
             }),
+            ingestion_path: Some(PathBuf::from("./data/chk")),
             ..Default::default()
         };
         executor.run_with_config(config).await?;
@@ -138,19 +145,19 @@ impl IotaNamesWorker {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
                 self.metrics.total_auction_started.inc();
-                let domain_name = event.domain.to_string();
+                let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
-                    upsert_domain_bids_entry(conn, &domain_name)
+                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
+                    upsert_name_bids_entry(conn, &name_str)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
-                let domain_name = event.domain.to_string();
+                let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_domain_entry(conn, &event.bidder.to_string(), &domain_name)?;
-                    upsert_domain_bids_entry(conn, &domain_name)
+                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
+                    upsert_name_bids_entry(conn, &name_str)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
@@ -160,10 +167,10 @@ impl IotaNamesWorker {
                 self.metrics
                     .auction_durations
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
-                let domain_name = event.domain.to_string();
+                let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    remove_domain_bids_entry(conn, &domain_name)
+                    remove_name_bids_entry(conn, &name_str)
                 })?;
                 self.metrics
                     .auction_bid_count_distribution
@@ -182,13 +189,13 @@ impl IotaNamesWorker {
             IotaNamesEvent::NameRecordAdded(event) => {
                 self.metrics.total_name_records_added.inc();
 
-                let sld_length = event.domain.label(1).expect("missing SLD").len();
+                let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&sld_length.to_string()])
+                    .with_label_values(&[&sln_length.to_string()])
                     .inc();
 
-                let depth = event.domain.num_labels();
+                let depth = event.name.num_labels();
                 self.metrics
                     .name_depth_distribution
                     .with_label_values(&[&depth.to_string()])
@@ -197,13 +204,13 @@ impl IotaNamesWorker {
             IotaNamesEvent::NameRecordRemoved(event) => {
                 self.metrics.total_name_records_removed.inc();
 
-                let sld_length = event.domain.label(1).expect("missing SLD").len();
+                let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
                     .name_length_distribution
-                    .with_label_values(&[&sld_length.to_string()])
+                    .with_label_values(&[&sln_length.to_string()])
                     .dec();
 
-                let depth = event.domain.num_labels();
+                let depth = event.name.num_labels();
                 self.metrics
                     .name_depth_distribution
                     .with_label_values(&[&depth.to_string()])
@@ -240,18 +247,18 @@ impl IotaNamesWorker {
                         .inc();
                 }
             }
-            // `subdomains`
-            IotaNamesEvent::NodeSubdomainCreated(_event) => {
-                self.metrics.total_node_subdomains.inc();
+            // `subnames`
+            IotaNamesEvent::NodeSubnameCreated(_event) => {
+                self.metrics.total_node_subnames.inc();
             }
-            IotaNamesEvent::NodeSubdomainBurned(_event) => {
-                self.metrics.total_node_subdomains.dec();
+            IotaNamesEvent::NodeSubnameBurned(_event) => {
+                self.metrics.total_node_subnames.dec();
             }
-            IotaNamesEvent::LeafSubdomainCreated(_event) => {
-                self.metrics.total_leaf_subdomains.inc();
+            IotaNamesEvent::LeafSubnameCreated(_event) => {
+                self.metrics.total_leaf_subnames.inc();
             }
-            IotaNamesEvent::LeafSubdomainRemoved(_event) => {
-                self.metrics.total_leaf_subdomains.dec();
+            IotaNamesEvent::LeafSubnameRemoved(_event) => {
+                self.metrics.total_leaf_subnames.dec();
             }
         }
 
@@ -386,7 +393,7 @@ fn get_auction_house_balance(object: &Object) -> anyhow::Result<Balance> {
     struct AuctionHouse {
         pub id: ObjectID,
         pub balance: Balance,
-        pub auctions: LinkedTable<Domain>,
+        pub auctions: LinkedTable<Name>,
     }
 
     Ok(bcs::from_bytes::<AuctionHouse>(
@@ -398,4 +405,66 @@ fn get_auction_house_balance(object: &Object) -> anyhow::Result<Balance> {
             .contents(),
     )?
     .balance)
+}
+
+async fn initialize_progress_store(
+    worker: &IotaNamesWorker,
+    node_url: &str,
+    progress_store_path: &str,
+) -> anyhow::Result<()> {
+    if std::path::Path::new(progress_store_path).exists() {
+        return Ok(());
+    }
+
+    info!("Progress store file not found, creating with initial checkpoint");
+    let client = IotaClientBuilder::default().build(node_url).await?;
+
+    let package_id = &worker.extended_config.iota_names_config.package_address;
+    let checkpoint = get_package_deployment_checkpoint(&client, package_id).await?;
+
+    // Create the data directory if it doesn't exist
+    std::fs::create_dir_all("./data")?;
+
+    let progress_content = serde_json::json!({
+        "iota_names_reader": checkpoint
+    });
+    info!("Setting progress store checkpoint to: {checkpoint}");
+    std::fs::write(
+        progress_store_path,
+        serde_json::to_string_pretty(&progress_content)?,
+    )?;
+
+    Ok(())
+}
+
+async fn get_package_deployment_checkpoint(
+    client: &iota_sdk::IotaClient,
+    package_address: &iota_types::base_types::IotaAddress,
+) -> anyhow::Result<u64> {
+    let object_response = client
+        .read_api()
+        .get_object_with_options(
+            ObjectID::from(*package_address),
+            IotaObjectDataOptions::default().with_previous_transaction(),
+        )
+        .await?;
+
+    if let Some(error) = object_response.error {
+        bail!("Failed to fetch package object: {error}");
+    }
+
+    let tx_response = client
+        .read_api()
+        .get_transaction_with_options(
+            object_response.data.unwrap().previous_transaction.unwrap(),
+            IotaTransactionBlockResponseOptions::default(),
+        )
+        .await?;
+    if !tx_response.errors.is_empty() {
+        bail!("Failed to fetch transaction: {:?}", tx_response.errors);
+    }
+
+    tx_response
+        .checkpoint
+        .ok_or_else(|| anyhow::anyhow!("Missing checkpoint"))
 }

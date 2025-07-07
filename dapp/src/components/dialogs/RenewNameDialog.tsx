@@ -13,7 +13,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubName } from '@iota/iota-names-sdk';
+import { isSubname } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -44,7 +44,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const isNameSubName = nameRecord?.nameRecord ? isSubName(nameRecord.nameRecord.name) : null;
+    const isNameSubName = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isGracePeriodExpired(nameRecord?.nameRecord) : false;
     const namePermissions = nameRecord?.nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
@@ -53,8 +53,8 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
 
-    const { data: domainsOwned } = useRegistrationNfts('domain');
-    const { data: subdomainsOwned } = useRegistrationNfts('subdomain');
+    const { data: namesOwned } = useRegistrationNfts('name');
+    const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     const updates: NameUpdate[] = [];
 
@@ -63,8 +63,8 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     // Extend names
     if (nameRecord && editRenewYears && !isExpired && namePermissions?.allowTimeExtension) {
         const objectId = getNameObject(
-            domainsOwned ?? [],
-            subdomainsOwned ?? [],
+            namesOwned ?? [],
+            subnamesOwned ?? [],
             nameRecord.nameRecord.name,
         );
         if (objectId) {
@@ -81,13 +81,13 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     // Extend subnames
     if (isNameSubName && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
         const objectId = getNameObject(
-            domainsOwned ?? [],
-            subdomainsOwned ?? [],
+            namesOwned ?? [],
+            subnamesOwned ?? [],
             nameRecord.nameRecord.name,
         );
         const parentName = getParentObject(
-            domainsOwned ?? [],
-            subdomainsOwned ?? [],
+            namesOwned ?? [],
+            subnamesOwned ?? [],
             nameRecord.nameRecord.name,
         );
         // Only allow extending the expiration time if its less than its parent

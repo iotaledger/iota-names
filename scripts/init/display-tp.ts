@@ -4,9 +4,9 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-export const getImageUrl = (isSubdomain: boolean, network: string) => {
-    const name = `{${isSubdomain ? 'nft.' : ''}domain_name}`;
-    const expiration = `{${isSubdomain ? 'nft.' : ''}expiration_timestamp_ms}`;
+export const getImageUrl = (isSubname: boolean, network: string) => {
+    const name = `{${isSubname ? 'nft.' : ''}name_str}`;
+    const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
 
     return `https://api-${network}.iota-names.io/nfts/${name}/${expiration}`;
 };
@@ -15,25 +15,25 @@ export const getImageUrl = (isSubdomain: boolean, network: string) => {
 export const createDisplay = ({
     txb,
     publisher,
-    isSubdomain,
+    isSubname,
     iotaNamesPackageId,
-    subdomainsPackageId,
+    subnamesPackageId,
     network = 'mainnet',
 }: {
     txb: Transaction;
     publisher: string;
-    isSubdomain: boolean;
+    isSubname: boolean;
     iotaNamesPackageId: string;
-    subdomainsPackageId: string;
+    subnamesPackageId: string;
     network: string;
 }) => {
-    const subnameRegistration = `${subdomainsPackageId}::subdomain_registration::SubdomainRegistration`;
+    const subnameRegistration = `${subnamesPackageId}::subname_registration::SubnameRegistration`;
     const iotaNamesRegistration = `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
 
     const display = txb.moveCall({
         target: `0x2::display::new`,
         arguments: [txb.object(publisher)],
-        typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
     });
 
     txb.moveCall({
@@ -42,20 +42,20 @@ export const createDisplay = ({
             display,
             txb.pure.vector('string', ['name', 'link', 'image_url', 'description', 'project_url']),
             txb.pure.vector('string', [
-                `{${isSubdomain ? 'nft.' : ''}domain_name}`,
-                `https://{${isSubdomain ? 'nft.' : ''}domain_name}.id`,
-                getImageUrl(isSubdomain, network),
+                `{${isSubname ? 'nft.' : ''}name_str}`,
+                `https://{${isSubname ? 'nft.' : ''}name_str}.id`,
+                getImageUrl(isSubname, network),
                 'IOTA-Names - Sculpt Your Identity',
                 'https://iota-names.io',
             ]),
         ],
-        typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
     });
 
     txb.moveCall({
         target: `0x2::display::update_version`,
         arguments: [display],
-        typeArguments: [isSubdomain ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
     });
 
     const sender = txb.moveCall({
