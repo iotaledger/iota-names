@@ -40,7 +40,7 @@ export function loadLocalnetConfig(): PackageInfo {
             registryTableId: localnetConfig.registryTableId,
             reverseRegistryTableId: localnetConfig.reverseRegistryTableId,
             subNamesPackageId: localnetConfig.subNamesPackageId,
-            tempSubdomainsProxyPackageId: localnetConfig.tempSubdomainsProxyPackageId,
+            tempSubnameProxyPackageId: localnetConfig.tempSubnameProxyPackageId,
         };
     } catch (error) {
         throw new Error(
@@ -95,9 +95,9 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
         10n * NANOS_PER_IOTA,
     ]);
 
-    // Register a domain for 2 years
+    // Register a name for 2 years
     const nft = iotaNamesTx.register({
-        domain: uniqueName,
+        name: uniqueName,
         years: 2,
         coinConfig: iotaNamesClient.config.coins.IOTA,
         coin: coinInput,
@@ -127,7 +127,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create a subname
-    const subNft = iotaNamesTx.createSubName({
+    const subNft = iotaNamesTx.createSubname({
         parentNft: nft,
         name: 'node.' + uniqueName,
         allowChildCreation: true,
@@ -136,19 +136,19 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create leaf subnames and then remove them
-    iotaNamesTx.createLeafSubName({
+    iotaNamesTx.createLeafSubname({
         parentNft: nft,
         name: 'leaf.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubName({ parentNft: nft, name: 'leaf.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: nft, name: 'leaf.' + uniqueName });
 
-    iotaNamesTx.createLeafSubName({
+    iotaNamesTx.createLeafSubname({
         parentNft: subNft,
         name: 'leaf.node.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubName({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
 
     // Extend expiration for subNft
     iotaNamesTx.extendExpiration({
@@ -165,7 +165,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     });
 
     // Create another level of nesting
-    const moreNestedNft = iotaNamesTx.createSubName({
+    const moreNestedNft = iotaNamesTx.createSubname({
         parentNft: subNft,
         name: 'more.node.' + uniqueName,
         allowChildCreation: true,
@@ -280,7 +280,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
         it('should reject subname pricing', async () => {
             await expect(
                 client.calculatePrice({ name: 'sub.test.iota', years: 1 }),
-            ).rejects.toThrow('Subdomains do not have a registration fee');
+            ).rejects.toThrow('Subnames do not have a registration fee');
         }, 30000);
     });
 
@@ -296,7 +296,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const nft = iotaNamesTx.register({
-                domain: uniqueName,
+                name: uniqueName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
@@ -331,7 +331,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const nft = iotaNamesTx.register({
-                domain: uniqueName,
+                name: uniqueName,
                 years: 2,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
@@ -383,13 +383,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const parentNft = iotaNamesTx.register({
-                domain: parentName,
+                name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -427,19 +427,19 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const parentNft = iotaNamesTx.register({
-                domain: parentName,
+                name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
 
-            iotaNamesTx.createLeafSubName({
+            iotaNamesTx.createLeafSubname({
                 parentNft,
                 name: leafName,
                 targetAddress: toolbox.address(),
             });
 
-            iotaNamesTx.removeLeafSubName({
+            iotaNamesTx.removeLeafSubname({
                 parentNft,
                 name: leafName,
             });
@@ -468,13 +468,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const parentNft = iotaNamesTx.register({
-                domain: parentName,
+                name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -511,13 +511,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const parentNft = iotaNamesTx.register({
-                domain: parentName,
+                name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
 
-            const subNft = iotaNamesTx.createSubName({
+            const subNft = iotaNamesTx.createSubname({
                 parentNft,
                 name: subName,
                 allowChildCreation: true,
@@ -556,16 +556,16 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            // Register the root domain
+            // Register the root name
             const rootNft = iotaNamesTx.register({
-                domain: rootName,
+                name: rootName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
 
-            // Create first level subdomain: level1.root-{timestamp}.iota
-            const level1Nft = iotaNamesTx.createSubName({
+            // Create first level subname: level1.root-{timestamp}.iota
+            const level1Nft = iotaNamesTx.createSubname({
                 parentNft: rootNft,
                 name: `level1.${rootName}`,
                 allowChildCreation: true,
@@ -573,8 +573,8 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
             });
 
-            // Create second level subdomain: level2.level1.root-{timestamp}.iota
-            const level2Nft = iotaNamesTx.createSubName({
+            // Create second level subname: level2.level1.root-{timestamp}.iota
+            const level2Nft = iotaNamesTx.createSubname({
                 parentNft: level1Nft,
                 name: `level2.level1.${rootName}`,
                 allowChildCreation: false,
@@ -611,7 +611,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const nft = iotaNamesTx.register({
-                domain: uniqueName,
+                name: uniqueName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
@@ -646,7 +646,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             const nft = iotaNamesTx.register({
-                domain: uniqueName,
+                name: uniqueName,
                 years: 5,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,

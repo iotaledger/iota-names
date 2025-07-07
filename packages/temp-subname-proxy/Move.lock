@@ -2,11 +2,11 @@
 
 [move]
 version = 3
-manifest_digest = "342DC9E1C467B283E991E9C5C69A3EF7C5D07CE99EC84CD5DFECB1F1A31B70F0"
+manifest_digest = "2CD61DAF293B35F9B41B66DB5435792B0D837FEFD78CF29AFA48E01E88FFA036"
 deps_digest = "3C4103934B1E040BB6B23F1D610B4EF9F2F1166A50A104EADCF77467C004C600"
 dependencies = [
   { id = "Iota", name = "Iota" },
-  { id = "iota_names", name = "iota_names" },
+  { id = "iota_names_subnames", name = "iota_names_subnames" },
 ]
 
 [[move.package]]
@@ -29,8 +29,17 @@ dependencies = [
   { id = "Iota", name = "Iota" },
 ]
 
+[[move.package]]
+id = "iota_names_subnames"
+source = { local = "../subnames" }
+
+dependencies = [
+  { id = "Iota", name = "Iota" },
+  { id = "iota_names", name = "iota_names" },
+]
+
 [move.toolchain-version]
-compiler-version = "0.12.0-rc"
+compiler-version = "1.2.2-rc"
 edition = "2024"
 flavor = "iota"
 
@@ -38,6 +47,6 @@ flavor = "iota"
 
 [env.devnet]
 chain-id = "e678123a"
-original-published-id = "0xe2d9b88ccfd3c752152873385e3da7d2d849e0bd98e91db68e7bd16e41fe8345"
-latest-published-id = "0xe2d9b88ccfd3c752152873385e3da7d2d849e0bd98e91db68e7bd16e41fe8345"
+original-published-id = "0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444"
+latest-published-id = "0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444"
 published-version = "1"

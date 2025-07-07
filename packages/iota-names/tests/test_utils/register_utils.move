@@ -17,7 +17,7 @@ const IOTA_NAMES_ADDRESS: address = @0xA001;
 
 public fun register_util<T>(
     scenario: &mut Scenario,
-    domain_name: String,
+    name: String,
     no_years: u8,
     amount: u64,
     clock_tick: u64,
@@ -30,7 +30,7 @@ public fun register_util<T>(
     clock.increment_for_testing(clock_tick);
     let nft = register<T>(
         &mut iota_names,
-        domain_name,
+        name,
         no_years,
         payment,
         &clock,

@@ -17,7 +17,6 @@ export type PackageInfo = {
         };
     };
     couponsPackageId: string;
-    denyListPackageId: string;
     iotaNamesObjectId: string;
     packageId: string;
     paymentsPackageId: string;
@@ -25,7 +24,7 @@ export type PackageInfo = {
     registryTableId: string;
     reverseRegistryTableId: string;
     subNamesPackageId: string;
-    tempSubdomainsProxyPackageId: string;
+    tempSubnameProxyPackageId: string;
     upgradeCap: string;
 };
 

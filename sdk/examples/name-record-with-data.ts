@@ -11,7 +11,7 @@ import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
 (async () => {
-    const domain = `test-fields-${Math.floor(Math.random() * 10000000)}.iota`;
+    const name = `test-fields-${Math.floor(Math.random() * 10000000)}.iota`;
 
     const network = 'devnet';
     const { url, graphql, faucet } = getNetwork(network);
@@ -20,7 +20,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     const address = keypair.toIotaAddress();
 
     console.log('[Address]:', address);
-    console.log('[Domain]:', domain);
+    console.log('[Name]:', name);
 
     // Get funds from faucet
     await requestIotaFromFaucetV0({
@@ -38,20 +38,17 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
         network,
     });
 
-    // Check if domain is available
-    console.log(
-        '[Domain Record (before registration)]:',
-        await iotaNamesClient.getNameRecord(domain),
-    );
+    // Check if name is available
+    console.log('[Name Record (before registration)]:', await iotaNamesClient.getNameRecord(name));
 
-    // Step 1: Register the domain
-    console.log('\n=== STEP 1: Registering domain ===');
+    // Step 1: Register the name
+    console.log('\n=== STEP 1: Registering name ===');
     const registerTx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, registerTx);
     const [coin] = iotaNamesTx.transaction.splitCoins(registerTx.gas, [100_000_000]);
 
     const nft = iotaNamesTx.register({
-        domain,
+        name,
         years: 1,
         coin,
     });
@@ -140,7 +137,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
     // Step 3: Query the name record to verify fields are set
     console.log('\n=== STEP 3: Querying name record with fields ===');
-    const nameRecord = await iotaNamesClient.getNameRecord(domain);
+    const nameRecord = await iotaNamesClient.getNameRecord(name);
 
     console.log('[Final Name Record]:');
     console.log('- Name:', nameRecord?.name);
@@ -151,5 +148,5 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     console.log('- Content Hash:', nameRecord?.contentHash);
 
     console.log('\n=== SUCCESS ===');
-    console.log(`Domain '${domain}' registered and fields set successfully!`);
+    console.log(`Name '${name}' registered and fields set successfully!`);
 })();

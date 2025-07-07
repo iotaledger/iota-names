@@ -3,8 +3,8 @@
 import { useCurrentAccount } from '@iota/dapp-kit';
 import {
     getIotaNamesRegistrationType,
-    getIotaSubdomainRegistrationType,
-    isSubName,
+    getIotaSubnameRegistrationType,
+    isSubname,
 } from '@iota/iota-names-sdk';
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
@@ -13,21 +13,21 @@ import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
-type RegistrationNftType = 'domain' | 'subdomain';
-export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
+type RegistrationNftType = 'name' | 'subname';
+export function useRegistrationNfts(type: RegistrationNftType = 'name') {
     const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const address = account?.address ?? '';
     const packageId = iotaNamesClient.config.packageId;
     const filter = (() => {
         switch (type) {
-            case 'domain':
+            case 'name':
                 return {
                     StructType: getIotaNamesRegistrationType(packageId),
                 };
-            case 'subdomain':
+            case 'subname':
                 return {
-                    StructType: getIotaSubdomainRegistrationType(packageId),
+                    StructType: getIotaSubnameRegistrationType(packageId),
                 };
         }
     })();
@@ -40,7 +40,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                     | Extract<IotaParsedData, { dataType: 'moveObject' }>
                     | undefined
                     | null;
-                const isNameSubName = isSubName(data?.name || '');
+                const isNameSubName = isSubname(data?.name || '');
                 type NameFields = undefined | { expiration_timestamp_ms?: string };
                 const fields = isNameSubName
                     ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
@@ -56,7 +56,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'domain') {
                         Number(fields?.expiration_timestamp_ms) < Date.now(),
                     expirationTimestampMs: Number(fields?.expiration_timestamp_ms ?? ''),
                     id: nameRecord.objectId,
-                    isSubdomain: type === 'subdomain',
+                    isSubname: type === 'subname',
                 } satisfies RegistrationNft;
             });
         },

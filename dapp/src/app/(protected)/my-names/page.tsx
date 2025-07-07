@@ -21,13 +21,13 @@ export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
 
-    const { data: domains } = useRegistrationNfts('domain');
-    const { data: subdomains } = useRegistrationNfts('subdomain');
+    const { data: names } = useRegistrationNfts('name');
+    const { data: subnames } = useRegistrationNfts('subname');
 
     const namesWithChildren = useMemo(() => {
         const parents = new Set<string>();
 
-        [...(domains ?? []), ...(subdomains ?? [])].forEach(({ name }) => {
+        [...(names ?? []), ...(subnames ?? [])].forEach(({ name }) => {
             const firstDot = name.indexOf('.');
             if (firstDot !== -1) {
                 const parentName = name.slice(firstDot + 1);
@@ -36,7 +36,7 @@ export default function MyNamesPage(): JSX.Element {
         });
 
         return parents;
-    }, [domains, subdomains]);
+    }, [names, subnames]);
 
     const renderMenuOptions = (nft: RegistrationNft): MenuListItem[] => [
         {
@@ -82,10 +82,9 @@ export default function MyNamesPage(): JSX.Element {
             </div>
 
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
-                {domains?.map((nft) => {
+                {names?.map((nft) => {
                     const name = removeSuffixFromName(nft.name);
-
-                    const subnames = subdomains?.filter((sub) => {
+                    const nftSubnames = subnames?.filter((sub) => {
                         return sub.name !== nft.name && sub.name.endsWith(nft.name);
                     });
 
@@ -98,7 +97,7 @@ export default function MyNamesPage(): JSX.Element {
                         >
                             <NameCardBody title={`@${name}`}>
                                 <SubnameCountIndicator
-                                    subnameCount={subnames?.length ?? 0}
+                                    subnameCount={nftSubnames?.length ?? 0}
                                     onSubnameListClick={() => {}}
                                 />
 
@@ -116,27 +115,26 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My subnames" />
             </div>
 
-            {subdomains?.length ? (
+            {subnames?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
-                    {subdomains.map((subdomain) => {
-                        const { namePart, subnamePart } = splitNameInParts(subdomain.name);
+                    {subnames.map((subname) => {
+                        const { namePart, subnamePart } = splitNameInParts(subname.name);
                         const name = removeSuffixFromName(namePart);
 
-                        const subnames = subdomains.filter(
-                            (sub) =>
-                                sub.name !== subdomain.name && sub.name.endsWith(subdomain.name),
+                        const nftSubnames = subnames.filter(
+                            (sub) => sub.name !== subname.name && sub.name.endsWith(subname.name),
                         );
 
                         return (
                             <NameCard
-                                key={subdomain.name}
-                                registrationNft={subdomain}
+                                key={subname.name}
+                                registrationNft={subname}
                                 badge={<Badge type={BadgeType.Neutral} label="Placeholder" />}
-                                menuOptions={renderMenuOptions(subdomain)}
+                                menuOptions={renderMenuOptions(subname)}
                             >
                                 <NameCardBody title={`${subnamePart}@${name}`}>
                                     <SubnameCountIndicator
-                                        subnameCount={subnames.length}
+                                        subnameCount={nftSubnames.length}
                                         onSubnameListClick={() => {}}
                                     />
 

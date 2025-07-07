@@ -11,4 +11,4 @@ export const GAS_BUDGET_ERROR_MESSAGES = {
 
 export const NO_BALANCE_GENERIC_MESSAGE = 'Make sure you have enough funds and try again.';
 
-export const CANT_RENEW_NAME_FOR_MORE_TIME = `Can't renew this domain for more time.`;
+export const CANT_RENEW_NAME_FOR_MORE_TIME = `Can't renew this name for more time.`;
