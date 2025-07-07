@@ -51,7 +51,7 @@ export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDi
                 )}
 
                 <img
-                    className="absolute inset-0 w-full h-full -z-[1]"
+                    className="absolute inset-0 w-full h-full -z-[1] object-cover"
                     src={avatarSrc && showAvatar ? avatarSrc : PLACEHOLDER_DISPLAY}
                     alt={registrationNft.name}
                 />

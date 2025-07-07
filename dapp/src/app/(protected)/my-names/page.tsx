@@ -4,7 +4,7 @@
 'use client';
 
 import { Settings, Warning } from '@iota/apps-ui-icons';
-import { Badge, BadgeType, Button, ButtonType, Title } from '@iota/apps-ui-kit';
+import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
@@ -94,7 +94,6 @@ export default function MyNamesPage(): JSX.Element {
                         <NameCard
                             key={nft.name}
                             registrationNft={nft}
-                            badge={<Badge type={BadgeType.Neutral} label="Placeholder" />}
                             menuOptions={renderMenuOptions(nft)}
                         >
                             <NameCardBody title={`@${name}`}>
@@ -132,7 +131,6 @@ export default function MyNamesPage(): JSX.Element {
                             <NameCard
                                 key={subname.name}
                                 registrationNft={subname}
-                                badge={<Badge type={BadgeType.Neutral} label="Placeholder" />}
                                 menuOptions={renderMenuOptions(subname)}
                             >
                                 <NameCardBody title={`${subnamePart}@${name}`}>
