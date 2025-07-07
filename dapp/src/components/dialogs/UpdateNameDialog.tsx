@@ -118,7 +118,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
         const nftId = isNameSubname
-            ? getNameObject(namesOwned ?? [], subnamesOwned ?? [], nameRecord.nameRecord.name)
+            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
         if (nftId) {
             updates.push({
@@ -165,7 +165,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
         const nftId = isNameSubname
-            ? getNameObject(namesOwned ?? [], subnamesOwned ?? [], nameRecord.nameRecord.name)
+            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
         if (nftId) {
             updates.push({

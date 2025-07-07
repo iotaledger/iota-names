@@ -68,14 +68,7 @@ export function getParentObject(
 /**
  * Get object id of a given name or subname
  */
-export function getNameObject(
-    ownedNames: RegistrationNft[],
-    ownedSubnames: RegistrationNft[],
-    name: string,
-) {
-    const names = isSubname(name) ? ownedSubnames : ownedNames;
-    const nameObject = names.find(
-        (nameOrSubname: { name: string | null }) => nameOrSubname.name === name,
-    );
+export function getNameObject(names: RegistrationNft[], name: string) {
+    const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
     return nameObject?.id || null;
 }
