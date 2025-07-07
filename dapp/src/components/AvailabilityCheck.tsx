@@ -3,7 +3,8 @@
 
 'use client';
 
-import { Button, ButtonSize, ButtonType, Input, InputType } from '@iota/apps-ui-kit';
+import { Close, Search } from '@iota/apps-ui-icons';
+import { Button, ButtonType, ButtonUnstyled, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
@@ -40,7 +41,10 @@ function getValidationError(
     return null;
 }
 
-export function AvailabilityCheck() {
+interface AvailabilityCheckProps {
+    autoFocusInput?: boolean;
+}
+export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -97,6 +101,26 @@ export function AvailabilityCheck() {
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
     const cleanName = normalizeNameInput(name);
 
+    const inputTrailingElement = (
+        <div className="flex flex-row gap-xs">
+            {searchValue.length > 0 && (
+                <ButtonUnstyled
+                    className="input-icon-color [&_svg]:h-5 [&_svg]:w-5 p-sm state-layer relative rounded-full"
+                    onClick={() => handleInputChange('')}
+                >
+                    <Close />
+                </ButtonUnstyled>
+            )}
+            <ButtonUnstyled
+                className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100 disabled:opacity-40"
+                disabled={!enableSearch}
+                onClick={handleSearch}
+            >
+                <Search className="text-black" />
+            </ButtonUnstyled>
+        </div>
+    );
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             {isPurchaseDialogOpen && isAvailable && (
@@ -108,7 +132,7 @@ export function AvailabilityCheck() {
                 />
             )}
             <div className="flex flex-col gap-2xl w-full max-w-[744px]">
-                <div className="flex items-baseline justify-center w-full">
+                <div className="flex gap-x-sm items-baseline justify-center w-full">
                     <Input
                         type={InputType.Text}
                         placeholder="Check name availability"
@@ -119,12 +143,8 @@ export function AvailabilityCheck() {
                         leadingIcon={
                             <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
                         }
-                    />
-                    <Button
-                        size={ButtonSize.Medium}
-                        text="Search"
-                        disabled={!enableSearch}
-                        onClick={handleSearch}
+                        autoFocus={autoFocusInput}
+                        trailingElement={inputTrailingElement}
                     />
                 </div>
                 {nameRecordData && (
