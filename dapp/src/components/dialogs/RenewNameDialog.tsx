@@ -13,19 +13,72 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
+import { RegistrationNft } from '@/lib/interfaces';
 import {
     getNameObject,
     getNamePermissions,
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
+
+function createRenewUpdates({
+    nameRecord,
+    ownedNames = [],
+    ownedSubnames = [],
+    renewYears,
+}: {
+    nameRecord?: NameRecord;
+    ownedNames?: RegistrationNft[];
+    ownedSubnames?: RegistrationNft[];
+    renewYears?: number;
+}) {
+    const isNameSubName = nameRecord?.name ? isSubname(nameRecord.name) : false;
+    const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
+    const isExpired = nameRecord ? isGracePeriodExpired(nameRecord) : false;
+
+    const updates: NameUpdate[] = [];
+
+    // Renew names
+    if (
+        !isNameSubName &&
+        nameRecord &&
+        namePermissions?.allowTimeExtension &&
+        renewYears &&
+        !isExpired
+    ) {
+        updates.push({
+            type: 'renew-name',
+            nftId: nameRecord.nftId,
+            years: renewYears,
+        });
+    }
+
+    // Renew subnames
+    if (isNameSubName && nameRecord && namePermissions?.allowTimeExtension && !isExpired) {
+        const objectId = getNameObject(ownedSubnames, nameRecord.name);
+        const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
+        if (objectId && parentObject) {
+            // Only allow extending the expiration time if its less than its parent
+            const expiresBeforeParent =
+                nameRecord.expirationTimestampMs < parentObject?.expirationTimestampMs;
+            if (expiresBeforeParent) {
+                updates.push({
+                    type: 'renew-subname',
+                    nftId: objectId,
+                    expirationTimestampMs: parentObject.expirationTimestampMs,
+                });
+            }
+        }
+    }
+    return updates;
+}
 
 interface RenewDialogProps {
     name: string;
@@ -45,66 +98,19 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         | undefined;
 
     const isNameSubName = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const isExpired = nameRecord?.nameRecord ? isGracePeriodExpired(nameRecord?.nameRecord) : false;
-    const namePermissions = nameRecord?.nameRecord
-        ? getNamePermissions(nameRecord.nameRecord)
-        : null;
 
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
 
-    const { data: namesOwned } = useRegistrationNfts('name');
-    const { data: subnamesOwned } = useRegistrationNfts('subname');
+    const { data: ownedNames } = useRegistrationNfts('name');
+    const { data: ownedSubnames } = useRegistrationNfts('subname');
 
-    const updates: NameUpdate[] = [];
-
-    let canBeRenewed = true;
-
-    // Extend names
-    if (nameRecord && editRenewYears && !isExpired && namePermissions?.allowTimeExtension) {
-        const objectId = getNameObject(
-            namesOwned ?? [],
-            subnamesOwned ?? [],
-            nameRecord.nameRecord.name,
-        );
-        if (objectId) {
-            updates.push({
-                type: 'renew-name',
-                nftId: objectId,
-                years: editRenewYears,
-            });
-        } else {
-            canBeRenewed = false;
-        }
-    }
-
-    // Extend subnames
-    if (isNameSubName && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
-        const objectId = getNameObject(
-            namesOwned ?? [],
-            subnamesOwned ?? [],
-            nameRecord.nameRecord.name,
-        );
-        const parentName = getParentObject(
-            namesOwned ?? [],
-            subnamesOwned ?? [],
-            nameRecord.nameRecord.name,
-        );
-        // Only allow extending the expiration time if its less than its parent
-        if (
-            objectId &&
-            parentName?.expirationTimestampMs &&
-            nameRecord.nameRecord.expirationTimestampMs < parentName?.expirationTimestampMs
-        ) {
-            updates.push({
-                type: 'renew-subname',
-                nftId: objectId,
-                expirationTimestampMs: parentName.expirationTimestampMs,
-            });
-        } else {
-            canBeRenewed = false;
-        }
-    }
+    const updates = createRenewUpdates({
+        nameRecord: nameRecord?.nameRecord,
+        ownedNames,
+        ownedSubnames,
+        renewYears: editRenewYears,
+    });
 
     const {
         data: updateNameTransaction,
@@ -141,9 +147,11 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
+    const wantsToRenew = isNameSubName ?? !!editRenewYears;
+    const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
-    const disableEdit = isLoading;
-    const disableSave = isLoading || updates.length === 0 || !!updateNameError;
+    const disableEdit = isSendingTransaction || isSigning;
+    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -167,7 +175,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                                 />
                             </div>
                         ) : null}
-                        {!canBeRenewed ? (
+                        {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
                         {updateNameError ? (
