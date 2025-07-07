@@ -40,7 +40,10 @@ function getValidationError(
     return null;
 }
 
-export function AvailabilityCheck() {
+interface AvailabilityCheckProps {
+    autoFocusInput?: boolean;
+}
+export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -119,6 +122,7 @@ export function AvailabilityCheck() {
                         leadingIcon={
                             <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
                         }
+                        autoFocus={autoFocusInput}
                     />
                     <Button
                         size={ButtonSize.Medium}
