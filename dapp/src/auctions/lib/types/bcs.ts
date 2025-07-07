@@ -3,7 +3,7 @@
 
 import { bcs } from '@iota/iota-sdk/bcs';
 
-export const DomainBcs = bcs.struct('Domain', {
+export const NameBcs = bcs.struct('Name', {
     labels: bcs.vector(bcs.string()),
 });
 
@@ -17,19 +17,19 @@ export const AuctionHouseBcs = bcs.struct('AuctionHouse', {
     auctions: bcs.struct('LinkedTable', {
         id: bcs.Address,
         size: bcs.u64(),
-        head: bcs.option(DomainBcs),
-        tail: bcs.option(DomainBcs),
+        head: bcs.option(NameBcs),
+        tail: bcs.option(NameBcs),
     }),
 });
 
 export const AuctionFieldBcs = bcs.struct('AuctionField', {
     id: bcs.Address,
-    name: DomainBcs,
+    name: NameBcs,
     value: bcs.struct('Node', {
-        prev: bcs.option(DomainBcs),
-        next: bcs.option(DomainBcs),
+        prev: bcs.option(NameBcs),
+        next: bcs.option(NameBcs),
         value: bcs.struct('Auction', {
-            domain: DomainBcs,
+            name: NameBcs,
             start_timestamp_ms: bcs.u64(),
             end_timestamp_ms: bcs.u64(),
             winner: bcs.Address,
@@ -39,8 +39,8 @@ export const AuctionFieldBcs = bcs.struct('AuctionField', {
             }),
             nft: bcs.struct('Nft', {
                 id: bcs.Address,
-                domain: DomainBcs,
-                domain_name: bcs.string(),
+                name: NameBcs,
+                name_str: bcs.string(),
                 expiration_timestamp_ms: bcs.u64(),
             }),
         }),

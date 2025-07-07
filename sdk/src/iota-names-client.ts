@@ -6,14 +6,14 @@ import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { toB64 } from '@iota/iota-sdk/utils';
 
-import { DomainBcs, PricingConfigBcs } from './bcs.js';
+import { NameBcs, PricingConfigBcs } from './bcs.js';
 import { packages } from './constants.js';
 import {
     getConfigType,
-    getDomainType,
+    getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
-    isSubName,
+    isSubname,
     validateYears,
 } from './helpers.js';
 import type {
@@ -34,7 +34,7 @@ export class IotaNamesClient {
         this.graphQlClient = config.graphQlClient;
 
         if ('network' in config) {
-            this.config = packages[config.network];
+            this.config = packages[config.network as keyof typeof packages];
         } else {
             this.config = config.packageInfo;
         }
@@ -178,9 +178,9 @@ export class IotaNamesClient {
     async getDefaultName(address: string): Promise<string | null> {
         const response: any = await this.graphQlClient.query({
             query: graphql(`
-                query resolveNameServiceName($address: IotaAddress!, $domainFormat: DomainFormat) {
+                query resolveNameServiceName($address: IotaAddress!, $nameFormat: NameFormat) {
                     address(address: $address) {
-                        iotaNamesDefaultName(format: $domainFormat)
+                        iotaNamesDefaultName(format: $nameFormat)
                     }
                 }
             `),
@@ -198,8 +198,8 @@ export class IotaNamesClient {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
         if (!this.config.registryTableId) throw new Error('IotaNames package ID is not set');
 
-        const domainBcsB64 = toB64(
-            DomainBcs.serialize({
+        const nameBcsB64 = toB64(
+            NameBcs.serialize({
                 labels: normalizeIotaName(name, 'dot').split('.').reverse(),
             }).toBytes(),
         );
@@ -222,8 +222,8 @@ export class IotaNamesClient {
             variables: {
                 parentId: this.config.registryTableId,
                 name: {
-                    type: getDomainType(this.config.packageId),
-                    bcs: domainBcsB64,
+                    type: getNameType(this.config.packageId),
+                    bcs: nameBcsB64,
                 },
             },
         });
@@ -236,7 +236,7 @@ export class IotaNamesClient {
         const nameRecordData = nameRecord.data?.contents;
 
         if (nameRecord.error || !nameRecordData)
-            throw new Error('Name record not found. This domain is not registered.');
+            throw new Error('Name record not found. This name is not registered.');
 
         const data: Record<string, string> = {};
 
@@ -260,12 +260,12 @@ export class IotaNamesClient {
     }
 
     /**
-     * Calculates the registration or renewal price for an SLD (Second Level Domain).
-     * It expects a domain name, the number of years and a `IotaNamesPriceList` object,
+     * Calculates the registration or renewal price for an SLN (Second Level Name).
+     * It expects a name, the number of years and a `IotaNamesPriceList` object,
      * as returned from `iotaNamesClient.getPriceList()` function, or `iotaNames.getRenewalPriceList()` function.
      *
      * It throws an error:
-     * 1. if the name is a subdomain
+     * 1. if the name is a subname
      * 2. if the name is not a valid IOTA name
      * 3. if the years are not between 1 and 5
      */
@@ -283,8 +283,8 @@ export class IotaNamesClient {
         }
         validateYears(years);
 
-        if (isSubName(name)) {
-            throw new Error('Subdomains do not have a registration fee');
+        if (isSubname(name)) {
+            throw new Error('Subnames do not have a registration fee');
         }
 
         const length = normalizeIotaName(name, 'dot').split('.')[0].length;

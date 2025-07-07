@@ -6,7 +6,7 @@ import { AuctionFieldBcs } from './bcs';
 export type RawAuctionMetadata = ReturnType<typeof AuctionFieldBcs.parse> | null;
 
 export interface AuctionMetadata {
-    domainName: string;
+    name: string;
     startTimestamp: Date;
     endTimestamp: Date;
     winner: string;

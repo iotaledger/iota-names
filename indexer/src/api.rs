@@ -15,7 +15,7 @@ use tokio_util::sync::CancellationToken;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
-use crate::db::{pool::DbConnectionPool, queries::get_domains_for_bidder_address};
+use crate::db::{pool::DbConnectionPool, queries::get_names_for_bidder_address};
 
 #[derive(Clone)]
 pub struct ApiState {
@@ -31,7 +31,7 @@ pub async fn start_api_server(
 
     let app = Router::new()
         .route("/health", get(health_check))
-        .route("/auctions/{address}", get(get_domains_for_address))
+        .route("/auctions/{address}", get(get_names_for_address))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -63,7 +63,7 @@ async fn health_check() -> &'static str {
     "OK"
 }
 
-async fn get_domains_for_address(
+async fn get_names_for_address(
     State(state): State<ApiState>,
     Path(address_str): Path<String>,
 ) -> Result<Json<Vec<String>>, ApiError> {
@@ -71,9 +71,9 @@ async fn get_domains_for_address(
         .map_err(|_| ApiError::BadRequest("Invalid IOTA address".to_string()))?;
 
     let mut conn = state.pool.get_connection()?;
-    let domains = get_domains_for_bidder_address(&mut conn, &address_str)?;
+    let names = get_names_for_bidder_address(&mut conn, &address_str)?;
 
-    Ok(Json(domains))
+    Ok(Json(names))
 }
 
 #[derive(Debug)]

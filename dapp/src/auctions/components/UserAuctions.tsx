@@ -92,7 +92,7 @@ export function UserAuctions() {
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {groupedAuctions.active.map((auctionGroup) => (
                             <AuctionItem
-                                key={auctionGroup.details.domain}
+                                key={auctionGroup.details.name}
                                 auction={auctionGroup.details}
                                 auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}
@@ -110,7 +110,7 @@ export function UserAuctions() {
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {groupedAuctions.claimable.map((auctionGroup) => (
                             <AuctionItem
-                                key={auctionGroup.details.domain}
+                                key={auctionGroup.details.name}
                                 auction={auctionGroup.details}
                                 auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}
@@ -128,7 +128,7 @@ export function UserAuctions() {
                     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         {groupedAuctions.lost.map((auctionGroup) => (
                             <AuctionItem
-                                key={auctionGroup.details.domain}
+                                key={auctionGroup.details.name}
                                 auction={auctionGroup.details}
                                 auctionStatus={auctionGroup.status}
                                 onBidClick={handleBidClick}

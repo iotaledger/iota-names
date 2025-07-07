@@ -16,13 +16,13 @@ export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
 
-    const { data: domains } = useRegistrationNfts('domain');
-    const { data: subdomains } = useRegistrationNfts('subdomain');
+    const { data: names } = useRegistrationNfts('name');
+    const { data: subnames } = useRegistrationNfts('subname');
 
     const namesWithChildren = useMemo(() => {
         const parents = new Set<string>();
 
-        [...(domains ?? []), ...(subdomains ?? [])].forEach(({ name }) => {
+        [...(names ?? []), ...(subnames ?? [])].forEach(({ name }) => {
             const firstDot = name.indexOf('.');
             if (firstDot !== -1) {
                 const parentName = name.slice(firstDot + 1);
@@ -31,7 +31,7 @@ export default function MyNamesPage(): JSX.Element {
         });
 
         return parents;
-    }, [domains, subdomains]);
+    }, [names, subnames]);
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center">
@@ -53,7 +53,7 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My names" testId="my-names-page" />
             </div>
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
-                {domains?.map((nft) => {
+                {names?.map((nft) => {
                     const isNftDeletable = nft.isExpired && !namesWithChildren.has(nft.name);
                     return (
                         <div key={nft.name}>
@@ -101,23 +101,23 @@ export default function MyNamesPage(): JSX.Element {
                 <Title title="My subnames" />
             </div>
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
-                {subdomains?.map((subdomain) => {
-                    const isSubdomainRemovable =
-                        subdomain.isExpired && !namesWithChildren.has(subdomain.name);
+                {subnames?.map((subname) => {
+                    const isSubnameRemovable =
+                        subname.isExpired && !namesWithChildren.has(subname.name);
                     return (
-                        <div key={subdomain.name}>
-                            <Card key={subdomain.name} type={CardType.Filled}>
+                        <div key={subname.name}>
+                            <Card key={subname.name} type={CardType.Filled}>
                                 <div className="flex flex-col items-center gap-y-sm">
                                     <div className="w-40 h-40 object-cover">
-                                        <AvatarDisplay registration={subdomain} />
+                                        <AvatarDisplay registration={subname} />
                                     </div>
                                     <Title
-                                        title={subdomain.name}
+                                        title={subname.name}
                                         size={TitleSize.Small}
                                         subtitle={`Expiration Date: ${
-                                            subdomain?.expirationTimestampMs
+                                            subname?.expirationTimestampMs
                                                 ? new Date(
-                                                      subdomain.expirationTimestampMs,
+                                                      subname.expirationTimestampMs,
                                                   ).toLocaleDateString('en-US', {
                                                       year: 'numeric',
                                                       month: 'short',
@@ -130,13 +130,13 @@ export default function MyNamesPage(): JSX.Element {
                                         <Button
                                             text="Manage"
                                             fullWidth
-                                            onClick={() => setUpdateNameDialog(subdomain.name)}
+                                            onClick={() => setUpdateNameDialog(subname.name)}
                                         />
-                                        {isSubdomainRemovable ? (
+                                        {isSubnameRemovable ? (
                                             <Button
                                                 text="Delete"
                                                 type={ButtonType.Destructive}
-                                                onClick={() => setDeleteNameDialog(subdomain)}
+                                                onClick={() => setDeleteNameDialog(subname)}
                                             />
                                         ) : null}
                                     </div>
