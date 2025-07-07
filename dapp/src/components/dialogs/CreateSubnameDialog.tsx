@@ -19,13 +19,62 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, MIN_LABEL_SIZE } from '@iota/iota-names-sdk';
+import { isSubname, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { RegistrationNft } from '@/lib/interfaces';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
+
+function createSubnameUpdates({
+    name,
+    nameRecord,
+    ownedSubnames,
+    newSubname,
+    allowChildCreation,
+    allowTimeExtension,
+}: {
+    name: string;
+    nameRecord?: NameRecord;
+    ownedSubnames?: RegistrationNft[];
+    newSubname: string | null;
+    allowChildCreation: boolean;
+    allowTimeExtension: boolean;
+}) {
+    const isNameSubName = isSubname(nameRecord?.name || '');
+
+    // Only join names if there user has written anything
+    const fullSubnameName = newSubname?.trim() ? newSubname + '.' + name : null;
+    // See if there is an existing subname with the same name
+    const isSubnameAvailable = fullSubnameName
+        ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
+        : false;
+
+    const updates: NameUpdate[] = [];
+
+    const nftId = isNameSubName
+        ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
+        : nameRecord?.nftId;
+
+    if (nftId && fullSubnameName && isSubnameAvailable) {
+        updates.push({
+            type: 'new-subname',
+            subname: fullSubnameName,
+            parentNftId: nftId,
+            expirationTimeParent: nameRecord?.expirationTimestampMs || 0,
+            allowChildCreation,
+            allowTimeExtension,
+        });
+    }
+
+    return {
+        updates,
+        fullSubnameName,
+        isSubnameAvailable,
+    };
+}
 
 type CreateSubnameProps = {
     name: string;
@@ -37,7 +86,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const { data: subnamesOwned } = useRegistrationNfts('subname');
+    const { data: ownedSubnames } = useRegistrationNfts('subname');
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
     // We are sure that only owned names are passed here
@@ -46,39 +95,21 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         | undefined;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-    const isNameSubName = isSubname(name);
-
-    // Create updates
-    const updates: NameUpdate[] = [];
 
     // Editable values
-    const [newSubname, setNewSubname] = useState('');
+    const [editSubname, setEditSubname] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
 
-    // Only join names if there user has written anything
-    const fullSubname = newSubname.trim() ? newSubname + '.' + name : null;
-    const isAvailable = fullSubname
-        ? getNameObject(subnamesOwned ?? [], fullSubname) === null
-        : false;
+    const { updates, fullSubnameName, isSubnameAvailable } = createSubnameUpdates({
+        name,
+        nameRecord: nameRecord?.nameRecord,
+        newSubname: editSubname,
+        ownedSubnames,
+        allowTimeExtension: editIsAllowingRenew,
+        allowChildCreation: editIsAllowSubnames,
+    });
 
-    if (name && newSubname && fullSubname && isAvailable) {
-        // We only need to search in the owned subnames if its a subname
-        const nftId = isNameSubName
-            ? getNameObject(subnamesOwned ?? [], name)
-            : nameRecord?.nameRecord.nftId;
-
-        if (nftId) {
-            updates.push({
-                type: 'new-subname',
-                subname: fullSubname,
-                parentNftId: nftId,
-                expirationTimeParent: nameRecord?.nameRecord?.expirationTimestampMs || 0,
-                allowChildCreation: editIsAllowSubnames,
-                allowTimeExtension: editIsAllowingRenew,
-            });
-        }
-    }
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -114,7 +145,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         setOpen(false);
     }
     const handleCancelAddSubname = () => {
-        setNewSubname('');
+        setEditSubname('');
         closeDialog();
     };
 
@@ -133,8 +164,8 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         updates.length === 0 ||
         isLoading ||
         isExpired ||
-        !newSubname.trim() ||
-        newSubname.length < MIN_LABEL_SIZE;
+        !editSubname.trim() ||
+        editSubname.length < MIN_LABEL_SIZE;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -147,8 +178,8 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
                             <label className="block text-sm font-medium mb-2">Subname:</label>
                             <Input
                                 type={InputType.Text}
-                                value={newSubname}
-                                onChange={(e) => setNewSubname(e.target.value)}
+                                value={editSubname}
+                                onChange={(e) => setEditSubname(e.target.value)}
                                 placeholder="Input subname"
                             />
                             <Card type={CardType.Outlined}>
@@ -173,11 +204,13 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
                                     onCheckedChange={handleAllowSubnameChange}
                                 />
                             </Card>
-                            {newSubname && (
-                                <p className="text-sm text-gray-600 mt-1">Preview: {fullSubname}</p>
+                            {editSubname && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                    Preview: {fullSubnameName}
+                                </p>
                             )}
                         </div>
-                        {!isAvailable && fullSubname ? (
+                        {!isSubnameAvailable && fullSubnameName ? (
                             <div className="text-red-500 mb-4">This subname is not available</div>
                         ) : null}
                         {updateNameError ? (
