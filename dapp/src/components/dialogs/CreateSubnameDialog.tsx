@@ -59,13 +59,13 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     // Only join names if there user has written anything
     const fullSubname = newSubname.trim() ? newSubname + '.' + name : null;
     const isAvailable = fullSubname
-        ? getNameObject([], subnamesOwned ?? [], fullSubname) === null
+        ? getNameObject(subnamesOwned ?? [], fullSubname) === null
         : false;
 
     if (name && newSubname && fullSubname && isAvailable) {
         // We only need to search in the owned subnames if its a subname
         const nftId = isNameSubName
-            ? getNameObject([], subnamesOwned ?? [], name)
+            ? getNameObject(subnamesOwned ?? [], name)
             : nameRecord?.nameRecord.nftId;
 
         if (nftId) {
