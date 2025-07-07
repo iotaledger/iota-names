@@ -5,22 +5,28 @@ import { Add, Calendar } from '@iota/apps-ui-icons';
 import { ButtonUnstyled } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 
+import { AuctionDetails, formatTimeRemaining, getTimeRemaining } from '@/auctions';
+import { useCountdown } from '@/auctions/hooks/useCountdown';
+
 import { SvgSubnames } from '../svgs/SvgSubnames';
 
 const INDICATOR_CLASSES =
     'state-layer relative cursor-pointer p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs text-names-neutral-70 text-label-md w-max';
 
 interface ExpiryDateIndicatorProps {
-    expiration: number;
+    auction: AuctionDetails;
 }
 
-export function ExpiryDateIndicator({ expiration }: ExpiryDateIndicatorProps) {
-    const expDate = new Date(expiration).getDate();
+export function ExpiryDateIndicator({ auction }: ExpiryDateIndicatorProps) {
+    const timeRemainingMs = getTimeRemaining(auction.metadata);
+    const { milliseconds } = useCountdown(timeRemainingMs);
+
+    const formattedTimeRemaining = formatTimeRemaining(milliseconds);
 
     return (
         <span className={cx(INDICATOR_CLASSES)}>
             <Calendar className="h-4 w-4" />
-            {expDate}
+            {formattedTimeRemaining}
         </span>
     );
 }

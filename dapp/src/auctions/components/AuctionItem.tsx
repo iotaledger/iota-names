@@ -1,23 +1,20 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Card, CardType, KeyValueInfo, LoadingIndicator } from '@iota/apps-ui-kit';
+import { Button, Card, CardType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { NameCard } from '@/components/name-card/NameCard';
+import { NameCardBody } from '@/components/name-card/NameCardBody';
+import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
-import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
-import {
-    formatTimeRemaining,
-    getCurrentBidAmount,
-    getNextBidAmount,
-    getTimeRemaining,
-    UserAuctionStatus,
-} from '../lib/utils';
+import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
 import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {
@@ -81,9 +78,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         );
     }
 
-    const currentBid = getCurrentBidAmount(auction.metadata);
     const timeRemaining = getTimeRemaining(auction.metadata);
-    const nextBidAmount = getNextBidAmount(auction.metadata);
 
     const renderActionButton = () => {
         if (auctionStatus === 'claimable') {
@@ -103,7 +98,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
             );
         }
 
-        if (auctionStatus === 'outbid' && timeRemaining > 0) {
+        if (['outbid', 'top_bidder'].includes(auctionStatus) && timeRemaining > 0) {
             return (
                 <Button
                     text="Bid Again"
@@ -120,41 +115,15 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     };
 
     return (
-        <Card type={CardType.Filled}>
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-lg">{auction.name}</h3>
+        <NameCard key={auction.name} name={auction.name}>
+            <NameCardBody title={`@${normalizeNameInput(auction.name)}`}>
+                <div className="flex flex-row items-center justify-between gap-x-xs">
+                    <ExpiryDateIndicator auction={auction} />
                     <AuctionStatusBadge status={auctionStatus} />
                 </div>
 
-                <div className="space-y-2">
-                    <KeyValueInfo
-                        keyText="Current Bid"
-                        value={formatNanosToIota(currentBid, {
-                            formatRounded: false,
-                            showIotaSymbol: false,
-                        })}
-                        fullwidth
-                    />
-                    <KeyValueInfo
-                        keyText="Time Remaining"
-                        value={formatTimeRemaining(timeRemaining)}
-                        fullwidth
-                    />
-                    {auctionStatus === 'outbid' && timeRemaining > 0 && (
-                        <KeyValueInfo
-                            keyText="Next Bid"
-                            value={formatNanosToIota(nextBidAmount, {
-                                formatRounded: false,
-                                showIotaSymbol: false,
-                            })}
-                            fullwidth
-                        />
-                    )}
-                </div>
-
-                <div className="pt-2">{renderActionButton()}</div>
-            </div>
-        </Card>
+                {renderActionButton()}
+            </NameCardBody>
+        </NameCard>
     );
 }

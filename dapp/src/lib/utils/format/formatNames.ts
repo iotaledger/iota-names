@@ -10,6 +10,6 @@ export function splitNameInParts(name: string) {
     };
 }
 
-export function removeSuffixFromName(name: string) {
-    return name.replace('.iota', '');
+export function normalizeNameInput(name: string) {
+    return name.toLowerCase().replace(/\.iota$/i, '');
 }

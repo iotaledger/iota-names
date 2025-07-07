@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MoreHoriz } from '@iota/apps-ui-icons';
+import cx from 'clsx';
 
+import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
@@ -13,16 +15,21 @@ interface NameCardProps extends NftDisplayProps {
 }
 
 export function NameCard({
-    registrationNft,
+    name,
     badge,
     size,
     menuOptions,
     children,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
-        <div className="relative group/name-card rounded-xl overflow-hidden shadow-md bg-names-neutral-6">
+        <div
+            className={cx(
+                'relative group/name-card rounded-xl overflow-hidden shadow-md bg-names-neutral-6',
+                nftDisplayVariants({ size }),
+            )}
+        >
             <AvatarDisplay
-                registrationNft={registrationNft}
+                name={name}
                 size={size}
                 badge={badge}
                 button={

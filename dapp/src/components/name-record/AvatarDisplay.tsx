@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
 import { useNameRecord } from '@/hooks';
@@ -13,10 +14,10 @@ interface AvatarDisplayProps extends NftDisplayProps {
     button?: React.ReactNode;
 }
 
-export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDisplayProps) {
+export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps) {
     const [showAvatar, setShowAvatar] = useState(false);
 
-    const { data } = useNameRecord(registrationNft.name);
+    const { data } = useNameRecord(name);
 
     //TODO: Remove when we add the svg api
     const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
@@ -41,7 +42,12 @@ export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDi
     }, [avatarSrc]);
 
     return (
-        <div className={nftDisplayVariants({ size })}>
+        <div
+            className={cx(
+                'flex flex-col relative aspect-square rounded-xl group/display z-0',
+                nftDisplayVariants({ size }),
+            )}
+        >
             <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
                 {badge && <div className="absolute top-sm left-sm">{badge}</div>}
                 {button && (
@@ -53,7 +59,7 @@ export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDi
                 <img
                     className="absolute inset-0 w-full h-full -z-[1] object-cover"
                     src={avatarSrc && showAvatar ? avatarSrc : PLACEHOLDER_DISPLAY}
-                    alt={registrationNft.name}
+                    alt={name}
                 />
             </div>
         </div>
