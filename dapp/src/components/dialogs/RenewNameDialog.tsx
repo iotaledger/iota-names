@@ -147,7 +147,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
-    const wantsToRenew = isNameSubName ?? !!editRenewYears;
+    const wantsToRenew = isNameSubName || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
