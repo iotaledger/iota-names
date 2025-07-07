@@ -15,7 +15,7 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 
 /* friend iota_names::registry; */
 /* #[test_only] */
-/* friend iota_names::sub_name_tests; */
+/* friend iota_names::su_name_tests; */
 
 /// === Error codes ===
 #[error]
@@ -25,13 +25,13 @@ const ENotSubname: vector<u8> = b"NFT is not a subname.";
 #[error]
 const ENameNotExpired: vector<u8> = b"Tried to destroy a subname that has not expired.";
 
-/// A wrapper for IotaNamesRegistration object specifically for SubNames.
+/// A wrapper for IotaNamesRegistration object specifically for Subnames.
 public struct SubnameRegistration has key, store {
     id: UID,
     nft: IotaNamesRegistration,
 }
 
-/// Creates a `SubName` wrapper for IotaNamesRegistration object
+/// Creates a `Subname` wrapper for IotaNamesRegistration object
 /// (as long as it's used for a subname).
 public(package) fun new(
     nft: IotaNamesRegistration,

@@ -4,7 +4,7 @@
 
 #[test_only]
 #[allow(lint(abort_without_constant))]
-module iota_names::sub_name_tests;
+module iota_names::subname_tests;
 
 use iota::clock;
 use iota_names::name;
