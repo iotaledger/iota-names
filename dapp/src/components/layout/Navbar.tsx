@@ -11,7 +11,7 @@ import { PROTECTED_ROUTES } from '@/lib/constants';
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     return (
-        <nav className="sticky top-0 z-50 backdrop-blur-lg border-b border-names-neutral-20">
+        <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg border-b border-names-neutral-20">
             <div className="container flex justify-between py-2">
                 <h1 className="flex items-center text-headline-sm">IOTA NAMES</h1>
                 <div className="flex flex-row gap-x-sm items-center">
