@@ -15,7 +15,7 @@ use iota_names::iota_names_registration::IotaNamesRegistration;
 
 /* friend iota_names::registry; */
 /* #[test_only] */
-/* friend iota_names::su_name_tests; */
+/* friend iota_names::subname_tests; */
 
 /// === Error codes ===
 #[error]
