@@ -46,7 +46,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         | undefined;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
-    const isNameSubName = isSubname(name);
+    const isNameSubname = isSubname(name);
 
     // Create updates
     const updates: NameUpdate[] = [];
@@ -64,7 +64,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
 
     if (name && newSubname && fullSubname && isAvailable) {
         // We only need to search in the owned subnames if its a subname
-        const nftId = isNameSubName
+        const nftId = isNameSubname
             ? getNameObject([], subnamesOwned ?? [], name)
             : nameRecord?.nameRecord.nftId;
 

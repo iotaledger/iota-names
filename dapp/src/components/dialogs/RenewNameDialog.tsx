@@ -44,7 +44,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const isNameSubName = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
+    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isGracePeriodExpired(nameRecord?.nameRecord) : false;
     const namePermissions = nameRecord?.nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
@@ -79,7 +79,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     }
 
     // Extend subnames
-    if (isNameSubName && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
+    if (isNameSubname && nameRecord && !isExpired && namePermissions?.allowTimeExtension) {
         const objectId = getNameObject(
             namesOwned ?? [],
             subnamesOwned ?? [],
@@ -154,7 +154,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         <h3 className="text-lg font-semibold mb-4">
                             Renew name {nameRecord?.nameRecord?.name}
                         </h3>
-                        {!isNameSubName ? (
+                        {!isNameSubname ? (
                             <div className="mb-4">
                                 <Input
                                     type={InputType.Text}

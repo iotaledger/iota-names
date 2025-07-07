@@ -39,7 +39,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const { data: namesOwned } = useRegistrationNfts('name');
     const { data: subnamesOwned } = useRegistrationNfts('subname');
 
-    const isNameSubName = nft ? isSubname(nft.name) : null;
+    const isNameSubname = nft ? isSubname(nft.name) : null;
 
     // Create updates
     const updates: NameUpdate[] = [];
@@ -50,7 +50,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             updates.push({
                 type: 'delete-name',
                 nft: nftId,
-                isSubname: isNameSubName || false,
+                isSubname: isNameSubname || false,
             });
         }
     }
