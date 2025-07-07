@@ -4,7 +4,6 @@
 import { Add, Calendar } from '@iota/apps-ui-icons';
 import { ButtonUnstyled } from '@iota/apps-ui-kit';
 import cx from 'clsx';
-import Link from 'next/link';
 
 import { SvgSubnames } from '../svgs/SvgSubnames';
 
@@ -29,19 +28,21 @@ export function ExpiryDateIndicator({ expiration }: ExpiryDateIndicatorProps) {
 interface SubnameCountIndicatorProps {
     subnameCount: number;
     onSubnameListClick: () => void;
+    onAddSubnameClick?: () => void;
     showAddSubnameLink?: boolean;
 }
 
 export function SubnameCountIndicator({
     subnameCount,
     onSubnameListClick,
+    onAddSubnameClick,
     showAddSubnameLink,
 }: SubnameCountIndicatorProps) {
     if (subnameCount === 0 && showAddSubnameLink !== false) {
         return (
-            <Link href="#" className={cx(INDICATOR_CLASSES)}>
+            <ButtonUnstyled href="#" className={cx(INDICATOR_CLASSES)} onClick={onAddSubnameClick}>
                 <Add className="h-4 w-4" /> Add subname
-            </Link>
+            </ButtonUnstyled>
         );
     }
 

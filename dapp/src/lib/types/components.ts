@@ -3,7 +3,7 @@
 
 import type { ListItem } from '@iota/apps-ui-kit';
 
-import type { NftDisplayVariants } from '@/components/name-card/variants';
+import type { NftDisplayVariants } from '@/components/name-record/variants';
 
 import type { RegistrationNft } from '../interfaces/registration.interfaces';
 

@@ -1,54 +1,61 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useNameRecord } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
 import type { NftDisplayProps } from '@/lib/types/components';
 
-import { NameCardDisplay } from '../name-card/NameCardDisplay';
-
-const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
+import { nftDisplayVariants } from './variants';
 
 interface AvatarDisplayProps extends NftDisplayProps {
     button?: React.ReactNode;
 }
 
 export function AvatarDisplay({ registrationNft, size, badge, button }: AvatarDisplayProps) {
-    const [showPlaceholder, setShowPlaceholder] = useState(false);
+    const [showAvatar, setShowAvatar] = useState(false);
 
-    const {
-        data,
-        isLoading: isLoadingRegistration,
-        isError: isErrorRegistration,
-    } = useNameRecord(registrationNft.name);
+    const { data } = useNameRecord(registrationNft.name);
+
+    //TODO: Remove when we add the svg api
+    const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
 
     const avatarId = data?.type === 'unavailable' ? data?.nameRecord.avatar : null;
 
-    const {
-        data: avatarObject,
-        isLoading: isLoadingAvatarObject,
-        isError: isErrorAvatarObject,
-    } = useGetObject({ id: avatarId ?? '', options: { showDisplay: true, showContent: true } });
+    const { data: avatarObject } = useGetObject({
+        id: avatarId ?? '',
+        options: { showDisplay: true, showContent: true },
+    });
 
-    const fallbackImage = showPlaceholder
-        ? PLACEHOLDER_DISPLAY
-        : registrationNft?.imageUrl || PLACEHOLDER_DISPLAY;
+    const avatarSrc = avatarObject?.display?.data?.image_url;
 
-    const mediaUrl =
-        isLoadingAvatarObject || isLoadingRegistration || isErrorAvatarObject || isErrorRegistration
-            ? fallbackImage
-            : avatarObject?.display?.data?.image_url || fallbackImage;
+    useEffect(() => {
+        if (!avatarSrc) return;
+
+        const img = new Image();
+        img.src = avatarSrc;
+
+        img.onload = () => setShowAvatar(true);
+        img.onerror = () => setShowAvatar(false);
+    }, [avatarSrc]);
 
     return (
-        <NameCardDisplay
-            size={size}
-            src={mediaUrl}
-            alt={registrationNft.name}
-            badge={badge}
-            button={button}
-            onError={() => setShowPlaceholder(true)}
-        />
+        <div className={nftDisplayVariants({ size })}>
+            <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
+                {badge && <div className="absolute top-sm left-sm">{badge}</div>}
+                {button && (
+                    <div className="opacity-0 group-hover/display:opacity-100 transition-opacity absolute w-full top-0 right-0 px-sm py-sm bg-gradient-to-b from-black/80 to-transparent flex justify-end pointer-events-none">
+                        <div className="shadow-xl pointer-events-auto">{button}</div>
+                    </div>
+                )}
+
+                <img
+                    className="absolute inset-0 w-full h-full -z-[1]"
+                    src={avatarSrc && showAvatar ? avatarSrc : PLACEHOLDER_DISPLAY}
+                    alt={registrationNft.name}
+                />
+            </div>
+        </div>
     );
 }
