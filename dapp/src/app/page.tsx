@@ -3,14 +3,12 @@
 
 'use client';
 
-import { AvailabilityCheck } from '@/components/AvailabilityCheck';
+import { LandingHero } from '@/components/LandingHero';
 
 export default function Home() {
     return (
         <main className="flex flex-col h-screen">
-            <div className="container w-full h-full py-12 flex">
-                <AvailabilityCheck />
-            </div>
+            <LandingHero />
         </main>
     );
 }

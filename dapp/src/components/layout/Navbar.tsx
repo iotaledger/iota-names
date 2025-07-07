@@ -18,7 +18,7 @@ export function Navbar() {
     const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
 
     return (
-        <nav className="sticky top-0 z-50 backdrop-blur-lg">
+        <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
             <div className="container py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">

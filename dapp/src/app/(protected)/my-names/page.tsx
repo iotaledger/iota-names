@@ -34,7 +34,7 @@ export default function MyNamesPage(): JSX.Element {
     }, [names, subnames]);
 
     return (
-        <div className="flex flex-col w-full gap-y-lg items-center">
+        <div className="flex flex-col w-full gap-y-lg items-center py-24 md:py-lg">
             {updateNameDialog ? (
                 <UpdateNameDialog
                     name={updateNameDialog}
