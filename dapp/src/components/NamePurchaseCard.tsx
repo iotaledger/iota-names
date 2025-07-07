@@ -75,7 +75,7 @@ export function NamePurchaseCard({
                                 )}
                             </div>
                         )}
-                        <div className="flex transition-opacity duration-100 w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
+                        <div className="flex w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
                             {children}
                         </div>
                     </div>
