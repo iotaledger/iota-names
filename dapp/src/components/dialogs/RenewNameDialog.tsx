@@ -19,7 +19,7 @@ import { useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
+import { CANNOT_EXCEED_MAX_YEARS, CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
 import {
     getNameObject,
     getNamePermissions,
@@ -140,7 +140,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const handleCancelRenewName = () => {
         setOpen(false);
     };
-
+    const exceedYears = updateNameError && updateNameError?.message.includes('9223373020403073037');
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isLoading;
     const disableSave = isLoading || updates.length === 0 || !!updateNameError;
@@ -170,7 +170,9 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         {!canBeRenewed ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
-                        {updateNameError ? (
+                        {exceedYears ? (
+                            <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
+                        ) : updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
                         <div className="flex gap-2 justify-end">
