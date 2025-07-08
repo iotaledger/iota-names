@@ -3,6 +3,7 @@
 
 export const GAS_BALANCE_TOO_LOW_ID = 'GasBalanceTooLow';
 export const NOT_ENOUGH_BALANCE_ID = 'No valid gas coins found';
+export const INSUFFICIENT_COIN_BALANCE_ID = 'InsufficientCoinBalance';
 
 export const GAS_BUDGET_ERROR_MESSAGES = {
     [GAS_BALANCE_TOO_LOW_ID]: 'Not enough balance to cover transaction fees.',

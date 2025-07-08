@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
+import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '../lib/utils/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
@@ -61,10 +62,16 @@ export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
                       name,
                   );
 
-            await transaction.build({
+            const txBuild = await transaction.build({
                 client: iotaClient,
             });
-            return transaction;
+            const txDryRun = await iotaClient.dryRunTransactionBlock({
+                transactionBlock: txBuild,
+            });
+            return {
+                transaction,
+                gasSummary: getGasSummary(txDryRun),
+            };
         },
         enabled: enableAuctionBid,
     });

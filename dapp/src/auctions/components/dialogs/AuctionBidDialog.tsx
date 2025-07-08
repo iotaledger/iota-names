@@ -23,7 +23,13 @@ import { useState } from 'react';
 
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { queryKey } from '@/hooks';
+import { queryKey, useBalance } from '@/hooks';
+import {
+    GAS_BALANCE_TOO_LOW_ID,
+    GAS_BUDGET_ERROR_MESSAGES,
+    INSUFFICIENT_COIN_BALANCE_ID,
+    NOT_ENOUGH_BALANCE_ID,
+} from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 
@@ -36,6 +42,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
+    const { data: coinBalance } = useBalance(account?.address ?? '');
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
     const minBidNanos = auctionMetadata?.minBidNanos || NANOS_PER_IOTA;
     const [bidAmountValue, setBidAmountValue] = useState(
@@ -51,7 +58,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
         data: auctionBidTransaction,
         isLoading: isAuctionBidLoading,
         isPending: isAuctionBidPending,
-        error,
+        error: auctionError,
     } = useAuctionBid({
         name,
         bidNanos: bidNanos ?? BigInt(0),
@@ -80,22 +87,34 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
 
     const minBidLabel = formatNanosToIota(minBidNanos, {
         formatRounded: false,
-        showIotaSymbol: true,
     });
     const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = (bidNanos || BigInt(0)) < minBidNanos;
 
+    const totalBalance = Number(coinBalance?.totalBalance) || 0;
+    const totalGas = Number(auctionBidTransaction?.gasSummary?.totalGas) || 0;
+    const totalPrice = Number(minBidNanos) + totalGas;
+    const hasBalance = totalBalance > totalPrice;
+
+    const hasEnoughGas =
+        !auctionError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !auctionError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
+        !auctionError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
+
     const isLoading = isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
+    const disablePlaceBid =
+        isPending || isLoading || isBidBelowMinimum || !hasBalance || !hasEnoughGas;
 
     const errorMessage = (() => {
         if (isBidAboveDecimals) {
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (error) {
-            return error.message;
+        } else if (!hasEnoughGas) {
+            return GAS_BUDGET_ERROR_MESSAGES[NOT_ENOUGH_BALANCE_ID];
+        } else if (auctionError) {
+            return auctionError.message;
         }
     })();
 
@@ -124,6 +143,27 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                             <span className="text-body-md text-neutral-60">Minimum bid:</span>
                             <span className="text-body-md">{minBidLabel}</span>
                         </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-body-md text-neutral-60">Gas:</span>
+                            <span className="text-body-md">
+                                {!isLoading
+                                    ? formatNanosToIota(totalGas, { formatRounded: false })
+                                    : '-'}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="text-body-md text-neutral-60">
+                                Total price (Name + gas):
+                            </span>
+                            <span className="text-body-md">
+                                {' '}
+                                {!isLoading && !disablePlaceBid
+                                    ? formatNanosToIota(totalPrice, {
+                                          formatRounded: false,
+                                      })
+                                    : '-'}
+                            </span>
+                        </div>
                     </div>
                 </DialogBody>
 
@@ -142,7 +182,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                         text={auctionMetadata ? 'Place bid' : 'Start auction'}
                         onClick={() => {
                             if (auctionBidTransaction) {
-                                handleConfirm(auctionBidTransaction);
+                                handleConfirm(auctionBidTransaction.transaction);
                             }
                         }}
                     />
