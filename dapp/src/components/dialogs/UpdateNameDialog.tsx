@@ -6,6 +6,8 @@
 import {
     Button,
     Card,
+    CardAction,
+    CardActionType,
     CardBody,
     CardType,
     Checkbox,
@@ -18,15 +20,26 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { isSubname } from '@iota/iota-names-sdk';
 import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
+import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import {
+    getNameObject,
+    getNamePermissions,
+    getParentObjectId,
+    isNameRecordExpired,
+} from '@/lib/utils/names';
+
+import { VisualAssetsDialog } from './AvatarSelectDialog';
+import { CreateSubnameDialog } from './CreateSubnameDialog';
+import { RenewNameDialog } from './RenewNameDialog';
 
 type UpdateNameDialogProps = {
     name: string;
@@ -47,12 +60,34 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
-
+    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
+    const namePermissions = nameRecord?.nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : null;
+
+    const { data: namesOwned } = useRegistrationNfts('name');
+    const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     // Editable values
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
+    const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
+    const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+    const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
+
+    // Dialogs
+    const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
+    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
+    const [subnameDialogOpen, setSubnameDialogOpen] = useState(false);
+
+    // Sync permissions
+    useEffect(() => {
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
+        }
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
     // Sync name target address
     useEffect(() => {
@@ -80,13 +115,19 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     // Create updates
     const updates: NameUpdate[] = [];
 
-    if (isThereAddress && isValidAddress && !isTargetUsedInName) {
+    if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
         // Only allow changing the target address if it is valid and it is not used yet
-        updates.push({
-            type: 'set-target-address',
-            address: editTargetAddress,
-            isSubname: false,
-        });
+        const nftId = isNameSubname
+            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
+            : nameRecord.nameRecord.nftId;
+        if (nftId) {
+            updates.push({
+                type: 'set-target-address',
+                address: editTargetAddress,
+                isSubname: !!isNameSubname,
+                nftId: nftId,
+            });
+        }
     }
 
     if (isDefaultName && !editIsDefaultName) {
@@ -102,16 +143,46 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         });
     }
 
+    if (
+        nameRecord &&
+        isNameSubname &&
+        (editIsAllowSubnames != namePermissions?.allowChildCreation ||
+            editIsAllowingRenew != namePermissions?.allowTimeExtension)
+    ) {
+        // To edit the setup of a subname we need to get its parent
+        // Its parent can be another name or another subname
+        const parentObjectId = getParentObjectId(namesOwned ?? [], subnamesOwned ?? [], name);
+        if (parentObjectId) {
+            updates.push({
+                type: 'edit-setup',
+                name,
+                parentNftId: parentObjectId,
+                allowChildCreation: editIsAllowSubnames,
+                allowTimeExtension: editIsAllowingRenew,
+            });
+        }
+    }
+
+    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
+        const nftId = isNameSubname
+            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
+            : nameRecord.nameRecord.nftId;
+        if (nftId) {
+            updates.push({
+                type: 'set-avatar',
+                nftId,
+                avatarNftId: avatarNftId,
+            });
+        }
+    }
+
     const {
         data: updateNameTransaction,
         error: updateNameError,
         isLoading: isLoadingUpdateNameTransaction,
     } = useUpdateNameTransaction({
         address: account?.address || '',
-        name,
-        nft: nameRecord?.nameRecord?.nftId || '',
         updates,
-        isExpired,
     });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
@@ -136,6 +207,8 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
+                    case 'set-avatar':
+                    case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
                             queryKey: queryKey.nameRecord(name),
@@ -157,6 +230,13 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     function handleReverseLookupChange({ target: { checked } }: ChangeEvent<HTMLInputElement>) {
         setEditDefaultName(checked);
     }
+    const handleAllowRenewChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
+        setEditIsAllowingRenew(checked);
+    };
+
+    const handleAllowSubnameChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
+        setEditIsAllowSubnames(checked);
+    };
 
     function handleSetCurrentAsTargetAddress() {
         if (account?.address) {
@@ -169,66 +249,153 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
+    const disableRenew = isExpired;
+    const disableAddSubname = isExpired;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
-                <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
-                <DialogBody>
-                    {isExpired && !isLoading ? (
-                        <Card>
-                            <p className="text-yellow-300">Name is expired.</p>
-                        </Card>
-                    ) : null}
-                    {isThereAddress && !isValidAddress ? (
-                        <Card>
-                            <p className="text-yellow-300"> Not valid IOTA address.</p>
-                        </Card>
-                    ) : null}
-                    <Card type={CardType.Outlined}>
-                        <CardBody title="Target Address" />
-                        <Input
-                            type={InputType.Text}
-                            value={editTargetAddress}
-                            disabled={disableEdit}
-                            onChange={handleTargetAddressChange}
-                        />
-                        {!isTargetCurrentAddress && (
-                            <Button
-                                onClick={handleSetCurrentAsTargetAddress}
-                                text="Use current"
+        <>
+            <Dialog open={open} onOpenChange={setOpen}>
+                <DialogContent containerId="overlay-portal-container">
+                    <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
+                    <DialogBody>
+                        {isExpired && !isLoading ? (
+                            <Card>
+                                <p className="text-yellow-300">Name is expired.</p>
+                            </Card>
+                        ) : null}
+                        {isThereAddress && !isValidAddress ? (
+                            <Card>
+                                <p className="text-yellow-300"> Not valid IOTA address.</p>
+                            </Card>
+                        ) : null}
+                        <Card type={CardType.Outlined}>
+                            <CardBody title="Target Address" />
+                            <Input
+                                type={InputType.Text}
+                                value={editTargetAddress}
                                 disabled={disableEdit}
+                                onChange={handleTargetAddressChange}
                             />
-                        )}
-                    </Card>
-                    {isWrongCombination ? (
-                        <Card>
-                            <p className="text-yellow-300">
-                                {' '}
-                                Use your account as target address to be able to set this name as
-                                default.
-                            </p>
+                            {!isTargetCurrentAddress && (
+                                <Button
+                                    onClick={handleSetCurrentAsTargetAddress}
+                                    text="Use current"
+                                    disabled={disableEdit}
+                                />
+                            )}
                         </Card>
-                    ) : null}
-                    <Card type={CardType.Outlined}>
-                        <CardBody title="Set as default name" subtitle="Enables reverse lookup." />
-                        <Checkbox
-                            isChecked={editIsDefaultName}
-                            isDisabled={disableEdit}
-                            onCheckedChange={handleReverseLookupChange}
+                        {isWrongCombination ? (
+                            <Card>
+                                <p className="text-yellow-300">
+                                    {' '}
+                                    Use your account as target address to be able to set this name
+                                    as default.
+                                </p>
+                            </Card>
+                        ) : null}
+                        <Card type={CardType.Outlined}>
+                            <CardBody
+                                title="Set as default name"
+                                subtitle="Enables reverse lookup."
+                            />
+                            <Checkbox
+                                isChecked={editIsDefaultName}
+                                isDisabled={disableEdit}
+                                onCheckedChange={handleReverseLookupChange}
+                            />
+                        </Card>
+
+                        <Card type={CardType.Outlined}>
+                            <CardBody title="Avatar NFT" />
+                            <CardAction
+                                type={CardActionType.Button}
+                                title="Update Avatar NFT"
+                                onClick={() => setIsAvatarSelectorOpen(true)}
+                            />
+                        </Card>
+                        {isNameSubname ? (
+                            <>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow renew name"
+                                        subtitle="Allow renew name."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowingRenew}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowRenewChange}
+                                    />
+                                </Card>
+                                <Card type={CardType.Outlined}>
+                                    <CardBody
+                                        title="Set allow subname"
+                                        subtitle="Allow creating subnames."
+                                    />
+                                    <Checkbox
+                                        isChecked={editIsAllowSubnames}
+                                        isDisabled={disableEdit}
+                                        onCheckedChange={handleAllowSubnameChange}
+                                    />
+                                </Card>
+                            </>
+                        ) : null}
+                        {namePermissions?.allowTimeExtension && (
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Renew"
+                                    subtitle={`Renew ${isNameSubname ? 'Subname' : 'Name'}.`}
+                                />
+                                <Button
+                                    text="Renew"
+                                    onClick={() => setRenewDialogOpen(true)}
+                                    disabled={disableRenew} //TODO: add grace period
+                                />
+                            </Card>
+                        )}
+                        {namePermissions?.allowChildCreation && (
+                            <Card type={CardType.Outlined}>
+                                <CardBody
+                                    title="Add new subname"
+                                    subtitle="Create a new subname."
+                                />
+                                <Button
+                                    text="Add subname"
+                                    onClick={() => setSubnameDialogOpen(true)}
+                                    disabled={disableAddSubname}
+                                />
+                            </Card>
+                        )}
+                        {updateNameError ? (
+                            <div className="text-red-400">{updateNameError.message}</div>
+                        ) : null}
+                        <Button
+                            icon={isLoading ? <LoadingIndicator /> : null}
+                            text="Save"
+                            disabled={disableSave}
+                            onClick={() => save()}
                         />
-                    </Card>
-                    {updateNameError ? (
-                        <div className="text-red-400">{updateNameError.message}</div>
-                    ) : null}
-                    <Button
-                        icon={isLoading ? <LoadingIndicator /> : null}
-                        text="Save"
-                        disabled={disableSave}
-                        onClick={() => save()}
-                    />
-                </DialogBody>
-            </DialogContent>
-        </Dialog>
+                    </DialogBody>
+                </DialogContent>
+            </Dialog>
+            {isAvatarSelectorOpen && (
+                <VisualAssetsDialog
+                    setOpen={setIsAvatarSelectorOpen}
+                    onAssetClick={(assetId) => {
+                        setAvatarNftId(assetId);
+                        setIsAvatarSelectorOpen(false);
+                    }}
+                />
+            )}
+            {subnameDialogOpen && (
+                <CreateSubnameDialog
+                    name={name}
+                    open={subnameDialogOpen}
+                    setOpen={setSubnameDialogOpen}
+                />
+            )}
+            {renewDialogOpen && (
+                <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
+            )}
+        </>
     );
 }

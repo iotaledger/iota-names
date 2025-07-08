@@ -4,8 +4,8 @@
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
-const NAME_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
-const DOMAIN_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
+const NAME_AT_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
+const NAME_DOT_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
 const MAX_LENGTH = 235;
 
 export function isValidIotaName(name: string): boolean {
@@ -13,17 +13,17 @@ export function isValidIotaName(name: string): boolean {
         return false;
     }
 
-    return NAME_REGEX.test(name) || DOMAIN_REGEX.test(name);
+    return NAME_AT_REGEX.test(name) || NAME_DOT_REGEX.test(name);
 }
 
 export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): string {
     const lowerCase = name.toLowerCase();
     let parts;
 
-    if (NAME_REGEX.test(lowerCase)) {
-        let [path, domain] = lowerCase.split('@');
-        parts = [...(path ? path.split('.') : []), domain];
-    } else if (DOMAIN_REGEX.test(lowerCase)) {
+    if (NAME_AT_REGEX.test(lowerCase)) {
+        let [path, name] = lowerCase.split('@');
+        parts = [...(path ? path.split('.') : []), name];
+    } else if (NAME_DOT_REGEX.test(lowerCase)) {
         parts = lowerCase.split('.').slice(0, -1);
     } else {
         throw new Error(`Invalid IOTA name "${name}"`);

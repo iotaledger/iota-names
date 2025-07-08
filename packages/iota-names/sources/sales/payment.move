@@ -23,11 +23,12 @@ use iota::event;
 use iota::vec_map::{Self, VecMap};
 use iota_names::constants;
 use iota_names::core_config::CoreConfig;
-use iota_names::domain::{Self, Domain};
+use iota_names::name::{Self, Name};
 use iota_names::iota_names::IotaNames;
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::pricing_config::{PricingConfig, RenewalConfig};
 use iota_names::registry::Registry;
+use iota_names::validation;
 use std::string::String;
 use std::type_name::{Self, TypeName};
 
@@ -40,13 +41,13 @@ const ERecordNotFound: vector<u8> =
 #[error]
 const ERecordExpired: vector<u8> = b"Tried to renew an expired name (post grace period).";
 #[error]
-const EReceiptDomainMismatch: vector<u8> =
-    b"The receipt domain does not match the domain of the NFT.";
+const EReceiptNameMismatch: vector<u8> =
+    b"The receipt name does not match the name of the NFT.";
 #[error]
 const EVersionMismatch: vector<u8> =
     b"Version mismatch. The payment intent is not of the correct version for this package.";
 #[error]
-const ECannotRenewSubdomain: vector<u8> = b"Cannot renew a subdomain using the payment system.";
+const ECannotRenewSubname: vector<u8> = b"Cannot renew a subname using the payment system.";
 #[error]
 const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of years.";
 
@@ -54,8 +55,8 @@ const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of 
 public struct RequestData has drop {
     /// The version of the payment module.
     version: u8,
-    /// The domain for which the payment is being made.
-    domain: Domain,
+    /// The name for which the payment is being made.
+    name: Name,
     /// The years for which the payment is being made.
     /// Defaults to 1 for registration.
     years: u8,
@@ -65,9 +66,9 @@ public struct RequestData has drop {
     metadata: VecMap<String, String>,
 }
 
-/// The payment intent for a given domain
-/// - Registration: The user is registering a new domain.
-/// - Renewal: The user is renewing an existing domain.
+/// The payment intent for a given name
+/// - Registration: The user is registering a new name.
+/// - Renewal: The user is renewing an existing name.
 public enum PaymentIntent {
     Registration(RequestData),
     Renewal(RequestData),
@@ -78,15 +79,15 @@ public enum PaymentIntent {
 /// - Prove that the payment was successful.
 /// - Register a new name, or renew an existing one.
 public enum Receipt {
-    Registration { domain: Domain, years: u8, version: u8 },
-    Renewal { domain: Domain, years: u8, version: u8 },
+    Registration { name: Name, years: u8, version: u8 },
+    Renewal { name: Name, years: u8, version: u8 },
 }
 
 /// An event that is emitted after a successful payment for
 /// a `PaymentIntent`
 public struct TransactionEvent has copy, drop, store {
     app: TypeName,
-    domain: Domain,
+    name: Name,
     years: u8,
     request_data_version: u8,
     base_amount: u64,
@@ -98,7 +99,7 @@ public struct TransactionEvent has copy, drop, store {
 }
 
 /// Allow an authorized app to finalize a payment.
-/// Returns a receipt that can be used to register or renew a domain.
+/// Returns a receipt that can be used to register or renew a name.
 ///
 /// SAFETY: Only authorized packages can call this.
 /// We do not check the amount of funds in this helper.
@@ -109,21 +110,20 @@ public fun finalize_payment<A: drop, T>(
     app: A,
     coin: Coin<T>,
 ): Receipt {
-    iota_names.assert_is_authorized<A>();
     event::emit(intent.to_event<A, T>(coin.value()));
     iota_names.auth_add_balance(app, coin.into_balance());
 
     match (intent) {
         PaymentIntent::Registration(data) => {
             Receipt::Registration {
-                domain: data.domain,
+                name: data.name,
                 years: data.years,
                 version: data.version,
             }
         },
         PaymentIntent::Renewal(data) => {
             Receipt::Renewal {
-                domain: data.domain,
+                name: data.name,
                 years: data.years,
                 version: data.version,
             }
@@ -131,16 +131,16 @@ public fun finalize_payment<A: drop, T>(
     }
 }
 
-/// Creates a `PaymentIntent` for registering a new domain.
+/// Creates a `PaymentIntent` for registering a new name.
 /// This is a hot-potato and can only be consumed in a single transaction.
-public fun init_registration(iota_names: &mut IotaNames, domain: String): PaymentIntent {
-    let domain = domain::new(domain);
-    iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&domain);
+public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentIntent {
+    let name = name::new(name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
 
-    let price = iota_names.get_config<PricingConfig>().calculate_base_price(domain.sld().length());
+    let price = iota_names.get_config<PricingConfig>().calculate_base_price_of_name(name);
 
     PaymentIntent::Registration(RequestData {
-        domain,
+        name,
         years: 1,
         base_amount: price,
         metadata: vec_map::empty(),
@@ -148,24 +148,24 @@ public fun init_registration(iota_names: &mut IotaNames, domain: String): Paymen
     })
 }
 
-/// Creates a `PaymentIntent` for renewing an existing domain.
+/// Creates a `PaymentIntent` for renewing an existing name.
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_renewal(
     iota_names: &mut IotaNames,
     nft: &IotaNamesRegistration,
     years: u8,
 ): PaymentIntent {
-    let domain = nft.domain();
-    assert!(!domain.is_subdomain(), ECannotRenewSubdomain);
+    let name = nft.name();
+    assert!(!name.is_subname(), ECannotRenewSubname);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
 
     let price = iota_names
         .get_config<RenewalConfig>()
         .config()
-        .calculate_base_price(domain.sld().length());
+        .calculate_base_price_of_name(name);
 
     PaymentIntent::Renewal(RequestData {
-        domain,
+        name,
         years,
         base_amount: price * (years as u64),
         metadata: vec_map::empty(),
@@ -173,7 +173,7 @@ public fun init_renewal(
     })
 }
 
-/// Register a domain with the given receipt.
+/// Register a name with the given receipt.
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun register(
     receipt: Receipt,
@@ -184,18 +184,18 @@ public fun register(
     let config = iota_names.get_config<CoreConfig>();
 
     match (receipt) {
-        Receipt::Registration { domain, years, version } => {
+        Receipt::Registration { name, years, version } => {
             assert!(version == config.payments_version(), EVersionMismatch);
-            config.assert_is_valid_for_sale(&domain); // sanity check. We also check on `init_registration`.
-            iota_names.pkg_registry_mut<Registry>().add_record(domain, years, clock, ctx)
+            validation::assert_is_valid_for_sale(config, iota_names, &name); // sanity check. We also check on `init_registration`.
+            iota_names.pkg_registry_mut<Registry>().add_record(name, years, clock, ctx)
         },
-        Receipt::Renewal { domain: _, years: _, version: _ } => {
+        Receipt::Renewal { name: _, years: _, version: _ } => {
             abort ENotSupportedType
         },
     }
 }
 
-/// Renew a domain with the given receipt.
+/// Renew a name with the given receipt.
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun renew(
     receipt: Receipt,
@@ -205,18 +205,18 @@ public fun renew(
     _ctx: &mut TxContext,
 ) {
     match (receipt) {
-        Receipt::Renewal { domain, years, version } => {
+        Receipt::Renewal { name, years, version } => {
             let config = iota_names.get_config<CoreConfig>();
             let max_years = config.max_years();
 
             assert!(version == config.payments_version(), EVersionMismatch);
-            assert!(nft.domain() == domain, EReceiptDomainMismatch);
+            assert!(nft.name() == name, EReceiptNameMismatch);
             let registry = iota_names.pkg_registry_mut<Registry>();
             // Calculate target expiration. Aborts if expiration or selected
             // years are invalid.
             let target_expiration = target_expiration(
                 registry,
-                domain,
+                name,
                 clock,
                 years,
             );
@@ -231,11 +231,11 @@ public fun renew(
             // set the expiration of the NFT + the registry's name record.
             registry.set_expiration_timestamp_ms(
                 nft,
-                domain,
+                name,
                 target_expiration,
             );
         },
-        Receipt::Registration { domain: _, years: _, version: _ } => {
+        Receipt::Registration { name: _, years: _, version: _ } => {
             abort ENotSupportedType
         },
     }
@@ -277,7 +277,7 @@ public fun base_amount(self: &RequestData): u64 { self.base_amount }
 
 public fun base_amount_mut(self: &mut RequestData): &mut u64 { &mut self.base_amount }
 
-public fun domain(self: &RequestData): &Domain { &self.domain }
+public fun name(self: &RequestData): &Name { &self.name }
 
 /// Public helper to calculate price after a percentage discount has been
 /// applied.
@@ -298,7 +298,7 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
 
     TransactionEvent {
         app: type_name::get<A>(),
-        domain: data.domain,
+        name: data.name,
         years: data.years,
         request_data_version: data.version,
         base_amount: data.base_amount,
@@ -309,10 +309,10 @@ fun to_event<A: drop, T>(intent: &PaymentIntent, currency_amount: u64): Transact
     }
 }
 
-/// Calculate the target expiration for a domain,
-/// or abort if the domain or the expiration setup is invalid.
-fun target_expiration(registry: &Registry, domain: Domain, clock: &Clock, no_years: u8): u64 {
-    let name_record_option = registry.lookup(domain);
+/// Calculate the target expiration for a name,
+/// or abort if the name or the expiration setup is invalid.
+fun target_expiration(registry: &Registry, name: Name, clock: &Clock, no_years: u8): u64 {
+    let name_record_option = registry.lookup(name);
     // validate that the name_record still exists in the registry.
     assert!(name_record_option.is_some(), ERecordNotFound);
 
@@ -331,7 +331,7 @@ fun target_expiration(registry: &Registry, domain: Domain, clock: &Clock, no_yea
 #[test_only]
 public(package) fun test_registration_receipt(name: String, years: u8, version: u8): Receipt {
     Receipt::Registration {
-        domain: domain::new(name),
+        name: name::new(name),
         years,
         version,
     }
@@ -340,7 +340,7 @@ public(package) fun test_registration_receipt(name: String, years: u8, version: 
 #[test_only]
 public(package) fun test_renewal_receipt(name: String, years: u8, version: u8): Receipt {
     Receipt::Renewal {
-        domain: domain::new(name),
+        name: name::new(name),
         years,
         version,
     }

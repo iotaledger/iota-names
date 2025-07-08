@@ -14,11 +14,11 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 import { isValidIotaName } from '../src/utils.js';
 
 const cmd = process.argv[2];
-const domain = process.argv[3] || 'rustisbetterthanjs.iota';
+const name = process.argv[3] || 'rustisbetterthanjs.iota';
 
 (async () => {
-    if (!isValidIotaName(domain)) {
-        throw new Error('Invalid iota name domain!');
+    if (!isValidIotaName(name)) {
+        throw new Error('Invalid iota name!');
     }
 
     const keypair = Ed25519Keypair.deriveKeypair(
@@ -39,7 +39,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
         network: 'devnet',
     });
 
-    console.log('[Domain]:', domain);
+    console.log('[Name]:', name);
     console.log('[Secret key]:', keypair.getSecretKey());
     console.log('[Address]:', address);
 
@@ -57,7 +57,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
                     bidAmount,
                 ]);
 
-                await startAuctionAndPlaceBid(iotaNamesTx, auctionHouse, domain, bid);
+                await startAuctionAndPlaceBid(iotaNamesTx, auctionHouse, name, bid);
 
                 iotaNamesTx.transaction.setSender(address);
 
@@ -89,8 +89,8 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
 
         case 'check-own': {
             console.log(
-                '[Domain Record (null if available)]: ',
-                await iotaNamesClient.getNameRecord(domain),
+                '[Name Record (null if available)]: ',
+                await iotaNamesClient.getNameRecord(name),
             );
 
             break;
@@ -105,8 +105,8 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
             console.log('[Faucet]: Received funds');
 
             console.log(
-                '[Domain Record (null if available)]: ',
-                await iotaNamesClient.getNameRecord(domain),
+                '[Name Record (null if available)]: ',
+                await iotaNamesClient.getNameRecord(name),
             );
 
             const tx = new Transaction();
@@ -114,7 +114,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
             const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
 
             const nft = iotaNamesTx.register({
-                domain,
+                name,
                 years: 1,
                 coin,
             });
@@ -146,7 +146,7 @@ const domain = process.argv[3] || 'rustisbetterthanjs.iota';
             });
 
             console.log('[Transaction response]:', transactionBlockResponse);
-            console.log(`[IotaNames]: You own '${domain}'`);
+            console.log(`[IotaNames]: You own '${name}'`);
 
             break;
         }
@@ -187,7 +187,7 @@ async function getAuctionHouse(
 async function startAuctionAndPlaceBid(
     iotaNamesTx: IotaNamesTransaction,
     auctionHouse: string,
-    domain: string,
+    name: string,
     coin: TransactionObjectArgument,
 ): Promise<void> {
     const transaction = iotaNamesTx.transaction;
@@ -197,8 +197,8 @@ async function startAuctionAndPlaceBid(
         target: `${config.auctionPackageId}::auction::start_auction_and_place_bid`,
         arguments: [
             transaction.object(auctionHouse),
-            transaction.object(config.iotaNames),
-            transaction.pure.string(domain),
+            transaction.object(config.iotaNamesObjectId),
+            transaction.pure.string(name),
             coin,
             transaction.object('0x06'),
         ],

@@ -7,9 +7,10 @@ module iota_names_coupons::setup;
 
 use iota::clock;
 use iota::hash::blake2b256;
+use iota::hex;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names::registry;
+use iota_names::test_init_utils;
 use iota_names_coupons::coupon_house::{Self, CouponsAuth};
 use iota_names_coupons::coupons::Coupons;
 use iota_names_coupons::range;
@@ -48,7 +49,7 @@ public fun initialize_coupon_house(scenario: &mut Scenario) {
         let mut iota_names = scenario.take_shared<IotaNames>();
         // initialize coupon data.
         coupon_house::setup(&mut iota_names, &admin_cap, scenario.ctx());
-        registry::init_for_testing(&admin_cap, &mut iota_names, scenario.ctx());
+        test_init_utils::setup_for_testing(&mut iota_names, &admin_cap, scenario.ctx());
         // authorize TestAuth to CouponHouse.
         coupon_house::authorize<TestAuth>(&admin_cap, &mut iota_names);
         test_scenario::return_to_sender(scenario, admin_cap);
@@ -87,7 +88,7 @@ public fun unauthorized_test_app(): UnauthorizedTestAuth {
 public fun populate_coupons(data_mut: &mut Coupons) {
     // 25% DISCOUNT, ONLY FOR 2 YEARS OR LESS REGISTRATIONS
     data_mut.add_percentage_coupon(
-        blake2b256(&b"25_PERCENT_DISCOUNT_MAX_2_YEARS"),
+        hex::encode(blake2b256(&b"25_PERCENT_DISCOUNT_MAX_2_YEARS")).to_string(),
         25, // 25%
         rules::new_coupon_rules(
             option::none(),
@@ -101,7 +102,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 25% DISCOUNT, only claimable ONCE by a specific user
     data_mut.add_percentage_coupon(
-        blake2b256(&b"25_PERCENT_DISCOUNT_USER_ONLY"),
+        hex::encode(blake2b256(&b"25_PERCENT_DISCOUNT_USER_ONLY")).to_string(),
         25, // 25%
         rules::new_coupon_rules(
             option::none(),
@@ -115,7 +116,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 50% DISCOUNT, only claimable only for names > 5 digits
     data_mut.add_percentage_coupon(
-        blake2b256(&b"50_PERCENT_5_PLUS_NAMES"),
+        hex::encode(blake2b256(&b"50_PERCENT_5_PLUS_NAMES")).to_string(),
         50, // 25%
         rules::new_coupon_rules(
             option::some(range::new(5, 63)),
@@ -129,7 +130,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 50% DISCOUNT, only for 3 digit names
     data_mut.add_percentage_coupon(
-        blake2b256(&b"50_PERCENT_3_DIGITS"),
+        hex::encode(blake2b256(&b"50_PERCENT_3_DIGITS")).to_string(),
         50, // 50%
         rules::new_coupon_rules(
             option::some(range::new(3, 3)),
@@ -143,7 +144,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 50% DISCOUNT, has all rules so we can test combinations!
     data_mut.add_percentage_coupon(
-        blake2b256(&b"50_DISCOUNT_SALAD"),
+        hex::encode(blake2b256(&b"50_DISCOUNT_SALAD")).to_string(),
         50, // 50%
         rules::new_coupon_rules(
             option::some(range::new(3, 4)),
@@ -157,7 +158,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 5% DISCOUNT, can be stacked
     data_mut.add_percentage_coupon(
-        blake2b256(&b"5_DISCOUNT_STACKABLE"),
+        hex::encode(blake2b256(&b"5_DISCOUNT_STACKABLE")).to_string(),
         5, // 5%
         rules::new_coupon_rules(
             option::none(),
@@ -171,7 +172,7 @@ public fun populate_coupons(data_mut: &mut Coupons) {
 
     // 1 IOTA DISCOUNT
     data_mut.add_fixed_coupon(
-        blake2b256(&b"ONE_IOTA_OFF"),
+        hex::encode(blake2b256(&b"ONE_IOTA_OFF")).to_string(),
         nanos_per_iota(),
         rules::new_coupon_rules(
             option::none(),
@@ -186,11 +187,11 @@ public fun populate_coupons(data_mut: &mut Coupons) {
     // THESE last two are just for easy coverage.
     // We just add + remove the coupon immediately.
     data_mut.add_percentage_coupon(
-        blake2b256(&b"REMOVE_FOR_COVERAGE"),
+        hex::encode(blake2b256(&b"REMOVE_FOR_COVERAGE")).to_string(),
         50,
         rules::new_empty_rules(),
     );
-    data_mut.remove_coupon(blake2b256(&b"REMOVE_FOR_COVERAGE"));
+    data_mut.remove_coupon(hex::encode(blake2b256(&b"REMOVE_FOR_COVERAGE")).to_string());
 }
 
 // Adds a percentage based coupon that gives a discount to test admin additions.
@@ -198,7 +199,7 @@ public fun admin_add_percentage_coupon(code_name: String, value: u64, scenario: 
     scenario.next_tx(admin());
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = scenario.take_from_sender<AdminCap>();
-    let hash = blake2b256(code_name.as_bytes());
+    let hash = hex::encode(blake2b256(code_name.as_bytes())).to_string();
     coupon_house::admin_add_percentage_coupon(
         &cap,
         &mut iota_names,
@@ -215,7 +216,7 @@ public fun admin_add_fixed_coupon(code_name: String, value: u64, scenario: &mut 
     scenario.next_tx(admin());
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = scenario.take_from_sender<AdminCap>();
-    let hash = blake2b256(code_name.as_bytes());
+    let hash = hex::encode(blake2b256(code_name.as_bytes())).to_string();
     coupon_house::admin_add_fixed_coupon(
         &cap,
         &mut iota_names,
@@ -232,7 +233,7 @@ public fun admin_remove_coupon(code_name: String, scenario: &mut Scenario) {
     scenario.next_tx(admin());
     let mut iota_names = scenario.take_shared<IotaNames>();
     let cap = scenario.take_from_sender<AdminCap>();
-    let hash = blake2b256(code_name.as_bytes());
+    let hash = hex::encode(blake2b256(code_name.as_bytes())).to_string();
     coupon_house::admin_remove_coupon(
         &cap,
         &mut iota_names,

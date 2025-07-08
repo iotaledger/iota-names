@@ -18,7 +18,7 @@ RUN mkdir -p ~/.cargo && \
   echo -e "[target.x86_64-unknown-linux-gnu]\nlinker = \"clang\"\nrustflags = [\"-C\", \"link-arg=-fuse-ld=lld\"]" > ~/.cargo/config.toml
 
 # Install additional dependencies
-RUN apt install -y libpq5 libpq-dev ca-certificates
+RUN apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev
 
 WORKDIR /iota-names/indexer
 
@@ -58,7 +58,7 @@ RUN if [ -d target/release ]; then \
 FROM debian:bookworm-slim AS runtime
 
 # Install runtime dependencies and tools
-RUN apt update && apt install -y libpq5 ca-certificates curl
+RUN apt update && apt install -y libpq5 ca-certificates curl libsqlite3-0
 
 COPY --from=builder /iota-names/indexer/iota-names-indexer /usr/local/bin
 

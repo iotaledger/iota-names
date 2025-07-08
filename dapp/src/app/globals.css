@@ -5,6 +5,13 @@
 @tailwind utilities;
 
 :root {
-    @apply bg-neutral-100 dark:bg-neutral-900;
-    @apply text-neutral-900 dark:text-neutral-100;
+    @apply bg-names-neutral-4;
+    @apply text-names-primary-100;
+}
+
+.landing-background {
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+        url('/hero-landing.jpg') no-repeat center center fixed;
+    background-size: cover;
 }

@@ -3,15 +3,17 @@
 
 'use client';
 
-import { darkTheme, IotaClientProvider, lightTheme, WalletProvider } from '@iota/dapp-kit';
+import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { IotaNamesClientProvider } from '@/contexts';
+import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
+import { KioskClientProvider } from '@/contexts/KioskClientContext';
+import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
-import { ThemeProvider } from './';
+import { ThemeProvider } from './ThemeProvider';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
@@ -32,22 +34,25 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 defaultNetwork={defaultNetwork}
                 onNetworkChange={handleNetworkChange}
             >
-                <IotaNamesClientProvider>
-                    <WalletProvider
-                        autoConnect={true}
-                        theme={[
-                            {
-                                variables: lightTheme,
-                            },
-                            {
-                                selector: '.dark',
-                                variables: darkTheme,
-                            },
-                        ]}
-                    >
-                        <ThemeProvider appId="IOTA-evm-bridge">{children}</ThemeProvider>
-                    </WalletProvider>
-                </IotaNamesClientProvider>
+                <KioskClientProvider>
+                    <IotaNamesClientProvider>
+                        <IotaNamesIndexerClientProvider>
+                            <WalletProvider
+                                autoConnect={true}
+                                theme={[
+                                    {
+                                        selector: '.names',
+                                        variables: darkTheme,
+                                    },
+                                ]}
+                            >
+                                <ThemeProvider staticTheme={APP_STATIC_THEME}>
+                                    {children}
+                                </ThemeProvider>
+                            </WalletProvider>
+                        </IotaNamesIndexerClientProvider>
+                    </IotaNamesClientProvider>
+                </KioskClientProvider>
             </IotaClientProvider>
         </QueryClientProvider>
     );

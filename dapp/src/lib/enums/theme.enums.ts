@@ -1,13 +1,9 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export enum Theme {
-    Light = 'light',
-    Dark = 'dark',
-}
-
 export enum ThemePreference {
     Light = 'light',
     Dark = 'dark',
+    Names = 'names',
     System = 'system',
 }

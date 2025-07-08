@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod api;
+mod config;
 mod db;
 mod events;
 mod metrics;
@@ -11,16 +12,16 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
-use iota_names::config::IotaNamesConfig;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 use tracing_subscriber::{
     EnvFilter, fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt,
 };
 
 use crate::{
     api::start_api_server,
+    config::IotaNamesExtendedConfig,
     db::pool::{DbConnectionPool, DbConnectionPoolConfig},
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
@@ -41,15 +42,21 @@ enum Command {
     Start {
         #[clap(flatten)]
         connection_pool_config: DbConnectionPoolConfig,
-        /// The URL of an IOTA node to get data from.
+        /// The URL of an IOTA node with JSON API.
         #[arg(long, default_value = "http://localhost:9000")]
         node_url: String,
+        /// The URL of an IOTA node with REST API enabled or a historical store.
+        #[arg(long, default_value = "http://localhost:9000")]
+        checkpoint_url: String,
         /// The number of workers to spawn in parallel.
         #[arg(long, default_value_t = 1)]
         num_workers: usize,
         /// The port to run the API server on.
         #[arg(long, default_value_t = 3030)]
         api_port: u16,
+        /// The URL of Prometheus to restore metrics from on startup.
+        #[arg(long, default_value = "http://localhost:9090")]
+        prometheus_url: String,
     },
 }
 
@@ -59,13 +66,23 @@ impl Command {
             Command::Start {
                 connection_pool_config,
                 node_url,
+                checkpoint_url,
                 num_workers,
                 api_port,
+                prometheus_url,
             } => {
                 info!("Starting IOTA Names Indexer");
 
                 let prometheus = PrometheusServer::new();
                 let registry = prometheus.registry();
+                let metrics = Arc::new(IotaNamesMetrics::new(&registry));
+
+                // Try to restore metrics from Prometheus
+                if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
+                    warn!("Could not restore all metrics from Prometheus ({e})");
+                } else {
+                    info!("Successfully restored metrics from Prometheus");
+                }
 
                 let cancel_token = CancellationToken::new();
 
@@ -73,11 +90,7 @@ impl Command {
 
                 // Spawn the prometheus API
                 let handle = cancel_token.clone();
-                tasks.spawn(async move {
-                    let res = prometheus.start(handle.clone()).await;
-                    handle.cancel();
-                    res
-                });
+                tasks.spawn(async move { prometheus.start(handle).await });
 
                 let connection_pool = DbConnectionPool::new(connection_pool_config)?;
                 connection_pool.run_migrations()?;
@@ -85,34 +98,31 @@ impl Command {
                 // Spawn the auction API server
                 let handle = cancel_token.clone();
                 let database_pool = connection_pool.clone();
-                tasks.spawn(async move {
-                    let res = start_api_server(database_pool, api_port, handle.clone()).await;
-                    handle.cancel();
-                    res
-                });
+                tasks.spawn(async move { start_api_server(database_pool, api_port, handle).await });
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
+                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
                         connection_pool,
-                        IotaNamesConfig::from_env().unwrap_or_default(),
-                        Arc::new(IotaNamesMetrics::new(&registry)),
+                        iota_names_config,
+                        metrics,
                         handle.clone(),
                     )?;
 
-                    let res = tokio::select! {
-                        res = run_iota_names_reader(worker, &node_url, &registry, num_workers) => res,
+                    tokio::select! {
+                        res = run_iota_names_reader(worker, &node_url, &checkpoint_url, &registry, num_workers) => res,
                         _ = handle.cancelled() => Ok(()),
-                    };
-                    handle.cancel();
-                    res
+                    }
                 });
 
                 let mut exit_code = Ok(());
 
                 tokio::select! {
                     res = interrupt_or_terminate() => {
+                        cancel_token.cancel();
                         if let Err(err) = res {
                             tracing::error!("subscribing to OS interrupt signals failed with error: {err}; shutting down");
                             exit_code = Err(err);
@@ -121,14 +131,19 @@ impl Command {
                         }
                     },
                     res = tasks.join_next() => {
+                        cancel_token.cancel();
+                        tracing::debug!("tasks have begun shutting down");
                         if let Some(Ok(Err(err))) = res {
                             tracing::error!("a worker failed with error: {err}");
                             exit_code = Err(err);
                         }
+                        while let Some(res) = tasks.join_next().await {
+                            if let Ok(Err(err)) = res {
+                                tracing::error!("a worker failed with error: {err}");
+                            }
+                        }
                     },
                 }
-
-                cancel_token.cancel();
 
                 // Allow the user to abort if the tasks aren't shutting down quickly.
                 tokio::select! {
@@ -142,7 +157,13 @@ impl Command {
                         tasks.shutdown().await;
                         tracing::info!("runtime aborted");
                     },
-                    _ = async { while tasks.join_next().await.is_some() {} } => {
+                    _ = async {
+                            while let Some(res) = tasks.join_next().await {
+                                if let Ok(Err(err)) = res {
+                                    tracing::error!("a worker failed with error: {err}");
+                                }
+                            }
+                        } => {
                         tracing::info!("runtime stopped");
                     },
                 }

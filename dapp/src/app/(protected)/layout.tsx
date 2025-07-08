@@ -19,7 +19,7 @@ function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
     }, [currentAccount]);
 
     return (
-        <main className="flex flex-col h-screen">
+        <main className="flex flex-col min-h-screen">
             <div className="container w-full h-full py-12 flex">{children}</div>
         </main>
     );

@@ -47,14 +47,14 @@ export const Packages = (network: string) => {
             processPublish: (data: IotaTransactionBlockResponse) => {
                 const { packageId, upgradeCap } = parseCorePackageObjects(data);
                 const publisher = parseCreatedObject(data, '0x2::package::Publisher');
-                const iotaNames = parseCreatedObject(data, `${packageId}::iota_names::IotaNames`);
+                const objectId = parseCreatedObject(data, `${packageId}::iota_names::IotaNames`);
                 const adminCap = parseCreatedObject(data, `${packageId}::iota_names::AdminCap`);
 
                 return {
                     packageId,
                     upgradeCap,
                     publisher,
-                    iotaNames,
+                    objectId,
                     adminCap,
                 };
             },
@@ -62,14 +62,14 @@ export const Packages = (network: string) => {
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
                 publisher: string,
             ) => {
                 // Adds the default registry where name records and reverse records will live
                 addRegistry({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     registry: newLookupRegistry({
                         txb,
@@ -78,11 +78,13 @@ export const Packages = (network: string) => {
                     }),
                     type: `${packageId}::registry::Registry`,
                 });
+                // Add the deny list
+                setup({ txb, adminCap, iotaNamesObjectId, target: `${packageId}::deny_list` });
                 // Add new core config
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: addCoreConfig({ txb, latestPackageId: packageId }),
                     type: `${packageId}::core_config::CoreConfig`,
@@ -91,7 +93,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: newPriceConfig({
                         txb,
@@ -113,7 +115,7 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId: packageId,
                     config: newRenewalConfig({
                         txb,
@@ -135,77 +137,76 @@ export const Packages = (network: string) => {
                 createDisplay({
                     txb,
                     publisher,
-                    isSubdomain: false,
+                    isSubname: false,
                     iotaNamesPackageId: packageId,
                     network,
-                    subdomainsPackageId: packageId,
+                    subnamesPackageId: packageId,
                 });
                 // create display for subnames
                 createDisplay({
                     txb,
                     publisher,
-                    isSubdomain: true,
+                    isSubname: true,
                     iotaNamesPackageId: packageId,
                     network,
-                    subdomainsPackageId: packageId,
+                    subnamesPackageId: packageId,
                 });
             },
-            authorizationType: (packageId: string) => `${packageId}::controller::ControllerAuth`, // Authorize the iotaNames controller
+            authorizationTypes: (packageId: string) => [
+                `${packageId}::admin::AdminAuth`,
+                `${packageId}::controller::ControllerAuth`,
+                `${packageId}::deny_list::DenyListAuth`,
+            ],
         },
         Auction: {
             order: 2,
             folder: 'auction',
-            processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-            authorizationType: (packageId: string) => `${packageId}::auction::AuctionAuth`,
-        },
-        DenyList: {
-            order: 2,
-            folder: 'deny-list',
-            processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-            authorizationType: (packageId: string) => `${packageId}::deny_list::DenyListAuth`,
-            setupFunction: (
-                txb: Transaction,
-                packageId: string,
-                adminCap: string,
-                iotaNames: string,
-            ) => {
-                setup({ txb, adminCap, iotaNames, target: `${packageId}::deny_list` });
+            processPublish: (data: IotaTransactionBlockResponse) => {
+                const { packageId, upgradeCap } = parseCorePackageObjects(data);
+                const objectId = parseCreatedObject(data, `${packageId}::auction::AuctionHouse`);
+
+                return {
+                    packageId,
+                    upgradeCap,
+                    objectId,
+                };
             },
+            authorizationTypes: (packageId: string) => [`${packageId}::auction::AuctionAuth`],
         },
         Coupons: {
             order: 2,
             folder: 'coupons',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-            authorizationType: (packageId: string) => `${packageId}::coupon_house::CouponsAuth`,
+            authorizationTypes: (packageId: string) => [`${packageId}::coupon_house::CouponsAuth`],
             setupFunction: (
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
             ) => {
-                setup({ txb, adminCap, iotaNames, target: `${packageId}::coupon_house` });
+                setup({ txb, adminCap, iotaNamesObjectId, target: `${packageId}::coupon_house` });
             },
         },
         Payments: {
             order: 2,
             folder: 'payments',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-            authorizationType: (packageId: string) => `${packageId}::payments::PaymentsAuth`,
+            authorizationTypes: (packageId: string) => [`${packageId}::payments::PaymentsAuth`],
             setupFunction: ({
                 txb,
                 packageId,
                 adminCap,
-                iotaNames,
+                iotaNamesObjectId,
                 iotaNamesPackageId,
             }: {
                 txb: Transaction;
                 packageId: string;
                 adminCap: string;
-                iotaNames: string;
+                iotaNamesObjectId: string;
                 iotaNamesPackageId: string;
             }) => {
                 const packageInfo = readPackageInfo(network);
-                const paymentsconfig = newPaymentsConfig({
+                const paymentsConfig = newPaymentsConfig({
                     txb,
                     packageId,
                     coinType: [packageInfo.coins.IOTA],
@@ -214,43 +215,44 @@ export const Packages = (network: string) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId,
-                    config: paymentsconfig,
+                    config: paymentsConfig,
                     type: `${packageId}::payments::PaymentsConfig`,
                 });
             },
         },
-        Subdomains: {
+        Subnames: {
             order: 3,
-            folder: 'subdomains',
+            folder: 'subnames',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
             setupFunction: (
                 txb: Transaction,
                 packageId: string,
                 adminCap: string,
-                iotaNames: string,
+                iotaNamesObjectId: string,
                 iotaNamesPackageId: string,
             ) => {
                 addConfig({
                     txb,
                     adminCap,
-                    iotaNames,
+                    iotaNamesObjectId,
                     iotaNamesPackageId,
                     config: txb.moveCall({
                         target: `${packageId}::config::default`,
                     }),
-                    type: `${packageId}::config::SubdomainConfig`,
+                    type: `${packageId}::config::SubnameConfig`,
                 });
             },
-            authorizationType: (packageId: string) => `${packageId}::subdomains::SubdomainsAuth`,
+            authorizationTypes: (packageId: string) => [`${packageId}::subnames::SubnamesAuth`],
         },
-        TempSubdomainProxy: {
+        TempSubnameProxy: {
             order: 3,
-            folder: 'temp-subdomain-proxy',
+            folder: 'temp-subname-proxy',
             processPublish: (data: IotaTransactionBlockResponse) => parseCorePackageObjects(data),
-            authorizationType: (packageId: string) =>
-                `${packageId}::subdomain_proxy::SubdomainProxyAuth`,
+            authorizationTypes: (packageId: string) => [
+                `${packageId}::subname_proxy::SubnameProxyAuth`,
+            ],
         },
     };
 };

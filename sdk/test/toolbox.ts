@@ -6,12 +6,14 @@ import { execSync } from 'child_process';
 import { mkdtemp } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
-import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
+import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
+import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import {
     FaucetRateLimitError,
     getFaucetHost,
     requestIotaFromFaucetV0,
 } from '@iota/iota-sdk/faucet';
+import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { retry } from 'ts-retry-promise';
 
@@ -21,7 +23,7 @@ export const IOTA_BIN = process.env.VITE_IOTA_BIN ?? `iota`;
 //@ts-ignore-next-line
 const DEFAULT_FAUCET_URL = process.env.VITE_FAUCET_URL ?? getFaucetHost('localnet');
 //@ts-ignore-next-line
-const DEFAULT_FULLNODE_URL = process.env.VITE_FULLNODE_URL ?? getFullnodeUrl('localnet');
+const DEFAULT_GRAPHQL_URL = process.env.VITE_GRAPHQL_URL ?? getNetwork('localnet').graphql!;
 
 export class TestToolbox {
     keypair: Ed25519Keypair;
@@ -45,7 +47,13 @@ export class TestToolbox {
 
 export function getClient(): IotaClient {
     return new IotaClient({
-        url: DEFAULT_FULLNODE_URL,
+        transport: new IotaClientGraphQLTransport({ url: DEFAULT_GRAPHQL_URL }),
+    });
+}
+
+export function getGraphQLClient(): IotaGraphQLClient {
+    return new IotaGraphQLClient({
+        url: DEFAULT_GRAPHQL_URL,
     });
 }
 
@@ -62,6 +70,11 @@ export async function setupIotaClient() {
         retryIf: (error: any) => !(error instanceof FaucetRateLimitError),
         logger: (msg) => console.warn('Retrying requesting from faucet: ' + msg),
     });
+
+    const b = await client.getBalance({
+        owner: address,
+    });
+    console.log(`Balance for ${address}: ${b.totalBalance} IOTA`);
 
     const tmpDirPath = path.join(tmpdir(), 'config-');
     const tmpDir = await mkdtemp(tmpDirPath);

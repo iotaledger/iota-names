@@ -1,0 +1,11 @@
+[package]
+name = "iota_names_temp_subname_proxy"
+version = "0.0.1"
+edition = "2024"
+
+[dependencies]
+Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet" }
+iota_names_subnames = { local = "../subnames" }
+
+[addresses]
+iota_names_temp_subname_proxy = "0x0"

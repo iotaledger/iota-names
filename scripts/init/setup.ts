@@ -22,22 +22,23 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         adminAddress: getActiveAddress(),
         adminCap: packageInfo.IotaNames.adminCap,
         auctionPackageId: packageInfo.Auction.packageId,
+        auctionHouseObjectId: packageInfo.Auction.objectId,
         coins: {
             IOTA: {
                 type: iotaCoinType,
                 metadataId: await getCoinMetadataId(network, iotaCoinType),
             },
         },
-        denyListPackageId: packageInfo.DenyList.packageId,
-        iotaNames: packageInfo.IotaNames.iotaNames,
+        iotaNamesObjectId: packageInfo.IotaNames.objectId,
         packageId: packageInfo.IotaNames.packageId,
         paymentsPackageId: packageInfo.Payments.packageId,
         publisherId: packageInfo.IotaNames.publisher,
         registryTableId: '',
         reverseRegistryTableId: '',
         couponsPackageId: packageInfo.Coupons.packageId,
-        subNamesPackageId: packageInfo.Subdomains.packageId,
-        tempSubdomainsProxyPackageId: packageInfo.TempSubdomainProxy.packageId,
+        subNamesPackageId: packageInfo.Subnames.packageId,
+        tempSubnameProxyPackageId: packageInfo.TempSubnameProxy.packageId,
+        upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);
 
@@ -46,59 +47,48 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 
     const txb = new Transaction();
 
-    // authorize admin module
-    authorize({
-        txb,
-        adminCap: packageInfo.IotaNames.adminCap,
-        iotaNames: packageInfo.IotaNames.iotaNames,
-        type: `${packageInfo.IotaNames.packageId}::admin::AdminAuth`,
-        iotaNamesPackageId: packageInfo.IotaNames.packageId,
-    });
     for (const [key, pkg] of Object.entries(packageInfo)) {
         const data = packages[key as keyof typeof packages];
-        if (data && 'authorizationType' in data) {
-            authorize({
-                txb,
-                adminCap: packageInfo.IotaNames.adminCap,
-                iotaNames: packageInfo.IotaNames.iotaNames,
-                type: data.authorizationType(pkg.packageId),
-                iotaNamesPackageId: packageInfo.IotaNames.packageId,
-            });
+        if (data && 'authorizationTypes' in data) {
+            const authTypes = data.authorizationTypes(pkg.packageId);
+            for (const authType of authTypes) {
+                authorize({
+                    txb,
+                    adminCap: packageInfo.IotaNames.adminCap,
+                    iotaNamesObjectId: packageInfo.IotaNames.objectId,
+                    type: authType,
+                    iotaNamesPackageId: packageInfo.IotaNames.packageId,
+                });
+            }
         }
     }
     // Call setup functions for our packages.
-    packages.Subdomains.setupFunction(
+    packages.Subnames.setupFunction(
         txb,
-        packageInfo.Subdomains.packageId,
+        packageInfo.Subnames.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.packageId,
-    );
-    packages.DenyList.setupFunction(
-        txb,
-        packageInfo.DenyList.packageId,
-        packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
     );
     packages.IotaNames.setupFunction(
         txb,
         packageInfo.IotaNames.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
         packageInfo.IotaNames.publisher,
     );
     packages.Payments.setupFunction({
         txb,
         packageId: packageInfo.Payments.packageId,
         adminCap: packageInfo.IotaNames.adminCap,
-        iotaNames: packageInfo.IotaNames.iotaNames,
+        iotaNamesObjectId: packageInfo.IotaNames.objectId,
         iotaNamesPackageId: packageInfo.IotaNames.packageId,
     });
     packages.Coupons.setupFunction(
         txb,
         packageInfo.Coupons.packageId,
         packageInfo.IotaNames.adminCap,
-        packageInfo.IotaNames.iotaNames,
+        packageInfo.IotaNames.objectId,
     );
     let retries = 0;
 
@@ -132,11 +122,12 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
 
             let { registryTableId, reverseRegistryTableId } = await queryRegistryTables(
                 client,
-                packageInfo.IotaNames.iotaNames,
+                packageInfo.IotaNames.objectId,
                 packageInfo.IotaNames.packageId,
             );
             constants.registryTableId = registryTableId;
             constants.reverseRegistryTableId = reverseRegistryTableId;
+            constants.auctionHouseObjectId = packageInfo.Auction.objectId;
 
             writePackageInfo(network, constants);
         } catch (e) {

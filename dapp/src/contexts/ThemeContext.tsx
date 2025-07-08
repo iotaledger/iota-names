@@ -3,18 +3,19 @@
 
 'use client';
 
+import { UIKitTheme } from '@iota/apps-ui-kit';
 import { createContext } from 'react';
 
-import { Theme, ThemePreference } from '../lib/enums';
+import { ThemePreference } from '../lib/enums';
 
 export interface ThemeContextType {
-    theme: Theme;
+    theme: UIKitTheme;
     themePreference: ThemePreference;
     setThemePreference: (theme: ThemePreference) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextType>({
-    theme: Theme.Light,
+    theme: UIKitTheme.Names,
     themePreference: ThemePreference.System,
     setThemePreference: () => {},
 });

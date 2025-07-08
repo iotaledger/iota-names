@@ -11,7 +11,7 @@ import type {
 import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants';
-import { isNestedSubName, isSubName } from './helpers';
+import { isNestedSubname, isSubname } from './helpers';
 import type { IotaNamesClient } from './iota-names-client';
 import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
 import { isValidIotaName, normalizeIotaName } from './utils';
@@ -26,10 +26,10 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Registers a domain for a number of years.
+     * Registers a name for a number of years.
      */
     register(params: RegistrationParams): TransactionObjectArgument {
-        const paymentIntent = this.initRegistration(params.domain);
+        const paymentIntent = this.initRegistration(params.name);
         let price = this.getBasePrice(paymentIntent);
         const receipt = this.generateReceipt({
             paymentIntent,
@@ -66,13 +66,13 @@ export class IotaNamesTransaction {
         this.finalizeRenew(receipt, params.nft);
     }
 
-    initRegistration(domain: string): TransactionObjectArgument {
+    initRegistration(name: string): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
             target: `${config.packageId}::payment::init_registration`,
             arguments: [
-                this.transaction.object(config.iotaNames),
-                this.transaction.pure.string(domain),
+                this.transaction.object(config.iotaNamesObjectId),
+                this.transaction.pure.string(name),
             ],
         });
     }
@@ -82,7 +82,7 @@ export class IotaNamesTransaction {
         return this.transaction.moveCall({
             target: `${config.packageId}::payment::init_renewal`,
             arguments: [
-                this.transaction.object(config.iotaNames),
+                this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.pure.u8(years),
             ],
@@ -97,7 +97,7 @@ export class IotaNamesTransaction {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
             target: `${config.payments.packageId}::payments::handle_base_payment`,
-            arguments: [this.transaction.object(config.iotaNames), paymentIntent, payment],
+            arguments: [this.transaction.object(config.iotaNamesObjectId), paymentIntent, payment],
             typeArguments: [paymentType],
         });
     }
@@ -108,7 +108,7 @@ export class IotaNamesTransaction {
             target: `${config.packageId}::payment::register`,
             arguments: [
                 receipt,
-                this.transaction.object(config.iotaNames),
+                this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.object.clock(),
             ],
         });
@@ -123,7 +123,7 @@ export class IotaNamesTransaction {
             target: `${config.packageId}::payment::renew`,
             arguments: [
                 receipt,
-                this.transaction.object(config.iotaNames),
+                this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.object.clock(),
             ],
@@ -151,9 +151,9 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Creates a subdomain.
+     * Creates a subname.
      */
-    createSubName({
+    createSubname({
         parentNft,
         name,
         expirationTimestampMs,
@@ -167,20 +167,20 @@ export class IotaNamesTransaction {
         allowTimeExtension: boolean;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubdomain = isNestedSubName(name);
-        if (!this.iotaNamesClient.config.iotaNames)
+        const isParentSubname = isNestedSubname(name);
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IotaNames Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubdomain && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         const subNft = this.transaction.moveCall({
-            target: isParentSubdomain
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::new`
-                : `${this.iotaNamesClient.config.subNamesPackageId}::subdomains::new`,
+            target: isParentSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new`
+                : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::new`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -194,11 +194,11 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Builds the PTB to create a leaf subdomain.
-     * Parent can be a `IotaNamesRegistration` or a `SubdomainRegistration` object.
+     * Builds the PTB to create a leaf subname.
+     * Parent can be a `IotaNamesRegistration` or a `SubnameRegistration` object.
      * Can be passed in as an ID or a TransactionArgument.
      */
-    createLeafSubName({
+    createLeafSubname({
         parentNft,
         name,
         targetAddress,
@@ -208,20 +208,20 @@ export class IotaNamesTransaction {
         targetAddress: string;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubdomain = isNestedSubName(name);
-        if (!this.iotaNamesClient.config.iotaNames)
+        const isParentSubname = isNestedSubname(name);
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubdomain && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
-            target: isParentSubdomain
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::new_leaf`
-                : `${this.iotaNamesClient.config.subNamesPackageId}::subdomains::new_leaf`,
+            target: isParentSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new_leaf`
+                : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::new_leaf`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -233,23 +233,23 @@ export class IotaNamesTransaction {
     /**
      * Removes a leaf subname.
      */
-    removeLeafSubName({ parentNft, name }: { parentNft: TransactionObjectInput; name: string }) {
+    removeLeafSubname({ parentNft, name }: { parentNft: TransactionObjectInput; name: string }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubdomain = isNestedSubName(name);
-        if (!isSubName(name)) throw new Error('This can only be invoked for subnames');
-        if (!this.iotaNamesClient.config.iotaNames)
+        const isParentSubname = isNestedSubname(name);
+        if (!isSubname(name)) throw new Error('This can only be invoked for subnames');
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubdomain && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
-            target: isParentSubdomain
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::remove_leaf`
-                : `${this.iotaNamesClient.config.subNamesPackageId}::subdomains::remove_leaf`,
+            target: isParentSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::remove_leaf`
+                : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::remove_leaf`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -269,15 +269,15 @@ export class IotaNamesTransaction {
         address?: string;
         isSubname?: boolean;
     }) {
-        if (isSubname && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
             target: isSubname
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::set_target_address`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_target_address`
                 : `${this.iotaNamesClient.config.packageId}::controller::set_target_address`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.pure(bcs.option(bcs.Address).serialize(address).toBytes()),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
@@ -290,13 +290,13 @@ export class IotaNamesTransaction {
      */
     setDefault(name: string) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
             target: `${this.iotaNamesClient.config.packageId}::controller::set_reverse_lookup`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
             ],
         });
@@ -306,12 +306,12 @@ export class IotaNamesTransaction {
      * Unsets a default name for the user.
      */
     unsetDefault() {
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
             target: `${this.iotaNamesClient.config.packageId}::controller::unset_reverse_lookup`,
-            arguments: [this.transaction.object(this.iotaNamesClient.config.iotaNames)],
+            arguments: [this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId)],
         });
     }
 
@@ -330,20 +330,20 @@ export class IotaNamesTransaction {
         allowTimeExtension: boolean;
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const isParentSubdomain = isNestedSubName(name);
-        if (!this.iotaNamesClient.config.iotaNames)
+        const isParentSubname = isNestedSubname(name);
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
-        if (!isParentSubdomain && !this.iotaNamesClient.config.subNamesPackageId)
+        if (!isParentSubname && !this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
-        if (isParentSubdomain && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isParentSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         this.transaction.moveCall({
-            target: isParentSubdomain
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::edit_setup`
-                : `${this.iotaNamesClient.config.subNamesPackageId}::subdomains::edit_setup`,
+            target: isParentSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::edit_setup`
+                : `${this.iotaNamesClient.config.subNamesPackageId}::subnames::edit_setup`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -363,15 +363,15 @@ export class IotaNamesTransaction {
         nft: TransactionObjectInput;
         expirationTimestampMs: number;
     }) {
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
         if (!this.iotaNamesClient.config.subNamesPackageId)
             throw new Error('Subnames package ID not found');
 
         this.transaction.moveCall({
-            target: `${this.iotaNamesClient.config.subNamesPackageId}::subdomains::extend_expiration`,
+            target: `${this.iotaNamesClient.config.subNamesPackageId}::subnames::extend_expiration`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.pure.u64(expirationTimestampMs),
             ],
@@ -392,19 +392,19 @@ export class IotaNamesTransaction {
         key: string;
         isSubname?: boolean;
     }) {
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
-        if (isSubname && !this.iotaNamesClient.config.tempSubdomainsProxyPackageId)
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
             throw new Error('Subnames proxy package ID not found');
 
         if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
 
         this.transaction.moveCall({
             target: isSubname
-                ? `${this.iotaNamesClient.config.tempSubdomainsProxyPackageId}::subdomain_proxy::set_user_data`
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_user_data`
                 : `${this.iotaNamesClient.config.packageId}::controller::set_user_data`,
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.pure.string(key),
                 this.transaction.pure.string(value),
@@ -417,7 +417,7 @@ export class IotaNamesTransaction {
      * Burns an expired NFT to collect storage rebates.
      */
     burnExpired({ nft, isSubname }: { nft: TransactionObjectInput; isSubname?: boolean }) {
-        if (!this.iotaNamesClient.config.iotaNames)
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
@@ -425,7 +425,7 @@ export class IotaNamesTransaction {
                 isSubname ? 'burn_expired_subname' : 'burn_expired'
             }`, // Update this
             arguments: [
-                this.transaction.object(this.iotaNamesClient.config.iotaNames),
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
             ],

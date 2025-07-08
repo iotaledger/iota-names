@@ -7,6 +7,7 @@ module iota_names_coupons::coupon_tests;
 
 use iota::clock::Clock;
 use iota::hash::blake2b256;
+use iota::hex;
 use iota::test_scenario::{Scenario, return_shared};
 use iota::test_utils::{Self, destroy};
 use iota_names::iota_names::IotaNames;
@@ -413,7 +414,7 @@ fun coupon_not_valid_for_years_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForNameLength)]
 fun coupon_invalid_length_1_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -429,7 +430,7 @@ fun coupon_invalid_length_1_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForNameLength)]
 fun coupon_invalid_length_2_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -445,7 +446,7 @@ fun coupon_invalid_length_2_failure() {
     scenario_val.end();
 }
 
-#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForDomainLength)]
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidForNameLength)]
 fun coupon_invalid_length_3_failure() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
@@ -526,13 +527,13 @@ fun add_coupon_twice_failure() {
 fun remove_non_existing_coupon() {
     let mut ctx = tx_context::dummy();
     let mut data = coupons::new(&mut ctx);
-    data.remove_coupon(blake2b256(&b"TEST_SUCCESS_ADDITION"));
+    data.remove_coupon(hex::encode(blake2b256(&b"TEST_SUCCESS_ADDITION")).to_string());
     test_utils::destroy(data);
 }
 
 fun test_coupon_register(
     scenario: &mut Scenario,
-    domain: String,
+    name: String,
     coupon_code: String,
     user: address,
     amount: Option<u64>, // optional param to test for expected amount
@@ -542,7 +543,7 @@ fun test_coupon_register(
         let mut iota_names = scenario.take_shared<IotaNames>();
         let mut intent = init_registration(
             &mut iota_names,
-            domain,
+            name,
         );
         let clock = scenario.take_shared<Clock>();
         coupon_house::apply_coupon(
@@ -564,7 +565,7 @@ fun test_coupon_register(
 
 fun test_multi_coupon_register(
     scenario: &mut Scenario,
-    domain: String,
+    name: String,
     mut coupon_codes: vector<String>,
     user: address,
     amount: Option<u64>, // optional param to test for expected amount
@@ -574,7 +575,7 @@ fun test_multi_coupon_register(
         let mut iota_names = scenario.take_shared<IotaNames>();
         let mut intent = init_registration(
             &mut iota_names,
-            domain,
+            name,
         );
         let clock = scenario.take_shared<Clock>();
         while (!coupon_codes.is_empty()) {
@@ -599,7 +600,7 @@ fun test_multi_coupon_register(
 
 fun test_coupon_renewal(
     scenario: &mut Scenario,
-    domain: String,
+    name: String,
     renewal_years: u8,
     coupon_code: String,
     user: address,
@@ -610,7 +611,7 @@ fun test_coupon_renewal(
         let mut iota_names = scenario.take_shared<IotaNames>();
         let clock = scenario.take_shared<Clock>();
         let nft = iota_names::iota_names_registration::new_for_testing(
-            iota_names::domain::new(domain),
+            iota_names::name::new(name),
             1,
             &clock,
             scenario.ctx(),
@@ -639,8 +640,8 @@ fun test_coupon_renewal(
     };
 }
 
-fun init_registration(iota_names: &mut IotaNames, domain: String): PaymentIntent {
-    let intent = iota_names::payment::init_registration(iota_names, domain);
+fun init_registration(iota_names: &mut IotaNames, name: String): PaymentIntent {
+    let intent = iota_names::payment::init_registration(iota_names, name);
 
     intent
 }

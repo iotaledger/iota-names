@@ -1,11 +1,19 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export interface ProtectedRoute {
-    title: string;
+export type BaseRoute = {
     path: string;
-    icon?: (props: React.SVGProps<SVGSVGElement>) => React.JSX.Element;
-    id: string;
-}
+    icon?: JSX.Element;
+    title?: string;
+};
 
-export interface PublicRoute extends Pick<ProtectedRoute, 'path'> {}
+export type PublicRoute = BaseRoute & {
+    isProtected?: false;
+};
+
+export type ProtectedRoute = BaseRoute & {
+    isProtected: true;
+    id: string;
+};
+
+export type Route = PublicRoute | ProtectedRoute;

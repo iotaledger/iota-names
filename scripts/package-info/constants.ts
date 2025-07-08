@@ -9,23 +9,23 @@ export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
     auctionPackageId: string;
+    auctionHouseObjectId: string;
     coins: {
         [key: string]: {
             type: string;
             metadataId: string;
         };
     };
-    denyListPackageId: string;
-    iotaNames: string;
+    couponsPackageId: string;
+    iotaNamesObjectId: string;
     packageId: string;
     paymentsPackageId: string;
     publisherId: string;
     registryTableId: string;
     reverseRegistryTableId: string;
     subNamesPackageId: string;
-    couponsPackageId: string;
-    tempSubdomainsProxyPackageId: string;
-    upgradeCap?: string;
+    tempSubnameProxyPackageId: string;
+    upgradeCap: string;
 };
 
 export const readPackageInfo = (network: string): PackageInfo => {
