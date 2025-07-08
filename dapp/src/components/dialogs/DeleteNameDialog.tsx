@@ -36,7 +36,6 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
 
-    const { data: namesOwned } = useRegistrationNfts('name');
     const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     const isNameSubname = nft ? isSubname(nft.name) : null;
@@ -45,7 +44,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const updates: NameUpdate[] = [];
 
     if (nft.isExpired) {
-        const nftId = getNameObject(namesOwned ?? [], subnamesOwned ?? [], nft.name);
+        const nftId = isNameSubname ? getNameObject(subnamesOwned ?? [], nft.name) : nft.id;
         if (nftId) {
             updates.push({
                 type: 'delete-name',
