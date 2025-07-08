@@ -101,7 +101,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
 
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
-
+    const [renewError, setRenewError] = useState<string | null>(null);
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
@@ -146,13 +146,16 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const handleCancelRenewName = () => {
         setOpen(false);
     };
-    const exceedYears = updateNameError && updateNameError?.message.includes('9223373020403073037');
+    const exceedYears =
+        (updateNameError && updateNameError?.message.includes('9223373020403073037')) ||
+        updateNameError?.message.includes('9223372724050329613');
 
     const wantsToRenew = isNameSubname || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
-    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
+    const disableSave =
+        isLoading || !canRenew || !wantsToRenew || !!updateNameError || !!renewError;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -166,13 +169,23 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         {!isNameSubname ? (
                             <div className="mb-4">
                                 <Input
-                                    type={InputType.Text}
+                                    type={InputType.Number}
                                     onChange={(e) => {
                                         const val = Number(e.target.value);
-                                        setEditRenewYears(isNaN(val) ? 0 : val);
+                                        setRenewError(null);
+                                        if (val > 5) {
+                                            setRenewError(
+                                                'You cannot renew for more than 5 years.',
+                                            );
+                                        } else if (val < 0) {
+                                            setRenewError('Input a positive number.');
+                                        } else {
+                                            setEditRenewYears(isNaN(val) ? 0 : val);
+                                        }
                                     }}
-                                    placeholder="Input renew years"
+                                    placeholder="Input renew years (max 5)"
                                     disabled={disableEdit}
+                                    errorMessage={renewError || ''}
                                 />
                             </div>
                         ) : null}
