@@ -11,7 +11,7 @@ export function getTimeRemaining(auction: AuctionMetadata | null): number {
 }
 
 export function formatTimeRemaining(milliseconds: number): string {
-    if (milliseconds <= 0) return 'Ended';
+    if (milliseconds <= 0) return 'Finished';
 
     const seconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(seconds / 60);
