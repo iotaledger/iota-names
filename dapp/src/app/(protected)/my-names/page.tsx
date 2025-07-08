@@ -7,7 +7,7 @@ import { Button, ButtonType, Card, CardType, Title, TitleSize } from '@iota/apps
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
-import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
+import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
@@ -34,8 +34,7 @@ export default function MyNamesPage(): JSX.Element {
     }, [names, subnames]);
 
     return (
-        <div className="flex flex-col w-full gap-y-lg items-center">
-            <AvailabilityCheck />
+        <div className="flex flex-col w-full gap-y-lg items-center py-24 md:py-lg">
             {updateNameDialog ? (
                 <UpdateNameDialog
                     name={updateNameDialog}

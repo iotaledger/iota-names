@@ -5,3 +5,4 @@ export * from './ConnectionGuard';
 export * from './AvailabilityCheck';
 
 export * from './dialogs';
+export * from './Searchbox';
