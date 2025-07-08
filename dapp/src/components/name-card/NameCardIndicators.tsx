@@ -11,7 +11,9 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { SvgSubnames } from '../svgs/SvgSubnames';
 
 const INDICATOR_CLASSES =
-    'state-layer relative cursor-pointer p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs text-names-neutral-70 text-label-md w-max';
+    'p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs text-names-neutral-70 text-label-md w-max';
+
+const CLICKABLE_INDICATOR_CLASSES = 'state-layer relative cursor-pointer';
 
 interface ExpiryDateIndicatorProps {
     auction: AuctionDetails;
@@ -46,14 +48,20 @@ export function SubnameCountIndicator({
 }: SubnameCountIndicatorProps) {
     if (subnameCount === 0 && showAddSubnameLink !== false) {
         return (
-            <ButtonUnstyled href="#" className={cx(INDICATOR_CLASSES)} onClick={onAddSubnameClick}>
+            <ButtonUnstyled
+                className={cx(INDICATOR_CLASSES, CLICKABLE_INDICATOR_CLASSES)}
+                onClick={onAddSubnameClick}
+            >
                 <Add className="h-4 w-4" /> Add subname
             </ButtonUnstyled>
         );
     }
 
     return (
-        <ButtonUnstyled onClick={onSubnameListClick} className={cx(INDICATOR_CLASSES)}>
+        <ButtonUnstyled
+            onClick={onSubnameListClick}
+            className={cx(INDICATOR_CLASSES, CLICKABLE_INDICATOR_CLASSES)}
+        >
             <SvgSubnames className="h-4 w-4" />
             {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
         </ButtonUnstyled>
