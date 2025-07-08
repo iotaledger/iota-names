@@ -8,7 +8,7 @@ import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
-import { AvailabilityCheck, DeleteNameDialog, UpdateNameDialog } from '@/components';
+import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -63,8 +63,7 @@ export default function MyNamesPage(): JSX.Element {
     ];
 
     return (
-        <div className="flex flex-col w-full gap-y-lg items-center">
-            <AvailabilityCheck />
+        <div className="flex flex-col w-full gap-y-lg items-center py-24 md:py-lg">
             {updateNameDialog ? (
                 <UpdateNameDialog
                     name={updateNameDialog}
