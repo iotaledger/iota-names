@@ -43,7 +43,7 @@ function createSubnameUpdates({
     allowChildCreation: boolean;
     allowTimeExtension: boolean;
 }) {
-    const isNameSubName = isSubname(nameRecord?.name || '');
+    const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
     const fullSubnameName = newSubname?.trim() ? newSubname + '.' + name : null;
@@ -54,7 +54,7 @@ function createSubnameUpdates({
 
     const updates: NameUpdate[] = [];
 
-    const nftId = isNameSubName
+    const nftId = isNameSubname
         ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
         : nameRecord?.nftId;
 
