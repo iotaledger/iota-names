@@ -36,7 +36,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
         registryTableId: '',
         reverseRegistryTableId: '',
         couponsPackageId: packageInfo.Coupons.packageId,
-        subNamesPackageId: packageInfo.Subnames.packageId,
+        subnamesPackageId: packageInfo.Subnames.packageId,
         tempSubnameProxyPackageId: packageInfo.TempSubnameProxy.packageId,
         upgradeCap: packageInfo.IotaNames.upgradeCap,
     };

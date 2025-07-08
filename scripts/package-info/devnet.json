@@ -16,7 +16,7 @@
     "registryTableId": "0x88fa01b1f2462f2f33b593eb205b88158e1f51594102b9748b73f134388a3f2d",
     "reverseRegistryTableId": "0x1b3840a267efdc30d11b2b7ad2e574cf8483cd4e06bdf7b39c61ee5717ac3fe6",
     "couponsPackageId": "0x7add42bba66f170587fb5ead0c411f3356c54f9e0f9d11028a230702eab6ea60",
-    "subNamesPackageId": "0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1",
+    "subnamesPackageId": "0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1",
     "tempSubnameProxyPackageId": "0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444",
     "upgradeCap": "0xa2134d26f35ad4ba25614913d0b267117b52626c7a99f106adaa97fb928e12a7"
 }

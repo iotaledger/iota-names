@@ -20,7 +20,7 @@ export interface PackageInfo {
     auctionPackageId: string;
     packageId: string;
     iotaNamesObjectId: string;
-    subNamesPackageId: string;
+    subnamesPackageId: string;
     tempSubnameProxyPackageId: string;
     payments: {
         packageId: string;

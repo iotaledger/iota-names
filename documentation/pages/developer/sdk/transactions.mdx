@@ -96,18 +96,18 @@ const setDefault = async (name: string) => {
 ### Creating a Subname
 
 ```js
-const createSubname = async (subName: string, parentNftId: string, expirationMs: number) => {
+const createSubname = async (subname: string, parentNftId: string, expirationMs: number) => {
     // Create a transaction block as usual in your PTBs.
     const transaction = new Transaction();
     // Pass in the transaction block & the app's global IotaNamesClient.
     const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // We build the transaction to create a subname.
-	const subNameNft = iotaNamesTransaction.createSubName({
+	const subnameNft = iotaNamesTransaction.createSubname({
         // The NFT of the parent
         parentNft: parentNftId,
         // The subname to be created.
-        name: subName,
+        name: subname,
         // The expiration timestamp needs to be less than or equal to the parent's expiration.
         expirationTimestampMs: expirationMs,
         // Whether the subname can create more nested subnames.
@@ -119,7 +119,7 @@ const createSubname = async (subName: string, parentNftId: string, expirationMs:
     });
 
     // Transfer the NFT
-    transaction.transferObjects([subNameNft], transaction.pure.address('0xMyAddress'));
+    transaction.transferObjects([subnameNft], transaction.pure.address('0xMyAddress'));
     // ... sign and execute the transaction
 }
 ```
@@ -181,7 +181,7 @@ const createLeafSubname = async (name: stringify, parentNftId: string, targetAdd
 
     // We build the transaction to create a leaf subname.
     // A leaf subname is a subname that has a target address and no NFT of its own.
-    iotaNamesTransaction.createLeafSubName({
+    iotaNamesTransaction.createLeafSubname({
         // The NFT of the parent
         parentNft: parentNftId,
         // The leaf subname to be created.
@@ -204,7 +204,7 @@ const removeLeafSubname = async (name: string, parentNftId: string) => {
     const iotaNamesTransaction = new IotaNamesTransaction(iotaNamesClient, transaction);
 
     // Build the transaction to remove a leaf subname.
-    iotaNamesTransaction.removeLeafSubName({
+    iotaNamesTransaction.removeLeafSubname({
         // The NFT of the parent
         parentNft: parentNftId,
         // The leaf subname to be removed.

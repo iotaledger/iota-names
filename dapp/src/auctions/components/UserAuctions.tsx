@@ -89,7 +89,7 @@ export function UserAuctions() {
                     <h4 className="text-md font-medium text-gray-100">
                         Active Auctions ({groupedAuctions.active.length})
                     </h4>
-                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex flex-row gap-md items-stretch justify-start flex-wrap">
                         {groupedAuctions.active.map((auctionGroup) => (
                             <AuctionItem
                                 key={auctionGroup.details.name}
@@ -107,7 +107,7 @@ export function UserAuctions() {
                     <h4 className="text-md font-medium text-gray-100">
                         Won Auctions ({groupedAuctions.claimable.length})
                     </h4>
-                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex flex-row gap-md items-stretch justify-start flex-wrap">
                         {groupedAuctions.claimable.map((auctionGroup) => (
                             <AuctionItem
                                 key={auctionGroup.details.name}
@@ -125,7 +125,7 @@ export function UserAuctions() {
                     <h4 className="text-md font-medium text-gray-100">
                         Lost Auctions ({groupedAuctions.lost.length})
                     </h4>
-                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex flex-row gap-md items-stretch justify-start flex-wrap">
                         {groupedAuctions.lost.map((auctionGroup) => (
                             <AuctionItem
                                 key={auctionGroup.details.name}
