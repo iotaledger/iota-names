@@ -115,7 +115,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     };
 
     return (
-        <NameCard key={auction.name} name={auction.name}>
+        <NameCard name={auction.name}>
             <NameCardBody title={`@${normalizeNameInput(auction.name)}`}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
