@@ -40,8 +40,8 @@
         "sdk": "turbo --filter ./sdk",
         "dapp": "turbo --filter ./dapp",
         "prepare": "husky",
-		"changeset-publish": "pnpm changeset publish",
-		"changeset-version": "pnpm changeset version"
+        "changeset-publish": "pnpm changeset publish",
+        "changeset-version": "pnpm changeset version"
     },
     "author": "",
     "license": "Apache-2.0",
