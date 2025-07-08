@@ -40,9 +40,9 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
                     | Extract<IotaParsedData, { dataType: 'moveObject' }>
                     | undefined
                     | null;
-                const isNameSubName = isSubname(data?.name || '');
+                const isNameSubname = isSubname(data?.name || '');
                 type NameFields = undefined | { expiration_timestamp_ms?: string };
-                const fields = isNameSubName
+                const fields = isNameSubname
                     ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
                     : (content?.fields as NameFields);
                 return {
