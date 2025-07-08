@@ -21,7 +21,7 @@ export const CONNECT_ROUTE: Route = {
     path: '/',
 };
 
-export const FOOTER_EXTERNAL_LINKS: Route[] = [
+export const FOOTER_SOCIAL_LINKS: Route[] = [
     {
         path: 'https://discord.iota.org/',
         icon: <Discord />,
@@ -32,7 +32,7 @@ export const FOOTER_EXTERNAL_LINKS: Route[] = [
     },
 ];
 
-export const FOOTER_USE_CONDITIONS_LINKS: Route[] = [
+export const FOOTER_LEGAL_LINKS: Route[] = [
     {
         title: 'Terms & Conditions',
         path: '',

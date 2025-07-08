@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import Link from 'next/link';
 
-import { FOOTER_EXTERNAL_LINKS, FOOTER_USE_CONDITIONS_LINKS } from '@/lib/constants';
+import { FOOTER_LEGAL_LINKS, FOOTER_SOCIAL_LINKS } from '@/lib/constants';
 import { NamesLogoBranded } from '@/public/icons';
 
 export function Footer() {
@@ -17,7 +17,7 @@ export function Footer() {
                     </span>
                 </div>
                 <div className="flex flex-row gap-md items-center text-names-neutral-70 text-body-md">
-                    {FOOTER_USE_CONDITIONS_LINKS.map(({ path, title }) => (
+                    {FOOTER_LEGAL_LINKS.map(({ path, title }) => (
                         <Link
                             key={title}
                             href={path}
@@ -26,7 +26,7 @@ export function Footer() {
                             {title}
                         </Link>
                     ))}
-                    {FOOTER_EXTERNAL_LINKS.map(({ path, icon }, index) => (
+                    {FOOTER_SOCIAL_LINKS.map(({ path, icon }, index) => (
                         <div key={index} className="[&_svg]:h-6 [&_svg]:w-6">
                             <Link href={path} target="_blank" rel="noopener noreferrer">
                                 {icon}
