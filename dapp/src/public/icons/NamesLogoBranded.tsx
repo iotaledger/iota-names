@@ -30,9 +30,9 @@ export default function SvgNamesLogoBranded(props: SVGProps<SVGSVGElement>) {
                     y2="15.1447"
                     gradientUnits="userSpaceOnUse"
                 >
-                    <stop stop-color="#A139FF" />
-                    <stop offset="0.5" stop-color="#3131FF" />
-                    <stop offset="1" stop-color="#14F0D6" />
+                    <stop stopColor="#A139FF" />
+                    <stop offset="0.5" stopColor="#3131FF" />
+                    <stop offset="1" stopColor="#14F0D6" />
                 </linearGradient>
                 <linearGradient
                     id="paint1_linear_11079_3429"
@@ -42,9 +42,9 @@ export default function SvgNamesLogoBranded(props: SVGProps<SVGSVGElement>) {
                     y2="15.1447"
                     gradientUnits="userSpaceOnUse"
                 >
-                    <stop stop-color="#A139FF" />
-                    <stop offset="0.5" stop-color="#3131FF" />
-                    <stop offset="1" stop-color="#14F0D6" />
+                    <stop stopColor="#A139FF" />
+                    <stop offset="0.5" stopColor="#3131FF" />
+                    <stop offset="1" stopColor="#14F0D6" />
                 </linearGradient>
             </defs>
         </svg>
