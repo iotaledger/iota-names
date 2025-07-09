@@ -1,9 +1,16 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// import { Add, Assets, Calendar, Delete, Info, Link } from '@iota/apps-ui-icons';
-// import { Dropdown, ListItem } from '@iota/apps-ui-kit';
+interface DropdownMenuOptionProps {
+    icon: JSX.Element;
+    label: string;
+}
 
-// export function DropDownMenuOptions() {
-
-// }
+export function DropdownMenuOption({ icon, label }: DropdownMenuOptionProps) {
+    return (
+        <div className="flex items-center gap-sm min-w-[262px] text-body-lg text-names-neutral-92">
+            <span className="[&_svg]:h-6 [&_svg]:w-6">{icon}</span>
+            <span>{label}</span>
+        </div>
+    );
+}
