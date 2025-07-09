@@ -197,7 +197,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                                             setEditRenewYears(isNaN(val) ? 0 : val);
                                         }
                                     }}
-                                    placeholder="Input renew years (max 5)"
+                                    placeholder="Input renew years"
                                     disabled={disableEdit}
                                     errorMessage={renewError || ''}
                                 />
