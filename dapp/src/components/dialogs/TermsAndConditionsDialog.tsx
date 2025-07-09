@@ -41,7 +41,7 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                             </span>
                             <p className="text-body-md text-names-neutral-92">
                                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ac
-                                aliquam neque, quis ullamcorper ipsum. Nam ac purus a magna
+                                aliquam neque, quis ullamcorper ipsum. Name ac purus a magna
                                 ullamcorper venenatis ac eu nulla. Integer odio nunc, pretium sed
                                 nibh non, dignissim mattis metus. Donec quis bibendum mi. Donec sed
                                 tortor ullamcorper, tempus urna porta, sollicitudin nulla. Donec
@@ -51,7 +51,7 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                                 mauris bibendum nisi, id hendrerit erat nunc porttitor erat.
                                 Pellentesque vitae purus ac urna lacinia commodo. In quis nulla
                                 dapibus, mattis metus ac, vulputate arcu. Vestibulum quis velit
-                                risus. Nam lacus nisi, lobortis ac tristique eget, viverra ut
+                                risus. Name lacus nisi, lobortis ac tristique eget, viverra ut
                                 libero. Nulla interdum, nibh at egestas fermentum, lorem lectus
                                 consectetur felis, nec rutrum nibh arcu vel lorem. Proin id urna sit
                                 amet odio luctus vulputate vestibulum ut diam.
