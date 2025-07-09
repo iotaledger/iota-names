@@ -146,10 +146,13 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const handleCancelRenewName = () => {
         setOpen(false);
     };
-    const exceedYears =
-        (updateNameError && updateNameError?.message.includes('9223373020403073037')) ||
-        updateNameError?.message.includes('9223372724050329613');
 
+    const isRenewable =
+        nameRecord?.nameRecord?.expirationTimestampMs && editRenewYears
+            ? nameRecord.nameRecord.expirationTimestampMs +
+                  editRenewYears * 365 * 24 * 60 * 60 * 1000 <
+              Date.now() + 6 * 365 * 24 * 60 * 60 * 1000
+            : true;
     const wantsToRenew = isNameSubname || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
@@ -192,7 +195,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
-                        {exceedYears ? (
+                        {wantsToRenew && !isRenewable ? (
                             <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
                         ) : updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
