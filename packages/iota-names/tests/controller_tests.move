@@ -493,7 +493,7 @@ fun test_set_user_data_admin_add() {
 
     add_user_data_util(scenario, b"key".to_string(), 0);
 
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
     set_user_data_util(
         scenario,
@@ -503,7 +503,7 @@ fun test_set_user_data_admin_add() {
         0,
     );
 
-    let data = &scenario.get_user_data(DOMAIN_NAME.to_string());
+    let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 1);
     assert_eq(*data.get(&b"key".to_string()), b"value".to_string());
 
