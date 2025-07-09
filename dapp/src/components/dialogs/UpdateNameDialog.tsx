@@ -384,6 +384,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                         setAvatarNftId(assetId);
                         setIsAvatarSelectorOpen(false);
                     }}
+                    name={name}
                 />
             )}
             {subnameDialogOpen && (
