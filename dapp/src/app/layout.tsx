@@ -7,7 +7,7 @@ import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
 import { ConnectionGuard } from '@/components';
-import { Navbar } from '@/components/layout/Navbar';
+import { Footer, Navbar } from '@/components/layout';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
 
@@ -28,6 +28,7 @@ export default function RootLayout({
                     <ConnectionGuard>
                         <Navbar />
                         {children}
+                        <Footer />
                     </ConnectionGuard>
                 </AppProviders>
             </body>

@@ -32,7 +32,7 @@ export const packages = {
         auctionHouseObjectId: '0xcb9e1c857825e61211d1ea7507847d8b8145e0a890f3392c56771af2a77c932c',
         packageId: '0xe1284870018484a7a12255aebb737b6b98b47d652b842ea2f324499ff163a648',
         iotaNamesObjectId: '0xa92a67ae8a8c644acfa6dd5a4d8098a20b07b6061cbf36aff8daef3ba892913f',
-        subNamesPackageId: '0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1',
+        subnamesPackageId: '0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1',
         tempSubnameProxyPackageId:
             '0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444',
         payments: {
