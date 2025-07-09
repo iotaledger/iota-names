@@ -147,6 +147,17 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
+    function getYearsToRenew() {
+        if (!nameRecord?.nameRecord?.expirationTimestampMs) return 0;
+        for (let years = 6; years >= 0; years--) {
+            const newExpirationTime =
+                nameRecord.nameRecord.expirationTimestampMs + years * 365 * 24 * 60 * 60 * 1000;
+            const maxRenewalTime = Date.now() + 6 * 365 * 24 * 60 * 60 * 1000;
+            if (newExpirationTime < maxRenewalTime) return years;
+        }
+        return 0;
+    }
+
     const isRenewable =
         nameRecord?.nameRecord?.expirationTimestampMs && editRenewYears
             ? nameRecord.nameRecord.expirationTimestampMs +
@@ -192,6 +203,9 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                                 />
                             </div>
                         ) : null}
+                        <div className="mb-4">
+                            You can renew this name for a maximum of {getYearsToRenew()} years
+                        </div>
                         {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
