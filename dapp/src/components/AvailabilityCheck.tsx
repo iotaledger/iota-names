@@ -12,14 +12,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
-import { formatNanosToIota } from '@/lib/utils';
+import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './NamePurchaseCard';
-
-function normalizeNameInput(name: string) {
-    return name.toLowerCase().replace(/\.iota$/i, '');
-}
 
 function getValidationError(
     name: string,
@@ -80,7 +76,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     }, [searchValue]);
 
     function handleInputChange(inputValue: string) {
-        setSearchValue(normalizeNameInput(inputValue));
+        setSearchValue(sanitizeIotaName(inputValue));
         if (name) {
             setName('');
         }
@@ -99,7 +95,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
               : undefined;
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
-    const cleanName = normalizeNameInput(name);
+    const cleanName = sanitizeIotaName(name);
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
