@@ -163,7 +163,7 @@ public fun set_user_data_util(
     scenario.return_to_sender(nft);
 }
 
-public fun add_user_data_util(
+public fun add_user_data_key_util(
     scenario: &mut Scenario,
     key: String,
     clock_tick: u64,
@@ -485,13 +485,13 @@ fun test_set_user_data_aborts_if_key_is_unsupported() {
 }
 
 #[test]
-fun test_set_user_data_admin_add() {
+fun test_set_user_data_admin_add_key() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
     scenario.setup(FIRST_ADDRESS, 0);
 
-    add_user_data_util(scenario, b"key".to_string(), 0);
+    add_user_data_key_util(scenario, b"key".to_string(), 0);
 
     let data = &scenario.get_user_data(NAME.to_string());
     assert_eq(data.size(), 0);
