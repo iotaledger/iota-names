@@ -1,0 +1,80 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+import {
+    Button,
+    ButtonSize,
+    ButtonType,
+    Checkbox,
+    Dialog,
+    DialogBody,
+    DialogContent,
+    DialogPosition,
+    Header,
+} from '@iota/apps-ui-kit';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+interface TermsAndConditionsDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditionsDialogProps) {
+    const [termsAccepted, setTermsAccepted] = useState(false);
+    const router = useRouter();
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent
+                containerId="overlay-portal-container"
+                position={DialogPosition.Center}
+                isFixedPosition
+                customWidth="w-full max-w-md md:max-w-2xl xl:max-w-4xl"
+            >
+                <Header title="Terms & Conditions" onClose={() => onOpenChange(false)} />
+                <DialogBody>
+                    <div className="flex flex-col gap-xl">
+                        <div className="flex flex-col gap-md">
+                            <span className="text-label-md text-names-neutral-70">
+                                Effective Date: Lorem ipsum
+                            </span>
+                            <p className="text-body-md text-names-neutral-92">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ac
+                                aliquam neque, quis ullamcorper ipsum. Nam ac purus a magna
+                                ullamcorper venenatis ac eu nulla. Integer odio nunc, pretium sed
+                                nibh non, dignissim mattis metus. Donec quis bibendum mi. Donec sed
+                                tortor ullamcorper, tempus urna porta, sollicitudin nulla. Donec
+                                mattis lectus non consectetur sollicitudin. Nunc vel erat sit amet
+                                lectus condimentum fermentum. Vestibulum dapibus eros ut congue
+                                consectetur. Integer laoreet, leo id hendrerit accumsan, nulla
+                                mauris bibendum nisi, id hendrerit erat nunc porttitor erat.
+                                Pellentesque vitae purus ac urna lacinia commodo. In quis nulla
+                                dapibus, mattis metus ac, vulputate arcu. Vestibulum quis velit
+                                risus. Nam lacus nisi, lobortis ac tristique eget, viverra ut
+                                libero. Nulla interdum, nibh at egestas fermentum, lorem lectus
+                                consectetur felis, nec rutrum nibh arcu vel lorem. Proin id urna sit
+                                amet odio luctus vulputate vestibulum ut diam.
+                            </p>
+                        </div>
+                        <div className="flex flex-row items-center justify-between">
+                            <Checkbox
+                                name="terms_conditions"
+                                label="I have read, understand, and agree to the Terms of Service"
+                                onCheckedChange={() => setTermsAccepted(true)}
+                                isChecked={termsAccepted}
+                            />
+                            <Button
+                                onClick={() => router.push('/')}
+                                type={ButtonType.Primary}
+                                disabled={!termsAccepted}
+                                text="Accept"
+                                size={ButtonSize.Small}
+                            />
+                        </div>
+                    </div>
+                </DialogBody>
+            </DialogContent>
+        </Dialog>
+    );
+}
