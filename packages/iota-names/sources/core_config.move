@@ -111,7 +111,7 @@ public fun default(): CoreConfig {
         iota_names::constants::payments_version!(),
         5,
         vector[iota_names::constants::iota_tln()],
-        valid_user_data_key(),
+        valid_user_data_keys(),
         iota::vec_map::empty(),
     )
 }
@@ -120,7 +120,7 @@ public fun default(): CoreConfig {
 use std::string::utf8;
 
 #[test_only]
-public fun valid_user_data_key() : vector<String> {
+public fun valid_user_data_keys() : vector<String> {
     vector[
         utf8(b"avatar"),
         utf8(b"twitter/x"),
