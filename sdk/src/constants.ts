@@ -28,24 +28,24 @@ export const ALLOWED_METADATA = {
 
 export const packages = {
     devnet: {
-        auctionPackageId: '0x3263bf636c2f60b04a7bf376b0048c36cc0268afee6abaaaceee765d5ea3f3cf',
-        auctionHouseObjectId: '0xcb9e1c857825e61211d1ea7507847d8b8145e0a890f3392c56771af2a77c932c',
-        packageId: '0xe1284870018484a7a12255aebb737b6b98b47d652b842ea2f324499ff163a648',
-        iotaNamesObjectId: '0xa92a67ae8a8c644acfa6dd5a4d8098a20b07b6061cbf36aff8daef3ba892913f',
-        subnamesPackageId: '0xa61121b31bc079e3dcc8e8e0c97857bde9eb077cd90070fbec737246161922b1',
+        auctionPackageId: '0x79c8714ea294a92da04875c77ccabf8d1a06107e80d41c23d6777d5b1e6724a5',
+        auctionHouseObjectId: '0xc922c77a1d4f4e699aa912a7c24aee4668f8975d2a5f01ba780f656289bf2c2c',
+        packageId: '0xb9d617f24c84826bf660a2f4031951678cc80c264aebc4413459fb2a95ada9ba',
+        iotaNamesObjectId: '0x07c59b37bd7d036bf78fa30561a2ab9f7a970837487656ec29466e817f879342',
+        subnamesPackageId: '0x1efbf928710d0d92635dacff4c502516169d37fa006cabd2f3cdd0123221e09e',
         tempSubnameProxyPackageId:
-            '0x799739dbc50b5b0aa3f9011c475ddc479673a96b230a2a064178c9a65181d444',
+            '0x4a16b7b2a9c194989519c87ee3f1d1007ece8aecb62b9a50a4c10075db0591a3',
         payments: {
-            packageId: '0x1efac8bf200acca64b62ce75557cd7232310fc8c4ea90960487d2908055fc94f',
+            packageId: '0x98b9b33b7c2347a8f4e8b8716fb4c7e6e1af846ec2ea063a47bba81ffe03b440',
         },
         coins: {
             IOTA: {
                 type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
             },
         },
-        registryTableId: '0x88fa01b1f2462f2f33b593eb205b88158e1f51594102b9748b73f134388a3f2d',
+        registryTableId: '0xe00b2f2400c33b4dbd3081c4dcf2e289d0544caba23a3d130b264bd756403c07',
         reverseRegistryTableId:
-            '0x1b3840a267efdc30d11b2b7ad2e574cf8483cd4e06bdf7b39c61ee5717ac3fe6',
+            '0x1c1da17843cc453ad4079b05ce55e103b7a8cdd4db6ab42dc367b47ed6d8994d',
     },
     // TODO: Support Mainnet and Testnet
 };
