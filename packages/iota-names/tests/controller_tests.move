@@ -16,7 +16,7 @@ use iota_names::constants::year_ms;
 use iota_names::controller::{Self, ControllerAuth};
 use iota_names::name::{Self, Name};
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
+use iota_names::name_registration::{Self, NameRegistration};
 use iota_names::register::RegisterAuth;
 use iota_names::register_utils::register_util;
 use iota_names::registry::{Self, Registry, lookup, reverse_lookup};
@@ -89,7 +89,7 @@ public fun set_target_address_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<NameRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
@@ -152,7 +152,7 @@ public fun set_user_data_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<NameRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
@@ -190,7 +190,7 @@ public fun unset_user_data_util(
 ) {
     scenario.next_tx(sender);
     let mut iota_names = scenario.take_shared<IotaNames>();
-    let nft = scenario.take_from_sender<IotaNamesRegistration>();
+    let nft = scenario.take_from_sender<NameRegistration>();
     let mut clock = scenario.take_shared<Clock>();
 
     clock.increment_for_testing(clock_tick);
@@ -663,7 +663,7 @@ fun test_burn_expired() {
     let mut clock = scenario.take_shared<Clock>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    let ns_registration = iota_names_registration::new_for_testing(
+    let ns_registration = name_registration::new_for_testing(
         name::new(b"test.iota".to_string()),
         1,
         &clock,
@@ -689,7 +689,7 @@ fun test_burn_subname_expired() {
     let mut clock = scenario.take_shared<Clock>();
     let mut iota_names = scenario.take_shared<IotaNames>();
 
-    let ns_registration = iota_names_registration::new_for_testing(
+    let ns_registration = name_registration::new_for_testing(
         name::new(b"inner.test.iota".to_string()),
         1,
         &clock,

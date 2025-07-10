@@ -27,7 +27,7 @@ use iota_names::constants;
 use iota_names::core_config;
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::test_init_utils;
 use std::string::{String, utf8};
 
@@ -114,7 +114,7 @@ public fun claim_util(
     sender: address,
     name: String,
     clock_tick: u64,
-): IotaNamesRegistration {
+): NameRegistration {
     scenario.next_tx(sender);
     let mut auction_house = scenario.take_shared<AuctionHouse>();
     let mut clock = scenario.take_shared<Clock>();
@@ -454,7 +454,7 @@ fun test_admin_try_finalize_auction() {
     );
     assert_balance(scenario, 1220 * NANOS_PER_IOTA);
 
-    let nft = test_scenario::take_from_address<IotaNamesRegistration>(
+    let nft = test_scenario::take_from_address<NameRegistration>(
         scenario,
         THIRD_ADDRESS,
     );
@@ -505,7 +505,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
     );
     assert_balance(scenario, 2410 * NANOS_PER_IOTA);
 
-    let nft = test_scenario::take_from_address<IotaNamesRegistration>(
+    let nft = test_scenario::take_from_address<NameRegistration>(
         scenario,
         SECOND_ADDRESS,
     );
@@ -513,7 +513,7 @@ fun test_admin_try_finalize_auction_2_auctions() {
     assert!(nft.expiration_timestamp_ms() == constants::year_ms(), 0);
     nft.burn_for_testing();
 
-    let nft = test_scenario::take_from_address<IotaNamesRegistration>(
+    let nft = test_scenario::take_from_address<NameRegistration>(
         scenario,
         FIRST_ADDRESS,
     );
@@ -880,7 +880,7 @@ fun test_admin_try_finalize_auction_works_even_if_auction_is_deauthorized() {
     );
     assert_balance(scenario, 1220 * NANOS_PER_IOTA);
 
-    let nft = test_scenario::take_from_address<IotaNamesRegistration>(
+    let nft = test_scenario::take_from_address<NameRegistration>(
         scenario,
         THIRD_ADDRESS,
     );
