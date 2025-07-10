@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// A wrapper for `IotaNamesRegistration` subname objects.
+/// A wrapper for `NameRegistration` subname objects.
 ///
 /// With the wrapper, we are allowing easier distinction between second
 /// level names & subnames in RPC Querying | filtering.
@@ -11,7 +11,7 @@
 module iota_names::subname_registration;
 
 use iota::clock::Clock;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 
 /* friend iota_names::registry; */
 /* #[test_only] */
@@ -25,16 +25,16 @@ const ENotSubname: vector<u8> = b"NFT is not a subname.";
 #[error]
 const ENameNotExpired: vector<u8> = b"Tried to destroy a subname that has not expired.";
 
-/// A wrapper for IotaNamesRegistration object specifically for Subnames.
+/// A wrapper for NameRegistration object specifically for Subnames.
 public struct SubnameRegistration has key, store {
     id: UID,
-    nft: IotaNamesRegistration,
+    nft: NameRegistration,
 }
 
-/// Creates a `Subname` wrapper for IotaNamesRegistration object
+/// Creates a `Subname` wrapper for NameRegistration object
 /// (as long as it's used for a subname).
 public(package) fun new(
-    nft: IotaNamesRegistration,
+    nft: NameRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
 ): SubnameRegistration {
@@ -49,9 +49,9 @@ public(package) fun new(
     }
 }
 
-/// Destroys the wrapper and returns the IotaNamesRegistration object.
+/// Destroys the wrapper and returns the NameRegistration object.
 /// Fails if the subname is not expired.
-public(package) fun burn(name: SubnameRegistration, clock: &Clock): IotaNamesRegistration {
+public(package) fun burn(name: SubnameRegistration, clock: &Clock): NameRegistration {
     // tries to unwrap a non-expired subname.
     assert!(name.nft.has_expired(clock), ENameNotExpired);
 
@@ -64,10 +64,10 @@ public(package) fun burn(name: SubnameRegistration, clock: &Clock): IotaNamesReg
     nft
 }
 
-public fun nft(name: &SubnameRegistration): &IotaNamesRegistration {
+public fun nft(name: &SubnameRegistration): &NameRegistration {
     &name.nft
 }
 
-public fun nft_mut(name: &mut SubnameRegistration): &mut IotaNamesRegistration {
+public fun nft_mut(name: &mut SubnameRegistration): &mut NameRegistration {
     &mut name.nft
 }

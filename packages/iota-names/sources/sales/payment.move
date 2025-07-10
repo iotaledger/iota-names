@@ -25,7 +25,7 @@ use iota_names::constants;
 use iota_names::core_config::CoreConfig;
 use iota_names::name::{Self, Name};
 use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::pricing_config::{PricingConfig, RenewalConfig};
 use iota_names::registry::Registry;
 use iota_names::validation;
@@ -152,7 +152,7 @@ public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentI
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_renewal(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     years: u8,
 ): PaymentIntent {
     let name = nft.name();
@@ -180,7 +180,7 @@ public fun register(
     iota_names: &mut IotaNames,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     let config = iota_names.get_config<CoreConfig>();
 
     match (receipt) {
@@ -200,7 +200,7 @@ public fun register(
 public fun renew(
     receipt: Receipt,
     iota_names: &mut IotaNames,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut NameRegistration,
     clock: &Clock,
     _ctx: &mut TxContext,
 ) {

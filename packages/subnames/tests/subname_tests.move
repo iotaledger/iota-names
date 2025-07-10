@@ -13,7 +13,7 @@ use iota_names::controller::{Self, ControllerAuth};
 use iota_names::deny_list::{Self, DenyListAuth};
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::{Self, IotaNamesRegistration};
+use iota_names::name_registration::{Self, NameRegistration};
 use iota_names::registry::{Self, Registry};
 use iota_names::registry_tests::burn_nfts;
 use iota_names::subname_registration::{Self, SubnameRegistration};
@@ -68,7 +68,7 @@ fun test_multiple_operation_cases() {
     // extend node's subname expiration to the limit.
     extend_node_subname(
         &mut child,
-        iota_names_registration::expiration_timestamp_ms(&parent),
+        name_registration::expiration_timestamp_ms(&parent),
         scenario,
     );
 
@@ -94,7 +94,7 @@ fun expiration_past_parents_expiration() {
     let _child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        iota_names_registration::expiration_timestamp_ms(&parent) + 1,
+        name_registration::expiration_timestamp_ms(&parent) + 1,
         true,
         true,
         scenario,
@@ -113,7 +113,7 @@ fun invalid_parent_failure() {
     let _child = create_node_subname(
         &parent,
         utf8(b"node.example.iota"),
-        iota_names_registration::expiration_timestamp_ms(&parent),
+        name_registration::expiration_timestamp_ms(&parent),
         true,
         true,
         scenario,
@@ -131,7 +131,7 @@ fun tries_to_create_subname_with_disallowed_node_parent() {
     let child = create_node_subname(
         &parent,
         utf8(b"node.test.iota"),
-        iota_names_registration::expiration_timestamp_ms(&parent),
+        name_registration::expiration_timestamp_ms(&parent),
         false,
         true,
         scenario,
@@ -141,7 +141,7 @@ fun tries_to_create_subname_with_disallowed_node_parent() {
     let _nested = create_node_subname(
         child_nft,
         utf8(b"test.node.test.iota"),
-        iota_names_registration::expiration_timestamp_ms(child_nft),
+        name_registration::expiration_timestamp_ms(child_nft),
         false,
         true,
         scenario,
@@ -187,7 +187,7 @@ fun tries_to_extend_with_burned_parent() {
 
     // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
+        name_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -222,7 +222,7 @@ fun tries_to_extend_while_parent_changed() {
 
     // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
+        name_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -252,7 +252,7 @@ fun tries_to_extend_with_too_long_date() {
 
     // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
+        name_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -279,7 +279,7 @@ fun tries_to_extend_with_too_short_date() {
 
     // Update time to ensure child is expired
     increment_clock(
-        iota_names_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
+        name_registration::expiration_timestamp_ms(&parent) + grace_period_ms() + 1,
         scenario,
     );
 
@@ -468,7 +468,7 @@ public fun registry_mut(iota_names: &mut IotaNames): &mut Registry {
 }
 
 /// Create a regular name to help with our tests.
-public fun create_sln(name: String, scenario: &mut Scenario): IotaNamesRegistration {
+public fun create_sln(name: String, scenario: &mut Scenario): NameRegistration {
     ts::next_tx(scenario, USER_ADDRESS);
     let mut iota_names = ts::take_shared<IotaNames>(scenario);
     let clock = ts::take_shared<Clock>(scenario);
@@ -489,7 +489,7 @@ public fun create_sln(name: String, scenario: &mut Scenario): IotaNamesRegistrat
 
 /// Create a leaf subname
 public fun create_leaf_subname(
-    parent: &IotaNamesRegistration,
+    parent: &NameRegistration,
     name: String,
     target: address,
     scenario: &mut Scenario,
@@ -506,7 +506,7 @@ public fun create_leaf_subname(
 
 /// Remove a leaf subname
 public fun remove_leaf_subname(
-    parent: &IotaNamesRegistration,
+    parent: &NameRegistration,
     name: String,
     scenario: &mut Scenario,
 ) {
@@ -522,7 +522,7 @@ public fun remove_leaf_subname(
 
 /// Create a node subname
 public fun create_node_subname(
-    parent: &IotaNamesRegistration,
+    parent: &NameRegistration,
     name: String,
     expiration: u64,
     allow_creation: bool,
@@ -567,7 +567,7 @@ public fun extend_node_subname(
 }
 
 public fun update_subname_setup(
-    parent: &IotaNamesRegistration,
+    parent: &NameRegistration,
     subname: String,
     allow_creation: bool,
     allow_extension: bool,
