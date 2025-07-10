@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { GRACE_PERIOD_MS, isSubname, NameRecord } from '@iota/iota-names-sdk';
+import { GRACE_PERIOD_MS, isSubname, MAX_RENEWAL_YEARS, NameRecord } from '@iota/iota-names-sdk';
 
 import { RegistrationNft } from '../interfaces/registration.interfaces';
 
@@ -71,4 +71,32 @@ export function getParentObject(
 export function getNameObject(names: RegistrationNft[], name: string) {
     const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
     return nameObject?.id || null;
+}
+
+/**
+ * Get the maximum number of years to renew a name.
+ * Returns 0 if the name is not renewable for more time.
+ */
+export function getYearsToRenew(nameRecord?: NameRecord): number {
+    if (!nameRecord?.expirationTimestampMs) return 0;
+    for (let years = 6; years >= 0; years--) {
+        const newExpirationTime =
+            nameRecord.expirationTimestampMs + years * 365 * 24 * 60 * 60 * 1000;
+        const maxRenewalTime = Date.now() + (MAX_RENEWAL_YEARS + 1) * 365 * 24 * 60 * 60 * 1000;
+        if (newExpirationTime < maxRenewalTime) return years;
+    }
+    return 0;
+}
+
+/**
+ * Check if a name is renewable for renewYears years.
+ */
+export function isNameRenewable(nameRecord?: NameRecord, renewYears?: number): boolean {
+    if (!nameRecord?.expirationTimestampMs || !renewYears) {
+        return true;
+    }
+    const newExpirationTime =
+        nameRecord.expirationTimestampMs + renewYears * 365 * 24 * 60 * 60 * 1000;
+    const maxRenewalTime = Date.now() + (MAX_RENEWAL_YEARS + 1) * 365 * 24 * 60 * 60 * 1000;
+    return newExpirationTime < maxRenewalTime;
 }
