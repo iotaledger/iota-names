@@ -39,7 +39,7 @@ function createRenewUpdates({
     ownedSubnames?: RegistrationNft[];
     renewYears?: number;
 }) {
-    const isNameSubName = nameRecord?.name ? isSubname(nameRecord.name) : false;
+    const isNameSubname = nameRecord?.name ? isSubname(nameRecord.name) : false;
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
     const isExpired = nameRecord ? isGracePeriodExpired(nameRecord) : false;
 
@@ -47,7 +47,7 @@ function createRenewUpdates({
 
     // Renew names
     if (
-        !isNameSubName &&
+        !isNameSubname &&
         nameRecord &&
         namePermissions?.allowTimeExtension &&
         renewYears &&
@@ -61,7 +61,7 @@ function createRenewUpdates({
     }
 
     // Renew subnames
-    if (isNameSubName && nameRecord && namePermissions?.allowTimeExtension && !isExpired) {
+    if (isNameSubname && nameRecord && namePermissions?.allowTimeExtension && !isExpired) {
         const objectId = getNameObject(ownedSubnames, nameRecord.name);
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
@@ -97,7 +97,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const isNameSubName = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
+    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
@@ -147,7 +147,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
-    const wantsToRenew = isNameSubName || !!editRenewYears;
+    const wantsToRenew = isNameSubname || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
@@ -155,14 +155,14 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
+            <DialogContent containerId="overlay-portal-container" isFixedPosition>
                 <Header title="Renew" titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
                         <h3 className="text-lg font-semibold mb-4">
                             Renew name {nameRecord?.nameRecord?.name}
                         </h3>
-                        {!isNameSubName ? (
+                        {!isNameSubname ? (
                             <div className="mb-4">
                                 <Input
                                     type={InputType.Text}
