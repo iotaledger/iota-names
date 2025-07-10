@@ -7,16 +7,17 @@ import {
     Accordion,
     AccordionContent,
     AccordionHeader,
-    Button,
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
     Header,
     KeyValueInfo,
     Title,
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -66,7 +67,11 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent containerId="overlay-portal-container" isFixedPosition>
+                <DialogContent
+                    containerId="overlay-portal-container"
+                    isFixedPosition
+                    position={DialogPosition.Right}
+                >
                     <Header title="General Info" onClose={handleClose} />
                     <DialogBody>
                         <div className="flex flex-col justify-center items-center gap-lg">
@@ -86,12 +91,12 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                             isTruncated
                                             keyText="Owner"
                                             value={
-                                                <a
-                                                    href="https://iota.org"
+                                                <Link
+                                                    href={`https://explorer.iota.org/address/${address}`}
                                                     className="text-names-primary-80 text-body-md select-none"
                                                 >
                                                     {truncate(address)}
-                                                </a>
+                                                </Link>
                                             }
                                             fullwidth
                                         />
@@ -99,14 +104,14 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                             <KeyValueInfo
                                                 keyText="Target address"
                                                 value={
-                                                    <a
-                                                        href={`https://explorer.iota.org/testnet/address/${targetAddress}`}
+                                                    <Link
+                                                        href={`https://explorer.iota.org/address/${targetAddress}`}
                                                         className="text-names-primary-80 text-body-md"
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
                                                         {truncate(targetAddress)}
-                                                    </a>
+                                                    </Link>
                                                 }
                                                 fullwidth
                                             />
@@ -115,28 +120,13 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                         <KeyValueInfo
                                             keyText="Object ID"
                                             value={
-                                                <a
-                                                    href="https://iota.org"
+                                                <Link
+                                                    href={`https://explorer.iota.org/address/${currentNameId}`}
                                                     className="text-names-primary-80 text-body-md"
                                                 >
                                                     {truncate(currentNameId)}
-                                                </a>
+                                                </Link>
                                             }
-                                            fullwidth
-                                        />
-                                    </div>
-                                </AccordionContent>
-                            </Accordion>
-                            <Accordion hideBorder={false}>
-                                <AccordionHeader isExpanded={isExpanded} onToggle={onToggle}>
-                                    <Title title="IPFS Website" />
-                                </AccordionHeader>
-                                <AccordionContent isExpanded={isExpanded}>
-                                    <div className="flex flex-col py-xs px-md--rs ">
-                                        <KeyValueInfo keyText="IPFS CID" value="" fullwidth />
-                                        <KeyValueInfo
-                                            keyText="CID not set yey"
-                                            value={<Button text="Set" />}
                                             fullwidth
                                         />
                                     </div>
