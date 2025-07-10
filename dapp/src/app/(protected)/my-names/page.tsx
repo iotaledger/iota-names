@@ -73,6 +73,7 @@ export default function MyNamesPage(): JSX.Element {
 
     const noCardToDisplay =
         !isLoadingCards && filteredNames.length === 0 && !isAuctionsErrored && !isNamesErrored;
+    const noAuctions = !auctionDetails || auctionDetails.length === 0;
 
     function handleSubnameListClick(name: string): void {
         router.push(MY_NAMES_ROUTE.path + `/${normalizeNameInput(name)}`);
@@ -99,30 +100,31 @@ export default function MyNamesPage(): JSX.Element {
                 </SegmentedButton>
             </div>
 
-            <div className="flex-1 flex flex-row gap-lg items-center flex-wrap w-full">
+            <>
                 {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
-                    isAuctionsErrored ? (
-                        <InfoBox
-                            style={InfoBoxStyle.Elevated}
-                            type={InfoBoxType.Error}
-                            supportingText="Failed to load auctions. Please try again later."
-                            icon={<Warning />}
-                        />
-                    ) : !auctionDetails || auctionDetails.length === 0 ? (
+                    isAuctionsErrored || noAuctions ? (
+                        <div className="flex">
+                            <InfoBox
+                                style={InfoBoxStyle.Elevated}
+                                type={isAuctionsErrored ? InfoBoxType.Error : InfoBoxType.Default}
+                                supportingText={
+                                    isAuctionsErrored
+                                        ? 'Failed to load auctions. Please try again later.'
+                                        : "You haven't participated in any auctions yet."
+                                }
+                                icon={isAuctionsErrored ? <Warning /> : <Info />}
+                            />
+                        </div>
+                    ) : null
+                ) : noCardToDisplay ? (
+                    <div className="flex">
                         <InfoBox
                             style={InfoBoxStyle.Elevated}
                             type={InfoBoxType.Default}
-                            supportingText="You haven't participated in any auctions yet."
+                            supportingText="You don't own any names yet."
                             icon={<Info />}
                         />
-                    ) : null
-                ) : noCardToDisplay ? (
-                    <InfoBox
-                        style={InfoBoxStyle.Elevated}
-                        type={InfoBoxType.Default}
-                        supportingText="You don't own any names yet."
-                        icon={<Info />}
-                    />
+                    </div>
                 ) : null}
 
                 {isLoadingCards && (
@@ -131,23 +133,26 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
                 )}
 
-                {!isLoadingCards &&
-                    filteredNames.map((nft) =>
-                        isAuctionCard(nft) ? (
-                            <ExtendedAuctionCard
-                                key={nft.details.name}
-                                name={nft.details.name}
-                                auctionDetails={nft.details}
-                            />
-                        ) : (
-                            <ExtendedNameCard
-                                key={nft.name}
-                                nft={nft}
-                                onSubnameListClick={() => handleSubnameListClick(nft.name)}
-                            />
-                        ),
-                    )}
-            </div>
+                {!isLoadingCards && filteredNames.length > 0 && (
+                    <div className="flex flex-row gap-lg items-center flex-wrap w-full">
+                        {filteredNames.map((nft) =>
+                            isAuctionCard(nft) ? (
+                                <ExtendedAuctionCard
+                                    key={nft.details.name}
+                                    name={nft.details.name}
+                                    auctionDetails={nft.details}
+                                />
+                            ) : (
+                                <ExtendedNameCard
+                                    key={nft.name}
+                                    nft={nft}
+                                    onSubnameListClick={() => handleSubnameListClick(nft.name)}
+                                />
+                            ),
+                        )}
+                    </div>
+                )}
+            </>
         </>
     );
 }
