@@ -41,10 +41,10 @@ function getValidationError(
     return null;
 }
 
-interface AvailabilityCheckProps {
+interface AvailabilityCheckDialogProps {
     autoFocusInput?: boolean;
 }
-export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
+export function AvailabilityCheckDialog({ autoFocusInput }: AvailabilityCheckDialogProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');

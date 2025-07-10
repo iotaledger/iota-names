@@ -89,7 +89,7 @@ export default function NftSubnamesPage({
 
             <div className="flex flex-row gap-xl">
                 <div className="flex flex-row gap-lg items-center flex-wrap w-full">
-                    {nftSubnames.map(({ name, subnames: childSubnames }) => {
+                    {nftSubnames.map(({ name }) => {
                         const subnameNft = subnames?.find(
                             (nft) => normalizeNameInput(nft.name) === normalizeNameInput(name),
                         );

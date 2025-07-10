@@ -16,7 +16,7 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
@@ -28,11 +28,13 @@ import { useRegistrationNfts } from '@/hooks';
 import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { NAMES_CRUMB } from './constants';
 import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
+    const { open } = useAvailabilityCheckDialog();
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
@@ -50,7 +52,6 @@ export default function MyNamesPage(): JSX.Element {
     const isLoadingCards = isLoadingAuctions || isLoadingRegistrations;
 
     const router = useRouter();
-    const pathname = usePathname();
     const account = useCurrentAccount();
 
     const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
@@ -82,8 +83,19 @@ export default function MyNamesPage(): JSX.Element {
     return (
         <>
             <Breadcrumbs
-                items={[{ ...NAMES_CRUMB, isActive: pathname === NAMES_CRUMB.path }]}
-                trailingElement={<Button type={ButtonType.Outlined} text="Name" icon={<Add />} />}
+                items={[{ ...NAMES_CRUMB, isActive: true }]}
+                trailingElement={
+                    <Button
+                        type={ButtonType.Outlined}
+                        text="Name"
+                        icon={<Add />}
+                        onClick={() =>
+                            open({
+                                autoFocusInput: true,
+                            })
+                        }
+                    />
+                }
             />
 
             <div className="flex">
@@ -95,6 +107,10 @@ export default function MyNamesPage(): JSX.Element {
                             label={value}
                             selected={selectedFilter === value}
                             onClick={() => setSelectedFilter(value)}
+                            disabled={
+                                (value === GroupedNamesFilter.InAuction && noAuctions) ||
+                                (value === GroupedNamesFilter.Owned && !names?.length)
+                            }
                         />
                     ))}
                 </SegmentedButton>
