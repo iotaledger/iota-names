@@ -197,6 +197,9 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
                                 }
                             />
                             <div className="flex flex-col gap-y-md w-full">
+                                <span className="text-label-lg text-names-neutral-92">
+                                    Permissions
+                                </span>
                                 <Checkbox
                                     isChecked={editIsAllowSubnames}
                                     isDisabled={disableEdit}
