@@ -116,7 +116,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
 
     return (
         <NameCard name={auction.name}>
-            <NameCardBody title={`@${normalizeNameInput(auction.name)}`}>
+            <NameCardBody name={`@${normalizeNameInput(auction.name)}`}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
                     <AuctionStatusBadge status={auctionStatus} />

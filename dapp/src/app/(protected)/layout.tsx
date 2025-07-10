@@ -9,7 +9,7 @@ import { useEffect, type PropsWithChildren } from 'react';
 
 import { CONNECT_ROUTE } from '@/lib/constants';
 
-function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
+export default function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
     const currentAccount = useCurrentAccount();
 
     useEffect(() => {
@@ -20,9 +20,9 @@ function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
 
     return (
         <main className="flex flex-col min-h-screen">
-            <div className="container w-full h-full py-12 flex">{children}</div>
+            <div className="container w-full h-full pt-20">
+                <div className="flex flex-col w-full gap-y-lg py-lg">{children}</div>
+            </div>
         </main>
     );
 }
-
-export default ProtectedLayout;

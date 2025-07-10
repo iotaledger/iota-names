@@ -40,6 +40,7 @@ export function LandingHero() {
             {isDialogOpen && (
                 <Dialog open onOpenChange={toggleDialog}>
                     <DialogContent
+                        isFixedPosition
                         showCloseOnOverlay
                         customWidth="w-[60vw] h-[clamp(400px,80vh,600px)]"
                     >

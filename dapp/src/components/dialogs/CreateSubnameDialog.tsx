@@ -169,7 +169,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
+            <DialogContent isFixedPosition containerId="overlay-portal-container">
                 <Header title="Add subname" titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">

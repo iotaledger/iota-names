@@ -101,7 +101,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
 
     return (
         <Dialog open onOpenChange={closeDialog}>
-            <DialogContent showCloseOnOverlay>
+            <DialogContent isFixedPosition showCloseOnOverlay>
                 <Header
                     title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
                     titleCentered
