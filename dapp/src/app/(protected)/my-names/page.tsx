@@ -85,11 +85,6 @@ export default function MyNamesPage(): JSX.Element {
         {
             onClick: () => {},
             children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Link />} label="Link to IPFS Website" />,
         },
         {
             onClick: () => {},
