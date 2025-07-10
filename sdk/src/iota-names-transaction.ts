@@ -96,7 +96,7 @@ export class IotaNamesTransaction {
     ): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
-            target: `${config.payments.packageId}::payments::handle_base_payment`,
+            target: `${config.paymentsPackageId}::payments::handle_base_payment`,
             arguments: [this.transaction.object(config.iotaNamesObjectId), paymentIntent, payment],
             typeArguments: [paymentType],
         });
