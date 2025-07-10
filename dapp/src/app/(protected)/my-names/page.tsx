@@ -4,13 +4,14 @@
 'use client';
 
 import {
-    Add,
     Assets,
-    Calendar,
-    Delete,
-    Info,
-    Link,
-    Pined,
+    // Add,
+    // Assets,
+    // Calendar,
+    // Delete,
+    // Info,
+    // Link,
+    // Pined,
     Settings,
     Warning,
 } from '@iota/apps-ui-icons';
@@ -59,11 +60,11 @@ export default function MyNamesPage(): JSX.Element {
             children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
             hideBottomBorder: true,
         },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
-            hideBottomBorder: true,
-        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
+        //     hideBottomBorder: true,
+        // },
         {
             onClick: () => setDeleteNameDialog(nft),
             children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
@@ -71,43 +72,33 @@ export default function MyNamesPage(): JSX.Element {
             hideBottomBorder: true,
         },
         {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
-            hideBottomBorder: true,
-        },
-        {
             onClick: () => setPersonalizeAvatarName(nft.name),
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
             hideBottomBorder: true,
         },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
-            isDisabled: true,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Link />} label="Link to IPFS Website" />,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => {},
-            children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
-            hideBottomBorder: true,
-        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
+        //     isDisabled: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+        //     hideBottomBorder: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
+        //     hideBottomBorder: true,
+        // },
     ];
 
     return (
