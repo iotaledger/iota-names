@@ -20,6 +20,7 @@ import { useMemo, useState } from 'react';
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { GeneralInfoDialog } from '@/components/dialogs/GeneralDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -31,6 +32,7 @@ import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatN
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+    const [generalInfoDialog, setGeneralInfoDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [subnameAddDialog, setSubnameAddDialog] = useState<RegistrationNft | null>(null);
 
@@ -97,7 +99,7 @@ export default function MyNamesPage(): JSX.Element {
             hideBottomBorder: true,
         },
         {
-            onClick: () => {},
+            onClick: () => setGeneralInfoDialog(nft.name),
             children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
             hideBottomBorder: true,
         },
@@ -112,6 +114,14 @@ export default function MyNamesPage(): JSX.Element {
                     setOpen={() => setUpdateNameDialog(null)}
                 />
             ) : null}
+            {generalInfoDialog ? (
+                <GeneralInfoDialog
+                    name={generalInfoDialog}
+                    open
+                    setOpen={() => setGeneralInfoDialog(null)}
+                />
+            ) : null}
+
             {deleteNameDialog ? (
                 <DeleteNameDialog
                     nft={deleteNameDialog}
