@@ -8,8 +8,5 @@
     "baseBranch": "develop",
     "updateInternalDependencies": "minor",
     "privatePackages": false,
-    "ignore": ["dapp", "scripts"],
-    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
-        "onlyUpdatePeerDependentsWhenOutOfRange": true
-    }
+    "ignore": ["dapp", "scripts"]
 }
