@@ -17,7 +17,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
@@ -56,7 +56,7 @@ export default function MyNamesPage(): JSX.Element {
 
     const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
 
-    const filteredNames: (RegistrationNft | AuctionCard)[] = useMemo(() => {
+    const filteredNames: (RegistrationNft | AuctionCard)[] = (() => {
         const inAuction = groupedAuctions ?? [];
         const owned = names ?? [];
 
@@ -70,7 +70,7 @@ export default function MyNamesPage(): JSX.Element {
             default:
                 return owned;
         }
-    }, [auctionDetails, names, selectedFilter]);
+    })();
 
     const noCardToDisplay =
         !isLoadingCards && filteredNames.length === 0 && !isAuctionsErrored && !isNamesErrored;
