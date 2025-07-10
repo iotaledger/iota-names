@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Info } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -9,6 +10,9 @@ import {
     DialogContent,
     DialogPosition,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
     VisualAssetCard,
 } from '@iota/apps-ui-kit';
@@ -56,57 +60,62 @@ export function VisualAssetsDialog({ setOpen, onAssetClick, name }: AvatarSelect
                 />
 
                 <DialogBody>
-                    {isLoading ? (
-                        <div className="flex items-center justify-center w-full h-full min-h-[200px]">
-                            <LoadingIndicator text="Loading Assets..." />
-                        </div>
-                    ) : (
+                    <div className="flex flex-col gap-md items-center">
                         <div className="flex flex-col gap-md items-center">
-                            <div className="flex flex-col gap-md items-center">
-                                <BrandedAssets className="w-12 h-12" />
-                                <div className="flex flex-col gap-xxs text-center">
-                                    <span className="text-title-md text-names-neutral-92">
-                                        Personalize @{cleanName}
-                                    </span>
-                                    <span className="text-body-md text-names-neutral-70">
-                                        Use an NFT to personalize your avatar
-                                    </span>
-                                </div>
+                            <BrandedAssets className="w-12 h-12" />
+                            <div className="flex flex-col gap-xxs text-center">
+                                <span className="text-title-md text-names-neutral-92">
+                                    Personalize @{cleanName}
+                                </span>
+                                <span className="text-body-md text-names-neutral-70">
+                                    Use an NFT to personalize your avatar
+                                </span>
                             </div>
-
-                            {!filteredVisualAssets || filteredVisualAssets?.length === 0 ? (
-                                <p>No NFTs found</p>
-                            ) : (
-                                <div className="max-h-[400px] w-full grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-md">
-                                    {filteredVisualAssets.map((asset) => {
-                                        const isSelected = selectedAssetId === asset.objectId;
-
-                                        return (
-                                            <div
-                                                key={asset.objectId}
-                                                className={`rounded-xl p-[1px] transition-all ${
-                                                    isSelected
-                                                        ? 'bg-names-gradient-primary'
-                                                        : 'bg-transparent'
-                                                }`}
-                                            >
-                                                <div className="bg-names-neutral-6 rounded-xl">
-                                                    <VisualAssetCard
-                                                        src={asset.display?.data?.image_url || ''}
-                                                        altText={asset.display?.data?.name || 'NFT'}
-                                                        isHoverable
-                                                        onClick={() =>
-                                                            setSelectedAssetId(asset.objectId)
-                                                        }
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
                         </div>
-                    )}
+                        {isLoading ? (
+                            <div className="flex items-center justify-center w-full h-full py-lg">
+                                <LoadingIndicator text="Loading Assets..." />
+                            </div>
+                        ) : !filteredVisualAssets || filteredVisualAssets?.length !== 0 ? (
+                            <div className="flex items-center justify-center w-full py-lg h-[400px]">
+                                <InfoBox
+                                    title="No Eligible NFTs"
+                                    supportingText="There are no NFTs in your wallet that can be used as an avatar"
+                                    icon={<Info />}
+                                    type={InfoBoxType.Warning}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            </div>
+                        ) : (
+                            <div className="max-h-[400px] w-full grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-md">
+                                {filteredVisualAssets.map((asset) => {
+                                    const isSelected = selectedAssetId === asset.objectId;
+
+                                    return (
+                                        <div
+                                            key={asset.objectId}
+                                            className={`rounded-xl p-[1px] transition-all ${
+                                                isSelected
+                                                    ? 'bg-names-gradient-primary'
+                                                    : 'bg-transparent'
+                                            }`}
+                                        >
+                                            <div className="bg-names-neutral-6 rounded-xl">
+                                                <VisualAssetCard
+                                                    src={asset.display?.data?.image_url || ''}
+                                                    altText={asset.display?.data?.name || 'NFT'}
+                                                    isHoverable
+                                                    onClick={() =>
+                                                        setSelectedAssetId(asset.objectId)
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
                 </DialogBody>
 
                 <div className="flex w-full flex-row justify-center gap-2 px-md--rs pb-md--rs pt-md--rs">
