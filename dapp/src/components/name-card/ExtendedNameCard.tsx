@@ -34,7 +34,7 @@ export function ExtendedNameCard({
     const [isDeleteNameDialogOpen, setIsDeleteNameDialogOpen] = useState<boolean>(false);
     const [isAddSubnameDialogOpen, setIsAddSubnameDialogOpen] = useState<boolean>(false);
 
-    const nameTree = useNameTree(nft.name, ownedSubnames ?? []);
+    const nameTree = useNameTree(nft.name);
 
     const name = normalizeNameInput(nft.name);
 
