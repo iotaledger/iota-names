@@ -93,7 +93,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent isFixedPosition containerId="overlay-portal-container">
+            <DialogContent containerId="overlay-portal-container" isFixedPosition>
                 <Header title={`Delete ${nft.name}`} onClose={closeDialog} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col gap-y-md">
