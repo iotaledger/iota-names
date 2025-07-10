@@ -94,17 +94,6 @@ export default function NftSubnamesPage({
                             (nft) => normalizeNameInput(nft.name) === normalizeNameInput(name),
                         );
 
-                        const childSubnameRegistrations = childSubnames
-                            .map((sub) => {
-                                const subnameNft = subnames?.find(
-                                    (nft) =>
-                                        normalizeNameInput(nft.name) ===
-                                        normalizeNameInput(sub.name),
-                                );
-                                return subnameNft;
-                            })
-                            .filter((nft) => nft !== undefined);
-
                         if (!subnameNft) {
                             return null;
                         }
@@ -113,7 +102,6 @@ export default function NftSubnamesPage({
                             <ExtendedNameCard
                                 key={name}
                                 nft={subnameNft}
-                                ownedSubnames={childSubnameRegistrations}
                                 badge={
                                     displayedSubname === name ? (
                                         <Badge type={BadgeType.PrimarySolid} label="Displayed" />

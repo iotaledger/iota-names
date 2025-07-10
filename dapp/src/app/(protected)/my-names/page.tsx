@@ -24,7 +24,6 @@ import { NAMES_CRUMB } from './constants';
 
 export default function MyNamesPage(): JSX.Element {
     const { data: names } = useRegistrationNfts('name');
-    const { data: subnames } = useRegistrationNfts('subname');
 
     const router = useRouter();
     const pathname = usePathname();
@@ -53,7 +52,6 @@ export default function MyNamesPage(): JSX.Element {
                     <ExtendedNameCard
                         key={nft.name}
                         nft={nft}
-                        ownedSubnames={subnames}
                         onSubnameListClick={() => handleSubnameListClick(nft.name)}
                     />
                 ))}

@@ -19,17 +19,11 @@ import { SubnameCountIndicator } from './NameCardIndicators';
 
 interface ExtendedNameCardProps {
     nft: RegistrationNft;
-    ownedSubnames: RegistrationNft[] | undefined;
     onSubnameListClick: () => void;
     badge?: React.ReactNode;
 }
 
-export function ExtendedNameCard({
-    nft,
-    ownedSubnames,
-    onSubnameListClick,
-    badge,
-}: ExtendedNameCardProps) {
+export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNameCardProps) {
     const [isUpdateNameDialogOpen, setIsUpdateNameDialogOpen] = useState<boolean>(false);
     const [isDeleteNameDialogOpen, setIsDeleteNameDialogOpen] = useState<boolean>(false);
     const [isAddSubnameDialogOpen, setIsAddSubnameDialogOpen] = useState<boolean>(false);
