@@ -46,7 +46,6 @@ export interface NameRecord {
     expirationTimestampMs: number;
     data: Record<string, string>;
     avatar?: string;
-    contentHash?: string;
 }
 
 // Types

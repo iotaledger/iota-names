@@ -8,14 +8,12 @@ use iota::event;
 use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::name;
+use iota_names::core_config::CoreConfig;
 use iota_names::iota_names::{Self, IotaNames};
 use iota_names::iota_names_registration::IotaNamesRegistration;
 use iota_names::registry::Registry;
 use iota_names::subname_registration::SubnameRegistration;
 use std::string::String;
-
-const AVATAR: vector<u8> = b"avatar";
-const CONTENT_HASH: vector<u8> = b"content_hash";
 
 use fun registry_mut as IotaNames.registry_mut;
 
@@ -87,13 +85,14 @@ public fun set_user_data(
     value: String,
     clock: &Clock,
 ) {
+    let config = iota_names.get_config<CoreConfig>();
+    assert!(config.is_valid_user_data_key(&key), EUnsupportedKey);
+    
     let registry = iota_names.registry_mut();
     let mut data = *registry.get_data(nft.name());
     let name = nft.name();
 
     registry.assert_nft_is_authorized(nft, clock);
-    let key_bytes = *key.as_bytes();
-    assert!(key_bytes == AVATAR || key_bytes == CONTENT_HASH, EUnsupportedKey);
 
     let exists = data.contains(&key);
 
