@@ -255,7 +255,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     return (
         <>
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent containerId="overlay-portal-container">
+                <DialogContent containerId="overlay-portal-container" isFixedPosition>
                     <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
                     <DialogBody>
                         {isExpired && !isLoading ? (
