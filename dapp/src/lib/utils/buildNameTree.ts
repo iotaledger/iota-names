@@ -6,11 +6,11 @@ export type NameTree = {
     subnames: NameTree[];
 };
 
-export function buildNameTree(name: string, ownedSubnames: Set<string>): NameTree {
+export function buildNameTree(name: string, ownedSubnames: string[]): NameTree {
     const normalizedName = name.toLowerCase();
     const parts = normalizedName.split('.');
 
-    const children = Array.from(ownedSubnames)
+    const children = ownedSubnames
         .filter((sub) => {
             if (sub === normalizedName) return false;
             const subParts = sub.split('.');

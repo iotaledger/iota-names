@@ -49,7 +49,7 @@ export default function NftSubnamesPage({
     const nftSubnames = nameTree?.subnames;
 
     const subnameListPanel = useMemo(() => {
-        if (!nameTree || !displayedSubname) return undefined;
+        if (!nameTree || !displayedSubname) return null;
         return findInNameTree(nameTree, displayedSubname);
     }, [nameTree, displayedSubname]);
 
