@@ -6,7 +6,6 @@
 import {
     Button,
     ButtonType,
-    Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
@@ -15,8 +14,6 @@ import {
     Header,
     LoadingIndicator,
     Panel,
-    Select,
-    SelectSize,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -122,8 +119,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         year: 'numeric',
     }).format(oneYearFromNow);
 
-    const REGISTRATION_YEAR_OPTIONS = [1, 2, 3];
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -138,25 +133,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
-                            <Select
-                                value="1"
-                                options={REGISTRATION_YEAR_OPTIONS.map((year) => ({
-                                    label: `${year} Year${year > 1 ? 's' : ''}`,
-                                    id: year.toString(),
-                                }))}
-                                onValueChange={(e) => {}}
-                                size={SelectSize.Small}
-                            />
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            <Panel bgColor="bg-names-neutral-10">
-                                <div className="flex items-center gap-x-xs w-full p-md--rs">
-                                    <Checkbox isChecked={false} onCheckedChange={() => {}} />
-                                    <span className="text-body-md text-neutral-60">
-                                        Set name as Display Name
-                                    </span>
-                                </div>
-                            </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats
