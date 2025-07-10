@@ -3,7 +3,17 @@
 
 'use client';
 
-import { Add, Assets, Calendar, Delete, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    Add,
+    Assets,
+    Calendar,
+    Delete,
+    Info,
+    Link,
+    Pined,
+    Settings,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
@@ -49,7 +59,11 @@ export default function MyNamesPage(): JSX.Element {
             children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
             hideBottomBorder: true,
         },
-
+        {
+            onClick: () => {},
+            children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
+            hideBottomBorder: true,
+        },
         {
             onClick: () => setDeleteNameDialog(nft),
             children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
@@ -74,6 +88,11 @@ export default function MyNamesPage(): JSX.Element {
         {
             onClick: () => {},
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        },
+        {
+            onClick: () => {},
+            children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+            hideBottomBorder: true,
         },
         {
             onClick: () => {},
