@@ -109,7 +109,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
+            <DialogContent containerId="overlay-portal-container" isFixedPosition>
                 <Header title="Buy name" onClose={closeDialog} titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
