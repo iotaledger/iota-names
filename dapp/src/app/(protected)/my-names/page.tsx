@@ -12,6 +12,7 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LoadingIndicator,
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -29,19 +30,24 @@ import { RegistrationNft } from '@/lib/interfaces';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { NAMES_CRUMB } from './constants';
-
-export enum GroupedNamesFilter {
-    All = 'All',
-    InAuction = 'In Auction',
-    Owned = 'Owned',
-}
+import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
-    const { data: names, error: isNamesErrored } = useRegistrationNfts('name');
-    const { data: auctionDetails, error: isAuctionsErrored } = useGetUserAuctions();
+    const {
+        data: names,
+        error: isNamesErrored,
+        isLoading: isLoadingRegistrations,
+    } = useRegistrationNfts('name');
+    const {
+        data: auctionDetails,
+        error: isAuctionsErrored,
+        isLoading: isLoadingAuctions,
+    } = useGetUserAuctions();
+
+    const isLoadingCards = isLoadingAuctions || isLoadingRegistrations;
 
     const router = useRouter();
     const pathname = usePathname();
@@ -65,7 +71,8 @@ export default function MyNamesPage(): JSX.Element {
         }
     }, [auctionDetails, names, selectedFilter]);
 
-    const noCardToDisplay = filteredNames.length === 0 && !isAuctionsErrored && !isNamesErrored;
+    const noCardToDisplay =
+        !isLoadingCards && filteredNames.length === 0 && !isAuctionsErrored && !isNamesErrored;
 
     function handleSubnameListClick(name: string): void {
         router.push(MY_NAMES_ROUTE.path + `/${normalizeNameInput(name)}`);
@@ -92,8 +99,8 @@ export default function MyNamesPage(): JSX.Element {
                 </SegmentedButton>
             </div>
 
-            <div className="flex flex-row gap-lg items-center flex-wrap w-full">
-                {selectedFilter === GroupedNamesFilter.InAuction ? (
+            <div className="flex-1 flex flex-row gap-lg items-center flex-wrap w-full">
+                {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
                     isAuctionsErrored ? (
                         <InfoBox
                             style={InfoBoxStyle.Elevated}
@@ -118,21 +125,28 @@ export default function MyNamesPage(): JSX.Element {
                     />
                 ) : null}
 
-                {filteredNames.map((nft) =>
-                    isAuctionCard(nft) ? (
-                        <ExtendedAuctionCard
-                            key={nft.details.name}
-                            name={nft.details.name}
-                            auctionDetails={nft.details}
-                        />
-                    ) : (
-                        <ExtendedNameCard
-                            key={nft.name}
-                            nft={nft}
-                            onSubnameListClick={() => handleSubnameListClick(nft.name)}
-                        />
-                    ),
+                {isLoadingCards && (
+                    <div className="w-full flex-1 flex flex-col items-center justify-center">
+                        <LoadingIndicator size="w-10 h-10" />
+                    </div>
                 )}
+
+                {!isLoadingCards &&
+                    filteredNames.map((nft) =>
+                        isAuctionCard(nft) ? (
+                            <ExtendedAuctionCard
+                                key={nft.details.name}
+                                name={nft.details.name}
+                                auctionDetails={nft.details}
+                            />
+                        ) : (
+                            <ExtendedNameCard
+                                key={nft.name}
+                                nft={nft}
+                                onSubnameListClick={() => handleSubnameListClick(nft.name)}
+                            />
+                        ),
+                    )}
             </div>
         </>
     );

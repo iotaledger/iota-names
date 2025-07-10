@@ -20,8 +20,8 @@ export default function ProtectedLayout({ children }: PropsWithChildren): JSX.El
 
     return (
         <main className="flex flex-col min-h-screen">
-            <div className="container w-full h-full pt-20">
-                <div className="flex flex-col w-full gap-y-lg py-lg">{children}</div>
+            <div className="container w-full h-full pt-20 flex flex-col flex-1">
+                <div className="flex flex-col w-full gap-y-lg py-lg flex-1">{children}</div>
             </div>
         </main>
     );
