@@ -9,7 +9,7 @@ use iota::clock::Clock;
 use iota::tx_context::sender;
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::registry::Registry;
 use iota_names::subname_registration::SubnameRegistration;
 use std::string::String;
@@ -38,7 +38,7 @@ public struct UserDataUnsetEvent has copy, drop {
 /// Set the target address of a name.
 public fun set_target_address(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     new_target: Option<address>,
     clock: &Clock,
 ) {
@@ -82,7 +82,7 @@ public fun unset_object_reverse_lookup(iota_names: &mut IotaNames, obj: &mut UID
 /// User-facing function - add a new key-value pair to the name record's data.
 public fun set_user_data(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     key: String,
     value: String,
     clock: &Clock,
@@ -114,7 +114,7 @@ public fun set_user_data(
 /// User-facing function - remove a key from the name record's data.
 public fun unset_user_data(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     key: String,
     clock: &Clock,
 ) {
@@ -134,7 +134,7 @@ public fun unset_user_data(
     registry.set_data(name, data);
 }
 
-public fun burn_expired(iota_names: &mut IotaNames, nft: IotaNamesRegistration, clock: &Clock) {
+public fun burn_expired(iota_names: &mut IotaNames, nft: NameRegistration, clock: &Clock) {
     iota_names.registry_mut().burn_registration_object(nft, clock);
 }
 
