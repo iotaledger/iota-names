@@ -54,7 +54,6 @@ jobs:
         if: steps.check-changes.outputs.has-changes == 'true'
         run: |
           pnpm changeset version --snapshot ${{ github.event.inputs.tag }}
-          pnpm --filter @iota/iota-sdk codegen:version
 
       - name: Publish snapshot packages
         if: steps.check-changes.outputs.has-changes == 'true'
@@ -75,8 +74,7 @@ jobs:
           echo "### Installation" >> $GITHUB_STEP_SUMMARY
           echo "Install snapshot packages using:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "npm install @iota/iota-sdk@${{ github.event.inputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "npm install @iota/dapp-kit@${{ github.event.inputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "npm install @iota/iota-names-sdk@${{ github.event.inputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: No changes detected
