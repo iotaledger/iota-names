@@ -38,4 +38,27 @@ export const writePackageInfo = (network: string, packageInfo: PackageInfo) => {
         JSON.stringify(packageInfo, null, 2),
         'utf8',
     );
+
+    // Export the constants based on the SDK's format so SDK can be easily tested.
+    writeFileSync(
+        path.resolve(__dirname, 'sdk.json'),
+        JSON.stringify(
+            {
+                auctionPackageId: packageInfo.auctionPackageId,
+                auctionHouseObjectId: packageInfo.auctionHouseObjectId,
+                packageId: packageInfo.packageId,
+                iotaNamesObjectId: packageInfo.iotaNamesObjectId,
+                subnamesPackageId: packageInfo.subnamesPackageId,
+                tempSubnameProxyPackageId: packageInfo.tempSubnameProxyPackageId,
+                payments: {
+                    packageId: packageInfo.paymentsPackageId,
+                },
+                coins: packageInfo.coins,
+                registryTableId: packageInfo.registryTableId,
+                reverseRegistryTableId: packageInfo.reverseRegistryTableId,
+            },
+            null,
+            2,
+        ),
+    );
 };
