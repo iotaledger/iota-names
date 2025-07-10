@@ -20,7 +20,7 @@ import { useMemo, useState } from 'react';
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
-import { GeneralInfoDialog } from '@/components/dialogs/GeneralDialog';
+import { GeneralInfoDialog } from '@/components/dialogs/GeneralInfoDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -161,7 +161,6 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
-
             {subnames?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
                     {subnames.map((subname) => {
