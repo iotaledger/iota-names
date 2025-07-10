@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { getNameLabel } from '@/lib/utils/format/formatNames';
 
 import { DeleteNameDialog, UpdateNameDialog } from '../dialogs';
 import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
@@ -30,7 +30,7 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
 
     const nameTree = useNameTree(nft.name);
 
-    const name = normalizeNameInput(nft.name);
+    const label = getNameLabel(nft.name);
 
     return (
         <>
@@ -60,7 +60,7 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
                     },
                 ]}
             >
-                <NameCardBody name={name}>
+                <NameCardBody name={label}>
                     <SubnameCountIndicator
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}

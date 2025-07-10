@@ -24,7 +24,7 @@ import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { findInNameTree } from '@/lib/utils/buildNameTree';
-import { addNameSuffix, normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { addNameSuffix, getNameLabel, normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { NAMES_CRUMB } from '../constants';
 
@@ -64,9 +64,9 @@ export default function NftSubnamesPage({
           }
         : undefined;
 
-    const displayedBreadcrumb: BreadcrumbItem | undefined = displayedSubname
+    const subnamesBreadcrumb: BreadcrumbItem | undefined = displayedSubname
         ? {
-              label: `@${normalizeNameInput(displayedSubname)}`,
+              label: `${getNameLabel(displayedSubname)}`,
               path: pathname,
               isActive: true,
           }
@@ -85,7 +85,7 @@ export default function NftSubnamesPage({
 
     return nftSubnames && nftSubnames.length > 0 ? (
         <>
-            <Breadcrumbs items={[NAMES_CRUMB, nftBreadcrumb, displayedBreadcrumb]} />
+            <Breadcrumbs items={[NAMES_CRUMB, nftBreadcrumb, subnamesBreadcrumb]} />
 
             <div className="flex flex-row gap-xl">
                 <div className="flex flex-row gap-lg items-center flex-wrap w-full">
@@ -115,11 +115,11 @@ export default function NftSubnamesPage({
                     })}
                 </div>
 
-                {subnameListPanel ? (
+                {subnameListPanel && displayedSubname ? (
                     <div className="max-w-[360px] w-full">
                         <Panel>
                             <div className="w-full flex flex-row items-center justify-between pr-md--rs">
-                                <Title title={`Subnames for ${nftName}`} />
+                                <Title title={`Subnames for ${getNameLabel(displayedSubname)}`} />
                                 <ButtonUnstyled
                                     className="text-names-neutral-70 hover:text-names-neutral-92"
                                     onClick={() => {
