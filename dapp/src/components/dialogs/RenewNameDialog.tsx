@@ -173,7 +173,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
+            <DialogContent containerId="overlay-portal-container" isFixedPosition>
                 <Header title="Renew" titleCentered />
                 <DialogBody>
                     <div className="flex flex-col items-center gap-y-md">
