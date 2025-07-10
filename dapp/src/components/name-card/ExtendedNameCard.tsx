@@ -35,7 +35,6 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
     return (
         <>
             <NameCard
-                key={nft.name}
                 name={nft.name}
                 badge={badge}
                 menuOptions={[
