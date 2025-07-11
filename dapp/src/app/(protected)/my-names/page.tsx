@@ -124,7 +124,8 @@ export default function MyNamesPage(): JSX.Element {
                             onClick={() => handleChipSelect(value)}
                             disabled={
                                 (value === GroupedNamesFilter.InAuction && noAuctions) ||
-                                (value === GroupedNamesFilter.Owned && !names?.length)
+                                (value === GroupedNamesFilter.Owned && !names?.length) ||
+                                (value === GroupedNamesFilter.Subnames && !subnames?.length)
                             }
                         />
                     ))}
