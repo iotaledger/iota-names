@@ -38,6 +38,6 @@ flavor = "iota"
 
 [env.devnet]
 chain-id = "e678123a"
-original-published-id = "0x7add42bba66f170587fb5ead0c411f3356c54f9e0f9d11028a230702eab6ea60"
-latest-published-id = "0x7add42bba66f170587fb5ead0c411f3356c54f9e0f9d11028a230702eab6ea60"
+original-published-id = "0xf2d61106ef44216f03709276c4e79c78485080c6d8fbad8464b7a570b9f36470"
+latest-published-id = "0xf2d61106ef44216f03709276c4e79c78485080c6d8fbad8464b7a570b9f36470"
 published-version = "1"

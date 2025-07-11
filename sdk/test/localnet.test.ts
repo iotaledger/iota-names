@@ -110,7 +110,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
 
     iotaNamesTx.setUserData({
         nft,
-        key: ALLOWED_METADATA.contentHash,
+        key: ALLOWED_METADATA.ipfs,
         value: '0x1',
     });
 
@@ -341,7 +341,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             iotaNamesTx.setUserData({
                 nft,
-                key: ALLOWED_METADATA.contentHash,
+                key: ALLOWED_METADATA.ipfs,
                 value: '0xfedcba9876543210',
             });
 
