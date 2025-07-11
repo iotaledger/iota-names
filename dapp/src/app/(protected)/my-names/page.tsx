@@ -3,13 +3,24 @@
 
 'use client';
 
-import { Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    // Add,
+    // Assets,
+    // Calendar,
+    // Delete,
+    // Info,
+    // Link,
+    // Pined,
+    Settings,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { SubnameCountIndicator } from '@/components/name-card/NameCardIndicators';
@@ -43,23 +54,48 @@ export default function MyNamesPage(): JSX.Element {
     const renderMenuOptions = (nft: RegistrationNft): MenuListItem[] => [
         {
             onClick: () => setUpdateNameDialog(nft.name),
-            children: (
-                <div className="flex flex-row gap-xxs items-center justify-center">
-                    <Settings /> Manage
-                </div>
-            ),
+            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
             hideBottomBorder: true,
         },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
+        //     hideBottomBorder: true,
+        // },
         {
             onClick: () => setDeleteNameDialog(nft),
-            children: (
-                <div className="flex flex-row gap-xxs items-center justify-center">
-                    <Warning /> Delete
-                </div>
-            ),
+            children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
             isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
             hideBottomBorder: true,
         },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+        //     hideBottomBorder: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
+        //     isDisabled: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+        //     hideBottomBorder: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
+        //     hideBottomBorder: true,
+        // },
     ];
 
     return (
