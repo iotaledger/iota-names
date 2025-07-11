@@ -60,26 +60,5 @@ export const publishPackages = async (network: string, isCiJob = false, configPa
         JSON.stringify(results, null, 2),
     );
     console.log('******* Packages published successfully *******');
-    const data = results as PackageInfo;
-
-    // Export the constants based on the SDK's format so SDK can be easily tested.
-    writeFileSync(
-        path.resolve(path.resolve(__dirname, '../'), 'constants.sdk.json'),
-        JSON.stringify(
-            {
-                iotaNamesPackageId: {
-                    latest: data.IotaNames.packageId,
-                    v1: data.IotaNames.packageId,
-                },
-                iotaNamesObjectId: data.IotaNames.objectId,
-                subnamesPackageId: data.Subnames.packageId,
-                tempSubnamesProxyPackageId: data.TempSubnameProxy.packageId,
-                paymentsPackageId: data.Payments.packageId,
-            },
-            null,
-            2,
-        ),
-    );
-
-    return data;
+    return results as PackageInfo;
 };

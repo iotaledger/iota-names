@@ -11,7 +11,7 @@ use iota::tx_context::sender;
 use iota_names::core_config::CoreConfig;
 use iota_names::name;
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::registry::Registry;
 use std::string::String;
 
@@ -29,7 +29,7 @@ public fun register_name(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     let name = name::new(name);
     iota_names.get_config<CoreConfig>().assert_is_valid_for_sale(&name);
     let registry = iota_names::auth_registry_mut<AdminAuth, Registry>(AdminAuth {}, iota_names);
