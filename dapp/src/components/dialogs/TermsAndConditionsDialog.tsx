@@ -3,7 +3,6 @@
 
 import {
     Button,
-    ButtonSize,
     ButtonType,
     Checkbox,
     Dialog,
