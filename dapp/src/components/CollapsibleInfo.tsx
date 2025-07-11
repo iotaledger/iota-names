@@ -2,22 +2,22 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Accordion, AccordionContent, AccordionHeader, Title } from '@iota/apps-ui-kit';
+import { useState } from 'react';
 
 type AccordionInfoProps = {
-    id: string;
     title: string;
-    isExpanded: boolean;
-    onToggle: (id: string) => void;
     children: React.ReactNode;
 };
 
-export function AccordionInfo({ id, title, isExpanded, onToggle, children }: AccordionInfoProps) {
+export function CollapsibleInfo({ title, children }: AccordionInfoProps) {
+    const [isOpen, setIsOpen] = useState(true);
+
     return (
         <Accordion hideBorder={false}>
-            <AccordionHeader isExpanded={isExpanded} onToggle={() => onToggle(id)}>
+            <AccordionHeader isExpanded={isOpen} onToggle={() => setIsOpen((prev) => !prev)}>
                 <Title title={title} />
             </AccordionHeader>
-            <AccordionContent isExpanded={isExpanded}>{children}</AccordionContent>
+            <AccordionContent isExpanded={isOpen}>{children}</AccordionContent>
         </Accordion>
     );
 }

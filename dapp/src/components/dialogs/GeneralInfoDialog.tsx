@@ -14,13 +14,12 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import Link from 'next/link';
-import { useState } from 'react';
 
 import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
-import { AccordionInfo } from '../AccordionInfo';
+import { CollapsibleInfo } from '../CollapsibleInfo';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 type UpdateNameDialogProps = {
@@ -30,14 +29,6 @@ type UpdateNameDialogProps = {
 };
 
 export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps) {
-    const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({
-        info: true,
-        object: true,
-    });
-
-    const toggleAccordion = (id: string) =>
-        setExpandedAccordions((prev) => ({ ...prev, [id]: !prev[id] }));
-
     const account = useCurrentAccount();
     const address = account?.address || '';
 
@@ -80,11 +71,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent
-                containerId="overlay-portal-container"
-                isFixedPosition
-                position={DialogPosition.Right}
-            >
+            <DialogContent isFixedPosition position={DialogPosition.Right}>
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
@@ -95,12 +82,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                     </div>
 
                     <div className="flex flex-col gap-md mt-lg">
-                        <AccordionInfo
-                            id="info"
-                            title="Info"
-                            isExpanded={!!expandedAccordions.info}
-                            onToggle={toggleAccordion}
-                        >
+                        <CollapsibleInfo title="Info">
                             <div className="flex flex-col py-xs px-md--rs">
                                 {InfoLinks.map(({ key, value, href }) => (
                                     <KeyValueInfo
@@ -121,14 +103,8 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                     />
                                 ))}
                             </div>
-                        </AccordionInfo>
-
-                        <AccordionInfo
-                            id="object"
-                            title="Name Object Info"
-                            isExpanded={!!expandedAccordions.object}
-                            onToggle={toggleAccordion}
-                        >
+                        </CollapsibleInfo>
+                        <CollapsibleInfo title="Name Object Info">
                             <div className="py-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
@@ -136,7 +112,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                     fullwidth
                                 />
                             </div>
-                        </AccordionInfo>
+                        </CollapsibleInfo>
                     </div>
                 </DialogBody>
             </DialogContent>
