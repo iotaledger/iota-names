@@ -8,7 +8,7 @@ module iota_names::subname_registration_tests;
 
 use iota::clock;
 use iota_names::name;
-use iota_names::iota_names_registration;
+use iota_names::name_registration;
 use iota_names::subname_registration as subname;
 use std::string::utf8;
 
@@ -19,7 +19,7 @@ fun test_wrap_and_destroy() {
 
     let name = name::new(utf8(b"sub.example.iota"));
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = name_registration::new_for_testing(
         name,
         1,
         &clock,
@@ -46,7 +46,7 @@ fun try_wrap_non_subname() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = name_registration::new_for_testing(
         name::new(utf8(b"example.iota")),
         1,
         &clock,
@@ -64,7 +64,7 @@ fun try_wrap_expired_subname() {
     let mut ctx = tx_context::dummy();
     let mut clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = name_registration::new_for_testing(
         name::new(utf8(b"sub.example.iota")),
         1,
         &clock,
@@ -83,7 +83,7 @@ fun try_unwrap_non_expired_subname() {
     let mut ctx = tx_context::dummy();
     let clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = name_registration::new_for_testing(
         name::new(utf8(b"sub.example.iota")),
         1,
         &clock,

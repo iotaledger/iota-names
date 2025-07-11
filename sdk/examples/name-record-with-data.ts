@@ -7,6 +7,7 @@ import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 
+import { ALLOWED_METADATA } from '../src/constants.js';
 import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
@@ -119,7 +120,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
     contentIotaNamesTx.setUserData({
         nft: nftId,
-        key: 'content_hash',
+        key: ALLOWED_METADATA.ipfs,
         value: '0x1234567890abcdef1234567890abcdef12345678',
     });
 
@@ -145,7 +146,6 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     console.log('- Target Address:', nameRecord?.targetAddress);
     console.log('- Data fields:', nameRecord?.data);
     console.log('- Avatar:', nameRecord?.avatar);
-    console.log('- Content Hash:', nameRecord?.contentHash);
 
     console.log('\n=== SUCCESS ===');
     console.log(`Name '${name}' registered and fields set successfully!`);

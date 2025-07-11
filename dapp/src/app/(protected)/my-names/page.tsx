@@ -16,25 +16,26 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
-import { Breadcrumbs } from '@/components/breadcrumb/Breadcrumb';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
+
+import '@iota/apps-ui-icons';
+
 import { useRegistrationNfts } from '@/hooks';
-import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { NAMES_CRUMB } from './constants';
+import { SubnamesPanel } from './components/SubnamesPanel';
 import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
+    const [selectedName, setSelectedName] = useState<RegistrationNft | null>(null);
+
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
@@ -44,59 +45,73 @@ export default function MyNamesPage(): JSX.Element {
         isLoading: isLoadingRegistrations,
     } = useRegistrationNfts('name');
     const {
+        data: subnames,
+        error: isSubnamesErrored,
+        isLoading: isLoadingSubnames,
+    } = useRegistrationNfts('subname');
+    const {
         data: auctionDetails,
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
     } = useGetUserAuctions();
 
-    const isLoadingCards = isLoadingAuctions || isLoadingRegistrations;
+    const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
 
-    const router = useRouter();
     const account = useCurrentAccount();
 
     const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
 
     const filteredNames: (RegistrationNft | AuctionCard)[] = (() => {
-        const inAuction = groupedAuctions ?? [];
-        const owned = names ?? [];
+        const auctionCards = groupedAuctions ?? [];
+        const namesRegistrations = names ?? [];
+        const subnamesRegistrations = subnames ?? [];
 
         switch (selectedFilter) {
             case GroupedNamesFilter.All:
-                return [...owned, ...inAuction];
+                return [...namesRegistrations, ...subnamesRegistrations, ...auctionCards];
             case GroupedNamesFilter.InAuction:
-                return inAuction;
+                return auctionCards;
             case GroupedNamesFilter.Owned:
-                return owned;
+                return namesRegistrations;
+            case GroupedNamesFilter.Subnames:
+                return subnamesRegistrations;
             default:
-                return owned;
+                return namesRegistrations;
         }
     })();
 
     const noCardToDisplay =
-        !isLoadingCards && filteredNames.length === 0 && !isAuctionsErrored && !isNamesErrored;
+        !isLoadingCards &&
+        filteredNames.length === 0 &&
+        !isAuctionsErrored &&
+        !isNamesErrored &&
+        !isSubnamesErrored;
+
     const noAuctions = !auctionDetails || auctionDetails.length === 0;
 
-    function handleSubnameListClick(name: string): void {
-        router.push(MY_NAMES_ROUTE.path + `/${normalizeNameInput(name)}`);
+    function handleChipSelect(filter: GroupedNamesFilter): void {
+        setSelectedFilter(filter);
+        setSelectedName(null);
     }
 
     return (
         <>
-            <Breadcrumbs
-                items={[{ ...NAMES_CRUMB, isActive: true }]}
-                trailingElement={
-                    <Button
-                        type={ButtonType.Outlined}
-                        text="Name"
-                        icon={<Add />}
-                        onClick={() =>
-                            open({
-                                autoFocusInput: true,
-                            })
-                        }
-                    />
-                }
-            />
+            <div className="flex flex-row gap-md items-center">
+                <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
+                    Names
+                </h2>
+
+                <Button
+                    type={ButtonType.Outlined}
+                    text="Name"
+                    icon={<Add />}
+                    onClick={() =>
+                        open({
+                            autoFocusInput: true,
+                        })
+                    }
+                />
+            </div>
 
             <div className="flex">
                 <SegmentedButton>
@@ -106,10 +121,11 @@ export default function MyNamesPage(): JSX.Element {
                             type={ButtonSegmentType.Rounded}
                             label={value}
                             selected={selectedFilter === value}
-                            onClick={() => setSelectedFilter(value)}
+                            onClick={() => handleChipSelect(value)}
                             disabled={
                                 (value === GroupedNamesFilter.InAuction && noAuctions) ||
-                                (value === GroupedNamesFilter.Owned && !names?.length)
+                                (value === GroupedNamesFilter.Owned && !names?.length) ||
+                                (value === GroupedNamesFilter.Subnames && !subnames?.length)
                             }
                         />
                     ))}
@@ -137,7 +153,7 @@ export default function MyNamesPage(): JSX.Element {
                         <InfoBox
                             style={InfoBoxStyle.Elevated}
                             type={InfoBoxType.Default}
-                            supportingText="You don't own any names yet."
+                            supportingText={`You don't own any ${selectedFilter === GroupedNamesFilter.Subnames ? 'subnames' : 'names'} yet.`}
                             icon={<Info />}
                         />
                     </div>
@@ -149,22 +165,32 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
                 )}
 
-                {!isLoadingCards && filteredNames.length > 0 && (
-                    <div className="flex flex-row gap-lg items-center flex-wrap w-full">
-                        {filteredNames.map((nft) =>
-                            isAuctionCard(nft) ? (
-                                <ExtendedAuctionCard
-                                    key={nft.details.name}
-                                    name={nft.details.name}
-                                    auctionDetails={nft.details}
-                                />
-                            ) : (
-                                <ExtendedNameCard
-                                    key={nft.name}
-                                    nft={nft}
-                                    onSubnameListClick={() => handleSubnameListClick(nft.name)}
-                                />
-                            ),
+                {((!isLoadingCards && filteredNames.length > 0) || selectedName) && (
+                    <div className="w-full flex flex-row items-start justify-between gap-xl">
+                        {!isLoadingCards && filteredNames.length > 0 && (
+                            <div className="flex flex-row gap-lg items-center flex-wrap w-full">
+                                {filteredNames.map((nft) =>
+                                    isAuctionCard(nft) ? (
+                                        <ExtendedAuctionCard
+                                            key={nft.details.name}
+                                            name={nft.details.name}
+                                            auctionDetails={nft.details}
+                                        />
+                                    ) : (
+                                        <ExtendedNameCard
+                                            key={nft.name}
+                                            nft={nft}
+                                            onSubnameListClick={() => setSelectedName(nft)}
+                                        />
+                                    ),
+                                )}
+                            </div>
+                        )}
+                        {selectedName && (
+                            <SubnamesPanel
+                                selectedName={selectedName}
+                                onClose={() => setSelectedName(null)}
+                            />
                         )}
                     </div>
                 )}

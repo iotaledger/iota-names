@@ -3,16 +3,28 @@
 
 'use client';
 
-import { Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    // Add,
+    // Assets,
+    // Calendar,
+    // Delete,
+    // Info,
+    // Link,
+    // Pined,
+    Settings,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
+import { MenuListItem } from '@/lib/types/components';
 import { getNameLabel } from '@/lib/utils/format/formatNames';
 
 import { DeleteNameDialog, UpdateNameDialog } from '../dialogs';
 import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
+import { DropdownMenuOption } from '../DropdownMenuOptions';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
 import { SubnameCountIndicator } from './NameCardIndicators';
@@ -32,34 +44,56 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
 
     const label = getNameLabel(nft.name);
 
+    const menuOptions: MenuListItem[] = [
+        {
+            onClick: () => setIsUpdateNameDialogOpen(true),
+            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
+            hideBottomBorder: true,
+        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
+        //     hideBottomBorder: true,
+        // },
+        {
+            onClick: () => setIsDeleteNameDialogOpen(true),
+            children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
+            isHidden: !nft.isExpired || (nameTree ? nameTree.subnames.length > 0 : false),
+            hideBottomBorder: true,
+        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+        //     hideBottomBorder: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
+        //     isDisabled: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+        //     hideBottomBorder: true,
+        // },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
+        //     hideBottomBorder: true,
+        // },
+    ];
+
     return (
         <>
-            <NameCard
-                name={nft.name}
-                badge={badge}
-                menuOptions={[
-                    {
-                        onClick: () => setIsUpdateNameDialogOpen(true),
-                        children: (
-                            <div className="flex flex-row gap-xxs items-center justify-center">
-                                <Settings /> Manage
-                            </div>
-                        ),
-                        hideBottomBorder: true,
-                    },
-                    {
-                        onClick: () => setIsDeleteNameDialogOpen(true),
-                        children: (
-                            <div className="flex flex-row gap-xxs items-center justify-center">
-                                <Warning /> Delete
-                            </div>
-                        ),
-                        isHidden:
-                            !nft.isExpired || (nameTree ? nameTree.subnames.length > 0 : false),
-                        hideBottomBorder: true,
-                    },
-                ]}
-            >
+            <NameCard name={nft.name} badge={badge} menuOptions={menuOptions}>
                 <NameCardBody name={label}>
                     <SubnameCountIndicator
                         onSubnameListClick={onSubnameListClick}

@@ -11,7 +11,7 @@ use iota::test_utils::assert_eq;
 use iota::vec_map;
 use iota_names::constants;
 use iota_names::name::{Self, Name};
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::name_registration::{Self as nft, NameRegistration};
 use iota_names::name_record as record;
 use iota_names::registry::{Self, Registry};
 use std::option::{some, none};
@@ -252,7 +252,7 @@ fun test_registry_grace_period() {
 // === Burn Names ===
 
 #[test]
-/// Checks that `burn_registration_object` burns `IotaNamesRegistration` object
+/// Checks that `burn_registration_object` burns `NameRegistration` object
 /// but doesn't touch the NameRecord, as this name has been re-registered by a
 /// different user (after its expiration).
 fun test_registry_burn_name() {
@@ -286,7 +286,7 @@ fun test_registry_burn_name() {
 }
 
 #[test]
-/// `burn_registration_object` burns the IotaNamesRegistration object as well as
+/// `burn_registration_object` burns the NameRegistration object as well as
 /// removes the record,
 /// since it still points to the old owner.
 fun test_registry_burn_name_and_removes_record() {
@@ -390,7 +390,7 @@ fun burn_expired_subname() {
 }
 
 #[test]
-fun burn_expired_iota_names_registration() {
+fun burn_expired_name_registration() {
     let mut ctx = tx_context::dummy();
     let (mut registry, mut clock, name) = setup(&mut ctx);
     let nft = registry.add_record(name, 1, &clock, &mut ctx);
@@ -611,7 +611,7 @@ fun wrapup_non_empty(registry: Registry, clock: Clock) {
 }
 
 #[test_only]
-public fun burn_nfts(mut nfts: vector<IotaNamesRegistration>) {
+public fun burn_nfts(mut nfts: vector<NameRegistration>) {
     while (vector::length(&nfts) > 0) {
         nft::burn_for_testing(vector::pop_back(&mut nfts));
     };

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getIotaNamesRegistrationType, getIotaSubnameRegistrationType } from '@iota/iota-names-sdk';
+import { getNameRegistrationType, getSubnameRegistrationType } from '@iota/iota-names-sdk';
 import { type IotaObjectData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -24,8 +24,8 @@ export function useGetVisualAssets(address: string) {
     const packageId = iotaNamesClient.config.packageId;
 
     const iotaNamesStructsToRemove = [
-        getIotaNamesRegistrationType(packageId),
-        getIotaSubnameRegistrationType(packageId),
+        getNameRegistrationType(packageId),
+        getSubnameRegistrationType(packageId),
     ];
 
     return useGetAllOwnedObjects<IotaObjectData[]>(

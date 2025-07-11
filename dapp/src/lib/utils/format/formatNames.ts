@@ -20,7 +20,10 @@ export function addNameSuffix(name: string) {
     return name.endsWith('.iota') ? name : `${name}.iota`;
 }
 
-export function getNameLabel(name: string) {
+export function getNameLabel(name: string, onlyFirstSubname = false) {
     const { parentName, subname } = splitNameParts(name);
-    return subname ? `${subname}@${parentName}` : `@${parentName}`;
+
+    return subname
+        ? `${onlyFirstSubname ? subname.split('.')[0] : subname}@${parentName}`
+        : `@${parentName}`;
 }
