@@ -29,19 +29,7 @@ export function loadLocalnetConfig(): PackageInfo {
         // Read the generated configuration file
         const localnetConfig = JSON.parse(readFileSync(localnetConfigPath, 'utf8'));
 
-        return {
-            auctionPackageId: localnetConfig.auctionPackageId,
-            coins: localnetConfig.coins,
-            iotaNamesObjectId: localnetConfig.iotaNamesObjectId,
-            packageId: localnetConfig.packageId,
-            payments: {
-                packageId: localnetConfig.paymentsPackageId,
-            },
-            registryTableId: localnetConfig.registryTableId,
-            reverseRegistryTableId: localnetConfig.reverseRegistryTableId,
-            subnamesPackageId: localnetConfig.subnamesPackageId,
-            tempSubnameProxyPackageId: localnetConfig.tempSubnameProxyPackageId,
-        };
+        return localnetConfig;
     } catch (error) {
         throw new Error(
             `Failed to load localnet configuration: ${error instanceof Error ? error.message : String(error)}`,
