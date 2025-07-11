@@ -103,7 +103,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const hasErrors = registerNameError || coinBalanceError || purchaseError;
 
-    const isLoading = isNameRecordLoading || isRegisterNameLoading || isSigning;
+    const isLoadingData = isNameRecordLoading || isRegisterNameLoading;
+    const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
@@ -124,7 +125,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         <div className="flex items-baseline justify-center gap-x-1">
                             <span className="text-body-md text-neutral-60">Price:</span>
                             <span className="text-body-md font-mono">
-                                {!isLoading && canPay
+                                {!isLoadingData && canPay
                                     ? formatNanosToIota(nameRecordData.price, {
                                           formatRounded: false,
                                       })
@@ -135,7 +136,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         <div className="flex items-baseline justify-center gap-x-1">
                             <span className="text-body-md text-neutral-60">Gas:</span>
                             <span className="text-body-md font-mono">
-                                {!isLoading
+                                {!isLoadingData
                                     ? formatNanosToIota(totalGas, { formatRounded: false })
                                     : '-'}
                             </span>
@@ -146,7 +147,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Total price (Name + gas):
                             </span>
                             <span className="text-body-md font-mono">
-                                {!isLoading
+                                {!isLoadingData
                                     ? formatNanosToIota(totalPrice, {
                                           formatRounded: false,
                                       })
