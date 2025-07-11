@@ -192,7 +192,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({
