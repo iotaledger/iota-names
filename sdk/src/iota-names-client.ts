@@ -7,7 +7,7 @@ import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { toB64 } from '@iota/iota-sdk/utils';
 
 import { NameBcs, PricingConfigBcs } from './bcs.js';
-import { packages } from './constants.js';
+import { ALLOWED_METADATA, packages } from './constants.js';
 import {
     getConfigType,
     getNameType,
@@ -254,8 +254,7 @@ export class IotaNamesClient {
             targetAddress: nameRecord?.target_address!,
             expirationTimestampMs: Number(nameRecord?.expiration_timestamp_ms),
             data,
-            avatar: data.avatar,
-            contentHash: data.content_hash,
+            avatar: data[ALLOWED_METADATA.avatar],
         };
     }
 
