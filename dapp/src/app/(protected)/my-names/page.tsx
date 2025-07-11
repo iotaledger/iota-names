@@ -5,8 +5,7 @@
 
 import {
     Add,
-    // Add,
-    // Assets,
+    Assets,
     // Calendar,
     // Delete,
     // Info,
@@ -21,6 +20,7 @@ import { useMemo, useState } from 'react';
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -34,6 +34,7 @@ export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
+    const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
     const { data: subnames } = useRegistrationNfts('subname');
@@ -69,11 +70,11 @@ export default function MyNamesPage(): JSX.Element {
             isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
             hideBottomBorder: true,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setPersonalizeAvatarName(nft.name),
+            children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+            hideBottomBorder: true,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
@@ -195,6 +196,12 @@ export default function MyNamesPage(): JSX.Element {
                     name={createSubnameDialog.name}
                     open={!!createSubnameDialog}
                     setOpen={() => setCreateSubnameDialog(null)}
+                />
+            )}
+            {!!personalizeAvatarName && (
+                <PersonalizeAvatarDialog
+                    name={personalizeAvatarName}
+                    setOpen={() => setPersonalizeAvatarName(null)}
                 />
             )}
         </div>
