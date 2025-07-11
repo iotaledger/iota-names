@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 import { useCurrentAccount } from '@iota/dapp-kit';
 import {
-    getIotaNamesRegistrationType,
-    getIotaSubnameRegistrationType,
+    getNameRegistrationType,
+    getSubnameRegistrationType,
     isSubname,
 } from '@iota/iota-names-sdk';
 import { IotaParsedData } from '@iota/iota-sdk/client';
@@ -23,11 +23,11 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
         switch (type) {
             case 'name':
                 return {
-                    StructType: getIotaNamesRegistrationType(packageId),
+                    StructType: getNameRegistrationType(packageId),
                 };
             case 'subname':
                 return {
-                    StructType: getIotaSubnameRegistrationType(packageId),
+                    StructType: getSubnameRegistrationType(packageId),
                 };
         }
     })();

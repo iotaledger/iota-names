@@ -78,7 +78,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     iotaNamesTx.setUserData({
         nft,
-        key: ALLOWED_METADATA.contentHash,
+        key: ALLOWED_METADATA.ipfs,
         value: '0x1',
     });
 
