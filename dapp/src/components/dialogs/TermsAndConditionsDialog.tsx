@@ -30,7 +30,7 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                 containerId="overlay-portal-container"
                 position={DialogPosition.Center}
                 isFixedPosition
-                customWidth="w-full max-w-md md:max-w-2xl xl:max-w-4xl"
+                customWidth="w-full max-w-md md:max-w-2xl xl:max-w-[744px]"
             >
                 <Header title="Terms & Conditions" onClose={() => onOpenChange(false)} />
                 <DialogBody>
@@ -69,7 +69,6 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                                 type={ButtonType.Primary}
                                 disabled={!termsAccepted}
                                 text="Accept"
-                                size={ButtonSize.Small}
                             />
                         </div>
                     </div>
