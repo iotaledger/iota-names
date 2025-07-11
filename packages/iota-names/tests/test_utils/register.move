@@ -10,7 +10,7 @@ use iota::coin::Coin;
 use iota_names::core_config::CoreConfig;
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
 use iota_names::validation;
@@ -38,7 +38,7 @@ public fun register<T>(
     payment: Coin<T>,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     iota_names.assert_is_authorized<RegisterAuth>();
 
     let config = iota_names.get_config<PricingConfig>();

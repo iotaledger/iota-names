@@ -9,7 +9,7 @@ use iota::clock::Clock;
 use iota::coin;
 use iota::test_scenario::{Self, Scenario, ctx};
 use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::register::register;
 use std::string::String;
 
@@ -21,7 +21,7 @@ public fun register_util<T>(
     no_years: u8,
     amount: u64,
     clock_tick: u64,
-): IotaNamesRegistration {
+): NameRegistration {
     scenario.next_tx(IOTA_NAMES_ADDRESS);
     let mut iota_names = scenario.take_shared<IotaNames>();
     let payment = coin::mint_for_testing<T>(amount, scenario.ctx());

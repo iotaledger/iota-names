@@ -14,7 +14,7 @@ use iota::linked_table::{Self, LinkedTable};
 use iota_names::core_config::CoreConfig;
 use iota_names::name::{Self, Name};
 use iota_names::iota_names::{Self, AdminCap, IotaNames};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::pricing_config::PricingConfig;
 use iota_names::registry::Registry;
 use iota_names::validation;
@@ -66,7 +66,7 @@ public struct Auction has store {
     end_timestamp_ms: u64,
     current_bidder: address,
     current_bid: Coin<IOTA>,
-    nft: IotaNamesRegistration,
+    nft: NameRegistration,
 }
 
 fun init(ctx: &mut TxContext) {
@@ -211,7 +211,7 @@ public fun claim(
     name: String,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     let name = name::new(name);
 
     let Auction {
@@ -304,7 +304,7 @@ public fun admin_withdraw_funds(
 ///
 /// This will:
 /// - claim the winning bid and place in the `AuctionHouse` balance
-/// - transfer the `IotaNamesRegistration` to the winner
+/// - transfer the `NameRegistration` to the winner
 ///
 /// Once all of the above has been done the auction is destroyed,
 /// freeing on-chain storage.
