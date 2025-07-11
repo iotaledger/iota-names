@@ -96,7 +96,7 @@ export class IotaNamesTransaction {
     ): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
-            target: `${config.payments.packageId}::payments::handle_base_payment`,
+            target: `${config.paymentsPackageId}::payments::handle_base_payment`,
             arguments: [this.transaction.object(config.iotaNamesObjectId), paymentIntent, payment],
             typeArguments: [paymentType],
         });
@@ -195,7 +195,7 @@ export class IotaNamesTransaction {
 
     /**
      * Builds the PTB to create a leaf subname.
-     * Parent can be a `IotaNamesRegistration` or a `SubnameRegistration` object.
+     * Parent can be a `NameRegistration` or a `SubnameRegistration` object.
      * Can be passed in as an ID or a TransactionArgument.
      */
     createLeafSubname({
