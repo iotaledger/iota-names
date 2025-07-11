@@ -4,9 +4,8 @@
 'use client';
 
 import {
+    Add,
     Assets,
-    // Add,
-    // Assets,
     // Calendar,
     // Delete,
     // Info,
@@ -34,7 +33,7 @@ import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatN
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
-    const [subnameAddDialog, setSubnameAddDialog] = useState<RegistrationNft | null>(null);
+    const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
@@ -81,10 +80,10 @@ export default function MyNamesPage(): JSX.Element {
         //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
         //     isDisabled: true,
         // },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-        // },
+        {
+            onClick: () => setCreateSubnameDialog(nft),
+            children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
@@ -137,7 +136,7 @@ export default function MyNamesPage(): JSX.Element {
                             <NameCardBody title={`@${name}`}>
                                 <SubnameCountIndicator
                                     subnameCount={nftSubnames?.length ?? 0}
-                                    onAddSubnameClick={() => setSubnameAddDialog(nft)}
+                                    onAddSubnameClick={() => setCreateSubnameDialog(nft)}
                                     onSubnameListClick={() => {}}
                                 />
 
@@ -174,7 +173,7 @@ export default function MyNamesPage(): JSX.Element {
                                 <NameCardBody title={`${subnamePart}@${name}`}>
                                     <SubnameCountIndicator
                                         subnameCount={nftSubnames.length}
-                                        onAddSubnameClick={() => setSubnameAddDialog(subname)}
+                                        onAddSubnameClick={() => setCreateSubnameDialog(subname)}
                                         onSubnameListClick={() => {}}
                                     />
 
@@ -192,11 +191,11 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md w-full">
                 <UserAuctions />
             </div>
-            {!!subnameAddDialog && (
+            {!!createSubnameDialog && (
                 <CreateSubnameDialog
-                    name={subnameAddDialog.name}
-                    open={!!subnameAddDialog}
-                    setOpen={() => setSubnameAddDialog(null)}
+                    name={createSubnameDialog.name}
+                    open={!!createSubnameDialog}
+                    setOpen={() => setCreateSubnameDialog(null)}
                 />
             )}
             {!!personalizeAvatarName && (

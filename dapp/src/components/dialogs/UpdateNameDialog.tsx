@@ -35,7 +35,6 @@ import {
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
-import { CreateSubnameDialog } from './CreateSubnameDialog';
 import { RenewNameDialog } from './RenewNameDialog';
 
 type UpdateNameDialogProps = {
@@ -74,7 +73,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     // Dialogs
     const [renewDialogOpen, setRenewDialogOpen] = useState(false);
-    const [subnameDialogOpen, setSubnameDialogOpen] = useState(false);
 
     // Sync permissions
     useEffect(() => {
@@ -231,7 +229,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
     const disableRenew = isExpired;
-    const disableAddSubname = isExpired;
 
     return (
         <>
@@ -324,19 +321,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                             </Card>
                         )}
-                        {namePermissions?.allowChildCreation && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Add new subname"
-                                    subtitle="Create a new subname."
-                                />
-                                <Button
-                                    text="Add subname"
-                                    onClick={() => setSubnameDialogOpen(true)}
-                                    disabled={disableAddSubname}
-                                />
-                            </Card>
-                        )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
@@ -349,13 +333,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     </DialogBody>
                 </DialogContent>
             </Dialog>
-            {subnameDialogOpen && (
-                <CreateSubnameDialog
-                    name={name}
-                    open={subnameDialogOpen}
-                    setOpen={setSubnameDialogOpen}
-                />
-            )}
             {renewDialogOpen && (
                 <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
             )}
