@@ -14,9 +14,11 @@ import {
     Header,
     LoadingIndicator,
     Panel,
+    Select,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { queryKey } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
@@ -48,12 +50,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
-
+    const [renewYears, setRenewYears] = useState<number>(1);
     const {
         data: registerNameData,
         isLoading: isRegisterNameLoading,
         error: registerNameError,
-    } = useRegisterNameTransaction(account?.address || '', name, price);
+    } = useRegisterNameTransaction(account?.address || '', name, price, renewYears);
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -111,13 +113,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
     const cleanName = sanitizeIotaName(name);
-    const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    const expirationTime = Date.now() + 365 * 24 * 60 * 60 * 1000 * renewYears;
 
     const expirationDate = new Intl.DateTimeFormat('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
-    }).format(oneYearFromNow);
+    }).format(new Date(expirationTime));
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -133,6 +135,22 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
+                            <div className="px-md py-sm border-t border-names-neutral-6">
+                                <Select
+                                    value={renewYears.toString()}
+                                    options={[
+                                        { id: '1', label: '1 Year' },
+                                        { id: '2', label: '2 Years' },
+                                        { id: '3', label: '3 Years' },
+                                        { id: '4', label: '4 Years' },
+                                        { id: '5', label: '5 Years' },
+                                    ]}
+                                    onValueChange={(value) => {
+                                        setRenewYears(parseInt(value, 10));
+                                    }}
+                                    placeholder="Select renewal period"
+                                />
+                            </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">

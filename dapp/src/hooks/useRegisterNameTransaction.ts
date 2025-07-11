@@ -15,7 +15,7 @@ export function useRegisterNameTransaction(
     address: string,
     name: string,
     price: number,
-    years: number = 1,
+    years: number,
 ) {
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
@@ -45,7 +45,7 @@ export function useRegisterNameTransaction(
                 txDryRun,
             };
         },
-        enabled: !!address && !!price && !!name && name.length > 0,
+        enabled: !!address && !!price && !!name && name.length > 0 && years > 0,
         gcTime: 0,
         select: ({ transaction, txDryRun }) => {
             return {
