@@ -6,6 +6,7 @@
 import {
     Button,
     ButtonType,
+    Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
@@ -42,15 +43,23 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const account = useCurrentAccount();
+
+    const [renewYears, setRenewYears] = useState<number>(1);
+    const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+
     const {
         data: nameRecordData,
         isLoading: isNameRecordLoading,
         error: nameRecordError,
-    } = useNameRecord(name);
+    } = useNameRecord(name, {
+        price: {
+            years: renewYears,
+            isRegistration: true,
+        },
+    });
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
-    const [renewYears, setRenewYears] = useState<number>(1);
     const {
         data: registerNameData,
         isLoading: isRegisterNameLoading,
@@ -153,6 +162,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
+                            <Checkbox
+                                isChecked={isDisplayName}
+                                onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                label="Set name as Display Name"
+                            />
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats
