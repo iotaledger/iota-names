@@ -44,7 +44,10 @@ export function LandingHero() {
                         customWidth="w-[60vw] h-[clamp(400px,80vh,600px)]"
                     >
                         <div className="flex flex-col gap-md px-48 py-20 flex-1">
-                            <AvailabilityCheck autoFocusInput />
+                            <AvailabilityCheck
+                                autoFocusInput
+                                onCompleted={() => setDialogOpen(false)}
+                            />
                         </div>
                     </DialogContent>
                 </Dialog>

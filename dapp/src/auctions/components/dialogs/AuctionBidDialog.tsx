@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonPill,
@@ -34,15 +34,18 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { queryKey } from '@/hooks';
-import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;
     closeDialog: () => void;
+    onCompleted?: () => void;
 }
 
-export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
@@ -85,6 +88,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             closeDialog();
+            onCompleted?.();
         },
     });
 
@@ -113,7 +117,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
             return error.message;
         }
     })();
-    const cleanName = sanitizeIotaName(name);
+    const cleanName = normalizeNameInput(name);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
@@ -127,11 +131,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
           })
         : '--';
     const expirationDate = auctionMetadata
-        ? new Intl.DateTimeFormat('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-          }).format(auctionMetadata.nftExpiration)
+        ? formatExpirationDate(auctionMetadata.nftExpiration)
         : '--';
     return (
         <Dialog open onOpenChange={closeDialog}>
@@ -150,8 +150,8 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                                 <InfoBox
                                     title="Top Bidder"
                                     supportingText="Your are the top bidder already"
-                                    icon={<Info />}
-                                    type={InfoBoxType.Default}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Warning}
                                     style={InfoBoxStyle.Default}
                                 />
                             )}
@@ -199,7 +199,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                             )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
-                                    type={ButtonType.Outlined}
+                                    type={ButtonType.Secondary}
                                     text="Cancel"
                                     onClick={() => closeDialog()}
                                     fullWidth

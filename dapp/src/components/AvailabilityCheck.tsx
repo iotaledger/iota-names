@@ -12,7 +12,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
-import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './NamePurchaseCard';
@@ -39,8 +40,9 @@ function getValidationError(
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
+    onCompleted?: () => void;
 }
-export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
+export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -76,7 +78,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     }, [searchValue]);
 
     function handleInputChange(inputValue: string) {
-        setSearchValue(sanitizeIotaName(inputValue));
+        setSearchValue(normalizeNameInput(inputValue));
         if (name) {
             setName('');
         }
@@ -86,6 +88,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         setPurchaseDialogOpen(false);
         setSearchValue('');
         setName('');
+        onCompleted?.();
     }
     const statusMessage =
         isUnavailable && !isAuctionInProgress
@@ -95,7 +98,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
               : undefined;
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
-    const cleanName = sanitizeIotaName(name);
+    const cleanName = normalizeNameInput(name);
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -199,7 +202,16 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                 )}
 
                 {isAuctionBidDialogOpen && (
-                    <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
+                    <AuctionBidDialog
+                        name={name}
+                        closeDialog={() => setAuctionDialogOpen(false)}
+                        onCompleted={() => {
+                            setAuctionDialogOpen(false);
+                            setSearchValue('');
+                            setName('');
+                            onCompleted?.();
+                        }}
+                    />
                 )}
             </div>
         </div>

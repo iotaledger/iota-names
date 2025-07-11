@@ -27,7 +27,9 @@ import {
     GAS_BUDGET_ERROR_MESSAGES,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
-import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 
 type PurchaseNameProps = {
     name: string;
@@ -110,14 +112,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const cleanName = sanitizeIotaName(name);
-    const oneYearFromNow = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-
-    const expirationDate = new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(oneYearFromNow);
+    const cleanName = normalizeNameInput(name);
+    const expirationDate = getDefaultExpirationDate();
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
