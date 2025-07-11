@@ -4,12 +4,10 @@
 import { Accordion, AccordionContent, AccordionHeader, Title } from '@iota/apps-ui-kit';
 import { useState } from 'react';
 
-type AccordionInfoProps = {
+interface CollapsibleProps {
     title: string;
-    children: React.ReactNode;
-};
-
-export function CollapsibleInfo({ title, children }: AccordionInfoProps) {
+}
+export function Collapsible({ title, children }: React.PropsWithChildren<CollapsibleProps>) {
     const [isOpen, setIsOpen] = useState(true);
 
     return (

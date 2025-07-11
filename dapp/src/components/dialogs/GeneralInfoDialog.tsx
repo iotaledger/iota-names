@@ -19,16 +19,21 @@ import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
-import { CollapsibleInfo } from '../CollapsibleInfo';
+import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
-type UpdateNameDialogProps = {
+interface GeneralInfoDialogProps {
     name: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
-};
+}
+interface InfoLinks {
+    key: string;
+    value: string;
+    href: string;
+}
 
-export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps) {
+export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProps) {
     const account = useCurrentAccount();
     const address = account?.address || '';
 
@@ -50,22 +55,21 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
             : undefined;
 
     const handleClose = () => setOpen(false);
-    type InfoLinks = { key: string; value: string; href: string };
     const InfoLinks: InfoLinks[] = [
         {
             key: 'Owner',
             value: address,
-            href: `https://explorer.iota.org/address/${address}`,
+            href: `https://explorer.iota.org/address/${address}?network=devnet`,
         },
         targetAddress && {
             key: 'Target address',
             value: targetAddress,
-            href: `https://explorer.iota.org/address/${targetAddress}`,
+            href: `https://explorer.iota.org/address/${targetAddress}?network=devnet`,
         },
         {
             key: 'Object ID',
             value: currentNameId,
-            href: `https://explorer.iota.org/address/${currentNameId}`,
+            href: `https://explorer.iota.org/address/${currentNameId}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
@@ -82,7 +86,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                     </div>
 
                     <div className="flex flex-col gap-md mt-lg">
-                        <CollapsibleInfo title="Info">
+                        <Collapsible title="Info">
                             <div className="flex flex-col py-xs px-md--rs">
                                 {InfoLinks.map(({ key, value, href }) => (
                                     <KeyValueInfo
@@ -103,8 +107,8 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                     />
                                 ))}
                             </div>
-                        </CollapsibleInfo>
-                        <CollapsibleInfo title="Name Object Info">
+                        </Collapsible>
+                        <Collapsible title="Name Object Info">
                             <div className="py-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
@@ -112,7 +116,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: UpdateNameDialogProps
                                     fullwidth
                                 />
                             </div>
-                        </CollapsibleInfo>
+                        </Collapsible>
                     </div>
                 </DialogBody>
             </DialogContent>
