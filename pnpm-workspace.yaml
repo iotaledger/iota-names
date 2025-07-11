@@ -1,6 +1,6 @@
 packages:
   - "sdk"
   - "build-scripts"
-  - "scripts/**"
+  - "scripts"
   - "documentation/**"
-  - "dapp/**"
+  - "dapp"

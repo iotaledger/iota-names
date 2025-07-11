@@ -14,7 +14,7 @@ use iota_names::constants;
 use iota_names::core_config;
 use iota_names::name;
 use iota_names::iota_names::{Self, IotaNames};
-use iota_names::iota_names_registration;
+use iota_names::name_registration;
 use iota_names::payment::{Self, PaymentIntent, Receipt};
 use iota_names::pricing_config::{Self, PricingConfig};
 use iota_names::registry::Registry;
@@ -95,7 +95,7 @@ fun try_to_renew_using_registration_receipt() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = name_registration::new_for_testing(
         name::new(b"test.iota".to_string()),
         1,
         &clock,
@@ -118,7 +118,7 @@ fun try_to_renew_with_other_name_receipt() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = name_registration::new_for_testing(
         name::new(b"test2.iota".to_string()),
         1,
         &clock,
@@ -158,7 +158,7 @@ fun try_to_renew_using_invalid_receipt_version() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = name_registration::new_for_testing(
         name::new(b"test.iota".to_string()),
         1,
         &clock,
@@ -228,7 +228,7 @@ fun try_renewing_non_existent_name() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let mut nft = iota_names_registration::new_for_testing(
+    let mut nft = name_registration::new_for_testing(
         name::new(b"test.iota".to_string()),
         1,
         &clock,
@@ -271,7 +271,7 @@ fun try_renewal_process_longer_than_max_years() {
     let mut iota_names = setup_iota_names(&mut ctx);
     let clock = clock::create_for_testing(&mut ctx);
 
-    let nft = iota_names_registration::new_for_testing(
+    let nft = name_registration::new_for_testing(
         name::new(b"test.iota".to_string()),
         1,
         &clock,

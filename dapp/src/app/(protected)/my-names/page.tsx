@@ -5,10 +5,8 @@
 
 import { Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
-    Button,
     ButtonSegment,
     ButtonSegmentType,
-    ButtonType,
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
@@ -24,6 +22,11 @@ import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupU
 import { Breadcrumbs } from '@/components/breadcrumb/Breadcrumb';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
+
+import '@iota/apps-ui-icons';
+
+import { Button, ButtonType } from '@iota/apps-ui-kit';
+
 import { useRegistrationNfts } from '@/hooks';
 import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
