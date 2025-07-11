@@ -84,6 +84,13 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         }
     }
 
+    function handleBid() {
+        setAuctionDialogOpen(false);
+        setSearchValue('');
+        setName('');
+        onCompleted?.();
+    }
+
     function handlePurchase() {
         setPurchaseDialogOpen(false);
         setSearchValue('');
@@ -205,12 +212,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                     <AuctionBidDialog
                         name={name}
                         closeDialog={() => setAuctionDialogOpen(false)}
-                        onCompleted={() => {
-                            setAuctionDialogOpen(false);
-                            setSearchValue('');
-                            setName('');
-                            onCompleted?.();
-                        }}
+                        onCompleted={handleBid}
                     />
                 )}
             </div>
