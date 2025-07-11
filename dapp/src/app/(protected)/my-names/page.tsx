@@ -24,6 +24,7 @@ import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { SubnameCountIndicator } from '@/components/name-card/NameCardIndicators';
+import { useIotaNamesClient } from '@/contexts';
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { MenuListItem } from '@/lib/types/components';
