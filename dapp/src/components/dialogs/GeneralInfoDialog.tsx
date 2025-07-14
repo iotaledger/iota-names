@@ -10,6 +10,7 @@ import {
     DialogPosition,
     Header,
     KeyValueInfo,
+    TitleSize,
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -80,14 +81,14 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
-                        <span className="text-headline-sm text-names-neutral-92">
+                        <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
                             @{normalizeNameInput(name)}
                         </span>
                     </div>
 
                     <div className="flex flex-col gap-md mt-lg">
-                        <Collapsible title="Info">
-                            <div className="flex flex-col py-xs px-md--rs">
+                        <Collapsible title="Info" titleSize={TitleSize.Small}>
+                            <div className="flex flex-col pb-xs px-md--rs">
                                 {InfoLinks.map(({ key, value, href }) => (
                                     <KeyValueInfo
                                         key={key}
@@ -108,8 +109,8 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
                                 ))}
                             </div>
                         </Collapsible>
-                        <Collapsible title="Name Object Info">
-                            <div className="py-xs px-md--rs">
+                        <Collapsible title="Name Object Info" titleSize={TitleSize.Small}>
+                            <div className="pb-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
                                     value={formatDate(expirationTime)}
