@@ -87,11 +87,10 @@ function createRenewUpdates({
 
 interface RenewDialogProps {
     name: string;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 }
 
-export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
+export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
@@ -175,7 +174,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         : getDefaultExpirationDate();
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header title="Renew Name" />
                 <DialogBody>
