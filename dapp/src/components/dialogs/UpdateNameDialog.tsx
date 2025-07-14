@@ -13,13 +13,10 @@ import {
     DialogBody,
     DialogContent,
     Header,
-    Input,
-    InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname } from '@iota/iota-names-sdk';
-import { isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
 
@@ -28,12 +25,7 @@ import { queryKey } from '@/hooks/queryKey';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import {
-    getNameObject,
-    getNamePermissions,
-    getParentObjectId,
-    isNameRecordExpired,
-} from '@/lib/utils/names';
+import { getNamePermissions, getParentObjectId, isNameRecordExpired } from '@/lib/utils/names';
 
 import { RenewNameDialog } from './RenewNameDialog';
 
@@ -66,7 +58,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     // Editable values
-    const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
@@ -82,13 +73,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
 
-    // Sync name target address
-    useEffect(() => {
-        if (nameRecord && editTargetAddress.length === 0) {
-            setEditTargetAddress(nameRecord.nameRecord.targetAddress ?? '');
-        }
-    }, [nameRecord]);
-
     // Sync address current default name
     useEffect(() => {
         if (addressName === name) {
@@ -96,39 +80,17 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }, [addressName]);
 
-    const isTargetCurrentAddress = editTargetAddress === account?.address;
-    const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
     const isDefaultName = addressName === name;
-
-    // Setting a different target address than the owner address and using the name as default is not possible
-    const isWrongCombination = !isTargetCurrentAddress && editIsDefaultName;
-    const isValidAddress = isValidIotaAddress(editTargetAddress);
-    const isThereAddress = editTargetAddress.length > 0;
 
     // Create updates
     const updates: NameUpdate[] = [];
-
-    if (nameRecord && isThereAddress && isValidAddress && !isTargetUsedInName) {
-        // Only allow changing the target address if it is valid and it is not used yet
-        const nftId = isNameSubname
-            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
-            : nameRecord.nameRecord.nftId;
-        if (nftId) {
-            updates.push({
-                type: 'set-target-address',
-                address: editTargetAddress,
-                isSubname: !!isNameSubname,
-                nftId: nftId,
-            });
-        }
-    }
 
     if (isDefaultName && !editIsDefaultName) {
         // If it is currently the default name, but it is now disabled
         updates.push({
             type: 'unset-default',
         });
-    } else if (!isDefaultName && editIsDefaultName && isTargetCurrentAddress) {
+    } else if (!isDefaultName && editIsDefaultName) {
         // If it is not currently the default name, but it is now enabled and the target address matches
         updates.push({
             type: 'set-default',
@@ -188,11 +150,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                         });
                         break;
                     case 'edit-setup':
-                    case 'set-target-address':
-                        queryClient.invalidateQueries({
-                            queryKey: queryKey.nameRecord(name),
-                        });
-                        break;
                 }
             }
         },
@@ -200,10 +157,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     function handleClose() {
         setOpen(false);
-    }
-
-    function handleTargetAddressChange({ target: { value } }: ChangeEvent<HTMLInputElement>) {
-        setEditTargetAddress(value);
     }
 
     function handleReverseLookupChange({ target: { checked } }: ChangeEvent<HTMLInputElement>) {
@@ -217,17 +170,11 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         setEditIsAllowSubnames(checked);
     };
 
-    function handleSetCurrentAsTargetAddress() {
-        if (account?.address) {
-            setEditTargetAddress(account?.address);
-        }
-    }
-
     const isLoading =
         isSaving || isAddressNameLoading || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
+    const disableSave = updates.length === 0 || isLoading || isExpired;
     const disableRenew = isExpired;
 
     return (
@@ -239,36 +186,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                         {isExpired && !isLoading ? (
                             <Card>
                                 <p className="text-yellow-300">Name is expired.</p>
-                            </Card>
-                        ) : null}
-                        {isThereAddress && !isValidAddress ? (
-                            <Card>
-                                <p className="text-yellow-300"> Not valid IOTA address.</p>
-                            </Card>
-                        ) : null}
-                        <Card type={CardType.Outlined}>
-                            <CardBody title="Target Address" />
-                            <Input
-                                type={InputType.Text}
-                                value={editTargetAddress}
-                                disabled={disableEdit}
-                                onChange={handleTargetAddressChange}
-                            />
-                            {!isTargetCurrentAddress && (
-                                <Button
-                                    onClick={handleSetCurrentAsTargetAddress}
-                                    text="Use current"
-                                    disabled={disableEdit}
-                                />
-                            )}
-                        </Card>
-                        {isWrongCombination ? (
-                            <Card>
-                                <p className="text-yellow-300">
-                                    {' '}
-                                    Use your account as target address to be able to set this name
-                                    as default.
-                                </p>
                             </Card>
                         ) : null}
                         <Card type={CardType.Outlined}>
