@@ -7,10 +7,13 @@ import {
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
+    DisplayStats,
     Header,
-    Input,
-    InputType,
     LoadingIndicator,
+    Panel,
+    Select,
+    SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord } from '@iota/iota-names-sdk';
@@ -19,8 +22,10 @@ import { useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
     getNamePermissions,
@@ -99,8 +104,8 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
 
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
-    // Editable values
-    const [editRenewYears, setEditRenewYears] = useState<number>();
+    const [selectedYears, setSelectedYears] = useState<string>('');
+    const renewYears = selectedYears ? Number(selectedYears) : undefined;
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -109,7 +114,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
-        renewYears: editRenewYears,
+        renewYears,
     });
 
     const {
@@ -143,57 +148,77 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         },
     });
 
-    const handleCancelRenewName = () => {
+    function handleCancelRenewName() {
         setOpen(false);
-    };
+    }
 
-    const wantsToRenew = isNameSubname || !!editRenewYears;
+    function handleYearsChange(id: string) {
+        setSelectedYears(id);
+    }
+
+    const RENEW_OPTIONS: SelectOption[] = [
+        { id: '', label: 'Select renewal period' },
+        ...Array.from({ length: 5 }, (_, i) => ({
+            id: String(i + 1),
+            label: `${i + 1} Year${i ? 's' : ''}`,
+        })),
+    ];
+
+    const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
+    const cleanName = normalizeNameInput(nameRecord?.nameRecord?.name || name);
+    const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
+        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
+        : getDefaultExpirationDate();
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container" isFixedPosition>
-                <Header title="Renew" titleCentered />
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
+                <Header title="Renew Name" />
                 <DialogBody>
-                    <div className="flex flex-col items-center gap-y-md">
-                        <h3 className="text-lg font-semibold mb-4">
-                            Renew name {nameRecord?.nameRecord?.name}
-                        </h3>
-                        {!isNameSubname ? (
-                            <div className="mb-4">
-                                <Input
-                                    type={InputType.Text}
-                                    onChange={(e) => {
-                                        const val = Number(e.target.value);
-                                        setEditRenewYears(isNaN(val) ? 0 : val);
-                                    }}
-                                    placeholder="Input renew years"
+                    <div className="flex flex-col justify-between h-full items-center">
+                        <div className="flex flex-col w-full gap-y-md">
+                            <Panel bgColor="bg-names-neutral-12">
+                                <div className="px-md py-lg">
+                                    <span className="text-names-neutral-100 text-headline-sm">
+                                        @{cleanName}
+                                    </span>
+                                </div>
+                            </Panel>
+                            {!isNameSubname && (
+                                <Select
+                                    options={RENEW_OPTIONS}
+                                    placeholder="Select renewal period"
+                                    value={selectedYears}
+                                    onValueChange={handleYearsChange}
                                     disabled={disableEdit}
+                                    errorMessage={updateNameError?.message}
+                                />
+                            )}
+                        </div>
+                        <div className="flex flex-col w-full gap-y-md">
+                            <div className="flex flex-row gap-x-sm w-full">
+                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                            </div>
+                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={handleCancelRenewName}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    type={ButtonType.Primary}
+                                    text="Renew"
+                                    onClick={() => handleConfirmRenewName()}
+                                    disabled={disableSave}
+                                    fullWidth
                                 />
                             </div>
-                        ) : null}
-                        {!canRenew && wantsToRenew ? (
-                            <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
-                        ) : null}
-                        {updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
-                        ) : null}
-                        <div className="flex gap-2 justify-end">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={handleCancelRenewName}
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                type={ButtonType.Primary}
-                                text="Confirm"
-                                onClick={() => handleConfirmRenewName()}
-                                disabled={disableSave}
-                            />
                         </div>
                     </div>
                 </DialogBody>
