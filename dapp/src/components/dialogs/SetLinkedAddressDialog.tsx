@@ -3,11 +3,12 @@
 
 'use client';
 
-import { Link } from '@iota/apps-ui-icons';
+import { Link, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSize,
     ButtonType,
+    Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
@@ -41,6 +42,7 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
     const account = useCurrentAccount();
 
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
+    const [isUnlinking, setIsUnlinking] = useState<boolean>(false);
 
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -53,24 +55,30 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
 
     const hasTargetAddress = editTargetAddress.length > 0;
-    const isValidAddress = isValidIotaAddress(editTargetAddress);
+    const isAddressValid = isValidIotaAddress(editTargetAddress);
     const isTargetUsedInName = editTargetAddress === nameRecord?.nameRecord.targetAddress;
 
     useEffect(() => {
-        if (nameRecord && editTargetAddress.length === 0) {
+        if (nameRecord && editTargetAddress.length === 0 && !isUnlinking) {
             setEditTargetAddress(nameRecord.nameRecord.targetAddress ?? '');
         }
-    }, [nameRecord]);
+    }, [nameRecord, isUnlinking]);
 
     function buildUpdates(): NameUpdate[] {
         const updates: NameUpdate[] = [];
+        const nftId = isNameSubname
+            ? getNameObject(ownedSubnames ?? [], nameRecord?.nameRecord.name ?? '')
+            : nameRecord?.nameRecord.nftId;
 
-        if (nameRecord && hasTargetAddress && isValidAddress && !isTargetUsedInName) {
-            const nftId = isNameSubname
-                ? getNameObject(ownedSubnames ?? [], nameRecord.nameRecord.name)
-                : nameRecord.nameRecord.nftId;
-
-            if (nftId) {
+        if (nameRecord && nftId) {
+            if (isUnlinking && nameRecord.nameRecord.targetAddress) {
+                updates.push({
+                    type: 'set-target-address',
+                    nftId,
+                    address: undefined,
+                    isSubname: !!isNameSubname,
+                });
+            } else if (hasTargetAddress && isAddressValid && !isTargetUsedInName) {
                 updates.push({
                     type: 'set-target-address',
                     nftId,
@@ -107,9 +115,7 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
             await iotaClient.waitForTransaction({ digest: txResult.digest });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: queryKey.nameRecord(name),
-            });
+            queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
             setOpen(false);
         },
     });
@@ -125,9 +131,10 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
     function handleUseCurrent() {
         return account?.address && setEditTargetAddress(account.address);
     }
+
     const isLoading = isApplying || isSigning || isLoadingTx;
-    const disableEdit = isNameRecordLoading || isExpired || isSigning;
-    const disableApply = updates.length === 0 || !isValidAddress || isExpired || isLoading;
+    const disableEdit = isNameRecordLoading || isExpired || isSigning || isUnlinking;
+    const disableApply = updates.length === 0 || isExpired || isLoading;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -143,27 +150,47 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
                                 placeholder="Enter Target Address"
                                 value={editTargetAddress}
                                 onChange={handleAddressChange}
+                                onClearInput={() => setEditTargetAddress('')}
                                 disabled={disableEdit}
                                 errorMessage={
-                                    hasTargetAddress && !isValidAddress
+                                    hasTargetAddress && !isAddressValid
                                         ? 'Not a valid IOTA address'
                                         : updateNameError?.message
                                 }
                             />
 
-                            {account?.address && editTargetAddress !== account.address && (
-                                <div className="flex justify-end w-full">
-                                    <Button
-                                        text="Link to Current Address"
-                                        icon={<Link />}
-                                        onClick={handleUseCurrent}
-                                        disabled={disableEdit}
-                                        size={ButtonSize.Small}
-                                        type={ButtonType.Secondary}
+                            {nameRecord?.nameRecord.targetAddress && (
+                                <div className="mt-sm">
+                                    <Checkbox
+                                        label="Remove Linked Address from Name"
+                                        isChecked={isUnlinking}
+                                        onCheckedChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setIsUnlinking(checked);
+                                            if (checked) {
+                                                setEditTargetAddress('');
+                                            }
+                                        }}
                                     />
                                 </div>
                             )}
-                            {isTargetUsedInName && (
+
+                            {account?.address &&
+                                editTargetAddress !== account.address &&
+                                !isUnlinking && (
+                                    <div className="flex justify-end w-full">
+                                        <Button
+                                            text="Link to Current Address"
+                                            icon={<Link />}
+                                            onClick={handleUseCurrent}
+                                            disabled={disableEdit}
+                                            size={ButtonSize.Small}
+                                            type={ButtonType.Secondary}
+                                        />
+                                    </div>
+                                )}
+
+                            {nameRecord?.nameRecord.targetAddress && editTargetAddress ? (
                                 <div className="flex w-full break-all">
                                     <InfoBox
                                         type={InfoBoxType.Success}
@@ -173,7 +200,17 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
                                         supportingText={editTargetAddress}
                                     />
                                 </div>
-                            )}
+                            ) : nameRecord?.nameRecord.targetAddress ? (
+                                <div className="flex w-full break-all">
+                                    <InfoBox
+                                        type={InfoBoxType.Warning}
+                                        style={InfoBoxStyle.Default}
+                                        icon={<Warning />}
+                                        title="No address will be linked"
+                                        supportingText="After applying, the linked address will be removed from the name"
+                                    />
+                                </div>
+                            ) : null}
                         </div>
 
                         <div className="flex w-full flex-row gap-x-xs mt-xs">

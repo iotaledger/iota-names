@@ -23,7 +23,7 @@ export type NameUpdate =
       }
     | {
           type: 'set-target-address';
-          address: string;
+          address: string | undefined;
           isSubname: boolean;
           nftId: string;
       }
