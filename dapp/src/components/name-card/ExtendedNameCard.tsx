@@ -4,6 +4,8 @@
 'use client';
 
 import {
+    Add,
+    Assets,
     // Add,
     // Assets,
     // Calendar,
@@ -24,6 +26,7 @@ import { getNameLabel } from '@/lib/utils/format/formatNames';
 
 import { DeleteNameDialog, UpdateNameDialog } from '../dialogs';
 import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
+import { PersonalizeAvatarDialog } from '../dialogs/PersonalizeAvatarDialog';
 import { DropdownMenuOption } from '../DropdownMenuOptions';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
@@ -39,6 +42,8 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
     const [isUpdateNameDialogOpen, setIsUpdateNameDialogOpen] = useState<boolean>(false);
     const [isDeleteNameDialogOpen, setIsDeleteNameDialogOpen] = useState<boolean>(false);
     const [isAddSubnameDialogOpen, setIsAddSubnameDialogOpen] = useState<boolean>(false);
+    const [isCreateSubnameDialogOpen, setIsCreateSubnameDialogOpen] = useState<boolean>(false);
+    const [isPersonalizeAvatarNameOpen, setIsPersonalizeAvatarNameOpen] = useState<boolean>(false);
 
     const nameTree = useNameTree(nft.name);
 
@@ -58,23 +63,23 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
         {
             onClick: () => setIsDeleteNameDialogOpen(true),
             children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
-            isHidden: !nft.isExpired || (nameTree ? nameTree.subnames.length > 0 : false),
+            isHidden: !(nft.isExpired && nameTree ? nameTree.subnames.length > 0 : false),
             hideBottomBorder: true,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setIsPersonalizeAvatarNameOpen(true),
+            children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+            hideBottomBorder: true,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
         //     isDisabled: true,
         // },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-        // },
+        {
+            onClick: () => setIsCreateSubnameDialogOpen(true),
+            children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
@@ -107,7 +112,7 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
 
             {isAddSubnameDialogOpen ? (
                 <CreateSubnameDialog
-                    open={isAddSubnameDialogOpen}
+                    open
                     name={nft.name}
                     setOpen={() => setIsAddSubnameDialogOpen(false)}
                 />
@@ -115,17 +120,28 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
 
             {isUpdateNameDialogOpen ? (
                 <UpdateNameDialog
-                    open={isUpdateNameDialogOpen}
+                    open
                     name={nft.name}
                     setOpen={() => setIsUpdateNameDialogOpen(false)}
                 />
             ) : null}
 
             {isDeleteNameDialogOpen ? (
-                <DeleteNameDialog
-                    open={isDeleteNameDialogOpen}
-                    nft={nft}
-                    setOpen={() => setIsDeleteNameDialogOpen(false)}
+                <DeleteNameDialog open nft={nft} setOpen={() => setIsDeleteNameDialogOpen(false)} />
+            ) : null}
+
+            {isCreateSubnameDialogOpen ? (
+                <CreateSubnameDialog
+                    name={nft.name}
+                    open
+                    setOpen={() => setIsCreateSubnameDialogOpen(false)}
+                />
+            ) : null}
+
+            {isPersonalizeAvatarNameOpen ? (
+                <PersonalizeAvatarDialog
+                    name={nft.name}
+                    setOpen={() => setIsPersonalizeAvatarNameOpen(false)}
                 />
             ) : null}
         </>

@@ -6,8 +6,6 @@
 import {
     Button,
     Card,
-    CardAction,
-    CardActionType,
     CardBody,
     CardType,
     Checkbox,
@@ -37,8 +35,6 @@ import {
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
-import { VisualAssetsDialog } from './AvatarSelectDialog';
-import { CreateSubnameDialog } from './CreateSubnameDialog';
 import { RenewNameDialog } from './RenewNameDialog';
 
 type UpdateNameDialogProps = {
@@ -74,12 +70,9 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
-    const [avatarNftId, setAvatarNftId] = useState<string | null>(null);
 
     // Dialogs
-    const [isAvatarSelectorOpen, setIsAvatarSelectorOpen] = useState<boolean>(false);
     const [renewDialogOpen, setRenewDialogOpen] = useState(false);
-    const [subnameDialogOpen, setSubnameDialogOpen] = useState(false);
 
     // Sync permissions
     useEffect(() => {
@@ -163,19 +156,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         }
     }
 
-    if (avatarNftId && avatarNftId !== nameRecord?.nameRecord.avatar && nameRecord) {
-        const nftId = isNameSubname
-            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
-            : nameRecord.nameRecord.nftId;
-        if (nftId) {
-            updates.push({
-                type: 'set-avatar',
-                nftId,
-                avatarNftId: avatarNftId,
-            });
-        }
-    }
-
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -207,7 +187,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                             queryKey: queryKey.defaultName(account?.address || ''),
                         });
                         break;
-                    case 'set-avatar':
                     case 'edit-setup':
                     case 'set-target-address':
                         queryClient.invalidateQueries({
@@ -250,7 +229,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isWrongCombination || isLoading || isExpired;
     const disableRenew = isExpired;
-    const disableAddSubname = isExpired;
 
     return (
         <>
@@ -304,15 +282,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 onCheckedChange={handleReverseLookupChange}
                             />
                         </Card>
-
-                        <Card type={CardType.Outlined}>
-                            <CardBody title="Avatar NFT" />
-                            <CardAction
-                                type={CardActionType.Button}
-                                title="Update Avatar NFT"
-                                onClick={() => setIsAvatarSelectorOpen(true)}
-                            />
-                        </Card>
                         {isNameSubname ? (
                             <>
                                 <Card type={CardType.Outlined}>
@@ -352,19 +321,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 />
                             </Card>
                         )}
-                        {namePermissions?.allowChildCreation && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Add new subname"
-                                    subtitle="Create a new subname."
-                                />
-                                <Button
-                                    text="Add subname"
-                                    onClick={() => setSubnameDialogOpen(true)}
-                                    disabled={disableAddSubname}
-                                />
-                            </Card>
-                        )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
@@ -377,22 +333,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     </DialogBody>
                 </DialogContent>
             </Dialog>
-            {isAvatarSelectorOpen && (
-                <VisualAssetsDialog
-                    setOpen={setIsAvatarSelectorOpen}
-                    onAssetClick={(assetId) => {
-                        setAvatarNftId(assetId);
-                        setIsAvatarSelectorOpen(false);
-                    }}
-                />
-            )}
-            {subnameDialogOpen && (
-                <CreateSubnameDialog
-                    name={name}
-                    open={subnameDialogOpen}
-                    setOpen={setSubnameDialogOpen}
-                />
-            )}
             {renewDialogOpen && (
                 <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
             )}
