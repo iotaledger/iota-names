@@ -13,13 +13,10 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './NamePurchaseCard';
-
-function normalizeNameInput(name: string) {
-    return name.toLowerCase().replace(/\.iota$/i, '');
-}
 
 function getValidationError(
     name: string,
@@ -43,8 +40,12 @@ function getValidationError(
 
 interface AvailabilityCheckDialogProps {
     autoFocusInput?: boolean;
+    onCompleted?: () => void;
 }
-export function AvailabilityCheckDialog({ autoFocusInput }: AvailabilityCheckDialogProps) {
+export function AvailabilityCheckDialog({
+    autoFocusInput,
+    onCompleted,
+}: AvailabilityCheckDialogProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -86,10 +87,18 @@ export function AvailabilityCheckDialog({ autoFocusInput }: AvailabilityCheckDia
         }
     }
 
+    function handleBid() {
+        setAuctionDialogOpen(false);
+        setSearchValue('');
+        setName('');
+        onCompleted?.();
+    }
+
     function handlePurchase() {
         setPurchaseDialogOpen(false);
         setSearchValue('');
         setName('');
+        onCompleted?.();
     }
     const statusMessage =
         isUnavailable && !isAuctionInProgress
@@ -203,7 +212,11 @@ export function AvailabilityCheckDialog({ autoFocusInput }: AvailabilityCheckDia
                 )}
 
                 {isAuctionBidDialogOpen && (
-                    <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
+                    <AuctionBidDialog
+                        name={name}
+                        closeDialog={() => setAuctionDialogOpen(false)}
+                        onCompleted={handleBid}
+                    />
                 )}
             </div>
         </div>

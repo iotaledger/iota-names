@@ -16,7 +16,7 @@ import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog'
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
-    const { open } = useAvailabilityCheckDialog();
+    const { open, close } = useAvailabilityCheckDialog();
 
     const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
     const showSearch = isConnected && isOnMyNamesPage;
@@ -24,6 +24,7 @@ export function Navbar() {
     function toggleSearchDialog() {
         open({
             autoFocusInput: true,
+            onCompleted: close,
         });
     }
 

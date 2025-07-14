@@ -11,7 +11,7 @@ const TITLE = 'Your On-Chain Name';
 const DESCRIPTION = 'Own a unique, human-readable name on IOTA.';
 
 export function LandingHero() {
-    const { open } = useAvailabilityCheckDialog();
+    const { open, close } = useAvailabilityCheckDialog();
 
     return (
         <div className="landing-background">
@@ -25,7 +25,7 @@ export function LandingHero() {
                     <Input
                         placeholder="Search for your IOTA name"
                         type={InputType.Text}
-                        onFocus={() => open({ autoFocusInput: true })}
+                        onFocus={() => open({ autoFocusInput: true, onCompleted: close })}
                     />
                 </div>
             </div>
