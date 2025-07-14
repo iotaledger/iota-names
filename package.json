@@ -39,7 +39,9 @@
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
         "sdk": "turbo --filter ./sdk",
         "dapp": "turbo --filter ./dapp",
-        "prepare": "husky"
+        "prepare": "husky",
+        "changeset-publish": "pnpm changeset publish",
+        "changeset-version": "pnpm changeset version"
     },
     "author": "",
     "license": "Apache-2.0",
