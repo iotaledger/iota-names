@@ -159,6 +159,20 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
                                 }
                             />
 
+                            {account?.address &&
+                                editTargetAddress !== account.address &&
+                                !isUnlinking && (
+                                    <div className="flex justify-end w-full">
+                                        <Button
+                                            text="Link to Current Address"
+                                            icon={<Link />}
+                                            onClick={handleUseCurrent}
+                                            disabled={disableEdit}
+                                            size={ButtonSize.Small}
+                                            type={ButtonType.Secondary}
+                                        />
+                                    </div>
+                                )}
                             {nameRecord?.nameRecord.targetAddress && (
                                 <div className="mt-sm">
                                     <Checkbox
@@ -174,21 +188,6 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
                                     />
                                 </div>
                             )}
-
-                            {account?.address &&
-                                editTargetAddress !== account.address &&
-                                !isUnlinking && (
-                                    <div className="flex justify-end w-full">
-                                        <Button
-                                            text="Link to Current Address"
-                                            icon={<Link />}
-                                            onClick={handleUseCurrent}
-                                            disabled={disableEdit}
-                                            size={ButtonSize.Small}
-                                            type={ButtonType.Secondary}
-                                        />
-                                    </div>
-                                )}
 
                             {nameRecord?.nameRecord.targetAddress && editTargetAddress ? (
                                 <div className="flex w-full break-all">
