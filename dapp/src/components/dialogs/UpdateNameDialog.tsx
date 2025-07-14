@@ -333,9 +333,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     </DialogBody>
                 </DialogContent>
             </Dialog>
-            {renewDialogOpen && (
-                <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
-            )}
+            {renewDialogOpen && <RenewNameDialog setOpen={setRenewDialogOpen} name={name} />}
         </>
     );
 }
