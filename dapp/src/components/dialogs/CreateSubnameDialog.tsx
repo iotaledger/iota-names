@@ -30,6 +30,8 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
+import { isValidIotaName } from '../../../../sdk/dist/esm/utils';
+
 function createSubnameUpdates({
     name,
     nameRecord,
@@ -60,7 +62,10 @@ function createSubnameUpdates({
         ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
         : nameRecord?.nftId;
 
-    if (nftId && fullSubnameName && isSubnameAvailable) {
+    if (nftId && fullSubnameName && isSubnameAvailable && newSubname) {
+        if (!isValidIotaName(fullSubnameName) || newSubname.length < MIN_LABEL_SIZE) {
+            return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
+        }
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
@@ -162,12 +167,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave =
-        updates.length === 0 ||
-        isLoading ||
-        isExpired ||
-        !editSubname.trim() ||
-        editSubname.length < MIN_LABEL_SIZE;
+    const disableSave = updates.length === 0 || isLoading || isExpired || !editSubname;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
