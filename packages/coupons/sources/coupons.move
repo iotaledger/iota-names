@@ -25,13 +25,9 @@ public struct Coupons has store {
     coupons: Table<vector<u8>, Coupon>,
 }
 
-public(package) fun new(ctx: &mut TxContext): Coupons {
-    Coupons {
-        coupons: table::new(ctx),
-    }
-}
+// === Public functions ===
 
-// Add percentaged based coupon.
+/// Add percentaged based coupon.
 public fun add_percentage_coupon(
     self: &mut Coupons,
     hash: String,
@@ -41,7 +37,7 @@ public fun add_percentage_coupon(
     self.save_coupon(hash, coupon::new_percentage(percentage, rules));
 }
 
-// Add fixed amount coupon.
+/// Add fixed amount coupon.
 public fun add_fixed_coupon(
     self: &mut Coupons,
     hash: String,
@@ -51,14 +47,22 @@ public fun add_fixed_coupon(
     self.save_coupon(hash, coupon::new_fixed(amount, rules));
 }
 
-// A function to remove a coupon from the system.
+// === Internal functions ===
+
+/// An internal function to create the `Coupons` struct.
+public(package) fun new(ctx: &mut TxContext): Coupons {
+    Coupons {
+        coupons: table::new(ctx),
+    }
+}
+
+/// An internal function to remove a coupon from the system.
 public(package) fun remove_coupon(self: &mut Coupons, hash: String) {
     let hash = hex::decode(hash.into_bytes());
     assert!(self.coupons.contains(hash), ECouponDoesNotExist);
     let _: Coupon = self.coupons.remove(hash);
 }
 
-/// Private internal functions
 /// An internal function to save the coupon in the shared object's config.
 public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon) {
     let hash = hex::decode(hash.into_bytes());
@@ -66,10 +70,12 @@ public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon
     self.coupons.add(hash, coupon);
 }
 
+/// An internal function to get a reference to the coupon table.
 public(package) fun coupons(self: &Coupons): &Table<vector<u8>, Coupon> {
     &self.coupons
 }
 
+/// An internal function to get a mutable reference to the coupon table.
 public(package) fun coupons_mut(self: &mut Coupons): &mut Table<vector<u8>, Coupon> {
     &mut self.coupons
 }
