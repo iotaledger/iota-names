@@ -57,7 +57,12 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
     const cleanName = normalizeNameInput(name);
     const updates: NameUpdate[] = [];
 
-    if (selectedAssetId && selectedAssetId !== nameRecord?.nameRecord.avatar && nameRecord) {
+    if (
+        selectedAssetId &&
+        selectedAssetId !== nameRecord?.nameRecord.avatar &&
+        nameRecord &&
+        isNameSubname !== null
+    ) {
         const nftId = isNameSubname
             ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
@@ -66,6 +71,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                 type: 'set-avatar',
                 nftId,
                 avatarNftId: selectedAssetId,
+                isSubname: isNameSubname,
             });
         }
     }

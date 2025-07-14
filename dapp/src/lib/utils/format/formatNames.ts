@@ -20,10 +20,32 @@ export function addNameSuffix(name: string) {
     return name.endsWith('.iota') ? name : `${name}.iota`;
 }
 
-export function getNameLabel(name: string, onlyFirstSubname = false) {
-    const { parentName, subname } = splitNameParts(name);
+const LONG_NAMES_TRUNCATE_LENGTH = 11;
+interface FormatNameOptions {
+    onlyFirstSubname?: boolean;
+    truncateLongSubnames?: boolean;
+}
+export function getNameLabel(
+    name: string,
+    { onlyFirstSubname = false, truncateLongSubnames = false }: FormatNameOptions = {},
+) {
+    const { parentName, subname: subnamePart } = splitNameParts(name);
 
-    return subname
-        ? `${onlyFirstSubname ? subname.split('.')[0] : subname}@${parentName}`
-        : `@${parentName}`;
+    const subnamesArr = subnamePart.split('.');
+    let subname = onlyFirstSubname
+        ? `${subnamesArr[0]}${subnamesArr.length > 1 ? '...' : ''}`
+        : subnamePart;
+
+    if (truncateLongSubnames) {
+        const subnames = subname.split('.');
+        subname = subnames
+            .map((s) => {
+                return s.length > LONG_NAMES_TRUNCATE_LENGTH
+                    ? `${s.slice(0, 3)}...${s.slice(-3)}`
+                    : s;
+            })
+            .join('.');
+    }
+
+    return subname ? `${subname}@${parentName}` : `@${parentName}`;
 }

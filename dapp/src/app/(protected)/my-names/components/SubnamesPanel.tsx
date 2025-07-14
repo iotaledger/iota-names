@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+'use client';
+
 import { Add, MoreHoriz } from '@iota/apps-ui-icons';
 import {
     Button,
@@ -8,7 +10,6 @@ import {
     Card,
     CardAction,
     CardActionType,
-    CardBody,
     CardImage,
     CardType,
     Header,
@@ -16,148 +17,109 @@ import {
     ImageType,
     Panel,
 } from '@iota/apps-ui-kit';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { findInNameTree } from '@/lib/utils/buildNameTree';
+import { NameTree } from '@/lib/utils/buildNameTree';
 import { addNameSuffix, getNameLabel } from '@/lib/utils/format/formatNames';
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
+    onSubnameAddClick: (subname: string) => void;
     onClose: () => void;
 }
 
-export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
-    const nftName = addNameSuffix(selectedName.name);
-    const nameTree = useNameTree(nftName);
+export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: SubnamesPanelProps) {
+    const [nameTreePaths, setNameTreePaths] = useState<string[]>([]);
+    const nameTree = useNameTree(addNameSuffix(selectedName.name));
 
-    const rootNode = useMemo(() => {
-        if (!nameTree || !selectedName.name) return null;
-        return findInNameTree(nameTree, selectedName.name);
-    }, [nameTree, selectedName.name]);
+    const currentTree = useMemo(
+        () => traverseNameTree(nameTree, nameTreePaths),
+        [nameTree, selectedName.name, nameTreePaths],
+    );
 
-    const [navigationStack, setNavigationStack] = useState<(typeof rootNode)[]>([]);
+    function goDeeper(subname: string) {
+        setNameTreePaths((p) => [...p, subname]);
+    }
 
-    useEffect(() => {
-        if (rootNode) {
-            setNavigationStack([rootNode]);
-        }
-    }, [rootNode]);
+    function goBack() {
+        setNameTreePaths((p) => p.slice(0, -1));
+    }
 
-    const currentNode = navigationStack[navigationStack.length - 1];
+    if (!currentTree) return null;
 
-    const goBack = () => {
-        setNavigationStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-    };
-
-    const goDeeper = (childName: string) => {
-        const child = currentNode?.subnames.find((n) => n.name === childName);
-        if (child) {
-            setNavigationStack((prev) => [...prev, child]);
-        }
-    };
-
-    if (!currentNode) return null;
-
-    const headerTitle = `Subnames for ${getNameLabel(navigationStack.length > 1 ? currentNode.name : selectedName.name)}`;
-    const isOnRoot = navigationStack.length === 1;
+    const isAtRoot = nameTreePaths.length === 0;
+    const titleName = isAtRoot ? selectedName.name : currentTree.name;
 
     return (
-        <div className="max-w-[360px] w-full">
-            <Panel>
-                <div className="w-full flex flex-row items-center justify-between">
-                    <Header
-                        onBack={isOnRoot ? undefined : goBack}
-                        title={headerTitle}
-                        onClose={onClose}
-                    />
-                </div>
+        <Panel>
+            <div className="w-full flex flex-row items-center justify-between">
+                <Header
+                    onBack={isAtRoot ? undefined : () => goBack()}
+                    title={`Subnames for ${getNameLabel(titleName, {
+                        onlyFirstSubname: true,
+                        truncateLongSubnames: true,
+                    })}`}
+                    onClose={onClose}
+                />
+            </div>
 
-                <div className="flex flex-col gap-xxs px-sm">
-                    {currentNode.subnames.map((nft) => (
-                        <Card
-                            key={nft.name}
-                            type={CardType.Default}
-                            isHoverable
-                            onClick={() => goDeeper(nft.name)}
-                        >
+            <div className="flex flex-col gap-xxs px-sm w-full">
+                {currentTree.subnames.map((sub) => (
+                    <Card
+                        key={sub.name}
+                        type={CardType.Default}
+                        isHoverable
+                        onClick={() => goDeeper(sub.name)}
+                    >
+                        <div className="flex flex-row items-center w-full gap-sm max-w-full">
                             <CardImage
                                 type={ImageType.BgTransparent}
                                 shape={ImageShape.SquareRounded}
                             >
-                                <div className="flex w-full h-full items-center justify-center bg-black rounded-lg">
-                                    <PlaceholderSvg />
-                                </div>
+                                <AvatarDisplay
+                                    name={sub.name}
+                                    size="full"
+                                    fallbackUrl="/subname-card-fallback.png"
+                                />
                             </CardImage>
-                            <CardBody title={nft.name} />
+
+                            <div className="min-w-0 text-title-md font-medium leading-[120%] tracking-[-0.15px] text-names-neutral-92 mr-auto break-words">
+                                {getNameLabel(sub.name, { truncateLongSubnames: true })}
+                            </div>
+
                             <CardAction
                                 type={CardActionType.Button}
                                 buttonType={ButtonType.Ghost}
                                 icon={<MoreHoriz />}
                                 onClick={() => {}}
                             />
-                        </Card>
-                    ))}
-                </div>
-                <div className="flex flex-col items-center justify-center py-sm">
-                    <div>
-                        <Button
-                            text="New Subname"
-                            type={ButtonType.Outlined}
-                            onClick={() => {}}
-                            icon={<Add />}
-                        />
-                    </div>
-                </div>
-            </Panel>
-        </div>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-sm">
+                <Button
+                    text="New Subname"
+                    type={ButtonType.Outlined}
+                    onClick={() => onSubnameAddClick(currentTree.name)}
+                    icon={<Add />}
+                />
+            </div>
+        </Panel>
     );
 }
 
-function PlaceholderSvg() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-        >
-            <path
-                d="M14.8714 7.52631C15.0698 7.52631 15.2308 7.68743 15.2308 7.88617V12.3275C15.2308 12.4227 15.1929 12.5143 15.1254 12.5819L9.82064 17.8945C9.75316 17.962 9.66172 18 9.56631 18H5.13124C4.93278 18 4.77189 17.8388 4.77189 17.6401V13.1987C4.77189 13.1032 4.80979 13.0117 4.87727 12.9441L10.2874 7.52631H14.8714Z"
-                fill="url(#paint0_linear_11465_1911)"
-            />
-            <path
-                d="M9.928 2C10.1265 2 10.2874 2.16112 10.2874 2.35986V7.52598H5.12858C4.93012 7.52597 4.76923 7.36483 4.76923 7.16609V2.35986C4.76923 2.16113 4.93012 2.00001 5.12858 2H9.928Z"
-                fill="url(#paint1_linear_11465_1911)"
-            />
-            <defs>
-                <linearGradient
-                    id="paint0_linear_11465_1911"
-                    x1="13.6154"
-                    y1="6.69231"
-                    x2="2.1042"
-                    y2="13.4304"
-                    gradientUnits="userSpaceOnUse"
-                >
-                    <stop stop-color="#D34BFF" />
-                    <stop offset="0.288525" stop-color="#278FFF" />
-                    <stop offset="0.673162" stop-color="#14F0D6" />
-                </linearGradient>
-                <linearGradient
-                    id="paint1_linear_11465_1911"
-                    x1="13.6154"
-                    y1="6.69231"
-                    x2="2.1042"
-                    y2="13.4304"
-                    gradientUnits="userSpaceOnUse"
-                >
-                    <stop stop-color="#D34BFF" />
-                    <stop offset="0.288525" stop-color="#278FFF" />
-                    <stop offset="0.673162" stop-color="#14F0D6" />
-                </linearGradient>
-            </defs>
-        </svg>
-    );
+function traverseNameTree(nameTree: NameTree | null, paths: string[]) {
+    if (!nameTree) return null;
+    let currentNameTree: NameTree | null = nameTree;
+
+    for (const subname of paths) {
+        if (!currentNameTree) break;
+        currentNameTree = currentNameTree.subnames.find((child) => child.name === subname) || null;
+    }
+    return currentNameTree;
 }
