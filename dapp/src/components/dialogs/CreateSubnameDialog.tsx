@@ -51,7 +51,7 @@ function createSubnameUpdates({
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
-    const fullSubnameName = newSubname?.trim() ? normalizeNameInput(newSubname + '.' + name) : null;
+    const fullSubnameName = newSubname?.trim() ? normalizeNameInput(newSubname) + '.' + name : null;
     // See if there is an existing subname with the same name
     const isSubnameAvailable = fullSubnameName
         ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
