@@ -6,6 +6,7 @@
 import {
     Add,
     Assets,
+    Link,
     // Calendar,
     // Delete,
     // Info,
@@ -21,6 +22,7 @@ import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
+import { SetLinkedAddressDialog } from '@/components/dialogs/SetLinkedAddressDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -35,6 +37,7 @@ export default function MyNamesPage(): JSX.Element {
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
+    const [linkedAddress, setLinkedAddress] = useState<string | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
     const { data: subnames } = useRegistrationNfts('subname');
@@ -84,10 +87,10 @@ export default function MyNamesPage(): JSX.Element {
             onClick: () => setCreateSubnameDialog(nft),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
-        // },
+        {
+            onClick: () => setLinkedAddress(nft.name),
+            children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
@@ -202,6 +205,12 @@ export default function MyNamesPage(): JSX.Element {
                 <PersonalizeAvatarDialog
                     name={personalizeAvatarName}
                     setOpen={() => setPersonalizeAvatarName(null)}
+                />
+            )}
+            {!!linkedAddress && (
+                <SetLinkedAddressDialog
+                    name={linkedAddress}
+                    setOpen={() => setLinkedAddress(null)}
                 />
             )}
         </div>
