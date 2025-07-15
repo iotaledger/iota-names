@@ -136,7 +136,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transactionResult = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({

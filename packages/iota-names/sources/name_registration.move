@@ -19,8 +19,6 @@ use iota_names::constants;
 use iota_names::name::Name;
 use std::string::String;
 
-/* friend iota_names::registry; */
-
 /// The main access point for the user.
 public struct NameRegistration has key, store {
     id: UID,
