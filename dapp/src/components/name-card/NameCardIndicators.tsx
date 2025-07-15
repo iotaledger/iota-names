@@ -10,8 +10,10 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 
 import { SvgSubnames } from '../svgs/SvgSubnames';
 
-const INDICATOR_CLASSES =
-    'p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs text-names-neutral-70 text-label-md w-max';
+const INDICATOR_PRIMARY_TEXT_COLOR = 'text-names-neutral-70';
+const INDICATOR_SECONDARY_TEXT_COLOR = 'text-iota-primary-80';
+const INDICATOR_COMMON_CLASSES =
+    'p-xxs rounded-lg leading-4 flex flex-row gap-x-xxxs  text-label-md w-max';
 
 const CLICKABLE_INDICATOR_CLASSES = 'state-layer relative cursor-pointer';
 
@@ -26,7 +28,7 @@ export function ExpiryDateIndicator({ auction }: ExpiryDateIndicatorProps) {
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
 
     return (
-        <span className={cx(INDICATOR_CLASSES)}>
+        <span className={cx(INDICATOR_PRIMARY_TEXT_COLOR, INDICATOR_COMMON_CLASSES)}>
             <Calendar className="h-4 w-4" />
             {formattedTimeRemaining}
         </span>
@@ -50,9 +52,9 @@ export function SubnameCountIndicator({
         return (
             <ButtonUnstyled
                 className={cx(
-                    INDICATOR_CLASSES,
+                    INDICATOR_SECONDARY_TEXT_COLOR,
+                    INDICATOR_COMMON_CLASSES,
                     CLICKABLE_INDICATOR_CLASSES,
-                    'text-iota-primary-80',
                 )}
                 onClick={onAddSubnameClick}
             >
@@ -64,7 +66,11 @@ export function SubnameCountIndicator({
     return (
         <ButtonUnstyled
             onClick={onSubnameListClick}
-            className={cx(INDICATOR_CLASSES, CLICKABLE_INDICATOR_CLASSES)}
+            className={cx(
+                INDICATOR_PRIMARY_TEXT_COLOR,
+                INDICATOR_COMMON_CLASSES,
+                CLICKABLE_INDICATOR_CLASSES,
+            )}
         >
             <SvgSubnames className="h-4 w-4" />
             {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
