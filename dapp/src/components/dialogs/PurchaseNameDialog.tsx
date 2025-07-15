@@ -17,6 +17,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import { queryKey } from '@/hooks';
@@ -87,6 +88,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
             if (onPurchase) onPurchase();
         },
+        onError(error) {
+            toast.error(error.message);
+        },
     });
 
     function closeDialog() {
@@ -115,6 +119,31 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const cleanName = normalizeNameInput(name);
     const expirationDate = getDefaultExpirationDate();
+
+    useEffect(() => {
+        if (coinBalanceError) {
+            toast.error(coinBalanceError.message);
+        }
+    }, [coinBalanceError]);
+
+    useEffect(() => {
+        if (nameRecordError) {
+            toast.error(nameRecordError.message);
+        }
+    }, [nameRecordError]);
+
+    useEffect(() => {
+        if (registerNameError) {
+            if (
+                registerNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                registerNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+            } else {
+                toast.error(registerNameError.message);
+            }
+        }
+    }, [registerNameError]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -156,26 +185,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 />
                             </div>
                         </div>
-                        {!hasEnoughGas && (
-                            <div className="text-center text-red-400 text-sm">
-                                {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
-                            </div>
-                        )}
-                        {purchaseError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {purchaseError.message}
-                            </div>
-                        )}
-                        {nameRecordError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {nameRecordError.message}
-                            </div>
-                        )}
-                        {hasEnoughGas && registerNameError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {registerNameError.message}
-                            </div>
-                        )}
                     </div>
                 </DialogBody>
             </DialogContent>

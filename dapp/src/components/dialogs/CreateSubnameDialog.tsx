@@ -24,6 +24,7 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubname, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
@@ -139,7 +140,11 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
+            toast.success(`Successfully created subname @${fullSubnameName}`);
             closeDialog();
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
