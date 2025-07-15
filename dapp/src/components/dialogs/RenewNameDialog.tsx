@@ -15,7 +15,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
     NameRecordData,
@@ -112,18 +112,8 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         nameRecord?.nameRecord.expirationTimestampMs ?? 0,
         editRenewYears ?? 1,
     );
+
     const maxYearsToRenew = renewData?.yearsToRenew;
-    let isRenewable = true;
-    useEffect(() => {
-        const checkRenewable = () => {
-            if (nameRecord?.nameRecord && editRenewYears) {
-                isRenewable = renewData?.isRenewable || false;
-            } else {
-                setRenewError(null);
-            }
-        };
-        checkRenewable();
-    }, [editRenewYears]);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
@@ -213,7 +203,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         ) : null}
                         {renewError ? (
                             <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
-                        ) : wantsToRenew && !isRenewable ? (
+                        ) : wantsToRenew && !renewData?.isRenewable ? (
                             <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
                         ) : updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
