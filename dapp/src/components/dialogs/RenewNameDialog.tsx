@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+'use client';
+
 import {
     Button,
     ButtonType,
@@ -18,7 +20,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
@@ -159,23 +161,26 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     }
 
     function remainingRenewYears(expirationMs: number) {
-        if (!coreConfig?.max_years) {
-            return 0;
-        }
-        const maxExpiration = Date.now() + coreConfig?.max_years * YEAR_MS;
+        if (!coreConfig?.max_years) return 0;
+        const maxExpiration = Date.now() + coreConfig.max_years * YEAR_MS;
         const diff = maxExpiration - expirationMs;
         return Math.max(0, Math.floor(diff / YEAR_MS));
     }
 
     const remainingYears = remainingRenewYears(nameRecord?.nameRecord?.expirationTimestampMs ?? 0);
 
-    const RENEW_OPTIONS: SelectOption[] = [
-        { id: '', label: 'Select renewal period' },
-        ...Array.from({ length: remainingYears }, (_, i) => ({
-            id: String(i + 1),
-            label: `${i + 1} Year${i ? 's' : ''}`,
-        })),
-    ];
+    const RENEW_OPTIONS: SelectOption[] = Array.from({ length: remainingYears }, (_, i) => ({
+        id: String(i + 1),
+        label: `${i + 1} Year${i ? 's' : ''}`,
+    }));
+
+    useEffect(() => {
+        if (!selectedYears && RENEW_OPTIONS.length) {
+            const first = RENEW_OPTIONS[0];
+            setSelectedYears(typeof first === 'string' ? first : first.id);
+        }
+    }, [RENEW_OPTIONS, selectedYears]);
+
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
@@ -204,10 +209,9 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                             {!isNameSubname && (
                                 <Select
                                     options={RENEW_OPTIONS}
-                                    placeholder="Select renewal period"
                                     value={selectedYears}
                                     onValueChange={handleYearsChange}
-                                    disabled={disableEdit}
+                                    disabled={disableEdit || RENEW_OPTIONS.length === 0}
                                     errorMessage={updateNameError?.message}
                                 />
                             )}
