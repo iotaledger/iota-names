@@ -47,7 +47,7 @@ public fun set_target_address(
     registry.set_target_address(name, new_target);
 }
 
-/// Set the reverse lookup address for the name
+/// Set the reverse lookup address for the name.
 public fun set_reverse_lookup(
     iota_names: &mut IotaNames,
     name: String,

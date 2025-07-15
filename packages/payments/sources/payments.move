@@ -10,7 +10,7 @@ use iota_names::iota_names::IotaNames;
 use iota_names::payment::{Receipt, PaymentIntent};
 use std::type_name::{Self, TypeName};
 
-/// Authorization capability to call protected functions of `iota_names`.
+/// Authorization witness to call protected functions of `iota_names`.
 public struct PaymentsAuth has drop {}
 
 #[error]

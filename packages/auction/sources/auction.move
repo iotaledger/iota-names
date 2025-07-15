@@ -48,7 +48,7 @@ const EBidTooLow: vector<u8> = b"The bid is too low, minimum overbid should be a
 #[error]
 const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 
-/// Authorization capability to call protected functions of `iota_names`.
+/// Authorization witness to call protected functions of `iota_names`.
 public struct AuctionAuth has drop {}
 
 /// The `AuctionHouse` application.
