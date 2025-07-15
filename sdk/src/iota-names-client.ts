@@ -6,10 +6,11 @@ import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { toB64 } from '@iota/iota-sdk/utils';
 
-import { NameBcs, PricingConfigBcs } from './bcs.js';
-import { packages } from './constants.js';
+import { CoreConfigBcs, NameBcs, PricingConfigBcs } from './bcs.js';
+import { ALLOWED_METADATA, packages } from './constants.js';
 import {
     getConfigType,
+    getCoreConfigType,
     getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
@@ -18,6 +19,7 @@ import {
 } from './helpers.js';
 import type {
     IotaNamesClientConfig,
+    IotaNamesCoreConfig,
     IotaNamesPriceList,
     NameRecord,
     PackageInfo,
@@ -41,9 +43,57 @@ export class IotaNamesClient {
     }
 
     /**
+     * Returns the core config of IOTA Names.
+     */
+    async getCoreConfig(): Promise<IotaNamesCoreConfig> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('Price list config not found');
+
+        const coreConfigBcsB64 = toB64(
+            CoreConfigBcs.serialize({
+                dummy_field: false,
+            }).toBytes(),
+        );
+
+        const coreConfigResponse: any = await this.graphQlClient.query({
+            query: graphql(`
+                query getCoreConfig($parentId: IotaAddress!, $name: DynamicFieldName!) {
+                    owner(address: $parentId) {
+                        address
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    json
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: this.config.iotaNamesObjectId,
+                name: {
+                    type: getConfigType(
+                        this.config.packageId,
+                        getCoreConfigType(this.config.packageId),
+                    ),
+                    bcs: coreConfigBcsB64,
+                },
+            },
+        });
+
+        const coreConfig = coreConfigResponse?.data?.owner?.dynamicField?.value?.json;
+
+        if (!coreConfig) {
+            throw new Error('Core config not found or is invalid');
+        }
+
+        return coreConfig;
+    }
+
+    /**
      * Returns the price list for IOTA names in the base asset.
      */
-
     // Format:
     // {
     // 	[ 3, 3 ] => 500000000,
@@ -110,7 +160,6 @@ export class IotaNamesClient {
     /**
      * Returns the renewal price list for IOTA names in the base asset.
      */
-
     // Format:
     // {
     // 	[ 3, 3 ] => 500000000,
@@ -254,8 +303,7 @@ export class IotaNamesClient {
             targetAddress: nameRecord?.target_address!,
             expirationTimestampMs: Number(nameRecord?.expiration_timestamp_ms),
             data,
-            avatar: data.avatar,
-            contentHash: data.content_hash,
+            avatar: data[ALLOWED_METADATA.avatar],
         };
     }
 

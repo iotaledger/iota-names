@@ -36,6 +36,8 @@ public struct CoreConfig has copy, drop, store {
     payments_version: u8,
     /// Maximum number of years available for a name.
     max_years: u8,
+    /// List of valid user data keys.
+    valid_user_data_keys: VecSet<String>,
     // Extra fields for future use.
     extra: VecMap<String, String>,
 }
@@ -46,6 +48,7 @@ public fun new(
     payments_version: u8,
     max_years: u8,
     valid_tlns: vector<String>,
+    valid_user_data_keys: vector<String>,
     extra: VecMap<String, String>,
 ): CoreConfig {
     CoreConfig {
@@ -54,6 +57,7 @@ public fun new(
         payments_version,
         max_years,
         valid_tlns: vec_set::from_keys(valid_tlns),
+        valid_user_data_keys: vec_set::from_keys(valid_user_data_keys),
         extra,
     }
 }
@@ -78,6 +82,14 @@ public fun max_years(config: &CoreConfig): u8 {
     config.max_years
 }
 
+public fun is_valid_user_data_key(config: &CoreConfig, user_data_key: &String): bool {
+    config.valid_user_data_keys.contains(user_data_key)
+}
+
+public fun add_user_data_key(config: &mut CoreConfig, user_data_key: String) {
+    config.valid_user_data_keys.insert(user_data_key)
+}
+
 /// Validates name against core configuration rules (length, TLN, subname restrictions).
 /// Does NOT check deny list - use validation::assert_is_valid_for_sale for complete validation.
 public fun assert_is_valid_for_sale(config: &CoreConfig, name: &Name) {
@@ -99,6 +111,30 @@ public fun default(): CoreConfig {
         iota_names::constants::payments_version!(),
         5,
         vector[iota_names::constants::iota_tln()],
+        valid_user_data_keys(),
         iota::vec_map::empty(),
     )
+}
+
+#[test_only]
+use std::string::utf8;
+
+#[test_only]
+public fun valid_user_data_keys() : vector<String> {
+    vector[
+        utf8(b"avatar"),
+        utf8(b"twitter/x"),
+        utf8(b"discord"),
+        utf8(b"github"),
+        utf8(b"email"),
+        utf8(b"btc"),
+        utf8(b"eth"),
+        utf8(b"ltc"),
+        utf8(b"doge"),
+        utf8(b"sol"),
+        utf8(b"sui"),
+        utf8(b"website"),
+        utf8(b"ipfs"),
+        utf8(b"arweave"),
+    ]
 }

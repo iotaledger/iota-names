@@ -3,17 +3,25 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
-    ButtonSize,
+    ButtonPill,
     ButtonType,
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
+    DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
+    Panel,
+    TooltipPosition,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
@@ -22,17 +30,22 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
+import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
+import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { queryKey } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;
     closeDialog: () => void;
+    onCompleted?: () => void;
 }
 
-export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
@@ -75,12 +88,18 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             closeDialog();
+            onCompleted?.();
         },
     });
 
     const minBidLabel = formatNanosToIota(minBidNanos, {
         formatRounded: false,
         showIotaSymbol: true,
+    });
+
+    const minBidWithoutLabel = formatNanosToIota(minBidNanos, {
+        formatRounded: false,
+        showIotaSymbol: false,
     });
     const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = (bidNanos || BigInt(0)) < minBidNanos;
@@ -98,55 +117,109 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
             return error.message;
         }
     })();
+    const cleanName = normalizeNameInput(name);
 
+    const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
+    const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
+    const { milliseconds } = useCountdown(timeRemainingMs || 0);
+
+    const formattedTimeRemaining = formatTimeRemaining(milliseconds);
+    const currentBid = auctionMetadata
+        ? formatNanosToIota(auctionMetadata.currentBidNanos, {
+              formatRounded: false,
+              showIotaSymbol: true,
+          })
+        : '--';
+    const expirationDate = auctionMetadata
+        ? formatExpirationDate(auctionMetadata.nftExpiration)
+        : '--';
     return (
         <Dialog open onOpenChange={closeDialog}>
-            <DialogContent showCloseOnOverlay>
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header
-                    title={auctionMetadata ? `Bid for ${name}` : `Start Auction for ${name}`}
+                    title="Auction"
                     titleCentered
                     onClose={() => closeDialog()}
                     onBack={() => closeDialog()}
                 />
 
                 <DialogBody>
-                    <div className="flex flex-col gap-md">
-                        <Input
-                            type={InputType.Number}
-                            label="Your bid (IOTA)"
-                            min={Number(minBidNanos)}
-                            value={bidAmountValue}
-                            onChange={({ target: { value } }) => setBidAmountValue(value)}
-                            errorMessage={errorMessage}
-                        />
+                    <div className="flex flex-col justify-between h-full items-center">
+                        <div className="flex flex-col w-full gap-y-md">
+                            {status === 'top_bidder' && (
+                                <InfoBox
+                                    title="Top Bidder"
+                                    supportingText="Your are the top bidder already"
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Warning}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
 
-                        <div className="flex items-center justify-between">
-                            <span className="text-body-md text-neutral-60">Minimum bid:</span>
-                            <span className="text-body-md">{minBidLabel}</span>
+                            <Panel bgColor="bg-names-neutral-12">
+                                <div className="px-md py-lg">
+                                    <span className="text-names-neutral-100 text-headline-sm">
+                                        @{cleanName}
+                                    </span>
+                                </div>
+                            </Panel>
+                            {auctionMetadata && (
+                                <div className="flex flex-row gap-x-sm w-full">
+                                    <DisplayStats
+                                        label="Current Bid"
+                                        value={currentBid}
+                                        tooltipText="The current highest bid for this auction."
+                                        tooltipPosition={TooltipPosition.Right}
+                                    />
+                                    <DisplayStats
+                                        label="Time Left"
+                                        value={formattedTimeRemaining}
+                                    />
+                                </div>
+                            )}
+                            <Input
+                                type={InputType.Number}
+                                label="Your Bid"
+                                min={Number(minBidNanos)}
+                                value={bidAmountValue}
+                                onChange={({ target: { value } }) => setBidAmountValue(value)}
+                                errorMessage={errorMessage}
+                                trailingElement={
+                                    <ButtonPill
+                                        onClick={() => setBidAmountValue(minBidWithoutLabel)}
+                                    >
+                                        Min
+                                    </ButtonPill>
+                                }
+                            />
+                        </div>
+                        <div className="flex w-full flex-col gap-y-md">
+                            {auctionMetadata && (
+                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                            )}
+                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={() => closeDialog()}
+                                    fullWidth
+                                />
+                                <Button
+                                    type={ButtonType.Primary}
+                                    disabled={disablePlaceBid}
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    text={auctionMetadata ? 'Bid' : 'Start auction'}
+                                    onClick={() => {
+                                        if (auctionBidTransaction) {
+                                            handleConfirm(auctionBidTransaction);
+                                        }
+                                    }}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogBody>
-
-                <div className="flex w-full justify-center gap-2 px-md--rs pb-md--rs pt-sm--rs">
-                    <Button
-                        size={ButtonSize.Small}
-                        type={ButtonType.Outlined}
-                        text="Cancel"
-                        onClick={() => closeDialog()}
-                    />
-                    <Button
-                        size={ButtonSize.Small}
-                        type={ButtonType.Primary}
-                        disabled={disablePlaceBid}
-                        icon={isLoading ? <LoadingIndicator /> : null}
-                        text={auctionMetadata ? 'Place bid' : 'Start auction'}
-                        onClick={() => {
-                            if (auctionBidTransaction) {
-                                handleConfirm(auctionBidTransaction);
-                            }
-                        }}
-                    />
-                </div>
             </DialogContent>
         </Dialog>
     );
