@@ -69,7 +69,7 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,

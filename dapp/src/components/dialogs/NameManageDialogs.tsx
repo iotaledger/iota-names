@@ -9,6 +9,7 @@ import { DeleteNameDialog, UpdateNameDialog } from '.';
 import { CreateSubnameDialog } from './CreateSubnameDialog';
 import { NameDialogId } from './enums';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
+import { RenewNameDialog } from './RenewNameDialog';
 
 interface NameManageDialogsProps {
     nft: RegistrationNft;
@@ -33,6 +34,10 @@ export function NameManageDialogs({ nft, openDialogId, onClose }: NameManageDial
 
             {openDialogId === NameDialogId.PersonalizeAvatar ? (
                 <PersonalizeAvatarDialog name={nft.name} setOpen={onClose} />
+            ) : null}
+
+            {openDialogId === NameDialogId.RenewName ? (
+                <RenewNameDialog name={nft.name} setOpen={onClose} />
             ) : null}
         </Fragment>
     );

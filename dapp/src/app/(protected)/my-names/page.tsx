@@ -23,7 +23,6 @@ import { useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
-import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
@@ -38,8 +37,6 @@ export default function MyNamesPage(): JSX.Element {
     const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
         null,
     );
-    const [addNewSubnameDialog, setAddNewSubnameDialog] = useState<RegistrationNft | null>(null);
-
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
@@ -100,14 +97,6 @@ export default function MyNamesPage(): JSX.Element {
     function handleChipSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
         setRightPanelSelectedName(null);
-    }
-
-    function handleAddNewSubname(subname: string) {
-        const selectedSubname = subnames?.find((nft) => nft.name === subname);
-
-        if (selectedSubname) {
-            setAddNewSubnameDialog(selectedSubname);
-        }
     }
 
     function isDefaultName(name: RegistrationNft): boolean {
@@ -225,19 +214,10 @@ export default function MyNamesPage(): JSX.Element {
                             <SubnamesPanel
                                 selectedName={rightPanelSelectedName}
                                 onClose={() => setRightPanelSelectedName(null)}
-                                onSubnameAddClick={handleAddNewSubname}
                             />
                         </div>
                     )}
                 </div>
-            )}
-
-            {addNewSubnameDialog && (
-                <CreateSubnameDialog
-                    name={addNewSubnameDialog.name}
-                    open
-                    setOpen={() => setAddNewSubnameDialog(null)}
-                />
             )}
         </>
     );

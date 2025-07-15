@@ -6,7 +6,6 @@
 import { Close, Search } from '@iota/apps-ui-icons';
 import { Button, ButtonType, ButtonUnstyled, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
@@ -15,8 +14,8 @@ import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
-import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from './NamePurchaseCard';
+import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { NamePurchaseCard } from '../NamePurchaseCard';
 
 function getValidationError(
     name: string,
@@ -38,14 +37,11 @@ function getValidationError(
     return null;
 }
 
-interface AvailabilityCheckDialogProps {
+interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
     onCompleted?: () => void;
 }
-export function AvailabilityCheckDialog({
-    autoFocusInput,
-    onCompleted,
-}: AvailabilityCheckDialogProps) {
+export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -100,15 +96,18 @@ export function AvailabilityCheckDialog({
         setName('');
         onCompleted?.();
     }
+
     const statusMessage =
         isUnavailable && !isAuctionInProgress
             ? 'Name is already taken.'
             : isAuctionInProgress
               ? 'In auction'
               : undefined;
+    const purchasePrice = isAvailable ? nameRecordData.price : undefined;
+    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
+    const cleanName = normalizeNameInput(name);
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
-    const cleanName = normalizeNameInput(name);
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -156,15 +155,15 @@ export function AvailabilityCheckDialog({
                         trailingElement={inputTrailingElement}
                     />
                 </div>
-                {nameRecordData && (
+                {nameRecordData && !errorMessage && (
                     <div className="flex flex-col items-center space-y-4 w-full">
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
                                 price={
-                                    isAvailable
-                                        ? formatNanosToIota(nameRecordData.price, {
+                                    purchasePrice
+                                        ? formatNanosToIota(purchasePrice, {
                                               showIotaSymbol: false,
                                           })
                                         : undefined
@@ -190,10 +189,11 @@ export function AvailabilityCheckDialog({
                             <NamePurchaseCard
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                price={formatNanosToIota(
-                                    auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
-                                    { showIotaSymbol: false },
-                                )}
+                                price={
+                                    bidPrice
+                                        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
+                                        : undefined
+                                }
                                 priceSupportingText="Minimum bid"
                                 statusMessage={statusMessage}
                             >

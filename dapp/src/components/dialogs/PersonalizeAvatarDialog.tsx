@@ -87,7 +87,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     const { mutate: saveAvatar, isPending: isSaving } = useMutation({
         async mutationFn() {
             if (!updateTransaction) return;
-            const tx = await signAndExecuteTransaction({ transaction: updateTransaction });
+            const tx = await signAndExecuteTransaction({
+                transaction: updateTransaction.transaction,
+            });
 
             await iotaClient.waitForTransaction({ digest: tx.digest });
 
