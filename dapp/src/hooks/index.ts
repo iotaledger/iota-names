@@ -11,4 +11,4 @@ export * from './usePriceList';
 export * from './queryKey';
 export * from './useGetDefaultName';
 export * from './useUpdateNameTransaction';
-export * from './useRenewData';
+export * from './useCoreConfig';

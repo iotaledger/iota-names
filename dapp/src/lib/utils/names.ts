@@ -74,31 +74,12 @@ export function getNameObject(names: RegistrationNft[], name: string) {
 }
 
 /**
- * Get the maximum number of years to renew a name.
- * Returns 0 if the name is not renewable for more time.
+ * Get the amount of years that this name can be renewed as of now.
  */
-export function getYearsToRenew(max_years: number, expirationTimestampMs: number): number {
-    if (!expirationTimestampMs) return 0;
-    for (let years = 6; years >= 0; years--) {
-        const newExpirationTime = expirationTimestampMs + years * 365 * 24 * 60 * 60 * 1000;
-        const maxRenewalTime = Date.now() + (max_years + 1) * 365 * 24 * 60 * 60 * 1000;
-        if (newExpirationTime < maxRenewalTime) return years;
-    }
-    return 0;
-}
+export function getNameRenewableYears(maxYears: number, expirationTimestampMs: number): number {
+    const expirationTime = new Date(expirationTimestampMs);
+    const in5YearsTime = new Date();
+    in5YearsTime.setFullYear(in5YearsTime.getFullYear() + maxYears + 1);
 
-/**
- * Check if a name is renewable for renewYears years.
- */
-export function isNameRenewable(
-    max_years: number,
-    expirationTimestampMs: number,
-    renewYears: number,
-): boolean {
-    if (!expirationTimestampMs || !renewYears) {
-        return true;
-    }
-    const newExpirationTime = expirationTimestampMs + renewYears * 365 * 24 * 60 * 60 * 1000;
-    const maxRenewalTime = Date.now() + (max_years + 1) * 365 * 24 * 60 * 60 * 1000;
-    return newExpirationTime < maxRenewalTime;
+    return in5YearsTime.getFullYear() - expirationTime.getFullYear();
 }

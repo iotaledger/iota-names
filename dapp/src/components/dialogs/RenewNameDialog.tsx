@@ -20,16 +20,17 @@ import { useState } from 'react';
 import {
     NameRecordData,
     queryKey,
+    useCoreConfig,
     useNameRecord,
     useRegistrationNfts,
-    useRenewData,
 } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { CANNOT_EXCEED_MAX_YEARS, CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
+import { CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import {
     getNameObject,
     getNamePermissions,
+    getNameRenewableYears,
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
@@ -97,23 +98,20 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const { data: nameRecordData } = useNameRecord(name);
+
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
+
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
-    const [renewError, setRenewError] = useState<string | null>(null);
+
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
-    const { data: renewData } = useRenewData(
-        nameRecord?.nameRecord.expirationTimestampMs ?? 0,
-        editRenewYears ?? 1,
-    );
-
-    const maxYearsToRenew = renewData?.yearsToRenew;
+    const { data: coreConfig } = useCoreConfig();
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
@@ -157,12 +155,27 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
+    const renewableYears =
+        coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  coreConfig.max_years,
+                  nameRecord.nameRecord.expirationTimestampMs,
+              )
+            : null;
+    const isRenewable = editRenewYears && renewableYears ? editRenewYears <= renewableYears : null;
+    let renewError = null;
+    if (isRenewable == false) {
+        renewError = `You cannot renew for more than ${renewableYears} years.`;
+    } else if (editRenewYears && editRenewYears < 0) {
+        renewError = 'Input a positive number.';
+    }
+
+    const errorMessage = renewError || updateNameError?.message;
     const wantsToRenew = isNameSubname || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
-    const disableSave =
-        isLoading || !canRenew || !wantsToRenew || !!updateNameError || !!renewError;
+    const disableSave = isLoading || !canRenew || !wantsToRenew || !!errorMessage;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -179,16 +192,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                                     type={InputType.Number}
                                     onChange={(e) => {
                                         const val = Number(e.target.value);
-                                        setRenewError(null);
-                                        if (maxYearsToRenew && val > maxYearsToRenew) {
-                                            setRenewError(
-                                                `You cannot renew for more than ${maxYearsToRenew} years.`,
-                                            );
-                                        } else if (val < 0) {
-                                            setRenewError('Input a positive number.');
-                                        } else {
-                                            setEditRenewYears(isNaN(val) ? 0 : val);
-                                        }
+                                        setEditRenewYears(isNaN(val) ? 0 : val);
                                     }}
                                     placeholder="Input renew years"
                                     disabled={disableEdit}
@@ -196,18 +200,12 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                             </div>
                         ) : null}
                         <div className="mb-4">
-                            You can renew this name for a maximum of {maxYearsToRenew} years
+                            You can renew this name for a maximum of {renewableYears} years
                         </div>
                         {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
                         ) : null}
-                        {renewError ? (
-                            <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
-                        ) : wantsToRenew && !renewData?.isRenewable ? (
-                            <div className="text-red-400">{CANNOT_EXCEED_MAX_YEARS}</div>
-                        ) : updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
-                        ) : null}
+                        {errorMessage ? <div className="text-red-400">{errorMessage}</div> : null}
                         <div className="flex gap-2 justify-end">
                             <Button
                                 type={ButtonType.Secondary}

@@ -22,8 +22,9 @@ export const queryKey = {
     // Generic
     ownedObjects: (address: string) => [queryKey.all, 'owned-objects', address],
 
-    // Price List
+    // Core
     priceList: () => [queryKey.all, 'price-list'],
+    coreConfig: () => [queryKey.all, 'core-config'],
 
     // Auctions
     userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
