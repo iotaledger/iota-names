@@ -66,7 +66,10 @@ export function Navbar() {
                             isFixedPosition
                         >
                             <div className="flex flex-col gap-md px-48 py-20 flex-1">
-                                <AvailabilityCheck autoFocusInput />
+                                <AvailabilityCheck
+                                    autoFocusInput
+                                    onCompleted={() => setSearchDialogOpen(false)}
+                                />
                             </div>
                         </DialogContent>
                     </Dialog>

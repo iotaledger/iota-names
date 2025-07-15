@@ -9,8 +9,11 @@ import {
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
+    DisplayStats,
     Header,
     LoadingIndicator,
+    Panel,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,6 +27,8 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 
 type PurchaseNameProps = {
     name: string;
@@ -120,67 +125,48 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
+    const cleanName = normalizeNameInput(name);
+    const expirationDate = getDefaultExpirationDate();
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container" isFixedPosition>
-                <Header title="Buy name" onClose={closeDialog} titleCentered />
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
+                <Header title="Register name" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col items-center gap-y-md">
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Name:</span>
-                            <span className="text-body-md font-mono">{name}</span>
+                    <div className="flex flex-col justify-between h-full items-center">
+                        <div className="flex flex-col w-full gap-y-md">
+                            <Panel bgColor="bg-names-neutral-12">
+                                <div className="px-md py-lg">
+                                    <span className="text-names-neutral-100 text-headline-sm">
+                                        @{cleanName}
+                                    </span>
+                                </div>
+                            </Panel>
                         </div>
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Registration time:</span>
-                            <span className="text-body-md font-mono">1 year</span>
-                        </div>
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Price:</span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading && canPay
-                                    ? formatNanosToIota(nameRecordData.price, {
-                                          formatRounded: false,
-                                      })
-                                    : '-'}
-                            </span>
-                        </div>
-
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Gas:</span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalGas, { formatRounded: false })
-                                    : '-'}
-                            </span>
-                        </div>
-
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">
-                                Total price (Name + gas):
-                            </span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalPrice, {
-                                          formatRounded: false,
-                                      })
-                                    : '-'}
-                            </span>
-                        </div>
-                        <div className="flex w-full flex-row gap-x-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={closeDialog}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                type={ButtonType.Primary}
-                                text="Buy"
-                                onClick={() => handlePurchase()}
-                                disabled={!canRegister}
-                                fullWidth
-                            />
+                        <div className="flex flex-col w-full gap-y-md">
+                            <div className="flex flex-row gap-x-sm w-full">
+                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                                <DisplayStats
+                                    label="Total Due"
+                                    value={formatNanosToIota(totalPrice)}
+                                />
+                            </div>
+                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={closeDialog}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    type={ButtonType.Primary}
+                                    text="Buy"
+                                    onClick={() => handlePurchase()}
+                                    disabled={!canRegister}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                         {!hasEnoughGas && (
                             <div className="text-center text-red-400 text-sm">
