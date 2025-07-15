@@ -222,9 +222,9 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
-                                    title="Maximum Renewal Time Reached"
+                                    title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`You cannot renew this name anymore, as it has already reached the maximum expiration time of ${coreConfig?.max_years} years.`}
+                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You’ll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
                         </div>
