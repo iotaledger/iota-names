@@ -49,10 +49,14 @@ export function getRenewalPricelistConfigType(iotaNamesPackageId: string): strin
     return `${iotaNamesPackageId}::pricing_config::RenewalConfig`;
 }
 
-export function getIotaNamesRegistrationType(iotaNamesPackageId: string): string {
-    return `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
+export function getNameRegistrationType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::name_registration::NameRegistration`;
 }
 
-export function getIotaSubnameRegistrationType(iotaNamesPackageId: string): string {
+export function getSubnameRegistrationType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::subname_registration::SubnameRegistration`;
+}
+
+export function getCoreConfigType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::core_config::CoreConfig`;
 }

@@ -3,17 +3,19 @@
 
 'use client';
 
+import { Info } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
-    Card,
-    CardBody,
-    CardType,
     Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
@@ -126,7 +128,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({
@@ -169,64 +171,63 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container" isFixedPosition>
-                <Header title="Add subname" titleCentered />
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
+                <Header title="New Subname" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col items-center gap-y-md">
-                        <h3 className="text-lg font-semibold mb-4">Add subname to {name}</h3>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium mb-2">Subname:</label>
+                    <div className="flex flex-col h-full justify-between">
+                        <div className="flex flex-col h-full items-center gap-y-lg">
+                            <InfoBox
+                                type={InfoBoxType.Default}
+                                style={InfoBoxStyle.Elevated}
+                                icon={<Info />}
+                                supportingText="Create as many Subnames as you want under @example_name, each with its own profile page and features"
+                            />
                             <Input
                                 type={InputType.Text}
                                 value={editSubname}
                                 onChange={(e) => setEditSubname(e.target.value)}
-                                placeholder="Input subname"
+                                placeholder="Enter subname"
+                                label="Subname name"
+                                errorMessage={
+                                    !isSubnameAvailable && fullSubnameName
+                                        ? 'Subname is not available'
+                                        : updateNameError
+                                          ? updateNameError.message
+                                          : undefined
+                                }
                             />
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Set allow renew name"
-                                    subtitle="Allow renew name."
-                                />
-                                <Checkbox
-                                    isChecked={editIsAllowingRenew}
-                                    isDisabled={disableEdit}
-                                    onCheckedChange={handleAllowRenewChange}
-                                />
-                            </Card>
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Set allow subname"
-                                    subtitle="Allow creating subnames."
-                                />
+                            <div className="flex flex-col gap-y-md w-full">
+                                <span className="text-label-lg text-names-neutral-92">
+                                    Permissions
+                                </span>
                                 <Checkbox
                                     isChecked={editIsAllowSubnames}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowSubnameChange}
+                                    label="Allow Subname to create additional Subnames"
                                 />
-                            </Card>
-                            {editSubname && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Preview: {fullSubnameName}
-                                </p>
-                            )}
+
+                                <Checkbox
+                                    isChecked={editIsAllowingRenew}
+                                    isDisabled={disableEdit}
+                                    onCheckedChange={handleAllowRenewChange}
+                                    label="Allow Subname to renew expiration"
+                                />
+                            </div>
                         </div>
-                        {!isSubnameAvailable && fullSubnameName ? (
-                            <div className="text-red-500 mb-4">This subname is not available</div>
-                        ) : null}
-                        {updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
-                        ) : null}
-                        <div className="flex gap-2 justify-end">
+                        <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}
                                 text="Cancel"
                                 onClick={handleCancelAddSubname}
+                                fullWidth
                             />
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
                                 text="Create"
                                 disabled={disableSave}
                                 onClick={() => save()}
+                                fullWidth
                             />
                         </div>
                     </div>

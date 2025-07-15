@@ -21,16 +21,17 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import { queryKey } from '@/hooks';
+import { NameUpdate, queryKey, useUpdateNameTransaction } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 import {
     GAS_BALANCE_TOO_LOW_ID,
     GAS_BUDGET_ERROR_MESSAGES,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
-import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { formatNanosToIota } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 
 type PurchaseNameProps = {
     name: string;
@@ -60,11 +61,26 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
+
+    const updates: NameUpdate[] = [];
+
+    if (nameRecordData?.type === 'available' && price > 0) {
+        updates.push({
+            type: 'register-name',
+            name: name,
+            price: price,
+            years: 1,
+        });
+    }
+
     const {
-        data: registerNameData,
-        isLoading: isRegisterNameLoading,
-        error: registerNameError,
-    } = useRegisterNameTransaction(account?.address || '', name, price, renewYears);
+        data: updateNameData,
+        isLoading: isUpdateNameLoading,
+        error: updateNameError,
+    } = useUpdateNameTransaction({
+        address: account?.address || '',
+        updates: updates,
+    });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -77,9 +93,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         isPending: isSigning,
     } = useMutation({
         async mutationFn() {
-            if (!registerNameData || nameRecordData?.type !== 'available') return;
+            if (!updateNameData || nameRecordData?.type !== 'available') return;
             const transactionResult = await signAndExecuteTransaction({
-                transaction: registerNameData.transaction,
+                transaction: updateNameData.transaction,
             });
 
             await client.waitForTransaction({
@@ -104,31 +120,25 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     if (!isConnected) return null;
 
     const totalBalance = Number(coinBalance?.totalBalance) || 0;
-    const totalGas = Number(registerNameData?.gasSummary?.totalGas) || 0;
+    const totalGas = Number(updateNameData?.gasSummary?.totalGas) || 0;
     const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
     const hasBalance = totalBalance > totalPrice;
 
     const hasEnoughGas =
-        !registerNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !registerNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
 
     const canPay =
         isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
 
-    const hasErrors = registerNameError || coinBalanceError || purchaseError;
+    const hasErrors = updateNameError || coinBalanceError || purchaseError;
 
-    const isLoading = isNameRecordLoading || isRegisterNameLoading || isSigning;
+    const isLoading = isNameRecordLoading || isUpdateNameLoading || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const cleanName = sanitizeIotaName(name);
-    const expirationTime = Date.now() + 365 * 24 * 60 * 60 * 1000 * renewYears;
-
-    const expirationDate = new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(new Date(expirationTime));
+    const cleanName = normalizeNameInput(name);
+    const expirationDate = getDefaultExpirationDate();
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -167,6 +177,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
                                 label="Set name as Display Name"
                             />
+                        </div>
+                        <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats
@@ -206,9 +218,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 {nameRecordError.message}
                             </div>
                         )}
-                        {hasEnoughGas && registerNameError && (
+                        {hasEnoughGas && updateNameError && (
                             <div className="text-center text-red-400 text-sm">
-                                {registerNameError.message}
+                                {updateNameError.message}
                             </div>
                         )}
                     </div>

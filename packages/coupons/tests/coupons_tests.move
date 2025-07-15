@@ -11,7 +11,7 @@ use iota::hex;
 use iota::test_scenario::{Scenario, return_shared};
 use iota::test_utils::{Self, destroy};
 use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::payment::PaymentIntent;
 use iota_names_coupons::coupon_house;
 use iota_names_coupons::coupons;
@@ -610,7 +610,7 @@ fun test_coupon_renewal(
     {
         let mut iota_names = scenario.take_shared<IotaNames>();
         let clock = scenario.take_shared<Clock>();
-        let nft = iota_names::iota_names_registration::new_for_testing(
+        let nft = iota_names::name_registration::new_for_testing(
             iota_names::name::new(name),
             1,
             &clock,
@@ -648,7 +648,7 @@ fun init_registration(iota_names: &mut IotaNames, name: String): PaymentIntent {
 
 fun init_renewal(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     years: u8,
 ): PaymentIntent {
     let intent = iota_names::payment::init_renewal(iota_names, nft, years);

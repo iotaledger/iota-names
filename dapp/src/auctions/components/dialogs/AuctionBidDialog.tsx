@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonPill,
@@ -25,37 +25,52 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { queryKey } from '@/hooks';
-import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
+import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;
     closeDialog: () => void;
+    onCompleted?: () => void;
 }
 
-export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogProps) {
+export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
-    const { data: auctionMetadata } = useGetAuctionMetadata(name);
-    const minBidNanos = auctionMetadata?.minBidNanos || NANOS_PER_IOTA;
-    const [bidAmountValue, setBidAmountValue] = useState(
-        formatNanosToIota(minBidNanos, {
-            formatRounded: false,
-            showIotaSymbol: false,
-        }),
-    );
+    const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
-    const bidNanos = toNanos(bidAmountValue);
+    const nameRecord = nameRecordData as Extract<NameRecordData, { type: 'available' }> | undefined;
+    const { data: auctionMetadata } = useGetAuctionMetadata(name);
+    const minBidNanos =
+        auctionMetadata?.minBidNanos || (nameRecord ? BigInt(nameRecord.price) : null);
+
+    const [bidAmountValue, setBidAmountValue] = useState<string | undefined>();
+
+    // Sync the minimum bid amount
+    useEffect(() => {
+        if (minBidNanos) {
+            setBidAmountValue(
+                formatNanosToIota(minBidNanos, {
+                    formatRounded: false,
+                    showIotaSymbol: false,
+                }),
+            );
+        }
+    }, [minBidNanos]);
+
+    const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
 
     const {
         data: auctionBidTransaction,
@@ -85,39 +100,22 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             closeDialog();
+            onCompleted?.();
         },
     });
 
-    const minBidLabel = formatNanosToIota(minBidNanos, {
-        formatRounded: false,
-        showIotaSymbol: true,
-    });
-
-    const minBidWithoutLabel = formatNanosToIota(minBidNanos, {
-        formatRounded: false,
-        showIotaSymbol: false,
-    });
     const isBidAboveDecimals = bidNanos === null;
-    const isBidBelowMinimum = (bidNanos || BigInt(0)) < minBidNanos;
 
-    const isLoading = isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
+    const isLoading =
+        isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
-
-    const errorMessage = (() => {
-        if (isBidAboveDecimals) {
-            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
-        } else if (isBidBelowMinimum) {
-            return `Bid must be ≥ ${minBidLabel}`;
-        } else if (error) {
-            return error.message;
-        }
-    })();
-    const cleanName = sanitizeIotaName(name);
+    const cleanName = normalizeNameInput(name);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
+    const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -127,12 +125,30 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
           })
         : '--';
     const expirationDate = auctionMetadata
-        ? new Intl.DateTimeFormat('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric',
-          }).format(auctionMetadata.nftExpiration)
+        ? formatExpirationDate(auctionMetadata.nftExpiration)
         : '--';
+    const minBidLabel = minBidNanos
+        ? formatNanosToIota(minBidNanos, {
+              formatRounded: false,
+              showIotaSymbol: true,
+          })
+        : '--';
+    const minBidWithoutLabel = minBidNanos
+        ? formatNanosToIota(minBidNanos, {
+              formatRounded: false,
+              showIotaSymbol: false,
+          })
+        : '--';
+    const errorMessage = (() => {
+        if (isBidAboveDecimals) {
+            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
+        } else if (isBidBelowMinimum) {
+            return `Bid must be ≥ ${minBidLabel}`;
+        } else if (error) {
+            return error.message;
+        }
+    })();
+
     return (
         <Dialog open onOpenChange={closeDialog}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -150,8 +166,8 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                                 <InfoBox
                                     title="Top Bidder"
                                     supportingText="Your are the top bidder already"
-                                    icon={<Info />}
-                                    type={InfoBoxType.Default}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Warning}
                                     style={InfoBoxStyle.Default}
                                 />
                             )}
@@ -199,7 +215,7 @@ export function AuctionBidDialog({ name, closeDialog }: AuctionBidDialogDialogPr
                             )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
-                                    type={ButtonType.Outlined}
+                                    type={ButtonType.Secondary}
                                     text="Cancel"
                                     onClick={() => closeDialog()}
                                     fullWidth

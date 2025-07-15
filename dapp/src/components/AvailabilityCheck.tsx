@@ -6,13 +6,13 @@
 import { Close, Search } from '@iota/apps-ui-icons';
 import { Button, ButtonType, ButtonUnstyled, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota, sanitizeIotaName } from '@/lib/utils';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './NamePurchaseCard';
@@ -39,8 +39,9 @@ function getValidationError(
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
+    onCompleted?: () => void;
 }
-export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
+export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -82,20 +83,31 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         }
     }
 
+    function handleBid() {
+        setAuctionDialogOpen(false);
+        setSearchValue('');
+        setName('');
+        onCompleted?.();
+    }
+
     function handlePurchase() {
         setPurchaseDialogOpen(false);
         setSearchValue('');
         setName('');
+        onCompleted?.();
     }
+
     const statusMessage =
         isUnavailable && !isAuctionInProgress
             ? 'Name is already taken.'
             : isAuctionInProgress
               ? 'In auction'
               : undefined;
+    const purchasePrice = isAvailable ? nameRecordData.price : undefined;
+    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
+    const cleanName = normalizeNameInput(name);
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
-    const cleanName = sanitizeIotaName(name);
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -143,15 +155,15 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                         trailingElement={inputTrailingElement}
                     />
                 </div>
-                {nameRecordData && (
+                {nameRecordData && !errorMessage && (
                     <div className="flex flex-col items-center space-y-4 w-full">
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
                                 price={
-                                    isAvailable
-                                        ? formatNanosToIota(nameRecordData.price, {
+                                    purchasePrice
+                                        ? formatNanosToIota(purchasePrice, {
                                               showIotaSymbol: false,
                                           })
                                         : undefined
@@ -177,10 +189,11 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                             <NamePurchaseCard
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                price={formatNanosToIota(
-                                    auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
-                                    { showIotaSymbol: false },
-                                )}
+                                price={
+                                    bidPrice
+                                        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
+                                        : undefined
+                                }
                                 priceSupportingText="Minimum bid"
                                 statusMessage={statusMessage}
                             >
@@ -199,7 +212,11 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                 )}
 
                 {isAuctionBidDialogOpen && (
-                    <AuctionBidDialog name={name} closeDialog={() => setAuctionDialogOpen(false)} />
+                    <AuctionBidDialog
+                        name={name}
+                        closeDialog={() => setAuctionDialogOpen(false)}
+                        onCompleted={handleBid}
+                    />
                 )}
             </div>
         </div>
