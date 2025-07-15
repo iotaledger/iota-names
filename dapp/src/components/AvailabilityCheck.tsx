@@ -155,7 +155,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                         trailingElement={inputTrailingElement}
                     />
                 </div>
-                {nameRecordData && (
+                {nameRecordData && !errorMessage && (
                     <div className="flex flex-col items-center space-y-4 w-full">
                         {!isAuctionInProgress && (
                             <NamePurchaseCard
