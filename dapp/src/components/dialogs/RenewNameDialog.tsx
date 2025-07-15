@@ -17,7 +17,13 @@ import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
-import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
+import {
+    NameRecordData,
+    queryKey,
+    useNameRecord,
+    useRegistrationNfts,
+    useRenewData,
+} from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { CANNOT_EXCEED_MAX_YEARS, CANT_RENEW_NAME_FOR_MORE_TIME } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
@@ -25,9 +31,7 @@ import {
     getNameObject,
     getNamePermissions,
     getParentObject,
-    getYearsToRenew,
     isGracePeriodExpired,
-    isNameRenewable,
 } from '@/lib/utils/names';
 
 function createRenewUpdates({
@@ -93,27 +97,32 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const { data: nameRecordData } = useNameRecord(name);
-
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-
     // Editable values
     const [editRenewYears, setEditRenewYears] = useState<number>();
     const [renewError, setRenewError] = useState<string | null>(null);
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
-
+    const { data: renewData } = useRenewData(
+        nameRecord?.nameRecord.expirationTimestampMs ?? 0,
+        editRenewYears ?? 1,
+    );
+    const maxYearsToRenew = renewData?.yearsToRenew;
     let isRenewable = true;
     useEffect(() => {
-        if (nameRecord?.nameRecord && editRenewYears) {
-            isRenewable = isNameRenewable(nameRecord.nameRecord, editRenewYears);
-        } else {
-            setRenewError(null);
-        }
+        const checkRenewable = () => {
+            if (nameRecord?.nameRecord && editRenewYears) {
+                isRenewable = renewData?.isRenewable || false;
+            } else {
+                setRenewError(null);
+            }
+        };
+        checkRenewable();
     }, [editRenewYears]);
 
     const updates = createRenewUpdates({
@@ -178,12 +187,12 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                             <div className="mb-4">
                                 <Input
                                     type={InputType.Number}
-                                    onChange={(e) => {
+                                    onChange={async (e) => {
                                         const val = Number(e.target.value);
                                         setRenewError(null);
-                                        if (val > getYearsToRenew(nameRecord?.nameRecord)) {
+                                        if (maxYearsToRenew && val > maxYearsToRenew) {
                                             setRenewError(
-                                                `You cannot renew for more than ${getYearsToRenew(nameRecord?.nameRecord)} years.`,
+                                                `You cannot renew for more than ${maxYearsToRenew} years.`,
                                             );
                                         } else if (val < 0) {
                                             setRenewError('Input a positive number.');
@@ -197,8 +206,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                             </div>
                         ) : null}
                         <div className="mb-4">
-                            You can renew this name for a maximum of{' '}
-                            {getYearsToRenew(nameRecord?.nameRecord)} years
+                            You can renew this name for a maximum of {maxYearsToRenew} years
                         </div>
                         {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>

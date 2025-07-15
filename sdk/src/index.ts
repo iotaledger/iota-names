@@ -5,13 +5,7 @@
 export { IotaNamesClient } from './iota-names-client';
 export { IotaNamesTransaction } from './iota-names-transaction';
 export type { IotaNamesClientConfig, NameRecord } from './types';
-export {
-    ALLOWED_METADATA,
-    MIN_LABEL_SIZE,
-    GRACE_PERIOD_MS,
-    MAX_RENEWAL_YEARS,
-    packages,
-} from './constants';
+export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants';
 export {
     isSubname,
     isNestedSubname,
