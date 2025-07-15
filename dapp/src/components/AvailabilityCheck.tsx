@@ -4,73 +4,53 @@
 'use client';
 
 import { Close, Search } from '@iota/apps-ui-icons';
-import { Button, ButtonType, ButtonUnstyled, Input, InputType } from '@iota/apps-ui-kit';
+import {
+    Button,
+    ButtonType,
+    ButtonUnstyled,
+    Input,
+    InputType,
+    LoadingIndicator,
+} from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { validateIotaName } from '@iota/iota-names-sdk';
 import { useCallback, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { useNameRecord, usePriceList } from '@/hooks';
-import { formatNanosToIota } from '@/lib/utils';
+import { isAuctionActive } from '@/auctions/lib/utils';
+import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
 import { NamePurchaseCard } from './NamePurchaseCard';
-
-function getValidationError(
-    name: string,
-    minLength: number = 3,
-    maxLength: number = 64,
-): string | null {
-    const IOTA_NAME_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
-    if (!name) return null;
-
-    if (name.includes('.')) {
-        return 'No subnames allowed';
-    }
-    if (!IOTA_NAME_REGEX.test(name)) {
-        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
-    }
-    if (name.length < minLength || name.length > maxLength) {
-        return `Name must be ${minLength}-${maxLength} characters long`;
-    }
-    return null;
-}
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
     onCompleted?: () => void;
 }
+
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
-    const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
-    const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
 
-    const { data: nameRecordData, error } = useNameRecord(name);
-    const { data: priceList } = usePriceList();
-
-    const { data: auctionMetadata, isLoading: isAuctionMetadataLoading } =
-        useGetAuctionMetadata(name);
-
-    const isAvailable = nameRecordData?.type === 'available';
-    const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress =
-        isUnavailable &&
-        auctionMetadata?.endTimestamp &&
-        auctionMetadata.endTimestamp.getTime() > Date.now();
-
-    // User can bid in existing auctions or if there is no auction and the name is not taken
-    const canBid = isAuctionInProgress || isAvailable;
+    const {
+        data: auctionMetadata,
+        error: auctionError,
+        isLoading: isLoadingAuctionMetadat,
+    } = useGetAuctionMetadata(name);
+    const {
+        data: nameRecordData,
+        error: nameError,
+        isLoading: isLoadingNameRecord,
+    } = useNameRecord(name);
+    const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
 
     const validationError = useMemo(
-        () => getValidationError(searchValue, priceList?.minLength, priceList?.maxLength),
+        () => validateIotaName(searchValue, priceList?.minLength, priceList?.maxLength),
         [searchValue, priceList],
     );
-
-    const errorMessage = error?.message ?? validationError ?? '';
-    const enableSearch = Boolean(searchValue) && !errorMessage;
 
     const handleSearch = useCallback(() => {
         if (searchValue) setName(`${searchValue}.iota`);
@@ -83,31 +63,21 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         }
     }
 
-    function handleBid() {
-        setAuctionDialogOpen(false);
+    function handleBidOrPurchase() {
         setSearchValue('');
         setName('');
         onCompleted?.();
     }
 
-    function handlePurchase() {
-        setPurchaseDialogOpen(false);
-        setSearchValue('');
-        setName('');
-        onCompleted?.();
-    }
+    const errorMessage =
+        auctionError?.message || nameError?.message || priceError?.message || validationError || '';
+    const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const statusMessage =
-        isUnavailable && !isAuctionInProgress
-            ? 'Name is already taken.'
-            : isAuctionInProgress
-              ? 'In auction'
-              : undefined;
-    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
-    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
-    const cleanName = normalizeNameInput(name);
-
-    const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
+    const normalizedName = normalizeNameInput(name);
+    const enableSearch = Boolean(searchValue) && !errorMessage;
+    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isUnavailable = nameRecordData?.type === 'unavailable';
+    const isNameTaken = isUnavailable && !isAuctionInProgress;
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -131,14 +101,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
-            {isPurchaseDialogOpen && isAvailable && (
-                <PurchaseNameDialog
-                    name={name}
-                    open={isPurchaseDialogOpen}
-                    setOpen={setPurchaseDialogOpen}
-                    onPurchase={handlePurchase}
-                />
-            )}
             <div className="flex flex-col gap-2xl w-full max-w-[744px]">
                 <div className="flex gap-x-sm items-baseline justify-center w-full">
                     <Input
@@ -155,70 +117,155 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                         trailingElement={inputTrailingElement}
                     />
                 </div>
-                {nameRecordData && !errorMessage && (
-                    <div className="flex flex-col items-center space-y-4 w-full">
-                        {!isAuctionInProgress && (
-                            <NamePurchaseCard
-                                name={cleanName}
-                                isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                price={
-                                    purchasePrice
-                                        ? formatNanosToIota(purchasePrice, {
-                                              showIotaSymbol: false,
-                                          })
-                                        : undefined
-                                }
-                                priceSupportingText={isAvailable ? 'Price' : undefined}
-                                statusMessage={statusMessage}
-                            >
-                                {isUnavailable ? null : isConnected ? (
-                                    <Button
-                                        type={ButtonType.Secondary}
-                                        text="Buy"
-                                        onClick={() => setPurchaseDialogOpen(true)}
-                                    />
-                                ) : (
-                                    <ConnectButton connectText="Connect" />
-                                )}
-                            </NamePurchaseCard>
-                        )}
+                <div className="flex flex-col items-center space-y-4 w-full">
+                    {isLoading ? (
+                        <LoadingIndicator />
+                    ) : isNameTaken ? (
+                        <NamePurchaseCard
+                            name={normalizedName}
+                            isAvailable={false}
+                            statusMessage="Name is already taken."
+                        ></NamePurchaseCard>
+                    ) : (
+                        nameRecordData && (
+                            <>
+                                <PurchaseName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleBidOrPurchase}
+                                />
 
-                        {isAuctionLoading ? (
-                            <p>Loading...</p>
-                        ) : canBid ? (
-                            <NamePurchaseCard
-                                name={cleanName}
-                                isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                price={
-                                    bidPrice
-                                        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
-                                        : undefined
-                                }
-                                priceSupportingText="Minimum bid"
-                                statusMessage={statusMessage}
-                            >
-                                {isConnected ? (
-                                    <Button
-                                        type={ButtonType.Primary}
-                                        text="Bid"
-                                        onClick={() => setAuctionDialogOpen(true)}
-                                    />
-                                ) : (
-                                    <ConnectButton connectText="Connect" />
-                                )}
-                            </NamePurchaseCard>
-                        ) : null}
-                    </div>
-                )}
-
-                {isAuctionBidDialogOpen && (
-                    <AuctionBidDialog
-                        name={name}
-                        closeDialog={() => setAuctionDialogOpen(false)}
-                        onCompleted={handleBid}
-                    />
-                )}
+                                <BidName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleBidOrPurchase}
+                                />
+                            </>
+                        )
+                    )}
+                </div>
             </div>
         </div>
+    );
+}
+
+function BidName({
+    name,
+    nameRecordData,
+    onCompleted,
+}: {
+    name: string;
+    nameRecordData: NameRecordData;
+    onCompleted: () => void;
+}) {
+    const { isConnected } = useCurrentWallet();
+    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
+    const { data: auctionMetadata } = useGetAuctionMetadata(name);
+
+    const isAvailable = nameRecordData?.type === 'available';
+    const isUnavailable = nameRecordData?.type === 'unavailable';
+    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAllowedToBid = isAvailable || (isUnavailable && isAuctionInProgress) || false;
+
+    function handleBid() {
+        setAuctionDialogOpen(false);
+        onCompleted();
+    }
+
+    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
+    // If there is no auction yet, then we use the purchase price as minimum
+    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
+    const formattedBidPrice = bidPrice
+        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
+        : undefined;
+    const normalizedName = normalizeNameInput(name);
+
+    return (
+        <>
+            <NamePurchaseCard
+                name={normalizedName}
+                isAvailable={isAllowedToBid}
+                price={formattedBidPrice}
+                priceSupportingText="Minimum bid"
+                statusMessage={isAuctionInProgress ? 'In auction' : ''}
+            >
+                {isConnected ? (
+                    <Button
+                        type={ButtonType.Primary}
+                        text="Bid"
+                        onClick={() => setAuctionDialogOpen(true)}
+                    />
+                ) : (
+                    <ConnectButton connectText="Connect" />
+                )}
+            </NamePurchaseCard>
+
+            {isAuctionBidDialogOpen && (
+                <AuctionBidDialog
+                    name={name}
+                    closeDialog={() => setAuctionDialogOpen(false)}
+                    onCompleted={handleBid}
+                />
+            )}
+        </>
+    );
+}
+
+function PurchaseName({
+    name,
+    nameRecordData,
+    onCompleted,
+}: {
+    name: string;
+    nameRecordData: NameRecordData;
+    onCompleted: () => void;
+}) {
+    const { isConnected } = useCurrentWallet();
+    const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
+    const isAvailable = nameRecordData?.type === 'available';
+    const isUnavailable = nameRecordData?.type === 'unavailable';
+
+    function handlePurchase() {
+        setPurchaseDialogOpen(false);
+        onCompleted();
+    }
+
+    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
+    const formattedPurchasePrice = purchasePrice
+        ? formatNanosToIota(purchasePrice, {
+              showIotaSymbol: false,
+          })
+        : undefined;
+    const normalizedName = normalizeNameInput(name);
+
+    return (
+        <>
+            <NamePurchaseCard
+                name={normalizedName}
+                isAvailable={isAvailable}
+                price={formattedPurchasePrice}
+                priceSupportingText={isAvailable ? 'Price' : undefined}
+            >
+                {isUnavailable ? null : isConnected ? (
+                    <Button
+                        type={ButtonType.Secondary}
+                        text="Buy"
+                        onClick={() => setPurchaseDialogOpen(true)}
+                    />
+                ) : (
+                    <ConnectButton connectText="Connect" />
+                )}
+            </NamePurchaseCard>
+
+            {isPurchaseDialogOpen && (
+                <PurchaseNameDialog
+                    name={name}
+                    open={isPurchaseDialogOpen}
+                    setOpen={setPurchaseDialogOpen}
+                    onPurchase={handlePurchase}
+                />
+            )}
+        </>
     );
 }
