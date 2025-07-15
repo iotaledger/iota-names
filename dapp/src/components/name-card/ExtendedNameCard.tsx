@@ -127,7 +127,6 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
             {isCreateSubnameDialogOpen ? (
                 <CreateSubnameDialog
                     name={nft.name}
-                    open
                     setOpen={() => setIsCreateSubnameDialogOpen(false)}
                 />
             ) : null}

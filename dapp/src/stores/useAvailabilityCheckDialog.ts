@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 
-import type { AvailabilityCheck } from '@/components';
+import type { AvailabilityCheck } from '@/components/availability-check/AvailabilityCheck';
 
 type DialogProps = React.ComponentProps<typeof AvailabilityCheck>;
 type UseAvailabilityCheckDialog = {
