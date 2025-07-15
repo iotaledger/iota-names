@@ -78,8 +78,8 @@ export function getNameObject(names: RegistrationNft[], name: string) {
  */
 export function getNameRenewableYears(maxYears: number, expirationTimestampMs: number): number {
     const expirationTime = new Date(expirationTimestampMs);
-    const in5YearsTime = new Date();
-    in5YearsTime.setFullYear(in5YearsTime.getFullYear() + maxYears + 1);
+    const inMaxYearsTime = new Date();
+    inMaxYearsTime.setFullYear(inMaxYearsTime.getFullYear() + maxYears + 1);
 
-    return in5YearsTime.getFullYear() - expirationTime.getFullYear();
+    return inMaxYearsTime.getFullYear() - expirationTime.getFullYear();
 }
