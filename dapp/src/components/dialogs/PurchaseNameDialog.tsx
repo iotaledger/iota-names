@@ -17,6 +17,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 import { queryKey } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
@@ -81,7 +82,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-
+            toast.success(`Successfully registered name @${normalizeNameInput(name)}`);
             setOpen(false);
 
             if (onPurchase) onPurchase();
