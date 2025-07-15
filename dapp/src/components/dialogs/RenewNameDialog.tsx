@@ -32,6 +32,7 @@ import {
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
+import { MAX_RENEW_YEARS, YEAR_MS } from '@/lib/constants';
 
 function createRenewUpdates({
     nameRecord,
@@ -83,6 +84,12 @@ function createRenewUpdates({
         }
     }
     return updates;
+}
+
+function remainingRenewYears(expirationMs: number) {
+    const maxExpiration = Date.now() + MAX_RENEW_YEARS * YEAR_MS;
+    const diff = maxExpiration - expirationMs;
+    return Math.max(0, Math.floor(diff / YEAR_MS));
 }
 
 interface RenewDialogProps {
@@ -155,9 +162,11 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         setSelectedYears(id);
     }
 
+    const remainingYears = remainingRenewYears(nameRecord?.nameRecord?.expirationTimestampMs ?? 0);
+
     const RENEW_OPTIONS: SelectOption[] = [
         { id: '', label: 'Select renewal period' },
-        ...Array.from({ length: 5 }, (_, i) => ({
+        ...Array.from({ length: remainingYears }, (_, i) => ({
             id: String(i + 1),
             label: `${i + 1} Year${i ? 's' : ''}`,
         })),
