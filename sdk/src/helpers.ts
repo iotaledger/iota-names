@@ -56,3 +56,7 @@ export function getNameRegistrationType(iotaNamesPackageId: string): string {
 export function getSubnameRegistrationType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::subname_registration::SubnameRegistration`;
 }
+
+export function getCoreConfigType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::core_config::CoreConfig`;
+}
