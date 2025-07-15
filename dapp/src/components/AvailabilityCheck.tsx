@@ -6,7 +6,6 @@
 import { Close, Search } from '@iota/apps-ui-icons';
 import { Button, ButtonType, ButtonUnstyled, Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { useCallback, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
