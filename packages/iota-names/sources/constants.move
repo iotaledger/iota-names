@@ -15,19 +15,17 @@ use std::string::String;
 const IOTA_TLN: vector<u8> = b"iota";
 /// The amount of milliseconds in a year.
 const YEAR_MS: u64 = 365 * 24 * 60 * 60 * 1000;
-/// 30 day Grace period in milliseconds.
+/// 30 day grace period in milliseconds.
 const GRACE_PERIOD_MS: u64 = 30 * 24 * 60 * 60 * 1000;
+
+// === Subname constants ===
+// These constants are the core of the subname functionality.
+// Even if we decide to change the subname module, these can
+// be re-used. They're added as metadata on `NameRecord`.
 
 /// A leaf record doesn't expire. Expiration is retrieved by the parent's
 /// expiration.
 const LEAF_EXPIRATION_TIMESTAMP: u64 = 0;
-
-/// Subname constants
-///
-/// These constants are the core of the subname functionality.
-/// Even if we decide to change the subname module, these can
-/// be re-used. They're added as metadata on NameRecord.
-///
 /// Whether a parent name can create child names. (name -> subname)
 const ALLOW_CREATION: vector<u8> = b"S_AC";
 /// Whether a child-name can auto-renew (if the parent hasn't changed).
@@ -44,7 +42,6 @@ public fun year_ms(): u64 { YEAR_MS }
 /// Grace period in milliseconds after which the name expires.
 public fun grace_period_ms(): u64 { GRACE_PERIOD_MS }
 
-/// Subname constants
 /// The NameRecord key that a subname can create child names.
 public fun subname_allow_creation_key(): String { ALLOW_CREATION.to_string() }
 
