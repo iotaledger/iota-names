@@ -8,6 +8,6 @@ In order to purchase a name via this method, one must begin by starting a new au
 
 Until the end of the auction period, which is defined by `AUCTION_BIDDING_PERIOD_MS`, anyone may place additional bids on the name via the `place_bid` function. Each bid must be greater than the last by at least `AUCTION_MIN_OVERBID_VALUE_IOTA`. When a new bid is successfully placed, the previous bid will be returned to the owner.
 
-Once the auction period is over, there is an additional quiet period to allow for last-minute bids. When some time, defined by `AUCTION_MIN_QUIET_PERIOD_MS`, has passed without any additional bids, the auction will be locked.
+Once the auction period is over, there may be an additional quiet period to allow for last-minute bids. When a bid is made near the end of the period, a small amount of additional time is added, defined by `AUCTION_MIN_QUIET_PERIOD_MS`. Once this full time has passed without any additional bids, the auction will be locked.
 
 Finally, the winner may call the `claim` function to accept their NFT.
