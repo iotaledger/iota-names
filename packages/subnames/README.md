@@ -10,7 +10,7 @@ Subnames can be one of two different types: leaf or node. Each has different use
 
 Node subnames have an associated NFT (`SubnameRegistration`), an expiration date and time, and a set of rules which govern their usage. The NFT defines the ownership of the subname, and can be used to manage it, transfer it, and burn it.
 
-When creating a node subname, an expiration date and time must be provided. This must be after than the minimum time defined by `MINIMUM_SUBNAME_DURATION` and before the expiration of the parent.
+When creating a node subname, an expiration date and time must be provided. This must be after the minimum time defined by `MINIMUM_SUBNAME_DURATION` and before the expiration of the parent.
 
 Node subnames have two configuration options:
 
