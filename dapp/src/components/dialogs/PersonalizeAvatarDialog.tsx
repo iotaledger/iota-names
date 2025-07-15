@@ -20,6 +20,7 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubname } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import {
     NameRecordData,
@@ -89,6 +90,10 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
         },
         onSuccess() {
             setOpen(false);
+            toast.success(`Successfully updated avatar for @${cleanName}`);
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 

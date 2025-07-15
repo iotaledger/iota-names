@@ -15,7 +15,8 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
@@ -147,6 +148,12 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
         setOpen(false);
     };
 
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(updateNameError.message);
+        }
+    }, [updateNameError]);
+
     const wantsToRenew = isNameSubname || !!editRenewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
@@ -177,9 +184,6 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                         ) : null}
                         {!canRenew && wantsToRenew ? (
                             <div className="text-yellow-400">{CANT_RENEW_NAME_FOR_MORE_TIME}</div>
-                        ) : null}
-                        {updateNameError ? (
-                            <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
                         <div className="flex gap-2 justify-end">
                             <Button
