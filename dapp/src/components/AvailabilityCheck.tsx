@@ -103,7 +103,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
             : isAuctionInProgress
               ? 'In auction'
               : undefined;
-    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
+    const purchasePrice = isAvailable ? nameRecordData.price : undefined;
     const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
     const cleanName = normalizeNameInput(name);
 
