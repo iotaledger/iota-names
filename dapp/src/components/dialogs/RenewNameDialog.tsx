@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -12,6 +13,9 @@ import {
     DialogPosition,
     DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
     Panel,
     Select,
@@ -212,6 +216,15 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     onValueChange={handleYearsChange}
                                     disabled={disableEdit || RENEW_OPTIONS.length === 0}
                                     errorMessage={updateNameError?.message}
+                                />
+                            )}
+                            {!isNameSubname && RENEW_OPTIONS.length === 0 && (
+                                <InfoBox
+                                    type={InfoBoxType.Warning}
+                                    icon={<Warning />}
+                                    title="Maximum Renewal Time Reached"
+                                    style={InfoBoxStyle.Default}
+                                    supportingText={`You cannot renew this name anymore, as it has already reached the maximum expiration time of ${coreConfig?.max_years} years.`}
                                 />
                             )}
                         </div>
