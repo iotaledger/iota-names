@@ -1234,12 +1234,112 @@
       "type": "barchart"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 0,
+        "y": 30
+      },
+      "id": 24,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "text": {
+          "valueSize": 30
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        },
+        "xField": "key",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "exemplar": false,
+          "expr": "user_data_distribution",
+          "format": "table",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "User data keys",
+      "type": "barchart"
+    },
+    {
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 36
       },
       "id": 8,
       "panels": [],
@@ -1310,7 +1410,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 31
+        "y": 37
       },
       "id": 15,
       "options": {
@@ -1405,7 +1505,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 31
+        "y": 37
       },
       "id": 18,
       "options": {
@@ -1471,7 +1571,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 31
+        "y": 37
       },
       "id": 19,
       "options": {
@@ -1575,7 +1675,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 38
+        "y": 44
       },
       "id": 4,
       "options": {
@@ -1711,7 +1811,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 38
+        "y": 44
       },
       "id": 14,
       "options": {
@@ -1783,7 +1883,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 38
+        "y": 44
       },
       "id": 22,
       "options": {
@@ -1876,7 +1976,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 45
+        "y": 51
       },
       "id": 23,
       "options": {
@@ -1962,5 +2062,5 @@
   "timezone": "browser",
   "title": "IOTA-Names",
   "uid": "1fd4a3ec-9556-42b6-8589-7eec88d04011",
-  "version": 1
+  "version": 2
 }
