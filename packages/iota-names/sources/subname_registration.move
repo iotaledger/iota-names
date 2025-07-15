@@ -13,10 +13,6 @@ module iota_names::subname_registration;
 use iota::clock::Clock;
 use iota_names::name_registration::NameRegistration;
 
-/* friend iota_names::registry; */
-/* #[test_only] */
-/* friend iota_names::subname_tests; */
-
 /// === Error codes ===
 #[error]
 const ENftExpired: vector<u8> = b"NFT is expired.";
