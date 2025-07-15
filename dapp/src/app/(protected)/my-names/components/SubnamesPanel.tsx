@@ -3,23 +3,12 @@
 
 'use client';
 
-import { Add, MoreHoriz } from '@iota/apps-ui-icons';
-import {
-    Button,
-    ButtonType,
-    Card,
-    CardAction,
-    CardActionType,
-    CardImage,
-    CardType,
-    Header,
-    ImageShape,
-    ImageType,
-    Panel,
-} from '@iota/apps-ui-kit';
+import { Add } from '@iota/apps-ui-icons';
+import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
-import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
+import { NamePanelTile } from '@/components/panel-tile/NamePanelTile';
+import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { NameTree } from '@/lib/utils/buildNameTree';
@@ -34,6 +23,7 @@ interface SubnamesPanelProps {
 export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: SubnamesPanelProps) {
     const [nameTreePaths, setNameTreePaths] = useState<string[]>([]);
     const nameTree = useNameTree(addNameSuffix(selectedName.name));
+    const { data: subnames } = useRegistrationNfts('subname');
 
     const currentTree = useMemo(
         () => traverseNameTree(nameTree, nameTreePaths),
@@ -50,6 +40,9 @@ export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: Subn
 
     if (!currentTree) return null;
 
+    const subnamesRegistrations = currentTree.subnames
+        .map((subname) => (subnames ?? []).find((sub) => sub.name === subname.name))
+        .filter((sub) => !!sub);
     const isAtRoot = nameTreePaths.length === 0;
     const titleName = isAtRoot ? selectedName.name : currentTree.name;
 
@@ -67,37 +60,12 @@ export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: Subn
             </div>
 
             <div className="flex flex-col gap-xxs px-sm w-full">
-                {currentTree.subnames.map((sub) => (
-                    <Card
+                {subnamesRegistrations.map((sub) => (
+                    <NamePanelTile
                         key={sub.name}
-                        type={CardType.Default}
-                        isHoverable
+                        registration={sub}
                         onClick={() => goDeeper(sub.name)}
-                    >
-                        <div className="flex flex-row items-center w-full gap-sm max-w-full">
-                            <CardImage
-                                type={ImageType.BgTransparent}
-                                shape={ImageShape.SquareRounded}
-                            >
-                                <AvatarDisplay
-                                    name={sub.name}
-                                    size="full"
-                                    fallbackUrl="/subname-card-fallback.png"
-                                />
-                            </CardImage>
-
-                            <div className="min-w-0 text-title-md font-medium leading-[120%] tracking-[-0.15px] text-names-neutral-92 mr-auto break-words">
-                                {getNameLabel(sub.name, { truncateLongSubnames: true })}
-                            </div>
-
-                            <CardAction
-                                type={CardActionType.Button}
-                                buttonType={ButtonType.Ghost}
-                                icon={<MoreHoriz />}
-                                onClick={() => {}}
-                            />
-                        </div>
-                    </Card>
+                    />
                 ))}
             </div>
 

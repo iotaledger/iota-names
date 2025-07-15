@@ -3,13 +3,13 @@
 
 import { GRACE_PERIOD_MS, isSubname, NameRecord } from '@iota/iota-names-sdk';
 
-import { RegistrationNft } from '../interfaces/registration.interfaces';
+import type { RegistrationNft } from '../interfaces/registration.interfaces';
 
-export function isNameRecordExpired(nameRecord: NameRecord) {
+export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs < Date.now();
 }
 
-export function isGracePeriodExpired(nameRecord: NameRecord) {
+export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs + GRACE_PERIOD_MS < Date.now();
 }
 
