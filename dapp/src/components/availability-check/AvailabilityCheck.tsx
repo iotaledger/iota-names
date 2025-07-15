@@ -15,8 +15,8 @@ import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
-import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from './NamePurchaseCard';
+import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { NamePurchaseCard } from '../NamePurchaseCard';
 
 function getValidationError(
     name: string,
@@ -38,14 +38,11 @@ function getValidationError(
     return null;
 }
 
-interface AvailabilityCheckDialogProps {
+interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
     onCompleted?: () => void;
 }
-export function AvailabilityCheckDialog({
-    autoFocusInput,
-    onCompleted,
-}: AvailabilityCheckDialogProps) {
+export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { isConnected } = useCurrentWallet();
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');

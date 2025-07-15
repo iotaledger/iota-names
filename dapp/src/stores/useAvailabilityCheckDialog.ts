@@ -3,9 +3,9 @@
 
 import { create } from 'zustand';
 
-import type { AvailabilityCheckDialog } from '@/components';
+import type { AvailabilityCheck } from '@/components';
 
-type DialogProps = React.ComponentProps<typeof AvailabilityCheckDialog>;
+type DialogProps = React.ComponentProps<typeof AvailabilityCheck>;
 type UseAvailabilityCheckDialog = {
     isOpen: boolean;
     open: (props?: DialogProps) => void;
