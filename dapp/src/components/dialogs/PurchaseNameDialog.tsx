@@ -18,6 +18,7 @@ import {
     Select,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+// import { isSubname } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -33,6 +34,8 @@ import { formatNanosToIota } from '@/lib/utils';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 
+// import { getNameObject } from '@/lib/utils/names';
+
 type PurchaseNameProps = {
     name: string;
     open: boolean;
@@ -47,6 +50,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+
+    // const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     const {
         data: nameRecordData,
@@ -72,6 +77,28 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             years: 1,
         });
     }
+
+    // if (nameRecordData?.type === 'available' && isDisplayName) {
+    //     const nameRecord = nameRecordData as
+    //         | Extract<NameRecordData, { type: 'available' }>
+    //         | undefined;
+    //     const isNameSubname = nameRecord?.nameRecord ? isSubname(name) : null;
+    //     const nftId = isNameSubname
+    //         ? getNameObject(subnamesOwned ?? [], name)
+    //         : nameRecord.nameRecord.nftId;
+    //     if (nftId) {
+    //         updates.push({
+    //             type: 'set-target-address',
+    //             address: account?.address || '',
+    //             isSubname: !!isNameSubname,
+    //             nftId: nftId,
+    //         });
+    //     }
+    //     updates.push({
+    //         type: 'set-default',
+    //         name: name,
+    //     });
+    // }
 
     const {
         data: updateNameData,
@@ -172,13 +199,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            <Checkbox
-                                isChecked={isDisplayName}
-                                onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
-                                label="Set name as Display Name"
-                            />
-                        </div>
-                        <div className="flex flex-col w-full gap-y-md">
+                            <div className="flex flex-row gap-x-sm w-full">
+                                <Checkbox
+                                    isChecked={isDisplayName}
+                                    onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                    label="Set name as Display Name"
+                                />
+                            </div>
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats

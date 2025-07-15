@@ -104,17 +104,15 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         },
     });
 
+    const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
+    const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
+    const { milliseconds } = useCountdown(timeRemainingMs || 0);
     const isBidAboveDecimals = bidNanos === null;
+    const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const cleanName = normalizeNameInput(name);
-
-    const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
-    const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
-    const { milliseconds } = useCountdown(timeRemainingMs || 0);
-    const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
     const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
@@ -148,6 +146,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return error.message;
         }
     })();
+    const cleanName = normalizeNameInput(name);
 
     return (
         <Dialog open onOpenChange={closeDialog}>
