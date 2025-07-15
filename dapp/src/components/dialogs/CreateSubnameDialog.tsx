@@ -21,7 +21,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, isValidIotaName, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
@@ -30,8 +30,6 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
-
-import { isValidIotaName } from '../../../../sdk/dist/esm/utils';
 
 function createSubnameUpdates({
     name,
@@ -67,6 +65,7 @@ function createSubnameUpdates({
         if (!isValidIotaName(fullSubnameName) || newSubname.length < MIN_LABEL_SIZE) {
             return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
         }
+
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
