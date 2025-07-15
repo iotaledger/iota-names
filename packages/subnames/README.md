@@ -1,6 +1,6 @@
 # Subnames
 
-This packages provides functions to create and manage subnames. Subnames are free to create as long as the parent name is owned, and any number of subnames can be created.
+This package provides functions to create and manage subnames. Subnames are free to create as long as the parent name is owned, and any number of subnames can be created.
 
 ## Types of Subname
 
