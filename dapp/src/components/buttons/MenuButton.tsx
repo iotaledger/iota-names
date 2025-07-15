@@ -1,9 +1,9 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import { MoreHoriz } from '@iota/apps-ui-icons';
 import { cva, VariantProps } from 'class-variance-authority';
 import { forwardRef } from 'react';
-
-// Copyright (c) 2025 IOTA Stiftung
-// SPDX-License-Identifier: Apache-2.0
 
 type ButtonVariantsType = VariantProps<typeof buttonVariants>;
 const buttonVariants = cva('[&>svg]:h-5 [&>svg]:w-5 relative state-layer rounded-full p-xs', {
