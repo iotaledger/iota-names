@@ -12,7 +12,7 @@ export function Toaster() {
     function getSnackbarType(type: ToastType): SnackbarType {
         switch (type) {
             case 'success':
-                return SnackbarType.Default;
+                return SnackbarType.Success;
             case 'error':
                 return SnackbarType.Error;
             case 'loading':
