@@ -181,7 +181,6 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         }
     }, [RENEW_OPTIONS, selectedYears]);
 
-
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
