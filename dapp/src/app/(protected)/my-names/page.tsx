@@ -22,9 +22,6 @@ import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-
-import '@iota/apps-ui-icons';
-
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';

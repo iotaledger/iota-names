@@ -6,6 +6,7 @@
 import {
     Add,
     Assets,
+    Calendar,
     // Add,
     // Assets,
     // Calendar,
@@ -27,6 +28,7 @@ import { getNameLabel } from '@/lib/utils/format/formatNames';
 import { DeleteNameDialog, UpdateNameDialog } from '../dialogs';
 import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
 import { PersonalizeAvatarDialog } from '../dialogs/PersonalizeAvatarDialog';
+import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { DropdownMenuOption } from '../DropdownMenuOptions';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
@@ -41,9 +43,9 @@ interface ExtendedNameCardProps {
 export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNameCardProps) {
     const [isUpdateNameDialogOpen, setIsUpdateNameDialogOpen] = useState<boolean>(false);
     const [isDeleteNameDialogOpen, setIsDeleteNameDialogOpen] = useState<boolean>(false);
-    const [isAddSubnameDialogOpen, setIsAddSubnameDialogOpen] = useState<boolean>(false);
     const [isCreateSubnameDialogOpen, setIsCreateSubnameDialogOpen] = useState<boolean>(false);
     const [isPersonalizeAvatarNameOpen, setIsPersonalizeAvatarNameOpen] = useState<boolean>(false);
+    const [isRenewSubnameDialogOpen, setIsRenewSubnameDialogOpen] = useState<boolean>(false);
 
     const nameTree = useNameTree(nft.name);
 
@@ -84,11 +86,11 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
         // },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setIsRenewSubnameDialogOpen(true),
+            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            hideBottomBorder: true,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
@@ -103,20 +105,12 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
                     <SubnameCountIndicator
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
-                        onAddSubnameClick={() => setIsAddSubnameDialogOpen(true)}
+                        onAddSubnameClick={() => setIsCreateSubnameDialogOpen(true)}
                     />
 
                     <Button text="Placeholder" type={ButtonType.Secondary} onClick={() => {}} />
                 </NameCardBody>
             </NameCard>
-
-            {isAddSubnameDialogOpen ? (
-                <CreateSubnameDialog
-                    open
-                    name={nft.name}
-                    setOpen={() => setIsAddSubnameDialogOpen(false)}
-                />
-            ) : null}
 
             {isUpdateNameDialogOpen ? (
                 <UpdateNameDialog
@@ -142,6 +136,13 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
                 <PersonalizeAvatarDialog
                     name={nft.name}
                     setOpen={() => setIsPersonalizeAvatarNameOpen(false)}
+                />
+            ) : null}
+
+            {isRenewSubnameDialogOpen ? (
+                <RenewNameDialog
+                    name={nft.name}
+                    setOpen={() => setIsRenewSubnameDialogOpen(false)}
                 />
             ) : null}
         </>
