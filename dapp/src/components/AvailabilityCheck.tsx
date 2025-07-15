@@ -97,15 +97,18 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         setName('');
         onCompleted?.();
     }
+
     const statusMessage =
         isUnavailable && !isAuctionInProgress
             ? 'Name is already taken.'
             : isAuctionInProgress
               ? 'In auction'
               : undefined;
+    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
+    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
+    const cleanName = normalizeNameInput(name);
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
-    const cleanName = normalizeNameInput(name);
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -160,8 +163,8 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
                                 price={
-                                    isAvailable
-                                        ? formatNanosToIota(nameRecordData.price, {
+                                    purchasePrice
+                                        ? formatNanosToIota(purchasePrice, {
                                               showIotaSymbol: false,
                                           })
                                         : undefined
@@ -187,10 +190,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             <NamePurchaseCard
                                 name={cleanName}
                                 isAvailable={!!(!isUnavailable || isAuctionInProgress)}
-                                price={formatNanosToIota(
-                                    auctionMetadata?.minBidNanos || NANOS_PER_IOTA,
-                                    { showIotaSymbol: false },
-                                )}
+                                price={
+                                    bidPrice
+                                        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
+                                        : undefined
+                                }
                                 priceSupportingText="Minimum bid"
                                 statusMessage={statusMessage}
                             >
