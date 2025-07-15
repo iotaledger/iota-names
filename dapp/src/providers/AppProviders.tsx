@@ -8,13 +8,13 @@ import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { Toaster } from '@/components/Toaster';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './ThemeProvider';
-import { Toaster } from '@/components/Toaster';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
