@@ -177,7 +177,7 @@ export function RenewNameDialog({ open, setOpen, name }: RenewDialogProps) {
                             <div className="mb-4">
                                 <Input
                                     type={InputType.Number}
-                                    onChange={async (e) => {
+                                    onChange={(e) => {
                                         const val = Number(e.target.value);
                                         setRenewError(null);
                                         if (maxYearsToRenew && val > maxYearsToRenew) {
