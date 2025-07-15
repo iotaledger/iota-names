@@ -116,7 +116,7 @@ impl IotaNamesMetrics {
             user_data_distribution: register_int_gauge_vec_with_registry!(
                 "user_data_distribution",
                 "Distribution of user data",
-                &["depth"],
+                &["key"],
                 registry,
             )
             .unwrap(),

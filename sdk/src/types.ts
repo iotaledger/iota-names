@@ -91,3 +91,7 @@ export type IotaNamesClientNetworkConfig =
       };
 
 export type IotaNamesPriceList = Map<[number, number], number>;
+
+export type IotaNamesCoreConfig = {
+    max_years: number;
+};
