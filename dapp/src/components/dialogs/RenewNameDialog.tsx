@@ -21,7 +21,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
+import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { YEAR_MS } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
@@ -32,7 +34,6 @@ import {
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
-import { MAX_RENEW_YEARS, YEAR_MS } from '@/lib/constants';
 
 function createRenewUpdates({
     nameRecord,
@@ -86,12 +87,6 @@ function createRenewUpdates({
     return updates;
 }
 
-function remainingRenewYears(expirationMs: number) {
-    const maxExpiration = Date.now() + MAX_RENEW_YEARS * YEAR_MS;
-    const diff = maxExpiration - expirationMs;
-    return Math.max(0, Math.floor(diff / YEAR_MS));
-}
-
 interface RenewDialogProps {
     name: string;
     setOpen: (bool: boolean) => void;
@@ -102,6 +97,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const { data: nameRecordData } = useNameRecord(name);
+    const { data: coreConfig } = useCoreConfig();
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -160,6 +156,15 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
 
     function handleYearsChange(id: string) {
         setSelectedYears(id);
+    }
+
+    function remainingRenewYears(expirationMs: number) {
+        if (!coreConfig?.max_years) {
+            return 0;
+        }
+        const maxExpiration = Date.now() + coreConfig?.max_years * YEAR_MS;
+        const diff = maxExpiration - expirationMs;
+        return Math.max(0, Math.floor(diff / YEAR_MS));
     }
 
     const remainingYears = remainingRenewYears(nameRecord?.nameRecord?.expirationTimestampMs ?? 0);
