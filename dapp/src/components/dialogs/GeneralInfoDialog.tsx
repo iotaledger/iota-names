@@ -14,11 +14,12 @@ import {
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { isSubname } from '@iota/iota-names-sdk';
 import Link from 'next/link';
 
-import { useNameRecord, useRegistrationNfts } from '@/hooks';
+import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatNames';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
@@ -28,6 +29,7 @@ interface GeneralInfoDialogProps {
     open: boolean;
     setOpen: (bool: boolean) => void;
 }
+
 interface InfoLinks {
     key: string;
     value: string;
@@ -38,25 +40,20 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
     const account = useCurrentAccount();
     const address = account?.address || '';
 
-    const { data: names } = useRegistrationNfts('name');
+    const { data: nameRecordData } = useNameRecord(name);
     const { data: subnames } = useRegistrationNfts('subname');
 
-    const isSubname = !names?.find((n) => n.name === name);
-    const currentName = isSubname
-        ? subnames?.find((n) => n.name === name)
-        : names?.find((n) => n.name === name);
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+    const targetAddress = nameRecord?.nameRecord.targetAddress;
+    const isNameSubname = isSubname(name);
+    const { id, expirationTimestampMs } =
+        (isNameSubname
+            ? subnames?.find((n) => n.name === name)
+            : { id: nameRecord?.nameRecord.nftId, ...nameRecord?.nameRecord }) ?? {};
 
-    const currentNameId = currentName?.id ?? '';
-    const expirationTime = currentName?.expirationTimestampMs;
-
-    const { data: nameRecordData } = useNameRecord(name);
-    const targetAddress =
-        nameRecordData?.type === 'unavailable'
-            ? nameRecordData.nameRecord.targetAddress
-            : undefined;
-
-    const handleClose = () => setOpen(false);
-    const InfoLinks: InfoLinks[] = [
+    const infoLinks: InfoLinks[] = [
         {
             key: 'Owner',
             value: address,
@@ -69,11 +66,16 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
         },
         {
             key: 'Object ID',
-            value: currentNameId,
-            href: `https://explorer.iota.org/address/${currentNameId}?network=devnet`,
+            value: id,
+            href: `https://explorer.iota.org/address/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
+    function handleClose() {
+        setOpen(false);
+    }
+
+    const { subnamePart, namePart } = splitNameInParts(name);
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
@@ -82,14 +84,13 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            @{normalizeNameInput(name)}
+                            {subnamePart}@{normalizeNameInput(namePart)}
                         </span>
                     </div>
-
                     <div className="flex flex-col gap-md mt-lg">
                         <Collapsible title="Info" titleSize={TitleSize.Small}>
                             <div className="flex flex-col pb-xs px-md--rs">
-                                {InfoLinks.map(({ key, value, href }) => (
+                                {infoLinks.map(({ key, value, href }) => (
                                     <KeyValueInfo
                                         key={key}
                                         isTruncated
@@ -113,7 +114,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
                             <div className="pb-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
-                                    value={formatDate(expirationTime)}
+                                    value={formatDate(expirationTimestampMs)}
                                     fullwidth
                                 />
                             </div>
