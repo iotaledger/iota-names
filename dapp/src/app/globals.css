@@ -15,3 +15,12 @@
         url('/hero-landing.jpg') no-repeat center center fixed;
     background-size: cover;
 }
+
+.name-card-selected::before {
+    --gradient-border-width: 1px;
+    content: '';
+    height: calc(100% + calc(var(--gradient-border-width) * 2));
+    width: calc(100% + calc(var(--gradient-border-width) * 2));
+
+    @apply absolute inset-0 rounded-[13px] z-[-1] -translate-x-[1px] -translate-y-[1px] bg-names-gradient-primary;
+}

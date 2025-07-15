@@ -49,7 +49,11 @@ export function SubnameCountIndicator({
     if (subnameCount === 0 && showAddSubnameLink !== false) {
         return (
             <ButtonUnstyled
-                className={cx(INDICATOR_CLASSES, CLICKABLE_INDICATOR_CLASSES)}
+                className={cx(
+                    INDICATOR_CLASSES,
+                    CLICKABLE_INDICATOR_CLASSES,
+                    'text-iota-primary-80',
+                )}
                 onClick={onAddSubnameClick}
             >
                 <Add className="h-4 w-4" /> Add subname

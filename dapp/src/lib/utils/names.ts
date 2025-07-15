@@ -13,6 +13,11 @@ export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs + GRACE_PERIOD_MS < Date.now();
 }
 
+export function isNameRecordCloseToExpiration(nameRecord: NameRecord | RegistrationNft): boolean {
+    const expirationThreshold = nameRecord.expirationTimestampMs - GRACE_PERIOD_MS;
+    return !isNameRecordExpired(nameRecord) && expirationThreshold < Date.now();
+}
+
 export function getNamePermissions(nameRecord: NameRecord) {
     const isNameSubname = isSubname(nameRecord.name);
     // Names are allowed always

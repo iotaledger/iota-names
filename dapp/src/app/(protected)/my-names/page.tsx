@@ -5,6 +5,8 @@
 
 import { Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
+    Badge,
+    BadgeType,
     Button,
     ButtonSegment,
     ButtonSegmentType,
@@ -24,7 +26,7 @@ import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupU
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-import { useRegistrationNfts } from '@/hooks';
+import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -41,6 +43,7 @@ export default function MyNamesPage(): JSX.Element {
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
+
     const {
         data: names,
         error: isNamesErrored,
@@ -56,6 +59,9 @@ export default function MyNamesPage(): JSX.Element {
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
     } = useGetUserAuctions();
+
+    const address = useCurrentAccount()?.address ?? '';
+    const { data: defaultName } = useGetDefaultName(address);
 
     const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
 
@@ -102,6 +108,10 @@ export default function MyNamesPage(): JSX.Element {
         if (selectedSubname) {
             setAddNewSubnameDialog(selectedSubname);
         }
+    }
+
+    function isDefaultName(name: RegistrationNft): boolean {
+        return defaultName ? defaultName === name.name : false;
     }
 
     return (
@@ -196,6 +206,15 @@ export default function MyNamesPage(): JSX.Element {
                                     key={nft.name}
                                     nft={nft}
                                     onSubnameListClick={() => setRightPanelSelectedName(nft)}
+                                    isActive={rightPanelSelectedName?.name === nft.name}
+                                    badge={
+                                        isDefaultName(nft) ? (
+                                            <Badge
+                                                type={BadgeType.PrimarySolid}
+                                                label="Displayed"
+                                            />
+                                        ) : null
+                                    }
                                 />
                             ),
                         )}

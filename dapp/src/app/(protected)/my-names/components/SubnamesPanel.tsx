@@ -7,12 +7,13 @@ import { Add } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
-import { NamePanelTile } from '@/components/panel-tile/NamePanelTile';
 import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { NameTree } from '@/lib/utils/buildNameTree';
 import { addNameSuffix, getNameLabel } from '@/lib/utils/format/formatNames';
+
+import { NamePanelTile } from './NamePanelTile';
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
@@ -48,7 +49,7 @@ export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: Subn
 
     return (
         <Panel>
-            <div className="w-full flex flex-row items-center justify-between">
+            <div className="w-full flex flex-row items-center justify-between overflow-hidden rounded-[inherit]">
                 <Header
                     onBack={isAtRoot ? undefined : () => goBack()}
                     title={`Subnames for ${getNameLabel(titleName, {
@@ -65,6 +66,7 @@ export function SubnamesPanel({ selectedName, onSubnameAddClick, onClose }: Subn
                         key={sub.name}
                         registration={sub}
                         onClick={() => goDeeper(sub.name)}
+                        hasSubnames={currentTree.subnames.length > 0}
                     />
                 ))}
             </div>

@@ -35,10 +35,10 @@ import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
 
 interface PersonalizeAvatarDialogProps {
-    setOpen: (bool: boolean) => void;
     name: string;
+    setOpen: (bool: boolean) => void;
 }
-export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDialogProps) {
+export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();

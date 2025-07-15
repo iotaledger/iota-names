@@ -1,13 +1,9 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MoreHoriz } from '@iota/apps-ui-icons';
 import {
-    ButtonType,
     ButtonUnstyled,
     Card,
-    CardAction,
-    CardActionType,
     CardImage,
     CardType,
     Divider,
@@ -16,41 +12,37 @@ import {
 } from '@iota/apps-ui-kit';
 import clsx from 'clsx';
 
-import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
+
 import { PanelTileType } from './enums';
 
+const CARD_BG_COLOR: Record<PanelTileType, string> = {
+    [PanelTileType.Default]: 'bg-transparent',
+    [PanelTileType.Warning]: 'bg-[#342109]',
+    [PanelTileType.Destructive]: 'bg-[#47000C]',
+};
+
 interface PanelTileProps {
-    type?: PanelTileType;
     title: string;
+    type?: PanelTileType;
     subtitle?: string;
+    footer?: React.ReactNode;
     icon?: React.ReactNode;
     onClick?: React.ComponentProps<typeof Card>['onClick'];
-    onActionClick?: React.ComponentProps<typeof CardAction>['onClick'];
-    footer?: React.ReactNode;
+    menuButton?: React.ReactNode;
 }
 
 export function PanelTile({
-    type = PanelTileType.Default,
     title,
+    type = PanelTileType.Default,
     subtitle,
+    footer,
     icon,
     onClick,
-    onActionClick,
-    footer,
+    menuButton,
 }: PanelTileProps) {
-    const CARD_BG_COLOR: Record<PanelTileType, string> = {
-        [PanelTileType.Default]: 'bg-transparent',
-        [PanelTileType.Warning]: 'bg-[#342109]',
-        [PanelTileType.Destructive]: 'bg-[#47000C]',
-    };
     return (
-        <div
-            className={clsx(
-                'flex flex-col',
-                type !== PanelTileType.Default && 'rounded-xl overflow-hidden',
-                CARD_BG_COLOR[type],
-            )}
-        >
+        <div className={clsx('flex flex-col rounded-xl overflow-hidden', CARD_BG_COLOR[type])}>
             <div className="relative">
                 <Card type={CardType.Default}>
                     <div className="flex flex-row items-center w-full gap-sm max-w-full">
@@ -70,8 +62,8 @@ export function PanelTile({
                             </CardImage>
 
                             <div className="flex flex-col gap-xxs w-full min-w-0">
-                                <div className="flex flex-row items-center w-full">
-                                    <div className="w-full text-title-md font-medium leading-[120%] tracking-[-0.15px] text-names-neutral-92 mr-auto break-words text-left">
+                                <div className="flex flex-row items-center max-w-full">
+                                    <div className="text-title-md font-medium leading-[120%] tracking-[-0.15px] text-names-neutral-92 break-words text-left min-w-0">
                                         {title}
                                     </div>
 
@@ -86,22 +78,13 @@ export function PanelTile({
                             </div>
                         </ButtonUnstyled>
 
-                        <CardAction
-                            type={CardActionType.Button}
-                            buttonType={ButtonType.Ghost}
-                            icon={<MoreHoriz />}
-                            onClick={onActionClick}
-                        />
+                        {menuButton}
                     </div>
                 </Card>
             </div>
 
-            {footer && (
-                <>
-                    <Divider />
-                    {footer}
-                </>
-            )}
+            {footer && <Divider />}
+            {footer}
         </div>
     );
 }
