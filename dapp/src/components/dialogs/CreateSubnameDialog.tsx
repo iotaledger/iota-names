@@ -61,11 +61,18 @@ function createSubnameUpdates({
         ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
         : nameRecord?.nftId;
 
-    if (nftId && fullSubnameName && isSubnameAvailable && newSubname) {
-        if (!isValidIotaName(fullSubnameName) || newSubname.length < MIN_LABEL_SIZE) {
-            return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
-        }
+    if (
+        fullSubnameName &&
+        newSubname &&
+        (!isValidIotaName(fullSubnameName) ||
+            newSubname.length < MIN_LABEL_SIZE ||
+            !nftId ||
+            !isSubnameAvailable)
+    ) {
+        return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
+    }
 
+    if (nftId && fullSubnameName && isSubnameAvailable) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
