@@ -155,8 +155,8 @@ fun is_valid_label(label: &String): bool {
     while (index < len) {
         let character = label_bytes[index];
         let is_valid_character =
-            (0x61 <= character && character <= 0x7A)                   // a-z
-                || (0x30 <= character && character <= 0x39)                // 0-9
+            (0x61 <= character && character <= 0x7A)                      // a-z
+                || (0x30 <= character && character <= 0x39)               // 0-9
                 || (character == 0x2D && index != 0 && index != len - 1); // '-' not at beginning or end
 
         if (!is_valid_character) {

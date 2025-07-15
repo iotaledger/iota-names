@@ -10,3 +10,7 @@ export const PricingConfigBcs = bcs.struct('PricingConfig', {
 export const NameBcs = bcs.struct('Name', {
     labels: bcs.vector(bcs.string()),
 });
+
+export const CoreConfigBcs = bcs.struct('CoreConfig', {
+    dummy_field: bcs.bool(),
+});

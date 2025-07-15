@@ -12,7 +12,7 @@ use std::string::String;
 #[error]
 const ENoLabelsInList: vector<u8> = b"No labels in the passed list.";
 
-/// A wrapper that holds the reserved and blocked labels.
+/// A type that holds the reserved and blocked labels. Attached to the `IotaNames` object as dynamic field.
 public struct DenyList has store {
     // The list of reserved labels.
     reserved: Table<String, bool>,
