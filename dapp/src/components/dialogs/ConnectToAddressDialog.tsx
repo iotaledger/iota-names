@@ -60,15 +60,15 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
     const currentTargetAddress = nameRecord?.nameRecord.targetAddress ?? '';
 
+    // Sync name target address
     useEffect(() => {
-        if (!editTargetAddress && currentTargetAddress) {
-            setEditTargetAddress(currentTargetAddress);
-        }
-    }, [currentTargetAddress, editTargetAddress]);
+        setEditTargetAddress(currentTargetAddress);
+    }, [currentTargetAddress]);
 
+    // Sync address current default name
     useEffect(() => {
         setEditIsDefaultName(addressName === name);
-    }, [addressName, name]);
+    }, [addressName]);
 
     const hasAddressChange = editTargetAddress !== currentTargetAddress;
     const hasDefaultChange = (addressName === name) !== editIsDefaultName;
