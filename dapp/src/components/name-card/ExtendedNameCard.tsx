@@ -43,6 +43,7 @@ enum NameDialogId {
     PersonalizeAvatar = 'personalize-avatar',
     Renew = 'renew',
     GeneralInfo = 'general-info',
+    SetPermissions = 'set-permissions',
 }
 
 interface ExtendedNameCardProps {
@@ -78,7 +79,6 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
         {
             onClick: () => setOpenDialogId(NameDialogId.PersonalizeAvatar),
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
-            hideBottomBorder: true,
         },
         // {
         //     onClick: () => {},
@@ -86,8 +86,13 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
         //     isDisabled: true,
         // },
         {
+            onClick: () => setOpenDialogId(NameDialogId.SetPermissions),
+            children: <DropdownMenuOption icon={<Add />} label="Set Permissions" />,
+        },
+        {
             onClick: () => setOpenDialogId(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+            hideBottomBorder: true,
         },
         // {
         //     onClick: () => {},
@@ -133,6 +138,10 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
 
             {openDialogId === NameDialogId.CreateSubname ? (
                 <CreateSubnameDialog name={nft.name} setOpen={closeDialog} />
+            ) : null}
+
+            {openDialogId === NameDialogId.SetPermissions ? (
+                <UpdateNameDialog open name={nft.name} setOpen={closeDialog} />
             ) : null}
 
             {openDialogId === NameDialogId.PersonalizeAvatar ? (
