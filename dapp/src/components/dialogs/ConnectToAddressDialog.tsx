@@ -10,6 +10,7 @@ import {
     ButtonType,
     Checkbox,
     Chip,
+    ChipType,
     Dialog,
     DialogBody,
     DialogContent,
@@ -32,6 +33,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -47,6 +49,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditIsDefaultName] = useState<boolean>(false);
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -119,7 +122,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
-            setOpen(false);
+            setIsSuccess(true);
         },
     });
 
@@ -135,6 +138,12 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         if (account?.address) setEditTargetAddress(account.address);
     }
 
+    function copyAddressToClipboard() {
+        if (account?.address) {
+            copyToClipboard(account.address);
+        }
+    }
+
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
@@ -145,109 +154,139 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
-                <Header title="Connect to Address" onClose={handleClose} />
+                <Header
+                    title={isSuccess ? 'Success' : 'Connect to Address'}
+                    onClose={handleClose}
+                />
 
                 <DialogBody>
                     <div className="flex flex-col h-full justify-between">
                         <div className="flex flex-col gap-y-md">
-                            <div className="flex flex-col gap-y-xxs">
-                                <span className="text-title-md text-names-neutral-100">
-                                    Link to Address
-                                </span>
-                                <Input
-                                    type={InputType.Text}
-                                    label={`Select a target address to connect to @${cleanName}`}
-                                    placeholder="Enter Address"
-                                    value={editTargetAddress}
-                                    onChange={handleAddressChange}
-                                    onClearInput={() => setEditTargetAddress('')}
-                                    disabled={disableEdit}
-                                    errorMessage={
-                                        editTargetAddress && !isValidAddressOrEmpty
-                                            ? 'Not a valid IOTA address'
-                                            : updateNameError?.message
-                                    }
-                                />
-                                {account?.address && editTargetAddress !== account.address && (
-                                    <div className="flex justify-start w-full">
-                                        <Button
-                                            text="Use Current Address"
-                                            icon={<Add />}
-                                            onClick={handleUseCurrent}
+                            {isSuccess ? (
+                                <div className="flex flex-col gap-y-md items-center text-center">
+                                    <div className="flex flex-col items-center gap-y-sm">
+                                        <span className="text-title-lg text-names-neutral-100">
+                                            @{normalizeNameInput(name)}
+                                        </span>
+                                        <Chip
+                                            leadingElement={<Link className="w-4 h-4" />}
+                                            label={formatAddress(account?.address || '')}
+                                            trailingElement={<Copy className="w-4 h-4" />}
+                                            onClick={copyAddressToClipboard}
+                                            type={ChipType.Success}
+                                        />
+                                    </div>
+                                    <span className="text-body-md text-names-neutral-70">
+                                        Address linked successfully
+                                    </span>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex flex-col gap-y-xxs">
+                                        <span className="text-title-md text-names-neutral-100">
+                                            Link to Address
+                                        </span>
+                                        <Input
+                                            type={InputType.Text}
+                                            label={`Select a target address to connect to @${cleanName}`}
+                                            placeholder="Enter Address"
+                                            value={editTargetAddress}
+                                            onChange={handleAddressChange}
+                                            onClearInput={() => setEditTargetAddress('')}
                                             disabled={disableEdit}
-                                            size={ButtonSize.Small}
-                                            type={ButtonType.Ghost}
-                                        />
-                                    </div>
-                                )}
-                                {nameRecord?.nameRecord.targetAddress &&
-                                    !hasAddressChange &&
-                                    editIsDefaultName && (
-                                        <div className="flex w-full break-all">
-                                            <InfoBox
-                                                type={InfoBoxType.Success}
-                                                style={InfoBoxStyle.Default}
-                                                icon={<Link />}
-                                                title="Name connected to"
-                                                supportingText={nameRecord.nameRecord.targetAddress}
-                                            />
-                                        </div>
-                                    )}
-                            </div>
-                            <Panel bgColor="bg-names-neutral-10">
-                                <div className="flex flex-col rounded-lg p-md gap-y-md">
-                                    <div className="flex flex-row items-start gap-x-md">
-                                        <div className=" flex flex-col gap-y-xxs">
-                                            <span className="text-title-md text-names-neutral-100">
-                                                Set as Display name
-                                            </span>
-                                            <span className="text-body-md text-names-neutral-90">
-                                                Use Name publicly across the web instead of current
-                                                address.
-                                            </span>
-                                        </div>
-                                        <Checkbox
-                                            isChecked={editIsDefaultName}
-                                            isDisabled={
-                                                disableEdit ||
-                                                editTargetAddress !== account?.address
-                                            }
-                                            onCheckedChange={(checked) =>
-                                                setEditIsDefaultName(!!checked)
+                                            errorMessage={
+                                                editTargetAddress && !isValidAddressOrEmpty
+                                                    ? 'Not a valid IOTA address'
+                                                    : updateNameError?.message
                                             }
                                         />
+                                        {account?.address &&
+                                            editTargetAddress !== account.address && (
+                                                <div className="flex justify-start w-full">
+                                                    <Button
+                                                        text="Use Current Address"
+                                                        icon={<Add />}
+                                                        onClick={handleUseCurrent}
+                                                        disabled={disableEdit}
+                                                        size={ButtonSize.Small}
+                                                        type={ButtonType.Ghost}
+                                                    />
+                                                </div>
+                                            )}
+                                        {nameRecord?.nameRecord.targetAddress &&
+                                            !hasAddressChange &&
+                                            editIsDefaultName && (
+                                                <div className="flex w-full break-all">
+                                                    <InfoBox
+                                                        type={InfoBoxType.Success}
+                                                        style={InfoBoxStyle.Default}
+                                                        icon={<Link />}
+                                                        title="Name connected to"
+                                                        supportingText={
+                                                            nameRecord.nameRecord.targetAddress
+                                                        }
+                                                    />
+                                                </div>
+                                            )}
                                     </div>
-                                    {editIsDefaultName && (
-                                        <Panel hasBorder bgColor="bg-names-neutral-10">
-                                            <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
-                                                <span className="text-title-lg text-names-neutral-100">
-                                                    @{normalizeNameInput(name)}
-                                                </span>
-                                                <Chip
-                                                    label={formatAddress(account?.address || '')}
-                                                    trailingElement={<Copy className="w-4 h-4" />}
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(
-                                                            account?.address || '',
-                                                        );
-                                                    }}
+                                    <Panel bgColor="bg-names-neutral-10">
+                                        <div className="flex flex-col rounded-lg p-md gap-y-md">
+                                            <div className="flex flex-row items-start gap-x-md">
+                                                <div className=" flex flex-col gap-y-xxs">
+                                                    <span className="text-title-md text-names-neutral-100">
+                                                        Set as Display name
+                                                    </span>
+                                                    <span className="text-body-md text-names-neutral-90">
+                                                        Use Name publicly across the web instead of
+                                                        current address.
+                                                    </span>
+                                                </div>
+                                                <Checkbox
+                                                    isChecked={editIsDefaultName}
+                                                    isDisabled={
+                                                        disableEdit ||
+                                                        editTargetAddress !== account?.address
+                                                    }
+                                                    onCheckedChange={(checked) =>
+                                                        setEditIsDefaultName(!!checked)
+                                                    }
                                                 />
                                             </div>
-                                        </Panel>
-                                    )}
+                                            {editIsDefaultName && (
+                                                <Panel hasBorder bgColor="bg-names-neutral-10">
+                                                    <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
+                                                        <span className="text-title-lg text-names-neutral-100">
+                                                            @{normalizeNameInput(name)}
+                                                        </span>
+                                                        <Chip
+                                                            label={formatAddress(
+                                                                account?.address || '',
+                                                            )}
+                                                            trailingElement={
+                                                                <Copy className="w-4 h-4" />
+                                                            }
+                                                            onClick={copyAddressToClipboard}
+                                                            type={ChipType.Elevated}
+                                                        />
+                                                    </div>
+                                                </Panel>
+                                            )}
 
-                                    {showAddressWarning && (
-                                        <InfoBox
-                                            type={InfoBoxType.Warning}
-                                            style={InfoBoxStyle.Default}
-                                            icon={<Warning />}
-                                            title="Address has a linked name!"
-                                            supportingText="Continuing will override the previous address’s name"
-                                        />
-                                    )}
-                                </div>
-                            </Panel>
+                                            {showAddressWarning && (
+                                                <InfoBox
+                                                    type={InfoBoxType.Warning}
+                                                    style={InfoBoxStyle.Default}
+                                                    icon={<Warning />}
+                                                    title="Address has a linked name!"
+                                                    supportingText="Continuing will override the previous address’s name"
+                                                />
+                                            )}
+                                        </div>
+                                    </Panel>
+                                </>
+                            )}
                         </div>
+
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}
@@ -255,14 +294,23 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 onClick={handleClose}
                                 fullWidth
                             />
-                            <Button
-                                type={ButtonType.Primary}
-                                text="Apply"
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                onClick={() => apply()}
-                                disabled={disableApply}
-                                fullWidth
-                            />
+                            {isSuccess ? (
+                                <Button
+                                    type={ButtonType.Primary}
+                                    text="Finish"
+                                    onClick={handleClose}
+                                    fullWidth
+                                />
+                            ) : (
+                                <Button
+                                    type={ButtonType.Primary}
+                                    text="Apply"
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    onClick={() => apply()}
+                                    disabled={disableApply}
+                                    fullWidth
+                                />
+                            )}
                         </div>
                     </div>
                 </DialogBody>
