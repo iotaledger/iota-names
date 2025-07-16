@@ -20,11 +20,11 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName, normalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
-import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from './NamePurchaseCard';
+import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { NamePurchaseCard } from '../NamePurchaseCard';
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
@@ -57,7 +57,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     }, [searchValue]);
 
     function handleInputChange(inputValue: string) {
-        setSearchValue(normalizeNameInput(inputValue));
+        setSearchValue(denormalizeName(inputValue));
         if (name) {
             setName('');
         }
@@ -73,7 +73,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         auctionError?.message || nameError?.message || priceError?.message || validationError || '';
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const normalizedName = normalizeNameInput(name);
+    const normalizedName = normalizeName(name);
     const enableSearch = Boolean(searchValue) && !errorMessage;
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
@@ -178,7 +178,7 @@ function BidName({
     const formattedBidPrice = bidPrice
         ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
         : undefined;
-    const normalizedName = normalizeNameInput(name);
+    const normalizedName = normalizeName(name);
 
     return (
         <>
@@ -237,7 +237,7 @@ function PurchaseName({
               showIotaSymbol: false,
           })
         : undefined;
-    const normalizedName = normalizeNameInput(name);
+    const normalizedName = normalizeName(name);
 
     return (
         <>
