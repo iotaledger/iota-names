@@ -77,11 +77,8 @@ fun init(ctx: &mut TxContext) {
     });
 }
 
-/// Start an auction for a name if it's available and not being auctioned already.
-/// 
-/// ### NOTE
-/// 
-/// This method will also place the first bid.
+/// Start an auction for a name by placing the first bid.
+/// This will fail if the name is not available or already being auctioned.
 public fun start_auction_and_place_bid(
     self: &mut AuctionHouse,
     iota_names: &mut IotaNames,
@@ -129,8 +126,10 @@ public fun start_auction_and_place_bid(
 ///
 /// ### Panics
 /// 
-/// Panics if `name` is invalid or there isn't an auction
-/// for `name` or `bid` is too low.
+/// Panics if:
+/// - the name is invalid
+/// - there is no auction for the name
+/// - the bid is too low
 public fun place_bid(
     self: &mut AuctionHouse,
     name: String,
