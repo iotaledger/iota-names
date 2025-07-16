@@ -104,12 +104,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                 customWidth="w-full max-w-[90vw] md:max-w-[50vw] xl:max-w-[60vw]"
                 position={DialogPosition.Right}
             >
-                <Header
-                    title="Personalize Avatar"
-                    titleCentered
-                    onClose={() => setOpen(false)}
-                    onBack={() => setOpen(false)}
-                />
+                <Header title="Personalize Avatar" onClose={() => setOpen(false)} />
 
                 <DialogBody>
                     <div className="flex flex-col gap-md items-center">
