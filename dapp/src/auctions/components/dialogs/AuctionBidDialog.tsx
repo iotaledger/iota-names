@@ -38,7 +38,6 @@ import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;

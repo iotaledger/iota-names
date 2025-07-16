@@ -25,7 +25,6 @@ import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface GeneralInfoDialogProps {
     name: string;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 }
 
@@ -35,7 +34,7 @@ interface InfoLinks {
     href: string;
 }
 
-export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProps) {
+export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
     const account = useCurrentAccount();
     const address = account?.address || '';
 
@@ -75,7 +74,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
     }
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
