@@ -14,12 +14,11 @@ import {
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
-import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatNames';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
@@ -75,7 +74,6 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
         setOpen(false);
     }
 
-    const { subnamePart, namePart } = splitNameInParts(name);
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
@@ -84,7 +82,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            {subnamePart}@{normalizeNameInput(namePart)}
+                            {normalizeIotaName(name)}
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">

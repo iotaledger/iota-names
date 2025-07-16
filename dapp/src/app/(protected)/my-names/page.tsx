@@ -16,6 +16,7 @@ import {
     Warning,
 } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
@@ -31,7 +32,6 @@ import { SubnameCountIndicator } from '@/components/name-card/NameCardIndicators
 import { useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { MenuListItem } from '@/lib/types/components';
-import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatNames';
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
@@ -136,7 +136,6 @@ export default function MyNamesPage(): JSX.Element {
 
             <div className="flex flex-row gap-sm items-center justify-center flex-wrap w-full">
                 {names?.map((nft) => {
-                    const name = normalizeNameInput(nft.name);
                     const nftSubnames = subnames?.filter((sub) => {
                         return sub.name !== nft.name && sub.name.endsWith(nft.name);
                     });
@@ -147,7 +146,7 @@ export default function MyNamesPage(): JSX.Element {
                             name={nft.name}
                             menuOptions={renderMenuOptions(nft)}
                         >
-                            <NameCardBody title={`@${name}`}>
+                            <NameCardBody title={normalizeIotaName(nft.name)}>
                                 <SubnameCountIndicator
                                     subnameCount={nftSubnames?.length ?? 0}
                                     onAddSubnameClick={() => setCreateSubnameDialog(nft)}
@@ -170,9 +169,6 @@ export default function MyNamesPage(): JSX.Element {
             {subnames?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
                     {subnames.map((subname) => {
-                        const { namePart, subnamePart } = splitNameInParts(subname.name);
-                        const name = normalizeNameInput(namePart);
-
                         const nftSubnames = subnames.filter(
                             (sub) => sub.name !== subname.name && sub.name.endsWith(subname.name),
                         );
@@ -183,7 +179,7 @@ export default function MyNamesPage(): JSX.Element {
                                 name={subname.name}
                                 menuOptions={renderMenuOptions(subname)}
                             >
-                                <NameCardBody title={`${subnamePart}@${name}`}>
+                                <NameCardBody title={normalizeIotaName(subname.name)}>
                                     <SubnameCountIndicator
                                         subnameCount={nftSubnames.length}
                                         onAddSubnameClick={() => setCreateSubnameDialog(subname)}

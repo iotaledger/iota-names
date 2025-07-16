@@ -22,7 +22,7 @@ import {
     SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -190,7 +190,6 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
-    const cleanName = normalizeNameInput(nameRecord?.nameRecord?.name || name);
     const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : getDefaultExpirationDate();
@@ -205,7 +204,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
                                     <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                        {normalizeIotaName(nameRecord?.nameRecord?.name || name)}
                                     </span>
                                 </div>
                             </Panel>
