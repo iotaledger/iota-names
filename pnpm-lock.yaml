@@ -103,11 +103,11 @@ importers:
   dapp:
     dependencies:
       '@iota/apps-ui-icons':
-        specifier: 0.0.0-experimental-names-20250714143736
-        version: 0.0.0-experimental-names-20250714143736(react@18.3.1)
+        specifier: 0.0.0-experimental-names-20250716112630
+        version: 0.0.0-experimental-names-20250716112630(react@18.3.1)
       '@iota/apps-ui-kit':
-        specifier: 0.0.0-experimental-names-20250714143736
-        version: 0.0.0-experimental-names-20250714143736(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: 0.0.0-experimental-names-20250716112630
+        version: 0.0.0-experimental-names-20250716112630(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
@@ -1602,13 +1602,13 @@ packages:
   '@iarna/toml@3.0.0':
     resolution: {integrity: sha512-td6ZUkz2oS3VeleBcN+m//Q6HlCFCPrnI0FZhrt/h4XqLEdOyYp2u21nd8MdsR+WJy5r9PTDaHTDDfhf4H4l6Q==}
 
-  '@iota/apps-ui-icons@0.0.0-experimental-names-20250714143736':
-    resolution: {integrity: sha512-Wz0Dnd3suSQIGBSQj3jZgNL36QfWolccoquTS3PNTtGEqwAx2+o03OdWTbu3QqcsC2TL+GPEkXyubuyiTjT9+g==}
+  '@iota/apps-ui-icons@0.0.0-experimental-names-20250716112630':
+    resolution: {integrity: sha512-6k38SDZBluGjTN+/IDjiGY/g4UGDQzIG+9vKkEhiy1rkY4Xt/hwXYOn30QLwyq4vI+jNfUqgyAqf6TMMGU4ALw==}
     peerDependencies:
       react: ^18 || ^19
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250714143736':
-    resolution: {integrity: sha512-/ZFItBKHj50SsB3BEK6WTqI7V4Fx7/2X61dFNqP/EgR7I4nj+Tso3S0WYSV9xob1Y17fHklVeqmoaK8Id86Avw==}
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250716112630':
+    resolution: {integrity: sha512-nKLwmrkx5qwdlTe0l4tkfZiUO9x4thg/zSaQ0/UjH3J2Bfhyo2o6aEGZkl7fNLvJjEWXbijj2+Fzx8ddEzmaKQ==}
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
@@ -5510,7 +5510,7 @@ packages:
   postcss-prefix-selector@1.16.1:
     resolution: {integrity: sha512-Umxu+FvKMwlY6TyDzGFoSUnzW+NOfMBLyC1tAkIjgX+Z/qGspJeRjVC903D7mx7TuBpJlwti2ibXtWuA7fKMeQ==}
     peerDependencies:
-      postcss: '>4 <9'
+      postcss: '>=8.4.31'
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
@@ -7983,15 +7983,15 @@ snapshots:
 
   '@iarna/toml@3.0.0': {}
 
-  '@iota/apps-ui-icons@0.0.0-experimental-names-20250714143736(react@18.3.1)':
+  '@iota/apps-ui-icons@0.0.0-experimental-names-20250716112630(react@18.3.1)':
     dependencies:
       react: 18.3.1
 
-  '@iota/apps-ui-kit@0.0.0-experimental-names-20250714143736(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@iota/apps-ui-kit@0.0.0-experimental-names-20250716112630(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@fontsource-variable/roboto-flex': 5.2.6
       '@fontsource/inter': 5.2.6
-      '@iota/apps-ui-icons': 0.0.0-experimental-names-20250714143736(react@18.3.1)
+      '@iota/apps-ui-icons': 0.0.0-experimental-names-20250716112630(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-visually-hidden': 1.2.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       classnames: 2.5.1
