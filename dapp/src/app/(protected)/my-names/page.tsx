@@ -6,6 +6,7 @@
 import {
     Add,
     Assets,
+    Calendar,
     Link,
     // Calendar,
     // Delete,
@@ -22,6 +23,7 @@ import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
+import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { SetLinkedAddressDialog } from '@/components/dialogs/SetLinkedAddressDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
@@ -38,6 +40,7 @@ export default function MyNamesPage(): JSX.Element {
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
     const [linkedAddress, setLinkedAddress] = useState<string | null>(null);
+    const [renewName, setRenewName] = useState<RegistrationNft | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
     const { data: subnames } = useRegistrationNfts('subname');
@@ -86,11 +89,11 @@ export default function MyNamesPage(): JSX.Element {
             onClick: () => setCreateSubnameDialog(nft),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setRenewName(nft),
+            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            hideBottomBorder: true,
+        },
         // {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
@@ -192,7 +195,6 @@ export default function MyNamesPage(): JSX.Element {
             {!!createSubnameDialog && (
                 <CreateSubnameDialog
                     name={createSubnameDialog.name}
-                    open={!!createSubnameDialog}
                     setOpen={() => setCreateSubnameDialog(null)}
                 />
             )}
@@ -207,6 +209,9 @@ export default function MyNamesPage(): JSX.Element {
                     name={linkedAddress}
                     setOpen={() => setLinkedAddress(null)}
                 />
+            )}
+            {!!renewName && (
+                <RenewNameDialog setOpen={() => setRenewName(null)} name={renewName.name} />
             )}
         </div>
     );

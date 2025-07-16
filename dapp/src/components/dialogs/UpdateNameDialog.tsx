@@ -27,8 +27,6 @@ import { NameRecordData, useNameRecord } from '@/hooks/useNameRecord';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { getNamePermissions, getParentObjectId, isNameRecordExpired } from '@/lib/utils/names';
 
-import { RenewNameDialog } from './RenewNameDialog';
-
 type UpdateNameDialogProps = {
     name: string;
     open: boolean;
@@ -61,9 +59,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
     const [editIsDefaultName, setEditDefaultName] = useState<boolean>(false);
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
-
-    // Dialogs
-    const [renewDialogOpen, setRenewDialogOpen] = useState(false);
 
     // Sync permissions
     useEffect(() => {
@@ -134,7 +129,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({
@@ -175,7 +170,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isLoading || isExpired;
-    const disableRenew = isExpired;
 
     return (
         <>
@@ -225,19 +219,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                                 </Card>
                             </>
                         ) : null}
-                        {namePermissions?.allowTimeExtension && (
-                            <Card type={CardType.Outlined}>
-                                <CardBody
-                                    title="Renew"
-                                    subtitle={`Renew ${isNameSubname ? 'Subname' : 'Name'}.`}
-                                />
-                                <Button
-                                    text="Renew"
-                                    onClick={() => setRenewDialogOpen(true)}
-                                    disabled={disableRenew} //TODO: add grace period
-                                />
-                            </Card>
-                        )}
                         {updateNameError ? (
                             <div className="text-red-400">{updateNameError.message}</div>
                         ) : null}
@@ -250,9 +231,6 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
                     </DialogBody>
                 </DialogContent>
             </Dialog>
-            {renewDialogOpen && (
-                <RenewNameDialog open={renewDialogOpen} setOpen={setRenewDialogOpen} name={name} />
-            )}
         </>
     );
 }

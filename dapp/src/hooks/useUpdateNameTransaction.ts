@@ -7,6 +7,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
+import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { queryKey } from './queryKey';
 
@@ -63,6 +64,12 @@ export type NameUpdate =
           type: 'renew-subname';
           nftId: string;
           expirationTimestampMs: number;
+      }
+    | {
+          type: 'register-name';
+          name: string;
+          price: number;
+          years: number;
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -134,16 +141,37 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
+                    case 'register-name':
+                        const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
+                        const nft = iotaNamesTx.register({
+                            name: update.name,
+                            years: update.years,
+                            coin,
+                        });
+                        iotaNamesTx.transaction.transferObjects([nft, coin], address);
+                        break;
                 }
             }
 
             iotaNamesTx.transaction.setSender(address);
-            await iotaNamesTx.transaction.build({
+            const transaction = await iotaNamesTx.transaction.build({
                 client,
             });
-            return iotaNamesTx.transaction;
+            const txDryRun = await client.dryRunTransactionBlock({
+                transactionBlock: transaction,
+            });
+            return {
+                transaction: iotaNamesTx.transaction,
+                txDryRun,
+            };
         },
         enabled: !!address && !!updates.length,
         gcTime: 0,
+        select: ({ transaction, txDryRun }) => {
+            return {
+                transaction,
+                gasSummary: getGasSummary(txDryRun),
+            };
+        },
     });
 }
