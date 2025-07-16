@@ -1,18 +1,16 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-'use client';
-
 import { Add } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { NameTree } from '@/lib/utils/buildNameTree';
-import { addNameSuffix, getNameLabel } from '@/lib/utils/format/formatNames';
+import { formatNameLabel, normalizeName } from '@/lib/utils/format/formatNames';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -22,31 +20,46 @@ interface SubnamesPanelProps {
 }
 
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
-    const [nameTreePaths, setNameTreePaths] = useState<string[]>([]);
-    const [isAddNewSubnameDialogOpen, setIsAddNewSubnameDialogOpen] = useState(false);
-    const nameTree = useNameTree(addNameSuffix(selectedName.name));
     const { data: subnames } = useRegistrationNfts('subname');
 
-    const currentTree = useMemo(
-        () => traverseNameTree(nameTree, nameTreePaths),
-        [nameTree, selectedName.name, nameTreePaths],
-    );
+    const nftName = normalizeName(selectedName.name);
+    const rootTree = useNameTree(nftName);
+
+    const [navigationStack, setNavigationStack] = useState<NameTree[]>([]);
+
+    const [isAddNewSubnameDialogOpen, setIsAddNewSubnameDialogOpen] = useState(false);
+
+    useEffect(() => {
+        if (rootTree) {
+            setNavigationStack([rootTree]);
+        }
+    }, [rootTree]);
+
+    const currentTree = navigationStack[navigationStack.length - 1];
 
     function goDeeper(subname: string) {
-        setNameTreePaths((p) => [...p, subname]);
+        const child = currentTree?.subnames.find((n) => n.name === subname);
+        if (child) {
+            setNavigationStack((prev) => [...prev, child]);
+        }
     }
 
     function goBack() {
-        setNameTreePaths((p) => p.slice(0, -1));
+        setNavigationStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
     }
 
-    if (!currentTree) return null;
+    if (!rootTree) return null;
 
     const subnamesRegistrations = currentTree.subnames
         .map((subname) => (subnames ?? []).find((sub) => sub.name === subname.name))
         .filter((sub) => !!sub);
-    const isAtRoot = nameTreePaths.length === 0;
-    const titleName = isAtRoot ? selectedName.name : currentTree.name;
+
+    const isAtRoot = navigationStack.length === 0;
+    const nameInHeader = isAtRoot ? selectedName.name : currentTree.name;
+    const headerTitle = `Subnames for ${formatNameLabel(nameInHeader, {
+        onlyFirstSubname: true,
+        truncateLongSubnames: true,
+    })}`;
 
     return (
         <>
@@ -54,10 +67,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                 <div className="w-full flex flex-row items-center justify-between overflow-hidden rounded-[inherit]">
                     <Header
                         onBack={isAtRoot ? undefined : () => goBack()}
-                        title={`Subnames for ${getNameLabel(titleName, {
-                            onlyFirstSubname: true,
-                            truncateLongSubnames: true,
-                        })}`}
+                        title={headerTitle}
                         onClose={onClose}
                     />
                 </div>
@@ -91,15 +101,4 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
             )}
         </>
     );
-}
-
-function traverseNameTree(nameTree: NameTree | null, paths: string[]) {
-    if (!nameTree) return null;
-    let currentNameTree: NameTree | null = nameTree;
-
-    for (const subname of paths) {
-        if (!currentNameTree) break;
-        currentNameTree = currentNameTree.subnames.find((child) => child.name === subname) || null;
-    }
-    return currentNameTree;
 }

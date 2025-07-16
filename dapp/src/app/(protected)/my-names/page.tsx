@@ -94,7 +94,7 @@ export default function MyNamesPage(): JSX.Element {
 
     const noAuctions = !auctionDetails || auctionDetails.length === 0;
 
-    function handleChipSelect(filter: GroupedNamesFilter): void {
+    function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
         setRightPanelSelectedName(null);
     }
@@ -130,7 +130,7 @@ export default function MyNamesPage(): JSX.Element {
                             type={ButtonSegmentType.Rounded}
                             label={value}
                             selected={selectedFilter === value}
-                            onClick={() => handleChipSelect(value)}
+                            onClick={() => handleFilterSelect(value)}
                             disabled={
                                 (value === GroupedNamesFilter.InAuction && noAuctions) ||
                                 (value === GroupedNamesFilter.Owned && !names?.length) ||
@@ -184,7 +184,7 @@ export default function MyNamesPage(): JSX.Element {
                         )}
                     >
                         {filteredNames.map((nft) =>
-                            isAuctionCard(nft) ? (
+                            'details' in nft ? (
                                 <ExtendedAuctionCard
                                     key={nft.details.name}
                                     name={nft.details.name}
@@ -221,8 +221,4 @@ export default function MyNamesPage(): JSX.Element {
             )}
         </>
     );
-}
-
-function isAuctionCard(name: RegistrationNft | AuctionCard): name is AuctionCard {
-    return 'details' in name && 'status' in name;
 }

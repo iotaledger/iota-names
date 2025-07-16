@@ -7,4 +7,5 @@ export enum NameDialogId {
     CreateSubname = 'create-subname',
     PersonalizeAvatar = 'personalize-avatar',
     RenewName = 'renew-name',
+    GeneralInfo = 'general-info',
 }

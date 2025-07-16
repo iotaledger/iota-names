@@ -32,7 +32,7 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { YEAR_MS } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { getNameLabel } from '@/lib/utils/format/formatNames';
+import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
@@ -190,7 +190,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
-    const cleanName = getNameLabel(nameRecord?.nameRecord?.name || name);
+    const cleanName = formatNameLabel(nameRecord?.nameRecord?.name || name);
     const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : getDefaultExpirationDate();

@@ -17,7 +17,7 @@ import { useNameContextMenu } from '@/hooks/useNameContextMenu';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import type { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { getNameLabel } from '@/lib/utils/format/formatNames';
+import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 import { isNameRecordCloseToExpiration, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -55,7 +55,7 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
-    const panelTitle = getNameLabel(registration.name, { truncateLongSubnames: true });
+    const panelTitle = formatNameLabel(registration.name, { truncateLongSubnames: true });
 
     return (
         <>
