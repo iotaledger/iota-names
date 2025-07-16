@@ -179,7 +179,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                     />
                     <Button
                         type={ButtonType.Primary}
-                        text={isSaving || isSigning ? 'Uploading...' : 'Set Avatar'}
+                        text="Set Avatar"
                         onClick={handleSelectAsset}
                         disabled={isSaving || isSigning || !selectedAssetId}
                         fullWidth
