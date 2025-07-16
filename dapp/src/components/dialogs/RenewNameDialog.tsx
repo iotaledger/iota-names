@@ -29,7 +29,6 @@ import { useEffect, useState } from 'react';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { YEAR_MS } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
@@ -37,6 +36,7 @@ import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
     getNamePermissions,
+    getNameRenewableYears,
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
@@ -112,8 +112,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
 
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
-    const [selectedYears, setSelectedYears] = useState<string>('');
-    const renewYears = selectedYears ? Number(selectedYears) : undefined;
+    const [renewYears, setRenewYears] = useState<number | undefined>();
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -160,30 +159,27 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         setOpen(false);
     }
 
-    function handleYearsChange(id: string) {
-        setSelectedYears(id);
+    function handleYearsChange(years: string) {
+        setRenewYears(Number(years));
     }
+    const renewableYears =
+        coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  coreConfig.max_years,
+                  nameRecord.nameRecord.expirationTimestampMs,
+              )
+            : 0;
 
-    function remainingRenewYears(expirationMs: number) {
-        if (!coreConfig?.max_years) return 0;
-        const maxExpiration = Date.now() + coreConfig.max_years * YEAR_MS;
-        const diff = maxExpiration - expirationMs;
-        return Math.max(0, Math.floor(diff / YEAR_MS));
-    }
-
-    const remainingYears = remainingRenewYears(nameRecord?.nameRecord?.expirationTimestampMs ?? 0);
-
-    const RENEW_OPTIONS: SelectOption[] = Array.from({ length: remainingYears }, (_, i) => ({
+    const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
         id: String(i + 1),
         label: `${i + 1} Year${i ? 's' : ''}`,
     }));
 
     useEffect(() => {
-        if (!selectedYears && RENEW_OPTIONS.length) {
-            const first = RENEW_OPTIONS[0];
-            setSelectedYears(typeof first === 'string' ? first : first.id);
+        if (!renewYears && renewOptions.length && renewableYears >= 1) {
+            setRenewYears(1);
         }
-    }, [RENEW_OPTIONS, selectedYears]);
+    }, [renewOptions, renewYears, renewableYears]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
@@ -211,14 +207,14 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                             </Panel>
                             {!isNameSubname && (
                                 <Select
-                                    options={RENEW_OPTIONS}
-                                    value={selectedYears}
+                                    options={renewOptions}
+                                    value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
-                                    disabled={disableEdit || RENEW_OPTIONS.length === 0}
+                                    disabled={disableEdit || renewOptions.length === 0}
                                     errorMessage={updateNameError?.message}
                                 />
                             )}
-                            {!isNameSubname && RENEW_OPTIONS.length === 0 && (
+                            {!isNameSubname && renewOptions.length === 0 && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}

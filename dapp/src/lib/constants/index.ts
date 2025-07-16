@@ -4,4 +4,3 @@
 export * from './errorMessages.constants';
 export * from './token';
 export * from './routes.constants';
-export * from './time';
