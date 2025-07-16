@@ -53,7 +53,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         .map((subname) => (subnames ?? []).find((sub) => sub.name === subname.name))
         .filter((sub) => !!sub);
 
-    const isAtRoot = navigationStack.length === 0;
+    const isAtRoot = navigationStack.length === 1;
     const nameInHeader = isAtRoot ? selectedName.name : currentTree.name;
     const headerTitle = `Subnames for ${formatNameLabel(nameInHeader, {
         onlyFirstSubname: true,

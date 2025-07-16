@@ -10,7 +10,7 @@ const buttonVariants = cva('[&>svg]:h-5 [&>svg]:w-5 relative state-layer rounded
     variants: {
         variant: {
             primary: 'bg-iota-primary-30',
-            ghost: 'bg-transparent text-names-neutral-92',
+            ghost: 'bg-transparent text-names-neutral-92/40',
         },
     },
     defaultVariants: {
