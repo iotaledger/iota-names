@@ -38,6 +38,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     useEffect(() => {
         if (initialNameTree) {
             const isNewRoot = namePaths[0] !== initialNameTree.name;
+            // Reset name paths only if the initial name has changed
             if (!namePaths.length || isNewRoot) {
                 setNamePaths([initialNameTree.name]);
             }
