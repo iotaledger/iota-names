@@ -87,7 +87,8 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
         // },
         {
             onClick: () => setOpenDialogId(NameDialogId.SetPermissions),
-            children: <DropdownMenuOption icon={<Add />} label="Set Permissions" />,
+            children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
+            isHidden: !nft.isSubname,
         },
         {
             onClick: () => setOpenDialogId(NameDialogId.CreateSubname),
