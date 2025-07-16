@@ -9,7 +9,7 @@ import {
     Calendar,
     // Calendar,
     // Delete,
-    // Info,
+    Info,
     // Link,
     // Pined,
     Settings,
@@ -21,6 +21,7 @@ import { useMemo, useState } from 'react';
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { GeneralInfoDialog } from '@/components/dialogs/GeneralInfoDialog';
 import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
@@ -34,6 +35,7 @@ import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatN
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+    const [generalInfoDialog, setGeneralInfoDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
@@ -91,16 +93,17 @@ export default function MyNamesPage(): JSX.Element {
         //     onClick: () => {},
         //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
         // },
+
         {
             onClick: () => setRenewName(nft),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
             hideBottomBorder: true,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setGeneralInfoDialog(nft.name),
+            children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
+            hideBottomBorder: true,
+        },
     ];
 
     return (
@@ -112,6 +115,14 @@ export default function MyNamesPage(): JSX.Element {
                     setOpen={() => setUpdateNameDialog(null)}
                 />
             ) : null}
+            {generalInfoDialog ? (
+                <GeneralInfoDialog
+                    name={generalInfoDialog}
+                    open
+                    setOpen={() => setGeneralInfoDialog(null)}
+                />
+            ) : null}
+
             {deleteNameDialog ? (
                 <DeleteNameDialog
                     nft={deleteNameDialog}
@@ -156,7 +167,6 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
-
             {subnames?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
                     {subnames.map((subname) => {
