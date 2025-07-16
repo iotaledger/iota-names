@@ -2,9 +2,9 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Handles creation of the `IotaNamesRegistration`s. Separates the logic of
+/// Handles creation of the `NameRegistration`s. Separates the logic of
 /// creating
-/// a `IotaNamesRegistration`. New `IotaNamesRegistration`s can be created only by the
+/// a `NameRegistration`. New `NameRegistration`s can be created only by the
 /// `registry` and this module is tightly coupled with it.
 ///
 /// When reviewing the module, make sure that:
@@ -12,17 +12,15 @@
 /// - mutable functions can't be called directly by the owner
 /// - all getters are public and take an immutable reference
 ///
-module iota_names::iota_names_registration;
+module iota_names::name_registration;
 
 use iota::clock::{timestamp_ms, Clock};
 use iota_names::constants;
 use iota_names::name::Name;
 use std::string::String;
 
-/* friend iota_names::registry; */
-
 /// The main access point for the user.
-public struct IotaNamesRegistration has key, store {
+public struct NameRegistration has key, store {
     id: UID,
     /// The parsed name.
     name: Name,
@@ -34,15 +32,15 @@ public struct IotaNamesRegistration has key, store {
 
 // === Protected methods ===
 
-/// Creates a new `IotaNamesRegistration`.
+/// Creates a new `NameRegistration`.
 /// Can only be called by the `registry` module.
 public(package) fun new(
     name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
-    IotaNamesRegistration {
+): NameRegistration {
+    NameRegistration {
         id: object::new(ctx),
         name,
         name_str: name.to_string(),
@@ -52,17 +50,17 @@ public(package) fun new(
 
 /// Sets the `expiration_timestamp_ms` for this NFT.
 public(package) fun set_expiration_timestamp_ms(
-    self: &mut IotaNamesRegistration,
+    self: &mut NameRegistration,
     expiration_timestamp_ms: u64,
 ) {
     self.expiration_timestamp_ms = expiration_timestamp_ms;
 }
 
-/// Destroys the `IotaNamesRegistration` by deleting it from the store, returning
+/// Destroys the `NameRegistration` by deleting it from the store, returning
 /// storage rebates to the caller.
 /// Can only be called by the `registry` module.
-public(package) fun burn(self: IotaNamesRegistration) {
-    let IotaNamesRegistration {
+public(package) fun burn(self: NameRegistration) {
+    let NameRegistration {
         id,
         name: _,
         name_str: _,
@@ -74,37 +72,37 @@ public(package) fun burn(self: IotaNamesRegistration) {
 
 // === Public methods ===
 
-/// Check whether the `IotaNamesRegistration` has expired by comparing the
+/// Check whether the `NameRegistration` has expired by comparing the
 /// expiration timeout with the current time.
-public fun has_expired(self: &IotaNamesRegistration, clock: &Clock): bool {
+public fun has_expired(self: &NameRegistration, clock: &Clock): bool {
     self.expiration_timestamp_ms < timestamp_ms(clock)
 }
 
-/// Check whether the `IotaNamesRegistration` has expired by comparing the
+/// Check whether the `NameRegistration` has expired by comparing the
 /// expiration timeout with the current time. This function also takes into
 /// account the grace period.
-public fun has_expired_past_grace_period(self: &IotaNamesRegistration, clock: &Clock): bool {
+public fun has_expired_past_grace_period(self: &NameRegistration, clock: &Clock): bool {
     (self.expiration_timestamp_ms + constants::grace_period_ms()) < timestamp_ms(clock)
 }
 
 // === Getters ===
 
-/// Get the `name` field of the `IotaNamesRegistration`.
-public fun name(self: &IotaNamesRegistration): Name { self.name }
+/// Get the `name` field of the `NameRegistration`.
+public fun name(self: &NameRegistration): Name { self.name }
 
-/// Get the `name_str` field of the `IotaNamesRegistration`.
-public fun name_str(self: &IotaNamesRegistration): String { self.name_str }
+/// Get the `name_str` field of the `NameRegistration`.
+public fun name_str(self: &NameRegistration): String { self.name_str }
 
-/// Get the `expiration_timestamp_ms` field of the `IotaNamesRegistration`.
-public fun expiration_timestamp_ms(self: &IotaNamesRegistration): u64 {
+/// Get the `expiration_timestamp_ms` field of the `NameRegistration`.
+public fun expiration_timestamp_ms(self: &NameRegistration): u64 {
     self.expiration_timestamp_ms
 }
 
-// get a read-only `uid` field of `IotaNamesRegistration`.
-public fun uid(self: &IotaNamesRegistration): &UID { &self.id }
+// get a read-only `uid` field of `NameRegistration`.
+public fun uid(self: &NameRegistration): &UID { &self.id }
 
-/// Get the mutable `id` field of the `IotaNamesRegistration`.
-public fun uid_mut(self: &mut IotaNamesRegistration): &mut UID { &mut self.id }
+/// Get the mutable `id` field of the `NameRegistration`.
+public fun uid_mut(self: &mut NameRegistration): &mut UID { &mut self.id }
 
 // === Testing ===
 
@@ -114,21 +112,21 @@ public fun new_for_testing(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     new(name, no_years, clock, ctx)
 }
 
 #[test_only]
 public fun set_expiration_timestamp_ms_for_testing(
-    self: &mut IotaNamesRegistration,
+    self: &mut NameRegistration,
     expiration_timestamp_ms: u64,
 ) {
     set_expiration_timestamp_ms(self, expiration_timestamp_ms);
 }
 
 #[test_only]
-public fun burn_for_testing(nft: IotaNamesRegistration) {
-    let IotaNamesRegistration {
+public fun burn_for_testing(nft: NameRegistration) {
+    let NameRegistration {
         id,
         name: _,
         name_str: _,

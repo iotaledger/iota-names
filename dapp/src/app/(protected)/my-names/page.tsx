@@ -3,13 +3,28 @@
 
 'use client';
 
-import { Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    Add,
+    Assets,
+    Calendar,
+    // Calendar,
+    // Delete,
+    Info,
+    // Link,
+    // Pined,
+    Settings,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
 import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { GeneralInfoDialog } from '@/components/dialogs/GeneralInfoDialog';
+import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
+import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
+import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { SubnameCountIndicator } from '@/components/name-card/NameCardIndicators';
@@ -20,8 +35,11 @@ import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatN
 
 export default function MyNamesPage(): JSX.Element {
     const [updateNameDialog, setUpdateNameDialog] = useState<string | null>(null);
+    const [generalInfoDialog, setGeneralInfoDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
-    const [subnameAddDialog, setSubnameAddDialog] = useState<RegistrationNft | null>(null);
+    const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
+    const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
+    const [renewName, setRenewName] = useState<RegistrationNft | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
     const { data: subnames } = useRegistrationNfts('subname');
@@ -43,21 +61,47 @@ export default function MyNamesPage(): JSX.Element {
     const renderMenuOptions = (nft: RegistrationNft): MenuListItem[] => [
         {
             onClick: () => setUpdateNameDialog(nft.name),
-            children: (
-                <div className="flex flex-row gap-xxs items-center justify-center">
-                    <Settings /> Manage
-                </div>
-            ),
+            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
+            hideBottomBorder: true,
+        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
+        //     hideBottomBorder: true,
+        // },
+        {
+            onClick: () => setDeleteNameDialog(nft),
+            children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
+            isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
             hideBottomBorder: true,
         },
         {
-            onClick: () => setDeleteNameDialog(nft),
-            children: (
-                <div className="flex flex-row gap-xxs items-center justify-center">
-                    <Warning /> Delete
-                </div>
-            ),
-            isHidden: !(nft.isExpired && !namesWithChildren.has(nft.name)),
+            onClick: () => setPersonalizeAvatarName(nft.name),
+            children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+            hideBottomBorder: true,
+        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
+        //     isDisabled: true,
+        // },
+        {
+            onClick: () => setCreateSubnameDialog(nft),
+            children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+        },
+        // {
+        //     onClick: () => {},
+        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
+        // },
+
+        {
+            onClick: () => setRenewName(nft),
+            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            hideBottomBorder: true,
+        },
+        {
+            onClick: () => setGeneralInfoDialog(nft.name),
+            children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
             hideBottomBorder: true,
         },
     ];
@@ -71,6 +115,14 @@ export default function MyNamesPage(): JSX.Element {
                     setOpen={() => setUpdateNameDialog(null)}
                 />
             ) : null}
+            {generalInfoDialog ? (
+                <GeneralInfoDialog
+                    name={generalInfoDialog}
+                    open
+                    setOpen={() => setGeneralInfoDialog(null)}
+                />
+            ) : null}
+
             {deleteNameDialog ? (
                 <DeleteNameDialog
                     nft={deleteNameDialog}
@@ -98,7 +150,7 @@ export default function MyNamesPage(): JSX.Element {
                             <NameCardBody title={`@${name}`}>
                                 <SubnameCountIndicator
                                     subnameCount={nftSubnames?.length ?? 0}
-                                    onAddSubnameClick={() => setSubnameAddDialog(nft)}
+                                    onAddSubnameClick={() => setCreateSubnameDialog(nft)}
                                     onSubnameListClick={() => {}}
                                 />
 
@@ -115,7 +167,6 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md">
                 <Title title="My subnames" />
             </div>
-
             {subnames?.length ? (
                 <div className="flex flex-row gap-sm items-stretch justify-center flex-wrap w-full">
                     {subnames.map((subname) => {
@@ -135,7 +186,7 @@ export default function MyNamesPage(): JSX.Element {
                                 <NameCardBody title={`${subnamePart}@${name}`}>
                                     <SubnameCountIndicator
                                         subnameCount={nftSubnames.length}
-                                        onAddSubnameClick={() => setSubnameAddDialog(subname)}
+                                        onAddSubnameClick={() => setCreateSubnameDialog(subname)}
                                         onSubnameListClick={() => {}}
                                     />
 
@@ -153,12 +204,20 @@ export default function MyNamesPage(): JSX.Element {
             <div className="pt-md w-full">
                 <UserAuctions />
             </div>
-            {!!subnameAddDialog && (
+            {!!createSubnameDialog && (
                 <CreateSubnameDialog
-                    name={subnameAddDialog.name}
-                    open={!!subnameAddDialog}
-                    setOpen={() => setSubnameAddDialog(null)}
+                    name={createSubnameDialog.name}
+                    setOpen={() => setCreateSubnameDialog(null)}
                 />
+            )}
+            {!!personalizeAvatarName && (
+                <PersonalizeAvatarDialog
+                    name={personalizeAvatarName}
+                    setOpen={() => setPersonalizeAvatarName(null)}
+                />
+            )}
+            {!!renewName && (
+                <RenewNameDialog setOpen={() => setRenewName(null)} name={renewName.name} />
             )}
         </div>
     );
