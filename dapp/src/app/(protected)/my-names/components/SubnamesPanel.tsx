@@ -9,7 +9,6 @@ import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { NameTree } from '@/lib/utils/buildNameTree';
 import { formatNameLabel, normalizeName } from '@/lib/utils/format/formatNames';
 
 import { NamePanelTile } from './NamePanelTile';
@@ -25,7 +24,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const nftName = normalizeName(selectedName.name);
     const rootTree = useNameTree(nftName);
 
-    const [navigationStack, setNavigationStack] = useState<NameTree[]>([]);
+    const [navigationStack, setNavigationStack] = useState<(typeof rootTree)[]>([rootTree]);
 
     const [isAddNewSubnameDialogOpen, setIsAddNewSubnameDialogOpen] = useState(false);
 
@@ -48,7 +47,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         setNavigationStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
     }
 
-    if (!rootTree) return null;
+    if (!currentTree) return null;
 
     const subnamesRegistrations = currentTree.subnames
         .map((subname) => (subnames ?? []).find((sub) => sub.name === subname.name))

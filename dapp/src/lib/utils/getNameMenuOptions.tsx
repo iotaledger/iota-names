@@ -49,7 +49,7 @@ export function getNameMenuOptions(
         //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
         // },
         {
-            onClick: () => onOpen(NameDialogId.Renew),
+            onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
             hideBottomBorder: true,
         },
