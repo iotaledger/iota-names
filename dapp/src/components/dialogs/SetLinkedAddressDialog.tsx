@@ -91,7 +91,7 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
         async mutationFn() {
             if (!updateNameTransaction) return;
             const txResult = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
             await iotaClient.waitForTransaction({ digest: txResult.digest });
         },
