@@ -34,7 +34,7 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 interface ConnectToAddressDialogProps {
@@ -147,7 +147,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
 
@@ -166,7 +166,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 <div className="flex flex-col gap-y-md items-center text-center">
                                     <div className="flex flex-col items-center gap-y-sm">
                                         <span className="text-title-lg text-names-neutral-100">
-                                            @{normalizeNameInput(name)}
+                                            @{denormalizeName(name)}
                                         </span>
                                         <Chip
                                             leadingElement={<Link className="w-4 h-4" />}
@@ -256,7 +256,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            @{normalizeNameInput(name)}
+                                                            @{normalizeName(name)}
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(

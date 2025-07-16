@@ -27,7 +27,7 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 
 type PurchaseNameProps = {
@@ -125,7 +125,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
     const expirationDate = getDefaultExpirationDate();
 
     return (
