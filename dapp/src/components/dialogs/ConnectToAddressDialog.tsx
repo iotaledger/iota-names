@@ -31,12 +31,12 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
-type SetLinkedAddressDialogProps = {
+type ConnectToAddressDialogProps = {
     name: string;
     setOpen: (b: boolean) => void;
 };
 
-export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialogProps) {
+export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();

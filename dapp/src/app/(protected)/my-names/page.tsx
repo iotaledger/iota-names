@@ -22,10 +22,10 @@ import { useMemo, useState } from 'react';
 
 import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog, UpdateNameDialog } from '@/components';
+import { ConnectToAddressDialog } from '@/components/dialogs/ConnectToAddressDialog';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
-import { SetLinkedAddressDialog } from '@/components/dialogs/SetLinkedAddressDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
@@ -207,7 +207,7 @@ export default function MyNamesPage(): JSX.Element {
                 />
             )}
             {!!connectToAddress && (
-                <SetLinkedAddressDialog
+                <ConnectToAddressDialog
                     name={connectToAddress}
                     setOpen={() => setConnectToAddress(null)}
                 />
