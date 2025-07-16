@@ -27,7 +27,7 @@ public struct Coupons has store {
 
 // === Public functions ===
 
-/// Add percentaged based coupon.
+/// Adds percentaged based coupon.
 public fun add_percentage_coupon(
     self: &mut Coupons,
     hash: String,
@@ -37,7 +37,7 @@ public fun add_percentage_coupon(
     self.save_coupon(hash, coupon::new_percentage(percentage, rules));
 }
 
-/// Add fixed amount coupon.
+/// Adds fixed amount coupon.
 public fun add_fixed_coupon(
     self: &mut Coupons,
     hash: String,
@@ -63,7 +63,7 @@ public(package) fun remove_coupon(self: &mut Coupons, hash: String) {
     let _: Coupon = self.coupons.remove(hash);
 }
 
-/// Save the coupon in the shared object's config.
+/// Saves the coupon in the shared object's config.
 public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon) {
     let hash = hex::decode(hash.into_bytes());
     assert!(!self.coupons.contains(hash), ECouponAlreadyExists);
