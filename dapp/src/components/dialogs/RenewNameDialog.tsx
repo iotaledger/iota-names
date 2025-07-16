@@ -99,7 +99,6 @@ interface RenewDialogProps {
 }
 
 export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
-    console.log('RenewNameDialog', { name });
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
