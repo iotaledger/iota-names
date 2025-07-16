@@ -256,7 +256,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            @{normalizeName(name)}
+                                                            @{denormalizeName(name)}
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(
