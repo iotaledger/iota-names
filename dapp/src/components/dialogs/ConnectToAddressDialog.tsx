@@ -180,17 +180,19 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         />
                                     </div>
                                 )}
-                                {nameRecord?.nameRecord.targetAddress && !hasAddressChange && (
-                                    <div className="flex w-full break-all">
-                                        <InfoBox
-                                            type={InfoBoxType.Success}
-                                            style={InfoBoxStyle.Default}
-                                            icon={<Link />}
-                                            title="Name connected to"
-                                            supportingText={nameRecord.nameRecord.targetAddress}
-                                        />
-                                    </div>
-                                )}
+                                {nameRecord?.nameRecord.targetAddress &&
+                                    !hasAddressChange &&
+                                    editIsDefaultName && (
+                                        <div className="flex w-full break-all">
+                                            <InfoBox
+                                                type={InfoBoxType.Success}
+                                                style={InfoBoxStyle.Default}
+                                                icon={<Link />}
+                                                title="Name connected to"
+                                                supportingText={nameRecord.nameRecord.targetAddress}
+                                            />
+                                        </div>
+                                    )}
                             </div>
                             <Panel bgColor="bg-names-neutral-10">
                                 <div className="flex flex-col rounded-lg p-md gap-y-md">
