@@ -86,7 +86,7 @@ export default function MyNamesPage(): JSX.Element {
 
     const noAuctions = !auctionDetails || auctionDetails.length === 0;
 
-    function handleChipSelect(filter: GroupedNamesFilter): void {
+    function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
         setSelectedName(null);
     }
@@ -118,7 +118,7 @@ export default function MyNamesPage(): JSX.Element {
                             type={ButtonSegmentType.Rounded}
                             label={value}
                             selected={selectedFilter === value}
-                            onClick={() => handleChipSelect(value)}
+                            onClick={() => handleFilterSelect(value)}
                             disabled={
                                 (value === GroupedNamesFilter.InAuction && noAuctions) ||
                                 (value === GroupedNamesFilter.Owned && !names?.length) ||
