@@ -145,19 +145,44 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
-                                {!isLoading && balanceValidation?.totalPrice && (
-                                    <>
-                                        <DisplayStats
-                                            label="Registration Expires"
-                                            value={expirationDate}
-                                        />
-                                        <DisplayStats
-                                            label="Total Due"
-                                            value={formatNanosToIota(balanceValidation.totalPrice)}
-                                        />
-                                    </>
-                                )}
+                                {!isLoading &&
+                                    balanceValidation &&
+                                    typeof balanceValidation?.totalPrice === 'number' &&
+                                    balanceValidation.totalPrice > 0 && (
+                                        <>
+                                            <DisplayStats
+                                                label="Registration Expires"
+                                                value={expirationDate}
+                                            />
+                                            <DisplayStats
+                                                label="Total Due"
+                                                value={formatNanosToIota(
+                                                    balanceValidation.totalPrice,
+                                                )}
+                                            />
+                                        </>
+                                    )}
                             </div>
+                            {!hasEnoughGas && (
+                                <div className="text-center text-red-400 text-sm">
+                                    {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
+                                </div>
+                            )}
+                            {purchaseError && (
+                                <div className="text-center text-red-400 text-sm">
+                                    {purchaseError.message}
+                                </div>
+                            )}
+                            {nameRecordError && (
+                                <div className="text-center text-red-400 text-sm">
+                                    {nameRecordError.message}
+                                </div>
+                            )}
+                            {hasEnoughGas && updateNameError && (
+                                <div className="text-center text-red-400 text-sm">
+                                    {updateNameError.message}
+                                </div>
+                            )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
@@ -175,26 +200,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 />
                             </div>
                         </div>
-                        {!hasEnoughGas && (
-                            <div className="text-center text-red-400 text-sm">
-                                {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
-                            </div>
-                        )}
-                        {purchaseError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {purchaseError.message}
-                            </div>
-                        )}
-                        {nameRecordError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {nameRecordError.message}
-                            </div>
-                        )}
-                        {hasEnoughGas && updateNameError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {updateNameError.message}
-                            </div>
-                        )}
                     </div>
                 </DialogBody>
             </DialogContent>
