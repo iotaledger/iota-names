@@ -31,6 +31,7 @@ import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
 import { GeneralInfoDialog } from '../dialogs/GeneralInfoDialog';
 import { PersonalizeAvatarDialog } from '../dialogs/PersonalizeAvatarDialog';
 import { RenewNameDialog } from '../dialogs/RenewNameDialog';
+import { SetPermissionsDialog } from '../dialogs/SetPermissionsDialog';
 import { DropdownMenuOption } from '../DropdownMenuOptions';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
@@ -142,7 +143,7 @@ export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNam
             ) : null}
 
             {openDialogId === NameDialogId.SetPermissions ? (
-                <UpdateNameDialog open name={nft.name} setOpen={closeDialog} />
+                <SetPermissionsDialog name={nft.name} setOpen={closeDialog} />
             ) : null}
 
             {openDialogId === NameDialogId.PersonalizeAvatar ? (
