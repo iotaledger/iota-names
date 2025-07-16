@@ -7,6 +7,7 @@ import {
     Add,
     Assets,
     Calendar,
+    Delete,
     Link,
     // Calendar,
     // Delete,
@@ -39,7 +40,7 @@ export default function MyNamesPage(): JSX.Element {
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
-    const [linkedAddress, setLinkedAddress] = useState<string | null>(null);
+    const [connectToAddress, setConnectToAddress] = useState<string | null>(null);
     const [renewName, setRenewName] = useState<RegistrationNft | null>(null);
 
     const { data: names } = useRegistrationNfts('name');
@@ -66,8 +67,9 @@ export default function MyNamesPage(): JSX.Element {
             hideBottomBorder: true,
         },
         {
-            onClick: () => setLinkedAddress(nft.name),
+            onClick: () => setConnectToAddress(nft.name),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+            hideBottomBorder: true,
         },
         {
             onClick: () => setDeleteNameDialog(nft),
@@ -80,11 +82,11 @@ export default function MyNamesPage(): JSX.Element {
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
             hideBottomBorder: true,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
-        //     isDisabled: true,
-        // },
+        {
+            onClick: () => {},
+            children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
+            isDisabled: true,
+        },
         {
             onClick: () => setCreateSubnameDialog(nft),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
@@ -204,10 +206,10 @@ export default function MyNamesPage(): JSX.Element {
                     setOpen={() => setPersonalizeAvatarName(null)}
                 />
             )}
-            {!!linkedAddress && (
+            {!!connectToAddress && (
                 <SetLinkedAddressDialog
-                    name={linkedAddress}
-                    setOpen={() => setLinkedAddress(null)}
+                    name={connectToAddress}
+                    setOpen={() => setConnectToAddress(null)}
                 />
             )}
             {!!renewName && (
