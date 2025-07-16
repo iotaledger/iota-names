@@ -45,7 +45,6 @@ function createSubnameUpdates({
     allowChildCreation: boolean;
     allowTimeExtension: boolean;
 }) {
-    console.log(nameRecord?.name);
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
