@@ -4,7 +4,7 @@
 'use client';
 
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
-import { ButtonUnstyled } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, truncate } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import clsx from 'clsx';
 import { Fragment } from 'react';
@@ -12,6 +12,7 @@ import { Fragment } from 'react';
 import { MenuButton } from '@/components/buttons/MenuButton';
 import { ContextMenuDropdown } from '@/components/ContextMenu';
 import { NameManageDialogs } from '@/components/dialogs/NameManageDialogs';
+import { useNameRecord } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { useNameContextMenu } from '@/hooks/useNameContextMenu';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
@@ -41,6 +42,10 @@ export function NamePanelTile({
 
     const account = useCurrentAccount();
     const { data: defaultName } = useGetDefaultName(account?.address ?? '');
+    const { data: nameRecord } = useNameRecord(registration.name);
+
+    const linkedAddress =
+        nameRecord?.type === 'unavailable' ? nameRecord?.nameRecord.targetAddress : undefined;
 
     const isDefaultName = defaultName === registration.name;
     const isCloseToExpiration = isNameRecordCloseToExpiration(registration);
@@ -63,6 +68,7 @@ export function NamePanelTile({
                 type={panelType}
                 icon={isDefaultName ? <StarHex className="w-4 h-4 text-names-primary-80" /> : null}
                 title={panelTitle}
+                subtitle={linkedAddress ? truncate(linkedAddress, 4, 4) : undefined}
                 onClick={onClick}
                 menuButton={<MenuButton variant="ghost" onClick={toggleMenu} ref={triggerRef} />}
                 footer={
