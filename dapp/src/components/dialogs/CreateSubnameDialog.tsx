@@ -187,7 +187,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText="Create as many Subnames as you want under @example_name, each with its own profile page and features"
+                                supportingText={`Create as many Subnames as you want under @${name}, each with its own profile page and features`}
                             />
                             <Input
                                 type={InputType.Text}
