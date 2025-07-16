@@ -14,6 +14,7 @@ import {
     // Info,
     // Link,
     // Pined,
+    Settings,
     Warning,
 } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Title } from '@iota/apps-ui-kit';
@@ -23,6 +24,7 @@ import { UserAuctions } from '@/auctions/components/UserAuctions';
 import { DeleteNameDialog } from '@/components';
 import { ConnectToAddressDialog } from '@/components/dialogs/ConnectToAddressDialog';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { ManageNameDialog } from '@/components/dialogs/ManageNameDialog';
 import { PersonalizeAvatarDialog } from '@/components/dialogs/PersonalizeAvatarDialog';
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
@@ -35,6 +37,7 @@ import { MenuListItem } from '@/lib/types/components';
 import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatNames';
 
 export default function MyNamesPage(): JSX.Element {
+    const [manageNameDialog, setManageNameDialog] = useState<string | null>(null);
     const [deleteNameDialog, setDeleteNameDialog] = useState<RegistrationNft | null>(null);
     const [createSubnameDialog, setCreateSubnameDialog] = useState<RegistrationNft | null>(null);
     const [personalizeAvatarName, setPersonalizeAvatarName] = useState<string | null>(null);
@@ -59,6 +62,11 @@ export default function MyNamesPage(): JSX.Element {
     }, [names, subnames]);
 
     const renderMenuOptions = (nft: RegistrationNft): MenuListItem[] => [
+        {
+            onClick: () => setManageNameDialog(nft.name),
+            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
+            hideBottomBorder: true,
+        },
         {
             onClick: () => setConnectToAddress(nft.name),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
@@ -98,6 +106,13 @@ export default function MyNamesPage(): JSX.Element {
 
     return (
         <div className="flex flex-col w-full gap-y-lg items-center py-24 md:py-lg">
+            {manageNameDialog ? (
+                <ManageNameDialog
+                    name={manageNameDialog}
+                    open
+                    setOpen={() => setManageNameDialog(null)}
+                />
+            ) : null}
             {deleteNameDialog ? (
                 <DeleteNameDialog
                     nft={deleteNameDialog}
