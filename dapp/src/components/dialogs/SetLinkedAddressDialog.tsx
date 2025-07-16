@@ -28,6 +28,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { normalizeNameInput } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 type SetLinkedAddressDialogProps = {
@@ -114,6 +115,7 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
+    const cleanName = normalizeNameInput(name);
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -123,21 +125,25 @@ export function SetLinkedAddressDialog({ name, setOpen }: SetLinkedAddressDialog
                 <DialogBody>
                     <div className="flex flex-col h-full justify-between">
                         <div className="flex flex-col gap-y-md">
-                            <Input
-                                type={InputType.Text}
-                                label="Enter Target Address"
-                                placeholder="Enter Target Address"
-                                value={editTargetAddress}
-                                onChange={handleAddressChange}
-                                onClearInput={() => setEditTargetAddress('')}
-                                disabled={disableEdit}
-                                errorMessage={
-                                    editTargetAddress && !isValidIotaAddress(editTargetAddress)
-                                        ? 'Not a valid IOTA address'
-                                        : updateNameError?.message
-                                }
-                            />
-
+                            <div className="flex flex-col gap-y-xxs">
+                                <span className="text-title-md text-names-neutral-100">
+                                    Link to Address
+                                </span>
+                                <Input
+                                    type={InputType.Text}
+                                    label={`Select a target address to connect to @${cleanName}`}
+                                    placeholder="Enter Address"
+                                    value={editTargetAddress}
+                                    onChange={handleAddressChange}
+                                    onClearInput={() => setEditTargetAddress('')}
+                                    disabled={disableEdit}
+                                    errorMessage={
+                                        editTargetAddress && !isValidIotaAddress(editTargetAddress)
+                                            ? 'Not a valid IOTA address'
+                                            : updateNameError?.message
+                                    }
+                                />
+                            </div>
                             {account?.address && editTargetAddress !== account.address && (
                                 <div className="flex justify-start w-full">
                                     <Button
