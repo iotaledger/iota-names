@@ -4,31 +4,32 @@
 'use client';
 
 import { Search } from '@iota/apps-ui-icons';
-import { Dialog, DialogContent, Input, InputType } from '@iota/apps-ui-kit';
+import { Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 
 import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
 import { NamesLogoWeb } from '@/public/icons';
-
-import { AvailabilityCheck } from '../AvailabilityCheck';
+import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
-    const [isSearchDialogOpen, setSearchDialogOpen] = useState(false);
+    const { open, close } = useAvailabilityCheckDialog();
 
     const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
     const showSearch = isConnected && isOnMyNamesPage;
 
     function toggleSearchDialog() {
-        setSearchDialogOpen(!isSearchDialogOpen);
+        open({
+            autoFocusInput: true,
+            onCompleted: close,
+        });
     }
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
+        <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
             <div className="container py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">
@@ -57,23 +58,6 @@ export function Navbar() {
                 </div>
 
                 {showSearch && <SearchInput onFocus={toggleSearchDialog} />}
-
-                {isSearchDialogOpen && (
-                    <Dialog open onOpenChange={toggleSearchDialog}>
-                        <DialogContent
-                            showCloseOnOverlay
-                            customWidth="w-[60vw] h-[clamp(400px,80vh,600px)]"
-                            isFixedPosition
-                        >
-                            <div className="flex flex-col gap-md px-48 py-20 flex-1">
-                                <AvailabilityCheck
-                                    autoFocusInput
-                                    onCompleted={() => setSearchDialogOpen(false)}
-                                />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                )}
             </div>
         </nav>
     );

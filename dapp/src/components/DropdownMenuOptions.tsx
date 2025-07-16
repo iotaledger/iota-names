@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 interface DropdownMenuOptionProps {
-    icon: JSX.Element;
+    icon: React.ReactNode;
     label: string;
 }
 

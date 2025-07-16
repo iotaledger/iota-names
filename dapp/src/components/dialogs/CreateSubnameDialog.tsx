@@ -80,11 +80,10 @@ function createSubnameUpdates({
 
 type CreateSubnameProps = {
     name: string;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps) {
+export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
@@ -128,7 +127,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({
@@ -170,7 +169,7 @@ export function CreateSubnameDialog({ name, open, setOpen }: CreateSubnameProps)
         editSubname.length < MIN_LABEL_SIZE;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header title="New Subname" onClose={closeDialog} />
                 <DialogBody>
