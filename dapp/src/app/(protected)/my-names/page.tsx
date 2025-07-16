@@ -173,7 +173,7 @@ export default function MyNamesPage(): JSX.Element {
                 </div>
             )}
 
-            {!isLoadingCards && filteredNames.length > 0 && (
+            {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
                     <div
                         className={cx(
