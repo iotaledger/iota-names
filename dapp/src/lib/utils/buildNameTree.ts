@@ -10,20 +10,23 @@ export function buildNameTree(name: string, ownedSubnames: string[]): NameTree {
     const normalizedName = name.toLowerCase();
     const parts = normalizedName.split('.');
 
-    const children = ownedSubnames
+    const subnames = ownedSubnames
         .filter((sub) => {
             if (sub === normalizedName) return false;
             const subParts = sub.split('.');
+
+            // Check if the subname has the name as parent, and if the length matches
             return (
                 subParts.slice(-parts.length).join('.') === parts.join('.') &&
                 subParts.length === parts.length + 1
             );
         })
-        .sort();
+        .sort()
+        .map((child) => buildNameTree(child, ownedSubnames));
 
     return {
         name,
-        subnames: children.map((child) => buildNameTree(child, ownedSubnames)),
+        subnames,
     };
 }
 

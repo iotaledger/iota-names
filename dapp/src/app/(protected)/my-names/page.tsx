@@ -167,7 +167,7 @@ export default function MyNamesPage(): JSX.Element {
                         {!isLoadingCards && filteredNames.length > 0 && (
                             <div className="flex flex-row gap-lg items-center flex-wrap w-full">
                                 {filteredNames.map((nft) =>
-                                    isAuctionCard(nft) ? (
+                                    'details' in nft ? (
                                         <ExtendedAuctionCard
                                             key={nft.details.name}
                                             name={nft.details.name}
@@ -194,8 +194,4 @@ export default function MyNamesPage(): JSX.Element {
             </>
         </>
     );
-}
-
-function isAuctionCard(name: RegistrationNft | AuctionCard): name is AuctionCard {
-    return 'details' in name && 'status' in name;
 }

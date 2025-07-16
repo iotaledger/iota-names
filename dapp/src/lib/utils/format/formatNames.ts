@@ -16,7 +16,7 @@ export function normalizeNameInput(name: string) {
     return name.toLowerCase().replace(/\.iota$/i, '');
 }
 
-export function addNameSuffix(name: string) {
+export function denormalizeNameInput(name: string) {
     return name.endsWith('.iota') ? name : `${name}.iota`;
 }
 

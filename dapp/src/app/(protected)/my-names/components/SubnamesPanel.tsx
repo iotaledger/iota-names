@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Card, CardBody, CardType, Header, Panel } from '@iota/apps-ui-kit';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { findInNameTree } from '@/lib/utils/buildNameTree';
-import { addNameSuffix, getNameLabel } from '@/lib/utils/format/formatNames';
+import { NameTree } from '@/lib/utils/buildNameTree';
+import { denormalizeNameInput, getNameLabel } from '@/lib/utils/format/formatNames';
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
@@ -15,21 +15,16 @@ interface SubnamesPanelProps {
 }
 
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
-    const nftName = addNameSuffix(selectedName.name);
-    const nameTree = useNameTree(nftName);
+    const nftName = denormalizeNameInput(selectedName.name);
+    const rootTree = useNameTree(nftName);
 
-    const rootNode = useMemo(() => {
-        if (!nameTree || !selectedName.name) return null;
-        return findInNameTree(nameTree, selectedName.name);
-    }, [nameTree, selectedName.name]);
-
-    const [navigationStack, setNavigationStack] = useState<(typeof rootNode)[]>([]);
+    const [navigationStack, setNavigationStack] = useState<NameTree[]>([]);
 
     useEffect(() => {
-        if (rootNode) {
-            setNavigationStack([rootNode]);
+        if (rootTree) {
+            setNavigationStack([rootTree]);
         }
-    }, [rootNode]);
+    }, [rootTree]);
 
     const currentNode = navigationStack[navigationStack.length - 1];
 
