@@ -62,11 +62,10 @@ export default function MyNamesPage(): JSX.Element {
             children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
             hideBottomBorder: true,
         },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
-        //     hideBottomBorder: true,
-        // },
+        {
+            onClick: () => setLinkedAddress(nft.name),
+            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+        },
         {
             onClick: () => setDeleteNameDialog(nft),
             children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
@@ -86,10 +85,6 @@ export default function MyNamesPage(): JSX.Element {
         {
             onClick: () => setCreateSubnameDialog(nft),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-        },
-        {
-            onClick: () => setLinkedAddress(nft.name),
-            children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
         },
         // {
         //     onClick: () => {},
