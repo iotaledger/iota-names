@@ -49,33 +49,33 @@ public fun add_fixed_coupon(
 
 // === Internal functions ===
 
-/// An internal function to create the `Coupons` struct.
+/// Creates the `Coupons` struct.
 public(package) fun new(ctx: &mut TxContext): Coupons {
     Coupons {
         coupons: table::new(ctx),
     }
 }
 
-/// An internal function to remove a coupon from the system.
+/// Removes a coupon from the system.
 public(package) fun remove_coupon(self: &mut Coupons, hash: String) {
     let hash = hex::decode(hash.into_bytes());
     assert!(self.coupons.contains(hash), ECouponDoesNotExist);
     let _: Coupon = self.coupons.remove(hash);
 }
 
-/// An internal function to save the coupon in the shared object's config.
+/// Save the coupon in the shared object's config.
 public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon) {
     let hash = hex::decode(hash.into_bytes());
     assert!(!self.coupons.contains(hash), ECouponAlreadyExists);
     self.coupons.add(hash, coupon);
 }
 
-/// An internal function to get a reference to the coupon table.
+/// Returns a reference to the coupon table.
 public(package) fun coupons(self: &Coupons): &Table<vector<u8>, Coupon> {
     &self.coupons
 }
 
-/// An internal function to get a mutable reference to the coupon table.
+/// Returns a mutable reference to the coupon table.
 public(package) fun coupons_mut(self: &mut Coupons): &mut Table<vector<u8>, Coupon> {
     &mut self.coupons
 }

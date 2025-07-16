@@ -362,7 +362,7 @@ fun internal_assert_parent_can_create_subnames(self: &IotaNames, parent: Name) {
     assert!(is_creation_allowed(&record_metadata(self, parent)), ECreationDisabledForSubname);
 }
 
-/// An internal function to add a subname to the registry with the correct expiration timestamp.
+/// Adds a subname to the registry with the correct expiration timestamp.
 /// It doesn't check whether the expiration is valid. This needs to be checked on the calling function.
 fun internal_create_subname(
     registry: &mut Registry,
