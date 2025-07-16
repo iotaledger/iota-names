@@ -173,7 +173,7 @@ export const getSigner = () => {
     );
 
     for (const entry of keystore.keys) {
-        if (entry.key.type != 'key_pair' || entry.address != sender) {
+        if (entry.key.type !== 'key_pair' || entry.address !== sender) {
             continue;
         }
         const keypair = decodeIotaPrivateKey(entry.key.value);
