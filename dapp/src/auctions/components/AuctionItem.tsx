@@ -10,7 +10,7 @@ import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
@@ -116,7 +116,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
 
     return (
         <NameCard name={auction.name}>
-            <NameCardBody name={`@${normalizeNameInput(auction.name)}`}>
+            <NameCardBody name={`@${denormalizeName(auction.name)}`}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
                     <AuctionStatusBadge status={auctionStatus} />

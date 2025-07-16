@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { NameTree } from '@/lib/utils/buildNameTree';
-import { denormalizeNameInput, getNameLabel } from '@/lib/utils/format/formatNames';
+import { formatNameLabel, normalizeName } from '@/lib/utils/format/formatNames';
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
@@ -15,7 +15,7 @@ interface SubnamesPanelProps {
 }
 
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
-    const nftName = denormalizeNameInput(selectedName.name);
+    const nftName = normalizeName(selectedName.name);
     const rootTree = useNameTree(nftName);
 
     const [navigationStack, setNavigationStack] = useState<NameTree[]>([]);
@@ -41,7 +41,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
 
     if (!currentNode) return null;
 
-    const headerTitle = `Subnames for ${getNameLabel(navigationStack.length > 1 ? currentNode.name : selectedName.name)}`;
+    const headerTitle = `Subnames for ${formatNameLabel(navigationStack.length > 1 ? currentNode.name : selectedName.name)}`;
     const isOnRoot = navigationStack.length === 1;
 
     return (

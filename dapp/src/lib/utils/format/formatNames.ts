@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export function splitNameParts(nftName: string) {
-    const parts = normalizeNameInput(nftName).split('.');
+    const parts = denormalizeName(nftName).split('.');
     const lastIndex = parts.length - 1;
     const parentName = parts[lastIndex];
 
@@ -12,15 +12,15 @@ export function splitNameParts(nftName: string) {
     };
 }
 
-export function normalizeNameInput(name: string) {
-    return name.toLowerCase().replace(/\.iota$/i, '');
-}
-
-export function denormalizeNameInput(name: string) {
+export function normalizeName(name: string) {
     return name.endsWith('.iota') ? name : `${name}.iota`;
 }
 
-export function getNameLabel(name: string, onlyFirstSubname = false) {
+export function denormalizeName(name: string) {
+    return name.toLowerCase().replace(/\.iota$/i, '');
+}
+
+export function formatNameLabel(name: string, onlyFirstSubname = false) {
     const { parentName, subname } = splitNameParts(name);
 
     return subname
