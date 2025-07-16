@@ -70,6 +70,7 @@ export type NameUpdate =
           name: string;
           price: number;
           years: number;
+          setDefault: boolean;
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -148,6 +149,14 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             years: update.years,
                             coin,
                         });
+                        if (update.setDefault) {
+                            iotaNamesTx.setTargetAddress({
+                                nft: nft,
+                                address: address,
+                                isSubname: false,
+                            });
+                            iotaNamesTx.setDefault(update.name);
+                        }
                         iotaNamesTx.transaction.transferObjects([nft, coin], address);
                         break;
                 }
