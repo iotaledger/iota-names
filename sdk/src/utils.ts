@@ -46,7 +46,7 @@ export function validateIotaName(
     if (name.includes('.')) {
         return 'No subnames allowed';
     }
-    if (!NAME_AT_REGEX.test(name)) {
+    if (!LABEL_REGEX.test(name)) {
         return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
     }
     if (name.length < minLength || name.length > maxLength) {
