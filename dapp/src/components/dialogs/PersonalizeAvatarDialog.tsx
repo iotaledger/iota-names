@@ -30,7 +30,7 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
 
@@ -54,7 +54,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
     const updates: NameUpdate[] = [];
 
     if (selectedAssetId && selectedAssetId !== nameRecord?.nameRecord.avatar && nameRecord) {
