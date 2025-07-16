@@ -12,10 +12,10 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { useNameRecord, usePriceList } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 
-import { PurchaseNameDialog } from './dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from './NamePurchaseCard';
+import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { NamePurchaseCard } from '../NamePurchaseCard';
 
 function getValidationError(
     name: string,
@@ -77,7 +77,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     }, [searchValue]);
 
     function handleInputChange(inputValue: string) {
-        setSearchValue(normalizeNameInput(inputValue));
+        setSearchValue(denormalizeName(inputValue));
         if (name) {
             setName('');
         }
@@ -105,7 +105,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
               : undefined;
     const purchasePrice = isAvailable ? nameRecordData.price : undefined;
     const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
 
     const isAuctionLoading = name && (!nameRecordData || isAuctionMetadataLoading);
 

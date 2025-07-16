@@ -7,6 +7,7 @@ import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
 import { ConnectionGuard } from '@/components';
+import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
@@ -28,6 +29,7 @@ export default function RootLayout({
                     <ConnectionGuard>
                         <Navbar />
                         {children}
+                        <AvailabilityCheckDialog />
                         <Footer />
                     </ConnectionGuard>
                 </AppProviders>
