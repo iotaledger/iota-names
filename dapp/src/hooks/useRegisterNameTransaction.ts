@@ -7,7 +7,6 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
-import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { queryKey } from './queryKey';
 
@@ -37,20 +36,17 @@ export function useRegisterNameTransaction(
             const transaction = await iotaNamesTx.transaction.build({
                 client,
             });
-            const txDryRun = await client.dryRunTransactionBlock({
-                transactionBlock: transaction,
-            });
             return {
                 transaction: tx,
-                txDryRun,
+                builtTx: transaction,
             };
         },
         enabled: !!address && !!price && !!name && name.length > 0,
         gcTime: 0,
-        select: ({ transaction, txDryRun }) => {
+        select: ({ transaction, builtTx }) => {
             return {
                 transaction,
-                gasSummary: getGasSummary(txDryRun),
+                builtTx,
             };
         },
     });

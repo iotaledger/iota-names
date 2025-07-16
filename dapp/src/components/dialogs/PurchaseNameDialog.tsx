@@ -15,8 +15,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { queryKey } from '@/hooks';
-import { useBalance } from '@/hooks/useBalance';
+import { queryKey, useBalanceValidation } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 import {
@@ -52,10 +51,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: registerNameError,
     } = useRegisterNameTransaction(account?.address || '', name, price);
 
+    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
+        registerNameData?.builtTx ?? null,
+        price,
+    );
+
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
-
-    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
     const {
         mutateAsync: handlePurchase,
@@ -89,19 +91,17 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     if (!isConnected) return null;
 
-    const totalBalance = Number(coinBalance?.totalBalance) || 0;
-    const totalGas = Number(registerNameData?.gasSummary?.totalGas) || 0;
-    const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
-    const hasBalance = totalBalance > totalPrice;
-
     const hasEnoughGas =
         !registerNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
         !registerNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
 
     const canPay =
-        isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
+        isConnected &&
+        hasEnoughGas &&
+        balanceValidation?.hasBalance &&
+        nameRecordData?.type === 'available';
 
-    const hasErrors = registerNameError || coinBalanceError || purchaseError;
+    const hasErrors = registerNameError || balanceValidationError || purchaseError;
 
     const isLoading = isNameRecordLoading || isRegisterNameLoading || isSigning;
 
@@ -124,7 +124,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         <div className="flex items-baseline justify-center gap-x-1">
                             <span className="text-body-md text-neutral-60">Price:</span>
                             <span className="text-body-md font-mono">
-                                {!isLoading && canPay
+                                {!isLoading && canPay && nameRecordData?.price
                                     ? formatNanosToIota(nameRecordData.price, {
                                           formatRounded: false,
                                       })
@@ -135,8 +135,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         <div className="flex items-baseline justify-center gap-x-1">
                             <span className="text-body-md text-neutral-60">Gas:</span>
                             <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalGas, { formatRounded: false })
+                                {!isLoading && balanceValidation?.totalGas
+                                    ? formatNanosToIota(balanceValidation?.totalGas ?? '', {
+                                          formatRounded: false,
+                                      })
                                     : '-'}
                             </span>
                         </div>
@@ -146,8 +148,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 Total price (Name + gas):
                             </span>
                             <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalPrice, {
+                                {!isLoading && balanceValidation?.totalPrice
+                                    ? formatNanosToIota(balanceValidation?.totalPrice ?? '', {
                                           formatRounded: false,
                                       })
                                     : '-'}
