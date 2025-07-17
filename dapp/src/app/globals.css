@@ -13,13 +13,6 @@ body[data-scroll-locked] #top-navbar {
     padding-right: var(--removed-body-scroll-bar-size);
 }
 
-.landing-background {
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/hero-landing.jpg');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
 .name-card-selected::before {
     --gradient-border-width: 1px;
     content: '';
