@@ -4,6 +4,12 @@
 import { GRACE_PERIOD_MS, isSubname, NameRecord } from '@iota/iota-names-sdk';
 
 import type { RegistrationNft } from '../interfaces/registration.interfaces';
+import { formatExpirationDate } from './format/formatExpirationDate';
+
+export function getTargetExpirationDate(renewYears: number): string {
+    const today = new Date();
+    return formatExpirationDate(new Date(today.setFullYear(today.getFullYear() + renewYears)));
+}
 
 export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs < Date.now();
