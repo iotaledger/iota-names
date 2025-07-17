@@ -19,16 +19,10 @@ import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
-import { normalizeNameInput, splitNameInParts } from '@/lib/utils/format/formatNames';
+import { formatNameLabel } from '@/lib/utils/format/formatNames';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
-
-interface GeneralInfoDialogProps {
-    name: string;
-    open: boolean;
-    setOpen: (bool: boolean) => void;
-}
 
 interface InfoLinks {
     key: string;
@@ -36,7 +30,12 @@ interface InfoLinks {
     href: string;
 }
 
-export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProps) {
+interface GeneralInfoDialogProps {
+    name: string;
+    setOpen: (bool: boolean) => void;
+}
+
+export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
     const account = useCurrentAccount();
     const address = account?.address || '';
 
@@ -67,7 +66,7 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/address/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
@@ -75,16 +74,15 @@ export function GeneralInfoDialog({ name, open, setOpen }: GeneralInfoDialogProp
         setOpen(false);
     }
 
-    const { subnamePart, namePart } = splitNameInParts(name);
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            {subnamePart}@{normalizeNameInput(namePart)}
+                            {formatNameLabel(name)}
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">

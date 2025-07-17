@@ -3,14 +3,25 @@
 
 import { GRACE_PERIOD_MS, isSubname, NameRecord } from '@iota/iota-names-sdk';
 
-import { RegistrationNft } from '../interfaces/registration.interfaces';
+import type { RegistrationNft } from '../interfaces/registration.interfaces';
+import { formatExpirationDate } from './format/formatExpirationDate';
 
-export function isNameRecordExpired(nameRecord: NameRecord) {
+export function getTargetExpirationDate(renewYears: number): string {
+    const today = new Date();
+    return formatExpirationDate(new Date(today.setFullYear(today.getFullYear() + renewYears)));
+}
+
+export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs < Date.now();
 }
 
-export function isGracePeriodExpired(nameRecord: NameRecord) {
+export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {
     return nameRecord.expirationTimestampMs + GRACE_PERIOD_MS < Date.now();
+}
+
+export function isNameRecordCloseToExpiration(nameRecord: NameRecord | RegistrationNft): boolean {
+    const expirationThreshold = nameRecord.expirationTimestampMs - GRACE_PERIOD_MS;
+    return !isNameRecordExpired(nameRecord) && expirationThreshold < Date.now();
 }
 
 export function getNamePermissions(nameRecord: NameRecord) {
@@ -71,4 +82,15 @@ export function getParentObject(
 export function getNameObject(names: RegistrationNft[], name: string) {
     const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
     return nameObject?.id || null;
+}
+
+/**
+ * Get the amount of years that this name can be renewed as of now.
+ */
+export function getNameRenewableYears(maxYears: number, expirationTimestampMs: number): number {
+    const expirationTime = new Date(expirationTimestampMs);
+    const inMaxYearsTime = new Date();
+    inMaxYearsTime.setFullYear(inMaxYearsTime.getFullYear() + maxYears + 1);
+
+    return inMaxYearsTime.getFullYear() - expirationTime.getFullYear();
 }

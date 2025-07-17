@@ -43,7 +43,7 @@ import {
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;
@@ -173,7 +173,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return balanceValidationError.message;
         }
     })();
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
 
     return (
         <Dialog open onOpenChange={closeDialog}>
