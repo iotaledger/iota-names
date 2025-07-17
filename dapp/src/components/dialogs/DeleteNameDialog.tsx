@@ -150,7 +150,9 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
                                 text={
-                                    deleteActionNotAllowed ? `Delete in ${deleteSeconds}s` : 'Delete'
+                                    deleteActionNotAllowed
+                                        ? `Delete in ${deleteSeconds}s`
+                                        : 'Delete'
                                 }
                                 disabled={disableDeleteButton || deleteActionNotAllowed}
                                 type={ButtonType.Destructive}
