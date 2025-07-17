@@ -16,6 +16,7 @@ import {
     LoadingIndicator,
     Panel,
     Select,
+    SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +24,7 @@ import { useState } from 'react';
 
 import { NameUpdate, queryKey, useUpdateNameTransaction } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
+import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import {
     GAS_BALANCE_TOO_LOW_ID,
@@ -31,7 +33,7 @@ import {
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
+import { getDefaultExpirationDateWithRenewYears } from '@/lib/utils/getDefaultExpirationDate';
 
 type PurchaseNameProps = {
     name: string;
@@ -44,11 +46,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const account = useCurrentAccount();
+    const { data: coreConfig } = useCoreConfig();
 
     const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
-
-    // const { data: subnamesOwned } = useRegistrationNfts('subname');
 
     const {
         data: nameRecordData,
@@ -71,7 +72,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             type: 'register-name',
             name: name,
             price: price,
-            years: 1,
+            years: renewYears,
             setDefault: isDisplayName,
         });
     }
@@ -122,6 +123,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     if (!isConnected) return null;
 
+    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
+        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
+              id: String(i + 1),
+              label: `${i + 1} Year${i ? 's' : ''}`,
+          }))
+        : [];
+
     const totalBalance = Number(coinBalance?.totalBalance) || 0;
     const totalGas = Number(updateNameData?.gasSummary?.totalGas) || 0;
     const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
@@ -141,7 +149,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
     const cleanName = denormalizeName(name);
-    const expirationDate = getDefaultExpirationDate();
+
+    const expirationDate = getDefaultExpirationDateWithRenewYears(renewYears);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -160,13 +169,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             <div className="px-md py-sm border-t border-names-neutral-6">
                                 <Select
                                     value={renewYears.toString()}
-                                    options={[
-                                        { id: '1', label: '1 Year' },
-                                        { id: '2', label: '2 Years' },
-                                        { id: '3', label: '3 Years' },
-                                        { id: '4', label: '4 Years' },
-                                        { id: '5', label: '5 Years' },
-                                    ]}
+                                    options={RENEW_OPTIONS}
                                     onValueChange={(value) => {
                                         setRenewYears(parseInt(value, 10));
                                     }}
