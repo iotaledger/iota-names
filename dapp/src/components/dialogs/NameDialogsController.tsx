@@ -14,13 +14,13 @@ import { ManageNameDialog } from './ManageNameDialog';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
 import { RenewNameDialog } from './RenewNameDialog';
 
-interface NameManageDialogsProps {
+interface NameDialogsControllerProps {
     nft: RegistrationNft;
     openDialogId: NameDialogId | null;
     onClose: () => void;
 }
 
-export function NameManageDialogs({ nft, openDialogId, onClose }: NameManageDialogsProps) {
+export function NameDialogsController({ nft, openDialogId, onClose }: NameDialogsControllerProps) {
     return (
         <Fragment>
             {openDialogId === NameDialogId.Manage ? (
