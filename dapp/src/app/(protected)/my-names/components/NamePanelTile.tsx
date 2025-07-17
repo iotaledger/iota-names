@@ -60,7 +60,7 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
-    const panelTitle = formatNameLabel(registration.name, { truncateLongSubnames: true });
+    const panelTitle = formatNameLabel(registration.name, { truncateLongParts: true });
 
     return (
         <>

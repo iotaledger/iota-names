@@ -14,6 +14,7 @@ import {
     InfoBoxStyle,
     InfoBoxType,
     LoadingIndicator,
+    TooltipPosition,
     VisualAssetCard,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
@@ -30,9 +31,10 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
+
+import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface PersonalizeAvatarDialogProps {
     name: string;
@@ -54,7 +56,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const cleanName = denormalizeName(name);
     const updates: NameUpdate[] = [];
 
     if (
@@ -118,7 +119,10 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                             <BrandedAssets className="w-12 h-12" />
                             <div className="flex flex-col gap-xs text-center">
                                 <span className="text-title-md text-names-neutral-92">
-                                    @{cleanName}
+                                    <TruncatedNameWithTooltip
+                                        name={name}
+                                        tooltipPosition={TooltipPosition.Top}
+                                    />
                                 </span>
                                 <span className="text-body-md text-names-neutral-70">
                                     Use an NFT to personalize your avatar

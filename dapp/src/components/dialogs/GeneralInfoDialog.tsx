@@ -11,6 +11,7 @@ import {
     Header,
     KeyValueInfo,
     TitleSize,
+    TooltipPosition,
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -19,10 +20,10 @@ import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface InfoLinks {
     key: string;
@@ -66,7 +67,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/address/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
@@ -82,7 +83,10 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            {formatNameLabel(name)}
+                            <TruncatedNameWithTooltip
+                                name={name}
+                                tooltipPosition={TooltipPosition.Bottom}
+                            />
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">

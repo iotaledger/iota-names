@@ -49,7 +49,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
 
     const headerTitle = `Subnames for ${formatNameLabel(
         isAtRoot ? selectedName.name : currentNode.name,
-        { onlyFirstSubname: true, truncateLongSubnames: true },
+        { onlyFirstSubname: true, truncateLongParts: true },
     )}`;
 
     const subnamesRegistrations = currentNode.subnames

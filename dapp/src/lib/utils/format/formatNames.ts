@@ -21,31 +21,38 @@ export function denormalizeName(name: string) {
 }
 
 const LONG_NAMES_TRUNCATE_LENGTH = 11;
+const CHARACTERS_TO_SHOW = 6;
 interface FormatNameOptions {
     onlyFirstSubname?: boolean;
-    truncateLongSubnames?: boolean;
+    truncateLongParts?: boolean;
 }
 export function formatNameLabel(
     name: string,
-    { onlyFirstSubname = false, truncateLongSubnames = false }: FormatNameOptions = {},
+    { onlyFirstSubname = false, truncateLongParts = false }: FormatNameOptions = {},
 ) {
     const { parentName, subname: subnamePart } = splitNameParts(name);
 
     const subnamesArr = subnamePart.split('.');
+    let formattedName = parentName;
     let subname = onlyFirstSubname
         ? `${subnamesArr[0]}${subnamesArr.length > 1 ? '...' : ''}`
         : subnamePart;
 
-    if (truncateLongSubnames) {
+    if (truncateLongParts) {
         const subnames = subname.split('.');
         subname = subnames
             .map((s) => {
                 return s.length > LONG_NAMES_TRUNCATE_LENGTH
-                    ? `${s.slice(0, 3)}...${s.slice(-3)}`
+                    ? `${s.slice(0, CHARACTERS_TO_SHOW)}...${s.slice(-CHARACTERS_TO_SHOW)}`
                     : s;
             })
             .join('.');
+
+        formattedName =
+            formattedName.length > LONG_NAMES_TRUNCATE_LENGTH
+                ? `${formattedName.slice(0, CHARACTERS_TO_SHOW)}...${formattedName.slice(-CHARACTERS_TO_SHOW)}`
+                : formattedName;
     }
 
-    return subname ? `${subname}@${parentName}` : `@${parentName}`;
+    return subname ? `${subname}@${formattedName}` : `@${formattedName}`;
 }
