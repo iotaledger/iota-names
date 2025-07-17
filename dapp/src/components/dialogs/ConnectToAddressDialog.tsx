@@ -52,7 +52,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
     const [editIsDefaultName, setEditIsDefaultName] = useState<boolean>(false);
-    const [isSuccess, setIsSuccess] = useState(false);
 
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -112,7 +111,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
 
-    const { mutate: apply, isPending: isApplying } = useMutation({
+    const {
+        mutate: apply,
+        isPending: isApplying,
+        isSuccess,
+    } = useMutation({
         async mutationFn() {
             if (!updateNameTransaction) return;
             const txResult = await signAndExecuteTransaction({
@@ -125,7 +128,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
-            setIsSuccess(true);
         },
     });
 
@@ -253,7 +255,9 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                         editTargetAddress !== account?.address
                                                     }
                                                     onCheckedChange={(checked) =>
-                                                        setEditIsDefaultName(!!checked)
+                                                        setEditIsDefaultName(
+                                                            !!checked.target.checked,
+                                                        )
                                                     }
                                                 />
                                             </div>
