@@ -3,161 +3,56 @@
 
 'use client';
 
-import {
-    Add,
-    Assets,
-    Calendar,
-    Info,
-    Link,
-    // Add,
-    // Assets,
-    // Calendar,
-    // Delete,
-    // Info,
-    // Link,
-    // Pined,
-    Settings,
-    Warning,
-} from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { useState } from 'react';
 
+import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { MenuListItem } from '@/lib/types/components';
 import { formatNameLabel } from '@/lib/utils/format/formatNames';
+import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 
-import { DeleteNameDialog } from '../dialogs';
-import { ConnectToAddressDialog } from '../dialogs/ConnectToAddressDialog';
-import { CreateSubnameDialog } from '../dialogs/CreateSubnameDialog';
-import { GeneralInfoDialog } from '../dialogs/GeneralInfoDialog';
-import { ManageNameDialog } from '../dialogs/ManageNameDialog';
-import { PersonalizeAvatarDialog } from '../dialogs/PersonalizeAvatarDialog';
-import { RenewNameDialog } from '../dialogs/RenewNameDialog';
-import { DropdownMenuOption } from '../DropdownMenuOptions';
+import { NameDialogId } from '../dialogs/enums';
+import { NameManageDialogs } from '../dialogs/NameManageDialogs';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
 import { SubnameCountIndicator } from './NameCardIndicators';
-
-enum NameDialogId {
-    Manage = 'manage',
-    Delete = 'delete',
-    CreateSubname = 'create-subname',
-    PersonalizeAvatar = 'personalize-avatar',
-    Renew = 'renew',
-    GeneralInfo = 'general-info',
-    ConnectToAddress = 'connect-to-address',
-}
 
 interface ExtendedNameCardProps {
     nft: RegistrationNft;
     onSubnameListClick: () => void;
     badge?: React.ReactNode;
+    isActive?: boolean;
 }
 
-export function ExtendedNameCard({ nft, onSubnameListClick, badge }: ExtendedNameCardProps) {
-    const [openDialogId, setOpenDialogId] = useState<NameDialogId | null>(null);
-
+export function ExtendedNameCard({
+    nft,
+    onSubnameListClick,
+    badge,
+    isActive,
+}: ExtendedNameCardProps) {
     const nameTree = useNameTree(nft.name);
 
+    const { openDialogId, openDialog, closeDialog } = useNameManageDialog();
+
+    const hasSubnames = nameTree ? nameTree?.subnames.length > 0 : false;
+    const menuOptions = getNameMenuOptions(nft, hasSubnames, openDialog);
     const label = formatNameLabel(nft.name);
-
-    const menuOptions: MenuListItem[] = [
-        {
-            onClick: () => setOpenDialogId(NameDialogId.Manage),
-            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.ConnectToAddress),
-            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
-            hideBottomBorder: true,
-        },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Pined />} label="Make name default" />,
-        //     hideBottomBorder: true,
-        // },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.Delete),
-            children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
-            isHidden: !(nft.isExpired && nameTree ? nameTree.subnames.length > 0 : false),
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.PersonalizeAvatar),
-            children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
-            hideBottomBorder: true,
-        },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Delete />} label="Remove Avatar" />,
-        //     isDisabled: true,
-        // },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.CreateSubname),
-            children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-        },
-        // {
-        //     onClick: () => {},
-        //     children: <DropdownMenuOption icon={<Link />} label="Link to Wallet Address" />,
-        // },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.Renew),
-            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            hideBottomBorder: true,
-        },
-        {
-            onClick: () => setOpenDialogId(NameDialogId.GeneralInfo),
-            children: <DropdownMenuOption icon={<Info />} label="View All Info" />,
-            hideBottomBorder: true,
-        },
-    ];
-
-    function closeDialog() {
-        setOpenDialogId(null);
-    }
 
     return (
         <>
-            <NameCard name={nft.name} badge={badge} menuOptions={menuOptions}>
+            <NameCard name={nft.name} badge={badge} menuOptions={menuOptions} isSelected={isActive}>
                 <NameCardBody name={label}>
                     <SubnameCountIndicator
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
-                        onAddSubnameClick={() => setOpenDialogId(NameDialogId.CreateSubname)}
+                        onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
                     />
 
                     <Button text="Placeholder" type={ButtonType.Secondary} onClick={() => {}} />
                 </NameCardBody>
             </NameCard>
 
-            {openDialogId === NameDialogId.Manage ? (
-                <ManageNameDialog open name={nft.name} setOpen={closeDialog} />
-            ) : null}
-
-            {openDialogId === NameDialogId.Delete ? (
-                <DeleteNameDialog open nft={nft} setOpen={closeDialog} />
-            ) : null}
-
-            {openDialogId === NameDialogId.CreateSubname ? (
-                <CreateSubnameDialog name={nft.name} setOpen={closeDialog} />
-            ) : null}
-
-            {openDialogId === NameDialogId.PersonalizeAvatar ? (
-                <PersonalizeAvatarDialog name={nft.name} setOpen={closeDialog} />
-            ) : null}
-
-            {openDialogId === NameDialogId.Renew ? (
-                <RenewNameDialog name={nft.name} setOpen={closeDialog} />
-            ) : null}
-
-            {openDialogId === NameDialogId.GeneralInfo ? (
-                <GeneralInfoDialog name={nft.name} setOpen={closeDialog} />
-            ) : null}
-            {openDialogId === NameDialogId.ConnectToAddress ? (
-                <ConnectToAddressDialog name={nft.name} setOpen={closeDialog} />
-            ) : null}
+            <NameManageDialogs nft={nft} openDialogId={openDialogId} onClose={closeDialog} />
         </>
     );
 }

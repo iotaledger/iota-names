@@ -1,7 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { MoreHoriz } from '@iota/apps-ui-icons';
 import cx from 'clsx';
 
 import { nftDisplayVariants } from '@/components/name-record/variants';
@@ -12,6 +11,7 @@ import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
+    isSelected?: boolean;
 }
 
 export function NameCard({
@@ -19,12 +19,14 @@ export function NameCard({
     badge,
     size,
     menuOptions,
+    isSelected,
     children,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
             className={cx(
-                'relative group/name-card rounded-xl overflow-hidden shadow-md bg-names-neutral-6',
+                'relative group/name-card rounded-xl shadow-md bg-names-neutral-6 overflow-visible',
+                isSelected && 'name-card-selected',
                 nftDisplayVariants({ size }),
             )}
         >
@@ -32,12 +34,10 @@ export function NameCard({
                 name={name}
                 size={size}
                 badge={badge}
-                button={
-                    menuOptions && <ContextMenuButton icon={<MoreHoriz />} options={menuOptions} />
-                }
+                button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
             />
 
-            {children}
+            <div className={nftDisplayVariants({ size })}>{children}</div>
         </div>
     );
 }
