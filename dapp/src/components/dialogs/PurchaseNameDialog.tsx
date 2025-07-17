@@ -32,12 +32,8 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
-import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-
-function getDefaultExpirationDateWithRenewYears(renewYears: number): string {
-    return formatExpirationDate(new Date(Date.now() + renewYears * 365 * 24 * 60 * 60 * 1000));
-}
+import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
     name: string;
@@ -154,7 +150,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const cleanName = denormalizeName(name);
 
-    const expirationDate = getDefaultExpirationDateWithRenewYears(renewYears);
+    const expirationDate = getTargetExpirationDate(renewYears);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
