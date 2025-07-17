@@ -180,19 +180,27 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                             {isSuccess ? (
                                 <div className="flex flex-col gap-y-md items-center text-center">
                                     <div className="flex flex-col items-center gap-y-sm">
-                                        <span className="text-title-lg text-names-neutral-100">
-                                            @{denormalizeName(name)}
-                                        </span>
+                                        {editIsDefaultName ? (
+                                            <span className="text-title-lg text-names-neutral-100">
+                                                @{denormalizeName(name)}
+                                            </span>
+                                        ) : null}
                                         <Chip
                                             leadingElement={<Link className="w-4 h-4" />}
                                             label={formatAddress(account?.address || '')}
                                             trailingElement={<Copy className="w-4 h-4" />}
                                             onClick={copyAddressToClipboard}
-                                            type={ChipType.Success}
+                                            type={
+                                                editIsDefaultName
+                                                    ? ChipType.Success
+                                                    : ChipType.Elevated
+                                            }
                                         />
                                     </div>
                                     <span className="text-body-md text-names-neutral-70">
-                                        Address linked successfully
+                                        {editIsDefaultName
+                                            ? 'Address linked successfully'
+                                            : `@${denormalizeName(name)} is no longer linked to an address`}
                                     </span>
                                 </div>
                             ) : (
