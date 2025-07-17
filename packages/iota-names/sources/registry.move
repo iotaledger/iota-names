@@ -185,7 +185,7 @@ public fun add_leaf_record(
 ) {
     assert!(name.is_subname(), EInvalidDepth);
 
-    // Get the parent of the name.
+    // Returns the parent of the name.
     let parent = name.parent().extract();
     let option_parent_name_record = self.lookup(parent);
 

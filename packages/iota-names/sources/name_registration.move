@@ -91,7 +91,7 @@ public fun expiration_timestamp_ms(self: &NameRegistration): u64 {
     self.expiration_timestamp_ms
 }
 
-// Get a read-only `uid` field of `NameRegistration`.
+// Returns a read-only `uid` field of `NameRegistration`.
 public fun uid(self: &NameRegistration): &UID { &self.id }
 
 /// Get the mutable `id` field of the `NameRegistration`.
