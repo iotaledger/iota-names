@@ -32,8 +32,12 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-import { getDefaultExpirationDateWithRenewYears } from '@/lib/utils/getDefaultExpirationDate';
+
+function getDefaultExpirationDateWithRenewYears(renewYears: number): string {
+    return formatExpirationDate(new Date(Date.now() + renewYears * 365 * 24 * 60 * 60 * 1000));
+}
 
 type PurchaseNameProps = {
     name: string;
