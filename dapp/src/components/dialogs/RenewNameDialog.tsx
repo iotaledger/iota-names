@@ -32,7 +32,6 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { formatNameLabel } from '@/lib/utils/format/formatNames';
-import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
     getNamePermissions,
@@ -102,8 +101,8 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const { data: nameRecordData } = useNameRecord(name);
-    const { data: coreConfig } = useCoreConfig();
+    const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
+    const { data: coreConfig, isLoading: isLoadingcoreConfig } = useCoreConfig();
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -169,6 +168,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                   nameRecord.nameRecord.expirationTimestampMs,
               )
             : 0;
+    const isRewable = (renewableYears ?? 0) > 0;
 
     const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
         id: String(i + 1),
@@ -183,13 +183,17 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
-    const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
-    const disableEdit = isSendingTransaction || isSigning;
+    const expirationDate = nameRecord?.nameRecord.expirationTimestampMs
+        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
+        : null;
+
+    const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
+    const isLoading =
+        isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
+
+    const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
     const cleanName = formatNameLabel(nameRecord?.nameRecord?.name || name);
-    const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
-        : getDefaultExpirationDate();
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -205,16 +209,16 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     </span>
                                 </div>
                             </Panel>
-                            {!isNameSubname && (
+                            {!isNameSubname && isRewable && !isLoadingData && (
                                 <Select
                                     options={renewOptions}
                                     value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
-                                    disabled={disableEdit || renewOptions.length === 0}
+                                    disabled={disableEdit}
                                     errorMessage={updateNameError?.message}
                                 />
                             )}
-                            {!isNameSubname && renewOptions.length === 0 && (
+                            {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
@@ -226,7 +230,11 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                                <DisplayStats
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    label="Registration Expires"
+                                    value={expirationDate}
+                                />
                             </div>
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
