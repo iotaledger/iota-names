@@ -20,6 +20,7 @@ export function LandingHero() {
                 isAutoPlayEnabled
                 disableControls
                 className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                poster="/poster-hero.png"
             />
 
             <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl">
