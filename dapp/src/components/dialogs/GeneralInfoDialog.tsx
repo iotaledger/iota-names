@@ -66,7 +66,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/address/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
