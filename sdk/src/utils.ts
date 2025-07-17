@@ -40,13 +40,17 @@ export function validateIotaName(
     name: string,
     minLength: number = 3,
     maxLength: number = 64,
+    allowSubnames: boolean = true,
 ): string | null {
     if (!name) return null;
+    const lowerCase = name.toLowerCase();
 
-    if (name.includes('.')) {
+    const parts = lowerCase.split('.');
+
+    if (!allowSubnames && parts.length > 2) {
         return 'No subnames allowed';
     }
-    if (!LABEL_REGEX.test(name)) {
+    if (!NAME_DOT_REGEX.test(name)) {
         return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
     }
     if (name.length < minLength || name.length > maxLength) {

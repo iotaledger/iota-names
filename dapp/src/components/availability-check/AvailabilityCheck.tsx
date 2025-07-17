@@ -48,7 +48,15 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
 
     const validationError = useMemo(
-        () => validateIotaName(searchValue, priceList?.minLength, priceList?.maxLength),
+        () =>
+            searchValue
+                ? validateIotaName(
+                      `${searchValue}.iota`,
+                      priceList?.minLength,
+                      priceList?.maxLength,
+                      false,
+                  )
+                : null,
         [searchValue, priceList],
     );
 
