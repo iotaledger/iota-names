@@ -31,7 +31,7 @@ import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
@@ -186,7 +186,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
-    const cleanName = normalizeNameInput(nameRecord?.nameRecord?.name || name);
+    const cleanName = formatNameLabel(nameRecord?.nameRecord?.name || name);
     const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : getDefaultExpirationDate();
@@ -194,14 +194,14 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
-                <Header title="Renew Name" />
+                <Header title="Renew Name" onClose={() => setOpen(false)} />
                 <DialogBody>
                     <div className="flex flex-col justify-between h-full items-center">
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
-                                    <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                    <span className="text-names-neutral-100 text-headline-sm break-words">
+                                        {cleanName}
                                     </span>
                                 </div>
                             </Panel>
@@ -220,7 +220,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     icon={<Warning />}
                                     title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You’ll be able to renew it again once it gets closer to its expiration date`}
+                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
                         </div>

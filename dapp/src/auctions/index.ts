@@ -3,7 +3,6 @@
 
 export { AuctionItem } from './components/AuctionItem';
 export { AuctionStatusBadge } from './components/AuctionStatusBadge';
-export { UserAuctions } from './components/UserAuctions';
 export { AuctionBidDialog } from './components/dialogs/AuctionBidDialog';
 
 export { useAuctionBid } from './hooks/useAuctionBid';
