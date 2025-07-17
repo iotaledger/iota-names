@@ -8,4 +8,5 @@ export enum NameDialogId {
     PersonalizeAvatar = 'personalize-avatar',
     RenewName = 'renew-name',
     GeneralInfo = 'general-info',
+    SetPermissions = 'set-permissions',
 }

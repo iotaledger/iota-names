@@ -11,6 +11,7 @@ import { NameDialogId } from './enums';
 import { GeneralInfoDialog } from './GeneralInfoDialog';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
 import { RenewNameDialog } from './RenewNameDialog';
+import { SetPermissionsDialog } from './SetPermissionsDialog';
 
 interface NameManageDialogsProps {
     nft: RegistrationNft;
@@ -27,6 +28,10 @@ export function NameManageDialogs({ nft, openDialogId, onClose }: NameManageDial
 
             {openDialogId === NameDialogId.Delete ? (
                 <DeleteNameDialog nft={nft} setOpen={onClose} />
+            ) : null}
+
+            {openDialogId === NameDialogId.SetPermissions ? (
+                <SetPermissionsDialog name={nft.name} setOpen={onClose} />
             ) : null}
 
             {openDialogId === NameDialogId.CreateSubname ? (

@@ -41,6 +41,11 @@ export function getNameMenuOptions(
         //     isDisabled: true,
         // },
         {
+            onClick: () => onOpen(NameDialogId.SetPermissions),
+            children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
+            isHidden: !nft.isSubname,
+        },
+        {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
         },
