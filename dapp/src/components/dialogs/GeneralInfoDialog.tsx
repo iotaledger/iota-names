@@ -24,15 +24,15 @@ import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
-interface GeneralInfoDialogProps {
-    name: string;
-    setOpen: (bool: boolean) => void;
-}
-
 interface InfoLinks {
     key: string;
     value: string;
     href: string;
+}
+
+interface GeneralInfoDialogProps {
+    name: string;
+    setOpen: (bool: boolean) => void;
 }
 
 export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {

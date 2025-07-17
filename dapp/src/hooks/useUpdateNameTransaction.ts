@@ -21,10 +21,11 @@ export type NameUpdate =
           type: 'set-avatar';
           nftId: string;
           avatarNftId: string;
+          isSubname?: boolean;
       }
     | {
           type: 'set-target-address';
-          address: string;
+          address: string | undefined;
           isSubname: boolean;
           nftId: string;
       }
@@ -89,6 +90,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             nft: update.nftId,
                             key: ALLOWED_METADATA.avatar,
                             value: update.avatarNftId,
+                            isSubname: update.isSubname,
                         });
                         break;
                     case 'set-target-address':
