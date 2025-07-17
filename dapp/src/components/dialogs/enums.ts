@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export enum NameDialogId {
-    Update = 'update',
+    Manage = 'manage',
     Delete = 'delete',
     CreateSubname = 'create-subname',
     PersonalizeAvatar = 'personalize-avatar',
     RenewName = 'renew-name',
     GeneralInfo = 'general-info',
     SetPermissions = 'set-permissions',
+    ConnectToAddress = 'connect-to-address',
 }
