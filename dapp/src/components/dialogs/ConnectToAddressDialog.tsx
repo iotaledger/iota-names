@@ -29,6 +29,7 @@ import { isSubname } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
@@ -122,7 +123,20 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
-            setIsSuccess(true);
+            if (editTargetAddress.length === 0) {
+                toast.success(`Successfully disconnected @${denormalizeName(name)}`);
+                setOpen(false);
+            } else if (editTargetAddress !== account?.address) {
+                toast.success(
+                    `Successfully connected @${denormalizeName(name)} to address ${formatAddress(editTargetAddress)}`,
+                );
+                setOpen(false);
+            } else {
+                setIsSuccess(true);
+            }
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
