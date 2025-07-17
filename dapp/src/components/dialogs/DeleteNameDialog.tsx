@@ -152,7 +152,7 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                                 text={
                                     deleteActionAllowed ? `Delete in ${deleteSeconds}s` : 'Delete'
                                 }
-                                disabled={disableDeleteButton && !deleteActionAllowed}
+                                disabled={disableDeleteButton || deleteActionAllowed}
                                 type={ButtonType.Destructive}
                                 onClick={() => deleteName()}
                                 fullWidth
