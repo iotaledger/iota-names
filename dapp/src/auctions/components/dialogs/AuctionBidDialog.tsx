@@ -107,6 +107,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
+
     const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
