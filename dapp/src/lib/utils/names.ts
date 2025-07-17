@@ -77,3 +77,14 @@ export function getNameObject(names: RegistrationNft[], name: string) {
     const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
     return nameObject?.id || null;
 }
+
+/**
+ * Get the amount of years that this name can be renewed as of now.
+ */
+export function getNameRenewableYears(maxYears: number, expirationTimestampMs: number): number {
+    const expirationTime = new Date(expirationTimestampMs);
+    const inMaxYearsTime = new Date();
+    inMaxYearsTime.setFullYear(inMaxYearsTime.getFullYear() + maxYears + 1);
+
+    return inMaxYearsTime.getFullYear() - expirationTime.getFullYear();
+}
