@@ -5,6 +5,8 @@
 
 import { Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
+    Badge,
+    BadgeType,
     Button,
     ButtonSegment,
     ButtonSegmentType,
@@ -16,13 +18,14 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import cx from 'clsx';
 import { useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-import { useRegistrationNfts } from '@/hooks';
+import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -31,11 +34,13 @@ import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
-    const [selectedName, setSelectedName] = useState<RegistrationNft | null>(null);
-
+    const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
+        null,
+    );
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
+
     const {
         data: names,
         error: isNamesErrored,
@@ -51,6 +56,9 @@ export default function MyNamesPage(): JSX.Element {
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
     } = useGetUserAuctions();
+
+    const address = useCurrentAccount()?.address ?? '';
+    const { data: defaultName } = useGetDefaultName(address);
 
     const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
 
@@ -84,11 +92,15 @@ export default function MyNamesPage(): JSX.Element {
         !isNamesErrored &&
         !isSubnamesErrored;
 
-    const noAuctions = !auctionDetails || auctionDetails.length === 0;
+    const noAuctions = auctionDetails.every((auction) => auction.metadata === null);
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
-        setSelectedName(null);
+        setRightPanelSelectedName(null);
+    }
+
+    function isDefaultName(name: RegistrationNft): boolean {
+        return defaultName ? defaultName === name.name : false;
     }
 
     return (
@@ -129,69 +141,84 @@ export default function MyNamesPage(): JSX.Element {
                 </SegmentedButton>
             </div>
 
-            <>
-                {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
-                    isAuctionsErrored || noAuctions ? (
-                        <div className="flex">
-                            <InfoBox
-                                style={InfoBoxStyle.Elevated}
-                                type={isAuctionsErrored ? InfoBoxType.Error : InfoBoxType.Default}
-                                supportingText={
-                                    isAuctionsErrored
-                                        ? 'Failed to load auctions. Please try again later.'
-                                        : "You haven't participated in any auctions yet."
-                                }
-                                icon={isAuctionsErrored ? <Warning /> : <Info />}
-                            />
-                        </div>
-                    ) : null
-                ) : noCardToDisplay ? (
+            {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
+                isAuctionsErrored || noAuctions ? (
                     <div className="flex">
                         <InfoBox
                             style={InfoBoxStyle.Elevated}
-                            type={InfoBoxType.Default}
-                            supportingText={`You don't own any ${selectedFilter === GroupedNamesFilter.Subnames ? 'subnames' : 'names'} yet.`}
-                            icon={<Info />}
+                            type={isAuctionsErrored ? InfoBoxType.Error : InfoBoxType.Default}
+                            supportingText={
+                                isAuctionsErrored
+                                    ? 'Failed to load auctions. Please try again later.'
+                                    : "You haven't participated in any auctions yet."
+                            }
+                            icon={isAuctionsErrored ? <Warning /> : <Info />}
                         />
                     </div>
-                ) : null}
+                ) : null
+            ) : noCardToDisplay ? (
+                <div className="flex">
+                    <InfoBox
+                        style={InfoBoxStyle.Elevated}
+                        type={InfoBoxType.Default}
+                        supportingText={`You don't own any ${selectedFilter === GroupedNamesFilter.Subnames ? 'subnames' : 'names'} yet.`}
+                        icon={<Info />}
+                    />
+                </div>
+            ) : null}
 
-                {isLoadingCards && (
-                    <div className="w-full flex-1 flex flex-col items-center justify-center">
-                        <LoadingIndicator size="w-10 h-10" />
-                    </div>
-                )}
+            {isLoadingCards && (
+                <div className="w-full flex-1 flex flex-col items-center justify-center">
+                    <LoadingIndicator size="w-10 h-10" />
+                </div>
+            )}
 
-                {((!isLoadingCards && filteredNames.length > 0) || selectedName) && (
-                    <div className="w-full flex flex-row items-start justify-between gap-xl">
-                        {!isLoadingCards && filteredNames.length > 0 && (
-                            <div className="flex flex-row gap-lg items-center flex-wrap w-full">
-                                {filteredNames.map((nft) =>
-                                    'details' in nft ? (
-                                        <ExtendedAuctionCard
-                                            key={nft.details.name}
-                                            name={nft.details.name}
-                                            auctionDetails={nft.details}
-                                        />
-                                    ) : (
-                                        <ExtendedNameCard
-                                            key={nft.name}
-                                            nft={nft}
-                                            onSubnameListClick={() => setSelectedName(nft)}
-                                        />
-                                    ),
-                                )}
-                            </div>
+            {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
+                <div className="flex flex-row items-start justify-between gap-xl">
+                    <div
+                        className={cx(
+                            'gap-lg w-full',
+                            rightPanelSelectedName
+                                ? 'grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] auto-rows-[1fr]'
+                                : 'flex flex-row items-center flex-wrap',
                         )}
-                        {selectedName && (
+                    >
+                        {filteredNames.map((nft) =>
+                            'details' in nft ? (
+                                <ExtendedAuctionCard
+                                    key={nft.details.name}
+                                    name={nft.details.name}
+                                    auctionDetails={nft.details}
+                                />
+                            ) : (
+                                <ExtendedNameCard
+                                    key={nft.name}
+                                    nft={nft}
+                                    onSubnameListClick={() => setRightPanelSelectedName(nft)}
+                                    isActive={rightPanelSelectedName?.name === nft.name}
+                                    badge={
+                                        isDefaultName(nft) ? (
+                                            <Badge
+                                                type={BadgeType.PrimarySolid}
+                                                label="Displayed"
+                                            />
+                                        ) : null
+                                    }
+                                />
+                            ),
+                        )}
+                    </div>
+
+                    {rightPanelSelectedName && (
+                        <div className="max-w-[420px] w-full">
                             <SubnamesPanel
-                                selectedName={selectedName}
-                                onClose={() => setSelectedName(null)}
+                                selectedName={rightPanelSelectedName}
+                                onClose={() => setRightPanelSelectedName(null)}
                             />
-                        )}
-                    </div>
-                )}
-            </>
+                        </div>
+                    )}
+                </div>
+            )}
         </>
     );
 }

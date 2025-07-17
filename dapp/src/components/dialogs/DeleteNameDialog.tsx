@@ -32,11 +32,10 @@ import { getNameObject } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
+export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -109,7 +108,7 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     }, [deleteActionAllowed]);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header title="Delete" onClose={closeDialog} />
                 <DialogBody>

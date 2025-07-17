@@ -8,6 +8,7 @@ export const nftDisplayVariants = cva('', {
         size: {
             medium: 'w-[220px]',
             large: 'w-[440px]',
+            full: 'w-full',
         },
     },
     defaultVariants: {
