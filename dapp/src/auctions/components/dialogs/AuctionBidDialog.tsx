@@ -104,7 +104,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
                     formatRounded: false,
                     showIotaSymbol: true,
-                })} on @${normalizeNameInput(name)}`,
+                })} on @${denormalizeName(name)}`,
             );
             closeDialog();
             onCompleted?.();
