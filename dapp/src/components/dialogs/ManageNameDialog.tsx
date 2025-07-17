@@ -35,12 +35,12 @@ import {
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
-type UpdateNameDialogProps = {
+type ManageNameDialogProps = {
     name: string;
     setOpen: (bool: boolean) => void;
 };
 
-export function UpdateNameDialog({ name, setOpen }: UpdateNameDialogProps) {
+export function ManageNameDialog({ name, setOpen }: ManageNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();

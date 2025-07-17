@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Add, Assets, Calendar, Info, Settings, Warning } from '@iota/apps-ui-icons';
+import { Add, Assets, Calendar, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
@@ -15,8 +15,13 @@ export function getNameMenuOptions(
 ): MenuListItem[] {
     return [
         {
-            onClick: () => onOpen(NameDialogId.Update),
+            onClick: () => onOpen(NameDialogId.Manage),
             children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
+            hideBottomBorder: true,
+        },
+        {
+            onClick: () => onOpen(NameDialogId.ConnectToAddress),
+            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
             hideBottomBorder: true,
         },
         // {
