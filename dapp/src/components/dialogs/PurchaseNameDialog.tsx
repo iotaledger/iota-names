@@ -6,6 +6,7 @@
 import {
     Button,
     ButtonType,
+    Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
@@ -14,14 +15,17 @@ import {
     Header,
     LoadingIndicator,
     Panel,
+    Select,
+    SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameUpdate, queryKey, useUpdateNameTransaction } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
+import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import {
     GAS_BALANCE_TOO_LOW_ID,
@@ -30,7 +34,7 @@ import {
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
+import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
     name: string;
@@ -43,11 +47,21 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const account = useCurrentAccount();
+    const { data: coreConfig } = useCoreConfig();
+
+    const [renewYears, setRenewYears] = useState<number>(1);
+    const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+
     const {
         data: nameRecordData,
         isLoading: isNameRecordLoading,
         error: nameRecordError,
-    } = useNameRecord(name);
+    } = useNameRecord(name, {
+        price: {
+            years: renewYears,
+            isRegistration: true,
+        },
+    });
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
@@ -59,7 +73,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             type: 'register-name',
             name: name,
             price: price,
-            years: 1,
+            years: renewYears,
+            setDefault: isDisplayName,
         });
     }
 
@@ -112,6 +127,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     if (!isConnected) return null;
 
+    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
+        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
+              id: String(i + 1),
+              label: `${i + 1} Year${i ? 's' : ''}`,
+          }))
+        : [];
+
     const totalBalance = Number(coinBalance?.totalBalance) || 0;
     const totalGas = Number(updateNameData?.gasSummary?.totalGas) || 0;
     const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
@@ -131,7 +153,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
     const cleanName = denormalizeName(name);
-    const expirationDate = getDefaultExpirationDate();
+
+    const expirationDate = getTargetExpirationDate(renewYears);
 
     useEffect(() => {
         if (coinBalanceError) {
@@ -172,8 +195,27 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
+                            <div className="px-md py-sm border-t border-names-neutral-6">
+                                <Select
+                                    value={renewYears.toString()}
+                                    options={RENEW_OPTIONS}
+                                    onValueChange={(value) => {
+                                        setRenewYears(parseInt(value, 10));
+                                    }}
+                                    placeholder="Select renewal period"
+                                />
+                            </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
+                            <Panel bgColor="bg-names-neutral-10">
+                                <div className="flex flex-row gap-x-sm w-full p-md">
+                                    <Checkbox
+                                        isChecked={isDisplayName}
+                                        onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                        label="Set name as Display Name"
+                                    />
+                                </div>
+                            </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats
