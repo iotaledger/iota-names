@@ -18,9 +18,15 @@ interface UseUpdateNameTransactionOptions {
 
 export type NameUpdate =
     | {
-          type: 'set-avatar';
+          type: 'set-data';
           nftId: string;
-          avatarNftId: string;
+          key: string;
+          value: string;
+      }
+    | {
+          type: 'unset-data';
+          nftId: string;
+          key: string;
       }
     | {
           type: 'set-target-address';
@@ -84,11 +90,17 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
 
             for (const update of updates) {
                 switch (update.type) {
-                    case 'set-avatar':
+                    case 'set-data':
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
-                            key: ALLOWED_METADATA.avatar,
-                            value: update.avatarNftId,
+                            key: update.key,
+                            value: update.value,
+                        });
+                        break;
+                    case 'unset-data':
+                        iotaNamesTx.unsetUserData({
+                            nft: update.nftId,
+                            key: update.key,
                         });
                         break;
                     case 'set-target-address':

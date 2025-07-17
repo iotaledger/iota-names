@@ -10,11 +10,11 @@ import type {
 } from '@iota/iota-sdk/transactions';
 import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
-import { ALLOWED_METADATA } from './constants';
-import { isNestedSubname, isSubname } from './helpers';
+import { ALLOWED_METADATA } from './constants.js';
+import { isNestedSubname, isSubname } from './helpers.js';
 import type { IotaNamesClient } from './iota-names-client';
 import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
-import { isValidIotaName, normalizeIotaName } from './utils';
+import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 export class IotaNamesTransaction {
     iotaNamesClient: IotaNamesClient;
@@ -195,7 +195,7 @@ export class IotaNamesTransaction {
 
     /**
      * Builds the PTB to create a leaf subname.
-     * Parent can be a `NameRegistration` or a `SubnameRegistration` object.
+     * Parent can be a `IotaNamesRegistration` or a `SubnameRegistration` object.
      * Can be passed in as an ID or a TransactionArgument.
      */
     createLeafSubname({
@@ -408,6 +408,38 @@ export class IotaNamesTransaction {
                 this.transaction.object(nft),
                 this.transaction.pure.string(key),
                 this.transaction.pure.string(value),
+                this.transaction.object(IOTA_CLOCK_OBJECT_ID),
+            ],
+        });
+    }
+
+    /**
+     * Unsets the user data of an NFT.
+     */
+    unsetUserData({
+        nft,
+        key,
+        isSubname,
+    }: {
+        nft: TransactionObjectInput;
+        key: string;
+        isSubname?: boolean;
+    }) {
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
+            throw new Error('IOTA-Names Object ID not found');
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
+            throw new Error('Subnames proxy package ID not found');
+
+        if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
+
+        this.transaction.moveCall({
+            target: isSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::unset_user_data`
+                : `${this.iotaNamesClient.config.packageId}::controller::unset_user_data`,
+            arguments: [
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
+                this.transaction.object(nft),
+                this.transaction.pure.string(key),
                 this.transaction.object(IOTA_CLOCK_OBJECT_ID),
             ],
         });

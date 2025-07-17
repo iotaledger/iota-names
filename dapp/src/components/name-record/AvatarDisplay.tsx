@@ -22,7 +22,8 @@ export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps)
     //TODO: Remove when we add the svg api
     const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
 
-    const avatarId = data?.type === 'unavailable' ? data?.nameRecord.avatar : null;
+    const avatarId =
+        data?.type === 'unavailable' ? (data.nameRecord.nftId ?? data?.nameRecord.avatar) : null;
 
     const { data: avatarObject } = useGetObject({
         id: avatarId ?? '',

@@ -72,3 +72,14 @@ export function getNameObject(names: RegistrationNft[], name: string) {
     const nameObject = names.find((domain: { name: string | null }) => domain.name === name);
     return nameObject?.id || null;
 }
+
+export const getImageUrl = (name: string, expirationTimestampMs: number) => {
+    return `http://localhost:3000/${name}/${expirationTimestampMs}`;
+};
+
+export const getDisplayImageUrl = (isSubname: boolean) => {
+    const name = `{${isSubname ? 'nft.' : ''}name_str}`;
+    const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
+
+    return `http://localhost:3000/${name}/${expiration}`;
+};
