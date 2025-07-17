@@ -172,6 +172,22 @@ export const getSigner = () => {
         readFileSync(path.join(homedir(), '.iota', 'iota_config', 'iota.keystore'), 'utf8'),
     );
 
+    // Support for old format, can be removed once https://github.com/iotaledger/iota/pull/7704 is in production
+    if (Array.isArray(keystore)) {
+        for (const priv of keystore) {
+            if (typeof priv !== 'string') {
+                break;
+            }
+            const keypair = decodeIotaPrivateKey(priv);
+
+            const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
+            if (pair.getPublicKey().toIotaAddress() === sender) {
+                return pair;
+            }
+        }
+    }
+
+    // New format
     for (const entry of keystore.keys) {
         if (entry.key.type !== 'key_pair' || entry.address !== sender) {
             continue;
