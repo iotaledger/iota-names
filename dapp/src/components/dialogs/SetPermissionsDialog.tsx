@@ -29,19 +29,21 @@ import { getNamePermissions, getParentObject, isNameRecordExpired } from '@/lib/
 
 function editSetupUpdates({
     name,
+    ownedNames,
     ownedSubnames,
     editIsAllowingRenew,
     editIsAllowSubnames,
     namePermissions,
 }: {
     name: string;
-    ownedSubnames?: RegistrationNft[];
+    ownedNames: RegistrationNft[];
+    ownedSubnames: RegistrationNft[];
     editIsAllowingRenew: boolean;
     editIsAllowSubnames: boolean;
     namePermissions?: ReturnType<typeof getNamePermissions>;
 }) {
     const updates: NameUpdate[] = [];
-    const nftId = getParentObject(ownedSubnames ?? [], ownedSubnames ?? [], name)?.id;
+    const nftId = getParentObject(ownedNames ?? [], ownedSubnames ?? [], name)?.id;
     if (
         nftId &&
         (editIsAllowingRenew !== namePermissions?.allowTimeExtension ||
@@ -70,7 +72,8 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const { data: ownedSubnames } = useRegistrationNfts('subname');
+    const { data: ownedNames = [] } = useRegistrationNfts('name');
+    const { data: ownedSubnames = [] } = useRegistrationNfts('subname');
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -93,6 +96,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
 
     const { updates } = editSetupUpdates({
         name,
+        ownedNames,
         ownedSubnames,
         editIsAllowingRenew,
         editIsAllowSubnames,
