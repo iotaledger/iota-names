@@ -96,16 +96,16 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
 
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
     const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !nft.isExpired;
-    const deleteActionAllowed = deleteSeconds > 0;
+    const deleteActionNotAllowed = deleteSeconds > 0;
     useEffect(() => {
-        if (!deleteActionAllowed) return;
+        if (!deleteActionNotAllowed) return;
 
         const id = setInterval(() => {
             setDeleteSeconds((s) => s - 1);
         }, 1_000);
 
         return () => clearInterval(id);
-    }, [deleteActionAllowed]);
+    }, [deleteActionNotAllowed]);
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -150,9 +150,9 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
                                 text={
-                                    deleteActionAllowed ? `Delete in ${deleteSeconds}s` : 'Delete'
+                                    deleteActionNotAllowed ? `Delete in ${deleteSeconds}s` : 'Delete'
                                 }
-                                disabled={disableDeleteButton || deleteActionAllowed}
+                                disabled={disableDeleteButton || deleteActionNotAllowed}
                                 type={ButtonType.Destructive}
                                 onClick={() => deleteName()}
                                 fullWidth
