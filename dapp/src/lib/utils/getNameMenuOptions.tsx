@@ -27,7 +27,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.Delete),
             children: <DropdownMenuOption icon={<Warning />} label="Delete" />,
-            isHidden: nft.isExpired && !hasSubnames,
+            isHidden: !nft.isExpired || hasSubnames,
             hideBottomBorder: true,
         },
         {
