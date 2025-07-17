@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Input, InputType } from '@iota/apps-ui-kit';
+import { Input, InputType, Video } from '@iota/apps-ui-kit';
 
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -14,8 +14,15 @@ export function LandingHero() {
     const { open, close } = useAvailabilityCheckDialog();
 
     return (
-        <div className="landing-background">
-            <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl min-h-[560px]">
+        <div className="relative min-h-[560px] overflow-hidden">
+            <Video
+                src="/hero-landing.mp4"
+                isAutoPlayEnabled
+                disableControls
+                className="absolute inset-0 w-full h-full object-cover z-[-1]"
+            />
+
+            <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl">
                 <div className="flex flex-col gap-md">
                     <h1 className="text-display-md -tracking-[0.4px]">{TITLE}</h1>
                     <p className="text-title-lg leading-5 -tracking-[0.4px]">{DESCRIPTION}</p>
