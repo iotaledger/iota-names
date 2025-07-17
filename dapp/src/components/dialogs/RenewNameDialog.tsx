@@ -168,7 +168,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                   nameRecord.nameRecord.expirationTimestampMs,
               )
             : 0;
-    const isRewable = (renewableYears ?? 0) > 0;
+    const isRenewable = (renewableYears ?? 0) > 0;
 
     const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
         id: String(i + 1),
@@ -209,7 +209,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     </span>
                                 </div>
                             </Panel>
-                            {!isNameSubname && isRewable && !isLoadingData && (
+                            {!isNameSubname && isRenewable && !isLoadingData && (
                                 <Select
                                     options={renewOptions}
                                     value={renewYears?.toString()}
