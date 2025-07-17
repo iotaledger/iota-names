@@ -92,7 +92,7 @@ export default function MyNamesPage(): JSX.Element {
         !isNamesErrored &&
         !isSubnamesErrored;
 
-    const noAuctions = !auctionDetails || auctionDetails.length === 0;
+    const noAuctions = auctionDetails.every((auction) => auction.metadata === null);
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
@@ -179,7 +179,7 @@ export default function MyNamesPage(): JSX.Element {
                         className={cx(
                             'gap-lg w-full',
                             rightPanelSelectedName
-                                ? 'grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))]'
+                                ? 'grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] auto-rows-[1fr]'
                                 : 'flex flex-row items-center flex-wrap',
                         )}
                     >
