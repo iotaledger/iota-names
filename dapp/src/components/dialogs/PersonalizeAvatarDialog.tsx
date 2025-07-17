@@ -31,15 +31,15 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { normalizeNameInput } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
 
 interface PersonalizeAvatarDialogProps {
-    setOpen: (bool: boolean) => void;
     name: string;
+    setOpen: (bool: boolean) => void;
 }
-export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDialogProps) {
+export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
@@ -55,10 +55,15 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const cleanName = normalizeNameInput(name);
+    const cleanName = denormalizeName(name);
     const updates: NameUpdate[] = [];
 
-    if (selectedAssetId && selectedAssetId !== nameRecord?.nameRecord.avatar && nameRecord) {
+    if (
+        selectedAssetId &&
+        selectedAssetId !== nameRecord?.nameRecord.avatar &&
+        nameRecord &&
+        isNameSubname !== null
+    ) {
         const nftId = isNameSubname
             ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
@@ -67,6 +72,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                 type: 'set-avatar',
                 nftId,
                 avatarNftId: selectedAssetId,
+                isSubname: isNameSubname,
             });
         }
     }
@@ -109,12 +115,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                 customWidth="w-full max-w-[90vw] md:max-w-[50vw] xl:max-w-[60vw]"
                 position={DialogPosition.Right}
             >
-                <Header
-                    title="Personalize Avatar"
-                    titleCentered
-                    onClose={() => setOpen(false)}
-                    onBack={() => setOpen(false)}
-                />
+                <Header title="Personalize Avatar" onClose={() => setOpen(false)} />
 
                 <DialogBody>
                     <div className="flex flex-col gap-md items-center">
@@ -184,7 +185,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                     />
                     <Button
                         type={ButtonType.Primary}
-                        text={isSaving || isSigning ? 'Uploading...' : 'Upload Avatar'}
+                        text="Set Avatar"
                         onClick={handleSelectAsset}
                         disabled={isSaving || isSigning || !selectedAssetId}
                         fullWidth
