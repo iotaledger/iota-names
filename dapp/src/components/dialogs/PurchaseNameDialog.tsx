@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -12,6 +13,9 @@ import {
     DialogPosition,
     DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
     Panel,
 } from '@iota/apps-ui-kit';
@@ -163,25 +167,44 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                         </>
                                     )}
                             </div>
+
                             {!hasEnoughGas && (
-                                <div className="text-center text-red-400 text-sm">
-                                    {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
-                                </div>
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={
+                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
+                                    }
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
                             )}
                             {purchaseError && (
-                                <div className="text-center text-red-400 text-sm">
-                                    {purchaseError.message}
-                                </div>
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={purchaseError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
                             )}
                             {nameRecordError && (
-                                <div className="text-center text-red-400 text-sm">
-                                    {nameRecordError.message}
-                                </div>
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={nameRecordError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
                             )}
                             {hasEnoughGas && updateNameError && (
-                                <div className="text-center text-red-400 text-sm">
-                                    {updateNameError.message}
-                                </div>
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={updateNameError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
                             )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button

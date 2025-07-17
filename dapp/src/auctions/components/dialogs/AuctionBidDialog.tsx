@@ -220,7 +220,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 </div>
                             )}
                             <Input
-                                type={InputType.Number}
+                                type={InputType.NumericFormat}
                                 label="Your Bid"
                                 min={Number(minBidNanos)}
                                 value={bidAmountValue}
