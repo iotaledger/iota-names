@@ -1,12 +1,38 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import Link from 'next/link';
+'use client';
 
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+
+import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { FOOTER_LEGAL_LINKS, FOOTER_SOCIAL_LINKS } from '@/lib/constants';
 import { NamesLogoBranded } from '@/public/icons';
 
 export function Footer() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const modalParam = searchParams.get('modal');
+
+    const isTermsOpen = modalParam === 'terms_conditions';
+
+    const handleCloseModal = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('modal');
+        router.replace(`/?${params.toString()}`, { scroll: false });
+    };
+
+    const handleLegalClick = (e: React.MouseEvent, path: string) => {
+        const url = new URL(path, window.location.href);
+        const modal = url.searchParams.get('modal');
+        if (modal === 'terms_conditions') {
+            e.preventDefault();
+            router.replace(path, { scroll: false });
+        }
+    };
+
     const COPYRIGHT_YEAR = new Date().getFullYear();
+
     return (
         <footer className="w-full bg-names-neutral-6 py-lg">
             <div className="container flex flex-col sm:flex-row justify-between items-center gap-y-lg">
@@ -21,6 +47,7 @@ export function Footer() {
                         <Link
                             key={title}
                             href={path}
+                            onClick={(e) => handleLegalClick(e, path)}
                             className="hover:text-names-primary-80 transition-colors duration-200"
                         >
                             {title}
@@ -35,6 +62,11 @@ export function Footer() {
                     ))}
                 </div>
             </div>
+
+            <TermsAndConditionsDialog
+                open={isTermsOpen}
+                onOpenChange={(open) => !open && handleCloseModal()}
+            />
         </footer>
     );
 }
