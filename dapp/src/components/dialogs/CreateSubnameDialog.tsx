@@ -49,7 +49,9 @@ function createSubnameUpdates({
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
-    const fullSubnameName = newSubname?.trim() ? normalizeName(newSubname) + '.' + name : null;
+    console.log(`Creating subname for: ${name}`);
+    console.log(`New subname: ${newSubname}`);
+    const fullSubnameName = newSubname?.trim() ? newSubname + '.' + normalizeName(name) : null;
     // See if there is an existing subname with the same name
     const isSubnameAvailable = fullSubnameName
         ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
@@ -73,6 +75,11 @@ function createSubnameUpdates({
     }
 
     if (nftId && fullSubnameName && isSubnameAvailable) {
+        console.log(`Creating subname: ${fullSubnameName} for parent NFT ID: ${nftId}`);
+        console.log(
+            `Allow child creation: ${allowChildCreation}, Allow time extension: ${allowTimeExtension}`,
+        );
+        console.log(`Parent expiration time: ${nameRecord?.expirationTimestampMs || 0}`);
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
