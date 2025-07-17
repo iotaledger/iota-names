@@ -12,7 +12,7 @@ import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 
 import { NameDialogId } from '../dialogs/enums';
-import { NameManageDialogs } from '../dialogs/NameManageDialogs';
+import { NameDialogsController } from '../dialogs/NameDialogsController';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
 import { SubnameCountIndicator } from './NameCardIndicators';
@@ -52,7 +52,7 @@ export function ExtendedNameCard({
                 </NameCardBody>
             </NameCard>
 
-            <NameManageDialogs nft={nft} openDialogId={openDialogId} onClose={closeDialog} />
+            <NameDialogsController nft={nft} openDialogId={openDialogId} onClose={closeDialog} />
         </>
     );
 }

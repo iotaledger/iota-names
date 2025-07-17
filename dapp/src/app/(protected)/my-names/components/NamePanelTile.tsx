@@ -11,7 +11,7 @@ import { Fragment } from 'react';
 
 import { MenuButton } from '@/components/buttons/MenuButton';
 import { ContextMenuDropdown } from '@/components/ContextMenu';
-import { NameManageDialogs } from '@/components/dialogs/NameManageDialogs';
+import { NameDialogsController } from '@/components/dialogs/NameDialogsController';
 import { useNameRecord } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { useNameContextMenu } from '@/hooks/useNameContextMenu';
@@ -90,7 +90,7 @@ export function NamePanelTile({
                 dropdownRef={dropdownRef}
             />
 
-            <NameManageDialogs
+            <NameDialogsController
                 nft={registration}
                 openDialogId={openDialogId}
                 onClose={closeDialog}

@@ -5,24 +5,26 @@ import { Fragment } from 'react';
 
 import { RegistrationNft } from '@/lib/interfaces';
 
-import { DeleteNameDialog, UpdateNameDialog } from '.';
+import { DeleteNameDialog } from '.';
+import { ConnectToAddressDialog } from './ConnectToAddressDialog';
 import { CreateSubnameDialog } from './CreateSubnameDialog';
 import { NameDialogId } from './enums';
 import { GeneralInfoDialog } from './GeneralInfoDialog';
+import { ManageNameDialog } from './ManageNameDialog';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
 import { RenewNameDialog } from './RenewNameDialog';
 
-interface NameManageDialogsProps {
+interface NameDialogsControllerProps {
     nft: RegistrationNft;
     openDialogId: NameDialogId | null;
     onClose: () => void;
 }
 
-export function NameManageDialogs({ nft, openDialogId, onClose }: NameManageDialogsProps) {
+export function NameDialogsController({ nft, openDialogId, onClose }: NameDialogsControllerProps) {
     return (
         <Fragment>
-            {openDialogId === NameDialogId.Update ? (
-                <UpdateNameDialog name={nft.name} setOpen={onClose} />
+            {openDialogId === NameDialogId.Manage ? (
+                <ManageNameDialog name={nft.name} setOpen={onClose} />
             ) : null}
 
             {openDialogId === NameDialogId.Delete ? (
@@ -43,6 +45,9 @@ export function NameManageDialogs({ nft, openDialogId, onClose }: NameManageDial
 
             {openDialogId === NameDialogId.GeneralInfo ? (
                 <GeneralInfoDialog name={nft.name} setOpen={onClose} />
+            ) : null}
+            {openDialogId === NameDialogId.ConnectToAddress ? (
+                <ConnectToAddressDialog name={nft.name} setOpen={onClose} />
             ) : null}
         </Fragment>
     );
