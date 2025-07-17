@@ -32,7 +32,7 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { YEAR_MS } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
+import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
@@ -190,7 +190,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
     const disableEdit = isSendingTransaction || isSigning;
     const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
-    const cleanName = denormalizeName(nameRecord?.nameRecord?.name || name);
+    const cleanName = formatNameLabel(nameRecord?.nameRecord?.name || name);
     const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : getDefaultExpirationDate();
@@ -204,8 +204,8 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
-                                    <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                    <span className="text-names-neutral-100 text-headline-sm break-words">
+                                        {cleanName}
                                     </span>
                                 </div>
                             </Panel>
@@ -224,7 +224,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     icon={<Warning />}
                                     title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You’ll be able to renew it again once it gets closer to its expiration date`}
+                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
                         </div>
