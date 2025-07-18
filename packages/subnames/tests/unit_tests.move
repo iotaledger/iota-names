@@ -8,7 +8,7 @@ module iota_names_subnames::unit_tests;
 
 use iota_names::name::{Self, new as new_name, parent};
 use std::string::utf8;
-use iota_names_subnames::config::{assert_is_valid_subname, default};
+use iota_names_subnames::config::{assert_is_valid_subname, default, new};
 
 // === Validity of subname | parent lengths (based on string) ===
 #[test]
@@ -105,7 +105,7 @@ fun test_invalid_parent_sln_failure() {
 fun test_invalid_child_label_size_failure() {
     assert_is_valid_subname(
         &new_name(utf8(b"sub.test.iota")),
-        &new_name(utf8(b"ob.example.iota")),
+        &new_name(utf8(b"ob.test.iota")),
         &default(),
     );
 }
@@ -113,8 +113,8 @@ fun test_invalid_child_label_size_failure() {
 #[test, expected_failure(abort_code = iota_names_subnames::config::ENotSupportedTLN)]
 fun test_not_supported_tln_failure() {
     assert_is_valid_subname(
-        &new_name(utf8(b"sub.sub.example.move")),
         &new_name(utf8(b"sub.example.move")),
+        &new_name(utf8(b"sub.sub.example.move")),
         &default(),
     );
 }
@@ -138,5 +138,14 @@ fun derive_parent_from_child() {
                 b"sub.sub.sub.sub.sub.example.iota"
             ),
         0,
+    );
+}
+
+#[test]
+fun test_custom_config() {
+    assert_is_valid_subname(
+        &new_name(utf8(b"a.move")),
+        &new_name(utf8(b"b.a.move")),
+        &new(vector[b"iota".to_string(), b"move".to_string()], 3, 1, 60 * 60 * 1000),
     );
 }
