@@ -21,7 +21,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, isValidIotaName, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, MIN_LABEL_SIZE, NameRecord, validateIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
@@ -49,8 +49,6 @@ function createSubnameUpdates({
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
-    console.log(`Creating subname for: ${name}`);
-    console.log(`New subname: ${newSubname}`);
     const fullSubnameName = newSubname?.trim() ? newSubname + '.' + normalizeName(name) : null;
     // See if there is an existing subname with the same name
     const isSubnameAvailable = fullSubnameName
@@ -66,7 +64,7 @@ function createSubnameUpdates({
     if (
         fullSubnameName &&
         newSubname &&
-        (!isValidIotaName(fullSubnameName) ||
+        (validateIotaName(fullSubnameName) ||
             newSubname.length < MIN_LABEL_SIZE ||
             !nftId ||
             !isSubnameAvailable)
@@ -75,11 +73,6 @@ function createSubnameUpdates({
     }
 
     if (nftId && fullSubnameName && isSubnameAvailable) {
-        console.log(`Creating subname: ${fullSubnameName} for parent NFT ID: ${nftId}`);
-        console.log(
-            `Allow child creation: ${allowChildCreation}, Allow time extension: ${allowTimeExtension}`,
-        );
-        console.log(`Parent expiration time: ${nameRecord?.expirationTimestampMs || 0}`);
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
