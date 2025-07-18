@@ -26,7 +26,7 @@ import {
     TooltipPosition,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
@@ -35,7 +35,6 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
@@ -152,9 +151,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
-    const cleanName = formatNameLabel(name, {
-        truncateLongParts: true,
-    });
+    const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
 
@@ -173,7 +170,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 <div className="flex flex-col gap-y-md items-center text-center">
                                     <div className="flex flex-col items-center gap-y-sm">
                                         <span className="text-title-lg text-names-neutral-100">
-                                            {formatNameLabel(name)}
+                                            {normalizeIotaName(name)}
                                         </span>
                                         <Chip
                                             leadingElement={<Link className="w-4 h-4" />}

@@ -21,7 +21,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, MIN_LABEL_SIZE, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
@@ -168,6 +168,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
         !editSubname.trim() ||
         editSubname.length < MIN_LABEL_SIZE;
 
+    const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
+
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -179,7 +181,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText="Create as many Subnames as you want under @example_name, each with its own profile page and features"
+                                supportingText={`Create as many Subnames as you want under ${cleanName}, each with its own profile page and features`}
                             />
                             <Input
                                 type={InputType.Text}
