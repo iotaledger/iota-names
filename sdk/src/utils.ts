@@ -44,12 +44,9 @@ export function normalizeIotaName(
     // Only select the first subname if desired
     let subnames = onlyFirstSubname
         ? [
-              // First name from the left (e.g yes.no.no.no.ita)
+              // First name from the left (e.g yes.no.no.no.iota)
               parts[0],
-              // First name from the right (e.g: no.no.no.yes.iota)
-              format === 'dot' && parts.length > 2 ? '.' : '',
-              // Second name from the right (e.g: no.no.no.yes@no)
-              ...(format === 'at' && parts.length > 3 ? ['.', ...parts.slice(-2, -1)] : ['']),
+              parts.length > 2 ? (format === 'dot' ? '.' : '..') : '',
           ].filter(Boolean)
         : parts.slice(0, -1);
 

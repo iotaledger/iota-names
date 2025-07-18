@@ -204,7 +204,7 @@ describe('Name normalization', () => {
     test('should only select fist subname at-style', () => {
         expect(
             normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', { onlyFirstSubname: true }),
-        ).toEqual('aaaa...cccccc@ddd');
+        ).toEqual('aaaa...@ddd');
         expect(normalizeIotaName('aaaa.bbbb.iota', 'at', { onlyFirstSubname: true })).toEqual(
             'aaaa@bbbb',
         );
