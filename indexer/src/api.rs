@@ -85,6 +85,7 @@ struct AuctionsPagination {
     page_size: usize,
     sort: SortOrder,
     sort_by: AuctionSortBy,
+    search: Option<String>,
 }
 
 #[derive(Clone, Deserialize, Default)]
@@ -94,6 +95,7 @@ struct AuctionsPaginationQuery {
     page_size: Option<usize>,
     sort: Option<String>,
     sort_by: Option<String>,
+    search: Option<String>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
@@ -124,6 +126,7 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
             page_size: query.page_size.unwrap_or(50),
             sort,
             sort_by,
+            search: query.search,
         })
     }
 }
@@ -135,10 +138,12 @@ async fn get_auctions(
         page_size,
         sort,
         sort_by,
+        search,
     }: AuctionsPagination,
 ) -> Result<Json<Vec<String>>, ApiError> {
     let mut conn = state.pool.get_connection()?;
-    let names = crate::db::queries::get_auctions(&mut conn, page, page_size, sort, sort_by)?;
+    let names =
+        crate::db::queries::get_auctions(&mut conn, page, page_size, sort, sort_by, search)?;
 
     Ok(Json(names))
 }

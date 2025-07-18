@@ -4,7 +4,7 @@
 use anyhow::Result;
 use diesel::{
     BelongingToDsl, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    SqliteConnection, delete, insert_into,
+    SqliteConnection, TextExpressionMethods, delete, insert_into,
 };
 
 use super::models::{Bidder, BidderName, Name, bidder_name, bidders, name_bids, names};
@@ -99,18 +99,24 @@ pub fn get_auctions(
     page_size: usize,
     sort: SortOrder,
     sort_by: AuctionSortBy,
+    search: Option<String>,
 ) -> Result<Vec<String>> {
-    let query = names::table
+    let mut query = names::table
         .inner_join(name_bids::table)
         .select(names::name)
         .limit(page_size as _)
-        .offset((page.unwrap_or_default() * page_size) as _);
-    Ok(match (sort, sort_by) {
-        (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()).load(conn)?,
-        (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()).load(conn)?,
-        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(name_bids::bids.asc()).load(conn)?,
-        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(name_bids::bids.desc()).load(conn)?,
-    })
+        .offset((page.unwrap_or_default() * page_size) as _)
+        .into_boxed();
+    if let Some(search) = search {
+        query = query.filter(names::name.like(format!("%{search}%")))
+    }
+    query = match (sort, sort_by) {
+        (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
+        (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
+        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(name_bids::bids.asc()),
+        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(name_bids::bids.desc()),
+    };
+    Ok(query.load(conn)?)
 }
 
 pub fn upsert_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<()> {
