@@ -15,11 +15,6 @@ export function getNameMenuOptions(
 ): MenuListItem[] {
     return [
         {
-            onClick: () => onOpen(NameDialogId.Manage),
-            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
-            hideBottomBorder: true,
-        },
-        {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
             hideBottomBorder: true,
