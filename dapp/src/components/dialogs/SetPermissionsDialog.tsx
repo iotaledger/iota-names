@@ -128,9 +128,6 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
             });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: queryKey.ownedObjects(account?.address || ''),
-            });
             const editSetupUpdate = updates.find((u) => u.type === 'edit-setup');
             if (editSetupUpdate) {
                 queryClient.invalidateQueries({
