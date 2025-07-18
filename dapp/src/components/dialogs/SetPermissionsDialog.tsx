@@ -28,7 +28,7 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNamePermissions, getParentObject, isNameRecordExpired } from '@/lib/utils/names';
 
-function editSetupUpdates({
+function buildPermissionsUpdate({
     name,
     ownedNames,
     ownedSubnames,
@@ -95,7 +95,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
         namePermissions?.allowChildCreation ?? false,
     );
 
-    const { updates } = editSetupUpdates({
+    const { updates } = buildPermissionsUpdate({
         name,
         ownedNames,
         ownedSubnames,
