@@ -6,7 +6,7 @@ import { isSubname } from '@iota/iota-names-sdk';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
-import { NameRecordData, useNameRecord } from '@/hooks';
+import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
 
@@ -16,12 +16,9 @@ export function getNameMenuOptions(
     nft: RegistrationNft,
     hasSubnames: boolean,
     onOpen: (dialogId: NameDialogId) => void,
+    record?: NameRecordData,
 ): MenuListItem[] {
-    const { data: nameRecordData } = useNameRecord(nft.name);
-    const nameRecord = nameRecordData as
-        | Extract<NameRecordData, { type: 'unavailable' }>
-        | undefined;
-
+    const nameRecord = record as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
     const isNameSubname = isSubname(nft.name);
     const namePermissions =
         isNameSubname && nameRecord
