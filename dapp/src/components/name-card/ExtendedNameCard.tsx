@@ -4,11 +4,11 @@
 'use client';
 
 import { Button, ButtonType } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 
 import { NameDialogId } from '../dialogs/enums';
@@ -36,7 +36,7 @@ export function ExtendedNameCard({
 
     const hasSubnames = nameTree ? nameTree?.subnames.length > 0 : false;
     const menuOptions = getNameMenuOptions(nft, hasSubnames, openDialog);
-    const label = formatNameLabel(nft.name);
+    const label = normalizeIotaName(nft.name);
 
     return (
         <>

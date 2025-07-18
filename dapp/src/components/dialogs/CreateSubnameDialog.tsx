@@ -21,14 +21,14 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, NameRecord, validateIotaName } from '@iota/iota-names-sdk';
+import { isSubname, NameRecord, normalizeIotaName, validateIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
-import { normalizeName } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -49,7 +49,7 @@ function createSubnameUpdates({
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
-    const fullSubnameName = newSubname?.trim() ? newSubname + '.' + normalizeName(name) : null;
+    const fullSubnameName = newSubname?.trim() ? newSubname + '.' + denormalizeName(name) : null;
     // See if there is an existing subname with the same name
     const isSubnameAvailable = fullSubnameName
         ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
@@ -194,7 +194,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText={`Create as many Subnames as you want under @${name}, each with its own profile page and features`}
+                                supportingText={`Create as many Subnames as you want under ${normalizeIotaName(name)}, each with its own profile page and features`}
                             />
                             <Input
                                 type={InputType.Text}
