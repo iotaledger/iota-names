@@ -2,17 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Add, Assets, Calendar, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
+import { isSubname } from '@iota/iota-names-sdk';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
+import { NameRecordData, useNameRecord } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
+
+import { getNamePermissions } from './names';
 
 export function getNameMenuOptions(
     nft: RegistrationNft,
     hasSubnames: boolean,
     onOpen: (dialogId: NameDialogId) => void,
 ): MenuListItem[] {
+    const { data: nameRecordData } = useNameRecord(nft.name);
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+
+    const isNameSubname = isSubname(nft.name);
+    const namePermissions =
+        isNameSubname && nameRecord
+            ? getNamePermissions(nameRecord.nameRecord)
+            : { allowChildCreation: true, allowTimeExtension: true };
     return [
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
@@ -48,6 +62,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+            isDisabled: !namePermissions.allowChildCreation,
         },
         // {
         //     onClick: () => {},
@@ -56,6 +71,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            isDisabled: !namePermissions.allowTimeExtension,
             hideBottomBorder: true,
         },
         {

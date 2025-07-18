@@ -20,7 +20,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -28,7 +28,7 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNamePermissions, getParentObject, isNameRecordExpired } from '@/lib/utils/names';
 
-function buildPermissionsUpdate({
+function createSetUpdates({
     name,
     ownedNames,
     ownedSubnames,
@@ -76,6 +76,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const { data: ownedNames = [] } = useRegistrationNfts('name');
     const { data: ownedSubnames = [] } = useRegistrationNfts('subname');
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
+
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
@@ -88,14 +89,18 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
 
     // Editable values
-    const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(
-        namePermissions?.allowTimeExtension ?? false,
-    );
-    const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(
-        namePermissions?.allowChildCreation ?? false,
-    );
+    const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
+    const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
 
-    const { updates } = buildPermissionsUpdate({
+    // Sync permissions
+    useEffect(() => {
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
+        }
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
+
+    const { updates } = createSetUpdates({
         name,
         ownedNames,
         ownedSubnames,
