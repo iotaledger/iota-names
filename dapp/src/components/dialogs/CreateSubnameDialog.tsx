@@ -21,7 +21,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, MIN_LABEL_SIZE, NameRecord, validateIotaName } from '@iota/iota-names-sdk';
+import { isSubname, NameRecord, validateIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
@@ -64,10 +64,7 @@ function createSubnameUpdates({
     if (
         fullSubnameName &&
         newSubname &&
-        (validateIotaName(fullSubnameName) ||
-            newSubname.length < MIN_LABEL_SIZE ||
-            !nftId ||
-            !isSubnameAvailable)
+        (validateIotaName(fullSubnameName) || !nftId || !isSubnameAvailable)
     ) {
         return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
     }
