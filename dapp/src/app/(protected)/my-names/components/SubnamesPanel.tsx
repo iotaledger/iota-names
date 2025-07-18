@@ -3,6 +3,7 @@
 
 import { Add } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
@@ -12,7 +13,6 @@ import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
 
 import { NamePanelTile } from './NamePanelTile';
-import { normalizeIotaName } from '@iota/iota-names-sdk'
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
@@ -22,8 +22,7 @@ interface SubnamesPanelProps {
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const { data: subnames } = useRegistrationNfts('subname');
 
-    const rootName = normalizeIotaName(selectedName.name);
-    const initialNameTree = useNameTree(rootName);
+    const initialNameTree = useNameTree(selectedName.name);
 
     const [namePaths, setNamePaths] = useState<string[]>([]);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);

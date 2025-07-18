@@ -6,6 +6,7 @@
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
 import { ButtonUnstyled, truncate } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 import { Fragment } from 'react';
 
@@ -23,7 +24,6 @@ import { isNameRecordCloseToExpiration, isNameRecordExpired } from '@/lib/utils/
 
 import { PanelTileType } from './enums';
 import { PanelTile } from './PanelTile';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
 
 interface NamePanelTileProps {
     registration: RegistrationNft;

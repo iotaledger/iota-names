@@ -4,6 +4,7 @@
 'use client';
 
 import { Button, ButtonType } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
@@ -15,7 +16,6 @@ import { NameDialogsController } from '../dialogs/NameDialogsController';
 import { NameCard } from './NameCard';
 import { NameCardBody } from './NameCardBody';
 import { SubnameCountIndicator } from './NameCardIndicators';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
 
 interface ExtendedNameCardProps {
     nft: RegistrationNft;

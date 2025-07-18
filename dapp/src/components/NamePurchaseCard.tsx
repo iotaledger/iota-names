@@ -27,7 +27,7 @@ export function NamePurchaseCard({
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
 
-    const [_, nameWithOutAt] = normalizeIotaName(name).split('@')
+    const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
 
     return (
         <div
