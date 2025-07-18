@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { isValidIotaName, normalizeIotaName } from '../src/utils';
+import { isValidIotaName, normalizeIotaName, validateIotaName } from '../src/utils';
 
 describe('Name validation', () => {
     test('should be valid dot-style', () => {
@@ -61,6 +61,57 @@ describe('Name validation', () => {
 
     test('should be invalid', () => {
         expect(isValidIotaName('Name.iota')).toBe(false);
+    });
+});
+
+describe('Name validation with error', () => {
+    test('should be valid', () => {
+        expect(validateIotaName('test.iota')).toBeNull();
+        expect(validateIotaName('sub.test.iota')).toBeNull();
+        expect(validateIotaName('more.sub.test.iota')).toBeNull();
+
+        expect(validateIotaName('test-dash.iota')).toBeNull();
+        expect(validateIotaName('sub-dash.test-dash.iota')).toBeNull();
+
+        expect(validateIotaName('test101.iota')).toBeNull();
+        expect(validateIotaName('sub-101.9test.iota')).toBeNull();
+
+        expect(validateIotaName('911.iota')).toBeNull();
+    });
+
+    test('should not start or end with dashes', () => {
+        expect(validateIotaName('-test.iota')).not.toBeNull();
+        expect(validateIotaName('test-.iota')).not.toBeNull();
+        expect(validateIotaName('sub-.test@test')).not.toBeNull();
+        expect(validateIotaName('-sub-test.test@test')).not.toBeNull();
+    });
+
+    test('should not contain invalid characters', () => {
+        expect(validateIotaName('@test.iota')).not.toBeNull();
+        expect(validateIotaName('test#@test')).not.toBeNull();
+        expect(validateIotaName('sub^.test.iota')).not.toBeNull();
+        expect(validateIotaName('one&two.test@test')).not.toBeNull();
+        expect(validateIotaName('one*two.test.iota')).not.toBeNull();
+        expect(validateIotaName('(psst).iota')).not.toBeNull();
+    });
+
+    test('should contain at least two labels dot-style', () => {
+        expect(validateIotaName('iota')).not.toBeNull();
+        expect(validateIotaName('test')).not.toBeNull();
+    });
+
+    test('should be invalid', () => {
+        expect(validateIotaName('Name.iota')).not.toBeNull();
+    });
+
+    test('should check the length', () => {
+        expect(validateIotaName('name.iota', 10)).not.toBeNull();
+        expect(validateIotaName('nameeeeeeeeeee.iota', 3, 10)).not.toBeNull();
+    });
+
+    test('should check the subnames', () => {
+        expect(validateIotaName('abcd.efgh.iota')).toBeNull();
+        expect(validateIotaName('abcd.efgh.iota', 3, 64, false)).not.toBeNull();
     });
 });
 
