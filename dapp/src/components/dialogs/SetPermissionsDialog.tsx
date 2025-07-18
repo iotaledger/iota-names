@@ -175,7 +175,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText="Modify the permissions of your name to allow subnames or renewals."
+                                supportingText="Modify the permissions of your subname to allow subnames or renewals."
                             />
                             <div className="flex flex-col gap-y-md w-full">
                                 <span className="text-label-lg text-names-neutral-92">
