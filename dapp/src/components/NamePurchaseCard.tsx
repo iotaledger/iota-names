@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
 interface NamePurchaseCardProps {
@@ -26,6 +27,8 @@ export function NamePurchaseCard({
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
 
+    const [_, nameWithOutAt] = normalizeIotaName(name).split('@')
+
     return (
         <div
             className={clsx(
@@ -41,7 +44,7 @@ export function NamePurchaseCard({
             >
                 <div className="flex text-headline-md gap-xxs">
                     <span className="text-names-neutral-50">@</span>
-                    <h2 className={clsx(textColorStatus)}>{name}</h2>
+                    <h2 className={clsx(textColorStatus)}>{nameWithOutAt}</h2>
                 </div>
                 <div className="flex justify-between space-x-4 h-auto w-full">
                     <div className="flex flex-row gap-2 text-body-md items-center min-h-12">

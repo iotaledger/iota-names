@@ -1,13 +1,18 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Card, CardBody, CardType, Header, Panel } from '@iota/apps-ui-kit';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { useEffect, useState } from 'react';
+import { Add } from '@iota/apps-ui-icons';
+import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
+import { useEffect, useMemo, useState } from 'react';
 
+import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
+import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
-import { NameTree } from '@/lib/utils/buildNameTree';
+import { traverseNameTree } from '@/lib/utils/buildNameTree';
+
+import { NamePanelTile } from './NamePanelTile';
+import { normalizeIotaName } from '@iota/iota-names-sdk'
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
@@ -15,57 +20,84 @@ interface SubnamesPanelProps {
 }
 
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
-    const rootTree = useNameTree(selectedName.name);
+    const { data: subnames } = useRegistrationNfts('subname');
 
-    const [navigationStack, setNavigationStack] = useState<NameTree[]>([]);
+    const rootName = normalizeIotaName(selectedName.name);
+    const initialNameTree = useNameTree(rootName);
+
+    const [namePaths, setNamePaths] = useState<string[]>([]);
+    const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+    const isAtRoot = namePaths.length === 1;
+
+    const currentNode = useMemo(
+        () => traverseNameTree(initialNameTree, namePaths),
+        [initialNameTree, namePaths],
+    );
 
     useEffect(() => {
-        if (rootTree) {
-            setNavigationStack([rootTree]);
+        if (initialNameTree) {
+            const isNewRoot = namePaths[0] !== initialNameTree.name;
+            // Reset name paths only if the initial name has changed
+            if (!namePaths.length || isNewRoot) {
+                setNamePaths([initialNameTree.name]);
+            }
         }
-    }, [rootTree]);
-
-    const currentNode = navigationStack[navigationStack.length - 1];
-
-    const goBack = () => {
-        setNavigationStack((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-    };
-
-    const goDeeper = (childName: string) => {
-        const child = currentNode?.subnames.find((n) => n.name === childName);
-        if (child) {
-            setNavigationStack((prev) => [...prev, child]);
-        }
-    };
+    }, [initialNameTree]);
 
     if (!currentNode) return null;
 
-    const headerTitle = `Subnames for ${normalizeIotaName(navigationStack.length > 1 ? currentNode.name : selectedName.name)}`;
-    const isOnRoot = navigationStack.length === 1;
+    const headerTitle = `Subnames for ${normalizeIotaName(
+        isAtRoot ? selectedName.name : currentNode.name,
+        'at',
+        { onlyFirstSubname: true, truncateLongSubnames: true },
+    )}`;
+
+    const subnamesRegistrations = currentNode.subnames
+        .map((sub) => subnames?.find((s) => s.name === sub.name))
+        .filter((sub) => !!sub);
+
+    function goDeeper(name: string) {
+        setNamePaths((prev) => [...prev, name]);
+    }
+
+    function goBack() {
+        setNamePaths((prev) => prev.slice(0, -1));
+    }
 
     return (
-        <div className="max-w-[360px] w-full">
+        <>
             <Panel>
-                <div className="w-full flex flex-row items-center justify-between">
-                    <Header
-                        onBack={isOnRoot ? undefined : goBack}
-                        title={headerTitle}
-                        onClose={onClose}
-                    />
-                </div>
+                <Header
+                    onBack={isAtRoot ? undefined : goBack}
+                    title={headerTitle}
+                    onClose={onClose}
+                />
 
-                <div className="flex flex-col gap-lg px-md">
-                    {currentNode.subnames.map((nft) => (
-                        <Card
-                            key={nft.name}
-                            type={CardType.Filled}
-                            onClick={() => goDeeper(nft.name)}
-                        >
-                            <CardBody title={nft.name} />
-                        </Card>
+                <div className="flex flex-col gap-xxs px-sm w-full">
+                    {subnamesRegistrations.map((sub) => (
+                        <NamePanelTile
+                            key={sub.name}
+                            registration={sub}
+                            onClick={() => goDeeper(sub.name)}
+                            hasSubnames={currentNode.subnames.length > 0}
+                        />
                     ))}
                 </div>
+
+                <div className="flex flex-col items-center justify-center py-sm">
+                    <Button
+                        text="New Subname"
+                        type={ButtonType.Outlined}
+                        onClick={() => setIsAddDialogOpen(true)}
+                        icon={<Add />}
+                    />
+                </div>
             </Panel>
-        </div>
+
+            {isAddDialogOpen && (
+                <CreateSubnameDialog name={currentNode.name} setOpen={setIsAddDialogOpen} />
+            )}
+        </>
     );
 }

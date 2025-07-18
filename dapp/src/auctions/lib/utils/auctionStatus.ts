@@ -14,7 +14,7 @@ export type UserAuctionStatus =
     | 'claimed'
     | 'unknown';
 
-function isAuctionActive(auctionMetadata: AuctionMetadata | null): boolean {
+export function isAuctionActive(auctionMetadata: AuctionMetadata | null): boolean {
     if (!auctionMetadata) return false;
 
     const now = Date.now();

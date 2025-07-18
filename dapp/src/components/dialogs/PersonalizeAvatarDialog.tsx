@@ -34,10 +34,10 @@ import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
 
 interface PersonalizeAvatarDialogProps {
-    setOpen: (bool: boolean) => void;
     name: string;
+    setOpen: (bool: boolean) => void;
 }
-export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDialogProps) {
+export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
@@ -55,7 +55,12 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
     const updates: NameUpdate[] = [];
 
-    if (selectedAssetId && selectedAssetId !== nameRecord?.nameRecord.avatar && nameRecord) {
+    if (
+        selectedAssetId &&
+        selectedAssetId !== nameRecord?.nameRecord.avatar &&
+        nameRecord &&
+        isNameSubname !== null
+    ) {
         const nftId = isNameSubname
             ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
@@ -64,6 +69,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                 type: 'set-avatar',
                 nftId,
                 avatarNftId: selectedAssetId,
+                isSubname: isNameSubname,
             });
         }
     }

@@ -29,13 +29,12 @@ import { useEffect, useState } from 'react';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { YEAR_MS } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { getDefaultExpirationDate } from '@/lib/utils/getDefaultExpirationDate';
 import {
     getNameObject,
     getNamePermissions,
+    getNameRenewableYears,
     getParentObject,
     isGracePeriodExpired,
 } from '@/lib/utils/names';
@@ -101,8 +100,8 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const { data: nameRecordData } = useNameRecord(name);
-    const { data: coreConfig } = useCoreConfig();
+    const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
+    const { data: coreConfig, isLoading: isLoadingcoreConfig } = useCoreConfig();
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -111,8 +110,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
 
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
-    const [selectedYears, setSelectedYears] = useState<string>('');
-    const renewYears = selectedYears ? Number(selectedYears) : undefined;
+    const [renewYears, setRenewYears] = useState<number | undefined>();
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -159,39 +157,42 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         setOpen(false);
     }
 
-    function handleYearsChange(id: string) {
-        setSelectedYears(id);
+    function handleYearsChange(years: string) {
+        setRenewYears(Number(years));
     }
+    const renewableYears =
+        coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  coreConfig.max_years,
+                  nameRecord.nameRecord.expirationTimestampMs,
+              )
+            : 0;
+    const isRenewable = (renewableYears ?? 0) > 0;
 
-    function remainingRenewYears(expirationMs: number) {
-        if (!coreConfig?.max_years) return 0;
-        const maxExpiration = Date.now() + coreConfig.max_years * YEAR_MS;
-        const diff = maxExpiration - expirationMs;
-        return Math.max(0, Math.floor(diff / YEAR_MS));
-    }
-
-    const remainingYears = remainingRenewYears(nameRecord?.nameRecord?.expirationTimestampMs ?? 0);
-
-    const RENEW_OPTIONS: SelectOption[] = Array.from({ length: remainingYears }, (_, i) => ({
+    const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
         id: String(i + 1),
         label: `${i + 1} Year${i ? 's' : ''}`,
     }));
 
     useEffect(() => {
-        if (!selectedYears && RENEW_OPTIONS.length) {
-            const first = RENEW_OPTIONS[0];
-            setSelectedYears(typeof first === 'string' ? first : first.id);
+        if (!renewYears && renewOptions.length && renewableYears >= 1) {
+            setRenewYears(1);
         }
-    }, [RENEW_OPTIONS, selectedYears]);
+    }, [renewOptions, renewYears, renewableYears]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
-    const isLoading = isLoadingUpdateNameTransaction || isSendingTransaction || isSigning;
-    const disableEdit = isSendingTransaction || isSigning;
-    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
-    const expirationDate = nameRecord?.nameRecord?.expirationTimestampMs
+    const expirationDate = nameRecord?.nameRecord.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
-        : getDefaultExpirationDate();
+        : null;
+
+    const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
+    const isLoading =
+        isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
+
+    const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
+    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
+    const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -202,33 +203,37 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
-                                    <span className="text-names-neutral-100 text-headline-sm">
-                                        {normalizeIotaName(nameRecord?.nameRecord?.name || name)}
+                                    <span className="text-names-neutral-100 text-headline-sm break-words">
+                                        {cleanName}
                                     </span>
                                 </div>
                             </Panel>
-                            {!isNameSubname && (
+                            {!isNameSubname && isRenewable && !isLoadingData && (
                                 <Select
-                                    options={RENEW_OPTIONS}
-                                    value={selectedYears}
+                                    options={renewOptions}
+                                    value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
-                                    disabled={disableEdit || RENEW_OPTIONS.length === 0}
+                                    disabled={disableEdit}
                                     errorMessage={updateNameError?.message}
                                 />
                             )}
-                            {!isNameSubname && RENEW_OPTIONS.length === 0 && (
+                            {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
                                     title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You’ll be able to renew it again once it gets closer to its expiration date`}
+                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                                <DisplayStats
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    label="Registration Expires"
+                                    value={expirationDate}
+                                />
                             </div>
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button

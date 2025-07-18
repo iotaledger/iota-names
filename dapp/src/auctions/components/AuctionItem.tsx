@@ -94,6 +94,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                         }
                     }}
                     disabled={isSigningClaimTransaction || !claimTransaction?.transaction}
+                    fullWidth
                 />
             );
         }
@@ -107,6 +108,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                             onBidClick(auction.name);
                         }
                     }}
+                    fullWidth
                 />
             );
         }
@@ -122,7 +124,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                     <AuctionStatusBadge status={auctionStatus} />
                 </div>
 
-                {renderActionButton()}
+                <div className="min-h-[44px] flex w-full">{renderActionButton()}</div>
             </NameCardBody>
         </NameCard>
     );

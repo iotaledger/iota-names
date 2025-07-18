@@ -16,10 +16,22 @@ export function isValidIotaName(name: string): boolean {
     return NAME_AT_REGEX.test(name) || NAME_DOT_REGEX.test(name);
 }
 
-export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): string {
+const LONG_NAMES_TRUNCATE_LENGTH = 11;
+
+interface NormalizeOptions {
+    onlyFirstSubname?: boolean;
+    truncateLongSubnames?: boolean;
+}
+
+export function normalizeIotaName(
+    name: string,
+    format: 'at' | 'dot' = 'at',
+    { onlyFirstSubname, truncateLongSubnames }: NormalizeOptions = {},
+): string {
     const lowerCase = name.toLowerCase();
     let parts;
 
+    // Split in parts
     if (NAME_AT_REGEX.test(lowerCase)) {
         let [path, name] = lowerCase.split('@');
         parts = [...(path ? path.split('.') : []), name];
@@ -29,9 +41,47 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
         throw new Error(`Invalid IOTA name "${name}"`);
     }
 
-    if (format === 'dot') {
-        return `${parts.join('.')}.iota`;
-    } else {
-        return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
+    // Only select the first subname if desired
+    let subnames = onlyFirstSubname
+        ? [parts[0], parts.length > 2 ? '.' : ''].filter(Boolean)
+        : parts.slice(0, -1);
+
+    // And also truncate those long subnames
+    if (truncateLongSubnames) {
+        subnames = subnames.map((s) => {
+            return s.length > LONG_NAMES_TRUNCATE_LENGTH ? `${s.slice(0, 3)}...${s.slice(-3)}` : s;
+        });
     }
+
+    // Construct name
+    if (format === 'dot') {
+        return `${[...subnames, parts[parts.length - 1]].join('.')}.iota`;
+    } else {
+        return `${subnames.join('.')}@${parts[parts.length - 1]}`;
+    }
+}
+
+export function validateIotaName(
+    name: string,
+    minLength: number = 3,
+    maxLength: number = 64,
+    allowSubnames: boolean = true,
+): string | null {
+    if (!name) return null;
+    const lowerCase = name.toLowerCase();
+
+    const parts = lowerCase.split('.');
+
+    if (!allowSubnames && parts.length > 2) {
+        return 'No subnames allowed';
+    }
+    if (!NAME_DOT_REGEX.test(name)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
+    }
+    for (const part of parts.slice(0, -1)) {
+        if (part.length < minLength || part.length > maxLength) {
+            return `Name must be ${minLength}-${maxLength} characters long`;
+        }
+    }
+    return null;
 }
