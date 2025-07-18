@@ -107,7 +107,7 @@ public fun is_subname(name: &Name): bool {
     number_of_levels(name) > 2
 }
 
-/// Derive the parent of a subname.
+/// Derives the parent of a subname.
 /// 
 /// e.g. `subname.example.iota` -> `example.iota`
 public fun parent(name: &Name): Option<Name> {
@@ -124,7 +124,7 @@ public fun parent(name: &Name): Option<Name> {
     }
 }
 
-/// Checks if the given `parent` name is a valid for `child`.
+/// Checks if the given `parent` name is valid for the given `child` name.
 /// 
 /// e.g. (`example.iota`, `subname.example.iota`) -> `true`
 public fun is_parent_of(parent: &Name, child: &Name): bool {
