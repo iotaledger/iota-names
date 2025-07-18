@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -21,6 +21,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
@@ -130,7 +131,18 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
+            updates.forEach((update) => {
+                if (update.type === 'edit-setup') {
+                    queryClient.invalidateQueries({
+                        queryKey: queryKey.nameRecord(update.name),
+                    });
+                }
+            });
+            toast.success('Permissions updated successfully');
             closeDialog();
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
         },
     });
 
@@ -181,15 +193,19 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
+                                {updateNameError ? (
+                                    <InfoBox
+                                        type={InfoBoxType.Error}
+                                        title="Error"
+                                        supportingText={updateNameError.message}
+                                        style={InfoBoxStyle.Elevated}
+                                        icon={
+                                            <Warning className="text-error-30 dark:text-error-70" />
+                                        }
+                                    />
+                                ) : null}
                             </div>
                         </div>
-                        {updateNameError ? (
-                            <InfoBox
-                                type={InfoBoxType.Error}
-                                title="Error"
-                                supportingText={updateNameError.message}
-                            />
-                        ) : null}
 
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
