@@ -162,37 +162,47 @@ describe('Name normalization', () => {
         expect(() => normalizeIotaName('empty. .iota')).toThrow('Invalid IOTA name "empty. .iota"');
     });
 
-    test('should truncate long subnames', () => {
+    test('should truncate long parts dot-style', () => {
         expect(
             normalizeIotaName('aaaa.bbbbbb.cccccccccccccccccccccccccccc.ddd.iota', 'dot', {
-                truncateLongSubnames: true,
+                truncateLongParts: true,
             }),
-        ).toEqual('aaaa.bbbbbb.ccc...ccc.ddd.iota');
+        ).toEqual('aaaa.bbbbbb.cccccc...cccccc.ddd.iota');
         expect(
             normalizeIotaName(
                 'aaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccc.ddd.iota',
                 'dot',
-                { truncateLongSubnames: true },
+                { truncateLongParts: true },
             ),
-        ).toEqual('aaaa.bbb...bbb.ccc...ccc.ddd.iota');
+        ).toEqual('aaaa.bbbbbb...bbbbbb.cccccc...cccccc.ddd.iota');
+        expect(
+            normalizeIotaName('aaaa.bbbb.cccc.dddddddddddddddddddddddddd.iota', 'dot', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbb.cccc.dddddd...dddddd.iota');
     });
 
-    test('should truncate long subnames at-style', () => {
+    test('should truncate long parts at-style', () => {
         expect(
             normalizeIotaName('aaaa.bbbbbb.cccccccccccccccccccccccccccc.ddd.iota', 'at', {
-                truncateLongSubnames: true,
+                truncateLongParts: true,
             }),
-        ).toEqual('aaaa.bbbbbb.ccc...ccc@ddd');
+        ).toEqual('aaaa.bbbbbb.cccccc...cccccc@ddd');
         expect(
             normalizeIotaName(
                 'aaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccc.ddd.iota',
                 'at',
-                { truncateLongSubnames: true },
+                { truncateLongParts: true },
             ),
-        ).toEqual('aaaa.bbb...bbb.ccc...ccc@ddd');
+        ).toEqual('aaaa.bbbbbb...bbbbbb.cccccc...cccccc@ddd');
+        expect(
+            normalizeIotaName('aaaa.bbbb.cccc.dddddddddddddddddddddddddd.iota', 'at', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbb.cccc@dddddd...dddddd');
     });
 
-    test('should only select fist subname', () => {
+    test('should only select fist subname dot-style', () => {
         expect(
             normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', { onlyFirstSubname: true }),
         ).toEqual('aaaa...ddd.iota');

@@ -49,7 +49,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
         'at',
-        { onlyFirstSubname: true, truncateLongSubnames: true },
+        { onlyFirstSubname: true, truncateLongParts: true },
     )}`;
 
     const subnamesRegistrations = currentNode.subnames

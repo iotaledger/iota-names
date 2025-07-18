@@ -17,16 +17,17 @@ export function isValidIotaName(name: string): boolean {
 }
 
 const LONG_NAMES_TRUNCATE_LENGTH = 11;
+const CHARACTERS_TO_SHOW = 6;
 
 interface NormalizeOptions {
     onlyFirstSubname?: boolean;
-    truncateLongSubnames?: boolean;
+    truncateLongParts?: boolean;
 }
 
 export function normalizeIotaName(
     name: string,
     format: 'at' | 'dot' = 'at',
-    { onlyFirstSubname, truncateLongSubnames }: NormalizeOptions = {},
+    { onlyFirstSubname, truncateLongParts }: NormalizeOptions = {},
 ): string {
     const lowerCase = name.toLowerCase();
     let parts;
@@ -49,19 +50,26 @@ export function normalizeIotaName(
               parts.length > 2 ? (format === 'dot' ? '.' : '..') : '',
           ].filter(Boolean)
         : parts.slice(0, -1);
+    let parentName = parts[parts.length - 1];
 
-    // And also truncate those long subnames
-    if (truncateLongSubnames) {
+    if (truncateLongParts) {
         subnames = subnames.map((s) => {
-            return s.length > LONG_NAMES_TRUNCATE_LENGTH ? `${s.slice(0, 3)}...${s.slice(-3)}` : s;
+            return s.length > LONG_NAMES_TRUNCATE_LENGTH
+                ? `${s.slice(0, CHARACTERS_TO_SHOW)}...${s.slice(-CHARACTERS_TO_SHOW)}`
+                : s;
         });
+
+        parentName =
+            parentName.length > LONG_NAMES_TRUNCATE_LENGTH
+                ? `${parentName.slice(0, CHARACTERS_TO_SHOW)}...${parentName.slice(-CHARACTERS_TO_SHOW)}`
+                : parentName;
     }
 
     // Construct name
     if (format === 'dot') {
-        return `${[...subnames, parts[parts.length - 1]].join('.')}.iota`;
+        return `${[...subnames, parentName].join('.')}.iota`;
     } else {
-        return `${subnames.join('.')}@${parts[parts.length - 1]}`;
+        return `${subnames.join('.')}@${parentName}`;
     }
 }
 

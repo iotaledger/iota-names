@@ -60,7 +60,7 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
-    const panelTitle = normalizeIotaName(registration.name, 'at', { truncateLongSubnames: true });
+    const panelTitle = normalizeIotaName(registration.name, 'at', { truncateLongParts: true });
 
     return (
         <>
