@@ -3,25 +3,27 @@
 
 import clsx from 'clsx';
 
-interface ImageCardprops {
-    /**
-     * title text
-     */
-    title: string;
-    /**
-     * body text
-     */
-    body?: React.ReactNode;
-    /**
-     * image url
-     */
-    image?: string;
-    /**
-     * alt text for the image
-     */
-    alt?: string;
+export enum ImageCardSize {
+    Large = 'large',
+    Small = 'small',
 }
-export function ImageCard({ title, body, image, alt }: ImageCardprops): JSX.Element {
+interface ImageCardprops {
+    title: string;
+    body?: React.ReactNode;
+    image?: string;
+    alt?: string;
+    size?: ImageCardSize;
+}
+export function ImageCard({
+    title,
+    body,
+    image,
+    alt,
+    size = ImageCardSize.Small,
+}: ImageCardprops): JSX.Element {
+    const isLarge = size === ImageCardSize.Large;
+    const textSize = isLarge ? 'text-headline-sm' : 'text-title-lg';
+    const isCentered = isLarge ? 'text-center' : 'text-start';
     return (
         <div
             className={clsx(
@@ -36,12 +38,11 @@ export function ImageCard({ title, body, image, alt }: ImageCardprops): JSX.Elem
 
             <div
                 className={clsx(
-                    'flex flex-col justify-end items-start pt-lg px-xl pb-xl self-stretch gap-x-xs',
+                    'flex flex-col pt-lg px-xl pb-xl self-stretch gap-x-xs',
+                    isCentered,
                 )}
             >
-                <div className={clsx('flex flex-col items-start self-stretch w-full')}>
-                    <h2 className="text-title-lg text-names-primary-100">{title}</h2>
-                </div>
+                <h2 className={clsx('text-names-primary-100', textSize)}>{title}</h2>
                 {body && <p className="text-body-lg text-names-neutral-70">{body}</p>}
             </div>
         </div>

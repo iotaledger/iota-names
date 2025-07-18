@@ -29,24 +29,23 @@ const FAIR_AUCTION = [
 
 export function FairAuction() {
     return (
-        <section className="container pb-[138px]">
-            <div className="flex flex-col md:flex-row gap-6 md:gap-[72px] py-lg md:py-[40px] items-center md:items-start bg-names-neutral-6 rounded-3xl px-xl md:px-2xl bg-[url('/landing-page/vector.png')] bg-no-repeat bg-cover bg-center">
-                <div className="flex flex-col justify-center gap-xl md:gap-2xl flex-1">
-                    <div className="flex flex-col gap-xs">
-                        <h2 className="text-headline-lg text-names-primary-100">{TITTLE}</h2>
-                        <p className="text-body-lg text-names-neutral-70 w-full md:max-w-[428px]">
-                            {BODY}
-                        </p>
+        <section>
+            <div className="container pb-[157px]">
+                <div className="flex flex-col md:flex-row gap-6 md:gap-[72px] py-lg md:py-[40px] items-center md:items-start bg-names-neutral-6 rounded-3xl px-xl md:px-2xl bg-[url('/landing-page/vector.png')] bg-no-repeat bg-cover bg-center">
+                    <div className="flex flex-col justify-center gap-xl md:gap-2xl flex-1">
+                        <div className="flex flex-col gap-xs">
+                            <h2 className="text-headline-lg text-names-primary-100">{TITTLE}</h2>
+                            <p className="text-body-lg text-names-neutral-70 w-full md:max-w-[428px]">
+                                {BODY}
+                            </p>
+                        </div>
+                        <div className="flex flex-col md:flex-row gap-lg">
+                            {FAIR_AUCTION.map((data, index) => (
+                                <IconCard key={index} {...data} />
+                            ))}
+                        </div>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-lg">
-                        {FAIR_AUCTION.map((data, index) => (
-                            <IconCard key={index} {...data} />
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center gap-lg">
-                    <img src="/landing-page/iota-news.png" alt="Fair Auction Illustration" />
+                    <img src="/landing-page/iota-news.png" />
                 </div>
             </div>
         </section>

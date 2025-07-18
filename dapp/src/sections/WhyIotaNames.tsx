@@ -25,7 +25,7 @@ export function WhyIotaNames() {
     return (
         <section>
             <div className="-mt-20 container pb-[138px] items-center">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-lg">
                     {WHY_IOTA_NAMES.map((data, index) => (
                         <ImageCard key={index} {...data} />
                     ))}
