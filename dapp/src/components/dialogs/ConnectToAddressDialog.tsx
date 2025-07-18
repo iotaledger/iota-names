@@ -34,7 +34,6 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 interface ConnectToAddressDialogProps {
@@ -149,7 +148,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
-    const cleanName = denormalizeName(name);
+    const cleanName = normalizeIotaName(name);
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
 
