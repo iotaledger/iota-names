@@ -8,6 +8,7 @@ use diesel::{
 };
 
 use super::models::{Bidder, BidderName, Name, bidder_name, bidders, name_bids, names};
+use crate::db::{AuctionSortBy, SortOrder};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -90,6 +91,26 @@ pub fn get_names_for_bidder_address(
         .load(conn)?;
 
     Ok(names.into_iter().map(|d| d.name).collect())
+}
+
+pub fn get_auctions(
+    conn: &mut SqliteConnection,
+    page: Option<usize>,
+    page_size: usize,
+    sort: SortOrder,
+    sort_by: AuctionSortBy,
+) -> Result<Vec<String>> {
+    let query = names::table
+        .inner_join(name_bids::table)
+        .select(names::name)
+        .limit(page_size as _)
+        .offset((page.unwrap_or_default() * page_size) as _);
+    Ok(match (sort, sort_by) {
+        (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()).load(conn)?,
+        (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()).load(conn)?,
+        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(name_bids::bids.asc()).load(conn)?,
+        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(name_bids::bids.desc()).load(conn)?,
+    })
 }
 
 pub fn upsert_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<()> {

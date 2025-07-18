@@ -69,3 +69,4 @@ diesel::joinable!(bidder_name -> bidders (bidder_id));
 diesel::joinable!(name_bids -> names (name_id));
 
 diesel::allow_tables_to_appear_in_same_query!(bidders, names, bidder_name);
+diesel::allow_tables_to_appear_in_same_query!(names, name_bids);
