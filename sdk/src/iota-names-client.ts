@@ -24,7 +24,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { isValidIotaName, normalizeIotaName } from './utils';
+import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.

@@ -4,7 +4,7 @@
 
 import type { Transaction } from '@iota/iota-sdk/transactions';
 
-import { normalizeIotaName } from './utils';
+import { normalizeIotaName } from './utils.js';
 
 export function isSubname(name: string): boolean {
     return normalizeIotaName(name, 'dot').split('.').length > 2;
