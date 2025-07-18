@@ -3,7 +3,8 @@
 
 'use client';
 
-import { Input, InputType } from '@iota/apps-ui-kit';
+import { Search } from '@iota/apps-ui-icons';
+import { ButtonUnstyled, Input, InputType, Video } from '@iota/apps-ui-kit';
 
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -14,18 +15,31 @@ export function LandingHero() {
     const { open, close } = useAvailabilityCheckDialog();
 
     return (
-        <div className="landing-background">
-            <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl min-h-[560px]">
+        <div className="relative min-h-[560px] overflow-hidden">
+            <Video
+                src="/hero-landing.mp4"
+                isAutoPlayEnabled
+                disableControls
+                className="absolute inset-0 w-full h-full object-cover z-[-1]"
+                poster="/poster-hero.png"
+            />
+
+            <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl text-center">
                 <div className="flex flex-col gap-md">
                     <h1 className="text-display-md -tracking-[0.4px]">{TITLE}</h1>
                     <p className="text-title-lg leading-5 -tracking-[0.4px]">{DESCRIPTION}</p>
                 </div>
 
-                <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 rounded-lg overflow-hidden">
+                <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-shader-neutral-dark-8 rounded-full overflow-hidden border-2 border-names-neutral-100">
                     <Input
                         placeholder="Search for your IOTA name"
                         type={InputType.Text}
                         onFocus={() => open({ autoFocusInput: true, onCompleted: close })}
+                        trailingElement={
+                            <ButtonUnstyled className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100">
+                                <Search className="text-names-primary-0" />
+                            </ButtonUnstyled>
+                        }
                     />
                 </div>
             </div>
