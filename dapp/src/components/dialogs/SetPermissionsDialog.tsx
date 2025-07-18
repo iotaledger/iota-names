@@ -131,13 +131,12 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-            updates.forEach((update) => {
-                if (update.type === 'edit-setup') {
-                    queryClient.invalidateQueries({
-                        queryKey: queryKey.nameRecord(update.name),
-                    });
-                }
-            });
+            const editSetupUpdate = updates.find((u) => u.type === 'edit-setup');
+            if (editSetupUpdate) {
+                queryClient.invalidateQueries({
+                    queryKey: queryKey.nameRecord(editSetupUpdate.name),
+                });
+            }
             toast.success('Permissions updated successfully');
             closeDialog();
         },
