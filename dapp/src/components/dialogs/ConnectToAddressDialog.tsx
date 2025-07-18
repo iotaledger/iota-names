@@ -148,7 +148,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
-    const cleanName = normalizeIotaName(name);
+    const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
 
@@ -259,7 +259,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            {normalizeIotaName(name)}
+                                                            {cleanName}
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(
