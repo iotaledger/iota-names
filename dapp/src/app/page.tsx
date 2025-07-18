@@ -3,12 +3,14 @@
 
 'use client';
 
-import { LandingHero } from '@/components/LandingHero';
+import { FairAuction, LandingHero, WhyIotaNames } from '@/sections';
 
 export default function Home() {
     return (
-        <main className="flex flex-col h-screen">
+        <main className="flex flex-col min-h-screen">
             <LandingHero />
+            <WhyIotaNames />
+            <FairAuction />
         </main>
     );
 }

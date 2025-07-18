@@ -24,7 +24,7 @@ export function LandingHero() {
                 poster="/poster-hero.png"
             />
 
-            <div className="container w-full h-full py-12 flex flex-col items-center justify-center gap-y-2xl text-center">
+            <div className="container w-full h-full pt-[200px] pb-20 flex flex-col items-center justify-center gap-y-2xl text-center">
                 <div className="flex flex-col gap-md">
                     <h1 className="text-display-md -tracking-[0.4px]">{TITLE}</h1>
                     <p className="text-title-lg leading-5 -tracking-[0.4px]">{DESCRIPTION}</p>
