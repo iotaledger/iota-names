@@ -35,3 +35,28 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
         return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
     }
 }
+
+export function validateIotaName(
+    name: string,
+    minLength: number = 3,
+    maxLength: number = 64,
+    allowSubnames: boolean = true,
+): string | null {
+    if (!name) return null;
+    const lowerCase = name.toLowerCase();
+
+    const parts = lowerCase.split('.');
+
+    if (!allowSubnames && parts.length > 2) {
+        return 'No subnames allowed';
+    }
+    if (!NAME_DOT_REGEX.test(name)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
+    }
+    for (const part of parts.slice(0, -1)) {
+        if (part.length < minLength || part.length > maxLength) {
+            return `Name must be ${minLength}-${maxLength} characters long`;
+        }
+    }
+    return null;
+}

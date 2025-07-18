@@ -24,15 +24,15 @@ import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
-interface GeneralInfoDialogProps {
-    name: string;
-    setOpen: (bool: boolean) => void;
-}
-
 interface InfoLinks {
     key: string;
     value: string;
     href: string;
+}
+
+interface GeneralInfoDialogProps {
+    name: string;
+    setOpen: (bool: boolean) => void;
 }
 
 export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
@@ -66,7 +66,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/address/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 

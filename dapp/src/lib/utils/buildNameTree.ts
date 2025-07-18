@@ -44,3 +44,18 @@ export function findInNameTree(tree: NameTree | NameTree[], target: string): Nam
 
     return null;
 }
+export function traverseNameTree(nameTree: NameTree | null, nameparts: string[]): NameTree | null {
+    if (!nameTree || nameparts.length === 0) return null;
+
+    let traversedTree: NameTree | null = nameTree;
+
+    for (const part of nameparts) {
+        if (!traversedTree) return null;
+
+        if (traversedTree.name === part) continue;
+
+        traversedTree = traversedTree.subnames.find((child) => child.name === part) || null;
+    }
+
+    return traversedTree;
+}
