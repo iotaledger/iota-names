@@ -64,9 +64,18 @@ function createSubnameUpdates({
     if (
         fullSubnameName &&
         newSubname &&
-        (validateIotaName(fullSubnameName) || !nftId || !isSubnameAvailable)
+        (validateIotaName(fullSubnameName, undefined, undefined, false) ||
+            !nftId ||
+            !isSubnameAvailable)
     ) {
-        return { updates: [], fullSubnameName: null, isSubnameAvailable: false };
+        return {
+            updates: [],
+            fullSubnameName: null,
+            isSubnameAvailable: false,
+            subnameError: fullSubnameName
+                ? validateIotaName(fullSubnameName, undefined, undefined, false)
+                : null,
+        };
     }
 
     if (nftId && fullSubnameName && isSubnameAvailable) {
@@ -84,6 +93,9 @@ function createSubnameUpdates({
         updates,
         fullSubnameName,
         isSubnameAvailable,
+        subnameError: fullSubnameName
+            ? validateIotaName(fullSubnameName, undefined, undefined, false)
+            : null,
     };
 }
 
@@ -111,7 +123,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
 
-    const { updates, fullSubnameName, isSubnameAvailable } = createSubnameUpdates({
+    const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
         name,
         nameRecord: nameRecord?.nameRecord,
         newSubname: editSubname,
@@ -119,7 +131,6 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
         allowTimeExtension: editIsAllowingRenew,
         allowChildCreation: editIsAllowSubnames,
     });
-
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -196,7 +207,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                         ? 'Subname is not available'
                                         : updateNameError
                                           ? updateNameError.message
-                                          : undefined
+                                          : subnameError || ''
                                 }
                             />
                             <div className="flex flex-col gap-y-md w-full">
