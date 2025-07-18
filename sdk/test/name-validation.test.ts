@@ -177,12 +177,36 @@ describe('Name normalization', () => {
         ).toEqual('aaaa.bbb...bbb.ccc...ccc.ddd.iota');
     });
 
+    test('should truncate long subnames at-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccccccccccccccccccccccccc.ddd.iota', 'at', {
+                truncateLongSubnames: true,
+            }),
+        ).toEqual('aaaa.bbbbbb.ccc...ccc@ddd');
+        expect(
+            normalizeIotaName(
+                'aaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccc.ddd.iota',
+                'at',
+                { truncateLongSubnames: true },
+            ),
+        ).toEqual('aaaa.bbb...bbb.ccc...ccc@ddd');
+    });
+
     test('should only select fist subname', () => {
         expect(
             normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', { onlyFirstSubname: true }),
         ).toEqual('aaaa...ddd.iota');
         expect(normalizeIotaName('aaaa.bbbb.iota', 'dot', { onlyFirstSubname: true })).toEqual(
             'aaaa.bbbb.iota',
+        );
+    });
+
+    test('should only select fist subname at-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', { onlyFirstSubname: true }),
+        ).toEqual('aaaa...cccccc@ddd');
+        expect(normalizeIotaName('aaaa.bbbb.iota', 'at', { onlyFirstSubname: true })).toEqual(
+            'aaaa@bbbb',
         );
     });
 });
