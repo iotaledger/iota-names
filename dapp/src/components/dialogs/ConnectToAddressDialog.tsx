@@ -25,7 +25,7 @@ import {
     Panel,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
@@ -35,7 +35,6 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 interface ConnectToAddressDialogProps {
@@ -127,11 +126,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
             if (editTargetAddress.length === 0) {
-                toast.success(`Successfully disconnected @${denormalizeName(name)}`);
+                toast.success(`Successfully disconnected ${cleanName}`);
                 setOpen(false);
             } else if (editTargetAddress !== account?.address) {
                 toast.success(
-                    `Successfully connected @${denormalizeName(name)} to address ${formatAddress(editTargetAddress)}`,
+                    `Successfully connected ${cleanName} to address ${formatAddress(editTargetAddress)}`,
                 );
                 setOpen(false);
             }
@@ -162,7 +161,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
-    const cleanName = denormalizeName(name);
+    const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
 
@@ -182,7 +181,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                     <div className="flex flex-col items-center gap-y-sm">
                                         {editIsDefaultName ? (
                                             <span className="text-title-lg text-names-neutral-100">
-                                                @{denormalizeName(name)}
+                                                {cleanName}
                                             </span>
                                         ) : null}
                                         <Chip
@@ -200,7 +199,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                     <span className="text-body-md text-names-neutral-70">
                                         {editIsDefaultName
                                             ? 'Address linked successfully'
-                                            : `@${denormalizeName(name)} is no longer linked to an address`}
+                                            : `${cleanName} is no longer linked to an address`}
                                     </span>
                                 </div>
                             ) : (
@@ -211,7 +210,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         </span>
                                         <Input
                                             type={InputType.Text}
-                                            label={`Select a target address to connect to @${cleanName}`}
+                                            label={`Select a target address to connect to ${cleanName}`}
                                             placeholder="Enter Address"
                                             value={editTargetAddress}
                                             onChange={handleAddressChange}
@@ -281,7 +280,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            @{denormalizeName(name)}
+                                                            {cleanName}
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(

@@ -21,7 +21,7 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, MIN_LABEL_SIZE, NameRecord } from '@iota/iota-names-sdk';
+import { isSubname, MIN_LABEL_SIZE, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -184,7 +184,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText="Create as many Subnames as you want under @example_name, each with its own profile page and features"
+                                supportingText={`Create as many Subnames as you want under ${normalizeIotaName(name)}, each with its own profile page and features`}
                             />
                             <Input
                                 type={InputType.Text}

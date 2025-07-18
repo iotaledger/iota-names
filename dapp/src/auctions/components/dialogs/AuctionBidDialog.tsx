@@ -24,6 +24,7 @@ import {
     TooltipPosition,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -38,7 +39,6 @@ import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 
 interface AuctionBidDialogDialogProps {
     name: string;
@@ -157,7 +157,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return error.message;
         }
     })();
-    const cleanName = denormalizeName(name);
 
     return (
         <Dialog open onOpenChange={closeDialog}>
@@ -185,7 +184,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
                                     <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                        {normalizeIotaName(name)}
                                     </span>
                                 </div>
                             </Panel>

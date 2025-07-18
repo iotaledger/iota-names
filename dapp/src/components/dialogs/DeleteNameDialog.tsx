@@ -19,7 +19,7 @@ import {
     Panel,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -28,7 +28,6 @@ import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameObject } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
@@ -126,7 +125,7 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                                 <Panel bgColor="bg-names-neutral-12">
                                     <div className="p-md">
                                         <span className="text-names-neutral-100 text-headline-sm">
-                                            {formatNameLabel(nft.name)}
+                                            {normalizeIotaName(nft.name)}
                                         </span>
                                     </div>
                                 </Panel>
