@@ -8,7 +8,7 @@ module iota_names_subnames::unit_tests;
 
 use iota_names::name::{Self, new as new_name, parent};
 use std::string::utf8;
-use iota_names_subnames::config::{assert_is_valid_subname, default, new};
+use iota_names_subnames::config::{assert_is_valid_subname, default, new as new_config};
 
 // === Validity of subname | parent lengths (based on string) ===
 #[test]
@@ -146,6 +146,6 @@ fun test_custom_config() {
     assert_is_valid_subname(
         &new_name(utf8(b"a.move")),
         &new_name(utf8(b"b.a.move")),
-        &new(vector[b"iota".to_string(), b"move".to_string()], 3, 1, 60 * 60 * 1000),
+        &new_config(vector[b"move".to_string()], 3, 1, 60 * 60 * 1000),
     );
 }
