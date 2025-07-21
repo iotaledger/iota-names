@@ -19,7 +19,7 @@ const WHY_IOTA_NAMES = [
 export function NameUtility() {
     return (
         <section>
-            <div className="container pb-[151px] items-center">
+            <div className="container py-14 md:py-20 items-center">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-[33px]">
                     {WHY_IOTA_NAMES.map((data, index) => (
                         <ImageCard key={index} {...data} size={ImageCardSize.Large} />

@@ -15,7 +15,7 @@ export function LandingHero() {
     const { open, close } = useAvailabilityCheckDialog();
 
     return (
-        <div className="relative min-h-[560px] overflow-hidden">
+        <div className="relative min-h-[700px] md:min-h-[560px] overflow-hidden">
             <Video
                 src="/hero-landing.mp4"
                 isAutoPlayEnabled

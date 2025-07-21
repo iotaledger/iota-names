@@ -30,7 +30,7 @@ const FAIR_AUCTION = [
 export function FairAuction() {
     return (
         <section>
-            <div className="container pb-[157px]">
+            <div className="container py-14 md:py-20">
                 <div className="flex flex-col md:flex-row gap-6 md:gap-[72px] py-lg md:py-[40px] items-center md:items-start bg-names-neutral-6 rounded-3xl px-xl md:px-2xl bg-[url('/landing-page/vector.png')] bg-no-repeat bg-cover bg-center">
                     <div className="flex flex-col justify-center gap-xl md:gap-2xl flex-1">
                         <div className="flex flex-col gap-xs">

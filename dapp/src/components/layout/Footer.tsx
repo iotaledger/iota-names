@@ -34,7 +34,7 @@ export function Footer() {
     const COPYRIGHT_YEAR = new Date().getFullYear();
 
     return (
-        <footer className="w-full bg-names-neutral-6 py-lg">
+        <footer className="w-full bg-names-neutral-6 py-lg mt-14 sm:mt-20">
             <div className="container flex flex-col sm:flex-row justify-between items-center gap-y-lg">
                 <div className="flex items-center gap-sm">
                     <NamesLogoBranded className="w-[14.71px] h-[22.97px]" />
