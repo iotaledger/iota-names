@@ -73,8 +73,8 @@ function createSubnameUpdates({
     if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
         return {
             updates: [],
-            fullSubnameName: null,
-            isSubnameAvailable: false,
+            fullSubnameName: fullSubnameName,
+            isSubnameAvailable: isSubnameAvailable,
             subnameError: isValidSubname ? isValidSubname : null,
         };
     }
