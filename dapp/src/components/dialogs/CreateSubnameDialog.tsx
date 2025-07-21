@@ -21,7 +21,13 @@ import {
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, NameRecord, normalizeIotaName, validateIotaName } from '@iota/iota-names-sdk';
+import {
+    isSubname,
+    NameRecord,
+    normalizeIotaName,
+    validateIotaName,
+    validateIotaSubname,
+} from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useState } from 'react';
 
@@ -61,24 +67,16 @@ function createSubnameUpdates({
 
     const isValidSubname =
         newSubname && fullSubnameName
-            ? validateIotaName(fullSubnameName, undefined, undefined, true)
+            ? validateIotaSubname(newSubname) ||
+              validateIotaName(fullSubnameName, undefined, undefined, true)
             : null;
 
-    const nestedSubname = newSubname.includes('.');
-    if (
-        fullSubnameName &&
-        newSubname &&
-        (nestedSubname || isValidSubname || !nftId || !isSubnameAvailable)
-    ) {
+    if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
         return {
             updates: [],
             fullSubnameName: null,
             isSubnameAvailable: false,
-            subnameError: nestedSubname
-                ? 'Nested subnames are not allowed'
-                : isValidSubname
-                  ? isValidSubname
-                  : null,
+            subnameError: isValidSubname ? isValidSubname : null,
         };
     }
     const updates: NameUpdate[] = [];
