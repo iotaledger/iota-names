@@ -40,7 +40,7 @@
     "engines": {
         "node": ">=20"
     },
-    "dependencies": {
+    "peerDependencies": {
         "@iota/iota-sdk": "0.0.0-experimental-20250620081851"
     },
     "devDependencies": {

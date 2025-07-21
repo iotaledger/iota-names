@@ -2,10 +2,10 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export { IotaNamesClient } from './iota-names-client';
-export { IotaNamesTransaction } from './iota-names-transaction';
+export { IotaNamesClient } from './iota-names-client.js';
+export { IotaNamesTransaction } from './iota-names-transaction.js';
 export type { IotaNamesClientConfig, NameRecord } from './types';
-export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants';
+export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants.js';
 export {
     isSubname,
     isNestedSubname,
