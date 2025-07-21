@@ -28,7 +28,6 @@ import { ChangeEvent, useState } from 'react';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -42,41 +41,47 @@ function createSubnameUpdates({
     name: string;
     nameRecord?: NameRecord;
     ownedSubnames?: RegistrationNft[];
-    newSubname: string | null;
+    newSubname: string;
     allowChildCreation: boolean;
     allowTimeExtension: boolean;
 }) {
     const isNameSubname = isSubname(nameRecord?.name || '');
 
     // Only join names if there user has written anything
-    const fullSubnameName = newSubname?.trim() ? newSubname + '.' + denormalizeName(name) : null;
+    const fullSubnameName = newSubname ? newSubname + '.' + name : null;
+
     // See if there is an existing subname with the same name
     const isSubnameAvailable = fullSubnameName
         ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
         : false;
 
-    const updates: NameUpdate[] = [];
-
     const nftId = isNameSubname
         ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
         : nameRecord?.nftId;
 
+    const isValidSubname =
+        newSubname && fullSubnameName
+            ? validateIotaName(fullSubnameName, undefined, undefined, true)
+            : null;
+
+    const nestedSubname = newSubname.includes('.');
     if (
         fullSubnameName &&
         newSubname &&
-        (validateIotaName(fullSubnameName, undefined, undefined, false) ||
-            !nftId ||
-            !isSubnameAvailable)
+        (nestedSubname || isValidSubname || !nftId || !isSubnameAvailable)
     ) {
         return {
             updates: [],
             fullSubnameName: null,
             isSubnameAvailable: false,
-            subnameError: fullSubnameName
-                ? validateIotaName(fullSubnameName, undefined, undefined, false)
-                : null,
+            subnameError: isValidSubname
+                ? isValidSubname
+                : nestedSubname
+                  ? 'Nested subnames are not allowed.'
+                  : null,
         };
     }
+    const updates: NameUpdate[] = [];
 
     if (nftId && fullSubnameName && isSubnameAvailable) {
         updates.push({
@@ -93,9 +98,7 @@ function createSubnameUpdates({
         updates,
         fullSubnameName,
         isSubnameAvailable,
-        subnameError: fullSubnameName
-            ? validateIotaName(fullSubnameName, undefined, undefined, false)
-            : null,
+        subnameError: fullSubnameName ? isValidSubname : null,
     };
 }
 
@@ -207,7 +210,9 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                         ? 'Subname is not available'
                                         : updateNameError
                                           ? updateNameError.message
-                                          : subnameError || ''
+                                          : typeof subnameError === 'string'
+                                            ? subnameError
+                                            : undefined
                                 }
                             />
                             <div className="flex flex-col gap-y-md w-full">
