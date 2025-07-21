@@ -19,6 +19,7 @@ import {
     SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -32,7 +33,6 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
@@ -148,8 +148,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const cleanName = denormalizeName(name);
-
     const expirationDate = getTargetExpirationDate(renewYears);
 
     return (
@@ -162,7 +160,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
                                     <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                        {normalizeIotaName(name)}
                                     </span>
                                 </div>
                             </Panel>

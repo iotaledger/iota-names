@@ -20,7 +20,7 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
-import { denormalizeName, normalizeName } from '@/lib/utils/format/formatNames';
+import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
@@ -81,7 +81,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         auctionError?.message || nameError?.message || priceError?.message || validationError || '';
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const normalizedName = normalizeName(name);
     const enableSearch = Boolean(searchValue) && !errorMessage;
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
@@ -128,9 +127,9 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                 <div className="flex flex-col items-center space-y-4 w-full">
                     {isLoading ? (
                         <LoadingIndicator />
-                    ) : isNameTaken ? (
+                    ) : isNameTaken && name ? (
                         <NamePurchaseCard
-                            name={normalizedName}
+                            name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
                         ></NamePurchaseCard>
@@ -186,12 +185,11 @@ function BidName({
     const formattedBidPrice = bidPrice
         ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
         : undefined;
-    const normalizedName = normalizeName(name);
 
     return (
         <>
             <NamePurchaseCard
-                name={normalizedName}
+                name={name}
                 isAvailable={isAllowedToBid}
                 price={formattedBidPrice}
                 priceSupportingText="Minimum bid"
@@ -245,12 +243,11 @@ function PurchaseName({
               showIotaSymbol: false,
           })
         : undefined;
-    const normalizedName = normalizeName(name);
 
     return (
         <>
             <NamePurchaseCard
-                name={normalizedName}
+                name={name}
                 isAvailable={isAvailable}
                 price={formattedPurchasePrice}
                 priceSupportingText={isAvailable ? 'Price' : undefined}
