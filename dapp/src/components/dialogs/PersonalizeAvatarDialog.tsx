@@ -96,7 +96,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         },
         onSuccess() {
             setOpen(false);
-            toast.success(`Successfully updated avatar for @${cleanName}`);
+            toast.success(`Successfully updated avatar for ${normalizeIotaName(name)}`);
         },
         onError: (error) => {
             toast.error(error.message);

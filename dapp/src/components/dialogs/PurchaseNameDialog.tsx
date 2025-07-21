@@ -111,7 +111,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-            toast.success(`Successfully registered name @${denormalizeName(name)}`);
+            toast.success(`Successfully registered name ${normalizeIotaName(name)}`);
             setOpen(false);
 
             if (onPurchase) onPurchase();
