@@ -74,10 +74,10 @@ function createSubnameUpdates({
             updates: [],
             fullSubnameName: null,
             isSubnameAvailable: false,
-            subnameError: isValidSubname
-                ? isValidSubname
-                : nestedSubname
-                  ? 'Nested subnames are not allowed.'
+            subnameError: nestedSubname
+                ? 'Nested subnames are not allowed'
+                : isValidSubname
+                  ? isValidSubname
                   : null,
         };
     }
@@ -210,7 +210,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                         ? 'Subname is not available'
                                         : updateNameError
                                           ? updateNameError.message
-                                          : typeof subnameError === 'string'
+                                          : subnameError
                                             ? subnameError
                                             : undefined
                                 }
