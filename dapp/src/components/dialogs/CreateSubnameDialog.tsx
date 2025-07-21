@@ -67,8 +67,7 @@ function createSubnameUpdates({
 
     const isValidSubname =
         newSubname && fullSubnameName
-            ? validateIotaSubname(newSubname) ||
-              validateIotaName(fullSubnameName, undefined, undefined, true)
+            ? validateIotaSubname(newSubname) || validateIotaName(fullSubnameName)
             : null;
 
     if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
