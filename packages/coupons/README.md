@@ -1,6 +1,6 @@
 # Coupons
 
-This package provides coupons which can be used to register or renew IOTA Names. 
+This package provides coupons which can be used to register or renew IOTA Names.
 
 ## Using a Coupon
 
