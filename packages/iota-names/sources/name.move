@@ -4,8 +4,8 @@
 
 /// Defines the `Name` type and helper functions.
 ///
-/// Names are structured similar to web2 domains and the rules
-/// determining what a valid name is can be found here:
+/// Names are structured similar to web2 domains, and the rules
+/// determining what constitutes a valid name can be found here:
 /// https://en.wikipedia.org/wiki/Domain_name#Domain_name_syntax
 module iota_names::name;
 
@@ -32,7 +32,7 @@ public struct Name has copy, drop, store {
     labels: vector<String>,
 }
 
-// Construct a `Name` by parsing and validating the provided string
+// Constructs a `Name` by parsing and validating the provided string.
 public fun new(name: String): Name {
     assert!(name.length() <= MAX_NAME_LENGTH, EInvalidName);
 
@@ -79,27 +79,36 @@ public fun label(self: &Name, level: u64): &String {
 
 /// Returns the TLN (Top-Level Name) of a `Name`.
 ///
-/// "name.iota" -> "iota"
+/// e.g. `name.iota` -> `iota`
 public fun tln(self: &Name): &String {
     label(self, 0)
 }
 
 /// Returns the SLN (Second-Level Name) of a `Name`.
 ///
-/// "name.iota" -> "iota"
+/// e.g. `name.iota` -> `name`
 public fun sln(self: &Name): &String {
     label(self, 1)
 }
 
+/// Returns the number of labels of a `Name` (TLN included).
+/// 
+/// e.g. `name.iota` -> 2
 public fun number_of_levels(self: &Name): u64 {
     self.labels.length()
 }
 
+/// Returns whether the name is a subname.
+/// 
+/// e.g.
+/// `name.iota` -> `false`, 
+/// `subname.name.iota` -> `true`
 public fun is_subname(name: &Name): bool {
     number_of_levels(name) > 2
 }
 
-/// Derive the parent of a subname.
+/// Derives the parent of a subname.
+/// 
 /// e.g. `subname.example.iota` -> `example.iota`
 public fun parent(name: &Name): Option<Name> {
     if (is_subname(name)) {
@@ -115,7 +124,9 @@ public fun parent(name: &Name): Option<Name> {
     }
 }
 
-/// Checks if `parent` name is a valid parent for `child`.
+/// Checks if the given `parent` name is valid for the given `child` name.
+/// 
+/// e.g. (`example.iota`, `subname.example.iota`) -> `true`
 public fun is_parent_of(parent: &Name, child: &Name): bool {
     if (number_of_levels(parent) < number_of_levels(child)) {
         let mut maybe_parent = parent(child);
