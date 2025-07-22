@@ -159,12 +159,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const expirationDate = getTargetExpirationDate(renewYears);
 
     useEffect(() => {
-        if (coinBalanceError) {
-            toast.error(coinBalanceError.message);
-        }
-    }, [coinBalanceError]);
-
-    useEffect(() => {
         if (nameRecordError) {
             toast.error(nameRecordError.message);
         }
