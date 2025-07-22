@@ -5,11 +5,11 @@ import clsx from 'clsx';
 
 import { SvgCircleGradient } from './svgs/circleGradient';
 
-interface CircleDecorationProps {
+interface CircleGradientProps {
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
-export function CircleDecoration({ position = 'top-left' }: CircleDecorationProps) {
+export function CircleGradient({ position = 'top-left' }: CircleGradientProps) {
     const base = 'absolute pointer-events-none select-none z-[-1]';
 
     const positionClass = {
