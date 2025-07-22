@@ -25,15 +25,11 @@ export function ImageCard({
     const textSize = isLarge ? 'text-headline-sm' : 'text-title-lg';
     const isCentered = isLarge ? 'text-center' : 'text-start';
     return (
-        <div
-            className={clsx(
-                'w-full flex flex-col items-center overflow-hidden rounded-3xl bg-names-neutral-6',
-            )}
-        >
+        <div className="w-full flex flex-col items-center overflow-hidden rounded-3xl bg-names-neutral-6">
             <img
                 src={image}
                 alt={alt || image}
-                className={clsx('w-full h-auto object-cover aspect-video')}
+                className="w-full h-auto object-cover aspect-video"
             />
 
             <div

@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { CircleDecoration } from '@/components/CircleDecoration';
 import { ImageCard, ImageCardSize } from '@/components/ImageCard';
 
 const WHY_IOTA_NAMES = [
@@ -18,9 +19,11 @@ const WHY_IOTA_NAMES = [
 
 export function NameUtility() {
     return (
-        <section>
+        <section className="relative">
             <div className="container py-14 md:py-20 items-center">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-[33px]">
+                <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-[33px]">
+                    <CircleDecoration position="top-right" />
+                    <CircleDecoration position="bottom-left" />
                     {WHY_IOTA_NAMES.map((data, index) => (
                         <ImageCard key={index} {...data} size={ImageCardSize.Large} />
                     ))}

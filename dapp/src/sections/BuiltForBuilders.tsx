@@ -25,7 +25,7 @@ const FEATURES = [
 export function BuiltForBuilders() {
     return (
         <section>
-            <div className="container py-14 md:py-20 items-center">
+            <div className="container pt-14 pb-28 md:pt-20 md:pb-40 items-center">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-lg bg-names-neutral-6 rounded-3xl  items-center">
                     <div className="flex flex-col gap-lg py-[40px] px-2xl">
                         <div className="flex flex-col gap-xs">
