@@ -22,9 +22,9 @@ export function SvgCircleGradient(props: React.SVGProps<SVGSVGElement>): React.J
                     width="524"
                     height="524"
                     filterUnits="userSpaceOnUse"
-                    color-interpolation-filters="sRGB"
+                    colorInterpolationFilters="sRGB"
                 >
-                    <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feBlend
                         mode="normal"
                         in="SourceGraphic"
@@ -41,9 +41,9 @@ export function SvgCircleGradient(props: React.SVGProps<SVGSVGElement>): React.J
                     y2="371.321"
                     gradientUnits="userSpaceOnUse"
                 >
-                    <stop stop-color="#A139FF" />
-                    <stop offset="0.5" stop-color="#3131FF" />
-                    <stop offset="1" stop-color="#14F0D6" />
+                    <stop stopColor="#A139FF" />
+                    <stop offset="0.5" stopColor="#3131FF" />
+                    <stop offset="1" stopColor="#14F0D6" />
                 </linearGradient>
             </defs>
         </svg>
