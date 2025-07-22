@@ -1,9 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Discord } from '@iota/apps-ui-icons';
-
-import { X } from '@/public/icons';
+import { Discord, SmX } from '@iota/apps-ui-icons';
 
 import { ProtectedRouteTitle } from '../enums';
 import type { Route } from '../interfaces';
@@ -28,7 +26,7 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
     },
     {
         path: 'https://x.com/iota',
-        icon: <X />,
+        icon: <SmX />,
     },
 ];
 

@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
+import { NamesLogoBranded } from '@/components/svgs';
 import { FOOTER_LEGAL_LINKS, FOOTER_SOCIAL_LINKS } from '@/lib/constants';
-import { NamesLogoBranded } from '@/public/icons';
 
 export function Footer() {
     const router = useRouter();
