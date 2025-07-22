@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
+const SUBNAME_REGEX = /^(?!-)[a-z0-9-]{1,62}[a-z0-9]$/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
 const NAME_AT_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
 const NAME_DOT_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
@@ -71,6 +72,23 @@ export function normalizeIotaName(
     } else {
         return `${subnames.join('.')}@${parentName}`;
     }
+}
+
+export function validateIotaSubname(
+    name: string,
+    minLength: number = 3,
+    maxLength: number = 64,
+): string | null {
+    if (!name) return null;
+    const lowerCase = name.toLowerCase();
+
+    if (!SUBNAME_REGEX.test(lowerCase)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
+    }
+    if (name.length < minLength || name.length > maxLength) {
+        return `Name must be ${minLength}-${maxLength} characters long`;
+    }
+    return null;
 }
 
 export function validateIotaName(
