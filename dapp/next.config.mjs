@@ -3,7 +3,17 @@
 
 import { execSync } from 'child_process';
 
-const NEXT_PUBLIC_IOTA_NAMES_REV = execSync('git rev-parse HEAD').toString().trim().toString();
+let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
+
+try {
+    if (process.env.VERCEL_GIT_COMMIT_SHA) {
+        NEXT_PUBLIC_IOTA_NAMES_REV = process.env.VERCEL_GIT_COMMIT_SHA;
+    } else {
+        NEXT_PUBLIC_IOTA_NAMES_REV = execSync('git rev-parse HEAD').toString().trim();
+    }
+} catch (error) {
+    console.warn('Could not get git revision, using default');
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
