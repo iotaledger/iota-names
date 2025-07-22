@@ -2,23 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Add, Assets, Calendar, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
+import { isSubname } from '@iota/iota-names-sdk';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
+import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
+
+import { getNamePermissions } from './names';
 
 export function getNameMenuOptions(
     nft: RegistrationNft,
     hasSubnames: boolean,
     onOpen: (dialogId: NameDialogId) => void,
+    record?: NameRecordData,
 ): MenuListItem[] {
+    const nameRecord = record as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
+    const isNameSubname = isSubname(nft.name);
+    const namePermissions =
+        isNameSubname && nameRecord
+            ? getNamePermissions(nameRecord.nameRecord)
+            : { allowChildCreation: true, allowTimeExtension: true };
     return [
-        {
-            onClick: () => onOpen(NameDialogId.Manage),
-            children: <DropdownMenuOption icon={<Settings />} label="Manage" />,
-            hideBottomBorder: true,
-        },
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
@@ -46,8 +52,14 @@ export function getNameMenuOptions(
         //     isDisabled: true,
         // },
         {
+            onClick: () => onOpen(NameDialogId.SetPermissions),
+            children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
+            isHidden: !nft.isSubname,
+        },
+        {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+            isDisabled: !namePermissions.allowChildCreation,
         },
         // {
         //     onClick: () => {},
@@ -56,6 +68,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            isDisabled: !namePermissions.allowTimeExtension,
             hideBottomBorder: true,
         },
         {

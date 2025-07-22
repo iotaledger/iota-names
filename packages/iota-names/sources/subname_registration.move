@@ -14,6 +14,7 @@ use iota::clock::Clock;
 use iota_names::name_registration::NameRegistration;
 
 /// === Error codes ===
+
 #[error]
 const ENftExpired: vector<u8> = b"NFT is expired.";
 #[error]

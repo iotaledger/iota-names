@@ -11,10 +11,11 @@ import {
     Header,
     KeyValueInfo,
     TitleSize,
+    TooltipPosition,
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
+import { isSubname } from '@iota/iota-names-sdk';
 import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -22,6 +23,7 @@ import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface InfoLinks {
     key: string;
@@ -81,7 +83,10 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            {normalizeIotaName(name)}
+                            <TruncatedNameWithTooltip
+                                name={name}
+                                tooltipPosition={TooltipPosition.Bottom}
+                            />
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">
