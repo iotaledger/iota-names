@@ -23,6 +23,7 @@ import {
     InputType,
     LoadingIndicator,
     Panel,
+    TooltipPosition,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -36,6 +37,8 @@ import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
+
+import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface ConnectToAddressDialogProps {
     name: string;
@@ -280,7 +283,12 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            {cleanName}
+                                                            <TruncatedNameWithTooltip
+                                                                name={name}
+                                                                tooltipPosition={
+                                                                    TooltipPosition.Top
+                                                                }
+                                                            />
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(
