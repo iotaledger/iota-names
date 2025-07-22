@@ -22,6 +22,7 @@ import { isSubname } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
+import { BrandedAssets } from '@/components/svgs';
 import {
     NameRecordData,
     NameUpdate,
@@ -32,7 +33,6 @@ import {
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
 import { getNameObject } from '@/lib/utils/names';
-import { BrandedAssets } from '@/public/icons';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 

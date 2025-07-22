@@ -1,14 +1,12 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Add, Calendar } from '@iota/apps-ui-icons';
+import { Add, Calendar, Subnames } from '@iota/apps-ui-icons';
 import { ButtonUnstyled } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 
 import { AuctionDetails, formatTimeRemaining, getTimeRemaining } from '@/auctions';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
-
-import { SvgSubnames } from '../svgs/SvgSubnames';
 
 const INDICATOR_PRIMARY_TEXT_COLOR = 'text-names-neutral-70';
 const INDICATOR_SECONDARY_TEXT_COLOR = 'text-iota-primary-80';
@@ -72,7 +70,7 @@ export function SubnameCountIndicator({
                 CLICKABLE_INDICATOR_CLASSES,
             )}
         >
-            <SvgSubnames className="h-4 w-4" />
+            <Subnames className="h-4 w-4" />
             {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
         </ButtonUnstyled>
     );

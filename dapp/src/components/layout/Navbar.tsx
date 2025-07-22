@@ -9,8 +9,8 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { NamesLogoWeb } from '@/components/svgs';
 import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
-import { NamesLogoWeb } from '@/public/icons';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {

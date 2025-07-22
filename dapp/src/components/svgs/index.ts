@@ -1,7 +1,6 @@
-// Copyright (c) 2024 IOTA Stiftung
+// Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-export { default as X } from './X';
 export { default as NamesLogoBranded } from './NamesLogoBranded';
 export { default as NamesLogoWeb } from './NamesLogoWeb';
 export { default as BrandedAssets } from './BrandedAssets';
