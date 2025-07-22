@@ -464,6 +464,17 @@ fun test_set_user_data() {
     assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_avatar".to_string());
     assert_eq(*data.get(&utf8(DATA_KEY_IPFS)), b"value_ipfs".to_string());
 
+    set_user_data_util(
+        scenario,
+        FIRST_ADDRESS,
+        DATA_KEY_AVATAR.to_string(),
+        b"value_new_avatar".to_string(),
+        0,
+    );
+    let data = &scenario.get_user_data(NAME.to_string());
+    assert_eq(data.size(), 2);
+    assert_eq(*data.get(&DATA_KEY_AVATAR.to_string()), b"value_new_avatar".to_string());
+
     scenario_val.end();
 }
 
