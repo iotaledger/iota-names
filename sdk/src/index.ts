@@ -18,4 +18,3 @@ export {
     getSubnameRegistrationType,
 } from './helpers';
 export { isValidIotaName, validateIotaName, normalizeIotaName, validateIotaSubname } from './utils';
-
