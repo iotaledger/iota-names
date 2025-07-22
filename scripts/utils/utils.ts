@@ -182,6 +182,7 @@ export const getSigner = () => {
                 return pair;
             }
         }
+        throw new Error(`keypair not found for sender: ${sender}`);
     }
 
     // New format
