@@ -2,11 +2,14 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { bcs } from '@iota/iota-sdk/bcs';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { toB64 } from '@iota/iota-sdk/utils';
+import { fromB64, toB64 } from '@iota/iota-sdk/utils';
+import { blake2b } from '@noble/hashes/blake2';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
-import { CoreConfigBcs, NameBcs, PricingConfigBcs } from './bcs.js';
+import { CouponBcs, CouponHouseBcs, DummyFieldBcs, NameBcs } from './bcs.js';
 import { ALLOWED_METADATA, packages } from './constants.js';
 import {
     getConfigType,
@@ -18,6 +21,8 @@ import {
     validateYears,
 } from './helpers.js';
 import type {
+    Coupon,
+    CouponHouse,
     IotaNamesClientConfig,
     IotaNamesCoreConfig,
     IotaNamesPriceList,
@@ -47,10 +52,10 @@ export class IotaNamesClient {
      */
     async getCoreConfig(): Promise<IotaNamesCoreConfig> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const coreConfigBcsB64 = toB64(
-            CoreConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -102,10 +107,10 @@ export class IotaNamesClient {
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const pricingConfigBcsB64 = toB64(
-            PricingConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -168,10 +173,10 @@ export class IotaNamesClient {
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const pricingConfigBcsB64 = toB64(
-            PricingConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -305,6 +310,104 @@ export class IotaNamesClient {
             data,
             avatar: data[ALLOWED_METADATA.avatar],
         };
+    }
+
+    async getCouponHouse(): Promise<CouponHouse> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        if (!this.config.couponsPackageId) throw new Error('Coupon package ID is not set');
+
+        const iotaNamesObjectId = this.config.iotaNamesObjectId;
+        const packageId = this.config.packageId;
+        const couponsPackageId = this.config.couponsPackageId;
+
+        const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
+
+        const couponHouseResponse = await this.graphQlClient.query<{
+            owner: { dynamicField: { value: { bcs: string } } };
+        }>({
+            query: graphql(`
+                query getIotaNamesCouponHouseRegistryKey(
+                    $parentId: IotaAddress!
+                    $name: DynamicFieldName!
+                ) {
+                    owner(address: $parentId) {
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    bcs
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: iotaNamesObjectId,
+                name: {
+                    type: `${packageId}::iota_names::RegistryKey<${couponsPackageId}::coupon_house::CouponHouse>`,
+                    bcs: DummyFieldB64,
+                },
+            },
+        });
+
+        const couponsHouseDynamicFieldBcsValue =
+            couponHouseResponse?.data?.owner?.dynamicField?.value?.bcs;
+
+        if (!couponsHouseDynamicFieldBcsValue) {
+            throw new Error('Coupon house not found or is invalid');
+        }
+
+        return CouponHouseBcs.parse(fromB64(couponsHouseDynamicFieldBcsValue));
+    }
+
+    async resolveCoupon(couponCode: string): Promise<Coupon | null> {
+        const couponHouse = await this.getCouponHouse();
+        const couponsTableId = couponHouse?.coupons?.coupons?.id;
+
+        if (!couponsTableId) {
+            throw new Error('Coupons table ID not found in the coupon house');
+        }
+
+        const couponCodeHash = bytesToHex(blake2b(couponCode, { dkLen: 32 }));
+        const couponCodeBytes = hexToBytes(couponCodeHash);
+
+        const couponCodeB64 = bcs.vector(bcs.u8()).serialize(couponCodeBytes).toBase64();
+
+        const couponResponse = await this.graphQlClient.query<{
+            owner: { dynamicField: { value: { bcs: string } } };
+        }>({
+            query: graphql(`
+                query getCouponBcs($parentId: IotaAddress!, $name: DynamicFieldName!) {
+                    owner(address: $parentId) {
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    bcs
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: couponsTableId,
+                name: {
+                    type: 'vector<u8>',
+                    bcs: couponCodeB64,
+                },
+            },
+        });
+
+        const couponBcsBase64 = couponResponse?.data?.owner?.dynamicField?.value?.bcs;
+
+        if (!couponBcsBase64) {
+            return null;
+        }
+
+        const couponData = CouponBcs.parse(fromB64(couponBcsBase64));
+
+        return { ...couponData, couponCode };
     }
 
     /**

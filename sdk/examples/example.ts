@@ -2,7 +2,7 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
+import { getNetwork, IotaClient, Network } from '@iota/iota-sdk/client';
 import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
@@ -14,7 +14,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 (async () => {
     const name = `cool-name-${Math.floor(Math.random() * 10000000)}.iota`;
 
-    const network = 'devnet';
+    const network = Network.Devnet;
 
     const { url, graphql, faucet } = getNetwork(network);
 
@@ -47,7 +47,7 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
 
-    const nft = iotaNamesTx.register({
+    const nft = await iotaNamesTx.register({
         name,
         years: 1,
         coin,

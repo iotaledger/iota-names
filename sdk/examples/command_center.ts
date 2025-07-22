@@ -113,7 +113,7 @@ const name = process.argv[3] || 'rustisbetterthanjs.iota';
             const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
             const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
 
-            const nft = iotaNamesTx.register({
+            const nft = await iotaNamesTx.register({
                 name,
                 years: 1,
                 coin,

@@ -84,7 +84,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     ]);
 
     // Register a name for 2 years
-    const nft = iotaNamesTx.register({
+    const nft = await iotaNamesTx.register({
         name: uniqueName,
         years: 2,
         coinConfig: iotaNamesClient.config.coins.IOTA,
@@ -283,7 +283,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const nft = iotaNamesTx.register({
+            const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -318,7 +318,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const nft = iotaNamesTx.register({
+            const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 2,
                 coinConfig: client.config.coins.IOTA,
@@ -370,7 +370,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const parentNft = iotaNamesTx.register({
+            const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -414,7 +414,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const parentNft = iotaNamesTx.register({
+            const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -455,7 +455,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const parentNft = iotaNamesTx.register({
+            const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -498,7 +498,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const parentNft = iotaNamesTx.register({
+            const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -545,7 +545,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             ]);
 
             // Register the root name
-            const rootNft = iotaNamesTx.register({
+            const rootNft = await iotaNamesTx.register({
                 name: rootName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -598,7 +598,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 10n * NANOS_PER_IOTA,
             ]);
 
-            const nft = iotaNamesTx.register({
+            const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 1,
                 coinConfig: client.config.coins.IOTA,
@@ -633,7 +633,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 50n * NANOS_PER_IOTA,
             ]);
 
-            const nft = iotaNamesTx.register({
+            const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 5,
                 coinConfig: client.config.coins.IOTA,

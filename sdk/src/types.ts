@@ -9,6 +9,8 @@ import type {
     TransactionObjectInput,
 } from '@iota/iota-sdk/transactions';
 
+import { CouponBcs, CouponHouseBcs } from './bcs';
+
 // Interfaces
 // -----------------
 
@@ -61,6 +63,7 @@ export type BaseParams = {
     years: number;
     coinConfig?: CoinConfig;
     coin: TransactionObjectInput;
+    couponCodes?: string[];
 };
 
 export type RegistrationParams = BaseParams & {
@@ -73,9 +76,15 @@ export type RenewalParams = BaseParams & {
 
 export type ReceiptParams = {
     paymentIntent: TransactionObjectArgument;
-    price: TransactionObjectArgument;
+    payment: TransactionObjectArgument;
     coinConfig: CoinConfig;
     coin: TransactionObjectInput;
+};
+
+export type CouponHouse = typeof CouponHouseBcs.$inferType;
+
+export type Coupon = typeof CouponBcs.$inferType & {
+    couponCode: string;
 };
 
 export type IotaNamesClientConfig = {
