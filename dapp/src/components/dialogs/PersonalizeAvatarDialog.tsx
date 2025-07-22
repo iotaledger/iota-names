@@ -17,7 +17,7 @@ import {
     VisualAssetCard,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { ALLOWED_METADATA, isSubname } from '@iota/iota-names-sdk';
+import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -30,13 +30,12 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getNameObject } from '@/lib/utils/names';
 import { BrandedAssets } from '@/public/icons';
 
 interface PersonalizeAvatarDialogProps {
-    setOpen: (bool: boolean) => void;
     name: string;
+    setOpen: (bool: boolean) => void;
 }
 
 type SetAction =
@@ -51,7 +50,7 @@ type SetAction =
           type: 'none';
       };
 
-export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDialogProps) {
+export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
@@ -67,7 +66,6 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const cleanName = denormalizeName(name);
     const updates: NameUpdate[] = [];
     const currentAvatar = nameRecord?.nameRecord.avatar;
 
@@ -81,7 +79,8 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
         }
     }, [currentAvatar]);
 
-    if (nameRecord) {
+    // if (nameRecord) {
+    if (nameRecord && isNameSubname !== null) {
         const nftId = isNameSubname
             ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
@@ -157,7 +156,7 @@ export function PersonalizeAvatarDialog({ setOpen, name }: PersonalizeAvatarDial
                             <BrandedAssets className="w-12 h-12" />
                             <div className="flex flex-col gap-xs text-center">
                                 <span className="text-title-md text-names-neutral-92">
-                                    @{cleanName}
+                                    {normalizeIotaName(name)}
                                 </span>
                                 <span className="text-body-md text-names-neutral-70">
                                     Use an NFT to personalize your avatar

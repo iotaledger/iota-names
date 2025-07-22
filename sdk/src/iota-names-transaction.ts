@@ -12,7 +12,7 @@ import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants.js';
 import { isNestedSubname, isSubname } from './helpers.js';
-import type { IotaNamesClient } from './iota-names-client';
+import type { IotaNamesClient } from './iota-names-client.js';
 import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
 import { isValidIotaName, normalizeIotaName } from './utils.js';
 

@@ -3,6 +3,7 @@
 
 import { Button, Card, CardType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -10,7 +11,6 @@ import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
@@ -94,6 +94,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                         }
                     }}
                     disabled={isSigningClaimTransaction || !claimTransaction?.transaction}
+                    fullWidth
                 />
             );
         }
@@ -107,6 +108,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
                             onBidClick(auction.name);
                         }
                     }}
+                    fullWidth
                 />
             );
         }
@@ -116,13 +118,13 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
 
     return (
         <NameCard name={auction.name}>
-            <NameCardBody name={`@${denormalizeName(auction.name)}`}>
+            <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
                     <AuctionStatusBadge status={auctionStatus} />
                 </div>
 
-                {renderActionButton()}
+                <div className="min-h-[44px] flex w-full">{renderActionButton()}</div>
             </NameCardBody>
         </NameCard>
     );

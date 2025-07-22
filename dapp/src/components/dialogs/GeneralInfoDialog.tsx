@@ -14,25 +14,24 @@ import {
     truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 
 import { Collapsible } from '../Collapsible';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
-
-interface GeneralInfoDialogProps {
-    name: string;
-    setOpen: (bool: boolean) => void;
-}
 
 interface InfoLinks {
     key: string;
     value: string;
     href: string;
+}
+
+interface GeneralInfoDialogProps {
+    name: string;
+    setOpen: (bool: boolean) => void;
 }
 
 export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
@@ -66,7 +65,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/address/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=devnet`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
@@ -82,7 +81,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full">
-                            {formatNameLabel(name)}
+                            {normalizeIotaName(name)}
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">

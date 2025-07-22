@@ -10,17 +10,24 @@ import type { NftDisplayProps } from '@/lib/types/components';
 
 import { nftDisplayVariants } from './variants';
 
+//TODO: Remove when we add the svg api
+const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
+
 interface AvatarDisplayProps extends NftDisplayProps {
     button?: React.ReactNode;
+    fallbackUrl?: string;
 }
 
-export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps) {
+export function AvatarDisplay({
+    name,
+    size,
+    badge,
+    button,
+    fallbackUrl = PLACEHOLDER_DISPLAY,
+}: AvatarDisplayProps) {
     const [showAvatar, setShowAvatar] = useState(false);
 
     const { data } = useNameRecord(name);
-
-    //TODO: Remove when we add the svg api
-    const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
 
     const avatarId =
         data?.type === 'unavailable' ? (data.nameRecord.nftId ?? data?.nameRecord.avatar) : null;
@@ -59,7 +66,7 @@ export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps)
 
                 <img
                     className="absolute inset-0 w-full h-full -z-[1] object-cover"
-                    src={avatarSrc && showAvatar ? avatarSrc : PLACEHOLDER_DISPLAY}
+                    src={avatarSrc && showAvatar ? avatarSrc : fallbackUrl}
                     alt={name}
                 />
             </div>

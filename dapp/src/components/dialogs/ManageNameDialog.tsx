@@ -35,13 +35,12 @@ import {
     isNameRecordExpired,
 } from '@/lib/utils/names';
 
-type UpdateNameDialogProps = {
+type ManageNameDialogProps = {
     name: string;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps) {
+export function ManageNameDialog({ name, setOpen }: ManageNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -226,7 +225,7 @@ export function UpdateNameDialog({ name, open, setOpen }: UpdateNameDialogProps)
 
     return (
         <>
-            <Dialog open={open} onOpenChange={setOpen}>
+            <Dialog open onOpenChange={setOpen}>
                 <DialogContent containerId="overlay-portal-container" isFixedPosition>
                     <Header title={`Update ${name}`} onClose={handleClose} titleCentered />
                     <DialogBody>
