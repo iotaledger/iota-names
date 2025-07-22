@@ -63,6 +63,14 @@ export function validateIotaName(
     return null;
 }
 
+export function validateCoupons(coupons: Coupon[]) {
+    for (const coupon of coupons) {
+        if (!validateCoupon(coupon)) {
+            throw new Error(`Invalid coupon: ${coupon.couponCode}`);
+        }
+    }
+}
+
 export function validateCoupon(_coupon: Coupon): boolean {
     // TODO Add coupon validation
     return true;

@@ -29,7 +29,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { isValidIotaName, normalizeIotaName } from './utils';
+import { applyCouponsToPrice, isValidIotaName, normalizeIotaName, validateCoupons } from './utils';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -462,5 +462,40 @@ export class IotaNamesClient {
         }
 
         return price;
+    }
+
+    async calculateDiscountedPrice({
+        coupons,
+        name,
+        years,
+        isRegistration = true,
+    }: {
+        coupons: Coupon[] | string[];
+        name: string;
+        years: number;
+        isRegistration?: boolean;
+    }) {
+        if (coupons.every((coupon) => typeof coupon === 'string')) {
+            const couponPromises = (coupons as string[]).map(async (couponCode) => {
+                const coupon = await this.resolveCoupon(couponCode);
+                if (!coupon) {
+                    throw new Error(`Coupon not found: ${couponCode}`);
+                }
+
+                return coupon;
+            });
+
+            coupons = (await Promise.all(couponPromises)) as Coupon[];
+        }
+
+        validateCoupons(coupons);
+
+        const standardPrice = await this.calculatePrice({
+            name,
+            years,
+            isRegistration,
+        });
+
+        return applyCouponsToPrice(coupons, standardPrice);
     }
 }
