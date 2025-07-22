@@ -117,9 +117,9 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     });
 
     const hasEnoughGas =
-        !auctionError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !auctionError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
-        !auctionError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
+        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
+        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
