@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -16,86 +16,51 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
-    Input,
-    InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import {
-    isSubname,
-    NameRecord,
-    normalizeIotaName,
-    validateIotaName,
-    validateIotaSubname,
-} from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
-import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, getParentObject, isNameRecordExpired } from '@/lib/utils/names';
 
-function createSubnameUpdates({
+function createSetUpdates({
     name,
-    nameRecord,
+    ownedNames,
     ownedSubnames,
-    newSubname,
-    allowChildCreation,
-    allowTimeExtension,
+    editIsAllowingRenew,
+    editIsAllowSubnames,
+    namePermissions,
 }: {
     name: string;
-    nameRecord?: NameRecord;
-    ownedSubnames?: RegistrationNft[];
-    newSubname: string;
-    allowChildCreation: boolean;
-    allowTimeExtension: boolean;
+    ownedNames: RegistrationNft[];
+    ownedSubnames: RegistrationNft[];
+    editIsAllowingRenew: boolean;
+    editIsAllowSubnames: boolean;
+    namePermissions?: ReturnType<typeof getNamePermissions>;
 }) {
-    const isNameSubname = isSubname(nameRecord?.name || '');
-
-    // Only join names if there user has written anything
-    const fullSubnameName = newSubname ? newSubname + '.' + name : null;
-
-    // See if there is an existing subname with the same name
-    const isSubnameAvailable = fullSubnameName
-        ? getNameObject(ownedSubnames ?? [], fullSubnameName) === null
-        : false;
-
-    const nftId = isNameSubname
-        ? getNameObject(ownedSubnames ?? [], name) // We only need to search in the owned subnames if its a subname
-        : nameRecord?.nftId;
-
-    const isValidSubname =
-        newSubname && fullSubnameName
-            ? validateIotaSubname(newSubname) || validateIotaName(fullSubnameName)
-            : null;
-
-    if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
-        return {
-            updates: [],
-            fullSubnameName: fullSubnameName,
-            isSubnameAvailable: isSubnameAvailable,
-            subnameError: isValidSubname ? isValidSubname : null,
-        };
-    }
     const updates: NameUpdate[] = [];
-
-    if (nftId && fullSubnameName && isSubnameAvailable) {
+    const nftId = getParentObject(ownedNames ?? [], ownedSubnames ?? [], name)?.id;
+    if (
+        nftId &&
+        (editIsAllowingRenew !== namePermissions?.allowTimeExtension ||
+            editIsAllowSubnames !== namePermissions?.allowChildCreation)
+    ) {
         updates.push({
-            type: 'new-subname',
-            subname: fullSubnameName,
+            type: 'edit-setup',
+            name,
             parentNftId: nftId,
-            expirationTimeParent: nameRecord?.expirationTimestampMs || 0,
-            allowChildCreation,
-            allowTimeExtension,
+            allowChildCreation: editIsAllowSubnames,
+            allowTimeExtension: editIsAllowingRenew,
         });
     }
 
     return {
         updates,
-        fullSubnameName,
-        isSubnameAvailable,
-        subnameError: fullSubnameName ? isValidSubname : null,
     };
 }
 
@@ -104,11 +69,12 @@ type CreateSubnameProps = {
     setOpen: (bool: boolean) => void;
 };
 
-export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
+export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
-    const { data: ownedSubnames } = useRegistrationNfts('subname');
+    const { data: ownedNames = [] } = useRegistrationNfts('name');
+    const { data: ownedSubnames = [] } = useRegistrationNfts('subname');
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
     // We are sure that only owned names are passed here
@@ -116,21 +82,33 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const namePermissions = nameRecord?.nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : undefined;
+
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord?.nameRecord) : false;
 
     // Editable values
-    const [editSubname, setEditSubname] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
 
-    const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
+    // Sync permissions
+    useEffect(() => {
+        if (namePermissions) {
+            setEditIsAllowingRenew(namePermissions.allowTimeExtension);
+            setEditIsAllowSubnames(namePermissions.allowChildCreation);
+        }
+    }, [namePermissions?.allowChildCreation, namePermissions?.allowTimeExtension]);
+
+    const { updates } = createSetUpdates({
         name,
-        nameRecord: nameRecord?.nameRecord,
-        newSubname: editSubname,
+        ownedNames,
         ownedSubnames,
-        allowTimeExtension: editIsAllowingRenew,
-        allowChildCreation: editIsAllowSubnames,
+        editIsAllowingRenew,
+        editIsAllowSubnames,
+        namePermissions,
     });
+
     const {
         data: updateNameTransaction,
         error: updateNameError,
@@ -155,20 +133,23 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             });
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: queryKey.ownedObjects(account?.address || ''),
-            });
+            const editSetupUpdate = updates.find((u) => u.type === 'edit-setup');
+            if (editSetupUpdate) {
+                queryClient.invalidateQueries({
+                    queryKey: queryKey.nameRecord(editSetupUpdate.name),
+                });
+            }
+            toast.success('Permissions updated successfully');
             closeDialog();
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
         },
     });
 
     function closeDialog() {
         setOpen(false);
     }
-    const handleCancelAddSubname = () => {
-        setEditSubname('');
-        closeDialog();
-    };
 
     const handleAllowRenewChange = ({ target: { checked } }: ChangeEvent<HTMLInputElement>) => {
         setEditIsAllowingRenew(checked);
@@ -181,14 +162,12 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isLoading || isExpired || !editSubname;
-
-    const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
+    const disableSave = updates.length === 0 || isLoading || isExpired;
 
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
-                <Header title="New Subname" onClose={closeDialog} />
+                <Header title="Set permissions" onClose={closeDialog} />
                 <DialogBody>
                     <div className="flex flex-col h-full justify-between">
                         <div className="flex flex-col h-full items-center gap-y-lg">
@@ -196,23 +175,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}
                                 icon={<Info />}
-                                supportingText={`Create as many Subnames as you want under ${cleanName}, each with its own profile page and features`}
-                            />
-                            <Input
-                                type={InputType.Text}
-                                value={editSubname}
-                                onChange={(e) => setEditSubname(e.target.value)}
-                                placeholder="Enter subname"
-                                label="Subname name"
-                                errorMessage={
-                                    !isSubnameAvailable && fullSubnameName
-                                        ? 'Subname is not available'
-                                        : updateNameError
-                                          ? updateNameError.message
-                                          : subnameError
-                                            ? subnameError
-                                            : undefined
-                                }
+                                supportingText="Modify the permissions of your subname to allow subnames or renewals."
                             />
                             <div className="flex flex-col gap-y-md w-full">
                                 <span className="text-label-lg text-names-neutral-92">
@@ -231,18 +194,30 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
+                                {updateNameError ? (
+                                    <InfoBox
+                                        type={InfoBoxType.Error}
+                                        title="Error"
+                                        supportingText={updateNameError.message}
+                                        style={InfoBoxStyle.Elevated}
+                                        icon={
+                                            <Warning className="text-error-30 dark:text-error-70" />
+                                        }
+                                    />
+                                ) : null}
                             </div>
                         </div>
+
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}
                                 text="Cancel"
-                                onClick={handleCancelAddSubname}
+                                onClick={closeDialog}
                                 fullWidth
                             />
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Create"
+                                text="Save"
                                 disabled={disableSave}
                                 onClick={() => save()}
                                 fullWidth

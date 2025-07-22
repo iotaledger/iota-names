@@ -10,9 +10,9 @@ import { ConnectToAddressDialog } from './ConnectToAddressDialog';
 import { CreateSubnameDialog } from './CreateSubnameDialog';
 import { NameDialogId } from './enums';
 import { GeneralInfoDialog } from './GeneralInfoDialog';
-import { ManageNameDialog } from './ManageNameDialog';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
 import { RenewNameDialog } from './RenewNameDialog';
+import { SetPermissionsDialog } from './SetPermissionsDialog';
 
 interface NameDialogsControllerProps {
     nft: RegistrationNft;
@@ -23,12 +23,12 @@ interface NameDialogsControllerProps {
 export function NameDialogsController({ nft, openDialogId, onClose }: NameDialogsControllerProps) {
     return (
         <Fragment>
-            {openDialogId === NameDialogId.Manage ? (
-                <ManageNameDialog name={nft.name} setOpen={onClose} />
-            ) : null}
-
             {openDialogId === NameDialogId.Delete ? (
                 <DeleteNameDialog nft={nft} setOpen={onClose} />
+            ) : null}
+
+            {openDialogId === NameDialogId.SetPermissions ? (
+                <SetPermissionsDialog name={nft.name} setOpen={onClose} />
             ) : null}
 
             {openDialogId === NameDialogId.CreateSubname ? (
