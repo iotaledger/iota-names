@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Close, Search } from '@iota/apps-ui-icons';
+import { Close } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
