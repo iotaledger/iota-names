@@ -30,7 +30,7 @@ const FAIR_AUCTION = [
 
 export function FairAuction() {
     return (
-        <section className="relative">
+        <section className="relative overflow-hidden">
             <div className="container py-14 md:py-20">
                 <div className="relative flex flex-col md:flex-row gap-6 md:gap-[72px] py-lg md:py-[40px] items-center md:items-start bg-names-neutral-6 rounded-3xl px-xl md:px-2xl bg-[url('/landing-page/vector.png')] bg-no-repeat bg-cover bg-center">
                     <CircleGradient position="top-left" />

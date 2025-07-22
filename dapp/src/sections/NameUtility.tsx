@@ -19,7 +19,7 @@ const WHY_IOTA_NAMES = [
 
 export function NameUtility() {
     return (
-        <section className="relative">
+        <section className="relative overflow-hidden">
             <div className="container py-14 md:py-20 items-center">
                 <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-[33px]">
                     <CircleGradient position="top-right" />
