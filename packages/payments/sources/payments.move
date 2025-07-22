@@ -21,22 +21,23 @@ const EInsufficientPayment: vector<u8> = b"Insufficient coin balance.";
 const EInvalidPaymentType: vector<u8> = b"The supplied payment coin type is not supported.";
 
 /// Configuration for the payments module.
-/// Holds a VecMap that determines the configuration for each currency.
+/// Holds a `VecMap` that determines the configuration for each currency.
 public struct PaymentsConfig has drop, store {
-    // the configuration for each currency.
+    /// The configuration for each currency.
     currencies: VecMap<TypeName, CoinTypeData>,
-    // the type of our base currency (which determines the base price unit).
+    /// The type of the base currency (which determines the base price unit).
     base_currency: TypeName,
 }
 
+/// Configuration of a currency.
 public struct CoinTypeData has copy, drop, store {
     /// The coin's decimals.
     decimals: u8,
-    // type
+    /// The type of currency.
     type_name: TypeName,
 }
 
-/// This has to be called with our base payment currency.
+/// This has to be called with the base payment currency.
 /// The payment has to be equal to the base price of the name.
 /// We do not need to check the price feed for the base currency.
 public fun handle_base_payment<T>(
@@ -55,8 +56,7 @@ public fun handle_base_payment<T>(
     intent.finalize_payment(iota_names, PaymentsAuth {}, payment)
 }
 
-/// Creates a new CoinTypeData struct.
-/// Leave price_feed_id empty for base currency.
+/// Creates a new `CoinTypeData` struct.
 public fun new_coin_type_data<T>(coin_metadata: &CoinMetadata<T>): CoinTypeData {
     let type_name = type_name::get<T>();
     CoinTypeData {
@@ -65,8 +65,8 @@ public fun new_coin_type_data<T>(coin_metadata: &CoinMetadata<T>): CoinTypeData 
     }
 }
 
-/// Creates a new PaymentsConfig struct.
-/// Can be attached by the Admin to IotaNames to allow the payments module to work.
+/// Creates a new `PaymentsConfig` struct.
+/// Can be attached by the Admin to `IotaNames` to allow the payments module to work.
 public fun new_payments_config(
     setups: vector<CoinTypeData>,
     base_currency: TypeName,

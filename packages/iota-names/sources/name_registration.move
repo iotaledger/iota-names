@@ -3,15 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Handles creation of the `NameRegistration`s. Separates the logic of
-/// creating
-/// a `NameRegistration`. New `NameRegistration`s can be created only by the
-/// `registry` and this module is tightly coupled with it.
-///
-/// When reviewing the module, make sure that:
-///
-/// - mutable functions can't be called directly by the owner
-/// - all getters are public and take an immutable reference
-///
+/// creating a `NameRegistration`. New `NameRegistration`s can be created 
+/// only by the `registry` and this module is tightly coupled with it.
 module iota_names::name_registration;
 
 use iota::clock::{timestamp_ms, Clock};
@@ -98,7 +91,7 @@ public fun expiration_timestamp_ms(self: &NameRegistration): u64 {
     self.expiration_timestamp_ms
 }
 
-// get a read-only `uid` field of `NameRegistration`.
+// Returns a read-only `uid` field of `NameRegistration`.
 public fun uid(self: &NameRegistration): &UID { &self.id }
 
 /// Get the mutable `id` field of the `NameRegistration`.
