@@ -4,7 +4,7 @@
 
 export { IotaNamesClient } from './iota-names-client.js';
 export { IotaNamesTransaction } from './iota-names-transaction.js';
-export type { IotaNamesClientConfig, NameRecord } from './types';
+export type { IotaNamesClientConfig, NameRecord } from './types.js';
 export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants.js';
 export {
     isSubname,
@@ -17,5 +17,4 @@ export {
     getNameRegistrationType,
     getSubnameRegistrationType,
 } from './helpers.js';
-
-export { isValidIotaName, validateIotaName, normalizeIotaName } from './utils';
+export { isValidIotaName, validateIotaName, normalizeIotaName } from './utils.js';
