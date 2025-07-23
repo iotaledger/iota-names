@@ -47,6 +47,12 @@ fastify.get('/:name/:timestamp', async (request, reply) => {
     }
 });
 
-fastify.listen({ port: Number(process.env['PORT']) || 3000 }, (err) => {
-    if (err) throw err;
-});
+fastify.listen(
+    {
+        host: '0.0.0.0',
+        port: Number(process.env['PORT']) || 3000,
+    },
+    (err) => {
+        if (err) throw err;
+    },
+);
