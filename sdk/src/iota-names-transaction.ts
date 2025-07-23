@@ -13,8 +13,8 @@ import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 import { ALLOWED_METADATA } from './constants';
 import { isNestedSubname, isSubname } from './helpers';
 import type { IotaNamesClient } from './iota-names-client';
-import type { Coupon, ReceiptParams, RegistrationParams, RenewalParams } from './types';
-import { applyCouponsToPrice, isValidIotaName, normalizeIotaName, validateCoupon } from './utils';
+import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
+import { isValidIotaName, normalizeIotaName } from './utils';
 
 export class IotaNamesTransaction {
     iotaNamesClient: IotaNamesClient;
@@ -33,47 +33,27 @@ export class IotaNamesTransaction {
 
         const couponCodes = params.couponCodes;
         let discountedPrice: number | null = null;
+
         if (couponCodes && couponCodes.length > 0) {
-            const coupons: Coupon[] = [];
-            for (const couponCode of couponCodes) {
-                const coupon = await this.iotaNamesClient.resolveCoupon(couponCode);
-
-                if (!coupon) {
-                    throw new Error(`Coupon not found: ${couponCode}`);
-                }
-
-                if (!validateCoupon(coupon)) {
-                    throw new Error(`Invalid coupon: ${couponCode}`);
-                }
-
-                coupons.push(coupon);
-            }
-
-            // Base price
-            discountedPrice = await this.iotaNamesClient.calculatePrice({
+            discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
                 name: params.name,
                 years: params.years,
                 isRegistration: true,
             });
-
-            discountedPrice = applyCouponsToPrice(coupons, discountedPrice);
 
             for (const couponCode of couponCodes) {
                 this.applyCoupon(couponCode, paymentIntent);
             }
         }
 
-        const basePrice = this.getBasePrice(paymentIntent);
-        const payment = this.transaction.splitCoins(
-            this.transaction.object(params.coin),
-            discountedPrice === null ? [basePrice] : [discountedPrice],
-        );
+        const amounts = [discountedPrice ?? this.getBasePrice(paymentIntent)];
+        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), amounts);
 
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,
             coinConfig: params.coinConfig || this.iotaNamesClient.config.coins.IOTA,
-            coin: params.coin,
         });
 
         const nft = this.finalizeRegister(receipt);
@@ -101,7 +81,6 @@ export class IotaNamesTransaction {
             paymentIntent,
             payment,
             coinConfig: params.coinConfig || this.iotaNamesClient.config.coins.IOTA,
-            coin: params.coin,
         });
         this.finalizeRenew(receipt, params.nft);
     }

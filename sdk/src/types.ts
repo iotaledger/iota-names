@@ -78,7 +78,6 @@ export type ReceiptParams = {
     paymentIntent: TransactionObjectArgument;
     payment: TransactionObjectArgument;
     coinConfig: CoinConfig;
-    coin: TransactionObjectInput;
 };
 
 export type CouponHouse = typeof CouponHouseBcs.$inferType;

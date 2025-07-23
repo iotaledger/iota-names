@@ -138,6 +138,14 @@ export function validateCoupon(
     );
 }
 
+export function validateCoupons(coupons: Coupon[]) {
+    for (const coupon of coupons) {
+        if (!validateCoupon(coupon)) {
+            throw new Error(`Invalid coupon: ${coupon.couponCode}`);
+        }
+    }
+}
+
 export function applyCouponsToPrice(coupons: Coupon[], initialPrice: number): number {
     if (!coupons || coupons.length === 0) {
         return initialPrice;
