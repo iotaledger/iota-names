@@ -98,14 +98,13 @@ impl IotaNamesExtendedConfig {
 
     /// Checks whether the given package address is an IOTA-Names one.
     pub fn is_iota_names_package(&self, package_address: impl Into<IotaAddress>) -> bool {
-        [
-            self.auction_package_address,
-            self.coupons_package_address,
-            self.iota_names_config.package_address,
-            self.iota_names_config.payments_package_address,
-            self.subnames_package_address,
-            self.subname_proxy_package_address,
-        ]
-        .contains(&package_address.into())
+        let package_address = package_address.into();
+
+        package_address == self.auction_package_address
+            || package_address == self.coupons_package_address
+            || package_address == self.iota_names_config.package_address
+            || package_address == self.iota_names_config.payments_package_address
+            || package_address == self.subnames_package_address
+            || package_address == self.subname_proxy_package_address
     }
 }
