@@ -63,9 +63,79 @@ export function validateIotaName(
     return null;
 }
 
-export function validateCoupon(_coupon: Coupon): boolean {
-    // TODO Add coupon validation
-    return true;
+export function hasAvailableClaims(rules: { available_claims?: string | null }): boolean {
+    if (rules.available_claims === null || rules.available_claims === undefined) {
+        return true;
+    }
+    return parseInt(rules.available_claims) > 0;
+}
+
+export function isCouponValidForNameYears(
+    rules: { years?: { from: number; to: number } | null },
+    years: number,
+): boolean {
+    if (!rules.years || rules.years === null) {
+        return true;
+    }
+    const { from: minYears, to: maxYears } = rules.years;
+    return years >= minYears && years <= maxYears;
+}
+
+export function isValidCouponPercentage(amount: string): boolean {
+    return parseFloat(amount) > 0 && parseFloat(amount) <= 100;
+}
+
+export function isCouponValidForNameLength(
+    rules: { length?: { from: number; to: number } | null },
+    length: number,
+): boolean {
+    if (!rules.length || rules.length === null) {
+        return true;
+    }
+    const { from: minLength, to: maxLength } = rules.length;
+    return length >= minLength && length <= maxLength;
+}
+
+export function isCouponValidForAddress(
+    rules: { user?: string | null },
+    userAddress: string,
+): boolean {
+    if (!rules.user || rules.user === null) {
+        return true;
+    }
+    return rules.user === userAddress;
+}
+
+export function isCouponExpired(
+    rules: { expiration?: string | null },
+    currentTimestamp: number = Date.now(),
+): boolean {
+    if (!rules.expiration || rules.expiration === null) {
+        return false;
+    }
+    return currentTimestamp > Number(rules.expiration);
+}
+
+export function validateCoupon(
+    _coupon: Coupon,
+    years: number,
+    length: number,
+    userAddress: string,
+): boolean {
+    const availableClaims = hasAvailableClaims(_coupon.rules);
+    const isValidForNameYears = isCouponValidForNameYears(_coupon.rules, years);
+    const isValidPercentage = isValidCouponPercentage(_coupon.amount);
+    const isValidForNameLength = isCouponValidForNameLength(_coupon.rules, length);
+    const isValidForAddress = isCouponValidForAddress(_coupon.rules, userAddress);
+    const isExpired = isCouponExpired(_coupon.rules);
+    return (
+        availableClaims &&
+        isValidForNameYears &&
+        isValidPercentage &&
+        isValidForNameLength &&
+        isValidForAddress &&
+        !isExpired
+    );
 }
 
 export function applyCouponsToPrice(coupons: Coupon[], initialPrice: number): number {
