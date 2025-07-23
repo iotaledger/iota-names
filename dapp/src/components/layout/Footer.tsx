@@ -35,32 +35,37 @@ export function Footer() {
 
     return (
         <footer className="w-full bg-names-neutral-6 py-lg">
-            <div className="container flex flex-col sm:flex-row justify-between items-center gap-y-lg">
-                <div className="flex items-center gap-sm">
-                    <NamesLogoBranded className="w-[14.71px] h-[22.97px]" />
-                    <span className="text-names-neutral-70 text-label-sm tracking-normal">
-                        © {COPYRIGHT_YEAR} IOTA Names. All Rights Reserved.
-                    </span>
-                </div>
-                <div className="flex flex-row gap-md items-center text-names-neutral-70 text-body-md">
-                    {FOOTER_LEGAL_LINKS.map(({ path, title }) => (
-                        <Link
-                            key={title}
-                            href={path}
-                            onClick={(e) => handleLegalClick(e, path)}
-                            className="hover:text-names-primary-80 transition-colors duration-200"
-                        >
-                            {title}
-                        </Link>
-                    ))}
-                    {FOOTER_SOCIAL_LINKS.map(({ path, icon }, index) => (
-                        <div key={index} className="[&_svg]:h-6 [&_svg]:w-6">
-                            <Link href={path} target="_blank" rel="noopener noreferrer">
-                                {icon}
+            <div className="container flex flex-col items-center gap-y-lg">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-y-lg w-full">
+                    <div className="flex items-center gap-sm">
+                        <NamesLogoBranded className="w-[14.71px] h-[22.97px]" />
+                        <span className="text-names-neutral-70 text-label-sm tracking-normal">
+                            © {COPYRIGHT_YEAR} IOTA Names. All Rights Reserved.
+                        </span>
+                    </div>
+                    <div className="flex flex-row gap-md items-center text-names-neutral-70 text-body-md">
+                        {FOOTER_LEGAL_LINKS.map(({ path, title }) => (
+                            <Link
+                                key={title}
+                                href={path}
+                                onClick={(e) => handleLegalClick(e, path)}
+                                className="hover:text-names-primary-80 transition-colors duration-200"
+                            >
+                                {title}
                             </Link>
-                        </div>
-                    ))}
+                        ))}
+                        {FOOTER_SOCIAL_LINKS.map(({ path, icon }, index) => (
+                            <div key={index} className="[&_svg]:h-6 [&_svg]:w-6">
+                                <Link href={path} target="_blank" rel="noopener noreferrer">
+                                    {icon}
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
                 </div>
+                <p className="w-full text-center text-label-sm text-names-neutral-70">
+                    {process.env.NEXT_PUBLIC_IOTA_NAMES_REV}
+                </p>
             </div>
 
             <TermsAndConditionsDialog
