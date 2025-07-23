@@ -32,6 +32,10 @@ interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
     onCompleted?: () => void;
 }
+interface RecentSearch {
+    searchedName: string;
+    isNotAvailable: boolean;
+}
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
@@ -39,7 +43,10 @@ const DEBOUNCE_DELAY = 500;
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
-    const [recentSearches, setRecentSearches] = useState<string[]>([]);
+    const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
+        const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
+        return storedRecentSearches ? (JSON.parse(storedRecentSearches) as RecentSearch[]) : [];
+    });
 
     const {
         data: auctionMetadata,
@@ -66,6 +73,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         [searchValue, priceList],
     );
 
+    const errorMessage =
+        auctionError?.message || nameError?.message || priceError?.message || validationError || '';
+    const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
+
+    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isUnavailable = nameRecordData?.type === 'unavailable';
+    const isNameTaken = isUnavailable && !isAuctionInProgress;
+
     useEffect(() => {
         if (!searchValue || validationError) {
             return;
@@ -81,54 +96,51 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         return () => window.clearTimeout(timer);
     }, [searchValue, validationError]);
 
-    useEffect(() => {
-        const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
-        if (storedRecentSearches) {
-            setRecentSearches(JSON.parse(storedRecentSearches));
-        }
-    }, []);
+    function persistRecentSearches(recentSearches: RecentSearch[]) {
+        localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(recentSearches));
+    }
 
-    function addRecentSearch(newSearchTerm: string) {
-        const MAX_RECENT_SEARCHES = 4;
+    function updateRecentSearch(searchedName: string, isNotAvailable: boolean) {
+        const MAX_RECENT = 4;
 
         setRecentSearches((previousSearches) => {
             const updatedRecentSearches = [
-                newSearchTerm,
-                ...previousSearches.filter((term) => term !== newSearchTerm),
-            ].slice(0, MAX_RECENT_SEARCHES);
-
-            localStorage.setItem(
-                RECENT_SEARCHES_STORAGE_KEY,
-                JSON.stringify(updatedRecentSearches),
-            );
+                { searchedName, isNotAvailable },
+                ...previousSearches.filter((search) => search.searchedName !== searchedName),
+            ].slice(0, MAX_RECENT);
+            persistRecentSearches(updatedRecentSearches);
             return updatedRecentSearches;
         });
     }
 
-    function removeRecentSearch(searchTerm: string) {
+    function removeRecentSearch(searchedNameToRemove: string) {
         setRecentSearches((previousSearches) => {
-            const updatedRecentSearches = previousSearches.filter((term) => term !== searchTerm);
-
-            localStorage.setItem(
-                RECENT_SEARCHES_STORAGE_KEY,
-                JSON.stringify(updatedRecentSearches),
+            const updatedRecentSearches = previousSearches.filter(
+                (search) => search.searchedName !== searchedNameToRemove,
             );
+            persistRecentSearches(updatedRecentSearches);
             return updatedRecentSearches;
         });
     }
+
+    useEffect(() => {
+        if (nameRecordData && searchValue && name === `${searchValue}.iota`) {
+            updateRecentSearch(searchValue, isNameTaken);
+        }
+    }, [nameRecordData, isNameTaken]);
 
     function handleRecentClick(value: string) {
         setSearchValue(value);
         setName(`${value}.iota`);
-        addRecentSearch(value);
+        updateRecentSearch(value, isNameTaken);
     }
 
     const handleSearch = useCallback(() => {
         if (searchValue && !validationError) {
             setName(`${searchValue}.iota`);
-            addRecentSearch(searchValue);
+            updateRecentSearch(searchValue, isNameTaken);
         }
-    }, [searchValue, validationError]);
+    }, [searchValue, validationError, isNameTaken]);
 
     function handleInputChange(inputValue: string) {
         setSearchValue(denormalizeName(inputValue));
@@ -142,14 +154,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         setName('');
         onCompleted?.();
     }
-
-    const errorMessage =
-        auctionError?.message || nameError?.message || priceError?.message || validationError || '';
-    const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
-
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
-    const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isNameTaken = isUnavailable && !isAuctionInProgress;
 
     const inputTrailingElement = (
         <div className="flex flex-row gap-xs">
@@ -185,26 +189,27 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             trailingElement={inputTrailingElement}
                         />
                     </div>
-                    {recentSearches.length > 0 && (
+                    {recentSearches?.length > 0 && (
                         <div className="flex flex-row gap-x-sm items-center">
                             <span className="text-body-lg text-names-neutral-50">Recent</span>
                             <div className="flex flex-wrap gap-xs">
-                                {recentSearches.map((recentSearch) => (
+                                {recentSearches.map(({ searchedName, isNotAvailable }) => (
                                     <Chip
-                                        label={recentSearch}
+                                        key={searchedName}
+                                        label={searchedName}
+                                        type={isNotAvailable ? ChipType.Error : ChipType.Elevated}
                                         trailingElement={
                                             <ButtonUnstyled
                                                 className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    removeRecentSearch(recentSearch);
+                                                    removeRecentSearch(searchedName);
                                                 }}
                                             >
                                                 <Close />
                                             </ButtonUnstyled>
                                         }
-                                        onClick={() => handleRecentClick(recentSearch)}
-                                        type={ChipType.Elevated}
+                                        onClick={() => handleRecentClick(searchedName)}
                                     />
                                 ))}
                             </div>
