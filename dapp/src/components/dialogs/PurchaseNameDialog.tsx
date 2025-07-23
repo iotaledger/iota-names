@@ -25,7 +25,8 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameUpdate, queryKey, useBalanceValidation, useUpdateNameTransaction } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
@@ -116,10 +117,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-
+            toast.success(`Successfully registered name ${normalizeIotaName(name)}`);
             setOpen(false);
 
             if (onPurchase) onPurchase();
+        },
+        onError(error) {
+            toast.error(error.message);
         },
     });
 
@@ -153,6 +157,25 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
     const expirationDate = getTargetExpirationDate(renewYears);
+
+    useEffect(() => {
+        if (nameRecordError) {
+            toast.error(nameRecordError.message);
+        }
+    }, [nameRecordError]);
+
+    useEffect(() => {
+        if (updateNameError) {
+            if (
+                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+            } else {
+                toast.error(updateNameError.message);
+            }
+        }
+    }, [updateNameError]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

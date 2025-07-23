@@ -29,6 +29,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
@@ -111,8 +112,17 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+            toast.success(
+                `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
+                    formatRounded: false,
+                    showIotaSymbol: true,
+                })} on ${normalizeIotaName(name)}`,
+            );
             closeDialog();
             onCompleted?.();
+        },
+        onError(err) {
+            toast.error(err.message);
         },
     });
 
