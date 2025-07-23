@@ -8,13 +8,15 @@ import {
     Button,
     ButtonType,
     ButtonUnstyled,
+    Chip,
+    ChipType,
     Input,
     InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
@@ -31,9 +33,12 @@ interface AvailabilityCheckProps {
     onCompleted?: () => void;
 }
 
+const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
+
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
+    const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
     const {
         data: auctionMetadata,
@@ -60,8 +65,52 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         [searchValue, priceList],
     );
 
+    useEffect(() => {
+        const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
+        if (storedRecentSearches) {
+            setRecentSearches(JSON.parse(storedRecentSearches));
+        }
+    }, []);
+
+    function addRecentSearch(newSearchTerm: string) {
+        const MAX_RECENT_SEARCHES = 4;
+
+        setRecentSearches((previousSearches) => {
+            const updatedRecentSearches = [
+                newSearchTerm,
+                ...previousSearches.filter((term) => term !== newSearchTerm),
+            ].slice(0, MAX_RECENT_SEARCHES);
+
+            localStorage.setItem(
+                RECENT_SEARCHES_STORAGE_KEY,
+                JSON.stringify(updatedRecentSearches),
+            );
+            return updatedRecentSearches;
+        });
+    }
+
+    function removeRecentSearch(searchTerm: string) {
+        setRecentSearches((previousSearches) => {
+            const updatedRecentSearches = previousSearches.filter((term) => term !== searchTerm);
+
+            localStorage.setItem(
+                RECENT_SEARCHES_STORAGE_KEY,
+                JSON.stringify(updatedRecentSearches),
+            );
+            return updatedRecentSearches;
+        });
+    }
+
+    function handleRecentClick(value: string) {
+        setSearchValue(value);
+        setName(`${value}.iota`);
+        addRecentSearch(value);
+    }
     const handleSearch = useCallback(() => {
-        if (searchValue) setName(`${searchValue}.iota`);
+        if (searchValue) {
+            setName(`${searchValue}.iota`);
+            addRecentSearch(searchValue);
+        }
     }, [searchValue]);
 
     function handleInputChange(inputValue: string) {
@@ -109,20 +158,49 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             <div className="flex flex-col gap-2xl w-full max-w-[744px]">
-                <div className="flex gap-x-sm items-baseline justify-center w-full">
-                    <Input
-                        type={InputType.Text}
-                        placeholder="Check name availability"
-                        value={searchValue}
-                        onChange={({ target: { value } }) => handleInputChange(value)}
-                        errorMessage={errorMessage}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        leadingIcon={
-                            <p className="text-primary-20 dark:text-primary-80 text-label-lg">@</p>
-                        }
-                        autoFocus={autoFocusInput}
-                        trailingElement={inputTrailingElement}
-                    />
+                <div className="flex flex-col gap-y-md">
+                    <div className="flex gap-x-sm items-baseline justify-center w-full">
+                        <Input
+                            type={InputType.Text}
+                            placeholder="Check name availability"
+                            value={searchValue}
+                            onChange={({ target: { value } }) => handleInputChange(value)}
+                            errorMessage={errorMessage}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            leadingIcon={
+                                <p className="text-primary-20 dark:text-primary-80 text-label-lg">
+                                    @
+                                </p>
+                            }
+                            autoFocus={autoFocusInput}
+                            trailingElement={inputTrailingElement}
+                        />
+                    </div>
+                    {recentSearches.length > 0 && (
+                        <div className="flex flex-row gap-x-sm items-center">
+                            <span className="text-body-lg text-names-neutral-50">Recent</span>
+                            <div className="flex flex-wrap gap-xs">
+                                {recentSearches.map((recentSearch) => (
+                                    <Chip
+                                        label={recentSearch}
+                                        trailingElement={
+                                            <ButtonUnstyled
+                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeRecentSearch(recentSearch);
+                                                }}
+                                            >
+                                                <Close />
+                                            </ButtonUnstyled>
+                                        }
+                                        onClick={() => handleRecentClick(recentSearch)}
+                                        type={ChipType.Elevated}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="flex flex-col items-center space-y-4 w-full">
                     {isLoading ? (
