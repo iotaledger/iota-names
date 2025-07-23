@@ -18,3 +18,11 @@ export {
     getSubnameRegistrationType,
 } from './helpers';
 export { isValidIotaName, validateIotaName } from './utils';
+export {
+    hasAvailableClaims,
+    isCouponValidForNameYears,
+    isValidCouponPercentage,
+    isCouponValidForNameLength,
+    isCouponValidForAddress,
+    isCouponExpired,
+} from './validate';

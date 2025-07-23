@@ -3,6 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Coupon } from './types';
+import {
+    hasAvailableClaims,
+    isCouponExpired,
+    isCouponValidForAddress,
+    isCouponValidForNameLength,
+    isCouponValidForNameYears,
+    isValidCouponPercentage,
+} from './validate';
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
@@ -61,59 +69,6 @@ export function validateIotaName(
         }
     }
     return null;
-}
-
-export function hasAvailableClaims(rules: { available_claims?: string | null }): boolean {
-    if (rules.available_claims === null || rules.available_claims === undefined) {
-        return true;
-    }
-    return parseInt(rules.available_claims) > 0;
-}
-
-export function isCouponValidForNameYears(
-    rules: { years?: { from: number; to: number } | null },
-    years: number,
-): boolean {
-    if (!rules.years || rules.years === null) {
-        return true;
-    }
-    const { from: minYears, to: maxYears } = rules.years;
-    return years >= minYears && years <= maxYears;
-}
-
-export function isValidCouponPercentage(amount: string): boolean {
-    return parseFloat(amount) > 0 && parseFloat(amount) <= 100;
-}
-
-export function isCouponValidForNameLength(
-    rules: { length?: { from: number; to: number } | null },
-    length: number,
-): boolean {
-    if (!rules.length || rules.length === null) {
-        return true;
-    }
-    const { from: minLength, to: maxLength } = rules.length;
-    return length >= minLength && length <= maxLength;
-}
-
-export function isCouponValidForAddress(
-    rules: { user?: string | null },
-    userAddress: string,
-): boolean {
-    if (!rules.user || rules.user === null) {
-        return true;
-    }
-    return rules.user === userAddress;
-}
-
-export function isCouponExpired(
-    rules: { expiration?: string | null },
-    currentTimestamp: number = Date.now(),
-): boolean {
-    if (!rules.expiration || rules.expiration === null) {
-        return false;
-    }
-    return currentTimestamp > Number(rules.expiration);
 }
 
 export function validateCoupon(
