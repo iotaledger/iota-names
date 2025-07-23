@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { CouponBcs } from '@iota/iota-names-sdk';
 import { bcs } from '@iota/iota-sdk/bcs';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { fromB64 } from '@iota/iota-sdk/utils';
@@ -10,10 +11,9 @@ import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
-import { CouponBcs } from '../lib/types';
 import { useCouponHouse } from './useCouponHouse';
 
-export function useResolveCoupon(couponKey: string) {
+export function useResolveCoupon(couponKey: string | undefined) {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: couponHouseData } = useCouponHouse();
 
@@ -22,7 +22,7 @@ export function useResolveCoupon(couponKey: string) {
     return useQuery({
         queryKey: ['resolveCoupon', couponKey, couponsTableId],
         queryFn: async () => {
-            if (!couponsTableId) {
+            if (!couponsTableId || !couponKey) {
                 return null;
             }
 

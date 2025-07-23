@@ -67,6 +67,7 @@ function createRenewUpdates({
     ) {
         updates.push({
             type: 'renew-name',
+            name: nameRecord.name,
             nftId: nameRecord.nftId,
             years: renewYears,
         });

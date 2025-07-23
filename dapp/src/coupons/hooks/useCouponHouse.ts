@@ -1,13 +1,14 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { CouponHouseBcs } from '@iota/iota-names-sdk';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
 import { fromB64 } from '@iota/iota-sdk/utils';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 
-import { CouponHouseBcs, DummyFieldBcs } from '../lib/types';
+import { DummyFieldBcs } from '../lib/types';
 
 const DUMMY_FIELD_B64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
 
