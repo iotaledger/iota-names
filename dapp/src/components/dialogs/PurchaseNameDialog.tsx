@@ -17,11 +17,13 @@ import {
     Panel,
     Select,
     SelectOption,
+    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useUpdateNameTransaction } from '@/hooks';
 import { useBalance } from '@/hooks/useBalance';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
@@ -35,6 +37,8 @@ import { formatNanosToIota } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
+import { CouponInput } from '../CouponInput';
+
 type PurchaseNameProps = {
     name: string;
     open: boolean;
@@ -45,11 +49,15 @@ type PurchaseNameProps = {
 export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const queryClient = useQueryClient();
     const client = useIotaClient();
+    const { iotaNamesClient } = useIotaNamesClient();
+
     const account = useCurrentAccount();
     const { data: coreConfig } = useCoreConfig();
 
     const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+    const [coupons, setCoupons] = useState<string[]>([]);
+    const [applyCoupons, setApplyCoupons] = useState(false);
 
     const {
         data: nameRecordData,
@@ -63,6 +71,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     });
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
+
     const isConnected = !!account?.address;
 
     const updates: NameUpdate[] = [];
@@ -74,6 +83,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             price: price,
             years: renewYears,
             setDefault: isDisplayName,
+            couponCodes: coupons,
         });
     }
 
@@ -152,6 +162,24 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const expirationDate = getTargetExpirationDate(renewYears);
 
+    const [discountedPrice, setDiscountedPrice] = useState<number>(price);
+
+    useEffect(() => {
+        if (coupons.length === 0) {
+            setDiscountedPrice(price + totalGas);
+            return;
+        }
+        iotaNamesClient
+            .calculateDiscountedPrice({
+                coupons,
+                name,
+                years: renewYears,
+                isRegistration: true,
+            })
+            .then((p) => setDiscountedPrice(p + totalGas))
+            .catch(() => setDiscountedPrice(price + totalGas));
+    }, [coupons, renewYears, price, totalGas]);
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -166,15 +194,25 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
-                            <div className="px-md py-sm border-t border-names-neutral-6">
-                                <Select
-                                    value={renewYears.toString()}
-                                    options={RENEW_OPTIONS}
-                                    onValueChange={(value) => {
-                                        setRenewYears(parseInt(value, 10));
-                                    }}
-                                    placeholder="Select renewal period"
-                                />
+                            <Select
+                                value={renewYears.toString()}
+                                options={RENEW_OPTIONS}
+                                onValueChange={(value) => {
+                                    setRenewYears(parseInt(value, 10));
+                                }}
+                                placeholder="Select renewal period"
+                            />
+                            <div className="flex flex-col">
+                                <div className="self-end">
+                                    <Toggle
+                                        isToggled={applyCoupons}
+                                        onChange={setApplyCoupons}
+                                        label="Apply Coupon"
+                                    />
+                                </div>
+                                {applyCoupons && (
+                                    <CouponInput coupons={coupons} onChange={setCoupons} />
+                                )}
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
@@ -191,7 +229,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats
                                     label="Total Due"
-                                    value={formatNanosToIota(totalPrice)}
+                                    value={formatNanosToIota(discountedPrice)}
                                 />
                             </div>
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
