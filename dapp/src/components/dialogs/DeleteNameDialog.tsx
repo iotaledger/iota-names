@@ -22,6 +22,7 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
@@ -85,7 +86,11 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
+            toast.success(`Successfully deleted expired name ${normalizeIotaName(nft.name)}`);
             closeDialog();
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
