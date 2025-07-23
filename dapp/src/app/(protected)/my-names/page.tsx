@@ -7,10 +7,8 @@ import { Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
-    Button,
     ButtonSegment,
     ButtonSegmentType,
-    ButtonType,
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
@@ -23,6 +21,7 @@ import { useState } from 'react';
 
 import { useGetUserAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
+import { GradientButton } from '@/components/buttons/gradient-button/GradientButton';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
@@ -110,8 +109,7 @@ export default function MyNamesPage(): JSX.Element {
                     Names
                 </h2>
 
-                <Button
-                    type={ButtonType.Outlined}
+                <GradientButton
                     text="Name"
                     icon={<Add />}
                     onClick={() =>

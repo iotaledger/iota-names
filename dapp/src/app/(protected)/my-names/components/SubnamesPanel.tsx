@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Add } from '@iota/apps-ui-icons';
-import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
+import { Header, Panel } from '@iota/apps-ui-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
+import { GradientButton } from '@/components/buttons/gradient-button/GradientButton';
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
 import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
@@ -85,9 +86,8 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                 </div>
 
                 <div className="flex flex-col items-center justify-center py-sm">
-                    <Button
+                    <GradientButton
                         text="New Subname"
-                        type={ButtonType.Outlined}
                         onClick={() => setIsAddDialogOpen(true)}
                         icon={<Add />}
                     />
