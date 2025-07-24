@@ -2,81 +2,61 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const EInvalidYears = 'Coupon is not valid for the given number of years.';
-const EInvalidForNameLength = 'Coupon is not valid for the given name length.';
-const EInvalidPercentage = 'Invalid percentage amount for coupon.';
-const EInvalidUser = 'Coupon address does not match.';
-const ECouponExpired = 'Coupon has expired.';
-const EInvalidAvailableClaims = 'Number of claims cannot be zero.';
+const INVALID_YEARS = 'Coupon is not valid for the given number of years.';
+const INVALID_FOR_NAME_LENGTH = 'Coupon is not valid for the given name length.';
+const INVALID_PERCENTAGE = 'Invalid percentage amount for coupon.';
+const INVALID_USER = 'Coupon address does not match.';
+const COUPON_EXPIRED = 'Coupon has expired.';
+const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
 
-export function hasAvailableClaims(rules: { available_claims?: string | null }): boolean {
-    if (rules.available_claims === null || rules.available_claims === undefined) {
-        return true;
+export function hasAvailableClaims(rules: { available_claims?: string | null }) {
+    if (
+        rules?.available_claims !== null &&
+        rules?.available_claims !== undefined &&
+        parseInt(rules?.available_claims) <= 0
+    ) {
+        throw new Error(INVALID_AVAILABLE_CLAIMS);
     }
-    if (parseInt(rules.available_claims) > 0) {
-        return true;
-    }
-    throw new Error(EInvalidAvailableClaims);
 }
 
 export function isCouponValidForNameYears(
     rules: { years?: { from: number; to: number } | null },
     years: number,
-): boolean {
-    if (!rules.years || rules.years === null) {
-        return true;
+) {
+    const { from: minYears, to: maxYears } = rules.years || {};
+    if (minYears && maxYears && (years < minYears || years > maxYears)) {
+        throw new Error(INVALID_YEARS);
     }
-    const { from: minYears, to: maxYears } = rules.years;
-    if (years >= minYears && years <= maxYears) {
-        return true;
-    }
-    throw new Error(EInvalidYears);
 }
 
-export function isValidCouponPercentage(amount: string): boolean {
-    if (parseInt(amount) > 0 && parseInt(amount) <= 100) {
-        return true;
+export function isValidCouponPercentage(amount: string) {
+    if (parseInt(amount) <= 0 || parseInt(amount) > 100) {
+        throw new Error(INVALID_PERCENTAGE);
     }
-    throw new Error(EInvalidPercentage);
 }
 
 export function isCouponValidForNameLength(
     rules: { length?: { from: number; to: number } | null },
     length: number,
-): boolean {
-    if (!rules.length || rules.length === null) {
-        return true;
+) {
+    const { from: minLength, to: maxLength } = rules.length || {};
+    if (minLength && maxLength && (length < minLength || length > maxLength)) {
+        throw new Error(INVALID_FOR_NAME_LENGTH);
     }
-    const { from: minLength, to: maxLength } = rules.length;
-    if (length >= minLength && length <= maxLength) {
-        return true;
-    }
-    throw new Error(EInvalidForNameLength);
 }
 
-export function isCouponValidForAddress(
-    rules: { user?: string | null },
-    userAddress: string,
-): boolean {
-    if (!rules.user || rules.user === null) {
-        return true;
+export function isCouponValidForAddress(rules: { user?: string | null }, userAddress: string) {
+    if (rules.user && rules.user !== userAddress) {
+        throw new Error(INVALID_USER);
     }
-    if (rules.user === userAddress) {
-        return true;
-    }
-    throw new Error(EInvalidUser);
 }
 
 // TODO: make sure both timestamps are the same units (seconds vs milliseconds)
 export function isCouponExpired(
     rules: { expiration?: string | null },
     currentTimestamp: number = Date.now(),
-): boolean {
-    if (!rules.expiration || rules.expiration === null) {
-        return false;
+) {
+    if (rules.expiration && currentTimestamp <= Number(rules.expiration)) {
+        throw new Error(COUPON_EXPIRED);
     }
-    if (currentTimestamp > Number(rules.expiration)) {
-        return true;
-    }
-    throw new Error(ECouponExpired);
 }
