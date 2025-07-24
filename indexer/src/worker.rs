@@ -40,7 +40,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{
         pool::DbConnectionPool,
-        queries::{add_bidder_name_entry, remove_name_bids_entry, upsert_name_bids_entry},
+        queries::{add_bids_entry, remove_name_bids_entry, upsert_name_bids_entry},
     },
     events::{CouponKind, IotaNamesEvent},
 };
@@ -148,7 +148,7 @@ impl IotaNamesWorker {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(
+                    add_bids_entry(
                         conn,
                         &event.bidder.to_string(),
                         &name_str,
@@ -161,7 +161,7 @@ impl IotaNamesWorker {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str, event.bid)?;
+                    add_bids_entry(conn, &event.bidder.to_string(), &name_str, event.bid)?;
                     upsert_name_bids_entry(conn, &name_str)
                 })?;
             }

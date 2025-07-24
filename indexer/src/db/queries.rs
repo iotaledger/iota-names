@@ -7,7 +7,7 @@ use diesel::{
     SqliteConnection, TextExpressionMethods, delete, insert_into,
 };
 
-use super::models::{Bidder, BidderName, Name, bidder_name, bidders, name_bids, names};
+use super::models::{Bidder, Bids, Name, bidders, bids, name_bids, names};
 use crate::db::{AuctionSortBy, SortOrder};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
@@ -44,24 +44,24 @@ pub fn get_or_create_name(conn: &mut SqliteConnection, name: &str) -> Result<Nam
     }
 }
 
-pub fn create_bidder_name_relationship(
+pub fn create_bid(
     conn: &mut SqliteConnection,
     bidder_id: i32,
     name_id: i32,
     bid: u64,
 ) -> Result<()> {
-    insert_into(bidder_name::table)
+    insert_into(bids::table)
         .values((
-            bidder_name::bidder_id.eq(bidder_id),
-            bidder_name::name_id.eq(name_id),
-            bidder_name::bid.eq(bid as f64),
+            bids::bidder_id.eq(bidder_id),
+            bids::name_id.eq(name_id),
+            bids::bid.eq(bid as i64),
         ))
         .on_conflict_do_nothing()
         .execute(conn)?;
     Ok(())
 }
 
-pub fn add_bidder_name_entry(
+pub fn add_bids_entry(
     conn: &mut SqliteConnection,
     bidder_address: &str,
     name_str: &str,
@@ -69,7 +69,7 @@ pub fn add_bidder_name_entry(
 ) -> Result<()> {
     let bidder = get_or_create_bidder(conn, bidder_address)?;
     let name = get_or_create_name(conn, name_str)?;
-    create_bidder_name_relationship(conn, bidder.id, name.id, bid)
+    create_bid(conn, bidder.id, name.id, bid)
 }
 
 pub fn get_names_for_bidder_address(
@@ -88,7 +88,7 @@ pub fn get_names_for_bidder_address(
         None => return Ok(vec![]),
     };
 
-    let names = BidderName::belonging_to(&bidder)
+    let names = Bids::belonging_to(&bidder)
         .inner_join(names::table)
         .select(Name::as_select())
         .load(conn)?;
@@ -105,9 +105,9 @@ pub fn get_auctions(
     search: Option<String>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
-        .inner_join(bidder_name::table)
+        .inner_join(bids::table)
         .group_by(names::id)
-        .select((names::name, diesel::dsl::max(bidder_name::bid)))
+        .select((names::name, diesel::dsl::max(bids::bid)))
         .limit(page_size as _)
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
@@ -117,11 +117,13 @@ pub fn get_auctions(
     query = match (sort, sort_by) {
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
         (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
-        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(bidder_name::bid.asc()),
-        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(bidder_name::bid.desc()),
+        (SortOrder::Asc, AuctionSortBy::Bid) => query.order((bids::bid.asc(), names::name.asc())),
+        (SortOrder::Desc, AuctionSortBy::Bid) => {
+            query.order((bids::bid.desc(), names::name.desc()))
+        }
     };
     Ok(query
-        .load::<(String, Option<f64>)>(conn)?
+        .load::<(String, Option<i64>)>(conn)?
         .into_iter()
         .map(|v| v.0)
         .collect())
