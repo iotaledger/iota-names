@@ -4,15 +4,18 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { validateCoupon } from '../src/coupons';
+import {
+    COUPON_EXPIRED,
+    INVALID_AVAILABLE_CLAIMS,
+    INVALID_FOR_NAME_LENGTH,
+    INVALID_PERCENTAGE,
+    INVALID_USER,
+    INVALID_YEARS,
+    NON_STACKING_COUPON,
+    validateCoupon,
+    validateCoupons,
+} from '../src/coupons';
 import { Coupon } from '../src/types';
-
-const INVALID_YEARS = 'Coupon is not valid for the given number of years.';
-const INVALID_FOR_NAME_LENGTH = 'Coupon is not valid for the given name length.';
-const INVALID_PERCENTAGE = 'Invalid percentage amount for coupon.';
-const INVALID_USER = 'Coupon address does not match.';
-const COUPON_EXPIRED = 'Coupon has expired.';
-const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
 
 const DEFAULT_YEARS = 1;
 const DEFAULT_LENGTH = 5;
@@ -262,5 +265,59 @@ describe('validateCoupon', () => {
             expiration: (Date.now() - 100000).toString(),
         });
         expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(COUPON_EXPIRED);
+    });
+});
+
+describe('validateCoupons (multi)', () => {
+    test('should pass if all coupons are stackable', () => {
+        const coupons = [
+            mockCoupon({
+                kind: 0,
+                amount: '30',
+                available_claims: '5',
+                can_stack: true,
+            }),
+            mockCoupon({
+                kind: 1,
+                amount: '1000',
+                available_claims: '1',
+                can_stack: true,
+            }),
+            mockCoupon({
+                kind: 1,
+                amount: '500',
+                available_claims: '1',
+                can_stack: true,
+            }),
+        ];
+
+        expect(() => validateCoupons(coupons, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
+    });
+
+    test('should fail if a coupon is NOT stackable', () => {
+        const coupons = [
+            mockCoupon({
+                kind: 0,
+                amount: '30',
+                available_claims: '5',
+                can_stack: true,
+            }),
+            mockCoupon({
+                kind: 1,
+                amount: '1000',
+                available_claims: '1',
+                can_stack: false, // <----
+            }),
+            mockCoupon({
+                kind: 1,
+                amount: '500',
+                available_claims: '1',
+                can_stack: true,
+            }),
+        ];
+
+        expect(() => validateCoupons(coupons, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(
+            NON_STACKING_COUPON,
+        );
     });
 });

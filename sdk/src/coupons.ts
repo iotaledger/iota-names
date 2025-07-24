@@ -4,13 +4,13 @@
 
 import { Coupon } from './types';
 
-const INVALID_YEARS = 'Coupon is not valid for the given number of years.';
-const INVALID_FOR_NAME_LENGTH = 'Coupon is not valid for the given name length.';
-const INVALID_PERCENTAGE = 'Invalid percentage amount for coupon.';
-const INVALID_USER = 'Coupon address does not match.';
-const COUPON_EXPIRED = 'Coupon has expired.';
-const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
-const NON_STACKING_COUPON = 'Coupon cannot be used with other coupons.';
+export const INVALID_YEARS = 'Coupon is not valid for the given number of years.';
+export const INVALID_FOR_NAME_LENGTH = 'Coupon is not valid for the given name length.';
+export const INVALID_PERCENTAGE = 'Invalid percentage amount for coupon.';
+export const INVALID_USER = 'Coupon address does not match.';
+export const COUPON_EXPIRED = 'Coupon has expired.';
+export const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
+export const NON_STACKING_COUPON = 'Coupon cannot be used with other coupons.';
 
 export function validateCoupon(coupon: Coupon, years: number, length: number, address?: string) {
     try {
