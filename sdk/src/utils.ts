@@ -2,7 +2,6 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Coupon } from './types';
 import {
     hasAvailableClaims,
     isCouponExpired,
@@ -10,7 +9,8 @@ import {
     isCouponValidForNameLength,
     isCouponValidForNameYears,
     isValidCouponPercentage,
-} from './validate';
+} from './coupons';
+import { Coupon } from './types';
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const SUBNAME_REGEX = /^(?!-)[a-z0-9-]{1,62}[a-z0-9]$/;
