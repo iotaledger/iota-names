@@ -3,8 +3,8 @@
 
 import { describe, expect, test } from 'vitest';
 
+import { applyCouponsToPrice, applyCouponToPrice } from '../src/coupons';
 import { Coupon } from '../src/types';
-import { applyCouponsToPrice, applyCouponToPrice } from '../src/utils';
 
 function mockCoupon(config: { kind: 1 | 0; amount: string; can_stack?: boolean }): Coupon {
     return {

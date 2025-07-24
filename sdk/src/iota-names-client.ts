@@ -11,6 +11,7 @@ import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 import { CouponBcs, CouponHouseBcs, DummyFieldBcs, NameBcs } from './bcs.js';
 import { ALLOWED_METADATA, packages } from './constants.js';
+import { applyCouponsToPrice, validateCoupons } from './coupons.js';
 import {
     getConfigType,
     getCoreConfigType,
@@ -29,12 +30,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import {
-    applyCouponsToPrice,
-    isValidIotaName,
-    normalizeIotaName,
-    validateCoupons,
-} from './utils.js';
+import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.

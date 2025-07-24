@@ -4,7 +4,6 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { Coupon } from '../src/types';
 import {
     hasAvailableClaims,
     isCouponExpired,
@@ -12,7 +11,8 @@ import {
     isCouponValidForNameLength,
     isCouponValidForNameYears,
     isValidCouponPercentage,
-} from '../src/validate';
+} from '../src/coupons';
+import { Coupon } from '../src/types';
 
 const INVALID_YEARS = 'Coupon is not valid for the given number of years.';
 const INVALID_FOR_NAME_LENGTH = 'Coupon is not valid for the given name length.';
