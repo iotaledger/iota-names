@@ -10,6 +10,7 @@ const INVALID_PERCENTAGE = 'Invalid percentage amount for coupon.';
 const INVALID_USER = 'Coupon address does not match.';
 const COUPON_EXPIRED = 'Coupon has expired.';
 const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
+const NON_STACKING_COUPON = 'Coupon cannot be used with other coupons.';
 
 export function validateCoupon(coupon: Coupon, years: number, length: number, address?: string) {
     try {
@@ -36,6 +37,11 @@ export function validateCoupons(
     address?: string,
 ) {
     for (const coupon of coupons) {
+        if (!coupon.rules.can_stack && coupons.length > 1) {
+            throw new Error(
+                `Coupon '${coupon.couponCode}' validation failed: ${NON_STACKING_COUPON}`,
+            );
+        }
         validateCoupon(coupon, years, length, address);
     }
 }
