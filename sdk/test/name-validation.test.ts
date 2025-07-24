@@ -109,6 +109,11 @@ describe('Name validation with error', () => {
         expect(validateIotaName('nameeeeeeeeeee.iota', 3, 10)).toEqual(
             'Name must be 3-10 characters long',
         );
+        expect(
+            validateIotaName(
+                'veryveryveryveryveryveryveryveryveryveryveryverylongnamewithmorethan63chars.iota',
+            ),
+        ).toEqual('Name must be 3-64 characters long');
     });
 
     test('should check the subnames', () => {
