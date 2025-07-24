@@ -13,3 +13,4 @@ SELECT `bidder_id`, `name_id`, 0
 FROM `bidder_name`;
 
 DROP TABLE `bidder_name`;
+DROP TABLE `name_bids`;

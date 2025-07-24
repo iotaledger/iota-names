@@ -4,10 +4,10 @@
 use anyhow::Result;
 use diesel::{
     BelongingToDsl, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    SqliteConnection, TextExpressionMethods, delete, insert_into,
+    SqliteConnection, TextExpressionMethods, dsl, insert_into,
 };
 
-use super::models::{Bidder, Bids, Name, bidders, bids, name_bids, names};
+use super::models::{Bidder, Bids, Name, bidders, bids, names};
 use crate::db::{AuctionSortBy, SortOrder};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
@@ -88,12 +88,11 @@ pub fn get_names_for_bidder_address(
         None => return Ok(vec![]),
     };
 
-    let names = Bids::belonging_to(&bidder)
+    Ok(Bids::belonging_to(&bidder)
         .inner_join(names::table)
-        .select(Name::as_select())
-        .load(conn)?;
-
-    Ok(names.into_iter().map(|d| d.name).collect())
+        .group_by(names::id)
+        .select(names::name)
+        .load(conn)?)
 }
 
 pub fn get_auctions(
@@ -107,7 +106,7 @@ pub fn get_auctions(
     let mut query = names::table
         .inner_join(bids::table)
         .group_by(names::id)
-        .select((names::name, diesel::dsl::max(bids::bid)))
+        .select((names::name, dsl::max(bids::bid)))
         .limit(page_size as _)
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
@@ -117,9 +116,11 @@ pub fn get_auctions(
     query = match (sort, sort_by) {
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
         (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
-        (SortOrder::Asc, AuctionSortBy::Bid) => query.order((bids::bid.asc(), names::name.asc())),
+        (SortOrder::Asc, AuctionSortBy::Bid) => {
+            query.order((dsl::max(bids::bid).asc(), names::name.asc()))
+        }
         (SortOrder::Desc, AuctionSortBy::Bid) => {
-            query.order((bids::bid.desc(), names::name.desc()))
+            query.order((dsl::max(bids::bid).desc(), names::name.desc()))
         }
     };
     Ok(query
@@ -129,25 +130,11 @@ pub fn get_auctions(
         .collect())
 }
 
-pub fn upsert_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<()> {
-    let name = get_or_create_name(conn, name_str)?;
-    insert_into(name_bids::table)
-        .values((name_bids::name_id.eq(name.id), name_bids::bids.eq(1)))
-        .on_conflict(name_bids::name_id)
-        .do_update()
-        .set(name_bids::bids.eq(name_bids::bids + 1))
-        .execute(conn)?;
-    Ok(())
-}
-
-pub fn remove_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<i32> {
-    let name = get_or_create_name(conn, name_str)?;
-    let bid_count = name_bids::table
-        .find(name.id)
-        .select(name_bids::bids)
-        .first(conn)?;
-
-    delete(name_bids::table.find(name.id)).execute(conn)?;
-
-    Ok(bid_count)
+pub fn get_bid_count(conn: &mut SqliteConnection, name_str: &str) -> Result<i64> {
+    Ok(names::table
+        .inner_join(bids::table)
+        .group_by(names::id)
+        .select(dsl::count(bids::bid))
+        .filter(names::name.eq(name_str))
+        .get_result(conn)?)
 }
