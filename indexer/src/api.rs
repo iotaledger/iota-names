@@ -88,16 +88,6 @@ struct AuctionsPagination {
     search: Option<String>,
 }
 
-#[derive(Clone, Deserialize, Default)]
-#[serde(default, deny_unknown_fields, rename_all = "camelCase")]
-struct AuctionsPaginationQuery {
-    page: Option<usize>,
-    page_size: Option<usize>,
-    sort: Option<String>,
-    sort_by: Option<String>,
-    search: Option<String>,
-}
-
 impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
     type Rejection = ApiError;
 
@@ -105,6 +95,16 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
         parts: &mut axum::http::request::Parts,
         state: &S,
     ) -> Result<Self, Self::Rejection> {
+        #[derive(Clone, Deserialize, Default)]
+        #[serde(default, deny_unknown_fields, rename_all = "camelCase")]
+        struct AuctionsPaginationQuery {
+            page: Option<usize>,
+            page_size: Option<usize>,
+            sort: Option<String>,
+            sort_by: Option<String>,
+            search: Option<String>,
+        }
+
         let Query(query) = Query::<AuctionsPaginationQuery>::from_request_parts(parts, state)
             .await
             .map_err(|e| ApiError::BadRequest(e.to_string()))?;
