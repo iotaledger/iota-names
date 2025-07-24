@@ -185,13 +185,13 @@ public fun add_leaf_record(
 ) {
     assert!(name.is_subname(), EInvalidDepth);
 
-    // get the parent of the name
+    // Returns the parent of the name.
     let parent = name.parent().extract();
     let option_parent_name_record = self.lookup(parent);
 
     assert!(option_parent_name_record.is_some(), ERecordNotFound);
 
-    // finds existing parent record
+    // Finds existing parent record.
     let parent_name_record = option_parent_name_record.borrow();
 
     // Make sure that the parent isn't expired (because leaf record is invalid
@@ -210,7 +210,7 @@ public fun add_leaf_record(
         name_record
     });
 
-    // adds the `leaf` record to the registry.
+    // Adds the `leaf` record to the registry.
     self
         .registry
         .add(
@@ -227,7 +227,7 @@ public fun remove_leaf_record(self: &mut Registry, name: Name) {
     // We can only call remove on a leaf record.
     assert!(self.is_leaf_record(name), ENonLeafRecord);
 
-    // if it's a leaf record, there's no `NameRegistration` object.
+    // If it's a leaf record, there's no `NameRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
     event::emit(NameRecordRemovedEvent {
@@ -327,7 +327,7 @@ public fun set_data(self: &mut Registry, name: Name, data: VecMap<String, String
 
 // === Reads ===
 
-/// Check whether the given `name` is registered in the `Registry`.
+/// Checks whether the given `name` is registered in the `Registry`.
 public fun has_record(self: &Registry, name: Name): bool {
     self.registry.contains(name)
 }
@@ -372,14 +372,11 @@ public fun get_data(self: &Registry, name: Name): &VecMap<String, String> {
 
 // === Private Functions ===
 
-/// Checks whether a subname record is `leaf`.
+/// Checks whether a subname record is a `leaf`.
 /// `leaf` record: a record whose target address can only be set by the parent,
 /// hence the nft_id points to the parent's ID. Leaf records can't create
-/// subnames
-/// and don't have their own `NameRegistration` object Cap. The
-/// `NameRegistration` of the parent
-/// is the one that manages them.
-///
+/// subnames and don't have their own `NameRegistration` object cap. The
+/// `NameRegistration` of the parent is the one that manages them.
 fun is_leaf_record(self: &Registry, name: Name): bool {
     if (!name.is_subname()) {
         return false
@@ -394,7 +391,7 @@ fun is_leaf_record(self: &Registry, name: Name): bool {
     option_name_record.borrow().is_leaf_record()
 }
 
-/// An internal helper to add a record
+/// An internal helper to add a record.
 fun internal_add_record(
     self: &mut Registry,
     name: Name,
@@ -445,10 +442,10 @@ fun remove_existing_record_if_exists_and_expired(
     // Special case for leaf records, we can override them iff their parent has
     // changed or has expired.
     if (record.is_leaf_record()) {
-        // find the parent of the leaf record.
+        // Find the parent of the leaf record.
         let option_parent_name_record = self.lookup(name.parent().extract());
 
-        // if there's a parent (if not, we can just remove it), we need to check
+        // If there's a parent (if not, we can just remove it), we need to check
         // if the parent is valid.
         // -> If the parent is valid, we need to check if the parent is expired.
         // -> If the parent is not valid (nft_id has changed), or if the parent
@@ -501,6 +498,7 @@ fun handle_invalidate_reverse_record(
 }
 
 // === Test Functions ===
+
 #[test_only]
 use iota_names::iota_names::{add_registry, IotaNames};
 
@@ -509,8 +507,8 @@ public fun init_for_testing(cap: &AdminCap, iota_names: &mut IotaNames, ctx: &mu
     add_registry(cap, iota_names, new(cap, ctx));
 }
 
-#[test_only]
 /// Create a new `Registry` for testing Purposes.
+#[test_only]
 public fun new_for_testing(ctx: &mut TxContext): Registry {
     Registry {
         registry: table::new(ctx),

@@ -2,7 +2,6 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Implementation of auction module.
 module iota_names_auction::auction;
 
 use iota::balance::{Self, Balance};
@@ -29,6 +28,7 @@ const AUCTION_BIDDING_PERIOD_MS: u64 = 60 * 60 * 1000;
 const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
 /// The overbid must be at least of 1 IOTA, which is 10^9 NANOs
 const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 1_000_000_000;
+
 // === Abort codes ===
 
 #[error]
@@ -51,14 +51,14 @@ const ENoProfits: vector<u8> = b"There are no profits to withdraw.";
 /// Authorization witness to call protected functions of `iota_names`.
 public struct AuctionAuth has drop {}
 
-/// The AuctionHouse application.
+/// The `AuctionHouse` application.
 public struct AuctionHouse has key, store {
     id: UID,
     balance: Balance<IOTA>,
     auctions: LinkedTable<Name, Auction>,
 }
 
-/// The Auction application.
+/// The `Auction` application.
 #[allow(lint(coin_field))]
 public struct Auction has store {
     name: Name,
@@ -77,7 +77,8 @@ fun init(ctx: &mut TxContext) {
     });
 }
 
-/// Start an auction if it's not started yet; and make the first bid.
+/// Start an auction for a name by placing the first bid.
+/// This will fail if the name is not available or already being auctioned.
 public fun start_auction_and_place_bid(
     self: &mut AuctionHouse,
     iota_names: &mut IotaNames,
@@ -121,13 +122,14 @@ public fun start_auction_and_place_bid(
     self.auctions.push_front(name, auction)
 }
 
-/// #### Notice
 /// Bidders use this function to place a new bid.
 ///
-/// Panics
-/// Panics if `name` is invalid
-/// or there isn't an auction for `name`
-/// or `bid` is too low,
+/// ### Panics
+/// 
+/// Panics if:
+/// - the name is invalid
+/// - there is no auction for the name
+/// - the bid is too low
 public fun place_bid(
     self: &mut AuctionHouse,
     name: String,
@@ -201,11 +203,11 @@ public fun place_bid(
     self.auctions.push_front(name, auction);
 }
 
-/// #### Notice
-/// Auction winner can come and claim the NFT
+/// Auction winners can use this function to claim the NFT associated with the name.
 ///
-/// Panics
-/// sender is not the winner
+/// ### Panics
+/// 
+/// Panics if the sender is not the winner.
 public fun claim(
     self: &mut AuctionHouse,
     name: String,
@@ -245,11 +247,7 @@ public fun claim(
 
 // === Public Functions ===
 
-/// #### Notice
-/// Get metadata of an auction
-///
-/// #### Params
-/// The name being auctioned.
+/// Get metadata of an auction.
 ///
 /// #### Return
 /// (`start_timestamp_ms`, `end_timestamp_ms`, `current_bidder`, `highest_amount`)
@@ -290,6 +288,11 @@ public fun collect_winning_auction_fund(
 
 // === Admin Functions ===
 
+/// Admin functionality used to withdraw all funds from the auction house.
+/// 
+/// ### Panics
+/// 
+/// Panics if the auction house has no profits.
 public fun admin_withdraw_funds(
     _: &AdminCap,
     self: &mut AuctionHouse,

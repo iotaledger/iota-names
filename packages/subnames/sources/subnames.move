@@ -6,13 +6,13 @@
 ///
 /// This module is responsible for creating subnames and managing their settings.
 ///
-/// It allows the following functionality:
+/// It provides the following functionality:
 ///
 /// 1. Registering a new subname as a holder of Parent NFT.
 /// 2. Setup the subname with capabilities (creating nested names, extending to parent's renewal time).
-/// 3. Registering `leaf` names (whose parent acts as the Capability holder)
-/// 4. Removing `leaf` names
-/// 5. Extending a subname expiration's time
+/// 3. Registering `leaf` names (whose parent acts as the Capability holder).
+/// 4. Removing `leaf` names.
+/// 5. Extending a subname's expiration time.
 /// 6. Burning expired subname NFTs.
 ///
 /// Comments:
@@ -21,7 +21,7 @@
 /// turn off this package completely, and retain the state on a different package's deployment. This is useful
 /// both for effort-less upgradeability and gas savings.
 /// 2. For any `registry_mut` call, we know that if this module is not authorized, we'll get an abort
-/// from the core IotaNames package.
+/// from the core `IotaNames` package.
 ///
 module iota_names_subnames::subnames;
 
@@ -64,7 +64,8 @@ public struct SubnamesAuth has drop {}
 /// The key to store the parent's ID in the subname object.
 public struct ParentKey has copy, drop, store {}
 
-/// Creates a `leaf` subname
+/// Creates a `leaf` subname.
+/// 
 /// A `leaf` subname, is a subname that is managed by the parent's NFT.
 public fun new_leaf(
     iota_names: &mut IotaNames,
@@ -90,6 +91,7 @@ public fun new_leaf(
 }
 
 /// Removes a `leaf` subname from the registry.
+/// 
 /// Management of the `leaf` subname can only be achieved through the parent's valid NFT.
 public fun remove_leaf(
     iota_names: &mut IotaNames,
@@ -111,7 +113,7 @@ public fun remove_leaf(
     });
 }
 
-/// Creates a new `node` subname
+/// Creates a new `node` subname.
 ///
 /// The following script does the following lookups:
 /// 1. Checks if app is authorized.
@@ -124,7 +126,7 @@ public fun remove_leaf(
 ///     2.4 Validates that the subname's expiration timestamp is less or equal to the parents.
 ///     2.5 Checks if this subname already exists. [If it does, it aborts if it's not expired, overrides otherwise]
 ///
-/// It then saves the configuration for that child (manage-able by the parent), and returns the NameRegistration object.
+/// It then saves the configuration for that child (manageable by the parent), and returns the `SubnameRegistration` object.
 public fun new(
     iota_names: &mut IotaNames,
     parent: &NameRegistration,
@@ -138,7 +140,7 @@ public fun new(
     let subname = name::new(subname);
     validation::assert_not_blocked_or_reserved(iota_names, &subname);
     
-    // all validation logic for subname creation / management.
+    // All validation logic for subname creation / management.
     internal_validate_nft_can_manage_subname(iota_names, parent, clock, subname, true);
 
     // Validate that the duration is at least the minimum duration.
@@ -146,7 +148,7 @@ public fun new(
         expiration_timestamp_ms >= clock.timestamp_ms() + app_config(iota_names).minimum_duration(),
         EInvalidExpirationDate,
     );
-    // validate that the requested expiration timestamp is not greater than the parent's one.
+    // Validate that the requested expiration timestamp is not greater than the parent's one.
     assert!(expiration_timestamp_ms <= parent.expiration_timestamp_ms(), EInvalidExpirationDate);
 
     // We register the subname (e.g. `subname.example.iota`) and return the NameRegistration object.
@@ -211,7 +213,7 @@ public fun extend_expiration(
     let existing_name_record = registry.lookup(subname);
     let parent_name_record = registry.lookup(parent_name);
 
-    // we need to make sure this name record exists (both child + parent), otherwise we don't have a valid object.
+    // We need to make sure this name record exists (both child + parent), otherwise we don't have a valid object.
     assert!(
         option::is_some(&existing_name_record) && option::is_some(&parent_name_record),
         ESubnameReplaced,
@@ -221,9 +223,9 @@ public fun extend_expiration(
     // (to prevent cases where owner of the parent changed. When that happens, subnames lose all abilities to renew / create subnames)
     assert!(parent(nft) == option::borrow(&parent_name_record).nft_id(), EParentChanged);
 
-    // validate that expiration date is > than the current.
+    // Validate that expiration date is > than the current.
     assert!(expiration_timestamp_ms > nft.expiration_timestamp_ms(), EInvalidExpirationDate);
-    // validate that the requested expiration timestamp is not greater than the parent's one.
+    // Validate that the requested expiration timestamp is not greater than the parent's one.
     assert!(
         expiration_timestamp_ms <= option::borrow(&parent_name_record).expiration_timestamp_ms(),
         EInvalidExpirationDate,
@@ -248,13 +250,13 @@ public fun edit_setup(
     allow_creation: bool,
     allow_time_extension: bool,
 ) {
-    // validate that parent is a valid, non expired object.
+    // Validate that parent is a valid, non expired object.
     registry(iota_names).assert_nft_is_authorized(parent, clock);
 
     let parent_name = parent.name();
     let subname = name::new(subname);
 
-    // validate that the subname is valid for the supplied parent
+    // Validate that the subname is valid for the supplied parent
     // (as well as it is valid in label length, total length, depth, etc).
     config::assert_is_valid_subname(&parent_name, &subname, app_config(iota_names));
 
@@ -279,13 +281,14 @@ public fun burn(iota_names: &mut IotaNames, nft: SubnameRegistration, clock: &Cl
     });
 }
 
-/// Parent ID of a subname
+/// Returns the parent ID of a subname.
 public fun parent(subname: &NameRegistration): ID {
     *df::borrow(subname.uid(), ParentKey {})
 }
 
-// Sets/removes a (key,value) on the name's NameRecord metadata (depending on cases).
-// Validation needs to happen on the calling function.
+/// Sets/removes a (key,value) on the name's NameRecord metadata (depending on cases).
+/// 
+/// Validation needs to happen on the calling function.
 fun internal_set_flag(self: &mut IotaNames, subname: Name, key: String, enable: bool) {
     let mut config = record_metadata(self, subname);
     let is_enabled = config.contains(&key);
@@ -301,25 +304,25 @@ fun internal_set_flag(self: &mut IotaNames, subname: Name, key: String, enable: 
     registry_mut(self).set_data(subname, config);
 }
 
-/// Check if subname creation is allowed.
+/// Checks if subname creation is allowed.
 fun is_creation_allowed(metadata: &VecMap<String, String>): bool {
     metadata.contains(&subname_allow_creation_key())
 }
 
-/// Check if time extension is allowed.
+/// Checks if time extension is allowed.
 fun is_extension_allowed(metadata: &VecMap<String, String>): bool {
     metadata.contains(&subname_allow_extension_key())
 }
 
-/// Get the name record's metadata for a subname.
+/// Returns the name record's metadata for a subname.
 fun record_metadata(self: &IotaNames, subname: Name): VecMap<String, String> {
     *registry(self).get_data(subname)
 }
 
-/// Does all the regular checks for validating that a parent `NameRegistration` object
+/// Performs all regular checks for validating that a parent `NameRegistration` object
 /// can operate on a given subname.
 ///
-/// 1. Checks that NFT is authorized.
+/// 1. Checks that the NFT is authorized.
 /// 2. Checks that the parent can create subnames (applies to subname `node` names).
 /// 3. Validates that the subname is valid (accepted TLN, depth, length, is child of given parent, etc).
 fun internal_validate_nft_can_manage_subname(
@@ -343,22 +346,23 @@ fun internal_validate_nft_can_manage_subname(
     config::assert_is_valid_subname(&parent.name(), &subname, app_config(iota_names));
 }
 
-/// Validate whether a `NameRegistration` object is eligible for creating a subname.
-/// 1. If the NFT is authorized (not expired, active)
+/// Validates whether a `NameRegistration` object is eligible for creating a subname.
+/// 
+/// 1. If the NFT is authorized (not expired, active).
 /// 2. If the parent is a subname, check whether it is allowed to create subnames.
 fun internal_assert_parent_can_create_subnames(self: &IotaNames, parent: Name) {
-    // if the parent is not a subname, we can always create subnames.
+    // If the parent is not a subname, we can always create subnames.
     if (!is_subname(&parent)) {
         return
     };
 
-    // if `parent` is a subname. We check the subname config to see if we are allowed to mint subnames.
+    // If `parent` is a subname. We check the subname config to see if we are allowed to mint subnames.
     // For regular names (e.g. example.iota), we can always mint subnames.
-    // if there's no config for this parent, and the parent is a subname, we can't create deeper names.
+    // If there's no config for this parent, and the parent is a subname, we can't create deeper names.
     assert!(is_creation_allowed(&record_metadata(self, parent)), ECreationDisabledForSubname);
 }
 
-/// An internal function to add a subname to the registry with the correct expiration timestamp.
+/// Adds a subname to the registry with the correct expiration timestamp.
 /// It doesn't check whether the expiration is valid. This needs to be checked on the calling function.
 fun internal_create_subname(
     registry: &mut Registry,
@@ -369,10 +373,10 @@ fun internal_create_subname(
     ctx: &mut TxContext,
 ): SubnameRegistration {
     let mut nft = registry.add_record_ignoring_grace_period(subname, 1, clock, ctx);
-    // set the timestamp to the correct one. `add_record` only works with years but we can correct it easily here.
+    // Set the timestamp to the correct one. `add_record` only works with years but we can correct it easily here.
     registry.set_expiration_timestamp_ms(&mut nft, subname, expiration_timestamp_ms);
 
-    // attach the `ParentID` to the NameRegistration, so we validate that the parent who created this subname
+    // Attach the `ParentID` to the NameRegistration, so we validate that the parent who created this subname
     // is the same as the one currently holding the parent name.
     df::add(nft.uid_mut(), ParentKey {}, parent_nft_id);
 

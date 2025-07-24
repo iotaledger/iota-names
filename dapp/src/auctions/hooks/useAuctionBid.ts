@@ -61,10 +61,13 @@ export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
                       name,
                   );
 
-            await transaction.build({
+            const tx = await transaction.build({
                 client: iotaClient,
             });
-            return transaction;
+            return {
+                transaction,
+                builtTx: tx,
+            };
         },
         enabled: enableAuctionBid,
     });
