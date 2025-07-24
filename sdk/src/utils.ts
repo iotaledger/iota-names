@@ -126,26 +126,29 @@ export function validateIotaName(
     return null;
 }
 
-export function validateCoupon(
-    _coupon: Coupon,
-    years: number,
-    length: number,
-    userAddress: string,
-): boolean {
-    hasAvailableClaims(_coupon.rules);
-    isCouponValidForNameYears(_coupon.rules, years);
-    isValidCouponPercentage(_coupon.amount);
-    isCouponValidForNameLength(_coupon.rules, length);
-    isCouponValidForAddress(_coupon.rules, userAddress);
-    isCouponExpired(_coupon.rules);
-    return true;
+export function validateCoupon(coupon: Coupon, years: number, length: number, address?: string) {
+    try {
+        hasAvailableClaims(coupon.rules);
+        isCouponValidForNameYears(coupon.rules, years);
+        isValidCouponPercentage(coupon.amount);
+        isCouponValidForNameLength(coupon.rules, length);
+        isCouponValidForAddress(coupon.rules, address);
+        isCouponExpired(coupon.rules);
+    } catch (error: unknown) {
+        throw new Error(
+            `Coupon '${coupon.couponCode}' validation failed: ${(error as Error)?.message}`,
+        );
+    }
 }
 
-export function validateCoupons(coupons: Coupon[]) {
+export function validateCoupons(
+    coupons: Coupon[],
+    years: number,
+    length: number,
+    address?: string,
+) {
     for (const coupon of coupons) {
-        if (!validateCoupon(coupon)) {
-            throw new Error(`Invalid coupon: ${coupon.couponCode}`);
-        }
+        validateCoupon(coupon, years, length, address);
     }
 }
 

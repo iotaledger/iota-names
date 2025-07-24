@@ -45,7 +45,7 @@ export function isCouponValidForNameLength(
     }
 }
 
-export function isCouponValidForAddress(rules: { user?: string | null }, userAddress: string) {
+export function isCouponValidForAddress(rules: { user?: string | null }, userAddress?: string) {
     if (rules.user && rules.user !== userAddress) {
         throw new Error(INVALID_USER);
     }

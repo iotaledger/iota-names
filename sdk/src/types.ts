@@ -64,6 +64,7 @@ export type BaseParams = {
     coinConfig?: CoinConfig;
     coin: TransactionObjectInput;
     couponCodes?: string[];
+    address?: string;
 };
 
 export type RegistrationParams = BaseParams & {

@@ -474,11 +474,13 @@ export class IotaNamesClient {
         name,
         years,
         isRegistration = true,
+        address,
     }: {
         coupons: Coupon[] | string[];
         name: string;
         years: number;
         isRegistration?: boolean;
+        address?: string;
     }) {
         if (coupons.every((coupon) => typeof coupon === 'string')) {
             const couponPromises = (coupons as string[]).map(async (couponCode) => {
@@ -493,7 +495,7 @@ export class IotaNamesClient {
             coupons = (await Promise.all(couponPromises)) as Coupon[];
         }
 
-        validateCoupons(coupons);
+        validateCoupons(coupons, years, name.length, address);
 
         const standardPrice = await this.calculatePrice({
             name,

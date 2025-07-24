@@ -40,6 +40,7 @@ export class IotaNamesTransaction {
                 name: params.name,
                 years: params.years,
                 isRegistration: true,
+                address: params.address,
             });
 
             for (const couponCode of couponCodes) {
@@ -86,6 +87,7 @@ export class IotaNamesTransaction {
                 name: params.name,
                 years: params.years,
                 isRegistration: false,
+                address: params.address,
             });
 
             for (const couponCode of couponCodes) {
