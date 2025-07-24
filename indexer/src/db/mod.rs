@@ -17,8 +17,8 @@ impl std::str::FromStr for SortOrder {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "asc" => SortOrder::Desc,
-            "desc" => SortOrder::Asc,
+            "asc" => SortOrder::Asc,
+            "desc" => SortOrder::Desc,
             _ => Err(anyhow::anyhow!(
                 "Invalid sort order descriptor. Expected `asc` or `desc`, found `{s}`"
             ))?,
