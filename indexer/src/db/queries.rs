@@ -106,7 +106,7 @@ pub fn get_auctions(
     let mut query = names::table
         .inner_join(bids::table)
         .group_by(names::id)
-        .select((names::name, dsl::max(bids::bid)))
+        .select((Name::as_select(), dsl::max(bids::bid)))
         .limit(page_size as _)
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
@@ -117,16 +117,16 @@ pub fn get_auctions(
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
         (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
         (SortOrder::Asc, AuctionSortBy::Bid) => {
-            query.order((dsl::max(bids::bid).asc(), names::name.asc()))
+            query.order((dsl::max(bids::bid).asc(), names::id.asc()))
         }
         (SortOrder::Desc, AuctionSortBy::Bid) => {
-            query.order((dsl::max(bids::bid).desc(), names::name.desc()))
+            query.order((dsl::max(bids::bid).desc(), names::id.desc()))
         }
     };
     Ok(query
-        .load::<(String, Option<i64>)>(conn)?
+        .load::<(Name, Option<i64>)>(conn)?
         .into_iter()
-        .map(|v| v.0)
+        .map(|(name, _)| name.name)
         .collect())
 }
 
