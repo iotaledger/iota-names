@@ -2,8 +2,6 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Coupon } from './types';
-
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
 const SUBNAME_REGEX = /^(?!-)[a-z0-9-]{1,62}[a-z0-9]$/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
@@ -116,56 +114,4 @@ export function validateIotaName(
         }
     }
     return null;
-}
-
-export function validateCoupons(coupons: Coupon[]) {
-    for (const coupon of coupons) {
-        if (!validateCoupon(coupon)) {
-            throw new Error(`Invalid coupon: ${coupon.couponCode}`);
-        }
-    }
-}
-
-export function validateCoupon(_coupon: Coupon): boolean {
-    // TODO Add coupon validation
-    return true;
-}
-
-export function applyCouponsToPrice(coupons: Coupon[], initialPrice: number): number {
-    if (!coupons || coupons.length === 0) {
-        return initialPrice;
-    }
-
-    let price = initialPrice;
-
-    for (const coupon of coupons) {
-        if (!coupon.rules.can_stack && coupons.length > 1) {
-            throw new Error('Coupons provided cannot be stacked');
-        }
-
-        price = applyCouponToPrice(price, coupon);
-    }
-
-    return price;
-}
-
-export function applyCouponToPrice(price: number, coupon?: Coupon): number {
-    if (!coupon) {
-        return price;
-    }
-
-    const couponAmount = Number(coupon.amount);
-
-    // 0 => percentage off
-    // 1 => fixed amount off,
-    if (coupon.kind === 0) {
-        let discountAmount = (price * couponAmount) / 100;
-        return price - discountAmount;
-    } else if (coupon.kind === 1) {
-        const discountedAmount = price - couponAmount;
-
-        return discountedAmount < 0 ? 0 : discountedAmount;
-    } else {
-        throw new Error(`Unknown coupon kind: ${coupon.kind}`);
-    }
 }

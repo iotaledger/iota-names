@@ -11,6 +11,7 @@ import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
 import { CouponBcs, CouponHouseBcs, DummyFieldBcs, NameBcs } from './bcs.js';
 import { ALLOWED_METADATA, packages } from './constants.js';
+import { applyCouponsToPrice, validateCoupons } from './coupons.js';
 import {
     getConfigType,
     getCoreConfigType,
@@ -29,12 +30,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import {
-    applyCouponsToPrice,
-    isValidIotaName,
-    normalizeIotaName,
-    validateCoupons,
-} from './utils.js';
+import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -474,11 +470,13 @@ export class IotaNamesClient {
         name,
         years,
         isRegistration = true,
+        address,
     }: {
         coupons: Coupon[] | string[];
         name: string;
         years: number;
         isRegistration?: boolean;
+        address?: string;
     }) {
         if (coupons.every((coupon) => typeof coupon === 'string')) {
             const couponPromises = (coupons as string[]).map(async (couponCode) => {
@@ -493,7 +491,7 @@ export class IotaNamesClient {
             coupons = (await Promise.all(couponPromises)) as Coupon[];
         }
 
-        validateCoupons(coupons);
+        validateCoupons(coupons, years, name.length, address);
 
         const standardPrice = await this.calculatePrice({
             name,
