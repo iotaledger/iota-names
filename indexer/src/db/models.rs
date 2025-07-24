@@ -28,15 +28,6 @@ pub struct Bids {
     pub bid: i64,
 }
 
-#[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
-#[diesel(belongs_to(Name))]
-#[diesel(table_name = name_bids)]
-#[diesel(primary_key(name_id))]
-pub struct NameBids {
-    pub name_id: i32,
-    pub bids: i32,
-}
-
 diesel::table! {
     names (id) {
         id -> Int4,
@@ -68,7 +59,5 @@ diesel::table! {
 
 diesel::joinable!(bids -> names (name_id));
 diesel::joinable!(bids -> bidders (bidder_id));
-diesel::joinable!(name_bids -> names (name_id));
 
 diesel::allow_tables_to_appear_in_same_query!(bidders, names, bids);
-diesel::allow_tables_to_appear_in_same_query!(names, name_bids);
