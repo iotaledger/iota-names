@@ -10,29 +10,27 @@ import { useState } from 'react';
 
 type Props = {
     coupons: string[];
-    setCoupons: (coupons: string[]) => void;
+    addCoupon: (code: string) => Promise<void>;
 };
 
-export function CouponInput({ coupons, setCoupons: onChange }: Props) {
-    const [coupon, setCoupon] = useState('');
+export function CouponsWrapper({ coupons, addCoupon: onAddCoupon }: Props) {
+    const [coupon, setCoupon] = useState<string>('');
 
-    function addCoupon() {
-        if (!coupon.trim()) return;
-        if (coupons.includes(coupon.trim())) return;
-        onChange([...coupons, coupon.trim()]);
+    async function addCoupon() {
+        const trimmedCoupon = coupon.trim();
+        if (!trimmedCoupon || coupons.includes(trimmedCoupon)) return;
+        await onAddCoupon(trimmedCoupon);
         setCoupon('');
     }
 
     return (
-        <div className={clsx('flex flex-col', coupons.length > 0 ? 'gap-y-sm' : 'mt-sm')}>
+        <div className={clsx('flex flex-col mt-sm', coupons.length && 'gap-y-sm')}>
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
                 {coupons.map((coupon) => (
                     <Chip
                         key={coupon}
                         label={coupon}
-                        onClick={() =>
-                            onChange(coupons.filter((newCoupon) => newCoupon !== coupon))
-                        }
+                        onClick={() => onAddCoupon(coupon)}
                         trailingElement={<Close />}
                         size={ChipSize.Small}
                     />
@@ -41,7 +39,9 @@ export function CouponInput({ coupons, setCoupons: onChange }: Props) {
 
             <div className="flex flex-col items-start gap-y-sm">
                 <Input
-                    placeholder="Enter coupons here"
+                    placeholder={
+                        coupons.length === 0 ? 'Enter a coupon code' : 'Add an extra coupon'
+                    }
                     type={InputType.Text}
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
@@ -49,11 +49,11 @@ export function CouponInput({ coupons, setCoupons: onChange }: Props) {
                     onClearInput={() => setCoupon('')}
                 />
                 <ButtonUnstyled
-                    className="text-label-md bg-names-gradient-primary bg-clip-text text-transparent cursor-pointer"
+                    className="text-label-md bg-names-gradient-primary bg-clip-text text-transparent"
                     onClick={addCoupon}
                     disabled={!coupon.trim()}
                 >
-                    + Apply New Coupon
+                    + Apply Coupon
                 </ButtonUnstyled>
             </div>
         </div>

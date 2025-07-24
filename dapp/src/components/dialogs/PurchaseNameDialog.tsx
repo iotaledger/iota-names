@@ -41,7 +41,7 @@ import {
 import { formatNanosToIota } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
-import { CouponInput } from '../CouponInput';
+import { CouponsWrapper } from '../CouponsWrapper';
 
 type PurchaseNameProps = {
     name: string;
@@ -187,6 +187,41 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         }
     }, [updateNameError]);
 
+    const [discountedPrice, setDiscountedPrice] = useState(balanceValidation?.totalPrice);
+
+    useEffect(() => {
+        if (!applyCoupons || coupons.length === 0) {
+            setDiscountedPrice(balanceValidation?.totalPrice);
+            return;
+        }
+        iotaNamesClient
+            .calculateDiscountedPrice({
+                coupons,
+                name,
+                years: renewYears,
+                isRegistration: true,
+            })
+            .then(setDiscountedPrice)
+            .catch(() => setDiscountedPrice(balanceValidation?.totalPrice));
+    }, [applyCoupons, coupons, renewYears, balanceValidation?.totalPrice]);
+
+    async function handleAddCoupon(coupon: string) {
+        if (coupons.includes(coupon)) {
+            setCoupons((currentCoupons) =>
+                currentCoupons.filter((existingCoupon) => existingCoupon !== coupon),
+            );
+            return;
+        }
+
+        try {
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
+            if (!resolvedCoupon) throw new Error();
+            setCoupons((currentCoupons) => [...currentCoupons, coupon]);
+        } catch {
+            toast.error('Invalid coupon');
+        }
+    }
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -219,7 +254,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponInput coupons={coupons} setCoupons={setCoupons} />
+                                    <CouponsWrapper coupons={coupons} addCoupon={handleAddCoupon} />
                                 )}
                             </div>
                             {!hasEnoughGas && (
@@ -228,33 +263,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     supportingText={
                                         GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
                                     }
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
-                            {purchaseError && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={purchaseError.message}
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
-                            {nameRecordError && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={nameRecordError.message}
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
-                            {hasEnoughGas && updateNameError && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={updateNameError.message}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
@@ -280,8 +288,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                         !isLoading &&
                                         balanceValidation &&
                                         typeof balanceValidation?.totalPrice === 'number' &&
-                                        balanceValidation.totalPrice > 0 ? (
-                                            formatNanosToIota(balanceValidation.totalPrice)
+                                        balanceValidation.totalPrice > 0 &&
+                                        discountedPrice ? (
+                                            formatNanosToIota(discountedPrice)
                                         ) : (
                                             <LoadingIndicator />
                                         )
