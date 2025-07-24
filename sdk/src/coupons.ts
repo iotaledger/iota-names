@@ -15,7 +15,10 @@ export function validateCoupon(coupon: Coupon, years: number, length: number, ad
     try {
         hasAvailableClaims(coupon.rules);
         isCouponValidForNameYears(coupon.rules, years);
-        isValidCouponPercentage(coupon.amount);
+        // Percentage off coupon
+        if (coupon.kind === 0) {
+            isValidCouponPercentage(coupon.amount);
+        }
         isCouponValidForNameLength(coupon.rules, length);
         isCouponValidForAddress(coupon.rules, address);
         isCouponExpired(coupon.rules);
