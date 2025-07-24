@@ -31,6 +31,7 @@ const envVars = {
     IOTA_NAMES_AUCTION_PACKAGE_ADDRESS: json.auctionPackageId,
     IOTA_NAMES_COUPONS_PACKAGE_ADDRESS: json.couponsPackageId,
     IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS: json.subnamesPackageId,
+    IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS: json.tempSubnameProxyPackageId,
     IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID: json.auctionHouseObjectId,
 };
 
