@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const LABEL_REGEX = /(?!-)[a-z0-9-]{0,62}[a-z0-9]/;
+const SUBNAME_REGEX = /^(?!-)[a-z0-9-]{1,62}[a-z0-9]$/;
 const PATH_REGEX = new RegExp(`(?:${LABEL_REGEX.source}(?:\\.${LABEL_REGEX.source})*)`);
 const NAME_AT_REGEX = new RegExp(`^(${PATH_REGEX.source})?@${LABEL_REGEX.source}$`);
 const NAME_DOT_REGEX = new RegExp(`^(?:${LABEL_REGEX.source}\\.)+(iota)$`);
@@ -16,10 +17,23 @@ export function isValidIotaName(name: string): boolean {
     return NAME_AT_REGEX.test(name) || NAME_DOT_REGEX.test(name);
 }
 
-export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): string {
+const LONG_NAMES_TRUNCATE_LENGTH = 11;
+const CHARACTERS_TO_SHOW = 6;
+
+interface NormalizeOptions {
+    onlyFirstSubname?: boolean;
+    truncateLongParts?: boolean;
+}
+
+export function normalizeIotaName(
+    name: string,
+    format: 'at' | 'dot' = 'at',
+    { onlyFirstSubname, truncateLongParts }: NormalizeOptions = {},
+): string {
     const lowerCase = name.toLowerCase();
     let parts;
 
+    // Split in parts
     if (NAME_AT_REGEX.test(lowerCase)) {
         let [path, name] = lowerCase.split('@');
         parts = [...(path ? path.split('.') : []), name];
@@ -29,11 +43,52 @@ export function normalizeIotaName(name: string, format: 'at' | 'dot' = 'at'): st
         throw new Error(`Invalid IOTA name "${name}"`);
     }
 
-    if (format === 'dot') {
-        return `${parts.join('.')}.iota`;
-    } else {
-        return `${parts.slice(0, -1).join('.')}@${parts[parts.length - 1]}`;
+    // Only select the first subname if desired
+    let subnames = onlyFirstSubname
+        ? [
+              // First name from the left (e.g yes.no.no.no.iota)
+              parts[0],
+              parts.length > 2 ? (format === 'dot' ? '.' : '..') : '',
+          ].filter(Boolean)
+        : parts.slice(0, -1);
+    let parentName = parts[parts.length - 1];
+
+    if (truncateLongParts) {
+        subnames = subnames.map((s) => {
+            return s.length > LONG_NAMES_TRUNCATE_LENGTH
+                ? `${s.slice(0, CHARACTERS_TO_SHOW)}...${s.slice(-CHARACTERS_TO_SHOW)}`
+                : s;
+        });
+
+        parentName =
+            parentName.length > LONG_NAMES_TRUNCATE_LENGTH
+                ? `${parentName.slice(0, CHARACTERS_TO_SHOW)}...${parentName.slice(-CHARACTERS_TO_SHOW)}`
+                : parentName;
     }
+
+    // Construct name
+    if (format === 'dot') {
+        return `${[...subnames, parentName].join('.')}.iota`;
+    } else {
+        return `${subnames.join('.')}@${parentName}`;
+    }
+}
+
+export function validateIotaSubname(
+    name: string,
+    minLength: number = 3,
+    maxLength: number = 64,
+): string | null {
+    if (!name) return null;
+    const lowerCase = name.toLowerCase();
+
+    if (!SUBNAME_REGEX.test(lowerCase)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
+    }
+    if (name.length < minLength || name.length > maxLength) {
+        return `Name must be ${minLength}-${maxLength} characters long`;
+    }
+    return null;
 }
 
 export function validateIotaName(
