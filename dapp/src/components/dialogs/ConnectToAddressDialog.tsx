@@ -23,18 +23,22 @@ import {
     InputType,
     LoadingIndicator,
     Panel,
+    TooltipPosition,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ChangeEvent, useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
+
+import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface ConnectToAddressDialogProps {
     name: string;
@@ -124,6 +128,18 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
+            if (editTargetAddress.length === 0) {
+                toast.success(`Successfully disconnected ${cleanName}`);
+                setOpen(false);
+            } else if (editTargetAddress !== account?.address) {
+                toast.success(
+                    `Successfully connected ${cleanName} to address ${formatAddress(editTargetAddress)}`,
+                );
+                setOpen(false);
+            }
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
@@ -166,19 +182,27 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                             {isSuccess ? (
                                 <div className="flex flex-col gap-y-md items-center text-center">
                                     <div className="flex flex-col items-center gap-y-sm">
-                                        <span className="text-title-lg text-names-neutral-100">
-                                            {normalizeIotaName(name)}
-                                        </span>
+                                        {editIsDefaultName ? (
+                                            <span className="text-title-lg text-names-neutral-100">
+                                                {cleanName}
+                                            </span>
+                                        ) : null}
                                         <Chip
                                             leadingElement={<Link className="w-4 h-4" />}
                                             label={formatAddress(account?.address || '')}
                                             trailingElement={<Copy className="w-4 h-4" />}
                                             onClick={copyAddressToClipboard}
-                                            type={ChipType.Success}
+                                            type={
+                                                editIsDefaultName
+                                                    ? ChipType.Success
+                                                    : ChipType.Elevated
+                                            }
                                         />
                                     </div>
                                     <span className="text-body-md text-names-neutral-70">
-                                        Address linked successfully
+                                        {editIsDefaultName
+                                            ? 'Address linked successfully'
+                                            : `${cleanName} is no longer linked to an address`}
                                     </span>
                                 </div>
                             ) : (
@@ -189,7 +213,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         </span>
                                         <Input
                                             type={InputType.Text}
-                                            label={`Select a target address to connect to @${cleanName}`}
+                                            label={`Select a target address to connect to ${cleanName}`}
                                             placeholder="Enter Address"
                                             value={editTargetAddress}
                                             onChange={handleAddressChange}
@@ -259,7 +283,12 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100">
-                                                            {cleanName}
+                                                            <TruncatedNameWithTooltip
+                                                                name={name}
+                                                                tooltipPosition={
+                                                                    TooltipPosition.Top
+                                                                }
+                                                            />
                                                         </span>
                                                         <Chip
                                                             label={formatAddress(

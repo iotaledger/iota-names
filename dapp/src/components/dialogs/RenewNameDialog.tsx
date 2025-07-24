@@ -25,6 +25,7 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
@@ -150,6 +151,10 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
+            toast.success('Name renewed successfully');
+        },
+        onError(error) {
+            toast.error(error.message);
         },
     });
 

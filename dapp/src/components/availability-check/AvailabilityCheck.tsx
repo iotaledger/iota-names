@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Close, Search } from '@iota/apps-ui-icons';
+import { Close } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -14,7 +14,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
@@ -30,6 +30,8 @@ interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
     onCompleted?: () => void;
 }
+
+const DEBOUNCE_DELAY = 500;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const [searchValue, setSearchValue] = useState<string>('');
@@ -61,8 +63,23 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     );
 
     const handleSearch = useCallback(() => {
-        if (searchValue) setName(`${searchValue}.iota`);
-    }, [searchValue]);
+        if (searchValue && !validationError) setName(`${searchValue}.iota`);
+    }, [searchValue, validationError]);
+
+    useEffect(() => {
+        if (!searchValue || validationError) {
+            return;
+        }
+
+        const timer = window.setTimeout(() => {
+            setName((current) => {
+                const newName = `${searchValue}.iota`;
+                return current === newName ? current : newName;
+            });
+        }, DEBOUNCE_DELAY);
+
+        return () => window.clearTimeout(timer);
+    }, [searchValue, validationError]);
 
     function handleInputChange(inputValue: string) {
         setSearchValue(denormalizeName(inputValue));
@@ -81,7 +98,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         auctionError?.message || nameError?.message || priceError?.message || validationError || '';
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const enableSearch = Boolean(searchValue) && !errorMessage;
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
@@ -96,13 +112,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                     <Close />
                 </ButtonUnstyled>
             )}
-            <ButtonUnstyled
-                className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100 disabled:opacity-40"
-                disabled={!enableSearch}
-                onClick={handleSearch}
-            >
-                <Search className="text-black" />
-            </ButtonUnstyled>
         </div>
     );
 

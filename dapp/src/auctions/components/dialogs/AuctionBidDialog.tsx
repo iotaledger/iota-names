@@ -29,12 +29,19 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
+import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
+import {
+    GAS_BALANCE_TOO_LOW_ID,
+    GAS_BUDGET_ERROR_MESSAGES,
+    INSUFFICIENT_COIN_BALANCE_ID,
+    NOT_ENOUGH_BALANCE_ID,
+} from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -76,11 +83,17 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         data: auctionBidTransaction,
         isLoading: isAuctionBidLoading,
         isPending: isAuctionBidPending,
-        error,
+        error: auctionError,
     } = useAuctionBid({
         name,
         bidNanos: bidNanos ?? BigInt(0),
     });
+
+    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
+        auctionBidTransaction?.builtTx ?? null,
+        Number(bidNanos),
+    );
+
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -99,10 +112,24 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+            toast.success(
+                `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
+                    formatRounded: false,
+                    showIotaSymbol: true,
+                })} on ${normalizeIotaName(name)}`,
+            );
             closeDialog();
             onCompleted?.();
         },
+        onError(err) {
+            toast.error(err.message);
+        },
     });
+
+    const hasEnoughGas =
+        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
+        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
@@ -114,7 +141,12 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum;
+    const disablePlaceBid =
+        isPending ||
+        isLoading ||
+        isBidBelowMinimum ||
+        !balanceValidation?.hasBalance ||
+        !hasEnoughGas;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -143,8 +175,12 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (error) {
-            return error.message;
+        } else if (!hasEnoughGas) {
+            return GAS_BUDGET_ERROR_MESSAGES[NOT_ENOUGH_BALANCE_ID];
+        } else if (auctionError) {
+            return auctionError.message;
+        } else if (balanceValidationError) {
+            return balanceValidationError.message;
         }
     })();
 
@@ -193,7 +229,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 </div>
                             )}
                             <Input
-                                type={InputType.Number}
+                                type={InputType.NumericFormat}
                                 label="Your Bid"
                                 min={Number(minBidNanos)}
                                 value={bidAmountValue}
@@ -226,7 +262,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     text={auctionMetadata ? 'Bid' : 'Start auction'}
                                     onClick={() => {
                                         if (auctionBidTransaction) {
-                                            handleConfirm(auctionBidTransaction);
+                                            handleConfirm(auctionBidTransaction.transaction);
                                         }
                                     }}
                                     fullWidth
