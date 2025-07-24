@@ -84,6 +84,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             years: renewYears,
             setDefault: isDisplayName,
             couponCodes: coupons,
+            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
         });
     }
 
@@ -140,10 +141,29 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
           }))
         : [];
 
+    const [discountedPrice, setDiscountedPrice] = useState(price);
+
+    useEffect(() => {
+        if (!applyCoupons || coupons.length === 0) {
+            setDiscountedPrice(price);
+            return;
+        }
+        iotaNamesClient
+            .calculateDiscountedPrice({
+                coupons,
+                name,
+                years: renewYears,
+                isRegistration: true,
+            })
+            .then(setDiscountedPrice)
+            .catch(() => setDiscountedPrice(price));
+    }, [applyCoupons, coupons, renewYears, price]);
+
     const totalBalance = Number(coinBalance?.totalBalance) || 0;
     const totalGas = Number(updateNameData?.gasSummary?.totalGas) || 0;
-    const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
-    const hasBalance = totalBalance > totalPrice;
+    const totalPrice = nameRecordData?.type === 'available' ? discountedPrice : 0;
+    const totalDue = discountedPrice + totalGas;
+    const hasBalance = totalBalance > totalDue;
 
     const hasEnoughGas =
         !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
@@ -161,24 +181,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const cleanName = denormalizeName(name);
 
     const expirationDate = getTargetExpirationDate(renewYears);
-
-    const [discountedPrice, setDiscountedPrice] = useState<number>(price);
-
-    useEffect(() => {
-        if (coupons.length === 0) {
-            setDiscountedPrice(price + totalGas);
-            return;
-        }
-        iotaNamesClient
-            .calculateDiscountedPrice({
-                coupons,
-                name,
-                years: renewYears,
-                isRegistration: true,
-            })
-            .then((p) => setDiscountedPrice(p + totalGas))
-            .catch(() => setDiscountedPrice(price + totalGas));
-    }, [coupons, renewYears, price, totalGas]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -207,11 +209,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     <Toggle
                                         isToggled={applyCoupons}
                                         onChange={setApplyCoupons}
-                                        label="Apply Coupon"
+                                        label="Add Coupons"
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponInput coupons={coupons} onChange={setCoupons} />
+                                    <CouponInput coupons={coupons} setCoupons={setCoupons} />
                                 )}
                             </div>
                         </div>

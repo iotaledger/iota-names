@@ -5,16 +5,15 @@
 
 import { Close } from '@iota/apps-ui-icons';
 import { ButtonUnstyled, Chip, ChipSize, Input, InputType } from '@iota/apps-ui-kit';
-import { Coupon } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 import { useState } from 'react';
 
 type Props = {
-    coupons: Coupon[];
-    onChange: (coupons: Coupon[]) => void;
+    coupons: string[];
+    setCoupons: (coupons: string[]) => void;
 };
 
-export function CouponInput({ coupons, onChange }: Props) {
+export function CouponInput({ coupons, setCoupons: onChange }: Props) {
     const [coupon, setCoupon] = useState('');
 
     function addCoupon() {
@@ -42,7 +41,7 @@ export function CouponInput({ coupons, onChange }: Props) {
 
             <div className="flex flex-col items-start gap-y-sm">
                 <Input
-                    placeholder="Enter a coupon"
+                    placeholder="Enter coupons here"
                     type={InputType.Text}
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
@@ -50,11 +49,11 @@ export function CouponInput({ coupons, onChange }: Props) {
                     onClearInput={() => setCoupon('')}
                 />
                 <ButtonUnstyled
-                    className="text-label-md bg-names-gradient-primary bg-clip-text text-transparent"
+                    className="text-label-md bg-names-gradient-primary bg-clip-text text-transparent cursor-pointer"
                     onClick={addCoupon}
                     disabled={!coupon.trim()}
                 >
-                    + New Coupon
+                    + Apply New Coupon
                 </ButtonUnstyled>
             </div>
         </div>
