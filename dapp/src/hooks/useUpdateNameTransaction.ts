@@ -61,6 +61,7 @@ export type NameUpdate =
           name: string;
           nftId: string;
           years: number;
+          address?: string;
           couponCodes?: string[];
       }
     | {
@@ -74,6 +75,7 @@ export type NameUpdate =
           price: number;
           years: number;
           setDefault: boolean;
+          address?: string;
           couponCodes?: string[];
       };
 
@@ -140,6 +142,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             name: update.name,
                             years: update.years,
                             coin: tx.gas,
+                            address: update.address,
                             couponCodes: update.couponCodes,
                         });
                         break;
@@ -155,6 +158,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             name: update.name,
                             years: update.years,
                             coin,
+                            address: update.address,
                             couponCodes: update.couponCodes,
                         });
                         if (update.setDefault) {

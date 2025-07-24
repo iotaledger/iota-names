@@ -86,7 +86,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             price: price,
             years: renewYears,
             setDefault: isDisplayName,
-            couponCodes: coupons,
+            address: account?.address,
             ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
         });
     }
