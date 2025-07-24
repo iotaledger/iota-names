@@ -54,9 +54,9 @@ export function isCouponValidForAddress(rules: { user?: string | null }, userAdd
 // TODO: make sure both timestamps are the same units (seconds vs milliseconds)
 export function isCouponExpired(
     rules: { expiration?: string | null },
-    currentTimestamp: number = Date.now(),
+    currentTimestamp: string = Date.now().toString(),
 ) {
-    if (rules.expiration && currentTimestamp <= Number(rules.expiration)) {
+    if (rules.expiration && Number(currentTimestamp) > Number(rules.expiration)) {
         throw new Error(COUPON_EXPIRED);
     }
 }
