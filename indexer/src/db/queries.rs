@@ -48,11 +48,13 @@ pub fn create_bidder_name_relationship(
     conn: &mut SqliteConnection,
     bidder_id: i32,
     name_id: i32,
+    bid: u64,
 ) -> Result<()> {
     insert_into(bidder_name::table)
         .values((
             bidder_name::bidder_id.eq(bidder_id),
             bidder_name::name_id.eq(name_id),
+            bidder_name::bid.eq(bid as f64),
         ))
         .on_conflict_do_nothing()
         .execute(conn)?;
@@ -63,10 +65,11 @@ pub fn add_bidder_name_entry(
     conn: &mut SqliteConnection,
     bidder_address: &str,
     name_str: &str,
+    bid: u64,
 ) -> Result<()> {
     let bidder = get_or_create_bidder(conn, bidder_address)?;
     let name = get_or_create_name(conn, name_str)?;
-    create_bidder_name_relationship(conn, bidder.id, name.id)
+    create_bidder_name_relationship(conn, bidder.id, name.id, bid)
 }
 
 pub fn get_names_for_bidder_address(
@@ -102,8 +105,9 @@ pub fn get_auctions(
     search: Option<String>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
-        .inner_join(name_bids::table)
-        .select(names::name)
+        .inner_join(bidder_name::table)
+        .group_by(names::id)
+        .select((names::name, diesel::dsl::max(bidder_name::bid)))
         .limit(page_size as _)
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
@@ -113,10 +117,14 @@ pub fn get_auctions(
     query = match (sort, sort_by) {
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
         (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
-        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(name_bids::bids.asc()),
-        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(name_bids::bids.desc()),
+        (SortOrder::Asc, AuctionSortBy::Bid) => query.order(bidder_name::bid.asc()),
+        (SortOrder::Desc, AuctionSortBy::Bid) => query.order(bidder_name::bid.desc()),
     };
-    Ok(query.load(conn)?)
+    Ok(query
+        .load::<(String, Option<f64>)>(conn)?
+        .into_iter()
+        .map(|v| v.0)
+        .collect())
 }
 
 pub fn upsert_name_bids_entry(conn: &mut SqliteConnection, name_str: &str) -> Result<()> {

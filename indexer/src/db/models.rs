@@ -25,6 +25,7 @@ pub struct Bidder {
 pub struct BidderName {
     pub bidder_id: i32,
     pub name_id: i32,
+    pub bid: f64,
 }
 
 #[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
@@ -54,6 +55,7 @@ diesel::table! {
     bidder_name (bidder_id, name_id) {
         bidder_id -> Int4,
         name_id -> Int4,
+        bid -> Float8,
     }
 }
 
