@@ -75,7 +75,7 @@ describe('validateCoupon', () => {
         );
     });
 
-    test('should pass if years are withing range', () => {
+    test('should pass if years are within range', () => {
         const coupon = mockCoupon({
             kind: 1,
             amount: '1000',
