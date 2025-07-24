@@ -14,8 +14,8 @@ const INVALID_USER = 'Coupon address does not match.';
 const COUPON_EXPIRED = 'Coupon has expired.';
 const INVALID_AVAILABLE_CLAIMS = 'Number of claims cannot be zero.';
 
-const DEFAULT_YEARS_RENEWAL = 1;
-const DEFAULT_NAME_LEN = 5;
+const DEFAULT_YEARS = 1;
+const DEFAULT_LENGTH = 5;
 
 function mockCoupon(config: {
     kind: 1 | 0;
@@ -42,323 +42,225 @@ function mockCoupon(config: {
     };
 }
 
-describe('Single', () => {
-    describe('validate available claims', () => {
-        test('check if it has available claims', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+describe('validateCoupon', () => {
+    test('should pass if there are available claims', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
         });
-        test('check if it has available claims when null', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: null,
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
-        });
-        test('throw error if no available claims', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '10000',
-                available_claims: '0',
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_AVAILABLE_CLAIMS,
-            );
-        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
     });
-});
 
-describe('Single', () => {
-    describe('validate coupon for name years', () => {
-        test('check range of years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 1, to: 3 },
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+    test('should pass if available claims is undefined/null', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: null,
         });
-
-        test('check range of null years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: null,
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
-        });
-
-        test('check invalid upper range of years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 1, to: 3 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_YEARS,
-            );
-        });
-        test('check invalid lower range of years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 1, to: 3 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_YEARS,
-            );
-        });
-        test('check fixed number of years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 2, to: 2 },
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
-        });
-        test('check invalid upper fixed years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 2, to: 2 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_YEARS,
-            );
-        });
-        test('check invalid lower fixed years', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                years: { from: 2, to: 2 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_YEARS,
-            );
-        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
     });
-});
 
-describe('Single', () => {
-    describe('validate coupon percentage', () => {
-        test('valid percentage', () => {
-            const coupon = mockCoupon({
-                kind: 0,
-                amount: '50',
-                available_claims: '1',
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+    test('should throw error if no available claims', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '10000',
+            available_claims: '0',
         });
-
-        test('invalid over than 100 percentage', () => {
-            const coupon = mockCoupon({
-                kind: 0,
-                amount: '500',
-                available_claims: '1',
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_PERCENTAGE,
-            );
-        });
-        test('invalid 0 percentage', () => {
-            const coupon = mockCoupon({
-                kind: 0,
-                amount: '0',
-                available_claims: '1',
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_PERCENTAGE,
-            );
-        });
-        test('invalid negative percentage', () => {
-            const coupon = mockCoupon({
-                kind: 0,
-                amount: '-50',
-                available_claims: '1',
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_PERCENTAGE,
-            );
-        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(
+            INVALID_AVAILABLE_CLAIMS,
+        );
     });
-});
 
-describe('Single', () => {
-    describe('validate coupon length', () => {
-        test('check valid length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 3, to: 5 },
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
-        });
-        test('check null length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: null,
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
-        });
-        test('check invalid upper range of length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 3, to: 5 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_FOR_NAME_LENGTH,
-            );
-        });
-        test('check invalid lower range of length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 3, to: 5 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_FOR_NAME_LENGTH,
-            );
-        });
-        test('check valid fixed length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 2, to: 2 },
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+    test('should pass if years are withing range', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            years: { from: 1, to: 3 },
         });
 
-        test('check invalid upper fixed length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 2, to: 2 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_FOR_NAME_LENGTH,
-            );
-        });
-        test('check invalid lower range of length', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                length: { from: 2, to: 2 },
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                INVALID_FOR_NAME_LENGTH,
-            );
-        });
+        expect(() => validateCoupon(coupon, 1, DEFAULT_LENGTH)).not.toThrow();
+        expect(() => validateCoupon(coupon, 3, DEFAULT_LENGTH)).not.toThrow();
     });
-});
 
-describe('Single', () => {
-    describe('validate coupon user address', () => {
-        test('check a valid user', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                user: '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
-            });
-            const result = validateCoupon(
+    test('should pass if years rule is undefined/null', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            years: null,
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
+    });
+
+    test('should throw error when outside the year range (over)', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            years: { from: 1, to: 3 },
+        });
+        expect(() => validateCoupon(coupon, 4, DEFAULT_LENGTH)).toThrow(INVALID_YEARS);
+    });
+
+    test('should throw error when outside the year range (under)', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            years: { from: 2, to: 4 },
+        });
+        expect(() => validateCoupon(coupon, 1, DEFAULT_LENGTH)).toThrow(INVALID_YEARS);
+    });
+
+    test('should pass with percentage coupon', () => {
+        const coupon = mockCoupon({
+            kind: 0,
+            amount: '50',
+            available_claims: '1',
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
+    });
+
+    test('should throw an error with invalid percentage', () => {
+        const coupon500 = mockCoupon({
+            kind: 0,
+            amount: '500',
+            available_claims: '1',
+        });
+        const coupon0 = mockCoupon({
+            kind: 0,
+            amount: '0',
+            available_claims: '1',
+        });
+        const couponNegative = mockCoupon({
+            kind: 0,
+            amount: '-50',
+            available_claims: '1',
+        });
+        expect(() => validateCoupon(coupon500, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(
+            INVALID_PERCENTAGE,
+        );
+        expect(() => validateCoupon(coupon0, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(
+            INVALID_PERCENTAGE,
+        );
+        expect(() => validateCoupon(couponNegative, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(
+            INVALID_PERCENTAGE,
+        );
+    });
+
+    test('should pass if length is within range', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            length: { from: 3, to: 5 },
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 3)).not.toThrow();
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 4)).not.toThrow();
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 5)).not.toThrow();
+    });
+
+    test('should pass if length is not defined', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            length: null,
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 3)).not.toThrow();
+    });
+
+    test('should throw error when length is outside rules range', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            length: { from: 4, to: 6 },
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 3)).toThrow(INVALID_FOR_NAME_LENGTH);
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, 7)).toThrow(INVALID_FOR_NAME_LENGTH);
+    });
+
+    test('should pass if user address is correct', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            user: '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
+        });
+        expect(() =>
+            validateCoupon(
                 coupon,
-                DEFAULT_YEARS_RENEWAL,
-                DEFAULT_NAME_LEN,
-                '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
-            );
-            expect(result).toBe(undefined);
-        });
-        test('check a null user', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                user: null,
-            });
-            const result = validateCoupon(
-                coupon,
-                DEFAULT_YEARS_RENEWAL,
-                DEFAULT_NAME_LEN,
-                '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
-            );
-            expect(result).toBe(undefined);
-        });
-        test('check a invalid user', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '10000',
-                available_claims: '0',
-                user: '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
-            });
-            expect(() =>
-                validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN, '0x123abc'),
-            ).toThrow(INVALID_USER);
-        });
-    });
-});
+                DEFAULT_YEARS,
+                DEFAULT_LENGTH,
 
-describe('Single', () => {
-    describe('validate expired coupons', () => {
-        test('check a non expired coupon', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                expiration: (Date.now() + 100000).toString(),
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+                '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
+            ),
+        ).not.toThrow();
+    });
+
+    test('should pass if user address is undefined/null', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            user: null,
         });
-        test('check a null expired coupon', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '1000',
-                available_claims: '1',
-                expiration: null,
-            });
-            const result = validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN);
-            expect(result).toBe(undefined);
+        expect(() =>
+            validateCoupon(
+                coupon,
+                DEFAULT_YEARS,
+                DEFAULT_LENGTH,
+                '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
+            ),
+        ).not.toThrow();
+    });
+
+    test('should throw an error if user is not a match', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '10000',
+            available_claims: '1',
+            user: '0xd17a0271bb4ae0a12af1a6d458805b6220603bb73a025d8da6d5c4cc848395e1',
         });
-        test('check an expired coupon', () => {
-            const coupon = mockCoupon({
-                kind: 1,
-                amount: '10000',
-                available_claims: '0',
-                expiration: (Date.now() - 100000).toString(),
-            });
-            expect(() => validateCoupon(coupon, DEFAULT_YEARS_RENEWAL, DEFAULT_NAME_LEN)).toThrow(
-                COUPON_EXPIRED,
-            );
+        expect(() =>
+            validateCoupon(
+                coupon,
+                DEFAULT_YEARS,
+                DEFAULT_LENGTH,
+                '0x8a1bf46b9c1fee6864c7c2366f381101c369a91b1060ee6af92f49804a9792d5',
+            ),
+        ).toThrow(INVALID_USER);
+    });
+
+    test('should pass if the coupon is not expired', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            expiration: (Date.now() + 100000).toString(),
         });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
+    });
+
+    test('should pass if the coupon expiration is undefined/null', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '1000',
+            available_claims: '1',
+            expiration: null,
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).not.toThrow();
+    });
+
+    test('should throw an error if the coupon is expired', () => {
+        const coupon = mockCoupon({
+            kind: 1,
+            amount: '10000',
+            available_claims: '1',
+            expiration: (Date.now() - 100000).toString(),
+        });
+        expect(() => validateCoupon(coupon, DEFAULT_YEARS, DEFAULT_LENGTH)).toThrow(COUPON_EXPIRED);
     });
 });
