@@ -10,11 +10,11 @@ import type {
 } from '@iota/iota-sdk/transactions';
 import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
 
-import { ALLOWED_METADATA } from './constants';
-import { isNestedSubname, isSubname } from './helpers';
-import type { IotaNamesClient } from './iota-names-client';
-import type { ReceiptParams, RegistrationParams, RenewalParams } from './types';
-import { isValidIotaName, normalizeIotaName } from './utils';
+import { ALLOWED_METADATA } from './constants.js';
+import { isNestedSubname, isSubname } from './helpers.js';
+import type { IotaNamesClient } from './iota-names-client.js';
+import type { ReceiptParams, RegistrationParams, RenewalParams } from './types.js';
+import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 export class IotaNamesTransaction {
     iotaNamesClient: IotaNamesClient;
@@ -61,6 +61,7 @@ export class IotaNamesTransaction {
         if (params.years > 1) {
             this.renew({
                 nft,
+                name: params.name,
                 years: params.years - 1,
                 coinConfig: params.coinConfig,
                 coin: params.coin,
@@ -73,10 +74,28 @@ export class IotaNamesTransaction {
     /**
      * Renews an NFT for a number of years.
      */
-    renew(params: RenewalParams): void {
+    async renew(params: RenewalParams): Promise<void> {
         const paymentIntent = this.initRenewal(params.nft, params.years);
-        const price = this.getBasePrice(paymentIntent);
-        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), [price]);
+
+        const couponCodes = params.couponCodes;
+        let discountedPrice: number | null = null;
+
+        if (couponCodes && couponCodes.length > 0) {
+            discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
+                name: params.name,
+                years: params.years,
+                isRegistration: false,
+            });
+
+            for (const couponCode of couponCodes) {
+                this.applyCoupon(couponCode, paymentIntent);
+            }
+        }
+
+        const amounts = [discountedPrice ?? this.getBasePrice(paymentIntent)];
+        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), amounts);
+
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,

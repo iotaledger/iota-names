@@ -9,8 +9,8 @@ import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { NamesLogoWeb } from '@/components/svgs';
 import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
-import { NamesLogoWeb } from '@/public/icons';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
@@ -30,7 +30,7 @@ export function Navbar() {
 
     return (
         <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
-            <div className="container py-md flex flex-col gap-y-sm">
+            <div className="px-lg py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">
                         <Link href="/" aria-label="Go to homepage">

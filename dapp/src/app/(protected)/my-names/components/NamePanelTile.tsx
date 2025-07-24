@@ -6,6 +6,7 @@
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
 import { ButtonUnstyled, truncate } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 import { Fragment } from 'react';
 
@@ -18,7 +19,6 @@ import { useNameContextMenu } from '@/hooks/useNameContextMenu';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import type { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
-import { formatNameLabel } from '@/lib/utils/format/formatNames';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 import { isNameRecordCloseToExpiration, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -60,7 +60,7 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
-    const panelTitle = formatNameLabel(registration.name, { truncateLongSubnames: true });
+    const panelTitle = normalizeIotaName(registration.name, 'at', { truncateLongParts: true });
 
     return (
         <>

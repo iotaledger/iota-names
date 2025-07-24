@@ -29,7 +29,12 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { applyCouponsToPrice, isValidIotaName, normalizeIotaName, validateCoupons } from './utils';
+import {
+    applyCouponsToPrice,
+    isValidIotaName,
+    normalizeIotaName,
+    validateCoupons,
+} from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.

@@ -241,7 +241,8 @@ public fun renew(
     }
 }
 
-/// Getters
+// === Getters ===
+
 public fun request_data(intent: &PaymentIntent): &RequestData {
     match (intent) {
         PaymentIntent::Registration(data) => data,
@@ -278,6 +279,8 @@ public fun base_amount(self: &RequestData): u64 { self.base_amount }
 public fun base_amount_mut(self: &mut RequestData): &mut u64 { &mut self.base_amount }
 
 public fun name(self: &RequestData): &Name { &self.name }
+
+// ==== Helpers ===
 
 /// Public helper to calculate price after a percentage discount has been
 /// applied.
@@ -327,6 +330,8 @@ fun target_expiration(registry: &Registry, name: Name, clock: &Clock, no_years: 
 
     target
 }
+
+// === Tests ===
 
 #[test_only]
 public(package) fun test_registration_receipt(name: String, years: u8, version: u8): Receipt {

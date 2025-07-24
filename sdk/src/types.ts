@@ -71,6 +71,7 @@ export type RegistrationParams = BaseParams & {
 };
 
 export type RenewalParams = BaseParams & {
+    name: string;
     nft: TransactionObjectInput;
 };
 
