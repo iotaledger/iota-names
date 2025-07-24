@@ -45,12 +45,14 @@ curl "http://localhost:3000/hello@iota/1609459200000"
 ## Valid Name Formats
 
 ✅ **Valid:**
+
 - `test@iota`
-- `hello.iota` 
+- `hello.iota`
 - `example@iota`
 - `myname.iota`
 
 ❌ **Invalid:**
+
 - `test` (missing domain)
 - `test@example` (wrong domain)
 - `test.com` (wrong TLD)
@@ -76,16 +78,19 @@ The service is containerized with complete isolation - no local Node.js/pnpm ins
 ## Development Commands
 
 ### View logs
+
 ```bash
 docker-compose logs -f
 ```
 
 ### Rebuild and restart
+
 ```bash
 docker-compose up --build --force-recreate
 ```
 
 ### Stop service
+
 ```bash
 docker-compose down
 ```
@@ -93,13 +98,13 @@ docker-compose down
 ## Troubleshooting
 
 1. **Empty reply from server**: Use valid IOTA name format (`name@iota` or `name.iota`)
-2. **500 Internal Server Error**: Check name format and timestamp validity  
+2. **500 Internal Server Error**: Check name format and timestamp validity
 3. **Container issues**: Check logs with `docker-compose logs`
 
-2. **Access the service:**
+4. **Access the service:**
    The service will be available at `http://localhost:3000`
 
-3. **Test the API:**
+5. **Test the API:**
    ```bash
    curl "http://localhost:3000/test/1234567890"
    ```
