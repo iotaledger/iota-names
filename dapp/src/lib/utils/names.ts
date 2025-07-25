@@ -84,17 +84,6 @@ export function getNameObject(names: RegistrationNft[], name: string) {
     return nameObject?.id || null;
 }
 
-export const getImageUrl = (name: string, expirationTimestampMs: number) => {
-    return `http://localhost:3000/${name}/${expirationTimestampMs}`;
-};
-
-export const getDisplayImageUrl = (isSubname: boolean) => {
-    const name = `{${isSubname ? 'nft.' : ''}name_str}`;
-    const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
-
-    return `http://localhost:3000/${name}/${expiration}`;
-};
-
 /**
  * Get the amount of years that this name can be renewed as of now.
  */
