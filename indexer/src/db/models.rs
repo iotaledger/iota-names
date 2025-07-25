@@ -22,7 +22,7 @@ pub struct Bidder {
 #[diesel(belongs_to(Name))]
 #[diesel(table_name = bids)]
 #[diesel(primary_key(name_id, bidder_id, bid))]
-pub struct Bids {
+pub struct Bid {
     pub bidder_id: i32,
     pub name_id: i32,
     pub bid: i64,

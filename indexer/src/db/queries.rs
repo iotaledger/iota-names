@@ -7,7 +7,7 @@ use diesel::{
     SqliteConnection, TextExpressionMethods, dsl, insert_into,
 };
 
-use super::models::{Bidder, Bids, Name, bidders, bids, names};
+use super::models::{Bid, Bidder, Name, bidders, bids, names};
 use crate::db::{AuctionSortBy, SortOrder};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
@@ -44,23 +44,6 @@ pub fn get_or_create_name(conn: &mut SqliteConnection, name: &str) -> Result<Nam
     }
 }
 
-pub fn create_bid(
-    conn: &mut SqliteConnection,
-    bidder_id: i32,
-    name_id: i32,
-    bid: u64,
-) -> Result<()> {
-    insert_into(bids::table)
-        .values((
-            bids::bidder_id.eq(bidder_id),
-            bids::name_id.eq(name_id),
-            bids::bid.eq(bid as i64),
-        ))
-        .on_conflict_do_nothing()
-        .execute(conn)?;
-    Ok(())
-}
-
 pub fn add_bids_entry(
     conn: &mut SqliteConnection,
     bidder_address: &str,
@@ -69,7 +52,15 @@ pub fn add_bids_entry(
 ) -> Result<()> {
     let bidder = get_or_create_bidder(conn, bidder_address)?;
     let name = get_or_create_name(conn, name_str)?;
-    create_bid(conn, bidder.id, name.id, bid)
+    insert_into(bids::table)
+        .values((
+            bids::bidder_id.eq(bidder.id),
+            bids::name_id.eq(name.id),
+            bids::bid.eq(bid as i64),
+        ))
+        .on_conflict_do_nothing()
+        .execute(conn)?;
+    Ok(())
 }
 
 pub fn get_names_for_bidder_address(
@@ -88,7 +79,7 @@ pub fn get_names_for_bidder_address(
         None => return Ok(vec![]),
     };
 
-    Ok(Bids::belonging_to(&bidder)
+    Ok(Bid::belonging_to(&bidder)
         .inner_join(names::table)
         .group_by(names::id)
         .select(names::name)
