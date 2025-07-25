@@ -20,6 +20,7 @@ import {
     Panel,
     Select,
     SelectOption,
+    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -27,6 +28,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
@@ -40,16 +42,24 @@ import {
     isGracePeriodExpired,
 } from '@/lib/utils/names';
 
+import { CouponsWrapper } from '../CouponsWrapper';
+
 function createRenewUpdates({
     nameRecord,
     ownedNames = [],
     ownedSubnames = [],
     renewYears,
+    applyCoupons = false,
+    coupons = [],
+    address,
 }: {
     nameRecord?: NameRecord;
     ownedNames?: RegistrationNft[];
     ownedSubnames?: RegistrationNft[];
     renewYears?: number;
+    applyCoupons?: boolean;
+    coupons?: string[];
+    address?: string;
 }) {
     const isNameSubname = nameRecord?.name ? isSubname(nameRecord.name) : false;
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -70,6 +80,8 @@ function createRenewUpdates({
             name: nameRecord.name,
             nftId: nameRecord.nftId,
             years: renewYears,
+            address,
+            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
         });
     }
 
@@ -101,6 +113,7 @@ interface RenewDialogProps {
 export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
+    const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
     const { data: coreConfig, isLoading: isLoadingcoreConfig } = useCoreConfig();
@@ -113,6 +126,8 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     const [renewYears, setRenewYears] = useState<number | undefined>();
+    const [coupons, setCoupons] = useState<string[]>([]);
+    const [applyCoupons, setApplyCoupons] = useState(false);
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
@@ -122,6 +137,9 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         ownedNames,
         ownedSubnames,
         renewYears,
+        applyCoupons,
+        coupons,
+        address: account?.address,
     });
 
     const {
@@ -158,6 +176,23 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
             toast.error(error.message);
         },
     });
+
+    async function handleAddCoupon(coupon: string) {
+        if (coupons.includes(coupon)) {
+            setCoupons((currentCoupons) =>
+                currentCoupons.filter((existingCoupon) => existingCoupon !== coupon),
+            );
+            return;
+        }
+
+        try {
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
+            if (!resolvedCoupon) throw new Error();
+            setCoupons((currentCoupons) => [...currentCoupons, coupon]);
+        } catch {
+            toast.error('Invalid coupon');
+        }
+    }
 
     function handleCancelRenewName() {
         setOpen(false);
@@ -232,6 +267,18 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
+                            <div className="flex flex-col">
+                                <div className="self-end">
+                                    <Toggle
+                                        isToggled={applyCoupons}
+                                        onChange={setApplyCoupons}
+                                        label="Add Coupons"
+                                    />
+                                </div>
+                                {applyCoupons && (
+                                    <CouponsWrapper coupons={coupons} addCoupon={handleAddCoupon} />
+                                )}
+                            </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
