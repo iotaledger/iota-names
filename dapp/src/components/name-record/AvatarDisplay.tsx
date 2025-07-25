@@ -1,10 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
-import { useNameRecord } from '@/hooks';
+import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
 import type { NftDisplayProps } from '@/lib/types/components';
 
@@ -28,9 +29,15 @@ export function AvatarDisplay({
     const [showAvatar, setShowAvatar] = useState(false);
 
     const { data } = useNameRecord(name);
+    const { data: subnames } = useRegistrationNfts('subname');
+    const isNameSubname = isSubname(name);
 
     const avatarId =
-        data?.type === 'unavailable' ? (data.nameRecord.nftId ?? data?.nameRecord.avatar) : null;
+        data?.type === 'unavailable'
+            ? isNameSubname
+                ? subnames?.find((n) => n.name === name)?.id
+                : (data?.nameRecord.avatar ?? data.nameRecord.nftId)
+            : null;
 
     const { data: avatarObject } = useGetObject({
         id: avatarId ?? '',
