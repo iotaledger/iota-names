@@ -136,5 +136,7 @@ pub fn get_bid_count(conn: &mut SqliteConnection, name_str: &str) -> Result<i64>
         .group_by(names::id)
         .select(dsl::count(bids::bid))
         .filter(names::name.eq(name_str))
-        .get_result(conn)?)
+        .get_result(conn)
+        .optional()?
+        .unwrap_or_default())
 }
