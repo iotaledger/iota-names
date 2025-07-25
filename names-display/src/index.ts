@@ -12,7 +12,11 @@ const formatter = new Intl.DateTimeFormat('en-US', {
 });
 
 function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
-    const formattedName = normalizeIotaName(name);
+    const formattedName = normalizeIotaName(name, 'at', {
+        truncateLongParts: true,
+        onlyFirstSubname: true,
+    });
+
     const date = formatter.format(new Date(timestamp));
 
     const content = `
