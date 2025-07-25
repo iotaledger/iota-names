@@ -13,7 +13,8 @@ interface ContextMenuButtonProps {
 }
 
 export function ContextMenuButton({ options }: ContextMenuButtonProps) {
-    const { isVisible, position, toggleMenu, dropdownRef, triggerRef } = useNameContextMenu();
+    const { isVisible, position, toggleMenu, closeMenu, dropdownRef, triggerRef } =
+        useNameContextMenu();
 
     return (
         <>
@@ -24,6 +25,7 @@ export function ContextMenuButton({ options }: ContextMenuButtonProps) {
                 position={position}
                 options={options}
                 dropdownRef={dropdownRef}
+                closeMenu={closeMenu}
             />
         </>
     );

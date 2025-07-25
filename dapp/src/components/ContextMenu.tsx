@@ -13,9 +13,16 @@ interface ContextMenuProps {
     position: { top: number; left: number };
     options: MenuListItem[];
     dropdownRef: (el: HTMLDivElement | null) => void;
+    closeMenu: () => void;
 }
 
-export function ContextMenuDropdown({ visible, position, options, dropdownRef }: ContextMenuProps) {
+export function ContextMenuDropdown({
+    visible,
+    position,
+    options,
+    dropdownRef,
+    closeMenu,
+}: ContextMenuProps) {
     if (!visible) return null;
 
     return createPortal(
@@ -28,7 +35,14 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
                 {options
                     .filter((option) => !option.isHidden)
                     .map((item, index) => (
-                        <ListItem key={index} {...item} />
+                        <ListItem
+                            key={index}
+                            {...item}
+                            onClick={() => {
+                                item.onClick?.();
+                                closeMenu();
+                            }}
+                        />
                     ))}
             </Dropdown>
         </div>,

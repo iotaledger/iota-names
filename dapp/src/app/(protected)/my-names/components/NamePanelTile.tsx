@@ -37,7 +37,8 @@ export function NamePanelTile({
     onClick,
     onRenewClick,
 }: NamePanelTileProps) {
-    const { isVisible, position, toggleMenu, dropdownRef, triggerRef } = useNameContextMenu();
+    const { isVisible, position, toggleMenu, closeMenu, dropdownRef, triggerRef } =
+        useNameContextMenu();
     const { openDialogId, openDialog, closeDialog } = useNameManageDialog();
 
     const account = useCurrentAccount();
@@ -88,6 +89,7 @@ export function NamePanelTile({
                 position={position}
                 options={menuOptions}
                 dropdownRef={dropdownRef}
+                closeMenu={closeMenu}
             />
 
             <NameDialogsController
