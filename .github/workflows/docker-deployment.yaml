@@ -50,4 +50,4 @@ jobs:
       - name: Deploy to Server
         if: ${{ github.event.inputs.deployment }}
         run: |
-          ssh -o StrictHostKeyChecking=no updater@${{ secrets.EXPLORER_GATEWAY }} "prod ${{ env.VERSION }}"
+          ssh -o StrictHostKeyChecking=no updater@${{ secrets.UPDATER_SSH_HOST }} "prod ${{ env.VERSION }}"
