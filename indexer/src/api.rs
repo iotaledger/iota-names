@@ -123,7 +123,7 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
 
         Ok(Self {
             page: query.page,
-            page_size: query.page_size.unwrap_or(50),
+            page_size: query.page_size.unwrap_or(50).min(50),
             sort,
             sort_by,
             search: query.search,
