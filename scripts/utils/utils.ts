@@ -172,13 +172,26 @@ export const getSigner = () => {
         readFileSync(path.join(homedir(), '.iota', 'iota_config', 'iota.keystore'), 'utf8'),
     );
 
-    for (const priv of keystore) {
-        const keypair = decodeIotaPrivateKey(priv);
+    // Support for old format, can be removed once https://github.com/iotaledger/iota/pull/7704 is in production
+    if (Array.isArray(keystore)) {
+        for (const priv of keystore) {
+            const keypair = decodeIotaPrivateKey(priv);
 
-        const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
-        if (pair.getPublicKey().toIotaAddress() === sender) {
-            return pair;
+            const pair = Ed25519Keypair.fromSecretKey(keypair.secretKey);
+            if (pair.getPublicKey().toIotaAddress() === sender) {
+                return pair;
+            }
         }
+        throw new Error(`keypair not found for sender: ${sender}`);
+    }
+
+    // New format
+    for (const entry of keystore.keys) {
+        if (entry.key.type !== 'key_pair' || entry.address !== sender) {
+            continue;
+        }
+        const keypair = decodeIotaPrivateKey(entry.key.value);
+        return Ed25519Keypair.fromSecretKey(keypair.secretKey);
     }
 
     throw new Error(`keypair not found for sender: ${sender}`);

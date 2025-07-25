@@ -173,15 +173,17 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
             });
             return {
                 transaction: iotaNamesTx.transaction,
+                builtTx: transaction,
                 txDryRun,
             };
         },
         enabled: !!address && !!updates.length,
         gcTime: 0,
-        select: ({ transaction, txDryRun }) => {
+        select: ({ transaction, txDryRun, builtTx }) => {
             return {
                 transaction,
                 gasSummary: getGasSummary(txDryRun),
+                builtTx,
             };
         },
     });
