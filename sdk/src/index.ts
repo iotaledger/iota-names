@@ -16,5 +16,10 @@ export {
     getRenewalPricelistConfigType,
     getNameRegistrationType,
     getSubnameRegistrationType,
-} from './helpers';
-export { isValidIotaName, validateIotaName, normalizeIotaName, validateIotaSubname } from './utils';
+} from './helpers.js';
+export {
+    isValidIotaName,
+    validateIotaName,
+    normalizeIotaName,
+    validateIotaSubname,
+} from './utils.js';

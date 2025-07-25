@@ -39,6 +39,7 @@
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
         "sdk": "turbo --filter ./sdk",
         "dapp": "turbo --filter ./dapp",
+        "names-display": "turbo --filter ./names-display",
         "prepare": "husky",
         "changeset-publish": "pnpm changeset publish",
         "changeset-version": "pnpm changeset version"

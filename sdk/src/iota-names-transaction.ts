@@ -414,6 +414,38 @@ export class IotaNamesTransaction {
     }
 
     /**
+     * Unsets the user data of an NFT.
+     */
+    unsetUserData({
+        nft,
+        key,
+        isSubname,
+    }: {
+        nft: TransactionObjectInput;
+        key: string;
+        isSubname?: boolean;
+    }) {
+        if (!this.iotaNamesClient.config.iotaNamesObjectId)
+            throw new Error('IOTA-Names Object ID not found');
+        if (isSubname && !this.iotaNamesClient.config.tempSubnameProxyPackageId)
+            throw new Error('Subnames proxy package ID not found');
+
+        if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
+
+        this.transaction.moveCall({
+            target: isSubname
+                ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::unset_user_data`
+                : `${this.iotaNamesClient.config.packageId}::controller::unset_user_data`,
+            arguments: [
+                this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
+                this.transaction.object(nft),
+                this.transaction.pure.string(key),
+                this.transaction.object(IOTA_CLOCK_OBJECT_ID),
+            ],
+        });
+    }
+
+    /**
      * Burns an expired NFT to collect storage rebates.
      */
     burnExpired({ nft, isSubname }: { nft: TransactionObjectInput; isSubname?: boolean }) {
