@@ -195,7 +195,7 @@ export class IotaNamesTransaction {
 
     /**
      * Builds the PTB to create a leaf subname.
-     * Parent can be a `IotaNamesRegistration` or a `SubnameRegistration` object.
+     * Parent can be a `NameRegistration` or a `SubnameRegistration` object.
      * Can be passed in as an ID or a TransactionArgument.
      */
     createLeafSubname({
