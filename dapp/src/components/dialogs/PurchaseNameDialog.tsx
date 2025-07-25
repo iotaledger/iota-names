@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -13,17 +14,21 @@ import {
     DialogPosition,
     DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
     Panel,
     Select,
     SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { NameUpdate, queryKey, useUpdateNameTransaction } from '@/hooks';
-import { useBalance } from '@/hooks/useBalance';
+import { NameUpdate, queryKey, useBalanceValidation, useUpdateNameTransaction } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import {
@@ -32,7 +37,6 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
-import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
@@ -86,10 +90,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         updates: updates,
     });
 
+    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
+        updateNameData?.builtTx ?? null,
+        price,
+    );
+
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
-
-    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
     const {
         mutateAsync: handlePurchase,
@@ -110,10 +117,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-
+            toast.success(`Successfully registered name ${normalizeIotaName(name)}`);
             setOpen(false);
 
             if (onPurchase) onPurchase();
+        },
+        onError(error) {
+            toast.error(error.message);
         },
     });
 
@@ -130,27 +140,42 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
           }))
         : [];
 
-    const totalBalance = Number(coinBalance?.totalBalance) || 0;
-    const totalGas = Number(updateNameData?.gasSummary?.totalGas) || 0;
-    const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
-    const hasBalance = totalBalance > totalPrice;
-
     const hasEnoughGas =
         !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
         !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
 
     const canPay =
-        isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
+        isConnected &&
+        hasEnoughGas &&
+        balanceValidation?.hasBalance &&
+        nameRecordData?.type === 'available';
 
-    const hasErrors = updateNameError || coinBalanceError || purchaseError;
+    const hasErrors = updateNameError || balanceValidationError || purchaseError;
 
     const isLoading = isNameRecordLoading || isUpdateNameLoading || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const cleanName = denormalizeName(name);
-
     const expirationDate = getTargetExpirationDate(renewYears);
+
+    useEffect(() => {
+        if (nameRecordError) {
+            toast.error(nameRecordError.message);
+        }
+    }, [nameRecordError]);
+
+    useEffect(() => {
+        if (updateNameError) {
+            if (
+                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+            } else {
+                toast.error(updateNameError.message);
+            }
+        }
+    }, [updateNameError]);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -162,7 +187,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
                                     <span className="text-names-neutral-100 text-headline-sm">
-                                        @{cleanName}
+                                        {normalizeIotaName(name)}
                                     </span>
                                 </div>
                             </Panel>
@@ -188,12 +213,63 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 </div>
                             </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
-                                <DisplayStats
-                                    label="Total Due"
-                                    value={formatNanosToIota(totalPrice)}
-                                />
+                                {!isLoading &&
+                                    balanceValidation &&
+                                    typeof balanceValidation?.totalPrice === 'number' &&
+                                    balanceValidation.totalPrice > 0 && (
+                                        <>
+                                            <DisplayStats
+                                                label="Registration Expires"
+                                                value={expirationDate}
+                                            />
+                                            <DisplayStats
+                                                label="Total Due"
+                                                value={formatNanosToIota(
+                                                    balanceValidation.totalPrice,
+                                                )}
+                                            />
+                                        </>
+                                    )}
                             </div>
+
+                            {!hasEnoughGas && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={
+                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
+                                    }
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {purchaseError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={purchaseError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {nameRecordError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={nameRecordError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {hasEnoughGas && updateNameError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={updateNameError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
@@ -211,26 +287,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 />
                             </div>
                         </div>
-                        {!hasEnoughGas && (
-                            <div className="text-center text-red-400 text-sm">
-                                {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
-                            </div>
-                        )}
-                        {purchaseError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {purchaseError.message}
-                            </div>
-                        )}
-                        {nameRecordError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {nameRecordError.message}
-                            </div>
-                        )}
-                        {hasEnoughGas && updateNameError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {updateNameError.message}
-                            </div>
-                        )}
                     </div>
                 </DialogBody>
             </DialogContent>

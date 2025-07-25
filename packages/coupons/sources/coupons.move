@@ -25,13 +25,9 @@ public struct Coupons has store {
     coupons: Table<vector<u8>, Coupon>,
 }
 
-public(package) fun new(ctx: &mut TxContext): Coupons {
-    Coupons {
-        coupons: table::new(ctx),
-    }
-}
+// === Public functions ===
 
-// Add percentaged based coupon.
+/// Adds percentaged based coupon.
 public fun add_percentage_coupon(
     self: &mut Coupons,
     hash: String,
@@ -41,7 +37,7 @@ public fun add_percentage_coupon(
     self.save_coupon(hash, coupon::new_percentage(percentage, rules));
 }
 
-// Add fixed amount coupon.
+/// Adds fixed amount coupon.
 public fun add_fixed_coupon(
     self: &mut Coupons,
     hash: String,
@@ -51,25 +47,35 @@ public fun add_fixed_coupon(
     self.save_coupon(hash, coupon::new_fixed(amount, rules));
 }
 
-// A function to remove a coupon from the system.
+// === Internal functions ===
+
+/// Creates the `Coupons` struct.
+public(package) fun new(ctx: &mut TxContext): Coupons {
+    Coupons {
+        coupons: table::new(ctx),
+    }
+}
+
+/// Removes a coupon from the system.
 public(package) fun remove_coupon(self: &mut Coupons, hash: String) {
     let hash = hex::decode(hash.into_bytes());
     assert!(self.coupons.contains(hash), ECouponDoesNotExist);
     let _: Coupon = self.coupons.remove(hash);
 }
 
-/// Private internal functions
-/// An internal function to save the coupon in the shared object's config.
+/// Saves the coupon in the shared object's config.
 public(package) fun save_coupon(self: &mut Coupons, hash: String, coupon: Coupon) {
     let hash = hex::decode(hash.into_bytes());
     assert!(!self.coupons.contains(hash), ECouponAlreadyExists);
     self.coupons.add(hash, coupon);
 }
 
+/// Returns a reference to the coupon table.
 public(package) fun coupons(self: &Coupons): &Table<vector<u8>, Coupon> {
     &self.coupons
 }
 
+/// Returns a mutable reference to the coupon table.
 public(package) fun coupons_mut(self: &mut Coupons): &mut Table<vector<u8>, Coupon> {
     &mut self.coupons
 }

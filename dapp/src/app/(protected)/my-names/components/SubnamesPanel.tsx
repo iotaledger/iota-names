@@ -3,6 +3,7 @@
 
 import { Add } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
@@ -10,7 +11,6 @@ import { useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
-import { formatNameLabel, normalizeName } from '@/lib/utils/format/formatNames';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -22,8 +22,7 @@ interface SubnamesPanelProps {
 export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const { data: subnames } = useRegistrationNfts('subname');
 
-    const rootName = normalizeName(selectedName.name);
-    const initialNameTree = useNameTree(rootName);
+    const initialNameTree = useNameTree(selectedName.name);
 
     const [namePaths, setNamePaths] = useState<string[]>([]);
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -47,9 +46,10 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
 
     if (!currentNode) return null;
 
-    const headerTitle = `Subnames for ${formatNameLabel(
+    const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
-        { onlyFirstSubname: true, truncateLongSubnames: true },
+        'at',
+        { onlyFirstSubname: true, truncateLongParts: true },
     )}`;
 
     const subnamesRegistrations = currentNode.subnames
