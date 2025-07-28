@@ -214,7 +214,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     !isSubnameAvailable && fullSubnameName
                                         ? 'Subname is not available'
                                         : updateNameError
-                                          ? updateNameError.message
+                                          ? getUserFriendlyErrorMessage(updateNameError)
                                           : subnameError
                                             ? subnameError
                                             : undefined

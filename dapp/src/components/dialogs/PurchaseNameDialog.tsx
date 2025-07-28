@@ -235,7 +235,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {purchaseError && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={purchaseError.message}
+                                    supportingText={getUserFriendlyErrorMessage(purchaseError)}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Default}
@@ -244,7 +244,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {nameRecordError && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={nameRecordError.message}
+                                    supportingText={getUserFriendlyErrorMessage(nameRecordError)}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Default}
@@ -253,7 +253,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {hasEnoughGas && updateNameError && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={updateNameError.message}
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Default}

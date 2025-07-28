@@ -220,7 +220,9 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
                                     disabled={disableEdit}
-                                    errorMessage={updateNameError?.message}
+                                    errorMessage={getUserFriendlyErrorMessage(
+                                        updateNameError || '',
+                                    )}
                                 />
                             )}
                             {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (

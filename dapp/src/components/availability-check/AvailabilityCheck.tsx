@@ -22,6 +22,7 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -74,8 +75,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         [searchValue, priceList],
     );
 
-    const errorMessage =
-        auctionError?.message || nameError?.message || priceError?.message || validationError || '';
+    const errorMessage = auctionError?.message || nameError?.message || priceError?.message;
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
@@ -188,7 +188,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             placeholder="Check name availability"
                             value={searchValue}
                             onChange={({ target: { value } }) => handleInputChange(value)}
-                            errorMessage={errorMessage}
+                            errorMessage={
+                                errorMessage
+                                    ? getUserFriendlyErrorMessage(errorMessage)
+                                    : validationError || ''
+                            }
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             leadingIcon={
                                 <p className="text-primary-20 dark:text-primary-80 text-label-lg">
