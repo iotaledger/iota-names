@@ -33,6 +33,7 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
@@ -130,7 +131,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             toast.success(`Successfully updated avatar for ${normalizeIotaName(name)}`);
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 

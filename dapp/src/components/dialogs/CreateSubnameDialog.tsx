@@ -35,6 +35,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -163,7 +164,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             closeDialog();
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 

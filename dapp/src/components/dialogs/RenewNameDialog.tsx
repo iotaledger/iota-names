@@ -31,6 +31,7 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
     getNameObject,
@@ -154,7 +155,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
             toast.success('Name renewed successfully');
         },
         onError(error) {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 

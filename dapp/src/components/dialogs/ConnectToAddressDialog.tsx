@@ -35,6 +35,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -139,7 +140,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             }
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -222,7 +223,9 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                             errorMessage={
                                                 editTargetAddress && !isValidAddressOrEmpty
                                                     ? 'Not a valid IOTA address'
-                                                    : updateNameError?.message
+                                                    : getUserFriendlyErrorMessage(
+                                                          updateNameError || '',
+                                                      )
                                             }
                                         />
                                         {account?.address &&

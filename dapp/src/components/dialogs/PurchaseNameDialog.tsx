@@ -31,12 +31,8 @@ import toast from 'react-hot-toast';
 import { NameUpdate, queryKey, useBalanceValidation, useUpdateNameTransaction } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    GAS_BUDGET_ERROR_MESSAGES,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
-import { formatNanosToIota } from '@/lib/utils';
+import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
@@ -123,7 +119,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             if (onPurchase) onPurchase();
         },
         onError(error) {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -160,20 +156,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     useEffect(() => {
         if (nameRecordError) {
-            toast.error(nameRecordError.message);
+            toast.error(getUserFriendlyErrorMessage(nameRecordError));
         }
     }, [nameRecordError]);
 
     useEffect(() => {
         if (updateNameError) {
-            if (
-                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
-                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
-            ) {
-                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
-            } else {
-                toast.error(updateNameError.message);
-            }
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
         }
     }, [updateNameError]);
 
@@ -235,9 +224,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {!hasEnoughGas && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={
-                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
-                                    }
+                                    supportingText={getUserFriendlyErrorMessage(
+                                        GAS_BALANCE_TOO_LOW_ID,
+                                    )}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Default}

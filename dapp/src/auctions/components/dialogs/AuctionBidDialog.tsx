@@ -38,11 +38,10 @@ import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/a
 import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
 import {
     GAS_BALANCE_TOO_LOW_ID,
-    GAS_BUDGET_ERROR_MESSAGES,
     INSUFFICIENT_COIN_BALANCE_ID,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
-import { formatNanosToIota } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -122,7 +121,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             onCompleted?.();
         },
         onError(err) {
-            toast.error(err.message);
+            toast.error(getUserFriendlyErrorMessage(err));
         },
     });
 
@@ -176,11 +175,11 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
         } else if (!hasEnoughGas) {
-            return GAS_BUDGET_ERROR_MESSAGES[NOT_ENOUGH_BALANCE_ID];
+            return getUserFriendlyErrorMessage(NOT_ENOUGH_BALANCE_ID);
         } else if (auctionError) {
-            return auctionError.message;
+            return getUserFriendlyErrorMessage(auctionError);
         } else if (balanceValidationError) {
-            return balanceValidationError.message;
+            return getUserFriendlyErrorMessage(balanceValidationError);
         }
     })();
 

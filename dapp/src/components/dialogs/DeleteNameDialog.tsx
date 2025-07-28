@@ -28,6 +28,7 @@ import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
@@ -90,7 +91,7 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
             closeDialog();
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -139,9 +140,13 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                             </div>
 
                             {updateNameError ? (
-                                <p className="text-error-30 dark:text-error-70 text-center">
-                                    {updateNameError.message}
-                                </p>
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
                             ) : null}
                         </div>
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
