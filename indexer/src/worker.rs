@@ -40,7 +40,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{
         pool::DbConnectionPool,
-        queries::{add_bidder_name_entry, remove_name_bids_entry, upsert_name_bids_entry},
+        queries::{add_bids_entry, get_bid_count},
     },
     events::{CouponKind, IotaNamesEvent},
 };
@@ -144,34 +144,36 @@ impl IotaNamesWorker {
         match event {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
-                self.metrics.total_auction_started.inc();
+                self.metrics.auctions_started.inc();
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
-                    upsert_name_bids_entry(conn, &name_str)
+                    add_bids_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &name_str,
+                        event.starting_bid,
+                    )
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
-                    upsert_name_bids_entry(conn, &name_str)
+                    add_bids_entry(conn, &event.bidder.to_string(), &name_str, event.bid)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
             IotaNamesEvent::AuctionFinalized(event) => {
-                self.metrics.total_auction_finalized.inc();
+                self.metrics.auctions_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
                 self.metrics
                     .auction_durations
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
-                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    remove_name_bids_entry(conn, &name_str)
-                })?;
+                let bid_count =
+                    conn.transaction::<_, anyhow::Error, _>(|conn| get_bid_count(conn, &name_str))?;
                 self.metrics
                     .auction_bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])
@@ -179,52 +181,51 @@ impl IotaNamesWorker {
             }
             // `coupons`
             IotaNamesEvent::CouponApplied(event) => match event.kind {
-                CouponKind::Percentage => self
-                    .metrics
-                    .total_percentage_discount
-                    .add(event.discount as _),
-                CouponKind::Fixed => self.metrics.total_fixed_discount.add(event.discount as _),
+                CouponKind::Percentage => {
+                    self.metrics.percentage_discounts.add(event.discount as _)
+                }
+                CouponKind::Fixed => self.metrics.fixed_discounts.add(event.discount as _),
             },
             // `iota-names`
             IotaNamesEvent::NameRecordAdded(event) => {
-                self.metrics.total_name_records_added.inc();
+                self.metrics.records_added.inc();
 
                 let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
-                    .name_length_distribution
+                    .length_distribution
                     .with_label_values(&[&sln_length.to_string()])
                     .inc();
 
                 let depth = event.name.num_labels();
                 self.metrics
-                    .name_depth_distribution
+                    .depth_distribution
                     .with_label_values(&[&depth.to_string()])
                     .inc();
             }
             IotaNamesEvent::NameRecordRemoved(event) => {
-                self.metrics.total_name_records_removed.inc();
+                self.metrics.records_removed.inc();
 
                 let sln_length = event.name.label(1).expect("missing SLN").len();
                 self.metrics
-                    .name_length_distribution
+                    .length_distribution
                     .with_label_values(&[&sln_length.to_string()])
                     .dec();
 
                 let depth = event.name.num_labels();
                 self.metrics
-                    .name_depth_distribution
+                    .depth_distribution
                     .with_label_values(&[&depth.to_string()])
                     .dec();
             }
             IotaNamesEvent::TargetAddressSet(event) => {
                 if event.target_address.is_some() {
-                    self.metrics.total_target_address.inc()
+                    self.metrics.target_addresses.inc()
                 } else {
-                    self.metrics.total_target_address.dec()
+                    self.metrics.target_addresses.dec()
                 }
             }
-            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.total_default_name.inc(),
-            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.total_default_name.dec(),
+            IotaNamesEvent::ReverseLookupSet(_event) => self.metrics.default_names.inc(),
+            IotaNamesEvent::ReverseLookupUnset(_event) => self.metrics.default_names.dec(),
             IotaNamesEvent::UserDataSet(event) => {
                 if event.new {
                     self.metrics
@@ -249,16 +250,16 @@ impl IotaNamesWorker {
             }
             // `subnames`
             IotaNamesEvent::NodeSubnameCreated(_event) => {
-                self.metrics.total_node_subnames.inc();
+                self.metrics.node_subnames.inc();
             }
             IotaNamesEvent::NodeSubnameBurned(_event) => {
-                self.metrics.total_node_subnames.dec();
+                self.metrics.node_subnames.dec();
             }
             IotaNamesEvent::LeafSubnameCreated(_event) => {
-                self.metrics.total_leaf_subnames.inc();
+                self.metrics.leaf_subnames.inc();
             }
             IotaNamesEvent::LeafSubnameRemoved(_event) => {
-                self.metrics.total_leaf_subnames.dec();
+                self.metrics.leaf_subnames.dec();
             }
         }
 
@@ -293,7 +294,7 @@ impl IotaNamesWorker {
         for object in checkpoint.latest_live_output_objects() {
             if object.id() == self.balance_object_id {
                 let balance = get_iota_names_balance(object)?;
-                self.metrics.iota_names_balance.set(balance.value() as _);
+                self.metrics.balance.set(balance.value() as _);
                 iota_names_balance = true;
             } else if object.id() == self.extended_config.auction_house_id {
                 let balance = get_auction_house_balance(object)?;
