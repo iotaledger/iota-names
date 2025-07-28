@@ -84,7 +84,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                     ))}
                 </div>
 
-                <div className="flex flex-col items-center justify-center py-sm">
+                <div className="flex flex-col items-center justify-center py-sm names-branded">
                     <Button
                         text="New Subname"
                         type={ButtonType.Outlined}

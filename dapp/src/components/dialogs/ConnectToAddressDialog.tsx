@@ -207,7 +207,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 </div>
                             ) : (
                                 <>
-                                    <div className="flex flex-col gap-y-xxs">
+                                    <div className="flex flex-col gap-y-xxs names-branded">
                                         <span className="text-title-md text-names-neutral-100">
                                             Link to Address
                                         </span>

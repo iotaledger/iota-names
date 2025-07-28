@@ -105,7 +105,7 @@ export default function MyNamesPage(): JSX.Element {
 
     return (
         <>
-            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0">
+            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 names-branded">
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Names
                 </h2>

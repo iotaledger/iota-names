@@ -193,7 +193,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
-                            <div className="px-md py-sm border-t border-names-neutral-6">
+                            <div className="px-md py-sm border-t border-names-neutral-6 names-branded">
                                 <Select
                                     value={renewYears.toString()}
                                     options={RENEW_OPTIONS}
