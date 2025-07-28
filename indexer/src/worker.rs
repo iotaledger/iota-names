@@ -40,7 +40,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{
         pool::DbConnectionPool,
-        queries::{add_bidder_name_entry, remove_name_bids_entry, upsert_name_bids_entry},
+        queries::{add_bids_entry, get_bid_count},
     },
     events::{CouponKind, IotaNamesEvent},
 };
@@ -148,16 +148,19 @@ impl IotaNamesWorker {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
-                    upsert_name_bids_entry(conn, &name_str)
+                    add_bids_entry(
+                        conn,
+                        &event.bidder.to_string(),
+                        &name_str,
+                        event.starting_bid,
+                    )
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bidder_name_entry(conn, &event.bidder.to_string(), &name_str)?;
-                    upsert_name_bids_entry(conn, &name_str)
+                    add_bids_entry(conn, &event.bidder.to_string(), &name_str, event.bid)
                 })?;
             }
             IotaNamesEvent::AuctionExtended(_event) => (),
@@ -169,9 +172,8 @@ impl IotaNamesWorker {
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
-                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    remove_name_bids_entry(conn, &name_str)
-                })?;
+                let bid_count =
+                    conn.transaction::<_, anyhow::Error, _>(|conn| get_bid_count(conn, &name_str))?;
                 self.metrics
                     .auction_bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])

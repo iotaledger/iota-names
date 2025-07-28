@@ -5,17 +5,20 @@ use std::{net::SocketAddr, str::FromStr};
 
 use axum::{
     Router,
-    extract::{Path, State},
+    extract::{FromRequestParts, Path, Query, State},
     http::StatusCode,
     response::{IntoResponse, Json, Response},
     routing::get,
 };
 use iota_types::base_types::IotaAddress;
+use serde::Deserialize;
 use tokio_util::sync::CancellationToken;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
-use crate::db::{pool::DbConnectionPool, queries::get_names_for_bidder_address};
+use crate::db::{
+    AuctionSortBy, SortOrder, pool::DbConnectionPool, queries::get_names_for_bidder_address,
+};
 
 #[derive(Clone)]
 pub struct ApiState {
@@ -31,6 +34,7 @@ pub async fn start_api_server(
 
     let app = Router::new()
         .route("/health", get(health_check))
+        .route("/auctions", get(get_auctions))
         .route("/auctions/{address}", get(get_names_for_address))
         .layer(
             CorsLayer::new()
@@ -72,6 +76,74 @@ async fn get_names_for_address(
 
     let mut conn = state.pool.get_connection()?;
     let names = get_names_for_bidder_address(&mut conn, &address_str)?;
+
+    Ok(Json(names))
+}
+
+struct AuctionsPagination {
+    page: Option<usize>,
+    page_size: usize,
+    sort: SortOrder,
+    sort_by: AuctionSortBy,
+    search: Option<String>,
+}
+
+impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
+    type Rejection = ApiError;
+
+    async fn from_request_parts(
+        parts: &mut axum::http::request::Parts,
+        state: &S,
+    ) -> Result<Self, Self::Rejection> {
+        #[derive(Clone, Deserialize, Default)]
+        #[serde(default, deny_unknown_fields, rename_all = "camelCase")]
+        struct AuctionsPaginationQuery {
+            page: Option<usize>,
+            page_size: Option<usize>,
+            sort: Option<String>,
+            sort_by: Option<String>,
+            search: Option<String>,
+        }
+
+        let Query(query) = Query::<AuctionsPaginationQuery>::from_request_parts(parts, state)
+            .await
+            .map_err(|e| ApiError::BadRequest(e.to_string()))?;
+
+        let sort = query
+            .sort
+            .as_deref()
+            .map_or(Ok(Default::default()), str::parse)
+            .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
+
+        let sort_by = query
+            .sort_by
+            .as_deref()
+            .map_or(Ok(Default::default()), str::parse)
+            .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
+
+        Ok(Self {
+            page: query.page,
+            page_size: query.page_size.unwrap_or(50).min(50),
+            sort,
+            sort_by,
+            search: query.search,
+        })
+    }
+}
+
+async fn get_auctions(
+    State(state): State<ApiState>,
+    AuctionsPagination {
+        page,
+        page_size,
+        sort,
+        sort_by,
+        search,
+    }: AuctionsPagination,
+) -> Result<Json<Vec<String>>, ApiError> {
+    let mut conn = state.pool.get_connection()?;
+    let names =
+        crate::db::queries::get_auctions(&mut conn, page, page_size, sort, sort_by, search)?;
 
     Ok(Json(names))
 }

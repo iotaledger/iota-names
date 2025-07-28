@@ -4,3 +4,4 @@ packages:
   - "scripts"
   - "documentation/**"
   - "dapp"
+  - "names-display"

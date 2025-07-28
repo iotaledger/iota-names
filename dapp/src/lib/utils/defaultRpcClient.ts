@@ -22,6 +22,11 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
         transport: new IotaClientGraphQLTransport({
             url: networkGraphqlUrl,
             fallbackTransportUrl: networkJsonRpcUrl,
+            unsupportedMethods: [
+                'multiGetObjects',
+                'getReferenceGasPrice',
+                'getNormalizedMoveFunction',
+            ],
         }),
     });
     defaultClientMap.set(network, client);

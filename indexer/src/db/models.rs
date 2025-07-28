@@ -20,20 +20,12 @@ pub struct Bidder {
 #[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
 #[diesel(belongs_to(Bidder))]
 #[diesel(belongs_to(Name))]
-#[diesel(table_name = bidder_name)]
-#[diesel(primary_key(bidder_id, name_id))]
-pub struct BidderName {
+#[diesel(table_name = bids)]
+#[diesel(primary_key(name_id, bidder_id, bid))]
+pub struct Bid {
     pub bidder_id: i32,
     pub name_id: i32,
-}
-
-#[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
-#[diesel(belongs_to(Name))]
-#[diesel(table_name = name_bids)]
-#[diesel(primary_key(name_id))]
-pub struct NameBids {
-    pub name_id: i32,
-    pub bids: i32,
+    pub bid: i64,
 }
 
 diesel::table! {
@@ -51,9 +43,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    bidder_name (bidder_id, name_id) {
+    bids (name_id, bidder_id, bid) {
         bidder_id -> Int4,
         name_id -> Int4,
+        bid -> Int8,
     }
 }
 
@@ -64,8 +57,7 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(bidder_name -> names (name_id));
-diesel::joinable!(bidder_name -> bidders (bidder_id));
-diesel::joinable!(name_bids -> names (name_id));
+diesel::joinable!(bids -> names (name_id));
+diesel::joinable!(bids -> bidders (bidder_id));
 
-diesel::allow_tables_to_appear_in_same_query!(bidders, names, bidder_name);
+diesel::allow_tables_to_appear_in_same_query!(bidders, names, bids);

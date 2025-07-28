@@ -8,6 +8,7 @@
 /documentation/ @iotaledger/devx
 /indexer/ @iotaledger/dev-tools
 /linting/ @iotaledger/tooling
+/names-display/ @iotaledger/tooling
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
 /sdk/ @iotaledger/tooling
