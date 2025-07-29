@@ -20,7 +20,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -49,25 +49,73 @@ type SetAction =
           type: 'none';
       };
 
-const METADATA_CONFIG: {
-    key: string;
-    label: string;
-    allowedKey: keyof typeof ALLOWED_METADATA;
-}[] = [
-    { key: 'twitter/x', label: 'Twitter/X', allowedKey: 'twitterX' },
-    { key: 'discord', label: 'Discord', allowedKey: 'discord' },
-    { key: 'github', label: 'Github', allowedKey: 'github' },
-    { key: 'email', label: 'Email', allowedKey: 'email' },
-    { key: 'btc', label: 'Btc', allowedKey: 'btc' },
-    { key: 'eth', label: 'Eth', allowedKey: 'eth' },
-    { key: 'ltc', label: 'Ltc', allowedKey: 'ltc' },
-    { key: 'doge', label: 'Doge', allowedKey: 'doge' },
-    { key: 'sol', label: 'Sol', allowedKey: 'sol' },
-    { key: 'sui', label: 'Sui', allowedKey: 'sui' },
-    { key: 'website', label: 'Website', allowedKey: 'website' },
-    { key: 'ipfs', label: 'Ipfs', allowedKey: 'ipfs' },
-    { key: 'arweave', label: 'Arweave', allowedKey: 'arweave' },
-];
+const METADATA_FIELDS = [
+    {
+        key: 'twitter/x',
+        label: 'Twitter/X',
+        allowedKey: 'twitterX',
+    },
+    {
+        key: 'discord',
+        label: 'Discord',
+        allowedKey: 'discord',
+    },
+    {
+        key: 'github',
+        label: 'Github',
+        allowedKey: 'github',
+    },
+    {
+        key: 'email',
+        label: 'Email',
+        allowedKey: 'email',
+    },
+    {
+        key: 'btc',
+        label: 'Btc',
+        allowedKey: 'btc',
+    },
+    {
+        key: 'eth',
+        label: 'Eth',
+        allowedKey: 'eth',
+    },
+    {
+        key: 'ltc',
+        label: 'Ltc',
+        allowedKey: 'ltc',
+    },
+    {
+        key: 'doge',
+        label: 'Doge',
+        allowedKey: 'doge',
+    },
+    {
+        key: 'sol',
+        label: 'Sol',
+        allowedKey: 'sol',
+    },
+    {
+        key: 'sui',
+        label: 'Sui',
+        allowedKey: 'sui',
+    },
+    {
+        key: 'website',
+        label: 'Website',
+        allowedKey: 'website',
+    },
+    {
+        key: 'ipfs',
+        label: 'Ipfs',
+        allowedKey: 'ipfs',
+    },
+    {
+        key: 'arweave',
+        label: 'Arweave',
+        allowedKey: 'arweave',
+    },
+] as const;
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     const account = useCurrentAccount();
@@ -81,102 +129,65 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
-    const nftId =
-        isNameSubname && nameRecord
-            ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
-            : nameRecord?.nameRecord.nftId;
-
-    const updates: NameUpdate[] = [];
-    const [metadataState, setMetadataState] = useState(() => {
-        const initialState: Record<string, { selected: boolean; data: string }> = {};
-
-        METADATA_CONFIG.forEach(({ key }) => {
+    const [metadata, setMetadata] = useState(() => {
+        const initial: Record<string, { selected: boolean; data: string }> = {};
+        METADATA_FIELDS.forEach(({ key }) => {
             const value = nameRecord?.nameRecord.data[key] || '';
-            initialState[key] = {
-                selected: !!value,
-                data: value,
-            };
+            initial[key] = { selected: !!value, data: value };
         });
-
-        return initialState;
+        return initial;
     });
 
-    const handleMetadataToggle = (key: string) => {
-        setMetadataState((prev) => ({
-            ...prev,
-            [key]: {
-                ...prev[key],
-                selected: !prev[key].selected,
-            },
-        }));
-
-        setAction({
-            type: metadataState[key].selected ? 'unset' : 'set',
-        });
-    };
-
-    const handleMetadataChange = (key: string, value: string) => {
-        setMetadataState((prev) => ({
-            ...prev,
-            [key]: {
-                ...prev[key],
-                data: value,
-            },
-        }));
-    };
-
-    const MetadataChips = () => (
-        <div className="flex flex-wrap gap-xs">
-            {METADATA_CONFIG.map(({ key, label }) => (
-                <Chip
-                    key={key}
-                    label={label}
-                    selected={metadataState[key].selected}
-                    type={metadataState[key].selected ? ChipType.Brand : ChipType.Outline}
-                    onClick={() => handleMetadataToggle(key)}
-                />
-            ))}
-        </div>
-    );
-
-    const MetadataInputs = () => (
-        <div className="flex flex-wrap gap-xs mt-xs">
-            {METADATA_CONFIG.map(
-                ({ key, label }) =>
-                    metadataState[key].selected && (
-                        <Input
-                            key={key}
-                            type={InputType.Text}
-                            label={label}
-                            value={metadataState[key].data}
-                            onChange={({ target: { value } }) => handleMetadataChange(key, value)}
-                        />
-                    ),
-            )}
-        </div>
-    );
     const [action, setAction] = useState<SetAction>({ type: 'none' });
-    if (nameRecord && nftId) {
-        METADATA_CONFIG.forEach(({ key, allowedKey }) => {
-            const metadata = metadataState[key];
+    const [shouldBuildUpdates, setShouldBuildUpdates] = useState(false);
 
-            if (action.type === 'set' && metadata.data) {
-                updates.push({
-                    type: 'set-data',
-                    nftId,
-                    key: ALLOWED_METADATA[allowedKey],
-                    value: metadata.data,
-                });
-            } else if (action.type === 'unset' && !metadata.selected) {
-                updates.push({
-                    type: 'unset-data',
-                    nftId,
-                    key: ALLOWED_METADATA[allowedKey],
-                });
-            }
-        });
-    }
+    const toggleMetadata = (key: string) => {
+        setMetadata((prev) => ({
+            ...prev,
+            [key]: { ...prev[key], selected: !prev[key].selected },
+        }));
+    };
+
+    const updateMetadataData = (key: string, data: string) => {
+        setMetadata((prev) => ({
+            ...prev,
+            [key]: { ...prev[key], data },
+        }));
+    };
+
+    const updates: NameUpdate[] = useMemo(() => {
+        if (!shouldBuildUpdates) return [];
+
+        const updatesArray: NameUpdate[] = [];
+        const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
+        const nftId =
+            isNameSubname && nameRecord
+                ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
+                : nameRecord?.nameRecord.nftId;
+
+        if (nameRecord && nftId) {
+            METADATA_FIELDS.forEach(({ key, allowedKey }) => {
+                const field = metadata[key];
+
+                if (action.type === 'set' && field.data && field.selected) {
+                    updatesArray.push({
+                        type: 'set-data',
+                        nftId,
+                        key: ALLOWED_METADATA[allowedKey],
+                        value: field.data,
+                    });
+                } else if (action.type === 'unset' && !field.selected) {
+                    updatesArray.push({
+                        type: 'unset-data',
+                        nftId,
+                        key: ALLOWED_METADATA[allowedKey],
+                    });
+                }
+            });
+        }
+
+        return updatesArray;
+    }, [shouldBuildUpdates, nameRecord, action, metadata, subnamesOwned]);
 
     const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
         address: account?.address || '',
@@ -192,50 +203,96 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             const tx = await signAndExecuteTransaction({
                 transaction: updateTransaction.transaction,
             });
-
             await iotaClient.waitForTransaction({ digest: tx.digest });
-
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onSuccess() {
+            setShouldBuildUpdates(false);
+            setAction({ type: 'none' });
             setOpen(false);
             toast.success(`Successfully updated metadata for ${normalizeIotaName(name)}`);
         },
         onError: (error) => {
+            setShouldBuildUpdates(false);
             toast.error(error.message);
         },
     });
 
+    const handleApplyClick = () => {
+        const hasSelected = Object.values(metadata).some((field) => field.selected);
+        const hasData = Object.values(metadata).some((field) => field.selected && field.data);
+
+        setAction({ type: hasSelected && hasData ? 'set' : 'unset' });
+        setShouldBuildUpdates(true);
+    };
+
+    useEffect(() => {
+        if (shouldBuildUpdates && updates.length > 0 && updateTransaction) {
+            saveMetadata();
+            setShouldBuildUpdates(false);
+        }
+    }, [shouldBuildUpdates, updates, updateTransaction, saveMetadata]);
+
+    useEffect(() => {
+        if (nameRecord?.nameRecord?.data) {
+            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
+            METADATA_FIELDS.forEach(({ key }) => {
+                const value = nameRecord.nameRecord.data[key] || '';
+                newMetadata[key] = { selected: !!value, data: value };
+            });
+            setMetadata(newMetadata);
+        }
+    }, [nameRecord?.nameRecord?.data]);
     const isLoading = isUpdating || isSigning || isSaving;
-    function handleClose() {
-        setOpen(false);
-    }
 
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
-                <Header title="Edit Metadata" onClose={handleClose} />
+                <Header title="Edit Metadata" onClose={() => setOpen(false)} />
                 <DialogBody>
                     <div className="flex flex-wrap gap-xs">Select type</div>
+
                     <div className="flex flex-wrap gap-xs">
-                        <MetadataChips />
+                        {METADATA_FIELDS.map(({ key, label }) => (
+                            <Chip
+                                key={key}
+                                label={label}
+                                selected={metadata[key]?.selected || false}
+                                type={metadata[key]?.selected ? ChipType.Brand : ChipType.Outline}
+                                onClick={() => toggleMetadata(key)}
+                            />
+                        ))}
                     </div>
+
                     <div className="flex flex-wrap gap-xs mt-xs">
-                        <MetadataInputs />
+                        {METADATA_FIELDS.map(
+                            ({ key, label }) =>
+                                metadata[key]?.selected && (
+                                    <Input
+                                        key={key}
+                                        type={InputType.Text}
+                                        label={label}
+                                        value={metadata[key]?.data || ''}
+                                        onChange={({ target: { value } }) =>
+                                            updateMetadataData(key, value)
+                                        }
+                                    />
+                                ),
+                        )}
                     </div>
+
                     <div className="flex w-full flex-row gap-x-xs mt-xs">
                         <Button
                             type={ButtonType.Secondary}
                             text="Cancel"
-                            onClick={handleClose}
+                            onClick={() => setOpen(false)}
                             fullWidth
                         />
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}
-                            text={'Apply'}
-                            // disabled={disableApplyButton}
+                            text="Apply"
                             type={ButtonType.Primary}
-                            onClick={() => saveMetadata()}
+                            onClick={handleApplyClick}
                             fullWidth
                         />
                     </div>
