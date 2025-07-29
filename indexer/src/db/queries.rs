@@ -66,6 +66,9 @@ pub fn add_bids_entry(
 pub fn get_names_for_bidder_address(
     conn: &mut SqliteConnection,
     address: &str,
+    page: Option<usize>,
+    page_size: usize,
+    sort: SortOrder,
 ) -> Result<Vec<String>> {
     let bidder = bidders::table
         .filter(bidders::address.eq(address))
@@ -79,11 +82,20 @@ pub fn get_names_for_bidder_address(
         None => return Ok(vec![]),
     };
 
-    Ok(Bid::belonging_to(&bidder)
+    let mut query = Bid::belonging_to(&bidder)
         .inner_join(names::table)
         .group_by(names::id)
         .select(names::name)
-        .load(conn)?)
+        .limit(page_size as _)
+        .offset((page.unwrap_or_default() * page_size) as _)
+        .into_boxed();
+
+    query = match sort {
+        SortOrder::Asc => query.order(names::name.asc()),
+        SortOrder::Desc => query.order(names::name.desc()),
+    };
+
+    Ok(query.load(conn)?)
 }
 
 pub fn get_auctions(
