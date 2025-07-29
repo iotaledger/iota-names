@@ -4,6 +4,22 @@ import Fastify from 'fastify';
 import * as z from 'zod';
 
 const BASE = readFileSync('./src/base.svg', 'utf-8');
+const ROBOTO_BASE64 = readFileSync('./src/fonts/roboto-flex.b64', 'utf-8');
+
+const FONT_STYLE = `
+  <style>
+    @font-face {
+      font-family: 'RobotoFlex';
+      src: url(data:font/woff2;charset=utf-8;base64,${ROBOTO_BASE64}) format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    text {
+      font-family: 'RobotoFlex', sans-serif;
+    }
+  </style>
+`;
 
 const formatter = new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -11,21 +27,71 @@ const formatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
 });
 
+function truncateWithEllipsis(text: string, maxLength: number): string {
+    return text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text;
+}
+function splitTextForSvg(text: string, maxLengthPerLine = 13, maxLines = 4): string[] {
+    const parts: string[] = [];
+
+    for (let i = 0; i < text.length && parts.length < maxLines; i += maxLengthPerLine) {
+        const isLastLine = parts.length === maxLines - 1;
+        const chunk = text.slice(i, i + maxLengthPerLine);
+        parts.push(
+            isLastLine
+                ? truncateWithEllipsis(chunk + text.slice(i + maxLengthPerLine), maxLengthPerLine)
+                : chunk,
+        );
+    }
+
+    return parts;
+}
+
 function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
     const formattedName = normalizeIotaName(name, 'at', {
-        truncateLongParts: true,
-        onlyFirstSubname: true,
+        truncateLongParts: false,
+        onlyFirstSubname: false,
     });
+    const fontSize = formattedName.length > 14 ? 15 : 20;
 
+    const lines = splitTextForSvg(formattedName.toUpperCase());
     const date = formatter.format(new Date(timestamp));
 
+    const lineHeightEm = 1.2;
+    const totalLineHeight = (lines.length - 1) * lineHeightEm;
+    const startDy = -(totalLineHeight / 2);
+
+    const contentLines = lines
+        .map((line, i) => {
+            const dy = i === 0 ? `${startDy}em` : `${lineHeightEm}em`;
+            return `<tspan x="50%" dy="${dy}">${line}</tspan>`;
+        })
+        .join('\n');
+
     const content = `
-        <text x="0" y="0" fill="white">
-            <tspan x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="17" font-weight="bold">${formattedName}</tspan>
-            <tspan x="150" y="200" font-family="sans-serif" font-size="8">${date}</tspan>
+        <text
+            x="50%"
+            y="50%"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="white"
+            font-family="sans-serif"
+            font-size="${fontSize}"
+            font-weight="bold"
+        >
+            ${contentLines}
         </text>
+        <text
+        x="150"
+        y="200"
+        font-family="sans-serif"
+        font-size="8"
+        fill="white"
+        >
+        ${date}
+       </text>
     `;
-    return BASE.replace('{{ CONTENT }}', content);
+
+    return BASE.replace('{{ CONTENT }}', FONT_STYLE + content);
 }
 
 const Params = z.object({
