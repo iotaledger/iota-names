@@ -212,35 +212,43 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [discountedPrice, setDiscountedPrice] = useState(balanceValidation?.totalPrice);
 
     useEffect(() => {
-        if (!applyCoupons || couponCodes.length === 0) {
-            setDiscountedPrice(balanceValidation?.totalPrice);
-            return;
-        }
-        iotaNamesClient
-            .calculateDiscountedPrice({
-                coupons: couponCodes,
-                name,
-                years: renewYears,
-                isRegistration: true,
-            })
-            .then(setDiscountedPrice)
-            .catch(() => setDiscountedPrice(balanceValidation?.totalPrice));
+        const applyDiscount = async () => {
+            if (!applyCoupons || couponCodes.length === 0) {
+                setDiscountedPrice(balanceValidation?.totalPrice);
+                return;
+            }
+
+            try {
+                const discount = await iotaNamesClient.calculateDiscountedPrice({
+                    coupons: couponCodes,
+                    name,
+                    years: renewYears,
+                    isRegistration: true,
+                });
+
+                console.log('Discounted price:', discount);
+                setDiscountedPrice(discount);
+            } catch {
+                setDiscountedPrice(balanceValidation?.totalPrice);
+            }
+        };
+        applyDiscount();
     }, [applyCoupons, couponCodes, renewYears, balanceValidation?.totalPrice]);
 
-    async function handleAddCoupon(couponCode: string) {
-        if (couponCodes.includes(couponCode)) {
+    async function handleAddCoupon(coupon: string) {
+        if (couponCodes.includes(coupon)) {
             setCoupons((currentCoupons) =>
-                currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
+                currentCoupons.filter((existingCoupon) => existingCoupon.code !== coupon),
             );
             return;
         }
 
         try {
-            const resolvedCoupon = await iotaNamesClient.resolveCoupon(couponCode);
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
             if (!resolvedCoupon) {
                 throw new Error();
             }
-            setCoupons((currentCoupons) => [...currentCoupons, { code: couponCode }]);
+            setCoupons((currentCoupons) => [...currentCoupons, { code: coupon }]);
         } catch {
             toast.error('Invalid coupon');
         }
