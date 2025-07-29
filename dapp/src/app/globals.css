@@ -29,7 +29,7 @@ body[data-scroll-locked] #top-navbar {
     .select-container:is(:active, :focus, :focus-visible) {
         outline: none;
         border: 1px solid transparent !important;
-        background-image: linear-gradient(#0a0d23, #0a0d23), var(--names-gradient-primary);
+        background-image: linear-gradient(#0f1228, #0f1228), var(--names-gradient-primary);
         background-origin: border-box;
         background-clip: padding-box, border-box;
     }
@@ -37,10 +37,13 @@ body[data-scroll-locked] #top-navbar {
     .btn.btn-outlined {
         border-radius: 120px;
     }
-
     .select-container,
     .input-container,
     .text-area-container {
         border-radius: 9px;
+    }
+
+    &.btn-alt-bg .btn.btn-outlined {
+        background-image: linear-gradient(#0a0d23, #0a0d23), var(--names-gradient-primary);
     }
 }
