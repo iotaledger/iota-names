@@ -28,20 +28,41 @@ export class IotaNamesTransaction {
     /**
      * Registers a name for a number of years.
      */
-    register(params: RegistrationParams): TransactionObjectArgument {
+    async register(params: RegistrationParams): Promise<TransactionObjectArgument> {
         const paymentIntent = this.initRegistration(params.name);
-        let price = this.getBasePrice(paymentIntent);
+
+        const couponCodes = params.couponCodes;
+        let discountedPrice: number | null = null;
+
+        if (couponCodes && couponCodes.length > 0) {
+            discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
+                name: params.name,
+                years: params.years,
+                isRegistration: true,
+                address: params.address,
+            });
+
+            for (const couponCode of couponCodes) {
+                this.applyCoupon(couponCode, paymentIntent);
+            }
+        }
+
+        const amounts = [discountedPrice ?? this.getBasePrice(paymentIntent)];
+        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), amounts);
+
         const receipt = this.generateReceipt({
             paymentIntent,
-            price,
+            payment,
             coinConfig: params.coinConfig || this.iotaNamesClient.config.coins.IOTA,
-            coin: params.coin,
         });
+
         const nft = this.finalizeRegister(receipt);
 
         if (params.years > 1) {
             this.renew({
                 nft,
+                name: params.name,
                 years: params.years - 1,
                 coinConfig: params.coinConfig,
                 coin: params.coin,
@@ -54,14 +75,33 @@ export class IotaNamesTransaction {
     /**
      * Renews an NFT for a number of years.
      */
-    renew(params: RenewalParams): void {
+    async renew(params: RenewalParams): Promise<void> {
         const paymentIntent = this.initRenewal(params.nft, params.years);
-        let price = this.getBasePrice(paymentIntent);
+
+        const couponCodes = params.couponCodes;
+        let discountedPrice: number | null = null;
+
+        if (couponCodes && couponCodes.length > 0) {
+            discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
+                name: params.name,
+                years: params.years,
+                isRegistration: false,
+                address: params.address,
+            });
+
+            for (const couponCode of couponCodes) {
+                this.applyCoupon(couponCode, paymentIntent);
+            }
+        }
+
+        const amounts = [discountedPrice ?? this.getBasePrice(paymentIntent)];
+        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), amounts);
+
         const receipt = this.generateReceipt({
             paymentIntent,
-            price,
+            payment,
             coinConfig: params.coinConfig || this.iotaNamesClient.config.coins.IOTA,
-            coin: params.coin,
         });
         this.finalizeRenew(receipt, params.nft);
     }
@@ -138,13 +178,23 @@ export class IotaNamesTransaction {
         });
     }
 
+    applyCoupon(couponCode: string, paymentIntent: TransactionObjectArgument) {
+        const config = this.iotaNamesClient.config;
+        return this.transaction.moveCall({
+            target: `${config.couponsPackageId}::coupon_house::apply_coupon`,
+            arguments: [
+                paymentIntent,
+                this.transaction.object(config.iotaNamesObjectId),
+                this.transaction.pure.string(couponCode),
+                this.transaction.object(IOTA_CLOCK_OBJECT_ID),
+            ],
+        });
+    }
+
     generateReceipt(params: ReceiptParams): TransactionObjectArgument {
-        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), [
-            params.price,
-        ]);
         const receipt = this.handleBasePayment(
             params.paymentIntent,
-            payment,
+            params.payment,
             params.coinConfig.type,
         );
         return receipt;
