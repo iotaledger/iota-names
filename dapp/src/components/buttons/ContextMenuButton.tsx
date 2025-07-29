@@ -22,7 +22,13 @@ export function ContextMenuButton({ options }: ContextMenuButtonProps) {
             <ContextMenuDropdown
                 visible={isVisible}
                 position={position}
-                options={options}
+                options={options.map((option) => ({
+                    ...option,
+                    onClick: () => {
+                        option.onClick?.();
+                        toggleMenu();
+                    },
+                }))}
                 dropdownRef={dropdownRef}
             />
         </>
