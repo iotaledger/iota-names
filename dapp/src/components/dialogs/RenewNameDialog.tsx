@@ -25,13 +25,18 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import {
+    GAS_BALANCE_TOO_LOW_ID,
+    GAS_BUDGET_ERROR_MESSAGES,
+    NOT_ENOUGH_BALANCE_ID,
+} from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
@@ -43,6 +48,7 @@ import {
 } from '@/lib/utils/names';
 
 import { CouponsWrapper } from '../CouponsWrapper';
+import type { UserSetCoupon } from './PurchaseNameDialog';
 
 function createRenewUpdates({
     nameRecord,
@@ -126,11 +132,13 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     const [renewYears, setRenewYears] = useState<number | undefined>();
-    const [coupons, setCoupons] = useState<string[]>([]);
+    const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
+
+    const couponStrings = coupons.map((c) => c.coupon);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
@@ -138,7 +146,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         ownedSubnames,
         renewYears,
         applyCoupons,
-        coupons,
+        coupons: couponStrings,
         address: account?.address,
     });
 
@@ -178,9 +186,9 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     });
 
     async function handleAddCoupon(coupon: string) {
-        if (coupons.includes(coupon)) {
+        if (couponStrings.includes(coupon)) {
             setCoupons((currentCoupons) =>
-                currentCoupons.filter((existingCoupon) => existingCoupon !== coupon),
+                currentCoupons.filter((existingCoupon) => existingCoupon.coupon !== coupon),
             );
             return;
         }
@@ -188,7 +196,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         try {
             const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
             if (!resolvedCoupon) throw new Error();
-            setCoupons((currentCoupons) => [...currentCoupons, coupon]);
+            setCoupons((currentCoupons) => [...currentCoupons, { coupon }]);
         } catch {
             toast.error('Invalid coupon');
         }
@@ -215,11 +223,37 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         label: `${i + 1} Year${i ? 's' : ''}`,
     }));
 
+    const handleErroredCoupon = useCallback((erroredCoupon: string) => {
+        setCoupons((currentCoupons) =>
+            currentCoupons.map((c) => (c.coupon === erroredCoupon ? { ...c, isError: true } : c)),
+        );
+    }, []);
+
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
             setRenewYears(1);
         }
     }, [renewOptions, renewYears, renewableYears]);
+
+    useEffect(() => {
+        if (updateNameError) {
+            if (
+                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+            } else {
+                const couponRegex = /^Coupon '([^']*)' validation failed/;
+                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+
+                if (couponMatch) {
+                    handleErroredCoupon(couponMatch);
+                }
+
+                toast.error(updateNameError.message);
+            }
+        }
+    }, [updateNameError, handleErroredCoupon]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
@@ -255,7 +289,6 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
                                     disabled={disableEdit}
-                                    errorMessage={updateNameError?.message}
                                 />
                             )}
                             {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
@@ -276,7 +309,10 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponsWrapper coupons={coupons} addCoupon={handleAddCoupon} />
+                                    <CouponsWrapper
+                                        coupons={coupons}
+                                        onAddCoupon={handleAddCoupon}
+                                    />
                                 )}
                             </div>
                         </div>

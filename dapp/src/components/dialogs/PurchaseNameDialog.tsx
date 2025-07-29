@@ -26,7 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -42,6 +42,11 @@ import { formatNanosToIota } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponsWrapper } from '../CouponsWrapper';
+
+export interface UserSetCoupon {
+    coupon: string;
+    isError?: boolean;
+}
 
 type PurchaseNameProps = {
     name: string;
@@ -60,7 +65,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
-    const [coupons, setCoupons] = useState<string[]>([]);
+    const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
 
     const {
@@ -87,7 +92,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             years: renewYears,
             setDefault: isDisplayName,
             address: account?.address,
-            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
+            ...(applyCoupons && coupons.length
+                ? { couponCodes: coupons.map((c) => c.coupon) }
+                : {}),
         });
     }
 
@@ -168,6 +175,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const expirationDate = getTargetExpirationDate(renewYears);
 
+    const handleErroredCoupon = useCallback((erroredCoupon: string) => {
+        setCoupons((currentCoupons) =>
+            currentCoupons.map((c) => (c.coupon === erroredCoupon ? { ...c, isError: true } : c)),
+        );
+    }, []);
+
     useEffect(() => {
         if (nameRecordError) {
             toast.error(nameRecordError.message);
@@ -182,10 +195,17 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             ) {
                 toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
             } else {
+                const couponRegex = /^Coupon '([^']*)' validation failed/;
+                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+
+                if (couponMatch) {
+                    handleErroredCoupon(couponMatch);
+                }
+
                 toast.error(updateNameError.message);
             }
         }
-    }, [updateNameError]);
+    }, [updateNameError, handleErroredCoupon]);
 
     const [discountedPrice, setDiscountedPrice] = useState(balanceValidation?.totalPrice);
 
@@ -206,17 +226,19 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     }, [applyCoupons, coupons, renewYears, balanceValidation?.totalPrice]);
 
     async function handleAddCoupon(coupon: string) {
-        if (coupons.includes(coupon)) {
+        if (coupons.some((c) => c.coupon === coupon)) {
             setCoupons((currentCoupons) =>
-                currentCoupons.filter((existingCoupon) => existingCoupon !== coupon),
+                currentCoupons.filter((existingCoupon) => existingCoupon.coupon !== coupon),
             );
             return;
         }
 
         try {
             const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
-            if (!resolvedCoupon) throw new Error();
-            setCoupons((currentCoupons) => [...currentCoupons, coupon]);
+            if (!resolvedCoupon) {
+                throw new Error();
+            }
+            setCoupons((currentCoupons) => [...currentCoupons, { coupon }]);
         } catch {
             toast.error('Invalid coupon');
         }
@@ -254,7 +276,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponsWrapper coupons={coupons} addCoupon={handleAddCoupon} />
+                                    <CouponsWrapper
+                                        coupons={coupons}
+                                        onAddCoupon={handleAddCoupon}
+                                    />
                                 )}
                             </div>
                             {!hasEnoughGas && (

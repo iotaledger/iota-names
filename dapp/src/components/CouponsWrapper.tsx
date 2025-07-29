@@ -4,21 +4,23 @@
 'use client';
 
 import { Close } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, Chip, ChipSize, Input, InputType } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, Chip, ChipSize, ChipType, Input, InputType } from '@iota/apps-ui-kit';
 import clsx from 'clsx';
 import { useState } from 'react';
 
-type Props = {
-    coupons: string[];
-    addCoupon: (code: string) => Promise<void>;
-};
+import type { UserSetCoupon } from './dialogs';
 
-export function CouponsWrapper({ coupons, addCoupon: onAddCoupon }: Props) {
+interface CouponsWrapperProps {
+    coupons: UserSetCoupon[];
+    onAddCoupon: (code: string) => Promise<void>;
+}
+
+export function CouponsWrapper({ coupons, onAddCoupon }: CouponsWrapperProps) {
     const [coupon, setCoupon] = useState<string>('');
 
     async function addCoupon() {
         const trimmedCoupon = coupon.trim();
-        if (!trimmedCoupon || coupons.includes(trimmedCoupon)) return;
+        if (!trimmedCoupon || coupons.some((c) => c.coupon === trimmedCoupon)) return;
         await onAddCoupon(trimmedCoupon);
         setCoupon('');
     }
@@ -26,13 +28,14 @@ export function CouponsWrapper({ coupons, addCoupon: onAddCoupon }: Props) {
     return (
         <div className={clsx('flex flex-col mt-sm', coupons.length && 'gap-y-sm')}>
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
-                {coupons.map((coupon) => (
+                {coupons.map(({ coupon, isError }) => (
                     <Chip
                         key={coupon}
                         label={coupon}
                         onClick={() => onAddCoupon(coupon)}
                         trailingElement={<Close />}
                         size={ChipSize.Small}
+                        type={isError ? ChipType.Error : undefined}
                     />
                 ))}
             </div>
@@ -49,7 +52,7 @@ export function CouponsWrapper({ coupons, addCoupon: onAddCoupon }: Props) {
                     onClearInput={() => setCoupon('')}
                 />
                 <ButtonUnstyled
-                    className="text-label-md bg-names-gradient-primary bg-clip-text text-transparent"
+                    className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md enabled:cursor-pointer disabled:opacity-40"
                     onClick={addCoupon}
                     disabled={!coupon.trim()}
                 >
