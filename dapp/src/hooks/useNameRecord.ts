@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isValidIotaName, NameRecord } from '@iota/iota-names-sdk';
+import { NameRecord, validateIotaName } from '@iota/iota-names-sdk';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -45,8 +45,9 @@ export function useNameRecord(
     return useQuery({
         queryKey: [...queryKey.nameRecord(name), price],
         async queryFn() {
-            if (!isValidIotaName(name)) {
-                throw new Error('Name is not valid.');
+            const validationError = validateIotaName(name);
+            if (validationError) {
+                throw new Error(validationError);
             }
 
             const nameRecord = await iotaNamesClient.getNameRecord(name);

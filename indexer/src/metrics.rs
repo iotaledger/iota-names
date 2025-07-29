@@ -14,143 +14,143 @@ use tokio_util::sync::CancellationToken;
 use tracing::info;
 
 pub(crate) struct IotaNamesMetrics {
-    pub total_name_records_added: IntCounter,
-    pub total_name_records_removed: IntCounter,
-    pub iota_names_balance: IntGauge,
-    pub total_node_subnames: IntGauge,
-    pub total_leaf_subnames: IntGauge,
-    pub total_auction_started: IntGauge,
-    pub total_auction_finalized: IntGauge,
-    pub total_target_address: IntGauge,
-    pub total_default_name: IntGauge,
-    pub name_length_distribution: IntGaugeVec,
+    pub records_added: IntCounter,
+    pub records_removed: IntCounter,
+    pub balance: IntGauge,
+    pub node_subnames: IntGauge,
+    pub leaf_subnames: IntGauge,
+    pub auctions_started: IntGauge,
+    pub auctions_finalized: IntGauge,
+    pub target_addresses: IntGauge,
+    pub default_names: IntGauge,
+    pub length_distribution: IntGaugeVec,
     pub renewal_years_distribution: IntCounterVec,
-    pub name_depth_distribution: IntGaugeVec,
+    pub depth_distribution: IntGaugeVec,
     pub user_data_distribution: IntGaugeVec,
     pub auction_final_prices: Histogram,
     pub auction_durations: Histogram,
     pub auction_house_balance: IntGauge,
     pub auction_bid_count_distribution: IntGaugeVec,
-    pub total_percentage_discount: IntGauge,
-    pub total_fixed_discount: IntGauge,
+    pub percentage_discounts: IntGauge,
+    pub fixed_discounts: IntGauge,
 }
 
 impl IotaNamesMetrics {
     pub fn new(registry: &Registry) -> Self {
         Self {
-            total_name_records_added: register_int_counter_with_registry!(
-                "total_name_records_added",
+            records_added: register_int_counter_with_registry!(
+                "iota_names_records_added",
                 "The total number of name records added to the registry",
                 registry,
             )
             .unwrap(),
-            total_name_records_removed: register_int_counter_with_registry!(
-                "total_name_records_removed",
+            records_removed: register_int_counter_with_registry!(
+                "iota_names_records_removed",
                 "The total number of name records removed from the registry",
                 registry,
             )
             .unwrap(),
-            iota_names_balance: register_int_gauge_with_registry!(
+            balance: register_int_gauge_with_registry!(
                 "iota_names_balance",
                 "The balance held in IOTA-Names",
                 registry,
             )
             .unwrap(),
-            total_node_subnames: register_int_gauge_with_registry!(
-                "total_node_subnames",
+            node_subnames: register_int_gauge_with_registry!(
+                "iota_names_node_subnames",
                 "The total number of node subnames in the registry",
                 registry,
             )
             .unwrap(),
-            total_leaf_subnames: register_int_gauge_with_registry!(
-                "total_leaf_subnames",
+            leaf_subnames: register_int_gauge_with_registry!(
+                "iota_names_leaf_subnames",
                 "The total number of leaf subnames in the registry",
                 registry,
             )
             .unwrap(),
-            total_auction_started: register_int_gauge_with_registry!(
-                "total_auction_started",
+            auctions_started: register_int_gauge_with_registry!(
+                "iota_names_auctions_started",
                 "The total number of auction that were started",
                 registry,
             )
             .unwrap(),
-            total_auction_finalized: register_int_gauge_with_registry!(
-                "total_auction_finalized",
+            auctions_finalized: register_int_gauge_with_registry!(
+                "iota_names_auctions_finalized",
                 "The total number of auction that were finalized",
                 registry,
             )
             .unwrap(),
-            total_target_address: register_int_gauge_with_registry!(
-                "total_target_address",
+            target_addresses: register_int_gauge_with_registry!(
+                "iota_names_target_addresses",
                 "The total number of target addresses set",
                 registry,
             )
             .unwrap(),
-            total_default_name: register_int_gauge_with_registry!(
-                "total_default_name",
+            default_names: register_int_gauge_with_registry!(
+                "iota_names_default_names",
                 "The total number of default names set",
                 registry,
             )
             .unwrap(),
-            name_length_distribution: register_int_gauge_vec_with_registry!(
-                "name_length_distribution",
+            length_distribution: register_int_gauge_vec_with_registry!(
+                "iota_names_length_distribution",
                 "The length of second level names",
                 &["length"],
                 registry,
             )
             .unwrap(),
             renewal_years_distribution: register_int_counter_vec_with_registry!(
-                "renewal_years_distribution",
+                "iota_names_renewal_years_distribution",
                 "The number of years per renewal",
                 &["years"],
                 registry,
             )
             .unwrap(),
-            name_depth_distribution: register_int_gauge_vec_with_registry!(
-                "name_depth_distribution",
+            depth_distribution: register_int_gauge_vec_with_registry!(
+                "iota_names_depth_distribution",
                 "Distribution of names depth",
                 &["depth"],
                 registry,
             )
             .unwrap(),
             user_data_distribution: register_int_gauge_vec_with_registry!(
-                "user_data_distribution",
+                "iota_names_user_data_distribution",
                 "Distribution of user data",
-                &["depth"],
+                &["key"],
                 registry,
             )
             .unwrap(),
             auction_final_prices: Histogram::new_in_registry(
-                "auction_final_prices",
+                "iota_names_auction_final_prices",
                 "The final prices paid for names in auctions",
                 registry,
             ),
             auction_durations: Histogram::new_in_registry(
-                "auction_durations",
+                "iota_names_auction_durations",
                 "The durations of auctions",
                 registry,
             ),
             auction_bid_count_distribution: register_int_gauge_vec_with_registry!(
-                "auction_bid_count_distribution",
+                "iota_names_auction_bid_count_distribution",
                 "Distribution of total bid count per auction",
                 &["bid_count"],
                 registry,
             )
             .unwrap(),
             auction_house_balance: register_int_gauge_with_registry!(
-                "auction_house_balance",
+                "iota_names_auction_house_balance",
                 "The balance held in the auction house",
                 registry,
             )
             .unwrap(),
-            total_percentage_discount: register_int_gauge_with_registry!(
-                "total_percentage_discount",
+            percentage_discounts: register_int_gauge_with_registry!(
+                "iota_names_percentage_discounts",
                 "The total amount of percentage discount applied",
                 registry,
             )
             .unwrap(),
-            total_fixed_discount: register_int_gauge_with_registry!(
-                "total_fixed_discount",
+            fixed_discounts: register_int_gauge_with_registry!(
+                "iota_names_fixed_discounts",
                 "The total amount of fixed discount applied",
                 registry,
             )
@@ -183,30 +183,26 @@ impl IotaNamesMetrics {
         }
 
         // Restore simple counters and gauges
+        restore_metric!("iota_names_records_added", records_added, counter);
+        restore_metric!("iota_names_records_removed", records_removed, counter);
+        restore_metric!("iota_names_balance", balance, gauge);
+        restore_metric!("iota_names_node_subnames", node_subnames, gauge);
+        restore_metric!("iota_names_leaf_subnames", leaf_subnames, gauge);
+        restore_metric!("iota_names_auctions_started", auctions_started, gauge);
+        restore_metric!("iota_names_auctions_finalized", auctions_finalized, gauge);
+        restore_metric!("iota_names_target_addresses", target_addresses, gauge);
+        restore_metric!("iota_names_default_names", default_names, gauge);
         restore_metric!(
-            "total_name_records_added",
-            total_name_records_added,
-            counter
-        );
-        restore_metric!(
-            "total_name_records_removed",
-            total_name_records_removed,
-            counter
-        );
-        restore_metric!("iota_names_balance", iota_names_balance, gauge);
-        restore_metric!("total_node_subnames", total_node_subnames, gauge);
-        restore_metric!("total_leaf_subnames", total_leaf_subnames, gauge);
-        restore_metric!("total_auction_started", total_auction_started, gauge);
-        restore_metric!("total_auction_finalized", total_auction_finalized, gauge);
-        restore_metric!("total_target_address", total_target_address, gauge);
-        restore_metric!("total_default_name", total_default_name, gauge);
-        restore_metric!("auction_house_balance", auction_house_balance, gauge);
-        restore_metric!(
-            "total_percentage_discount",
-            total_percentage_discount,
+            "iota_names_auction_house_balance",
+            auction_house_balance,
             gauge
         );
-        restore_metric!("total_fixed_discount", total_fixed_discount, gauge);
+        restore_metric!(
+            "iota_names_percentage_discounts",
+            percentage_discounts,
+            gauge
+        );
+        restore_metric!("iota_names_fixed_discounts", fixed_discounts, gauge);
 
         // Restore vector metrics
         self.restore_labeled_metrics(&client, prometheus_url)
@@ -266,31 +262,31 @@ impl IotaNamesMetrics {
 
         // Restore vector metrics
         restore_vector_metric!(
-            "name_length_distribution",
+            "iota_names_length_distribution",
             "length",
-            name_length_distribution,
+            length_distribution,
             gauge
         );
         restore_vector_metric!(
-            "name_depth_distribution",
+            "iota_names_depth_distribution",
             "depth",
-            name_depth_distribution,
+            depth_distribution,
             gauge
         );
         restore_vector_metric!(
-            "user_data_distribution",
+            "iota_names_user_data_distribution",
             "depth",
             user_data_distribution,
             gauge
         );
         restore_vector_metric!(
-            "renewal_years_distribution",
+            "iota_names_renewal_years_distribution",
             "years",
             renewal_years_distribution,
             counter
         );
         restore_vector_metric!(
-            "auction_bid_count_distribution",
+            "iota_names_auction_bid_count_distribution",
             "bid_count",
             auction_bid_count_distribution,
             gauge

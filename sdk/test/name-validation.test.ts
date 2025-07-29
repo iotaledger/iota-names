@@ -3,7 +3,7 @@
 
 import { describe, expect, test } from 'vitest';
 
-import { isValidIotaName, normalizeIotaName } from '../src/utils';
+import { isValidIotaName, normalizeIotaName, validateIotaName } from '../src/utils';
 
 describe('Name validation', () => {
     test('should be valid dot-style', () => {
@@ -64,6 +64,64 @@ describe('Name validation', () => {
     });
 });
 
+describe('Name validation with error', () => {
+    test('should be valid', () => {
+        expect(validateIotaName('test.iota')).toBeNull();
+        expect(validateIotaName('sub.test.iota')).toBeNull();
+        expect(validateIotaName('more.sub.test.iota')).toBeNull();
+
+        expect(validateIotaName('test-dash.iota')).toBeNull();
+        expect(validateIotaName('sub-dash.test-dash.iota')).toBeNull();
+
+        expect(validateIotaName('test101.iota')).toBeNull();
+        expect(validateIotaName('sub-101.9test.iota')).toBeNull();
+
+        expect(validateIotaName('911.iota')).toBeNull();
+    });
+
+    test('should not start or end with dashes', () => {
+        expect(validateIotaName('-test.iota')).not.toBeNull();
+        expect(validateIotaName('test-.iota')).not.toBeNull();
+        expect(validateIotaName('sub-.test@test')).not.toBeNull();
+        expect(validateIotaName('-sub-test.test@test')).not.toBeNull();
+    });
+
+    test('should not contain invalid characters', () => {
+        expect(validateIotaName('@test.iota')).not.toBeNull();
+        expect(validateIotaName('test#@test')).not.toBeNull();
+        expect(validateIotaName('sub^.test.iota')).not.toBeNull();
+        expect(validateIotaName('one&two.test@test')).not.toBeNull();
+        expect(validateIotaName('one*two.test.iota')).not.toBeNull();
+        expect(validateIotaName('(psst).iota')).not.toBeNull();
+    });
+
+    test('should contain at least two labels dot-style', () => {
+        expect(validateIotaName('iota')).not.toBeNull();
+        expect(validateIotaName('test')).not.toBeNull();
+    });
+
+    test('should be invalid', () => {
+        expect(validateIotaName('Name.iota')).not.toBeNull();
+    });
+
+    test('should check the length', () => {
+        expect(validateIotaName('name.iota', 10)).toEqual('Name must be 10-64 characters long');
+        expect(validateIotaName('nameeeeeeeeeee.iota', 3, 10)).toEqual(
+            'Name must be 3-10 characters long',
+        );
+        expect(
+            validateIotaName(
+                'veryveryveryveryveryveryveryveryveryveryveryverylongnamewithmorethan64chars.iota',
+            ),
+        ).toEqual('Name must be 3-64 characters long');
+    });
+
+    test('should check the subnames', () => {
+        expect(validateIotaName('abcd.efgh.iota')).toBeNull();
+        expect(validateIotaName('abcd.efgh.iota', 3, 64, false)).not.toBeNull();
+    });
+});
+
 describe('Name normalization', () => {
     test('should normalize as the same value dot-style', () => {
         expect(normalizeIotaName('test.iota', 'dot')).toEqual('test.iota');
@@ -109,5 +167,63 @@ describe('Name normalization', () => {
         expect(() => normalizeIotaName('.iota')).toThrow('Invalid IOTA name ".iota"');
         expect(() => normalizeIotaName('space .iota')).toThrow('Invalid IOTA name "space .iota"');
         expect(() => normalizeIotaName('empty. .iota')).toThrow('Invalid IOTA name "empty. .iota"');
+    });
+
+    test('should truncate long parts dot-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccccccccccccccccccccccccc.ddd.iota', 'dot', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbbbb.cccccc...cccccc.ddd.iota');
+        expect(
+            normalizeIotaName(
+                'aaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccc.ddd.iota',
+                'dot',
+                { truncateLongParts: true },
+            ),
+        ).toEqual('aaaa.bbbbbb...bbbbbb.cccccc...cccccc.ddd.iota');
+        expect(
+            normalizeIotaName('aaaa.bbbb.cccc.dddddddddddddddddddddddddd.iota', 'dot', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbb.cccc.dddddd...dddddd.iota');
+    });
+
+    test('should truncate long parts at-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccccccccccccccccccccccccc.ddd.iota', 'at', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbbbb.cccccc...cccccc@ddd');
+        expect(
+            normalizeIotaName(
+                'aaaa.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.cccccccccccccccccccccccccccc.ddd.iota',
+                'at',
+                { truncateLongParts: true },
+            ),
+        ).toEqual('aaaa.bbbbbb...bbbbbb.cccccc...cccccc@ddd');
+        expect(
+            normalizeIotaName('aaaa.bbbb.cccc.dddddddddddddddddddddddddd.iota', 'at', {
+                truncateLongParts: true,
+            }),
+        ).toEqual('aaaa.bbbb.cccc@dddddd...dddddd');
+    });
+
+    test('should only select fist subname dot-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', { onlyFirstSubname: true }),
+        ).toEqual('aaaa...ddd.iota');
+        expect(normalizeIotaName('aaaa.bbbb.iota', 'dot', { onlyFirstSubname: true })).toEqual(
+            'aaaa.bbbb.iota',
+        );
+    });
+
+    test('should only select fist subname at-style', () => {
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', { onlyFirstSubname: true }),
+        ).toEqual('aaaa...@ddd');
+        expect(normalizeIotaName('aaaa.bbbb.iota', 'at', { onlyFirstSubname: true })).toEqual(
+            'aaaa@bbbb',
+        );
     });
 });

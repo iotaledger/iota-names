@@ -28,7 +28,7 @@ export const fetchOwnedNames = async () => {
             filter: {
                 MatchAll: [
                     {
-                        StructType: `${packageInfo.packageId}::iota_names_registration::IotaNamesRegistration`,
+                        StructType: `${packageInfo.packageId}::name_registration::NameRegistration`,
                     },
                 ],
             },

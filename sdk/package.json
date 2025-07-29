@@ -2,10 +2,9 @@
     "name": "@iota/iota-names-sdk",
     "author": "IOTA Foundation <info@iota.org>",
     "description": "IOTA-Names SDK",
-    "version": "0.7.2",
+    "version": "0.0.0",
     "license": "Apache-2.0",
     "private": false,
-    "type": "commonjs",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.js",
     "types": "./dist/cjs/index.d.ts",
@@ -21,7 +20,6 @@
     },
     "sideEffects": false,
     "files": [
-        "CHANGELOG.md",
         "dist",
         "src"
     ],
@@ -39,12 +37,10 @@
         "run:example": "tsx"
     },
     "engines": {
-        "node": ">=16"
+        "node": ">=20"
     },
-    "dependencies": {
-        "@iota/iota-sdk": "0.0.0-experimental-20250620081851",
-        "axios": "^0.24.0",
-        "axios-retry": "^3.9.1"
+    "peerDependencies": {
+        "@iota/iota-sdk": "0.0.0-experimental-20250620081851"
     },
     "devDependencies": {
         "@iota/build-scripts": "workspace:^",

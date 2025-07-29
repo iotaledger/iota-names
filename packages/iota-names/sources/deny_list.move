@@ -12,7 +12,7 @@ use std::string::String;
 #[error]
 const ENoLabelsInList: vector<u8> = b"No labels in the passed list.";
 
-/// A wrapper that holds the reserved and blocked labels.
+/// A type that holds the reserved and blocked labels. Attached to the `IotaNames` object as dynamic field.
 public struct DenyList has store {
     // The list of reserved labels.
     reserved: Table<String, bool>,
@@ -23,6 +23,7 @@ public struct DenyList has store {
 /// Authorization witness to call protected functions of `iota_names`.
 public struct DenyListAuth has drop {}
 
+/// Sets up the deny list as admin.
 public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext) {
     iota_names::add_registry(
         cap,
@@ -34,7 +35,7 @@ public fun setup(iota_names: &mut IotaNames, cap: &AdminCap, ctx: &mut TxContext
     );
 }
 
-/// Check for a reserved name.
+/// Checks for a reserved name.
 public fun is_reserved_name(iota_names: &IotaNames, name: &Name): bool {
     let len = name.number_of_levels();
     let mut index = 1;
@@ -64,7 +65,7 @@ public fun is_blocked_name(iota_names: &IotaNames, name: &Name): bool {
     false
 }
 
-/// Add a list of reserved labels to the list as admin.
+/// Adds a list of reserved labels to the list as admin.
 public fun add_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_add_labels_to_list(
         &mut deny_list_mut(iota_names).reserved,
@@ -72,7 +73,7 @@ public fun add_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labels:
     );
 }
 
-/// Add a list of blocked labels to the list as admin.
+/// Adds a list of blocked labels to the list as admin.
 public fun add_blocked_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_add_labels_to_list(
         &mut deny_list_mut(iota_names).blocked,
@@ -80,7 +81,7 @@ public fun add_blocked_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: 
     );
 }
 
-/// Remove a list of labels from the reserved list as admin.
+/// Removes a list of labels from the reserved list as admin.
 public fun remove_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_remove_labels_from_list(
         &mut deny_list_mut(iota_names).reserved,
@@ -88,7 +89,7 @@ public fun remove_reserved_labels(iota_names: &mut IotaNames, _: &AdminCap, labe
     );
 }
 
-/// Remove a list of labels from the blocked list as admin.
+/// Removes a list of labels from the blocked list as admin.
 public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, labels: vector<String>) {
     internal_remove_labels_from_list(
         &mut deny_list_mut(iota_names).blocked,
@@ -96,7 +97,7 @@ public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, labels
     );
 }
 
-/// Get immutable access to the registry.
+/// Gets immutable access to the registry.
 fun deny_list(iota_names: &IotaNames): &DenyList {
     iota_names.registry()
 }

@@ -3,28 +3,41 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
+    Checkbox,
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
+    DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
+    Panel,
+    Select,
+    SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { queryKey } from '@/hooks';
-import { useBalance } from '@/hooks/useBalance';
+import { NameUpdate, queryKey, useBalanceValidation, useUpdateNameTransaction } from '@/hooks';
+import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import { useRegisterNameTransaction } from '@/hooks/useRegisterNameTransaction';
 import {
     GAS_BALANCE_TOO_LOW_ID,
     GAS_BUDGET_ERROR_MESSAGES,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota } from '@/lib/utils';
+import { getTargetExpirationDate } from '@/lib/utils/names';
 
 type PurchaseNameProps = {
     name: string;
@@ -37,25 +50,53 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const account = useCurrentAccount();
+    const { data: coreConfig } = useCoreConfig();
+
+    const [renewYears, setRenewYears] = useState<number>(1);
+    const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+
     const {
         data: nameRecordData,
         isLoading: isNameRecordLoading,
         error: nameRecordError,
-    } = useNameRecord(name);
+    } = useNameRecord(name, {
+        price: {
+            years: renewYears,
+            isRegistration: true,
+        },
+    });
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
     const isConnected = !!account?.address;
 
+    const updates: NameUpdate[] = [];
+
+    if (nameRecordData?.type === 'available' && price > 0) {
+        updates.push({
+            type: 'register-name',
+            name: name,
+            price: price,
+            years: renewYears,
+            setDefault: isDisplayName,
+        });
+    }
+
     const {
-        data: registerNameData,
-        isLoading: isRegisterNameLoading,
-        error: registerNameError,
-    } = useRegisterNameTransaction(account?.address || '', name, price);
+        data: updateNameData,
+        isLoading: isUpdateNameLoading,
+        error: updateNameError,
+    } = useUpdateNameTransaction({
+        address: account?.address || '',
+        updates: updates,
+    });
+
+    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
+        updateNameData?.builtTx ?? null,
+        price,
+    );
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
-
-    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
 
     const {
         mutateAsync: handlePurchase,
@@ -63,9 +104,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         isPending: isSigning,
     } = useMutation({
         async mutationFn() {
-            if (!registerNameData || nameRecordData?.type !== 'available') return;
+            if (!updateNameData || nameRecordData?.type !== 'available') return;
             const transactionResult = await signAndExecuteTransaction({
-                transaction: registerNameData.transaction,
+                transaction: updateNameData.transaction,
             });
 
             await client.waitForTransaction({
@@ -76,10 +117,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-
+            toast.success(
+                `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
+            );
             setOpen(false);
 
             if (onPurchase) onPurchase();
+        },
+        onError(error) {
+            toast.error(error.message);
         },
     });
 
@@ -89,106 +135,160 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     if (!isConnected) return null;
 
-    const totalBalance = Number(coinBalance?.totalBalance) || 0;
-    const totalGas = Number(registerNameData?.gasSummary?.totalGas) || 0;
-    const totalPrice = nameRecordData?.type === 'available' ? nameRecordData.price + totalGas : 0;
-    const hasBalance = totalBalance > totalPrice;
+    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
+        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
+              id: String(i + 1),
+              label: `${i + 1} Year${i ? 's' : ''}`,
+          }))
+        : [];
 
     const hasEnoughGas =
-        !registerNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !registerNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
 
     const canPay =
-        isConnected && hasEnoughGas && hasBalance && nameRecordData?.type === 'available';
+        isConnected &&
+        hasEnoughGas &&
+        balanceValidation?.hasBalance &&
+        nameRecordData?.type === 'available';
 
-    const hasErrors = registerNameError || coinBalanceError || purchaseError;
+    const hasErrors = updateNameError || balanceValidationError || purchaseError;
 
-    const isLoading = isNameRecordLoading || isRegisterNameLoading || isSigning;
+    const isLoading = isNameRecordLoading || isUpdateNameLoading || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
+    const expirationDate = getTargetExpirationDate(renewYears);
+
+    useEffect(() => {
+        if (nameRecordError) {
+            toast.error(nameRecordError.message);
+        }
+    }, [nameRecordError]);
+
+    useEffect(() => {
+        if (updateNameError) {
+            if (
+                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+            } else {
+                toast.error(updateNameError.message);
+            }
+        }
+    }, [updateNameError]);
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
-                <Header title="Buy name" onClose={closeDialog} titleCentered />
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
+                <Header title="Register name" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col items-center gap-y-md">
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Name:</span>
-                            <span className="text-body-md font-mono">{name}</span>
+                    <div className="flex flex-col justify-between h-full items-center">
+                        <div className="flex flex-col w-full gap-y-md">
+                            <Panel bgColor="bg-names-neutral-12">
+                                <div className="px-md py-lg">
+                                    <span className="text-names-neutral-100 text-headline-sm break-words overflow-hidden">
+                                        {normalizeIotaName(name)}
+                                    </span>
+                                </div>
+                            </Panel>
+                            <div className="px-md py-sm border-t border-names-neutral-6">
+                                <Select
+                                    value={renewYears.toString()}
+                                    options={RENEW_OPTIONS}
+                                    onValueChange={(value) => {
+                                        setRenewYears(parseInt(value, 10));
+                                    }}
+                                    placeholder="Select renewal period"
+                                />
+                            </div>
                         </div>
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Registration time:</span>
-                            <span className="text-body-md font-mono">1 year</span>
-                        </div>
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Price:</span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading && canPay
-                                    ? formatNanosToIota(nameRecordData.price, {
-                                          formatRounded: false,
-                                      })
-                                    : '-'}
-                            </span>
-                        </div>
+                        <div className="flex flex-col w-full gap-y-md">
+                            <Panel bgColor="bg-names-neutral-10">
+                                <div className="flex flex-row gap-x-sm w-full p-md">
+                                    <Checkbox
+                                        isChecked={isDisplayName}
+                                        onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                        label="Set name as Display Name"
+                                    />
+                                </div>
+                            </Panel>
+                            <div className="flex flex-row gap-x-sm w-full">
+                                {!isLoading &&
+                                    balanceValidation &&
+                                    typeof balanceValidation?.totalPrice === 'number' &&
+                                    balanceValidation.totalPrice > 0 && (
+                                        <>
+                                            <DisplayStats
+                                                label="Registration Expires"
+                                                value={expirationDate}
+                                            />
+                                            <DisplayStats
+                                                label="Total Due"
+                                                value={formatNanosToIota(
+                                                    balanceValidation.totalPrice,
+                                                )}
+                                            />
+                                        </>
+                                    )}
+                            </div>
 
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">Gas:</span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalGas, { formatRounded: false })
-                                    : '-'}
-                            </span>
+                            {!hasEnoughGas && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={
+                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
+                                    }
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {purchaseError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={purchaseError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {nameRecordError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={nameRecordError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            {hasEnoughGas && updateNameError && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={updateNameError.message}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                />
+                            )}
+                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={closeDialog}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    type={ButtonType.Primary}
+                                    text="Buy"
+                                    onClick={() => handlePurchase()}
+                                    disabled={!canRegister}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
-
-                        <div className="flex items-baseline justify-center gap-x-1">
-                            <span className="text-body-md text-neutral-60">
-                                Total price (Name + gas):
-                            </span>
-                            <span className="text-body-md font-mono">
-                                {!isLoading
-                                    ? formatNanosToIota(totalPrice, {
-                                          formatRounded: false,
-                                      })
-                                    : '-'}
-                            </span>
-                        </div>
-                        <div className="flex w-full flex-row gap-x-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={closeDialog}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                type={ButtonType.Primary}
-                                text="Buy"
-                                onClick={() => handlePurchase()}
-                                disabled={!canRegister}
-                                fullWidth
-                            />
-                        </div>
-                        {!hasEnoughGas && (
-                            <div className="text-center text-red-400 text-sm">
-                                {GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]}
-                            </div>
-                        )}
-                        {purchaseError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {purchaseError.message}
-                            </div>
-                        )}
-                        {nameRecordError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {nameRecordError.message}
-                            </div>
-                        )}
-                        {hasEnoughGas && registerNameError && (
-                            <div className="text-center text-red-400 text-sm">
-                                {registerNameError.message}
-                            </div>
-                        )}
                     </div>
                 </DialogBody>
             </DialogContent>

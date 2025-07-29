@@ -14,8 +14,8 @@ use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 
 // The migrations directory that contains the SQL migration files.
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
-// The filename for the sqlite database.
-pub const AUCTIONS_DB_FILENAME: &str = "AUCTIONS_DB";
+// The path for the sqlite database.
+pub const AUCTIONS_DB_PATH: &str = "data/AUCTIONS_DB";
 
 pub type PoolConnection = PooledConnection<ConnectionManager<SqliteConnection>>;
 
@@ -85,12 +85,14 @@ impl DbConnectionPool {
     ///
     /// Resolves the filename URL from the environment.
     pub fn new(pool_config: DbConnectionPoolConfig) -> Result<Self> {
-        Self::new_with_filename(AUCTIONS_DB_FILENAME, pool_config)
+        Self::new_with_path(AUCTIONS_DB_PATH, pool_config)
     }
 
-    /// Build a new pool of connections to the given filename.
-    pub fn new_with_filename(filename: &str, pool_config: DbConnectionPoolConfig) -> Result<Self> {
-        let manager = ConnectionManager::new(filename);
+    /// Build a new pool of connections to the given path.
+    pub fn new_with_path(path: &str, pool_config: DbConnectionPoolConfig) -> Result<Self> {
+        // Create the data directory if it doesn't exist
+        std::fs::create_dir_all("./data")?;
+        let manager = ConnectionManager::new(path);
 
         Ok(Self(
             Pool::builder()
@@ -99,7 +101,7 @@ impl DbConnectionPool {
                 .connection_customizer(Box::new(pool_config))
                 .build(manager)
                 .map_err(|e| {
-                    anyhow!("failed to initialize connection pool for {filename} with error: {e:?}")
+                    anyhow!("failed to initialize connection pool for {path} with error: {e:?}")
                 })?,
         ))
     }

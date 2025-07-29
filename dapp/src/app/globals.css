@@ -9,9 +9,15 @@
     @apply text-names-primary-100;
 }
 
-.landing-background {
-    background:
-        linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-        url('/hero-landing.jpg') no-repeat center center fixed;
-    background-size: cover;
+body[data-scroll-locked] #top-navbar {
+    padding-right: var(--removed-body-scroll-bar-size);
+}
+
+.name-card-selected::before {
+    --gradient-border-width: 1px;
+    content: '';
+    height: calc(100% + calc(var(--gradient-border-width) * 2));
+    width: calc(100% + calc(var(--gradient-border-width) * 2));
+
+    @apply absolute inset-0 rounded-[13px] z-[-1] -translate-x-[1px] -translate-y-[1px] bg-names-gradient-primary;
 }

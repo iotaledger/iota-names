@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useIotaClient } from '@iota/dapp-kit';
-import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
+import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { queryKey } from './queryKey';
 
@@ -17,13 +18,21 @@ interface UseUpdateNameTransactionOptions {
 
 export type NameUpdate =
     | {
-          type: 'set-avatar';
+          type: 'set-data';
           nftId: string;
-          avatarNftId: string;
+          key: string;
+          value: string;
+          isSubname?: boolean;
+      }
+    | {
+          type: 'unset-data';
+          nftId: string;
+          key: string;
+          isSubname?: boolean;
       }
     | {
           type: 'set-target-address';
-          address: string;
+          address: string | undefined;
           isSubname: boolean;
           nftId: string;
       }
@@ -63,6 +72,13 @@ export type NameUpdate =
           type: 'renew-subname';
           nftId: string;
           expirationTimestampMs: number;
+      }
+    | {
+          type: 'register-name';
+          name: string;
+          price: number;
+          years: number;
+          setDefault: boolean;
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -77,11 +93,18 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
 
             for (const update of updates) {
                 switch (update.type) {
-                    case 'set-avatar':
+                    case 'set-data':
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
-                            key: ALLOWED_METADATA.avatar,
-                            value: update.avatarNftId,
+                            key: update.key,
+                            value: update.value,
+                        });
+                        break;
+                    case 'unset-data':
+                        iotaNamesTx.unsetUserData({
+                            nft: update.nftId,
+                            key: update.key,
+                            isSubname: update.isSubname,
                         });
                         break;
                     case 'set-target-address':
@@ -134,16 +157,47 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             expirationTimestampMs: update.expirationTimestampMs,
                         });
                         break;
+                    case 'register-name':
+                        const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
+                        const nft = iotaNamesTx.register({
+                            name: update.name,
+                            years: update.years,
+                            coin,
+                        });
+                        if (update.setDefault) {
+                            iotaNamesTx.setTargetAddress({
+                                nft: nft,
+                                address: address,
+                                isSubname: false,
+                            });
+                            iotaNamesTx.setDefault(update.name);
+                        }
+                        iotaNamesTx.transaction.transferObjects([nft, coin], address);
+                        break;
                 }
             }
 
             iotaNamesTx.transaction.setSender(address);
-            await iotaNamesTx.transaction.build({
+            const transaction = await iotaNamesTx.transaction.build({
                 client,
             });
-            return iotaNamesTx.transaction;
+            const txDryRun = await client.dryRunTransactionBlock({
+                transactionBlock: transaction,
+            });
+            return {
+                transaction: iotaNamesTx.transaction,
+                builtTx: transaction,
+                txDryRun,
+            };
         },
         enabled: !!address && !!updates.length,
         gcTime: 0,
+        select: ({ transaction, txDryRun, builtTx }) => {
+            return {
+                transaction,
+                gasSummary: getGasSummary(txDryRun),
+                builtTx,
+            };
+        },
     });
 }

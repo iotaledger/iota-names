@@ -35,4 +35,7 @@ export const queryKey = {
         name,
         address,
     ],
+
+    // Core Config
+    coreConfig: () => [queryKey.all, 'core-config'],
 };

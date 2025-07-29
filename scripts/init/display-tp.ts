@@ -8,7 +8,7 @@ export const getImageUrl = (isSubname: boolean, network: string) => {
     const name = `{${isSubname ? 'nft.' : ''}name_str}`;
     const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
 
-    return `https://api-${network}.iota-names.io/nfts/${name}/${expiration}`;
+    return `https://iota-names.iota.cafe/${name}/${expiration}`;
 };
 
 /** Creates the display. Should be called for both subnames and names. */
@@ -28,12 +28,12 @@ export const createDisplay = ({
     network: string;
 }) => {
     const subnameRegistration = `${subnamesPackageId}::subname_registration::SubnameRegistration`;
-    const iotaNamesRegistration = `${iotaNamesPackageId}::iota_names_registration::IotaNamesRegistration`;
+    const nameRegistration = `${iotaNamesPackageId}::name_registration::NameRegistration`;
 
     const display = txb.moveCall({
         target: `0x2::display::new`,
         arguments: [txb.object(publisher)],
-        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : nameRegistration],
     });
 
     txb.moveCall({
@@ -49,13 +49,13 @@ export const createDisplay = ({
                 'https://iota-names.io',
             ]),
         ],
-        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : nameRegistration],
     });
 
     txb.moveCall({
         target: `0x2::display::update_version`,
         arguments: [display],
-        typeArguments: [isSubname ? subnameRegistration : iotaNamesRegistration],
+        typeArguments: [isSubname ? subnameRegistration : nameRegistration],
     });
 
     const sender = txb.moveCall({

@@ -10,18 +10,18 @@ use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
 use iota_names::name::Name;
 use iota_names::iota_names::AdminCap;
-use iota_names::iota_names_registration::{Self as nft, IotaNamesRegistration};
+use iota_names::name_registration::{Self as nft, NameRegistration};
 use iota_names::name_record::{Self, NameRecord};
 use iota_names::subname_registration::{Self, SubnameRegistration};
 use std::option::{none, some};
 use std::string::String;
 
 #[error]
-const ENftExpired: vector<u8> = b"The `IotaNamesRegistration` has expired.";
+const ENftExpired: vector<u8> = b"The `NameRegistration` has expired.";
 #[error]
 const ERecordNotExpired: vector<u8> = b"Record has not yet expired.";
 #[error]
-const EIdMismatch: vector<u8> = b"The `IotaNamesRegistration` does not match the `NameRecord`.";
+const EIdMismatch: vector<u8> = b"The `NameRegistration` does not match the `NameRecord`.";
 #[error]
 const ERecordExpired: vector<u8> = b"The `NameRecord` has expired.";
 #[error]
@@ -84,19 +84,19 @@ public fun new(_: &AdminCap, ctx: &mut TxContext): Registry {
 /// Attempts to add a new record to the registry without looking at the grace
 /// period.
 /// Currently used for subnames where there's no grace period to respect.
-/// Returns a `IotaNamesRegistration` upon success.
+/// Returns a `NameRegistration` upon success.
 public fun add_record_ignoring_grace_period(
     self: &mut Registry,
     name: Name,
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     self.internal_add_record(name, no_years, clock, false, ctx)
 }
 
 /// Attempts to add a new record to the registry and returns a
-/// `IotaNamesRegistration` upon success.
+/// `NameRegistration` upon success.
 /// Only use with second-level names. Enforces a `grace_period` by default.
 /// Not suitable for subnames (unless a grace period is needed).
 public fun add_record(
@@ -105,7 +105,7 @@ public fun add_record(
     no_years: u8,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     self.internal_add_record(name, no_years, clock, true, ctx)
 }
 
@@ -113,10 +113,10 @@ public fun add_record(
 /// Only works if the NFT has expired.
 public fun burn_registration_object(
     self: &mut Registry,
-    nft: IotaNamesRegistration,
+    nft: NameRegistration,
     clock: &Clock,
 ) {
-    // First we make sure that the IotaNamesRegistration object has expired.
+    // First we make sure that the NameRegistration object has expired.
     assert!(nft.has_expired(clock), ERecordNotExpired);
 
     let name = nft.name();
@@ -146,7 +146,7 @@ public fun burn_registration_object(
 /// Allow creation of subname wrappers only to authorized modules.
 public fun wrap_subname(
     _: &mut Registry,
-    nft: IotaNamesRegistration,
+    nft: NameRegistration,
     clock: &Clock,
     ctx: &mut TxContext,
 ): SubnameRegistration {
@@ -162,9 +162,9 @@ public fun burn_subname_object(self: &mut Registry, nft: SubnameRegistration, cl
 
 /// Adds a `leaf` record to the registry.
 /// A `leaf` record is a record that is a subname and doesn't have
-/// an equivalent `IotaNamesRegistration` object.
+/// an equivalent `NameRegistration` object.
 ///
-/// Instead, the parent's `IotaNamesRegistration` object is used to manage
+/// Instead, the parent's `NameRegistration` object is used to manage
 /// target_address & remove it / determine expiration.
 ///
 /// 1. Leaf records can't have children. They only work as a resolving
@@ -185,13 +185,13 @@ public fun add_leaf_record(
 ) {
     assert!(name.is_subname(), EInvalidDepth);
 
-    // get the parent of the name
+    // Returns the parent of the name.
     let parent = name.parent().extract();
     let option_parent_name_record = self.lookup(parent);
 
     assert!(option_parent_name_record.is_some(), ERecordNotFound);
 
-    // finds existing parent record
+    // Finds existing parent record.
     let parent_name_record = option_parent_name_record.borrow();
 
     // Make sure that the parent isn't expired (because leaf record is invalid
@@ -210,7 +210,7 @@ public fun add_leaf_record(
         name_record
     });
 
-    // adds the `leaf` record to the registry.
+    // Adds the `leaf` record to the registry.
     self
         .registry
         .add(
@@ -220,14 +220,14 @@ public fun add_leaf_record(
 }
 
 /// Can be used to remove a leaf record.
-/// Leaf records do not have any symmetrical `IotaNamesRegistration` object.
+/// Leaf records do not have any symmetrical `NameRegistration` object.
 /// Authorization of who calls this is delegated to the authorized module that
 /// calls this.
 public fun remove_leaf_record(self: &mut Registry, name: Name) {
     // We can only call remove on a leaf record.
     assert!(self.is_leaf_record(name), ENonLeafRecord);
 
-    // if it's a leaf record, there's no `IotaNamesRegistration` object.
+    // If it's a leaf record, there's no `NameRegistration` object.
     // We can just go ahead and remove the name_record, and invalidate the
     // reverse record (if any).
     event::emit(NameRecordRemovedEvent {
@@ -300,12 +300,12 @@ public fun set_reverse_lookup(self: &mut Registry, address: address, name: Name)
     };
 }
 
-/// Update the `expiration_timestamp_ms` of the given `IotaNamesRegistration` and
-/// `NameRecord`. Requires the `IotaNamesRegistration` to make sure that both
+/// Update the `expiration_timestamp_ms` of the given `NameRegistration` and
+/// `NameRecord`. Requires the `NameRegistration` to make sure that both
 /// timestamps are in sync.
 public fun set_expiration_timestamp_ms(
     self: &mut Registry,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut NameRegistration,
     name: Name,
     expiration_timestamp_ms: u64,
 ) {
@@ -316,7 +316,7 @@ public fun set_expiration_timestamp_ms(
     nft.set_expiration_timestamp_ms(expiration_timestamp_ms);
 }
 
-/// Update the `data` of the given `NameRecord` using a `IotaNamesRegistration`.
+/// Update the `data` of the given `NameRecord` using a `NameRegistration`.
 /// Use with caution and validate(!!) that any system fields are not removed
 /// (accidently),
 /// when building authorized packages that can write the metadata field.
@@ -327,7 +327,7 @@ public fun set_data(self: &mut Registry, name: Name, data: VecMap<String, String
 
 // === Reads ===
 
-/// Check whether the given `name` is registered in the `Registry`.
+/// Checks whether the given `name` is registered in the `Registry`.
 public fun has_record(self: &Registry, name: Name): bool {
     self.registry.contains(name)
 }
@@ -354,7 +354,7 @@ public fun reverse_lookup(self: &Registry, address: address): Option<Name> {
 /// Asserts that the provided NFT:
 /// 1. Matches the ID in the corresponding `Record`
 /// 2. Has not expired (does not take into account the grace period)
-public fun assert_nft_is_authorized(self: &Registry, nft: &IotaNamesRegistration, clock: &Clock) {
+public fun assert_nft_is_authorized(self: &Registry, nft: &NameRegistration, clock: &Clock) {
     let name = nft.name();
     let record = &self.registry[name];
 
@@ -372,14 +372,11 @@ public fun get_data(self: &Registry, name: Name): &VecMap<String, String> {
 
 // === Private Functions ===
 
-/// Checks whether a subname record is `leaf`.
+/// Checks whether a subname record is a `leaf`.
 /// `leaf` record: a record whose target address can only be set by the parent,
 /// hence the nft_id points to the parent's ID. Leaf records can't create
-/// subnames
-/// and don't have their own `IotaNamesRegistration` object Cap. The
-/// `IotaNamesRegistration` of the parent
-/// is the one that manages them.
-///
+/// subnames and don't have their own `NameRegistration` object cap. The
+/// `NameRegistration` of the parent is the one that manages them.
 fun is_leaf_record(self: &Registry, name: Name): bool {
     if (!name.is_subname()) {
         return false
@@ -394,7 +391,7 @@ fun is_leaf_record(self: &Registry, name: Name): bool {
     option_name_record.borrow().is_leaf_record()
 }
 
-/// An internal helper to add a record
+/// An internal helper to add a record.
 fun internal_add_record(
     self: &mut Registry,
     name: Name,
@@ -402,7 +399,7 @@ fun internal_add_record(
     clock: &Clock,
     with_grace_period: bool,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     self.remove_existing_record_if_exists_and_expired(
         name,
         clock,
@@ -445,10 +442,10 @@ fun remove_existing_record_if_exists_and_expired(
     // Special case for leaf records, we can override them iff their parent has
     // changed or has expired.
     if (record.is_leaf_record()) {
-        // find the parent of the leaf record.
+        // Find the parent of the leaf record.
         let option_parent_name_record = self.lookup(name.parent().extract());
 
-        // if there's a parent (if not, we can just remove it), we need to check
+        // If there's a parent (if not, we can just remove it), we need to check
         // if the parent is valid.
         // -> If the parent is valid, we need to check if the parent is expired.
         // -> If the parent is not valid (nft_id has changed), or if the parent
@@ -501,6 +498,7 @@ fun handle_invalidate_reverse_record(
 }
 
 // === Test Functions ===
+
 #[test_only]
 use iota_names::iota_names::{add_registry, IotaNames};
 
@@ -509,8 +507,8 @@ public fun init_for_testing(cap: &AdminCap, iota_names: &mut IotaNames, ctx: &mu
     add_registry(cap, iota_names, new(cap, ctx));
 }
 
-#[test_only]
 /// Create a new `Registry` for testing Purposes.
+#[test_only]
 public fun new_for_testing(ctx: &mut TxContext): Registry {
     Registry {
         registry: table::new(ctx),

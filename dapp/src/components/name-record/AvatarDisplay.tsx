@@ -1,10 +1,12 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Loader } from '@iota/apps-ui-icons';
+import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
-import { useNameRecord } from '@/hooks';
+import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
 import type { NftDisplayProps } from '@/lib/types/components';
 
@@ -12,24 +14,32 @@ import { nftDisplayVariants } from './variants';
 
 interface AvatarDisplayProps extends NftDisplayProps {
     button?: React.ReactNode;
+    fallbackUrl?: string;
 }
 
-export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps) {
+export function AvatarDisplay({ name, size, badge, button, fallbackUrl }: AvatarDisplayProps) {
     const [showAvatar, setShowAvatar] = useState(false);
 
-    const { data } = useNameRecord(name);
+    const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
+    const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
+    const isNameSubname = isSubname(name);
 
-    //TODO: Remove when we add the svg api
-    const PLACEHOLDER_DISPLAY = `/placeholder-name-display.svg`;
+    const avatarId =
+        nameRecordData?.type === 'unavailable'
+            ? isNameSubname
+                ? subnames?.find((n) => n.name === name)?.id
+                : (nameRecordData?.nameRecord.avatar ?? nameRecordData.nameRecord.nftId)
+            : null;
 
-    const avatarId = data?.type === 'unavailable' ? data?.nameRecord.avatar : null;
-
-    const { data: avatarObject } = useGetObject({
+    const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject({
         id: avatarId ?? '',
         options: { showDisplay: true, showContent: true },
     });
 
-    const avatarSrc = avatarObject?.display?.data?.image_url;
+    const isDataLoading = isNameRecordDataLoading || isSubnamesLoading || isAvatarLoading;
+    const avatarSrc = isDataLoading
+        ? null
+        : (avatarObject?.display?.data?.image_url ?? fallbackUrl);
 
     useEffect(() => {
         if (!avatarSrc) return;
@@ -56,11 +66,17 @@ export function AvatarDisplay({ name, size, badge, button }: AvatarDisplayProps)
                     </div>
                 )}
 
-                <img
-                    className="absolute inset-0 w-full h-full -z-[1] object-cover"
-                    src={avatarSrc && showAvatar ? avatarSrc : PLACEHOLDER_DISPLAY}
-                    alt={name}
-                />
+                {avatarSrc && showAvatar ? (
+                    <img
+                        className="absolute inset-0 w-full h-full -z-[1] object-cover"
+                        src={avatarSrc}
+                        alt={name}
+                    />
+                ) : (
+                    <div className="absolute inset-0 w-full h-full bg-names-neutral-4 flex items-center justify-center">
+                        <Loader className="animate-spin" data-testid="loading-indicator" />
+                    </div>
+                )}
             </div>
         </div>
     );

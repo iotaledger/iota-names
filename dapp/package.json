@@ -14,8 +14,8 @@
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix"
     },
     "dependencies": {
-        "@iota/apps-ui-icons": "^0.3.1",
-        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250708084918",
+        "@iota/apps-ui-icons": "0.0.0-experimental-names-20250716112630",
+        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250716112630",
         "@iota/dapp-kit": "0.0.0-experimental-20250620081851",
         "@iota/graphql-transport": "0.0.0-experimental-20250620081851",
         "@iota/iota-names-sdk": "workspace:^",
@@ -28,7 +28,9 @@
         "clsx": "^2.1.1",
         "next": "14.2.28",
         "react": "^18.3.1",
-        "react-dom": "^18.3.1"
+        "react-dom": "^18.3.1",
+        "react-hot-toast": "^2.4.1",
+        "zustand": "^5.0.6"
     },
     "devDependencies": {
         "@tanstack/eslint-plugin-query": "^5.35.6",

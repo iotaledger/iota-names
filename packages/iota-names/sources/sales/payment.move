@@ -25,7 +25,7 @@ use iota_names::constants;
 use iota_names::core_config::CoreConfig;
 use iota_names::name::{Self, Name};
 use iota_names::iota_names::IotaNames;
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::pricing_config::{PricingConfig, RenewalConfig};
 use iota_names::registry::Registry;
 use iota_names::validation;
@@ -152,7 +152,7 @@ public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentI
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_renewal(
     iota_names: &mut IotaNames,
-    nft: &IotaNamesRegistration,
+    nft: &NameRegistration,
     years: u8,
 ): PaymentIntent {
     let name = nft.name();
@@ -180,7 +180,7 @@ public fun register(
     iota_names: &mut IotaNames,
     clock: &Clock,
     ctx: &mut TxContext,
-): IotaNamesRegistration {
+): NameRegistration {
     let config = iota_names.get_config<CoreConfig>();
 
     match (receipt) {
@@ -200,7 +200,7 @@ public fun register(
 public fun renew(
     receipt: Receipt,
     iota_names: &mut IotaNames,
-    nft: &mut IotaNamesRegistration,
+    nft: &mut NameRegistration,
     clock: &Clock,
     _ctx: &mut TxContext,
 ) {
@@ -241,7 +241,8 @@ public fun renew(
     }
 }
 
-/// Getters
+// === Getters ===
+
 public fun request_data(intent: &PaymentIntent): &RequestData {
     match (intent) {
         PaymentIntent::Registration(data) => data,
@@ -278,6 +279,8 @@ public fun base_amount(self: &RequestData): u64 { self.base_amount }
 public fun base_amount_mut(self: &mut RequestData): &mut u64 { &mut self.base_amount }
 
 public fun name(self: &RequestData): &Name { &self.name }
+
+// ==== Helpers ===
 
 /// Public helper to calculate price after a percentage discount has been
 /// applied.
@@ -327,6 +330,8 @@ fun target_expiration(registry: &Registry, name: Name, clock: &Clock, no_years: 
 
     target
 }
+
+// === Tests ===
 
 #[test_only]
 public(package) fun test_registration_receipt(name: String, years: u8, version: u8): Receipt {

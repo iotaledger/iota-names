@@ -6,7 +6,7 @@
 #[allow(lint(abort_without_constant))]
 /// Testing strategy:
 ///
-/// - Admin can add new records to IotaNames and get the IotaNamesRegistrations
+/// - Admin can add new records to IotaNames and get the NameRegistrations
 /// for the registered names.
 /// - Admin keeps the registration NFTs at their account for now.
 ///
@@ -20,7 +20,7 @@ use iota_names::deny_list;
 use iota_names::name;
 use iota_names::registry;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
-use iota_names::iota_names_registration::IotaNamesRegistration;
+use iota_names::name_registration::NameRegistration;
 use iota_names::test_init_utils;
 use std::string::{utf8, String};
 
@@ -153,10 +153,10 @@ fun register_names_from_deny_list() {
     {
         scenario.next_tx(ctx.sender());
 
-        let mut ids = scenario.ids_for_sender<IotaNamesRegistration>();
+        let mut ids = scenario.ids_for_sender<NameRegistration>();
         assert_eq(ids.length(), names.length());
         while (!ids.is_empty()) {
-            let nft = scenario.take_from_sender_by_id<IotaNamesRegistration>(ids.pop_back());
+            let nft = scenario.take_from_sender_by_id<NameRegistration>(ids.pop_back());
             assert!(vector::contains(&names, &nft.name_str()));
             assert_eq(nft.expiration_timestamp_ms(), constants::year_ms());
             scenario.return_to_sender(nft);
@@ -211,10 +211,10 @@ fun register_multiple() {
     {
         scenario.next_tx(ctx.sender());
 
-        let mut ids = scenario.ids_for_sender<IotaNamesRegistration>();
+        let mut ids = scenario.ids_for_sender<NameRegistration>();
         assert_eq(ids.length(), names.length());
         while (!ids.is_empty()) {
-            let nft = scenario.take_from_sender_by_id<IotaNamesRegistration>(ids.pop_back());
+            let nft = scenario.take_from_sender_by_id<NameRegistration>(ids.pop_back());
             assert!(vector::contains(&names, &nft.name_str()));
             assert_eq(nft.expiration_timestamp_ms(), constants::year_ms());
             scenario.return_to_sender(nft);

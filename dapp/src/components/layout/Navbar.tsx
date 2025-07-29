@@ -3,28 +3,40 @@
 
 'use client';
 
+import { Search } from '@iota/apps-ui-icons';
+import { Input, InputType } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { NamesLogoWeb } from '@/components/svgs';
 import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
-import { NamesLogoWeb } from '@/public/icons';
-
-import { SearchBox } from '../Searchbox';
+import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
+    const { open, close } = useAvailabilityCheckDialog();
+
     const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
+    const showSearch = isConnected && isOnMyNamesPage;
+
+    function toggleSearchDialog() {
+        open({
+            autoFocusInput: true,
+            onCompleted: close,
+        });
+    }
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
-            <div className="container py-md flex flex-col gap-y-sm">
+        <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
+            <div className="px-lg py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">
                         <Link href="/" aria-label="Go to homepage">
                             <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
                         </Link>
+
                         {isConnected && (
                             <div className="flex gap-x-md text-names-neutral-70 text-body-md">
                                 {PROTECTED_ROUTES.map((route) => (
@@ -40,19 +52,35 @@ export function Navbar() {
                             </div>
                         )}
                     </div>
-                    {isConnected && isOnMyNamesPage && (
-                        <div className="hidden md:flex justify-center max-w-[360px] w-full">
-                            <SearchBox />
-                        </div>
-                    )}
+
+                    {showSearch && <SearchInput isBelowMd onFocus={toggleSearchDialog} />}
                     <ConnectButton connectText="Connect" />
                 </div>
-                {isConnected && isOnMyNamesPage && (
-                    <div className="flex md:hidden w-full max-w-[360px] justify-center mx-auto">
-                        <SearchBox />
-                    </div>
-                )}
+
+                {showSearch && <SearchInput onFocus={toggleSearchDialog} />}
             </div>
         </nav>
+    );
+}
+
+function SearchInput({ isBelowMd = false, onFocus }: { isBelowMd?: boolean; onFocus: () => void }) {
+    const wrapperClass = isBelowMd
+        ? 'md:flex hidden w-full max-w-[360px] justify-center mx-auto'
+        : 'flex md:hidden w-full justify-center mx-auto';
+
+    const containerClass =
+        'w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full';
+
+    return (
+        <div className={wrapperClass}>
+            <div className={containerClass}>
+                <Input
+                    placeholder="Search for your IOTA name"
+                    type={InputType.Text}
+                    onFocus={onFocus}
+                    trailingElement={<Search className="text-names-neutral-92 w-6 h-6" />}
+                />
+            </div>
+        </div>
     );
 }

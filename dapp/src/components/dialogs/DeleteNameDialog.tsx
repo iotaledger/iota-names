@@ -3,21 +3,26 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
+    ButtonType,
     Dialog,
     DialogBody,
     DialogContent,
+    DialogPosition,
     Header,
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
     LoadingIndicator,
+    Panel,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
@@ -27,16 +32,17 @@ import { getNameObject } from '@/lib/utils/names';
 
 type DeleteNameDialogProps = {
     nft: RegistrationNft;
-    open: boolean;
     setOpen: (bool: boolean) => void;
 };
 
-export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) {
+export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
 
     const { data: subnamesOwned } = useRegistrationNfts('subname');
+
+    const [deleteSeconds, setDeleteSeconds] = useState(5);
 
     const isNameSubname = nft ? isSubname(nft.name) : null;
 
@@ -66,11 +72,11 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const { mutate: save, isPending: isSaving } = useMutation({
+    const { mutate: deleteName, isPending: isSaving } = useMutation({
         async mutationFn() {
             if (!updateNameTransaction) return;
             const transaction = await signAndExecuteTransaction({
-                transaction: updateNameTransaction,
+                transaction: updateNameTransaction.transaction,
             });
             await iotaClient.waitForTransaction({
                 digest: transaction.digest,
@@ -80,7 +86,13 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
+            toast.success(
+                `Successfully deleted expired name ${normalizeIotaName(nft.name, 'at', { truncateLongParts: true })}`,
+            );
             closeDialog();
+        },
+        onError: (error) => {
+            toast.error(error.message);
         },
     });
 
@@ -90,40 +102,70 @@ export function DeleteNameDialog({ nft, open, setOpen }: DeleteNameDialogProps) 
 
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
     const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !nft.isExpired;
+    const deleteActionNotAllowed = deleteSeconds > 0;
+    useEffect(() => {
+        if (!deleteActionNotAllowed) return;
+
+        const id = setInterval(() => {
+            setDeleteSeconds((s) => s - 1);
+        }, 1_000);
+
+        return () => clearInterval(id);
+    }, [deleteActionNotAllowed]);
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogContent containerId="overlay-portal-container">
-                <Header title={`Delete ${nft.name}`} onClose={closeDialog} titleCentered />
+        <Dialog open onOpenChange={setOpen}>
+            <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
+                <Header title="Delete" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col gap-y-md">
-                        {nft.isExpired && !isLoading ? (
-                            <InfoBox
-                                title={`${nft.name} is expired`}
-                                supportingText="This name is expired and can be deleted."
-                                icon={<Info />}
-                                type={InfoBoxType.Warning}
-                                style={InfoBoxStyle.Elevated}
-                            />
-                        ) : null}
+                    <div className="flex flex-col justify-between h-full items-center">
+                        <div className="flex flex-col w-full gap-y-md">
+                            <div className="flex flex-col items-start gap-y-md">
+                                <p className="text-title-md text-names-neutral-100">
+                                    Are you sure you want to delete this name?
+                                </p>
+                                <Panel bgColor="bg-names-neutral-12">
+                                    <div className="p-md">
+                                        <span className="text-names-neutral-100 text-headline-sm">
+                                            {normalizeIotaName(nft.name)}
+                                        </span>
+                                    </div>
+                                </Panel>
+                                <InfoBox
+                                    type={InfoBoxType.Warning}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Permanently remove name"
+                                    supportingText="This action is irreversible and will permanently remove your ownership of the name"
+                                />
+                            </div>
 
-                        <div className="flex flex-col gap-y-xs items-center">
-                            <p className="text-body-md">
-                                Are you sure you want to delete this name?
-                            </p>
-                            <p>This action cannot be undone</p>
+                            {updateNameError ? (
+                                <p className="text-error-30 dark:text-error-70 text-center">
+                                    {updateNameError.message}
+                                </p>
+                            ) : null}
                         </div>
-                        {updateNameError ? (
-                            <p className="text-error-30 dark:text-error-70 text-center">
-                                {updateNameError.message}
-                            </p>
-                        ) : null}
-                        <Button
-                            icon={isLoading ? <LoadingIndicator /> : null}
-                            text="Delete Name"
-                            disabled={disableDeleteButton}
-                            onClick={() => save()}
-                        />
+                        <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            <Button
+                                type={ButtonType.Secondary}
+                                text="Cancel"
+                                onClick={closeDialog}
+                                fullWidth
+                            />
+                            <Button
+                                icon={isLoading ? <LoadingIndicator /> : null}
+                                text={
+                                    deleteActionNotAllowed
+                                        ? `Delete in ${deleteSeconds}s`
+                                        : 'Delete'
+                                }
+                                disabled={disableDeleteButton || deleteActionNotAllowed}
+                                type={ButtonType.Destructive}
+                                onClick={() => deleteName()}
+                                fullWidth
+                            />
+                        </div>
                     </div>
                 </DialogBody>
             </DialogContent>

@@ -2,7 +2,5 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export * from './ConnectionGuard';
-export * from './AvailabilityCheck';
 
 export * from './dialogs';
-export * from './Searchbox';

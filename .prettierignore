@@ -18,3 +18,5 @@ pnpm-workspace.yaml
 .prettierrc
 packages
 indexer/
+README.md
+docker-compose.yml
