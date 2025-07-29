@@ -105,13 +105,13 @@ export function validateIotaName(
     if (!allowSubnames && parts.length > 2) {
         return 'No subnames allowed';
     }
-    if (!NAME_DOT_REGEX.test(name)) {
-        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
-    }
     for (const part of parts.slice(0, -1)) {
         if (part.length < minLength || part.length > maxLength) {
             return `Name must be ${minLength}-${maxLength} characters long`;
         }
+    }
+    if (!NAME_DOT_REGEX.test(name)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
     }
     return null;
 }

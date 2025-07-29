@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useIotaClient } from '@iota/dapp-kit';
-import { ALLOWED_METADATA, IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
@@ -18,9 +18,16 @@ interface UseUpdateNameTransactionOptions {
 
 export type NameUpdate =
     | {
-          type: 'set-avatar';
+          type: 'set-data';
           nftId: string;
-          avatarNftId: string;
+          key: string;
+          value: string;
+          isSubname?: boolean;
+      }
+    | {
+          type: 'unset-data';
+          nftId: string;
+          key: string;
           isSubname?: boolean;
       }
     | {
@@ -91,11 +98,17 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
 
             for (const update of updates) {
                 switch (update.type) {
-                    case 'set-avatar':
+                    case 'set-data':
                         iotaNamesTx.setUserData({
                             nft: update.nftId,
-                            key: ALLOWED_METADATA.avatar,
-                            value: update.avatarNftId,
+                            key: update.key,
+                            value: update.value,
+                        });
+                        break;
+                    case 'unset-data':
+                        iotaNamesTx.unsetUserData({
+                            nft: update.nftId,
+                            key: update.key,
                             isSubname: update.isSubname,
                         });
                         break;

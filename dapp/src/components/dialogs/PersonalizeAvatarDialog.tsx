@@ -18,9 +18,9 @@ import {
     VisualAssetCard,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
+import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { BrandedAssets } from '@/components/svgs';
@@ -41,6 +41,19 @@ interface PersonalizeAvatarDialogProps {
     name: string;
     setOpen: (bool: boolean) => void;
 }
+
+type SetAction =
+    | {
+          type: 'set';
+          avatar: string;
+      }
+    | {
+          type: 'unset';
+      }
+    | {
+          type: 'none';
+      };
+
 export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDialogProps) {
     const account = useCurrentAccount();
     const iotaClient = useIotaClient();
@@ -49,36 +62,51 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
     const { data: nameRecordData } = useNameRecord(name);
     const { data: subnamesOwned } = useRegistrationNfts('subname');
-    const { data: visualAssets, isLoading } = useGetVisualAssets(address);
+    const { data: visualAssets, isLoading: isLoadingGetVisualAssets } = useGetVisualAssets(address);
 
-    const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+    const [action, setAction] = useState<SetAction>({ type: 'none' });
 
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
     const updates: NameUpdate[] = [];
+    const currentAvatar = nameRecord?.nameRecord.avatar;
 
-    if (
-        selectedAssetId &&
-        selectedAssetId !== nameRecord?.nameRecord.avatar &&
-        nameRecord &&
-        isNameSubname !== null
-    ) {
+    // Sync current avatar with selection
+    useEffect(() => {
+        if (action.type == 'none' && currentAvatar) {
+            setAction({
+                type: 'set',
+                avatar: currentAvatar,
+            });
+        }
+    }, [currentAvatar]);
+
+    // if (nameRecord) {
+    if (nameRecord && isNameSubname !== null) {
         const nftId = isNameSubname
             ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
             : nameRecord.nameRecord.nftId;
         if (nftId) {
-            updates.push({
-                type: 'set-avatar',
-                nftId,
-                avatarNftId: selectedAssetId,
-                isSubname: isNameSubname,
-            });
+            if (action.type === 'set' && action.avatar !== currentAvatar) {
+                updates.push({
+                    type: 'set-data',
+                    nftId,
+                    key: ALLOWED_METADATA.avatar,
+                    value: action.avatar,
+                });
+            } else if (action.type === 'unset' && currentAvatar) {
+                updates.push({
+                    type: 'unset-data',
+                    nftId,
+                    key: ALLOWED_METADATA.avatar,
+                });
+            }
         }
     }
 
-    const { data: updateTransaction } = useUpdateNameTransaction({
+    const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
     });
@@ -99,17 +127,31 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         },
         onSuccess() {
             setOpen(false);
-            toast.success(`Successfully updated avatar for ${normalizeIotaName(name)}`);
+            toast.success(
+                `Successfully updated avatar for ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
+            );
         },
         onError: (error) => {
             toast.error(error.message);
         },
     });
 
-    function handleSelectAsset() {
-        if (!selectedAssetId || !updateTransaction) return;
+    function handleUnset() {
+        setAction({
+            type: 'unset',
+        });
+    }
+
+    function handleSave() {
+        if (!updateTransaction) return;
         saveAvatar();
     }
+
+    const isLoadingData = isLoadingGetVisualAssets;
+    const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
+    const disableUnset = !currentAvatar || isLoading || updates.length > 0;
+    const disableSave = isLoading || updates.length === 0;
+
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent
@@ -134,7 +176,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                 </span>
                             </div>
                         </div>
-                        {isLoading ? (
+                        {isLoadingData ? (
                             <div className="flex items-center justify-center w-full h-full py-lg">
                                 <LoadingIndicator text="Loading Assets..." />
                             </div>
@@ -151,7 +193,8 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                         ) : (
                             <div className="max-h-[400px] w-full grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-md">
                                 {visualAssets.map((asset) => {
-                                    const isSelected = selectedAssetId === asset.objectId;
+                                    const isSelected =
+                                        action.type === 'set' && action.avatar === asset.objectId;
 
                                     return (
                                         <div
@@ -167,9 +210,12 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                                     src={asset.display?.data?.image_url || ''}
                                                     altText={asset.display?.data?.name || 'NFT'}
                                                     isHoverable
-                                                    onClick={() =>
-                                                        setSelectedAssetId(asset.objectId)
-                                                    }
+                                                    onClick={() => {
+                                                        setAction({
+                                                            type: 'set',
+                                                            avatar: asset.objectId,
+                                                        });
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -189,12 +235,24 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                     />
                     <Button
                         type={ButtonType.Primary}
-                        text="Set Avatar"
-                        onClick={handleSelectAsset}
-                        disabled={isSaving || isSigning || !selectedAssetId}
+                        text="Unset avatar"
+                        onClick={handleUnset}
+                        disabled={disableUnset}
                         fullWidth
                         icon={
-                            isSaving || isSigning ? (
+                            isLoading ? (
+                                <Loader className="animate-spin" data-testid="loading-indicator" />
+                            ) : null
+                        }
+                    />
+                    <Button
+                        type={ButtonType.Primary}
+                        text="Save"
+                        onClick={handleSave}
+                        disabled={disableSave}
+                        fullWidth
+                        icon={
+                            isLoading ? (
                                 <Loader className="animate-spin" data-testid="loading-indicator" />
                             ) : null
                         }
