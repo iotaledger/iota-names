@@ -103,6 +103,17 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }));
     };
 
+    useEffect(() => {
+        if (nameRecord?.nameRecord?.data) {
+            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
+            METADATA_FIELDS.forEach(({ key }) => {
+                const value = nameRecord.nameRecord.data[key] || '';
+                newMetadata[key] = { selected: !!value, data: value };
+            });
+            setMetadata(newMetadata);
+        }
+    }, [nameRecord?.nameRecord?.data]);
+
     const updates: NameUpdate[] = useMemo(() => {
         if (!shouldBuildUpdates) return [];
 
@@ -155,10 +166,14 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onSuccess() {
+            setShouldBuildUpdates(false);
+            setAction({ type: 'none' });
             setOpen(false);
             toast.success(`Successfully updated metadata for ${normalizeIotaName(name)}`);
         },
         onError: (error) => {
+            setShouldBuildUpdates(false);
+            setAction({ type: 'none' });
             toast.error(error.message);
         },
     });
@@ -178,59 +193,68 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     }, [shouldBuildUpdates, updates, updateTransaction, saveMetadata]);
 
     const isLoading = isUpdating || isSigning || isSaving;
-    const disableApply = shouldBuildUpdates && updates.length === 0;
+    const disableApply = isLoading || !Object.values(metadata).some((field) => field.selected);
 
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
                 <Header title="Edit Metadata" onClose={() => setOpen(false)} />
                 <DialogBody>
-                    <div className="flex flex-wrap gap-xs">Select type</div>
-
-                    <div className="flex flex-wrap gap-xs">
-                        {METADATA_FIELDS.map(({ key, label }) => (
-                            <Chip
-                                key={key}
-                                label={label}
-                                selected={metadata[key]?.selected || false}
-                                type={metadata[key]?.selected ? ChipType.Brand : ChipType.Outline}
-                                onClick={() => toggleMetadata(key)}
-                            />
-                        ))}
-                    </div>
-
-                    <div className="flex flex-wrap gap-xs mt-xs">
-                        {METADATA_FIELDS.map(
-                            ({ key, label }) =>
-                                metadata[key]?.selected && (
-                                    <Input
+                    <div className="flex flex-col h-full justify-between">
+                        <div className="flex flex-col gap-md">
+                            <p className="text-label-md y color text-names-neutral-70">
+                                Select type
+                            </p>
+                            <div className="flex flex-wrap gap-sm">
+                                {METADATA_FIELDS.map(({ key, label }) => (
+                                    <Chip
                                         key={key}
-                                        type={InputType.Text}
                                         label={label}
-                                        value={metadata[key]?.data || ''}
-                                        onChange={({ target: { value } }) =>
-                                            updateMetadataData(key, value)
+                                        selected={metadata[key]?.selected || false}
+                                        type={
+                                            metadata[key]?.selected
+                                                ? ChipType.Brand
+                                                : ChipType.Outline
                                         }
+                                        onClick={() => toggleMetadata(key)}
                                     />
-                                ),
-                        )}
-                    </div>
+                                ))}
+                            </div>
 
-                    <div className="flex w-full flex-row gap-x-xs mt-xs">
-                        <Button
-                            type={ButtonType.Secondary}
-                            text="Cancel"
-                            onClick={() => setOpen(false)}
-                            fullWidth
-                        />
-                        <Button
-                            icon={isLoading ? <LoadingIndicator /> : null}
-                            text="Apply"
-                            disabled={disableApply}
-                            type={ButtonType.Primary}
-                            onClick={handleApplyClick}
-                            fullWidth
-                        />
+                            <div className="flex flex-col gap-xs">
+                                {METADATA_FIELDS.map(
+                                    ({ key, label }) =>
+                                        metadata[key]?.selected && (
+                                            <Input
+                                                key={key}
+                                                type={InputType.Text}
+                                                label={label}
+                                                value={metadata[key]?.data || ''}
+                                                onChange={({ target: { value } }) =>
+                                                    updateMetadataData(key, value)
+                                                }
+                                            />
+                                        ),
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex w-full flex-row gap-x-xs">
+                            <Button
+                                type={ButtonType.Secondary}
+                                text="Cancel"
+                                onClick={() => setOpen(false)}
+                                fullWidth
+                            />
+                            <Button
+                                icon={isLoading ? <LoadingIndicator /> : null}
+                                text="Apply"
+                                disabled={disableApply}
+                                type={ButtonType.Primary}
+                                onClick={handleApplyClick}
+                                fullWidth
+                            />
+                        </div>
                     </div>
                 </DialogBody>
             </DialogContent>
