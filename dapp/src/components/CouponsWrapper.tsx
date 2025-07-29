@@ -52,7 +52,7 @@ export function CouponsWrapper({ coupons, onAddCoupon }: CouponsWrapperProps) {
                     onClearInput={() => setCoupon('')}
                 />
                 <ButtonUnstyled
-                    className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md enabled:cursor-pointer disabled:opacity-40"
+                    className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                     onClick={addCoupon}
                     disabled={!coupon.trim()}
                 >
