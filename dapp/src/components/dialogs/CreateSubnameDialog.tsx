@@ -159,7 +159,12 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-            toast.success(`Successfully created subname @${fullSubnameName}`);
+            if (fullSubnameName) {
+                toast.success(
+                    `Successfully created subname @${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
+                );
+            }
+
             closeDialog();
         },
         onError: (error) => {

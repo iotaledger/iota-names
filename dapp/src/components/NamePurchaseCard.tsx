@@ -44,7 +44,9 @@ export function NamePurchaseCard({
             >
                 <div className="flex text-headline-md gap-xxs">
                     <span className="text-names-neutral-50">@</span>
-                    <h2 className={clsx(textColorStatus)}>{nameWithOutAt}</h2>
+                    <h2 className={clsx('truncate w-full overflow-hidden', textColorStatus)}>
+                        {nameWithOutAt}
+                    </h2>
                 </div>
                 <div className="flex justify-between space-x-4 h-auto w-full">
                     <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
