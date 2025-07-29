@@ -28,44 +28,30 @@ function interpolateMessage(template: string, args?: ErrorMessageArgs): string {
 }
 
 /**
- * Get user-friendly error message from error key with optional arguments
- * @param key - The error message template key
+ * Get user-friendly error message by key or error object
+ * @param keyOrError - Error message manual key or Error object
  * @param args - Optional arguments for message interpolation
  * @returns User-friendly error message
- */
-export function getUserFriendlyErrorMessage(key: ErrorMessageKey, args?: ErrorMessageArgs): string;
-/**
- * Get user-friendly error message from error string or Error object (legacy support)
- * @param error - Error string or Error object
- * @returns User-friendly error message
- */
-export function getUserFriendlyErrorMessage(error: string | Error): string;
-/**
- * Get user-friendly error message with support for keys or legacy error objects
  */
 export function getUserFriendlyErrorMessage(
     keyOrError: ErrorMessageKey | string | Error,
     args?: ErrorMessageArgs,
 ): string {
-    // Check if it's a template key
     if (typeof keyOrError === 'string' && keyOrError in ERROR_MESSAGE_TEMPLATES) {
         const template = ERROR_MESSAGE_TEMPLATES[keyOrError as ErrorMessageKey];
         return interpolateMessage(template, args);
     }
 
-    // Legacy support for error objects and error strings
     const errorMessage =
         typeof keyOrError === 'string'
             ? keyOrError.toLowerCase()
             : keyOrError.message.toLowerCase();
 
-    // Check for specific error patterns
     for (const [pattern, message] of Object.entries(ERROR_PATTERNS)) {
         if (errorMessage.includes(pattern.toLowerCase())) {
             return message;
         }
     }
 
-    // Return default message for unrecognized errors
     return DEFAULT_ERROR_MESSAGE;
 }

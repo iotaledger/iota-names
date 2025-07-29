@@ -30,10 +30,6 @@ export const ERROR_PATTERNS = {
     unauthorized: "You don't have permission to perform this action.",
     'access denied': "Access denied. You don't have the required permissions.",
     forbidden: 'This action is not allowed.',
-
-    [GAS_BALANCE_TOO_LOW_ID]: 'Not enough balance to cover transaction fees.',
-    [NOT_ENOUGH_BALANCE_ID]: 'Not enough balance to create the transaction.',
-    [INSUFFICIENT_COIN_BALANCE_ID]: 'Insufficient coin balance to complete this action.',
 };
 
 /**
@@ -55,4 +51,7 @@ export const ERROR_MESSAGE_TEMPLATES = {
     NAME_NOT_FOUND: 'Name "{name}" not found. It may have been deleted or transferred.',
     SUBNAME_LIMIT_REACHED: 'Maximum number of subnames reached for "{name}".',
     FAILED_TO_COPY: 'Failed to copy to clipboard. Please try again.',
+    [GAS_BALANCE_TOO_LOW_ID]: 'Not enough balance to cover transaction fees.',
+    [NOT_ENOUGH_BALANCE_ID]: 'Not enough balance to create the transaction.',
+    [INSUFFICIENT_COIN_BALANCE_ID]: 'Insufficient coin balance to complete this action.',
 } as const;
