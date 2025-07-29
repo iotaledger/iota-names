@@ -20,7 +20,7 @@ export function CouponsWrapper({ coupons, onAddCoupon }: CouponsWrapperProps) {
 
     async function addCoupon() {
         const trimmedCoupon = coupon.trim();
-        if (!trimmedCoupon || coupons.some((c) => c.coupon === trimmedCoupon)) return;
+        if (!trimmedCoupon || coupons.some((c) => c.code === trimmedCoupon)) return;
         await onAddCoupon(trimmedCoupon);
         setCoupon('');
     }
@@ -28,7 +28,7 @@ export function CouponsWrapper({ coupons, onAddCoupon }: CouponsWrapperProps) {
     return (
         <div className={clsx('flex flex-col mt-sm', coupons.length && 'gap-y-sm')}>
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
-                {coupons.map(({ coupon, isError }) => (
+                {coupons.map(({ code: coupon, isInvalid: isError }) => (
                     <Chip
                         key={coupon}
                         label={coupon}

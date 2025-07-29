@@ -138,7 +138,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
-    const couponStrings = coupons.map((c) => c.coupon);
+    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
@@ -146,7 +146,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         ownedSubnames,
         renewYears,
         applyCoupons,
-        coupons: couponStrings,
+        coupons: couponCodes,
         address: account?.address,
     });
 
@@ -185,18 +185,18 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         },
     });
 
-    async function handleAddCoupon(coupon: string) {
-        if (couponStrings.includes(coupon)) {
+    async function handleAddCoupon(couponCode: string) {
+        if (couponCodes.includes(couponCode)) {
             setCoupons((currentCoupons) =>
-                currentCoupons.filter((existingCoupon) => existingCoupon.coupon !== coupon),
+                currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
             );
             return;
         }
 
         try {
-            const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(couponCode);
             if (!resolvedCoupon) throw new Error();
-            setCoupons((currentCoupons) => [...currentCoupons, { coupon }]);
+            setCoupons((currentCoupons) => [...currentCoupons, { code: couponCode }]);
         } catch {
             toast.error('Invalid coupon');
         }
@@ -225,7 +225,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
 
     const handleErroredCoupon = useCallback((erroredCoupon: string) => {
         setCoupons((currentCoupons) =>
-            currentCoupons.map((c) => (c.coupon === erroredCoupon ? { ...c, isError: true } : c)),
+            currentCoupons.map((c) => (c.code === erroredCoupon ? { ...c, isInvalid: true } : c)),
         );
     }, []);
 

@@ -44,8 +44,8 @@ import { getTargetExpirationDate } from '@/lib/utils/names';
 import { CouponsWrapper } from '../CouponsWrapper';
 
 export interface UserSetCoupon {
-    coupon: string;
-    isError?: boolean;
+    code: string;
+    isInvalid?: boolean;
 }
 
 type PurchaseNameProps = {
@@ -67,6 +67,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
+
+    const couponCodes = coupons.map((c) => c.code);
 
     const {
         data: nameRecordData,
@@ -92,9 +94,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             years: renewYears,
             setDefault: isDisplayName,
             address: account?.address,
-            ...(applyCoupons && coupons.length
-                ? { couponCodes: coupons.map((c) => c.coupon) }
-                : {}),
+            ...(applyCoupons && coupons.length ? { couponCodes } : {}),
         });
     }
 
@@ -179,7 +179,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const handleErroredCoupon = useCallback((erroredCoupon: string) => {
         setCoupons((currentCoupons) =>
-            currentCoupons.map((c) => (c.coupon === erroredCoupon ? { ...c, isError: true } : c)),
+            currentCoupons.map((c) => (c.code === erroredCoupon ? { ...c, isInvalid: true } : c)),
         );
     }, []);
 
@@ -212,35 +212,35 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [discountedPrice, setDiscountedPrice] = useState(balanceValidation?.totalPrice);
 
     useEffect(() => {
-        if (!applyCoupons || coupons.length === 0) {
+        if (!applyCoupons || couponCodes.length === 0) {
             setDiscountedPrice(balanceValidation?.totalPrice);
             return;
         }
         iotaNamesClient
             .calculateDiscountedPrice({
-                coupons,
+                coupons: couponCodes,
                 name,
                 years: renewYears,
                 isRegistration: true,
             })
             .then(setDiscountedPrice)
             .catch(() => setDiscountedPrice(balanceValidation?.totalPrice));
-    }, [applyCoupons, coupons, renewYears, balanceValidation?.totalPrice]);
+    }, [applyCoupons, couponCodes, renewYears, balanceValidation?.totalPrice]);
 
-    async function handleAddCoupon(coupon: string) {
-        if (coupons.some((c) => c.coupon === coupon)) {
+    async function handleAddCoupon(couponCode: string) {
+        if (couponCodes.includes(couponCode)) {
             setCoupons((currentCoupons) =>
-                currentCoupons.filter((existingCoupon) => existingCoupon.coupon !== coupon),
+                currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
             );
             return;
         }
 
         try {
-            const resolvedCoupon = await iotaNamesClient.resolveCoupon(coupon);
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(couponCode);
             if (!resolvedCoupon) {
                 throw new Error();
             }
-            setCoupons((currentCoupons) => [...currentCoupons, { coupon }]);
+            setCoupons((currentCoupons) => [...currentCoupons, { code: couponCode }]);
         } catch {
             toast.error('Invalid coupon');
         }
