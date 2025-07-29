@@ -33,7 +33,7 @@ Call the `getPricelist` method on the `IotaNamesClient` instance to query the ac
 const priceList = await iotaNamesClient.getPriceList();
 console.log(priceList);
 
-// ([domain_length_from, domain_length_to]: price. Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
+// ([name_length_from, name_length_to]: price. Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
 // Example output:
 // {
 // 	[ 3, 3 ] => 500000000000,
@@ -50,7 +50,7 @@ Call the `getRenewalPricelist` method on the `IotaNamesClient` instance to query
 const renewalPriceList = await iotaNamesClient.getRenewalPricelist();
 console.log(renewalPriceList);
 
-// ([domain_length_from, domain_length_to]: price. Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
+// ([name_length_from, name_length_to]: price. Prices are in NANOS; 1 IOTA = 1_000_000_000 NANOS)
 // Example output:
 // {
 // 	[ 3, 3 ] => 500000000000,

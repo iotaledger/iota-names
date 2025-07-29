@@ -18,7 +18,7 @@ The following table provides more details on the differences between the two typ
 
 | Capabilities/Category | Node subnames | Leaf subnames |
 | --- | --- | --- |
-| Has NFT | ✅ Yes, <ul style={{listStyle: 'disc', paddingLeft: 1 + 'rem'}}><li>`NameRegistration` for SLD*</li><li>`SubdomainRegistration` for nested names</li></ul> | ❌ No, parent's NFT acts as the capability |
+| Has NFT | ✅ Yes, <ul style={{listStyle: 'disc', paddingLeft: 1 + 'rem'}}><li>`NameRegistration` for SLD*</li><li>`SubnameRegistration` for nested names</li></ul> | ❌ No, parent's NFT acts as the capability |
 | Can create children (node/leaf) | ✅ Yes, provided the name is an SLD* or the parent allows it | ❌ No |
 | Expiration | ✅ Yes, IOTA-Names determines expiration for SLDs*, otherwise the parent determines | ❌ No, the parent's expiration determines the leaf expiration |
 | Extend expiration | ✅ Yes, you can extend expiration if parent rules allow it (or you can pay for it for SLD*) | ✅ Yes, leaf names do not expire |
@@ -28,7 +28,7 @@ The following table provides more details on the differences between the two typ
 | Burn | ✅ Yes, post-expiration only | ✅ Yes, burn and revoking is the same for leaf names |
 | Transfer ownership | ✅ Yes, the NFT determines node name ownership | ❌ No, IOTA-Names preserves ownership for the active parent name holder |
 
-*SLD - Second-level domain (for instance, example in example.iota)*
+*SLD - Second-level name (for instance, example in example.iota)*
 
 
 ## Integration
