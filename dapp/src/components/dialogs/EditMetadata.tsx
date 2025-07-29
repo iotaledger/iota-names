@@ -50,71 +50,19 @@ type SetAction =
       };
 
 const METADATA_FIELDS = [
-    {
-        key: 'twitter/x',
-        label: 'Twitter/X',
-        allowedKey: 'twitterX',
-    },
-    {
-        key: 'discord',
-        label: 'Discord',
-        allowedKey: 'discord',
-    },
-    {
-        key: 'github',
-        label: 'Github',
-        allowedKey: 'github',
-    },
-    {
-        key: 'email',
-        label: 'Email',
-        allowedKey: 'email',
-    },
-    {
-        key: 'btc',
-        label: 'Btc',
-        allowedKey: 'btc',
-    },
-    {
-        key: 'eth',
-        label: 'Eth',
-        allowedKey: 'eth',
-    },
-    {
-        key: 'ltc',
-        label: 'Ltc',
-        allowedKey: 'ltc',
-    },
-    {
-        key: 'doge',
-        label: 'Doge',
-        allowedKey: 'doge',
-    },
-    {
-        key: 'sol',
-        label: 'Sol',
-        allowedKey: 'sol',
-    },
-    {
-        key: 'sui',
-        label: 'Sui',
-        allowedKey: 'sui',
-    },
-    {
-        key: 'website',
-        label: 'Website',
-        allowedKey: 'website',
-    },
-    {
-        key: 'ipfs',
-        label: 'Ipfs',
-        allowedKey: 'ipfs',
-    },
-    {
-        key: 'arweave',
-        label: 'Arweave',
-        allowedKey: 'arweave',
-    },
+    { key: 'twitter/x', label: 'Twitter/X', allowedKey: 'twitterX' },
+    { key: 'discord', label: 'Discord', allowedKey: 'discord' },
+    { key: 'github', label: 'Github', allowedKey: 'github' },
+    { key: 'email', label: 'Email', allowedKey: 'email' },
+    { key: 'btc', label: 'Btc', allowedKey: 'btc' },
+    { key: 'eth', label: 'Eth', allowedKey: 'eth' },
+    { key: 'ltc', label: 'Ltc', allowedKey: 'ltc' },
+    { key: 'doge', label: 'Doge', allowedKey: 'doge' },
+    { key: 'sol', label: 'Sol', allowedKey: 'sol' },
+    { key: 'sui', label: 'Sui', allowedKey: 'sui' },
+    { key: 'website', label: 'Website', allowedKey: 'website' },
+    { key: 'ipfs', label: 'Ipfs', allowedKey: 'ipfs' },
+    { key: 'arweave', label: 'Arweave', allowedKey: 'arweave' },
 ] as const;
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
@@ -207,13 +155,10 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onSuccess() {
-            setShouldBuildUpdates(false);
-            setAction({ type: 'none' });
             setOpen(false);
             toast.success(`Successfully updated metadata for ${normalizeIotaName(name)}`);
         },
         onError: (error) => {
-            setShouldBuildUpdates(false);
             toast.error(error.message);
         },
     });
@@ -229,21 +174,11 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     useEffect(() => {
         if (shouldBuildUpdates && updates.length > 0 && updateTransaction) {
             saveMetadata();
-            setShouldBuildUpdates(false);
         }
     }, [shouldBuildUpdates, updates, updateTransaction, saveMetadata]);
 
-    useEffect(() => {
-        if (nameRecord?.nameRecord?.data) {
-            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
-            METADATA_FIELDS.forEach(({ key }) => {
-                const value = nameRecord.nameRecord.data[key] || '';
-                newMetadata[key] = { selected: !!value, data: value };
-            });
-            setMetadata(newMetadata);
-        }
-    }, [nameRecord?.nameRecord?.data]);
     const isLoading = isUpdating || isSigning || isSaving;
+    const disableApply = shouldBuildUpdates && updates.length === 0;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -291,6 +226,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         <Button
                             icon={isLoading ? <LoadingIndicator /> : null}
                             text="Apply"
+                            disabled={disableApply}
                             type={ButtonType.Primary}
                             onClick={handleApplyClick}
                             fullWidth
