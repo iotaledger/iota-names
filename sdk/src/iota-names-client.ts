@@ -490,14 +490,15 @@ export class IotaNamesClient {
 
             coupons = (await Promise.all(couponPromises)) as Coupon[];
         }
-        const nameParts = normalizeIotaName(name, 'dot').split('.');
-        const denormalizedName = nameParts[nameParts.length - 2];
 
-        if (nameParts.length < 2 || !denormalizedName) {
+        const nameParts = normalizeIotaName(name, 'dot').split('.');
+        const firstNamePart = nameParts[0];
+
+        if (nameParts.length < 2 || !firstNamePart) {
             throw new Error('Invalid IOTA name.');
         }
 
-        validateCoupons(coupons, years, denormalizedName.length, address);
+        validateCoupons(coupons, years, firstNamePart.length, address);
 
         const standardPrice = await this.calculatePrice({
             name,
