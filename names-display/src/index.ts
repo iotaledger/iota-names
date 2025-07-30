@@ -3,10 +3,15 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import Fastify from 'fastify';
 import * as z from 'zod';
 
+import { wrapTextByWidth } from './utils/measureTextWith';
+
 const BASE = readFileSync('./src/base.svg', 'utf-8');
 const ROBOTO_BASE64 = readFileSync('./src/fonts/roboto-flex.b64', 'utf-8');
 
-const FONT_STYLE = `
+const NAME_FONT_SIZE = 20;
+const NAME_FONT_SIZE_WITH_SUBNAME = 16;
+
+const FONT_STYLES = `
   <style>
     @font-face {
       font-family: 'RobotoFlex';
@@ -18,6 +23,10 @@ const FONT_STYLE = `
     text {
       font-family: 'RobotoFlex', sans-serif;
     }
+
+    .subname + .name {
+        margin-top: 4px;
+    }
   </style>
 `;
 
@@ -27,45 +36,46 @@ const formatter = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
 });
 
-function truncateWithEllipsis(text: string, maxLength: number): string {
-    return text.length > maxLength ? text.slice(0, maxLength - 1) + '…' : text;
-}
-function splitTextForSvg(text: string, maxLengthPerLine = 13, maxLines = 4): string[] {
-    const parts: string[] = [];
-
-    for (let i = 0; i < text.length && parts.length < maxLines; i += maxLengthPerLine) {
-        const isLastLine = parts.length === maxLines - 1;
-        const chunk = text.slice(i, i + maxLengthPerLine);
-        parts.push(
-            isLastLine
-                ? truncateWithEllipsis(chunk + text.slice(i + maxLengthPerLine), maxLengthPerLine)
-                : chunk,
-        );
-    }
-
-    return parts;
-}
-
 function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
     const formattedName = normalizeIotaName(name, 'at', {
         truncateLongParts: false,
         onlyFirstSubname: false,
     });
-    const fontSize = formattedName.length > 14 ? 15 : 20;
 
-    const lines = splitTextForSvg(formattedName.toUpperCase());
+    let subnameLines: string[] = [];
+    let nameLines: string[] = [];
+
+    let [subnames, _name] = formattedName.split('@').map((e) => e.toUpperCase());
+    _name = `@${_name}`;
+
+    const hasSubname = !!subnames;
+    const nameFontSize = hasSubname ? NAME_FONT_SIZE_WITH_SUBNAME : NAME_FONT_SIZE;
+    const subnameFontSize = NAME_FONT_SIZE;
+
+    nameLines = wrapTextByWidth(_name, nameFontSize);
+    subnameLines = wrapTextByWidth(subnames, subnameFontSize);
+
     const date = formatter.format(new Date(timestamp));
 
     const lineHeightEm = 1.2;
-    const totalLineHeight = (lines.length - 1) * lineHeightEm;
+    const totalLineHeight = (subnameLines.length + nameLines.length - 1) * lineHeightEm;
     const startDy = -(totalLineHeight / 2);
 
-    const contentLines = lines
-        .map((line, i) => {
+    const contentLines = [
+        ...subnameLines.map((line, i) => {
             const dy = i === 0 ? `${startDy}em` : `${lineHeightEm}em`;
-            return `<tspan x="50%" dy="${dy}">${line}</tspan>`;
-        })
-        .join('\n');
+            return `<tspan x="50%" dy="${dy}" style="${subnameFontSize}px;">${line}</tspan>`;
+        }),
+        ...nameLines.map((line, i) => {
+            const dy =
+                subnameLines.length > 0
+                    ? `${lineHeightEm}em`
+                    : i === 0
+                      ? `${startDy}em`
+                      : `${lineHeightEm}em`;
+            return `<tspan x="50%" dy="${dy}" style="font-size: ${nameFontSize}px; ${subnameLines.length > 0 && i === 0 ? 'padding-top: 4px;' : ''}">${line}</tspan>`;
+        }),
+    ].join('\n');
 
     const content = `
         <text
@@ -75,7 +85,6 @@ function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
             dominant-baseline="middle"
             fill="white"
             font-family="sans-serif"
-            font-size="${fontSize}"
             font-weight="bold"
         >
             ${contentLines}
@@ -91,7 +100,7 @@ function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
        </text>
     `;
 
-    return BASE.replace('{{ CONTENT }}', FONT_STYLE + content);
+    return BASE.replace('{{ CONTENT }}', FONT_STYLES + content);
 }
 
 const Params = z.object({
@@ -107,6 +116,7 @@ fastify.get('/:name/:timestamp', async (request, reply) => {
     try {
         const params = await z.parseAsync(Params, request.params);
         const svg = generateSvg(params);
+        console.log(svg);
         reply.type('image/svg+xml').code(200);
 
         return svg;
