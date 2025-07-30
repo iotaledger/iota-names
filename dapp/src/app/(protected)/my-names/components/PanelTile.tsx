@@ -10,6 +10,7 @@ import {
     ImageShape,
     ImageType,
 } from '@iota/apps-ui-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
 import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
@@ -23,7 +24,7 @@ const CARD_BG_COLOR: Record<PanelTileType, string> = {
 };
 
 interface PanelTileProps {
-    title: string;
+    name: string;
     type?: PanelTileType;
     subtitle?: string;
     footer?: React.ReactNode;
@@ -33,7 +34,7 @@ interface PanelTileProps {
 }
 
 export function PanelTile({
-    title,
+    name,
     type = PanelTileType.Default,
     subtitle,
     footer,
@@ -41,6 +42,8 @@ export function PanelTile({
     onClick,
     menuButton,
 }: PanelTileProps) {
+    const title = normalizeIotaName(name, 'at', { truncateLongParts: true });
+
     return (
         <div className={clsx('flex flex-col rounded-xl overflow-hidden', CARD_BG_COLOR[type])}>
             <div className="relative">
@@ -55,7 +58,7 @@ export function PanelTile({
                                 shape={ImageShape.SquareRounded}
                             >
                                 <AvatarDisplay
-                                    name={title}
+                                    name={name}
                                     size="full"
                                     fallbackUrl="/subname-card-fallback.png"
                                 />

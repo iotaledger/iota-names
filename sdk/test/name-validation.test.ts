@@ -209,21 +209,55 @@ describe('Name normalization', () => {
         ).toEqual('aaaa.bbbb.cccc@dddddd...dddddd');
     });
 
-    test('should only select fist subname dot-style', () => {
+    test('should only select first subname dot-style', () => {
         expect(
-            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', { onlyFirstSubname: true }),
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', {
+                onlyFirstSubname: true,
+            }),
         ).toEqual('aaaa...ddd.iota');
-        expect(normalizeIotaName('aaaa.bbbb.iota', 'dot', { onlyFirstSubname: true })).toEqual(
-            'aaaa.bbbb.iota',
-        );
+        expect(
+            normalizeIotaName('aaaa.bbbb.iota', 'dot', {
+                onlyFirstSubname: true,
+            }),
+        ).toEqual('aaaa.bbbb.iota');
+
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'dot', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('aaaa.ddd.iota');
+        expect(
+            normalizeIotaName('aaaa.bbbb.iota', 'dot', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('aaaa.bbbb.iota');
     });
 
-    test('should only select fist subname at-style', () => {
+    test('should only select first subname at-style', () => {
         expect(
-            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', { onlyFirstSubname: true }),
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', {
+                onlyFirstSubname: true,
+            }),
         ).toEqual('aaaa...@ddd');
-        expect(normalizeIotaName('aaaa.bbbb.iota', 'at', { onlyFirstSubname: true })).toEqual(
-            'aaaa@bbbb',
-        );
+        expect(
+            normalizeIotaName('aaaa.bbbb.iota', 'at', {
+                onlyFirstSubname: true,
+            }),
+        ).toEqual('aaaa@bbbb');
+
+        expect(
+            normalizeIotaName('aaaa.bbbbbb.cccccc.ddd.iota', 'at', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('aaaa@ddd');
+        expect(
+            normalizeIotaName('aaaa.bbbb.iota', 'at', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('aaaa@bbbb');
     });
 });
