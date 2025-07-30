@@ -226,7 +226,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                     isRegistration: true,
                 });
 
-                console.log('Discounted price:', discount);
                 setDiscountedPrice(discount);
             } catch {
                 setDiscountedPrice(balanceValidation?.totalPrice);
