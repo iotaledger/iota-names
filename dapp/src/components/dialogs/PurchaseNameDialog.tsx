@@ -26,6 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -107,9 +108,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         updates: updates,
     });
 
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        updateNameData?.builtTx ?? null,
-        price,
+    const {
+        data: balanceValidation,
+        error: balanceValidationError,
+        isLoading: isLoadingBalanceValidation,
+        isFetched: isBalanceValidationFetched,
+    } = useBalanceValidation(updateNameData?.builtTx ?? null, price);
+
+    const [discountedPrice, setDiscountedPrice] = useState<number | undefined>(
+        balanceValidation?.totalPrice,
     );
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
@@ -209,30 +216,45 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         }
     }, [updateNameError, handleErroredCoupon]);
 
-    const [discountedPrice, setDiscountedPrice] = useState(balanceValidation?.totalPrice);
-
     useEffect(() => {
         const applyDiscount = async () => {
-            if (!applyCoupons || couponCodes.length === 0) {
+            if (
+                !applyCoupons ||
+                couponCodes.length === 0 ||
+                !isBalanceValidationFetched ||
+                isLoadingBalanceValidation
+            ) {
                 setDiscountedPrice(balanceValidation?.totalPrice);
                 return;
             }
 
             try {
-                const discount = await iotaNamesClient.calculateDiscountedPrice({
+                const discountedPrice = await iotaNamesClient.calculateDiscountedPrice({
                     coupons: couponCodes,
                     name,
                     years: renewYears,
                     isRegistration: true,
                 });
 
-                setDiscountedPrice(discount);
+                const gasPrice = balanceValidation?.totalGas ?? 0;
+
+                const totalPricePlusGas = new BigNumber(discountedPrice).plus(gasPrice).toNumber();
+
+                setDiscountedPrice(totalPricePlusGas);
             } catch {
                 setDiscountedPrice(balanceValidation?.totalPrice);
             }
         };
         applyDiscount();
-    }, [applyCoupons, couponCodes, renewYears, balanceValidation?.totalPrice]);
+    }, [
+        applyCoupons,
+        couponCodes,
+        renewYears,
+        balanceValidation?.totalPrice,
+        balanceValidation?.totalGas,
+        isBalanceValidationFetched,
+        isLoadingBalanceValidation,
+    ]);
 
     async function handleAddCoupon(coupon: string) {
         if (couponCodes.includes(coupon)) {
