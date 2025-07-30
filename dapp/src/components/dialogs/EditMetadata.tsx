@@ -118,7 +118,9 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         if (!shouldBuildUpdates) return [];
 
         const updatesArray: NameUpdate[] = [];
-        const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
+        const isNameSubname = nameRecord?.nameRecord
+            ? isSubname(nameRecord.nameRecord.name)
+            : false;
         const nftId =
             isNameSubname && nameRecord
                 ? getNameObject(subnamesOwned ?? [], nameRecord.nameRecord.name)
@@ -134,12 +136,14 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         nftId,
                         key: ALLOWED_METADATA[allowedKey],
                         value: field.data,
+                        isSubname: isNameSubname,
                     });
                 } else if (action.type === 'unset' && !field.selected) {
                     updatesArray.push({
                         type: 'unset-data',
                         nftId,
                         key: ALLOWED_METADATA[allowedKey],
+                        isSubname: isNameSubname,
                     });
                 }
             });
