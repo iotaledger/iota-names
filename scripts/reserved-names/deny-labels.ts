@@ -117,12 +117,7 @@ export async function processLabelsFileBatched(
     for (const label of allLabels) {
         const labelLen = label.length + (batch.length > 0 ? 1 : 0);
         if (batchLen + labelLen > PURE_ARG_SIZE_LIMIT) {
-            const tx = new Transaction();
-            console.log(`${action === 'block' ? 'Blocking' : 'Reserving'} ${batch.length} labels`);
-            processLabelsBatch(tx, packageInfo, action, batch);
-            const result = await signAndExecute(tx, network);
-            await client.waitForTransaction({ digest: result.digest });
-            console.log(`Transaction digest: ${result.digest}`);
+            await sendLabelsBatchTransaction(batch, action, packageInfo, network, client);
             batch = [];
             batchLen = 0;
         }
@@ -130,11 +125,21 @@ export async function processLabelsFileBatched(
         batchLen += labelLen;
     }
     if (batch.length > 0) {
-        const tx = new Transaction();
-        console.log(`${action === 'block' ? 'Blocking' : 'Reserving'} ${batch.length} labels`);
-        processLabelsBatch(tx, packageInfo, action, batch);
-        const result = await signAndExecute(tx, network);
-        await client.waitForTransaction({ digest: result.digest });
-        console.log(`Transaction digest: ${result.digest}`);
+        await sendLabelsBatchTransaction(batch, action, packageInfo, network, client);
     }
+}
+
+async function sendLabelsBatchTransaction(
+    batch: string[],
+    action: 'block' | 'reserve',
+    packageInfo: PackageInfoForLabels,
+    network: string,
+    client: any,
+) {
+    const tx = new Transaction();
+    console.log(`${action === 'block' ? 'Blocking' : 'Reserving'} ${batch.length} labels`);
+    processLabelsBatch(tx, packageInfo, action, batch);
+    const result = await signAndExecute(tx, network);
+    await client.waitForTransaction({ digest: result.digest });
+    console.log(`Transaction digest: ${result.digest}`);
 }
