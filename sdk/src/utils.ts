@@ -29,7 +29,11 @@ interface NormalizeOptions {
 export function normalizeIotaName(
     name: string,
     format: 'at' | 'dot' = 'at',
-    { onlyFirstSubname, truncateLongParts, ellipsisForDeepSubnames }: NormalizeOptions = {},
+    {
+        onlyFirstSubname,
+        truncateLongParts,
+        ellipsisForDeepSubnames = onlyFirstSubname === true,
+    }: NormalizeOptions = {},
 ): string {
     const lowerCase = name.toLowerCase();
     let parts;
