@@ -5,22 +5,33 @@ import { useQuery } from '@tanstack/react-query';
 
 export function useAuctionDisplayImages(name: string, expirationTimestamp: string) {
     return useQuery({
-        // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: ['generateSVG', name, expirationTimestamp],
         queryFn: async () => {
+            const baseUrl = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
+
             const response = await fetch(
-                `https://iota-names.iota.cafe/${name}/${expirationTimestamp}`,
+                `${baseUrl}/${encodeURIComponent(name)}/${expirationTimestamp}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Accept: 'image/svg+xml',
+                    },
+                },
             );
-            const data = await response.json();
-            console.log('Fetched auction display images:', data);
-            return data;
+
+            if (!response.ok) {
+                throw new Error(`API responded with ${response.status}: ${response.statusText}`);
+            }
+
+            const svgText = await response.text();
+            const dataUrl = `data:image/svg+xml;base64,${btoa(svgText)}`;
+
+            return {
+                image: dataUrl,
+                svg: svgText,
+            };
         },
         enabled: !!name && !!expirationTimestamp,
         gcTime: 0,
-        select: ({ data }) => {
-            return {
-                image: data.transaction?.display?.data?.image_url || '',
-            };
-        },
     });
 }

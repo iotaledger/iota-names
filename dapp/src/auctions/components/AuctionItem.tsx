@@ -36,7 +36,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         auction.name,
         auction.metadata?.nftExpiration.getTime().toString() || '',
     );
-    console.log('Auction display images:', auctionDisplayImages, auction.name, auction.metadata);
+
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
         async mutationFn(claimAuctionTransaction: Transaction) {
@@ -122,18 +122,8 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         return null;
     };
 
-    // Ensure auctionDisplay is always a string
-    const auctionDisplay =
-        typeof auctionDisplayImages === 'string'
-            ? auctionDisplayImages
-            : auctionDisplayImages &&
-                typeof auctionDisplayImages === 'object' &&
-                'image' in auctionDisplayImages
-              ? auctionDisplayImages.image
-              : '';
-
     return (
-        <NameCard name={auction.name} auctionDisplay={auctionDisplay}>
+        <NameCard name={auction.name} auctionDisplay={auctionDisplayImages?.image}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
