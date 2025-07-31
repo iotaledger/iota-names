@@ -223,12 +223,6 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         label: `${i + 1} Year${i ? 's' : ''}`,
     }));
 
-    const handleErroredCoupon = useCallback((erroredCoupon: string) => {
-        setCoupons((currentCoupons) =>
-            currentCoupons.map((c) => (c.code === erroredCoupon ? { ...c, isInvalid: true } : c)),
-        );
-    }, []);
-
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
             setRenewYears(1);
@@ -236,6 +230,13 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     }, [renewOptions, renewYears, renewableYears]);
 
     useEffect(() => {
+        const handleErroredCoupon = (erroredCoupon: string) => {
+            setCoupons((currentCoupons) =>
+                currentCoupons.map((c) =>
+                    c.code === erroredCoupon ? { ...c, isInvalid: true } : c,
+                ),
+            );
+        };
         if (updateNameError) {
             if (
                 updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
@@ -253,7 +254,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                 toast.error(updateNameError.message);
             }
         }
-    }, [updateNameError, handleErroredCoupon]);
+    }, [updateNameError]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
