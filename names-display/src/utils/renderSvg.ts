@@ -26,14 +26,16 @@ type RenderSvgParameters = z.infer<typeof Params> & {
     addDataTestText?: boolean;
     template: string;
 };
+
 export function renderSvg({ name, timestamp, addDataTestText, template }: RenderSvgParameters) {
     const formattedDate = TEXT_CONFIG.dateFormatter.format(new Date(timestamp));
 
     const [rawSubname, rawName] = normalizeIotaName(name, 'at').split('@');
-    const subnameLines = rawSubname
-        ? generateLayoutForNameAndSubname(rawSubname.toUpperCase(), '').subnameLines
-        : [];
-    const nameLines = generateLayoutForNameAndSubname('', `@${rawName.toUpperCase()}`).nameLines;
+
+    const { subnameLines, nameLines } = generateLayoutForNameAndSubname(
+        rawSubname?.toUpperCase() ?? null,
+        `@${rawName.toUpperCase()}`,
+    );
 
     const hasSubname = subnameLines.length > 0;
 
@@ -42,7 +44,6 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
     const nameFontSize = hasSubname
         ? TEXT_CONFIG.nameFontSizeWithSubname
         : TEXT_CONFIG.nameFontSize;
-
     const nameLineHeight = hasSubname
         ? TEXT_CONFIG.nameLineHeightWithSubname
         : TEXT_CONFIG.nameLineHeight;
@@ -76,14 +77,14 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
     }
 
     const maximumBlockWidth = allTextLines.reduce(
-        (currentMax, lineInfo) =>
-            lineInfo.measuredWidth > currentMax ? lineInfo.measuredWidth : currentMax,
+        (max, line) => Math.max(max, line.measuredWidth),
         0,
     );
 
-    const subnameBlockHeight = subnameLines.length * subnameLineHeight;
-    const nameBlockHeight = nameLines.length * nameLineHeight;
-    const totalTextBlockHeight = subnameBlockHeight + gapBetweenBlocks + nameBlockHeight;
+    const totalTextBlockHeight =
+        subnameLines.length * subnameLineHeight +
+        nameLines.length * nameLineHeight +
+        gapBetweenBlocks;
 
     const horizontalOffset =
         SVG_CONFIG.paddingX + (SVG_CONFIG.textBoxWidth - maximumBlockWidth) / 2;
@@ -91,7 +92,6 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
         SVG_CONFIG.textBoxTop + (SVG_CONFIG.textBoxHeight - totalTextBlockHeight) / 2;
 
     let currentYPosition = verticalOffset;
-
     let svgContent = '';
 
     for (let index = 0; index < allTextLines.length; index++) {
@@ -102,7 +102,6 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
         }
 
         const xPosition = horizontalOffset + (maximumBlockWidth - lineInfo.measuredWidth) / 2;
-
         const yMiddle = currentYPosition + lineInfo.lineHeight / 2;
 
         const pathData = TEXT_TO_SVG_ROBOTO.getD(lineInfo.text, {
@@ -113,7 +112,6 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
         });
 
         const dataTestText = addDataTestText ? ` data-test-line-text="${lineInfo.text}"` : '';
-
         svgContent += `<path d="${pathData}"${dataTestText} fill="${TEXT_CONFIG.color}"/>\n`;
 
         currentYPosition += lineInfo.lineHeight;
@@ -128,6 +126,7 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
         fontSize: DATE_CONFIG.fontSize,
         anchor: 'right bottom',
     });
+
     svgContent += `<path d="${datePath}"${dateTestId} fill="${TEXT_CONFIG.color}"/>\n`;
 
     return template.replace('{{{CONTENT}}}', svgContent);
