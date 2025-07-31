@@ -25,13 +25,13 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameUpdate, queryKey, useBalanceValidation, useUpdateNameTransaction } from '@/hooks';
+import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import {
@@ -64,6 +64,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const account = useCurrentAccount();
     const { data: coreConfig } = useCoreConfig();
 
+    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
     const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
@@ -108,16 +109,20 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         updates: updates,
     });
 
-    const {
-        data: balanceValidation,
-        error: balanceValidationError,
-        isLoading: isLoadingBalanceValidation,
-        isFetched: isBalanceValidationFetched,
-    } = useBalanceValidation(updateNameData?.builtTx ?? null, price);
+    const applyDiscount = applyCoupons && couponCodes.length >= 0;
 
-    const [discountedPrice, setDiscountedPrice] = useState<number | undefined>(
-        balanceValidation?.totalPrice,
-    );
+    const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
+        queryKey: [couponCodes, name, renewYears],
+        async queryFn() {
+            return await iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
+                name,
+                years: renewYears,
+                isRegistration: true,
+            });
+        },
+        enabled: applyDiscount,
+    });
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -153,43 +158,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         },
     });
 
-    function closeDialog() {
-        setOpen(false);
-    }
-
-    if (!isConnected) return null;
-
-    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
-        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
-              id: String(i + 1),
-              label: `${i + 1} Year${i ? 's' : ''}`,
-          }))
-        : [];
-
-    const hasEnoughGas =
-        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
-
-    const canPay =
-        isConnected &&
-        hasEnoughGas &&
-        balanceValidation?.hasBalance &&
-        nameRecordData?.type === 'available';
-
-    const hasErrors = updateNameError || balanceValidationError || purchaseError;
-
-    const isLoading = isNameRecordLoading || isUpdateNameLoading || isSigning;
-
-    const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-
-    const expirationDate = getTargetExpirationDate(renewYears);
-
-    const handleErroredCoupon = useCallback((erroredCoupon: string) => {
-        setCoupons((currentCoupons) =>
-            currentCoupons.map((c) => (c.code === erroredCoupon ? { ...c, isInvalid: true } : c)),
-        );
-    }, []);
-
     useEffect(() => {
         if (nameRecordError) {
             toast.error(nameRecordError.message);
@@ -197,6 +165,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     }, [nameRecordError]);
 
     useEffect(() => {
+        const handleErroredCoupon = (erroredCoupon: string) => {
+            setCoupons((currentCoupons) =>
+                currentCoupons.map((c) =>
+                    c.code === erroredCoupon ? { ...c, isInvalid: true } : c,
+                ),
+            );
+        };
+
         if (updateNameError) {
             if (
                 updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
@@ -214,47 +190,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                 toast.error(updateNameError.message);
             }
         }
-    }, [updateNameError, handleErroredCoupon]);
+    }, [updateNameError]);
 
-    useEffect(() => {
-        const applyDiscount = async () => {
-            if (
-                !applyCoupons ||
-                couponCodes.length === 0 ||
-                !isBalanceValidationFetched ||
-                isLoadingBalanceValidation
-            ) {
-                setDiscountedPrice(balanceValidation?.totalPrice);
-                return;
-            }
-
-            try {
-                const discountedPrice = await iotaNamesClient.calculateDiscountedPrice({
-                    coupons: couponCodes,
-                    name,
-                    years: renewYears,
-                    isRegistration: true,
-                });
-
-                const gasPrice = balanceValidation?.totalGas ?? 0;
-
-                const totalPricePlusGas = new BigNumber(discountedPrice).plus(gasPrice).toNumber();
-
-                setDiscountedPrice(totalPricePlusGas);
-            } catch {
-                setDiscountedPrice(balanceValidation?.totalPrice);
-            }
-        };
-        applyDiscount();
-    }, [
-        applyCoupons,
-        couponCodes,
-        renewYears,
-        balanceValidation?.totalPrice,
-        balanceValidation?.totalGas,
-        isBalanceValidationFetched,
-        isLoadingBalanceValidation,
-    ]);
+    function closeDialog() {
+        setOpen(false);
+    }
 
     async function handleAddCoupon(coupon: string) {
         if (couponCodes.includes(coupon)) {
@@ -274,6 +214,39 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             toast.error('Invalid coupon');
         }
     }
+
+    if (!isConnected) return null;
+
+    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
+        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
+              id: String(i + 1),
+              label: `${i + 1} Year${i ? 's' : ''}`,
+          }))
+        : [];
+
+    const usingPrice = applyDiscount ? discountedPrice : price;
+    const finalPrice = new BigNumber(usingPrice ?? 0)
+        .plus(updateNameData?.gasSummary?.totalGas ?? 0)
+        .toNumber();
+
+    const hasEnoughGas =
+        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+
+    const canPay =
+        isConnected &&
+        hasEnoughGas &&
+        Number(coinBalance?.totalBalance) > finalPrice &&
+        nameRecordData?.type === 'available';
+
+    const hasErrors = updateNameError || coinBalanceError || purchaseError;
+
+    const isLoading =
+        isNameRecordLoading || isUpdateNameLoading || isSigning || isDiscountedPriceLoading;
+
+    const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
+
+    const expirationDate = getTargetExpirationDate(renewYears);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -341,12 +314,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        !isLoading &&
-                                        balanceValidation &&
-                                        typeof balanceValidation?.totalPrice === 'number' &&
-                                        balanceValidation.totalPrice > 0 &&
-                                        discountedPrice ? (
-                                            formatNanosToIota(discountedPrice)
+                                        !isLoading && finalPrice > 0 && finalPrice ? (
+                                            formatNanosToIota(finalPrice)
                                         ) : (
                                             <LoadingIndicator />
                                         )
