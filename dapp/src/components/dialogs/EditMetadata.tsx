@@ -50,19 +50,195 @@ type SetAction =
       };
 
 const METADATA_FIELDS = [
-    { key: 'twitter/x', label: 'Twitter/X', allowedKey: 'twitterX' },
-    { key: 'discord', label: 'Discord', allowedKey: 'discord' },
-    { key: 'github', label: 'Github', allowedKey: 'github' },
-    { key: 'email', label: 'Email', allowedKey: 'email' },
-    { key: 'btc', label: 'Btc', allowedKey: 'btc' },
-    { key: 'eth', label: 'Eth', allowedKey: 'eth' },
-    { key: 'ltc', label: 'Ltc', allowedKey: 'ltc' },
-    { key: 'doge', label: 'Doge', allowedKey: 'doge' },
-    { key: 'sol', label: 'Sol', allowedKey: 'sol' },
-    { key: 'sui', label: 'Sui', allowedKey: 'sui' },
-    { key: 'website', label: 'Website', allowedKey: 'website' },
-    { key: 'ipfs', label: 'Ipfs', allowedKey: 'ipfs' },
-    { key: 'arweave', label: 'Arweave', allowedKey: 'arweave' },
+    {
+        key: 'twitter/x',
+        label: 'Twitter/X',
+        allowedKey: 'twitterX',
+        validate: (value: string) => {
+            if (!value) return 'Twitter field is empty';
+            if (!value.startsWith('@')) return 'Twitter handle must start with @';
+            if (value.length < 2) return 'Twitter handle too short';
+            if (value.length > 16) return 'Twitter handle too long';
+            if (!/^@[a-zA-Z0-9_]+$/.test(value)) return 'Invalid Twitter handle format';
+            return null;
+        },
+    },
+    {
+        key: 'discord',
+        label: 'Discord',
+        allowedKey: 'discord',
+        validate: (value: string) => {
+            if (!value) return 'Discord field is empty';
+            if (!/^.{2,32}(#[0-9]{4})?$/.test(value))
+                return 'Discord format: username or username#1234';
+            return null;
+        },
+    },
+    {
+        key: 'github',
+        label: 'Github',
+        allowedKey: 'github',
+        validate: (value: string) => {
+            if (!value) return 'Github field is empty';
+            const cleanValue = value.replace(/^@/, '');
+            if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/.test(cleanValue)) {
+                return 'Invalid GitHub username format';
+            }
+            return null;
+        },
+    },
+    {
+        key: 'email',
+        label: 'Email',
+        allowedKey: 'email',
+        validate: (value: string) => {
+            if (!value) return 'Email field is empty';
+            const emailRegex =
+                /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            if (!emailRegex.test(value)) return 'Invalid email format';
+            if (value.length > 254) return 'Email too long';
+            return null;
+        },
+    },
+    {
+        key: 'btc',
+        label: 'Btc',
+        allowedKey: 'btc',
+        validate: (value: string) => {
+            if (!value) return 'Btc field is empty';
+            if (!/^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/.test(value)) {
+                return 'Invalid Bitcoin address';
+            }
+            return null;
+        },
+    },
+    {
+        key: 'eth',
+        label: 'Eth',
+        allowedKey: 'eth',
+        validate: (value: string) => {
+            if (!value) return 'Eth field is empty';
+            if (!value.startsWith('0x')) return 'Eth address must start with 0x';
+            if (!/^0x[0-9a-fA-F]{40}$/.test(value)) return 'Invalid Eth address format';
+            return null;
+        },
+    },
+    {
+        key: 'ltc',
+        label: 'Ltc',
+        allowedKey: 'ltc',
+        validate: (value: string) => {
+            if (!value) return 'Ltc field is empty';
+            const legacyRegex = /^[LM3][a-km-zA-HJ-NP-Z1-9]{25,33}$/;
+            const bech32Regex = /^ltc1[a-z0-9]{39,59}$/;
+            if (!legacyRegex.test(value) && !bech32Regex.test(value)) {
+                return 'Invalid Litecoin address format';
+            }
+            return null;
+        },
+    },
+    {
+        key: 'doge',
+        label: 'Doge',
+        allowedKey: 'doge',
+        validate: (value: string) => {
+            if (!value) return 'Doge field is empty';
+            if (!/^[DA][5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/.test(value)) {
+                return 'Invalid Dogecoin address format';
+            }
+            return null;
+        },
+    },
+    {
+        key: 'sol',
+        label: 'Sol',
+        allowedKey: 'sol',
+        validate: (value: string) => {
+            if (!value) return 'Sol field is empty';
+            if (!/^[1-9A-HJ-NP-Za-km-z]{43,44}$/.test(value)) {
+                return 'Invalid Solana address format';
+            }
+            return null;
+        },
+    },
+    {
+        key: 'sui',
+        label: 'Sui',
+        allowedKey: 'sui',
+        validate: (value: string) => {
+            if (!value) return 'Sui field is empty';
+            if (!value.startsWith('0x')) return 'Sui address must start with 0x';
+            if (!/^0x[0-9a-fA-F]{64}$/.test(value)) return 'Invalid Sui address format';
+            return null;
+        },
+    },
+    {
+        key: 'website',
+        label: 'Website',
+        allowedKey: 'website',
+        validate: (value: string) => {
+            if (!value) return 'Website field is empty';
+            try {
+                new URL(value);
+                return null;
+            } catch {
+                return 'Invalid URL format';
+            }
+        },
+    },
+    {
+        key: 'ipfs',
+        label: 'Ipfs',
+        allowedKey: 'ipfs',
+        validate: (value: string) => {
+            if (!value) return 'Ipfs field is empty';
+
+            const cidv0Regex = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
+            const cidv1Regex = /^b[a-z2-7]{58}$/;
+            const ipfsUrlRegex =
+                /^(ipfs:\/\/|https?:\/\/.+\/ipfs\/)(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58})$/;
+
+            if (value.includes('ipfs://') || value.includes('/ipfs/')) {
+                if (!ipfsUrlRegex.test(value)) {
+                    return 'Invalid IPFS URL format';
+                }
+                return null;
+            }
+
+            if (!cidv0Regex.test(value) && !cidv1Regex.test(value)) {
+                return 'Invalid IPFS hash. Use CIDv0 (Qm...) or CIDv1 (b...) format';
+            }
+
+            return null;
+        },
+    },
+    {
+        key: 'arweave',
+        label: 'Arweave',
+        allowedKey: 'arweave',
+        validate: (value: string) => {
+            if (!value) return 'Arweave field is empty';
+            const arweaveIdRegex = /^[A-Za-z0-9_-]{43}$/;
+            const arweaveUrlRegex =
+                /^https?:\/\/(arweave\.net|ar\.io|arweave\.dev)\/([A-Za-z0-9_-]{43})$/;
+            if (
+                value.includes('arweave.net/') ||
+                value.includes('ar.io/') ||
+                value.includes('arweave.dev/')
+            ) {
+                if (!arweaveUrlRegex.test(value)) {
+                    return 'Invalid Arweave URL format';
+                }
+                return null;
+            }
+
+            if (!arweaveIdRegex.test(value)) {
+                return 'Invalid Arweave transaction ID (43 characters, base64url)';
+            }
+
+            return null;
+        },
+    },
 ] as const;
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
@@ -88,6 +264,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
 
     const [action, setAction] = useState<SetAction>({ type: 'none' });
     const [shouldBuildUpdates, setShouldBuildUpdates] = useState(false);
+    const [validationErrors, setValidationErrors] = useState<Record<string, string | null>>({});
 
     const toggleMetadata = (key: string) => {
         setMetadata((prev) => ({
@@ -101,18 +278,17 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             ...prev,
             [key]: { ...prev[key], data },
         }));
+
+        const field = METADATA_FIELDS.find((f) => f.key === key);
+        const error = field?.validate ? field.validate(data) : null;
+
+        setValidationErrors((prev) => ({
+            ...prev,
+            [key]: error,
+        }));
     };
 
-    useEffect(() => {
-        if (nameRecord?.nameRecord?.data) {
-            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
-            METADATA_FIELDS.forEach(({ key }) => {
-                const value = nameRecord.nameRecord.data[key] || '';
-                newMetadata[key] = { selected: !!value, data: value };
-            });
-            setMetadata(newMetadata);
-        }
-    }, [nameRecord?.nameRecord?.data]);
+    const hasValidationErrors = Object.values(validationErrors).some((error) => error !== null);
 
     const updates: NameUpdate[] = useMemo(() => {
         if (!shouldBuildUpdates) return [];
@@ -183,6 +359,24 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     });
 
     const handleApplyClick = () => {
+        const errors: Record<string, string | null> = {};
+        let hasErrors = false;
+
+        METADATA_FIELDS.forEach(({ key, validate }) => {
+            if (metadata[key]?.selected && validate) {
+                const error = validate(metadata[key]?.data || '');
+                errors[key] = error;
+                if (error) hasErrors = true;
+            }
+        });
+
+        setValidationErrors(errors);
+
+        if (hasErrors) {
+            toast.error('Review errors before applying');
+            return;
+        }
+
         const hasSelected = Object.values(metadata).some((field) => field.selected);
         const hasData = Object.values(metadata).some((field) => field.selected && field.data);
 
@@ -193,11 +387,21 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     useEffect(() => {
         if (shouldBuildUpdates && updates.length > 0 && updateTransaction) {
             saveMetadata();
+            setShouldBuildUpdates(false);
         }
     }, [shouldBuildUpdates, updates, updateTransaction, saveMetadata]);
 
+    useEffect(() => {
+        if (nameRecord?.nameRecord?.data) {
+            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
+            METADATA_FIELDS.forEach(({ key }) => {
+                const value = nameRecord.nameRecord.data[key] || '';
+                newMetadata[key] = { selected: !!value, data: value };
+            });
+            setMetadata(newMetadata);
+        }
+    }, [nameRecord?.nameRecord?.data]);
     const isLoading = isUpdating || isSigning || isSaving;
-    const disableApply = isLoading || !Object.values(metadata).some((field) => field.selected);
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -237,6 +441,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                                 onChange={({ target: { value } }) =>
                                                     updateMetadataData(key, value)
                                                 }
+                                                errorMessage={validationErrors[key] || undefined}
                                             />
                                         ),
                                 )}
@@ -253,7 +458,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                             <Button
                                 icon={isLoading ? <LoadingIndicator /> : null}
                                 text="Apply"
-                                disabled={disableApply}
+                                disabled={hasValidationErrors}
                                 type={ButtonType.Primary}
                                 onClick={handleApplyClick}
                                 fullWidth
