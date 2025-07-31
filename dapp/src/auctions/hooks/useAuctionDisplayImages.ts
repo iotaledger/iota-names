@@ -9,7 +9,7 @@ export function useAuctionDisplayImages(name: string, expirationTimestamp: strin
         queryKey: ['generateSVG', name, expirationTimestamp],
         queryFn: async () => {
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL}/${name}/${expirationTimestamp}`,
+                `https://iota-names.iota.cafe/${name}/${expirationTimestamp}`,
             );
             const data = await response.json();
             console.log('Fetched auction display images:', data);
