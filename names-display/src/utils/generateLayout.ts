@@ -7,33 +7,35 @@ export function generateLayoutForNameAndSubname(
 ): { subnameLines: string[]; nameLines: string[] } {
     const hasSubname = Boolean(subname);
 
-    const firstFontSize = TEXT_CONFIG.subnameFontSize;
-    const firstLineHeight = TEXT_CONFIG.subnameLineHeight;
+    const subnameFontSize = TEXT_CONFIG.subnameFontSize;
+    const subnameLineHeight = TEXT_CONFIG.subnameLineHeight;
 
-    const secondFontSize = hasSubname ? TEXT_CONFIG.nameFontSize : TEXT_CONFIG.subnameFontSize;
-    const secondLineHeight = hasSubname
-        ? TEXT_CONFIG.nameLineHeight
-        : TEXT_CONFIG.subnameLineHeight;
+    const nameFontSize = hasSubname
+        ? TEXT_CONFIG.nameFontSizeWithSubname
+        : TEXT_CONFIG.nameFontSize;
+    const nameLineHeight = hasSubname
+        ? TEXT_CONFIG.nameLineHeightWithSubname
+        : TEXT_CONFIG.nameLineHeight;
 
-    const totalTextHeight = SVG_CONFIG.textBoxHeight;
+    const totalHeight = SVG_CONFIG.textBoxHeight;
 
-    const maxFirstLines = hasSubname
-        ? Math.floor(
-              (totalTextHeight - SVG_CONFIG.gapBetweenParagraphs - secondLineHeight) /
-                  firstLineHeight,
-          )
+    const gap = hasSubname ? SVG_CONFIG.gapBetweenParagraphs : 0;
+
+    const maxSubnameLines = hasSubname
+        ? Math.floor((totalHeight - gap - nameLineHeight) / subnameLineHeight)
         : 0;
 
-    const subnameLines = hasSubname ? wrapTextLines(subname!, firstFontSize, maxFirstLines) : [];
+    const subnameLines = hasSubname
+        ? wrapTextLines(subname!, subnameFontSize, maxSubnameLines)
+        : [];
 
     const usedHeight =
-        subnameLines.length * firstLineHeight +
-        (subnameLines.length > 0 ? SVG_CONFIG.gapBetweenParagraphs : 0);
+        subnameLines.length * subnameLineHeight + (subnameLines.length > 0 ? gap : 0);
+    const remainingHeight = totalHeight - usedHeight;
 
-    const remainingHeight = totalTextHeight - usedHeight;
-    const maxSecondLines = Math.floor(remainingHeight / secondLineHeight);
+    const maxNameLines = Math.floor(remainingHeight / nameLineHeight);
 
-    const nameLines = wrapTextLines(name, secondFontSize, maxSecondLines);
+    const nameLines = wrapTextLines(name, nameFontSize, maxNameLines);
 
     return { subnameLines, nameLines };
 }
