@@ -12,6 +12,7 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
 
+import { useAuctionDisplayImages } from '../hooks/useAuctionDisplayImages';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
 import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
@@ -31,6 +32,11 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
         useClaimAuctionTransaction(account?.address || '', auction.name);
 
+    const { data: auctionDisplayImages } = useAuctionDisplayImages(
+        auction.name,
+        auction.metadata?.nftExpiration.getTime().toString() || '',
+    );
+    console.log('Auction display images:', auctionDisplayImages, auction.name, auction.metadata);
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
         async mutationFn(claimAuctionTransaction: Transaction) {
@@ -116,8 +122,18 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         return null;
     };
 
+    // Ensure auctionDisplay is always a string
+    const auctionDisplay =
+        typeof auctionDisplayImages === 'string'
+            ? auctionDisplayImages
+            : auctionDisplayImages &&
+                typeof auctionDisplayImages === 'object' &&
+                'image' in auctionDisplayImages
+              ? auctionDisplayImages.image
+              : '';
+
     return (
-        <NameCard name={auction.name}>
+        <NameCard name={auction.name} auctionDisplay={auctionDisplay}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />

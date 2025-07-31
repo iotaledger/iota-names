@@ -12,6 +12,7 @@ import { AvatarDisplay } from '../name-record/AvatarDisplay';
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
     isSelected?: boolean;
+    auctionDisplay?: string;
 }
 
 export function NameCard({
@@ -21,6 +22,7 @@ export function NameCard({
     menuOptions,
     isSelected,
     children,
+    auctionDisplay,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
@@ -35,6 +37,7 @@ export function NameCard({
                 size={size}
                 badge={badge}
                 button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
+                fallbackUrl={auctionDisplay}
             />
 
             <div className={nftDisplayVariants({ size })}>{children}</div>
