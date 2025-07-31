@@ -241,8 +241,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const hasErrors = updateNameError || coinBalanceError;
 
-    const isLoading =
-        isNameRecordLoading || isUpdateNameLoading || isSigning || isDiscountedPriceLoading;
+    const isLoadingData = isNameRecordLoading || isDiscountedPriceLoading;
+    const isLoading = isLoadingData || isUpdateNameLoading || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
@@ -314,7 +314,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        !isLoading && finalPrice > 0 && finalPrice ? (
+                                        !isLoadingData && finalPrice > 0 && finalPrice ? (
                                             formatNanosToIota(finalPrice, { formatRounded: false })
                                         ) : (
                                             <LoadingIndicator />
