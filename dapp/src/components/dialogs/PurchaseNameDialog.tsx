@@ -127,11 +127,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
-    const {
-        mutateAsync: handlePurchase,
-        error: purchaseError,
-        isPending: isSigning,
-    } = useMutation({
+    const { mutateAsync: handlePurchase, isPending: isSigning } = useMutation({
         async mutationFn() {
             if (!updateNameData || nameRecordData?.type !== 'available') return;
             const transactionResult = await signAndExecuteTransaction({
@@ -241,8 +237,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const hasErrors = updateNameError || coinBalanceError;
 
-    const isLoadingData = isNameRecordLoading || isDiscountedPriceLoading;
-    const isLoading = isLoadingData || isUpdateNameLoading || isSigning;
+    const isLoadingData = isNameRecordLoading || isDiscountedPriceLoading || isUpdateNameLoading;
+    const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 

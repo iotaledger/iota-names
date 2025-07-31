@@ -364,7 +364,7 @@ export class IotaNamesClient {
 
     async resolveCoupon(couponCode: string): Promise<Coupon | null> {
         const couponHouse = await this.getCouponHouse();
-        const couponsTableId = couponHouse?.coupons?.coupons?.id;
+        const couponsTableId = couponHouse?.coupons?.coupons?.id.id.bytes;
 
         if (!couponsTableId) {
             throw new Error('Coupons table ID not found in the coupon house');
