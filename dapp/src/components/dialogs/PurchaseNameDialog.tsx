@@ -112,13 +112,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const applyDiscount = applyCoupons && couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
-        queryKey: [couponCodes, name, renewYears],
+        queryKey: [couponCodes, name, renewYears, account?.address],
         async queryFn() {
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
                 years: renewYears,
                 isRegistration: true,
+                address: account?.address,
             });
         },
         enabled: applyDiscount,
