@@ -9,6 +9,9 @@ use crate::{
     db::{AuctionSortBy, SortOrder},
 };
 
+const DEFAULT_PAGE_SIZE: usize = 50;
+const MAX_PAGE_SIZE: usize = 100;
+
 pub struct BidderNamesPagination {
     pub page: Option<usize>,
     pub page_size: usize,
@@ -42,7 +45,10 @@ impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
 
         Ok(Self {
             page: query.page,
-            page_size: query.page_size.unwrap_or(50).min(50),
+            page_size: query
+                .page_size
+                .unwrap_or(DEFAULT_PAGE_SIZE)
+                .min(MAX_PAGE_SIZE),
             sort,
         })
     }
