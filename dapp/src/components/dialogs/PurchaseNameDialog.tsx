@@ -42,7 +42,7 @@ import {
 import { formatNanosToIota } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
-import { CouponsWrapper } from '../CouponsWrapper';
+import { CouponInputSelection } from '../CouponInputSelection';
 
 export interface UserSetCoupon {
     code: string;
@@ -280,7 +280,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponsWrapper
+                                    <CouponInputSelection
                                         coupons={coupons}
                                         onAddCoupon={handleAddCoupon}
                                     />

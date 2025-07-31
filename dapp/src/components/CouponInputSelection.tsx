@@ -10,12 +10,12 @@ import { useState } from 'react';
 
 import type { UserSetCoupon } from './dialogs';
 
-interface CouponsWrapperProps {
+interface CouponInputSelectionProps {
     coupons: UserSetCoupon[];
     onAddCoupon: (code: string) => Promise<void>;
 }
 
-export function CouponsWrapper({ coupons, onAddCoupon }: CouponsWrapperProps) {
+export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelectionProps) {
     const [coupon, setCoupon] = useState<string>('');
 
     async function addCoupon() {

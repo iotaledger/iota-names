@@ -30,7 +30,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { isValidIotaName, normalizeIotaName } from './utils.js';
+import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -491,12 +491,12 @@ export class IotaNamesClient {
             coupons = (await Promise.all(couponPromises)) as Coupon[];
         }
 
-        const nameParts = normalizeIotaName(name, 'dot').split('.');
-        const firstNamePart = nameParts[0];
+        const normalizedName = normalizeIotaName(name, 'dot');
 
-        if (nameParts.length < 2 || !firstNamePart) {
-            throw new Error('Invalid IOTA name.');
-        }
+        validateIotaName(normalizedName);
+
+        const nameParts = normalizedName.split('.');
+        const firstNamePart = nameParts[0];
 
         validateCoupons(coupons, years, firstNamePart.length, address);
 

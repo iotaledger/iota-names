@@ -47,7 +47,7 @@ import {
     isGracePeriodExpired,
 } from '@/lib/utils/names';
 
-import { CouponsWrapper } from '../CouponsWrapper';
+import { CouponInputSelection } from '../CouponInputSelection';
 import type { UserSetCoupon } from './PurchaseNameDialog';
 
 function createRenewUpdates({
@@ -309,7 +309,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     />
                                 </div>
                                 {applyCoupons && (
-                                    <CouponsWrapper
+                                    <CouponInputSelection
                                         coupons={coupons}
                                         onAddCoupon={handleAddCoupon}
                                     />
