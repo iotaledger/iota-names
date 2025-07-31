@@ -1,78 +1,105 @@
 import { readFileSync } from 'node:fs';
+import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
+
+import { renderSvg } from './utils/renderSvg.js';
+
+const { validateParams } = await import('../src/test-utils');
+const baseSvgTemplate = readFileSync(new URL('./svg/base.svg', import.meta.url), 'utf-8');
+
+const JAN_1_2022_TIMESTAMP = 1640995200000;
+const MOCK_SUBNAME = 'subname';
+const MOCK_NAME = 'test';
+
+function generateTestSvg({
+    subname,
+    name = MOCK_NAME,
+    timestamp = JAN_1_2022_TIMESTAMP,
+}: { subname?: string; name?: string; timestamp?: number } = {}): string {
+    const subnamePart = subname ? subname + '.' : '';
+
+    return renderSvg({
+        name: `${subnamePart}${name}.iota`,
+        timestamp: timestamp,
+        addDataTestText: true,
+        template: baseSvgTemplate,
+    }).trim();
+}
 
 describe('names-display service', () => {
     describe('SVG generation', () => {
-        it('should generate valid SVG with name and timestamp', async () => {
-            const { generateSvg } = await import('./test-utils.js');
+        it('produces a well-formed SVG with at least one text <path>', () => {
+            const svg = generateTestSvg();
 
-            const result = generateSvg({
-                name: 'test.iota',
-                timestamp: 1640995200000, // 2022-01-01
-            });
+            expect(svg.startsWith('<svg')).toBe(true);
+            expect(svg.endsWith('</svg>')).toBe(true);
 
-            expect(result).toContain('<svg');
-            expect(result).toContain('</svg>');
-            expect(result).toContain('test.iota');
-            expect(result).toContain('January 1, 2022');
-        });
+            const dom = new JSDOM(svg, { contentType: 'image/svg+xml' });
+            const document = dom.window.document;
 
-        it('should normalize IOTA names correctly', async () => {
-            const { generateSvg } = await import('./test-utils.js');
-
-            const result = generateSvg({
-                name: 'TEST.IOTA',
-                timestamp: 1640995200000,
-            });
-
-            expect(result).toContain('test.iota');
-        });
-
-        it('should format dates correctly', async () => {
-            const { generateSvg } = await import('./test-utils.js');
-
-            const result = generateSvg({
-                name: 'example.iota',
-                timestamp: 1672531200000, // 2023-01-01
-            });
-
-            expect(result).toContain('January 1, 2023');
+            const textPaths = Array.from(document.querySelectorAll('path[fill="#FFF"]'));
+            expect(textPaths.length).toBeGreaterThan(0);
         });
     });
 
     describe('Parameter validation', () => {
-        it('should validate required parameters', async () => {
-            const { validateParams } = await import('./test-utils.js');
-
-            const validParams = {
-                name: 'test.iota',
+        it('accepts valid params', () => {
+            const result = validateParams({
+                name: MOCK_NAME + '.iota',
                 timestamp: '1640995200000',
-            };
-
-            const result = validateParams(validParams);
+            });
             expect(result.success).toBe(true);
-            expect(result.data?.name).toBe('test.iota');
+            expect(result.data?.name).toBe(MOCK_NAME + '.iota');
             expect(result.data?.timestamp).toBe(1640995200000);
         });
 
-        it('should reject invalid parameters', async () => {
-            const { validateParams } = await import('./test-utils.js');
-
-            const invalidParams = {
-                name: '',
-                timestamp: 'invalid',
-            };
-
-            const result = validateParams(invalidParams);
+        it('rejects empty name or non-numeric timestamp', () => {
+            const result = validateParams({ name: '', timestamp: 'not-a-number' });
             expect(result.success).toBe(false);
         });
     });
 
     describe('Base SVG template', () => {
-        it('should load base SVG template', () => {
-            const baseSvg = readFileSync('./src/base.svg', 'utf-8');
-            expect(baseSvg).toContain('<svg');
-            expect(baseSvg).toContain('{{ CONTENT }}');
+        it('loads base.svg with the new placeholder', () => {
+            const baseTemplate = readFileSync(new URL('./svg/base.svg', import.meta.url), 'utf-8');
+            expect(baseTemplate).toContain('<svg');
+            expect(baseTemplate).toContain('{{{CONTENT}}}');
+        });
+    });
+
+    describe('SVG Texts', () => {
+        it('contains a name formatted in at notation', () => {
+            const svg = generateTestSvg();
+
+            const dom = new JSDOM(svg, { contentType: 'image/svg+xml' });
+            const document = dom.window.document;
+
+            const testId = 'data-test-line-text';
+            const textLines = [...document.querySelectorAll(`[${testId}]`)]
+                .map((e) => e.getAttribute(testId))
+                .filter((e) => e !== null);
+
+            expect(textLines.length).toBeGreaterThan(0);
+            expect(textLines).toContain(`@${MOCK_NAME.toUpperCase()}`);
+        });
+
+        it('contains name and subname in two lines', () => {
+            const svg = generateTestSvg({ subname: MOCK_SUBNAME });
+
+            const dom = new JSDOM(svg, { contentType: 'image/svg+xml' });
+            const document = dom.window.document;
+
+            const testId = 'data-test-line-text';
+            const textLines = [...document.querySelectorAll(`[${testId}]`)]
+                .map((e) => e.getAttribute(testId))
+                .filter((e) => e !== null);
+
+            expect(textLines.length).toBeGreaterThan(1);
+
+            const [subnameLine, nameLine] = textLines;
+
+            expect(subnameLine).toBe(MOCK_SUBNAME.toUpperCase());
+            expect(nameLine).toBe(`@${MOCK_NAME}`.toUpperCase());
         });
     });
 });
