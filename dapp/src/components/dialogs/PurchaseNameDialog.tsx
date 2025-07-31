@@ -239,7 +239,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
 
-    const hasErrors = updateNameError || coinBalanceError || purchaseError;
+    const hasErrors = updateNameError || coinBalanceError;
 
     const isLoading =
         isNameRecordLoading || isUpdateNameLoading || isSigning || isDiscountedPriceLoading;
@@ -315,7 +315,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     label="Total Due"
                                     value={
                                         !isLoading && finalPrice > 0 && finalPrice ? (
-                                            formatNanosToIota(finalPrice)
+                                            formatNanosToIota(finalPrice, { formatRounded: false })
                                         ) : (
                                             <LoadingIndicator />
                                         )
