@@ -1,5 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+
 import { Loader } from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
@@ -14,17 +15,9 @@ import { nftDisplayVariants } from './variants';
 interface AvatarDisplayProps extends NftDisplayProps {
     button?: React.ReactNode;
     fallbackUrl?: string;
-    staticImageSrc?: string;
 }
 
-export function AvatarDisplay({
-    name,
-    size,
-    badge,
-    button,
-    fallbackUrl,
-    staticImageSrc,
-}: AvatarDisplayProps) {
+export function AvatarDisplay({ name, size, badge, button, fallbackUrl }: AvatarDisplayProps) {
     const [showAvatar, setShowAvatar] = useState(false);
 
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
@@ -77,12 +70,6 @@ export function AvatarDisplay({
                     <img
                         className="absolute inset-0 w-full h-full -z-[1] object-cover"
                         src={avatarSrc}
-                        alt={name}
-                    />
-                ) : staticImageSrc ? (
-                    <img
-                        className="absolute inset-0 w-full h-full -z-[1] object-cover"
-                        src={staticImageSrc}
                         alt={name}
                     />
                 ) : (
