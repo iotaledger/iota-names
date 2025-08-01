@@ -65,7 +65,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const { data: coreConfig } = useCoreConfig();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
-    const [renewYears, setRenewYears] = useState<number>(1);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
@@ -78,7 +77,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: nameRecordError,
     } = useNameRecord(name, {
         price: {
-            years: renewYears,
+            years: 1,
             isRegistration: true,
         },
     });
@@ -93,7 +92,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             type: 'register-name',
             name: name,
             price: price,
-            years: renewYears,
             setDefault: isDisplayName,
             address: account?.address,
             ...(applyCoupons && coupons.length ? { couponCodes } : {}),
@@ -112,12 +110,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const applyDiscount = applyCoupons && couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
-        queryKey: [couponCodes, name, renewYears, account?.address],
+        queryKey: [couponCodes, name, account?.address],
         async queryFn() {
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
-                years: renewYears,
+                years: 1,
                 isRegistration: true,
                 address: account?.address,
             });
@@ -142,6 +140,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         onSuccess() {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
+            queryClient.removeQueries({
+                queryKey: queryKey.nameRecord(name),
             });
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
@@ -243,7 +244,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
 
-    const expirationDate = getTargetExpirationDate(renewYears);
+    const expirationDate = getTargetExpirationDate(1);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -260,14 +261,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 </div>
                             </Panel>
 
-                            <Select
-                                value={renewYears.toString()}
-                                options={RENEW_OPTIONS}
-                                onValueChange={(value) => {
-                                    setRenewYears(parseInt(value, 10));
-                                }}
-                                placeholder="Select renewal period"
-                            />
                             <div className="flex flex-col">
                                 <div className="self-end">
                                     <Toggle

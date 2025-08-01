@@ -114,9 +114,10 @@ function createRenewUpdates({
 interface RenewDialogProps {
     name: string;
     setOpen: (bool: boolean) => void;
+    onRenew: () => void;
 }
 
-export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
+export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
@@ -175,6 +176,7 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         },
         onSuccess() {
             setOpen(false);
+            onRenew();
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });

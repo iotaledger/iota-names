@@ -26,7 +26,7 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Registers a name for a number of years.
+     * Registers a name.
      */
     async register(params: RegistrationParams): Promise<TransactionObjectArgument> {
         const paymentIntent = this.initRegistration(params.name);
@@ -38,7 +38,7 @@ export class IotaNamesTransaction {
             discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name: params.name,
-                years: params.years,
+                years: 1,
                 isRegistration: true,
                 address: params.address,
             });
@@ -57,19 +57,7 @@ export class IotaNamesTransaction {
             coinConfig: params.coinConfig || this.iotaNamesClient.config.coins.IOTA,
         });
 
-        const nft = this.finalizeRegister(receipt);
-
-        if (params.years > 1) {
-            this.renew({
-                nft,
-                name: params.name,
-                years: params.years - 1,
-                coinConfig: params.coinConfig,
-                coin: params.coin,
-            });
-        }
-
-        return nft as TransactionObjectArgument;
+        return this.finalizeRegister(receipt);
     }
 
     /**

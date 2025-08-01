@@ -10,7 +10,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
-const COUPONS = [''];
+const COUPONS = ['PERCENT_20'];
 
 (async () => {
     const name = `the-couponer-${Math.floor(Math.random() * 10000)}.iota`;
@@ -51,7 +51,6 @@ const COUPONS = [''];
 
     const nft = await iotaNamesTx.register({
         name,
-        years: 1,
         coin,
         couponCodes: COUPONS,
     });
