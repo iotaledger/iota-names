@@ -8,6 +8,9 @@ export function useAuctionDisplayImage(name: string, expirationTimestamp: string
         queryKey: ['generateSVG', name, expirationTimestamp],
         queryFn: async () => {
             const baseUrl = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
+            if (!baseUrl) {
+                throw new Error('NEXT_PUBLIC_NAMES_DISPLAY_API_URL is not configured');
+            }
             const url = `${baseUrl}/${name}/${expirationTimestamp}`;
             return {
                 url,
