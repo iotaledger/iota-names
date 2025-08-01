@@ -5,13 +5,14 @@ export { AuctionItem } from './components/AuctionItem';
 export { AuctionStatusBadge } from './components/AuctionStatusBadge';
 export { AuctionBidDialog } from './components/dialogs/AuctionBidDialog';
 
+export { useAuctions } from './hooks/useAuctions';
 export { useAuctionBid } from './hooks/useAuctionBid';
 export { useAuctionHouse } from './hooks/useAuctionHouse';
 export { useClaimAuctionTransaction } from './hooks/useClaimAuctionTransaction';
 export { useGetAddressAuctionHistory } from './hooks/useGetAddressAuctionHistory';
 export { useGetAuctionMetadata } from './hooks/useGetAuctionMetadata';
 export { useGetUserAuctions } from './hooks/useGetUserAuctions';
-export type { AuctionDetails } from './hooks/useGetUserAuctions';
+export type { AuctionDetails, UseAuctionsOptions } from './hooks/useAuctions';
 
 export * from './lib/types';
 export * from './lib/utils';

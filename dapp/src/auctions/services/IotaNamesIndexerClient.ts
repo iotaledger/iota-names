@@ -17,4 +17,29 @@ export class IotaNamesIndexerClient {
 
         return response.json();
     }
+
+    async getAuctionList(
+        search?: string,
+        sort?: 'asc' | 'desc',
+        sortBy?: 'bid' | 'name',
+    ): Promise<string[]> {
+        const url = new URL(`${this.host}/auctions`);
+        if (search) {
+            url.searchParams.set('search', search);
+        }
+        if (sort) {
+            url.searchParams.set('sort', sort);
+        }
+        if (sortBy) {
+            url.searchParams.set('sortBy', sortBy);
+        }
+
+        const response = await fetch(url.toString());
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch auction list: ${response.statusText}`);
+        }
+
+        return response.json();
+    }
 }
