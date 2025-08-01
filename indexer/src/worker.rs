@@ -72,6 +72,10 @@ pub(crate) async fn run_iota_names_reader(
     executor.register(worker_pool).await?;
 
     info!("Connecting to {checkpoint_url} to sync checkpoints");
+    let reader_options = ReaderOptions {
+        timeout_secs: 60,
+        ..Default::default()
+    };
     // Localnet does not support remote store, so we use the REST API
     if checkpoint_url.contains("localhost") || checkpoint_url.contains("host.docker.internal") {
         executor
@@ -81,17 +85,17 @@ pub(crate) async fn run_iota_names_reader(
                 Some(format!("{checkpoint_url}/api/v1")),
                 // optional remote store access options.
                 vec![],
-                ReaderOptions::default(),
+                reader_options,
             )
             .await?;
     } else {
         let config = CheckpointReaderConfig {
             remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
                 historical_url: format!("{checkpoint_url}/ingestion/historical"),
-                live_url: None,
+                live_url: Some(format!("{checkpoint_url}/ingestion/live")),
             }),
             ingestion_path: Some(PathBuf::from("./data/chk")),
-            ..Default::default()
+            reader_options,
         };
         executor.run_with_config(config).await?;
     }
