@@ -209,15 +209,15 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                         label={searchedName}
                                         type={isNotAvailable ? ChipType.Error : ChipType.Elevated}
                                         trailingElement={
-                                            <ButtonUnstyled
-                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full"
+                                            <div
+                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     removeRecentSearch(searchedName);
                                                 }}
                                             >
                                                 <Close />
-                                            </ButtonUnstyled>
+                                            </div>
                                         }
                                         onClick={() => handleRecentClick(searchedName)}
                                     />
