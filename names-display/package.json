@@ -8,8 +8,8 @@
         "build": "rm -rf dist && tsc -p tsconfig.json",
         "postbuild": "cp -R src/fonts dist/fonts && cp -R src/svg dist/svg",
         "start": "node ./dist/index.js | pino-pretty",
-        "dev": "tsx watch src/index.ts",
-        "dev:debug": "DEBUG_DISPLAY=true tsx watch src/index.ts | pino-pretty",
+        "dev": "tsx watch src/index.ts  | pino-pretty",
+        "dev:debug": "DEBUG_DISPLAY=true pnpm dev",
         "test": "vitest run",
         "test:watch": "vitest"
     },
