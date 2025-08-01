@@ -12,8 +12,8 @@ export const SVG_CONFIG = {
     svgWidth: 220,
     svgHeight: 220,
     paddingX: 16,
-    textBoxTop: 48,
-    textBoxBottom: 52,
+    textBoxTop: 58,
+    textBoxBottom: 62,
     get textBoxHeight() {
         return this.svgHeight - this.textBoxTop - this.textBoxBottom;
     },
