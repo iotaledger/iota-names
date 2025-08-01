@@ -60,7 +60,6 @@ export type VersionedPackageId = {
 };
 
 export type BaseParams = {
-    years: number;
     coinConfig?: CoinConfig;
     coin: TransactionObjectInput;
     couponCodes?: string[];
@@ -74,6 +73,7 @@ export type RegistrationParams = BaseParams & {
 export type RenewalParams = BaseParams & {
     name: string;
     nft: TransactionObjectInput;
+    years: number;
 };
 
 export type ReceiptParams = {

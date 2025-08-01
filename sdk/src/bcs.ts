@@ -27,13 +27,21 @@ const CouponRulesBcs = bcs.struct('CouponRules', {
 
 export const CouponHouseBcs = bcs.struct('CouponHouse', {
     coupons: bcs.struct('Coupons', {
-        coupons: bcs.struct('CouponsTable', {
-            id: bcs.Address,
-            size: bcs.string(),
+        coupons: bcs.struct('Table', {
+            id: bcs.struct('UID', {
+                id: bcs.struct('ID', {
+                    bytes: bcs.Address,
+                }),
+            }),
+            size: bcs.u64(),
         }),
     }),
     version: bcs.u8(),
-    id: bcs.Address,
+    id: bcs.struct('UID', {
+        id: bcs.struct('ID', {
+            bytes: bcs.Address,
+        }),
+    }),
 });
 
 export const CouponBcs = bcs.struct('Coupon', {

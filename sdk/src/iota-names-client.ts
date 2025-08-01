@@ -30,7 +30,7 @@ import type {
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { isValidIotaName, normalizeIotaName } from './utils.js';
+import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -364,7 +364,7 @@ export class IotaNamesClient {
 
     async resolveCoupon(couponCode: string): Promise<Coupon | null> {
         const couponHouse = await this.getCouponHouse();
-        const couponsTableId = couponHouse?.coupons?.coupons?.id;
+        const couponsTableId = couponHouse?.coupons?.coupons?.id.id.bytes;
 
         if (!couponsTableId) {
             throw new Error('Coupons table ID not found in the coupon house');
@@ -491,7 +491,14 @@ export class IotaNamesClient {
             coupons = (await Promise.all(couponPromises)) as Coupon[];
         }
 
-        validateCoupons(coupons, years, name.length, address);
+        const normalizedName = normalizeIotaName(name, 'dot');
+
+        validateIotaName(normalizedName);
+
+        const nameParts = normalizedName.split('.');
+        const firstNamePart = nameParts[0];
+
+        validateCoupons(coupons, years, firstNamePart.length, address);
 
         const standardPrice = await this.calculatePrice({
             name,

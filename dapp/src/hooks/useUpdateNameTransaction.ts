@@ -68,6 +68,8 @@ export type NameUpdate =
           name: string;
           nftId: string;
           years: number;
+          address?: string;
+          couponCodes?: string[];
       }
     | {
           type: 'renew-subname';
@@ -78,8 +80,9 @@ export type NameUpdate =
           type: 'register-name';
           name: string;
           price: number;
-          years: number;
           setDefault: boolean;
+          address?: string;
+          couponCodes?: string[];
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -151,6 +154,8 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             name: update.name,
                             years: update.years,
                             coin: tx.gas,
+                            address: update.address,
+                            couponCodes: update.couponCodes,
                         });
                         break;
                     case 'renew-subname':
@@ -163,8 +168,9 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
                         const nft = await iotaNamesTx.register({
                             name: update.name,
-                            years: update.years,
                             coin,
+                            address: update.address,
+                            couponCodes: update.couponCodes,
                         });
                         if (update.setDefault) {
                             iotaNamesTx.setTargetAddress({
