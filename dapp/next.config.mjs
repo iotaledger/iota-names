@@ -19,7 +19,7 @@ try {
 if (process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL) {
     NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
 } else {
-    throw new Error('NEXT_PUBLIC_NAMES_DISPLAY_API_URL env must be conigured');
+    throw new Error('NEXT_PUBLIC_NAMES_DISPLAY_API_URL env must be configured');
 }
 
 /** @type {import('next').NextConfig} */
