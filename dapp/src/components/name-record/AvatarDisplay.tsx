@@ -30,24 +30,30 @@ export function AvatarDisplay({
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
     const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
     const isNameSubname = isSubname(name);
+
     const avatarId =
         nameRecordData?.type === 'unavailable'
             ? isNameSubname
                 ? subnames?.find((n) => n.name === name)?.id
                 : (nameRecordData?.nameRecord.avatar ?? nameRecordData.nameRecord.nftId)
             : null;
+
     const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject({
         id: avatarId ?? '',
         options: { showDisplay: true, showContent: true },
     });
+
     const isDataLoading = isNameRecordDataLoading || isSubnamesLoading || isAvatarLoading;
     const avatarSrc = isDataLoading
         ? null
         : (avatarObject?.display?.data?.image_url ?? fallbackUrl);
+
     useEffect(() => {
         if (!avatarSrc) return;
+
         const img = new Image();
-        img.src = avatarSrc;
+        img.src = avatarSrc
+
         img.onload = () => setShowAvatar(true);
         img.onerror = () => setShowAvatar(false);
     }, [avatarSrc]);
