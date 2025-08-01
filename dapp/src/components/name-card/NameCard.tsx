@@ -12,7 +12,7 @@ import { AvatarDisplay } from '../name-record/AvatarDisplay';
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
     isSelected?: boolean;
-    displaySrc?: string;
+    displaySrc?: string | null;
 }
 
 export function NameCard({

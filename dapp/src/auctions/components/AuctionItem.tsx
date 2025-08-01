@@ -12,10 +12,10 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
 
+import { getNameDisplaySrc } from '../../lib/utils/displayImage';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
 import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
-import { getNameDisplaySrc } from '../lib/utils/displayImage';
 import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {
@@ -32,10 +32,9 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
         useClaimAuctionTransaction(account?.address || '', auction.name);
 
-    const auctionDisplayImage = getNameDisplaySrc(
-        auction.name,
-        auction.metadata?.nftExpiration.getTime().toString() || '',
-    );
+    const auctionDisplayImage = auction.metadata?.nftExpiration
+        ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
+        : null;
 
     const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
     const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
