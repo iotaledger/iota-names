@@ -10,25 +10,10 @@ description = "IOTA-Names Indexer"
 [dependencies]
 anyhow = "1.0"
 async-trait = "0.1"
-axum = { version = "0.8", default-features = false, features = [
-    "tokio",
-    "http1",
-    "http2",
-    "json",
-    "matched-path",
-    "original-uri",
-    "form",
-    "query",
-    "ws",
-    "macros",
-] }
+axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
 bcs = "0.1"
 clap = { version = "4.4", features = ["derive", "wrap_help", "env"] }
-diesel = { version = "2.2.0", features = [
-    "sqlite",
-    "returning_clauses_for_sqlite_3_35",
-    "r2d2",
-] }
+diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "r2d2"] }
 diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15"
 futures = "0.3"
@@ -40,15 +25,7 @@ tokio = "1.47"
 tokio-util = "0.7"
 tower-http = { version = "0.6.6", features = ["cors"] }
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", default-features = false, features = [
-    "std",
-    "fmt",
-    "ansi",
-    "smallvec",
-    "tracing-log",
-    "local-time",
-    "env-filter",
-] }
+tracing-subscriber = { version = "0.3", default-features = false, features = ["std", "fmt", "ansi", "smallvec", "tracing-log", "local-time", "env-filter"] }
 
 bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version" }
 iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core" }
