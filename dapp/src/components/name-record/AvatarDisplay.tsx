@@ -52,7 +52,7 @@ export function AvatarDisplay({
         if (!avatarSrc) return;
 
         const img = new Image();
-        img.src = avatarSrc
+        img.src = avatarSrc;
 
         img.onload = () => setShowAvatar(true);
         img.onerror = () => setShowAvatar(false);
