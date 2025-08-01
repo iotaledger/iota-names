@@ -19,8 +19,6 @@ import {
     InfoBoxType,
     LoadingIndicator,
     Panel,
-    Select,
-    SelectOption,
     Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
@@ -32,7 +30,6 @@ import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
-import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import {
     GAS_BALANCE_TOO_LOW_ID,
@@ -62,7 +59,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const { iotaNamesClient } = useIotaNamesClient();
 
     const account = useCurrentAccount();
-    const { data: coreConfig } = useCoreConfig();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
@@ -214,13 +210,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     }
 
     if (!isConnected) return null;
-
-    const RENEW_OPTIONS: SelectOption[] = coreConfig?.max_years
-        ? Array.from({ length: coreConfig?.max_years }, (_, i) => ({
-              id: String(i + 1),
-              label: `${i + 1} Year${i ? 's' : ''}`,
-          }))
-        : [];
 
     const usingPrice = applyDiscount ? discountedPrice : price;
     const finalPrice = new BigNumber(usingPrice ?? 0)
