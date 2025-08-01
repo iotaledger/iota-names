@@ -114,7 +114,7 @@ function createRenewUpdates({
 interface RenewDialogProps {
     name: string;
     setOpen: (bool: boolean) => void;
-    onRenew: () => void;
+    onRenew?: () => void;
 }
 
 export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
@@ -176,7 +176,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         },
         onSuccess() {
             setOpen(false);
-            onRenew();
+            if (onRenew) {
+                onRenew();
+            }
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
