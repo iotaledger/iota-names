@@ -183,7 +183,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                             <p className="text-label-md y color text-names-neutral-70">
                                 Select type
                             </p>
-                            <div className="flex flex-wrap gap-sm">
+                            <div className="flex flex-wrap gap-xs">
                                 {METADATA_FIELDS.map(({ key, label }) => (
                                     <Chip
                                         key={key}
@@ -216,25 +216,25 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                 )}
                             </div>
                         </div>
-
-                        <div className="flex w-full flex-row gap-x-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={() => setOpen(false)}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Apply"
-                                disabled={disableApply}
-                                type={ButtonType.Primary}
-                                onClick={() => handleApply()}
-                                fullWidth
-                            />
-                        </div>
                     </div>
                 </DialogBody>
+
+                <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
+                    <Button
+                        type={ButtonType.Secondary}
+                        text="Cancel"
+                        onClick={() => setOpen(false)}
+                        fullWidth
+                    />
+                    <Button
+                        icon={isLoading ? <LoadingIndicator /> : null}
+                        text="Apply"
+                        disabled={disableApply}
+                        type={ButtonType.Primary}
+                        onClick={() => handleApply()}
+                        fullWidth
+                    />
+                </div>
             </DialogContent>
         </Dialog>
     );
