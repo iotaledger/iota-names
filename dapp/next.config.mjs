@@ -4,6 +4,7 @@
 import { execSync } from 'child_process';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
+const NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
 
 try {
     if (process.env.VERCEL_GIT_COMMIT_SHA) {
@@ -15,10 +16,15 @@ try {
     console.warn('Could not get git revision, using default');
 }
 
+if (!NEXT_PUBLIC_NAMES_DISPLAY_API_URL) {
+    throw new Error('NEXT_PUBLIC_NAMES_DISPLAY_API_URL env must be configured');
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
         NEXT_PUBLIC_IOTA_NAMES_REV,
+        NEXT_PUBLIC_NAMES_DISPLAY_API_URL,
     },
 };
 
