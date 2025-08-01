@@ -20,7 +20,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -38,21 +38,27 @@ interface EditMetadataDialogProps {
     setOpen: (bool: boolean) => void;
 }
 
-const METADATA_FIELDS = [
-    { key: ALLOWED_METADATA.twitterX, label: 'Twitter/X', allowedKey: 'twitterX' },
-    { key: ALLOWED_METADATA.discord, label: 'Discord', allowedKey: 'discord' },
-    { key: ALLOWED_METADATA.github, label: 'Github', allowedKey: 'github' },
-    { key: ALLOWED_METADATA.email, label: 'Email', allowedKey: 'email' },
-    { key: ALLOWED_METADATA.btc, label: 'Btc', allowedKey: 'btc' },
-    { key: ALLOWED_METADATA.eth, label: 'Eth', allowedKey: 'eth' },
-    { key: ALLOWED_METADATA.ltc, label: 'Ltc', allowedKey: 'ltc' },
-    { key: ALLOWED_METADATA.doge, label: 'Doge', allowedKey: 'doge' },
-    { key: ALLOWED_METADATA.sol, label: 'Sol', allowedKey: 'sol' },
-    { key: ALLOWED_METADATA.sui, label: 'Sui', allowedKey: 'sui' },
-    { key: ALLOWED_METADATA.website, label: 'Website', allowedKey: 'website' },
-    { key: ALLOWED_METADATA.ipfs, label: 'Ipfs', allowedKey: 'ipfs' },
-    { key: ALLOWED_METADATA.arweave, label: 'Arweave', allowedKey: 'arweave' },
-] as const;
+const METADATA_KEYS = [
+    { label: 'Twitter/X', allowedKey: 'twitterX' },
+    { label: 'Discord', allowedKey: 'discord' },
+    { label: 'Github', allowedKey: 'github' },
+    { label: 'Email', allowedKey: 'email' },
+    { label: 'Btc', allowedKey: 'btc' },
+    { label: 'Eth', allowedKey: 'eth' },
+    { label: 'Ltc', allowedKey: 'ltc' },
+    { label: 'Doge', allowedKey: 'doge' },
+    { label: 'Sol', allowedKey: 'sol' },
+    { label: 'Sui', allowedKey: 'sui' },
+    { label: 'Website', allowedKey: 'website' },
+    { label: 'Ipfs', allowedKey: 'ipfs' },
+    { label: 'Arweave', allowedKey: 'arweave' },
+] as const satisfies { label: string; allowedKey: keyof typeof ALLOWED_METADATA }[];
+
+const METADATA_FIELDS = METADATA_KEYS.map(({ label, allowedKey }) => ({
+    key: ALLOWED_METADATA[allowedKey],
+    label,
+    allowedKey,
+}));
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     const account = useCurrentAccount();
@@ -66,7 +72,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const [metadata, setMetadata] = useState(() => {
+    const initialMetadata = (() => {
         const initial: Record<string, { selected: boolean; data: string }> = {};
         METADATA_FIELDS.forEach(({ key }) => {
             const data = nameRecord?.nameRecord.data[key];
@@ -76,22 +82,9 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             };
         });
         return initial;
-    });
+    })();
 
-    // Sync the name metadata
-    useEffect(() => {
-        if (nameRecord?.nameRecord?.data) {
-            const newMetadata: Record<string, { selected: boolean; data: string }> = {};
-            METADATA_FIELDS.forEach(({ key }) => {
-                const data = nameRecord?.nameRecord.data[key];
-                newMetadata[key] = {
-                    selected: data !== undefined,
-                    data: data || '',
-                };
-            });
-            setMetadata(newMetadata);
-        }
-    }, [nameRecord?.nameRecord?.data]);
+    const [metadata, setMetadata] = useState(initialMetadata);
 
     const updates: NameUpdate[] = (() => {
         const updates: NameUpdate[] = [];
@@ -108,7 +101,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 const field = metadata[key];
                 const currentField = nameRecord.nameRecord.data[key];
 
-                if (field.selected && currentField === undefined) {
+                if (field.selected && (currentField === undefined || field.data !== currentField)) {
                     updates.push({
                         type: 'set-data',
                         nftId,
