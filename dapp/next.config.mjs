@@ -16,14 +16,10 @@ try {
     console.warn('Could not get git revision, using default');
 }
 
-try {
-    if (process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL) {
-        NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
-    } else {
-        NEXT_PUBLIC_NAMES_DISPLAY_API_URL = 'http://localhost:3000';
-    }
-} catch (error) {
-    console.warn('Could not get NEXT_PUBLIC_NAMES_DISPLAY_API_URL, using default');
+if (process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL) {
+    NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
+} else {
+    throw new Error('NEXT_PUBLIC_NAMES_DISPLAY_API_URL env must be conigured');
 }
 
 /** @type {import('next').NextConfig} */
