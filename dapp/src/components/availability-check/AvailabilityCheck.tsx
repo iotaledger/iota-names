@@ -26,6 +26,7 @@ import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 
 interface AvailabilityCheckProps {
@@ -330,12 +331,18 @@ function PurchaseName({
 }) {
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+    const [isRenewDialogOpen, setRenewDialgOpen] = useState(false);
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
         setPurchaseDialogOpen(false);
+        setRenewDialgOpen(true);
+    }
+
+    function handleRenew() {
+        setRenewDialgOpen(false);
         onCompleted();
     }
 
@@ -372,6 +379,9 @@ function PurchaseName({
                     setOpen={setPurchaseDialogOpen}
                     onPurchase={handlePurchase}
                 />
+            )}
+            {isRenewDialogOpen && (
+                <RenewNameDialog name={name} setOpen={setRenewDialgOpen} onRenew={handleRenew} />
             )}
         </>
     );
