@@ -4,7 +4,7 @@
 import { execSync } from 'child_process';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
-let NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL || '';
+let NEXT_PUBLIC_NAMES_DISPLAY_API_URL = process.env.NEXT_PUBLIC_NAMES_DISPLAY_API_URL;
 
 try {
     if (process.env.VERCEL_GIT_COMMIT_SHA) {
