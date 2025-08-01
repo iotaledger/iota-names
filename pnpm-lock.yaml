@@ -259,6 +259,9 @@ importers:
       text-to-svg:
         specifier: ^3.1.5
         version: 3.1.5
+      tsx:
+        specifier: ^4.20.3
+        version: 4.20.3
       zod:
         specifier: ^4.0.5
         version: 4.0.5
@@ -5824,7 +5827,7 @@ packages:
   postcss-prefix-selector@1.16.1:
     resolution: {integrity: sha512-Umxu+FvKMwlY6TyDzGFoSUnzW+NOfMBLyC1tAkIjgX+Z/qGspJeRjVC903D7mx7TuBpJlwti2ibXtWuA7fKMeQ==}
     peerDependencies:
-      postcss: '>4 <9'
+      postcss: '>=8.4.31'
 
   postcss-selector-parser@6.1.2:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}

@@ -17,17 +17,24 @@ interface LineRenderingInfo {
     measuredWidth: number;
 }
 
+const DEBUG_DISPLAY = process.env.DEBUG_DISPLAY === 'true';
+
 export const Params = z.object({
     name: z.string(),
     timestamp: z.coerce.number(),
 });
 
 type RenderSvgParameters = z.infer<typeof Params> & {
-    addDataTestText?: boolean;
+    addTestDataAttributes?: boolean;
     template: string;
 };
 
-export function renderSvg({ name, timestamp, addDataTestText, template }: RenderSvgParameters) {
+export function renderSvg({
+    name,
+    timestamp,
+    addTestDataAttributes,
+    template,
+}: RenderSvgParameters) {
     const formattedDate = TEXT_CONFIG.dateFormatter.format(new Date(timestamp));
 
     const [rawSubname, rawName] = normalizeIotaName(name, 'at').split('@');
@@ -92,7 +99,7 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
         SVG_CONFIG.textBoxTop + (SVG_CONFIG.textBoxHeight - totalTextBlockHeight) / 2;
 
     let currentYPosition = verticalOffset;
-    let svgContent = '';
+    let svgContent = DEBUG_DISPLAY ? getDebugRectangle() : '';
 
     for (let index = 0; index < allTextLines.length; index++) {
         const lineInfo = allTextLines[index];
@@ -111,13 +118,13 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
             anchor: 'middle',
         });
 
-        const dataTestText = addDataTestText ? ` data-test-line-text="${lineInfo.text}"` : '';
+        const dataTestText = addTestDataAttributes ? ` data-test-line-text="${lineInfo.text}"` : '';
         svgContent += `<path d="${pathData}"${dataTestText} fill="${TEXT_CONFIG.color}"/>\n`;
 
         currentYPosition += lineInfo.lineHeight;
     }
 
-    const dateTestId = addDataTestText ? ` data-test-date="${formattedDate}"` : '';
+    const dateTestId = addTestDataAttributes ? ` data-test-date="${formattedDate}"` : '';
     const dateX = SVG_CONFIG.svgWidth - DATE_CONFIG.paddingRight;
     const dateY = SVG_CONFIG.svgHeight - DATE_CONFIG.paddingBottom;
     const datePath = TEXT_TO_SVG_INTER.getD(formattedDate, {
@@ -130,4 +137,16 @@ export function renderSvg({ name, timestamp, addDataTestText, template }: Render
     svgContent += `<path d="${datePath}"${dateTestId} fill="${TEXT_CONFIG.color}"/>\n`;
 
     return template.replace('{{{CONTENT}}}', svgContent);
+}
+
+function getDebugRectangle(): string {
+    const { svgWidth, svgHeight, paddingX, textBoxTop, textBoxBottom } = SVG_CONFIG;
+    const x1 = paddingX;
+    const y1 = textBoxTop;
+    const x2 = svgWidth - paddingX;
+    const y2 = svgHeight - textBoxBottom;
+    const d = [`M${x1} ${y1}`, `L${x2} ${y1}`, `L${x2} ${y2}`, `L${x1} ${y2}`, 'Z'].join(' ');
+
+    const rectAttrs = `fill="none" stroke="red" stroke-width="1" stroke-dasharray="4 2"`;
+    return `<path d="${d}" ${rectAttrs} />`;
 }

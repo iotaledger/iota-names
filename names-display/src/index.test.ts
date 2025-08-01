@@ -21,7 +21,7 @@ function generateTestSvg({
     return renderSvg({
         name: `${subnamePart}${name}.iota`,
         timestamp: timestamp,
-        addDataTestText: true,
+        addTestDataAttributes: true,
         template: baseSvgTemplate,
     }).trim();
 }
