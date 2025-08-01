@@ -7,12 +7,12 @@ import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
-import { NameCardDisplay } from '../name-record/NameCardDisplay';
+import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
     isSelected?: boolean;
-    auctionDisplay?: string;
+    displaySrc?: string;
 }
 
 export function NameCard({
@@ -22,7 +22,7 @@ export function NameCard({
     menuOptions,
     isSelected,
     children,
-    auctionDisplay,
+    displaySrc,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
@@ -32,14 +32,16 @@ export function NameCard({
                 nftDisplayVariants({ size }),
             )}
         >
-            <NameCardDisplay
-                name={name}
-                size={size}
-                badge={badge}
-                button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
-                fallbackUrl={auctionDisplay}
-            />
-
+            {displaySrc ? (
+                <img src={displaySrc} alt={name} />
+            ) : (
+                <AvatarDisplay
+                    name={name}
+                    size={size}
+                    badge={badge}
+                    button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
+                />
+            )}
             <div className={nftDisplayVariants({ size })}>{children}</div>
         </div>
     );
