@@ -22,7 +22,7 @@ import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { Collapsible } from '../Collapsible';
-import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { NameCardDisplay } from '../name-record/NameCardDisplay';
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface InfoLinks {
@@ -81,7 +81,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
-                        <AvatarDisplay name={name} />
+                        <NameCardDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 break-words max-w-full overflow-hidden">
                             <TruncatedNameWithTooltip
                                 name={name}

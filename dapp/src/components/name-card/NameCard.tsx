@@ -7,7 +7,7 @@ import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
-import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { NameCardDisplay } from '../name-record/NameCardDisplay';
 
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
@@ -32,7 +32,7 @@ export function NameCard({
                 nftDisplayVariants({ size }),
             )}
         >
-            <AvatarDisplay
+            <NameCardDisplay
                 name={name}
                 size={size}
                 badge={badge}

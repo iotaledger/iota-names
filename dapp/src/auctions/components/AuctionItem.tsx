@@ -12,7 +12,7 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 import { queryKey } from '@/hooks/queryKey';
 
-import { useAuctionDisplayImages } from '../hooks/useAuctionDisplayImages';
+import { useAuctionDisplayImage } from '../hooks/useAuctionDisplayImage';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
 import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
@@ -32,7 +32,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
         useClaimAuctionTransaction(account?.address || '', auction.name);
 
-    const { data: auctionDisplayImages } = useAuctionDisplayImages(
+    const { data: auctionDisplayImage } = useAuctionDisplayImage(
         auction.name,
         auction.metadata?.nftExpiration.getTime().toString() || '',
     );
@@ -123,7 +123,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     };
 
     return (
-        <NameCard name={auction.name} auctionDisplay={auctionDisplayImages?.image}>
+        <NameCard name={auction.name} auctionDisplay={auctionDisplayImage?.url}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
