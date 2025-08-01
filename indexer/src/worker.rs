@@ -87,8 +87,8 @@ pub(crate) async fn run_iota_names_reader(
     } else {
         let config = CheckpointReaderConfig {
             remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
-                historical_url: checkpoint_url.to_string(),
-                live_url: Some(format!("{checkpoint_url}/ingestion/live")),
+                historical_url: format!("{checkpoint_url}/ingestion/historical"),
+                live_url: None,
             }),
             ingestion_path: Some(PathBuf::from("./data/chk")),
             ..Default::default()
