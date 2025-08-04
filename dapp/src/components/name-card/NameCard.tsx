@@ -8,6 +8,7 @@ import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
+import { LottieLoader } from '../loaders/LottieLoader';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface NameCardProps extends NftDisplayProps {
@@ -36,15 +37,23 @@ export function NameCard({
             )}
         >
             {displaySrc ? (
-                <div className="w-full aspect-square">
+                <div className="w-full aspect-square relative">
+                    {!imageLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <LottieLoader className="w-16 h-16" />
+                        </div>
+                    )}
                     <img
-                        className={cx('w-full', !imageLoaded ? 'block' : 'hidden')}
+                        className={cx('w-full', !imageLoaded ? 'opacity-100' : 'opacity-0')}
                         src="/name-bg.svg"
                     />
                     <img
                         src={displaySrc}
                         alt={name}
-                        className={cx('w-full', imageLoaded ? 'block' : 'hidden')}
+                        className={cx(
+                            'w-full absolute inset-0',
+                            imageLoaded ? 'opacity-100' : 'opacity-0',
+                        )}
                         onLoad={() => setImageLoaded(true)}
                     />
                 </div>
