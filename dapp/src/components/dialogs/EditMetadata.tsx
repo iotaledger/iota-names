@@ -101,11 +101,21 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 const field = metadata[key];
                 const currentField = nameRecord.nameRecord.data[key];
 
+                console.log(
+                    'key:',
+                    key,
+                    'allowedKey:',
+                    allowedKey,
+                    'field:',
+                    field,
+                    'currentField:',
+                    currentField,
+                );
                 if (field.selected && (currentField === undefined || field.data !== currentField)) {
                     updates.push({
                         type: 'set-data',
                         nftId,
-                        key: ALLOWED_METADATA[allowedKey],
+                        key: key,
                         value: field.data,
                         isSubname: isNameSubname,
                     });
@@ -113,7 +123,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                     updates.push({
                         type: 'unset-data',
                         nftId,
-                        key: ALLOWED_METADATA[allowedKey],
+                        key: key,
                         isSubname: isNameSubname,
                     });
                 }
