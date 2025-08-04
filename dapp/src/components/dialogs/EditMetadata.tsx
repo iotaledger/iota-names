@@ -101,16 +101,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 const field = metadata[key];
                 const currentField = nameRecord.nameRecord.data[key];
 
-                console.log(
-                    'key:',
-                    key,
-                    'allowedKey:',
-                    allowedKey,
-                    'field:',
-                    field,
-                    'currentField:',
-                    currentField,
-                );
                 if (field.selected && (currentField === undefined || field.data !== currentField)) {
                     updates.push({
                         type: 'set-data',
