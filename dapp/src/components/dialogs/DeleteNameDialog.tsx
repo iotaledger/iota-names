@@ -87,7 +87,9 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
-            toast.success(`Successfully deleted expired name ${normalizeIotaName(nft.name)}`);
+            toast.success(
+                `Successfully deleted expired name ${normalizeIotaName(nft.name, 'at', { truncateLongParts: true })}`,
+            );
             closeDialog();
         },
         onError: (error) => {

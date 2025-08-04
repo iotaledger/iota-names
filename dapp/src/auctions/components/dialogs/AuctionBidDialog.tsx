@@ -208,7 +208,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
 
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
-                                    <span className="text-names-neutral-100 text-headline-sm">
+                                    <span className="text-names-neutral-100 text-headline-sm break-words overflow-hidden">
                                         {normalizeIotaName(name)}
                                     </span>
                                 </div>

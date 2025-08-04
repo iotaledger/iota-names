@@ -27,6 +27,7 @@ import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
+import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 
 interface AvailabilityCheckProps {
@@ -213,15 +214,15 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                         label={searchedName}
                                         type={isNotAvailable ? ChipType.Error : ChipType.Elevated}
                                         trailingElement={
-                                            <ButtonUnstyled
-                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full"
+                                            <div
+                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     removeRecentSearch(searchedName);
                                                 }}
                                             >
                                                 <Close />
-                                            </ButtonUnstyled>
+                                            </div>
                                         }
                                         onClick={() => handleRecentClick(searchedName)}
                                     />
@@ -334,12 +335,18 @@ function PurchaseName({
 }) {
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+    const [isRenewDialogOpen, setRenewDialgOpen] = useState(false);
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
         setPurchaseDialogOpen(false);
+        setRenewDialgOpen(true);
+    }
+
+    function handleRenew() {
+        setRenewDialgOpen(false);
         onCompleted();
     }
 
@@ -376,6 +383,9 @@ function PurchaseName({
                     setOpen={setPurchaseDialogOpen}
                     onPurchase={handlePurchase}
                 />
+            )}
+            {isRenewDialogOpen && (
+                <RenewNameDialog name={name} setOpen={setRenewDialgOpen} onRenew={handleRenew} />
             )}
         </>
     );

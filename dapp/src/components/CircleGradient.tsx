@@ -3,7 +3,7 @@
 
 import clsx from 'clsx';
 
-import { SvgCircleGradient } from './svgs/circleGradient';
+import { SvgCircleGradient } from './svgs/CircleGradient';
 
 interface CircleGradientProps {
     position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
