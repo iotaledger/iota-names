@@ -315,6 +315,9 @@ importers:
       '@iota/iota-sdk':
         specifier: 0.0.0-experimental-20250620081851
         version: 0.0.0-experimental-20250620081851(typescript@5.8.3)
+      '@noble/hashes':
+        specifier: ^1.4.0
+        version: 1.8.0
     devDependencies:
       '@iota/build-scripts':
         specifier: workspace:^
