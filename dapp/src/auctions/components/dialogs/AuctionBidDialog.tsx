@@ -196,7 +196,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
 
                 <DialogBody>
                     <div className="flex flex-col justify-between h-full items-center">
-                        <div className="flex flex-col w-full gap-y-md names-branded">
+                        <div className="flex flex-col w-full gap-y-md">
                             {status === 'top_bidder' && (
                                 <InfoBox
                                     title="Top Bidder"

@@ -22,7 +22,7 @@ body[data-scroll-locked] #top-navbar {
     @apply absolute inset-0 rounded-[13px] z-[-1] -translate-x-[1px] -translate-y-[1px] bg-names-gradient-primary;
 }
 
-.names-branded {
+:not(.default-ui-kit-styles) {
     .btn.btn-outlined,
     .input-container:has(input:is(:active, :focus, :focus-visible)),
     .text-area-container:is(:active, :focus, :focus-visible),
@@ -37,6 +37,7 @@ body[data-scroll-locked] #top-navbar {
     .btn.btn-outlined {
         border-radius: 120px;
     }
+
     .select-container,
     .input-container,
     .text-area-container {

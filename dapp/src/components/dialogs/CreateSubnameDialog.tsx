@@ -201,7 +201,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                 <Header title="New Subname" onClose={closeDialog} />
                 <DialogBody>
                     <div className="flex flex-col h-full justify-between">
-                        <div className="flex flex-col h-full items-center gap-y-lg names-branded">
+                        <div className="flex flex-col h-full items-center gap-y-lg">
                             <InfoBox
                                 type={InfoBoxType.Default}
                                 style={InfoBoxStyle.Elevated}

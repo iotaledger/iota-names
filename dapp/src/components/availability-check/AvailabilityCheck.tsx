@@ -183,7 +183,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         <div className="flex flex-col items-center w-full space-y-4">
             <div className="flex flex-col gap-2xl w-full max-w-[744px]">
                 <div className="flex flex-col gap-y-md">
-                    <div className="flex gap-x-sm items-baseline justify-center w-full names-branded">
+                    <div className="flex gap-x-sm items-baseline justify-center w-full">
                         <Input
                             type={InputType.Text}
                             placeholder="Check name availability"

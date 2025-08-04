@@ -40,7 +40,7 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
                 ))}
             </div>
 
-            <div className="flex flex-col items-start gap-y-sm names-branded">
+            <div className="flex flex-col items-start gap-y-sm">
                 <Input
                     placeholder={
                         coupons.length === 0 ? 'Enter a coupon code' : 'Add an extra coupon'
