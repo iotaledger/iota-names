@@ -65,8 +65,11 @@ export type NameUpdate =
       }
     | {
           type: 'renew-name';
+          name: string;
           nftId: string;
           years: number;
+          address?: string;
+          couponCodes?: string[];
       }
     | {
           type: 'renew-subname';
@@ -77,8 +80,9 @@ export type NameUpdate =
           type: 'register-name';
           name: string;
           price: number;
-          years: number;
           setDefault: boolean;
+          address?: string;
+          couponCodes?: string[];
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -145,10 +149,13 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         });
                         break;
                     case 'renew-name':
-                        iotaNamesTx.renew({
+                        await iotaNamesTx.renew({
                             nft: update.nftId,
+                            name: update.name,
                             years: update.years,
                             coin: tx.gas,
+                            address: update.address,
+                            couponCodes: update.couponCodes,
                         });
                         break;
                     case 'renew-subname':
@@ -159,10 +166,11 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         break;
                     case 'register-name':
                         const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
-                        const nft = iotaNamesTx.register({
+                        const nft = await iotaNamesTx.register({
                             name: update.name,
-                            years: update.years,
                             coin,
+                            address: update.address,
+                            couponCodes: update.couponCodes,
                         });
                         if (update.setDefault) {
                             iotaNamesTx.setTargetAddress({

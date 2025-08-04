@@ -1,5 +1,4 @@
-// Copyright (c) Mysten Labs, Inc.
-// Modifications Copyright (c) 2025 IOTA Stiftung
+// Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { getNetwork, IotaClient, Network } from '@iota/iota-sdk/client';
@@ -11,8 +10,10 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { IotaNamesClient } from '../src/iota-names-client.js';
 import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
 
+const COUPONS = ['PERCENT_20'];
+
 (async () => {
-    const name = `cool-name-${Math.floor(Math.random() * 10000000)}.iota`;
+    const name = `the-couponer-${Math.floor(Math.random() * 10000)}.iota`;
 
     const network = Network.Devnet;
 
@@ -42,19 +43,19 @@ import { IotaNamesTransaction } from '../src/iota-names-transaction.js';
     });
 
     console.log('[Name Record (null if available)]: ', await iotaNamesClient.getNameRecord(name));
+    console.log('Purchasing name:', name);
 
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [100_000_000]);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [10_000_000]);
 
     const nft = await iotaNamesTx.register({
         name,
-        years: 1,
         coin,
+        couponCodes: COUPONS,
     });
 
     iotaNamesTx.transaction.transferObjects([nft], address);
-
     iotaNamesTx.transaction.transferObjects([coin], address);
 
     iotaNamesTx.transaction.setSender(address);
