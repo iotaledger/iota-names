@@ -168,7 +168,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                 updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
                 updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
             ) {
-                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
                 const couponMatch = updateNameError.message.match(couponRegex)?.[1];
@@ -263,9 +263,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {!hasEnoughGas && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={
-                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
-                                    }
+                                    supportingText={getUserFriendlyErrorMessage(
+                                        GAS_BALANCE_TOO_LOW_ID,
+                                    )}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}

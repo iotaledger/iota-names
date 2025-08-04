@@ -32,11 +32,7 @@ import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    GAS_BUDGET_ERROR_MESSAGES,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
+import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -247,7 +243,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                 updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
                 updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
             ) {
-                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
                 const couponMatch = updateNameError.message.match(couponRegex)?.[1];
