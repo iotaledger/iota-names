@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cx from 'clsx';
+import { useState } from 'react';
 
 import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
@@ -24,6 +25,8 @@ export function NameCard({
     children,
     displaySrc,
 }: React.PropsWithChildren<NameCardProps>) {
+    const [imageLoaded, setImageLoaded] = useState(false);
+
     return (
         <div
             className={cx(
@@ -33,7 +36,18 @@ export function NameCard({
             )}
         >
             {displaySrc ? (
-                <img src={displaySrc} alt={name} />
+                <div className="w-full aspect-square">
+                    <img
+                        className={cx('w-full', !imageLoaded ? 'block' : 'hidden')}
+                        src="/name-bg.svg"
+                    />
+                    <img
+                        src={displaySrc}
+                        alt={name}
+                        className={cx('w-full', imageLoaded ? 'block' : 'hidden')}
+                        onLoad={() => setImageLoaded(true)}
+                    />
+                </div>
             ) : (
                 <AvatarDisplay
                     name={name}
