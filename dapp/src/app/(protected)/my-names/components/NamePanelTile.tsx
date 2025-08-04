@@ -6,7 +6,6 @@
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
 import { ButtonUnstyled, truncate } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 import { Fragment } from 'react';
 
@@ -60,14 +59,13 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
-    const panelTitle = normalizeIotaName(registration.name, 'at', { truncateLongParts: true });
 
     return (
         <>
             <PanelTile
                 type={panelType}
                 icon={isDefaultName ? <StarHex className="w-4 h-4 text-names-primary-80" /> : null}
-                title={panelTitle}
+                name={registration.name}
                 subtitle={linkedAddress ? truncate(linkedAddress, 4, 4) : undefined}
                 onClick={onClick}
                 menuButton={<MenuButton variant="ghost" onClick={toggleMenu} ref={triggerRef} />}

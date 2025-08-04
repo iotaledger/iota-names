@@ -8,9 +8,7 @@ interface NameCardBodyProps {
 export function NameCardBody({ name, children }: React.PropsWithChildren<NameCardBodyProps>) {
     return (
         <div className="p-md flex flex-col gap-y-xs">
-            <h4 className="text-names-neutral-92 text-title-md text-ellipsis overflow-hidden">
-                {name}
-            </h4>
+            <h4 className="text-names-neutral-92 text-title-md truncate overflow-hidden">{name}</h4>
 
             <div className="flex flex-col gap-y-md">{children}</div>
         </div>

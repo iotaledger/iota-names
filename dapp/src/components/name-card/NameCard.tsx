@@ -12,6 +12,7 @@ import { AvatarDisplay } from '../name-record/AvatarDisplay';
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
     isSelected?: boolean;
+    displaySrc?: string | null;
 }
 
 export function NameCard({
@@ -21,6 +22,7 @@ export function NameCard({
     menuOptions,
     isSelected,
     children,
+    displaySrc,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
@@ -30,13 +32,16 @@ export function NameCard({
                 nftDisplayVariants({ size }),
             )}
         >
-            <AvatarDisplay
-                name={name}
-                size={size}
-                badge={badge}
-                button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
-            />
-
+            {displaySrc ? (
+                <img src={displaySrc} alt={name} />
+            ) : (
+                <AvatarDisplay
+                    name={name}
+                    size={size}
+                    badge={badge}
+                    button={menuOptions ? <ContextMenuButton options={menuOptions} /> : null}
+                />
+            )}
             <div className={nftDisplayVariants({ size })}>{children}</div>
         </div>
     );
