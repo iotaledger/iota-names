@@ -69,7 +69,7 @@ function SearchInput({ isBelowMd = false, onFocus }: { isBelowMd?: boolean; onFo
         : 'flex md:hidden w-full justify-center mx-auto';
 
     const containerClass =
-        'w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full';
+        'w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full default-ui-kit-styles';
 
     return (
         <div className={wrapperClass}>
