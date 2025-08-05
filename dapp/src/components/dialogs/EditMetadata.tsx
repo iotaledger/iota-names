@@ -72,7 +72,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
-    const initialMetadata = (() => {
+    const [metadata, setMetadata] = useState(() => {
         const initial: Record<string, { selected: boolean; data: string }> = {};
         METADATA_FIELDS.forEach(({ key }) => {
             const data = nameRecord?.nameRecord.data[key];
@@ -82,9 +82,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             };
         });
         return initial;
-    })();
-
-    const [metadata, setMetadata] = useState(initialMetadata);
+    });
 
     const updates: NameUpdate[] = (() => {
         const updates: NameUpdate[] = [];
