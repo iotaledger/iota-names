@@ -8,20 +8,14 @@ import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
 
-const PAYMENT_AUTH_ID = 'payments';
-const PAYMENTH_AUTH = 'PaymentsAuth';
-
-const AUCTION_AUTH_ID = 'auction';
-const AUCTION_AUTH = 'AuctionAuth';
-
 export function useNamesPurchaseMode() {
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
 
     const authKeyType = `${iotaNamesClient.config.packageId}::iota_names::AuthKey`;
 
-    const paymentType = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::${PAYMENT_AUTH_ID}::${PAYMENTH_AUTH}>`;
-    const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::${AUCTION_AUTH_ID}::${AUCTION_AUTH}>`;
+    const paymentType = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::payments::PaymentsAuth>`;
+    const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::'AuctionAuth'>`;
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
