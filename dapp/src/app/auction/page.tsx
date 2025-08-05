@@ -17,7 +17,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { AuctionBidDialog, AuctionDetails } from '@/auctions';
+import { AuctionBidDialog, AuctionDetails, isAuctionActive } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -96,15 +96,13 @@ export default function AuctionsPage(): JSX.Element {
             return { activeAuctions: [], finishedAuctions: [] };
         }
 
-        const now = Date.now();
         const active: AuctionDetails[] = [];
         const finished: AuctionDetails[] = [];
 
         auctions.forEach((auction) => {
             // Only include auctions that have metadata and are not loading
             if (!auction.isLoading && auction.metadata) {
-                const endTime = auction.metadata.endTimestamp.getTime();
-                if (endTime > now) {
+                if (isAuctionActive(auction.metadata)) {
                     active.push(auction);
                 } else {
                     finished.push(auction);

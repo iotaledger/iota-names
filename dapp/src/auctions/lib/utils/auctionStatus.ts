@@ -21,7 +21,9 @@ export function isAuctionActive(auctionMetadata: AuctionMetadata | null): boolea
     return now < auctionMetadata.endTimestamp.getTime();
 }
 
-function getAuctionMetadataStatus(auctionMetadata: AuctionMetadata | null): AuctionMetadataStatus {
+export function getAuctionMetadataStatus(
+    auctionMetadata: AuctionMetadata | null,
+): AuctionMetadataStatus {
     if (!auctionMetadata) return 'not_found';
 
     if (isAuctionActive(auctionMetadata)) return 'active';
