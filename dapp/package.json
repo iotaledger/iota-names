@@ -14,8 +14,8 @@
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix"
     },
     "dependencies": {
-        "@iota/apps-ui-icons": "0.0.0-experimental-names-20250716112630",
-        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250716112630",
+        "@iota/apps-ui-icons": "0.0.0-experimental-names-20250805131312",
+        "@iota/apps-ui-kit": "0.0.0-experimental-names-20250805131312",
         "@iota/dapp-kit": "0.0.0-experimental-20250620081851",
         "@iota/graphql-transport": "0.0.0-experimental-20250620081851",
         "@iota/iota-names-sdk": "workspace:^",

@@ -10,8 +10,6 @@ import {
     ButtonUnstyled,
     Chip,
     ChipType,
-    Input,
-    InputType,
     LoadingIndicator,
 } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
@@ -28,6 +26,7 @@ import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
 import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
+import { SearchStylized } from '../search-component/SearchStylized';
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
@@ -184,17 +183,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
             <div className="flex flex-col gap-2xl w-full max-w-[744px]">
                 <div className="flex flex-col gap-y-md">
                     <div className="flex gap-x-sm items-baseline justify-center w-full">
-                        <Input
-                            type={InputType.Text}
+                        <SearchStylized
                             placeholder="Check name availability"
                             value={searchValue}
                             onChange={({ target: { value } }) => handleInputChange(value)}
                             errorMessage={errorMessage}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             leadingIcon={
-                                <p className="text-primary-20 dark:text-primary-80 text-label-lg">
-                                    @
-                                </p>
+                                <p className="text-names-neutral-50 text-headline-md">@</p>
                             }
                             autoFocus={autoFocusInput}
                             trailingElement={inputTrailingElement}
