@@ -297,7 +297,7 @@ export class IotaNamesClient {
 
         if (nameRecordData) {
             nameRecordData.forEach((field: any) => {
-                if (field.key && field.value) {
+                if (field.key) {
                     data[field.key as string] = field.value;
                 }
             });

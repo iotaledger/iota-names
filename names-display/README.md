@@ -40,7 +40,7 @@ curl "http://localhost:3000/hello@iota/1609459200000"
 ### Response
 
 - **Success (200)**: Returns SVG image with `Content-Type: image/svg+xml`
-- **Error (500)**: Returns "cooked" text for invalid names or processing errors
+- **Error (500)**: Returns "Error generating SVG" text for invalid names or processing errors
 
 ## Valid Name Formats
 
