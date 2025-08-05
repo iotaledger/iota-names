@@ -1,11 +1,11 @@
-// Copyright (c) 2024 IOTA Stiftung
+// Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import { SecondaryText } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 import { createElement } from 'react';
 
-export const LABEL_CLASSES = 'flex flex-col gap-y-2 text-label-lg input-label-color';
+export const LABEL_CLASSES = 'flex flex-col gap-y-2 text-headline-md text-names-neutral-92';
 
 export enum LabelHtmlTag {
     Label = 'label',
@@ -16,8 +16,6 @@ export interface InputWrapperProps {
     label?: string;
     caption?: string;
     errorMessage?: string;
-    amountCounter?: string | number;
-    required?: boolean;
     disabled?: boolean;
     labelHtmlTag?: LabelHtmlTag;
 }
@@ -27,8 +25,6 @@ export function InputWrapper({
     caption,
     disabled,
     errorMessage,
-    amountCounter,
-    required,
     labelHtmlTag = LabelHtmlTag.Label,
     children,
 }: React.PropsWithChildren<InputWrapperProps>) {
@@ -38,7 +34,6 @@ export function InputWrapper({
                 'cursor-not-allowed opacity-40': disabled,
                 errored: errorMessage,
                 enabled: !disabled,
-                required: required,
             })}
         >
             {label ? (
@@ -50,7 +45,7 @@ export function InputWrapper({
                 children
             )}
 
-            {(errorMessage || caption || amountCounter) && (
+            {(errorMessage || caption) && (
                 <div
                     className={cx(
                         'flex flex-row items-center',
@@ -60,7 +55,6 @@ export function InputWrapper({
                     {(errorMessage || caption) && (
                         <SecondaryText hasErrorStyles>{errorMessage || caption}</SecondaryText>
                     )}
-                    {amountCounter && <SecondaryText>{amountCounter}</SecondaryText>}
                 </div>
             )}
         </div>
