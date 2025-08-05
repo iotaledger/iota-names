@@ -20,7 +20,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
@@ -79,7 +78,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         auctionError?.message || nameError?.message || priceError?.message || validationError || '';
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isAuctionActive() ?? false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -274,7 +273,7 @@ function BidName({
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isAuctionActive() ?? false;
     const isAllowedToBid = isAvailable || (isUnavailable && isAuctionInProgress) || false;
 
     function handleBid() {

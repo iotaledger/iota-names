@@ -34,7 +34,6 @@ import toast from 'react-hot-toast';
 import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
 import {
     GAS_BALANCE_TOO_LOW_ID,
@@ -45,6 +44,7 @@ import {
 import { formatNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
+import { formatTimeRemaining } from '@/lib/utils/time';
 
 interface AuctionBidDialogDialogProps {
     name: string;
@@ -131,8 +131,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
         !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
 
-    const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
-    const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
+    const status = auctionMetadata?.getUserAuctionStatus(account?.address || '') || 'claimed';
+    const timeRemainingMs = auctionMetadata?.getTimeRemaining();
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
     const isBidAboveDecimals = bidNanos === null;

@@ -9,7 +9,12 @@ import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { queryKey } from '@/hooks';
 
 import { AuctionFieldBcs } from '../types/bcs';
-import { AuctionMetadata, RawAuctionMetadata } from '../types/metadata';
+import {
+    AuctionMetadata,
+    AuctionMetadataStatus,
+    RawAuctionMetadata,
+    UserAuctionStatus,
+} from '../types/metadata';
 import { deriveAuctionDynamicFieldId } from './dynamicField';
 import { createNameObject } from './name';
 
@@ -91,6 +96,48 @@ function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | nu
         minBidNanos,
         nftId: auction.nft.id,
         nftExpiration: new Date(Number(auction.nft.expiration_timestamp_ms)),
+        getCurrentBidAmount(): bigint {
+            return this.currentBidNanos;
+        },
+        getNextBidAmount(): bigint {
+            const currentBid = this.getCurrentBidAmount();
+            const oneIotaInNanos = BigInt(1) * NANOS_PER_IOTA;
+
+            return currentBid + oneIotaInNanos;
+        },
+        getTimeRemaining(): number {
+            const now = Date.now();
+            return Math.max(0, this.endTimestamp.getTime() - now);
+        },
+        isAuctionActive(): boolean {
+            const now = Date.now();
+            return now < this.endTimestamp.getTime();
+        },
+        getAuctionMetadataStatus(): AuctionMetadataStatus {
+            if (this.isAuctionActive()) return 'active';
+            return 'ended';
+        },
+        isUserWinner(userAddress: string): boolean {
+            return this.winner === userAddress;
+        },
+        getUserAuctionStatus(userAddress: string): UserAuctionStatus {
+            const isWinner = this.isUserWinner(userAddress);
+            const auctionMetadataStatus = this.getAuctionMetadataStatus();
+
+            if (auctionMetadataStatus === 'active') {
+                return isWinner ? 'top_bidder' : 'outbid';
+            } else if (auctionMetadataStatus === 'ended') {
+                if (isWinner) {
+                    return 'claimable';
+                } else {
+                    return 'lost';
+                }
+            } else if (auctionMetadataStatus === 'not_found') {
+                return 'claimed';
+            }
+
+            return 'unknown';
+        },
     };
 }
 

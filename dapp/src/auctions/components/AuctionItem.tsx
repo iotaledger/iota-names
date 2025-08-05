@@ -15,16 +15,14 @@ import { queryKey } from '@/hooks/queryKey';
 import { getNameDisplaySrc } from '../../lib/utils/displayImage';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
 import { AuctionDetails } from '../hooks/useGetUserAuctions';
-import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
 import { AuctionStatusBadge } from './AuctionStatusBadge';
 
 interface AuctionItemProps {
     auction: AuctionDetails;
-    auctionStatus: UserAuctionStatus;
     onBidClick?: (targetName: string) => void;
 }
 
-export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemProps) {
+export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
     const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
@@ -83,7 +81,9 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         );
     }
 
-    const timeRemaining = getTimeRemaining(auction.metadata);
+    const timeRemaining = auction.metadata.getTimeRemaining();
+    const auctionStatus =
+        auction.metadata?.getUserAuctionStatus(account?.address || '') || 'claimed';
 
     const renderActionButton = () => {
         if (auctionStatus === 'claimable') {
@@ -125,7 +125,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
         <NameCard name={auction.name} displaySrc={auctionDisplayImage}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
-                    <ExpiryDateIndicator auction={auction} />
+                    <ExpiryDateIndicator auctionMetadata={auction.metadata} />
                     <AuctionStatusBadge status={auctionStatus} />
                 </div>
 

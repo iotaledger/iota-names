@@ -3,10 +3,9 @@
 
 'use client';
 
-import { useCurrentAccount } from '@iota/dapp-kit';
 import { useState } from 'react';
 
-import { AuctionBidDialog, AuctionDetails, AuctionItem, getUserAuctionStatus } from '@/auctions';
+import { AuctionBidDialog, AuctionDetails, AuctionItem } from '@/auctions';
 
 interface ExtendedNameCardProps {
     name: string;
@@ -15,16 +14,10 @@ interface ExtendedNameCardProps {
 
 export function ExtendedAuctionCard({ name, auctionDetails }: ExtendedNameCardProps) {
     const [showBidDialog, setShowBidDialog] = useState<boolean>(false);
-    const address = useCurrentAccount()?.address ?? '';
-    const status = getUserAuctionStatus(auctionDetails.metadata, address);
 
     return (
         <>
-            <AuctionItem
-                auction={auctionDetails}
-                onBidClick={() => setShowBidDialog(true)}
-                auctionStatus={status}
-            />
+            <AuctionItem auction={auctionDetails} onBidClick={() => setShowBidDialog(true)} />
 
             {showBidDialog && (
                 <AuctionBidDialog

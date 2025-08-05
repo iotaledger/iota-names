@@ -5,8 +5,9 @@ import { Add, Calendar, Subnames } from '@iota/apps-ui-icons';
 import { ButtonUnstyled } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 
-import { AuctionDetails, formatTimeRemaining, getTimeRemaining } from '@/auctions';
+import { AuctionMetadata } from '@/auctions';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
+import { formatTimeRemaining } from '@/lib/utils/time';
 
 const INDICATOR_PRIMARY_TEXT_COLOR = 'text-names-neutral-70';
 const INDICATOR_SECONDARY_TEXT_COLOR = 'text-iota-primary-80';
@@ -16,11 +17,11 @@ const INDICATOR_COMMON_CLASSES =
 const CLICKABLE_INDICATOR_CLASSES = 'state-layer relative cursor-pointer';
 
 interface ExpiryDateIndicatorProps {
-    auction: AuctionDetails;
+    auctionMetadata: AuctionMetadata;
 }
 
-export function ExpiryDateIndicator({ auction }: ExpiryDateIndicatorProps) {
-    const timeRemainingMs = getTimeRemaining(auction.metadata);
+export function ExpiryDateIndicator({ auctionMetadata }: ExpiryDateIndicatorProps) {
+    const timeRemainingMs = auctionMetadata.getTimeRemaining();
     const { milliseconds } = useCountdown(timeRemainingMs);
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);

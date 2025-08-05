@@ -3,8 +3,6 @@
 
 import { AuctionDetails } from '@/auctions/hooks/useGetUserAuctions';
 
-import { getUserAuctionStatus } from './auctionStatus';
-
 export type AuctionCard = {
     details: AuctionDetails;
     status: AuctionCardStatus;
@@ -18,7 +16,7 @@ export enum AuctionCardStatus {
 
 export function groupUserAuctions(auctionDetails: AuctionDetails[], address: string) {
     return auctionDetails.reduce((acc, auctionDetails): AuctionCard[] => {
-        const status = getUserAuctionStatus(auctionDetails.metadata, address);
+        const status = auctionDetails.metadata?.getUserAuctionStatus(address) || 'claimed';
 
         if (status === 'top_bidder' || status === 'outbid') {
             acc.push({ details: auctionDetails, status: AuctionCardStatus.Active });
