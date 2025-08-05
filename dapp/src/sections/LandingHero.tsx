@@ -30,7 +30,7 @@ export function LandingHero() {
                     <p className="text-title-lg leading-5 -tracking-[0.4px]">{DESCRIPTION}</p>
                 </div>
 
-                <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-shader-neutral-dark-8 rounded-full overflow-hidden border-2 border-names-neutral-100">
+                <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-shader-neutral-dark-8 rounded-full overflow-hidden border-2 border-names-neutral-100 default-ui-kit-styles">
                     <Input
                         placeholder="Search for your IOTA name"
                         type={InputType.Text}
