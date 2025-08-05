@@ -9,4 +9,5 @@ export enum NameDialogId {
     GeneralInfo = 'general-info',
     SetPermissions = 'set-permissions',
     ConnectToAddress = 'connect-to-address',
+    EditMetadata = 'edit-metadata',
 }
