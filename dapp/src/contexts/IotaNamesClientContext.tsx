@@ -14,14 +14,10 @@ export const IotaNamesClientProvider: React.FC<React.PropsWithChildren> = ({ chi
     const network = getNetwork(ctx.network);
 
     const iotaNamesClient = useMemo(() => {
-        if (!network.graphql) return null;
-
-        const graphQlClient = new IotaGraphQLClient({
-            url: network.graphql,
-        });
-
         return new IotaNamesClient({
-            graphQlClient,
+            graphQlClient: new IotaGraphQLClient({
+                url: network.graphql!,
+            }),
             network: network.id,
         });
     }, [network.graphql, network.id]);
@@ -34,7 +30,7 @@ export const IotaNamesClientProvider: React.FC<React.PropsWithChildren> = ({ chi
 };
 
 type IotaNamesClientContextType = {
-    iotaNamesClient: IotaNamesClient | null;
+    iotaNamesClient: IotaNamesClient;
 };
 
 export const IotaNamesClientContext = createContext<IotaNamesClientContextType | null>(null);
