@@ -45,7 +45,7 @@ interface AvailabilityCheckProps {
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const SEARCH_DEBOUNCE_DELAY = 500;
-const PERSIST_DEBOUNCE_DELAY = 2000;
+const PERSIST_DEBOUNCE_DELAY = 1000;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const [searchValue, setSearchValue] = useState<string>('');
@@ -109,21 +109,23 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         if (!name || !nameRecordData) return;
 
         const timer = window.setTimeout(() => {
-            const MAX_RECENT = 4;
-
-            // Persist the name once it has been loaded
-            setRecentSearches((previousSearches) => {
-                const updatedRecentSearches = [
-                    { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
-                    ...previousSearches.filter((search) => search.searchedName !== name),
-                ].slice(0, MAX_RECENT);
-                persistRecentSearches(updatedRecentSearches);
-                return updatedRecentSearches;
-            });
+            addRecentSearch(name, nameRecordData);
         }, PERSIST_DEBOUNCE_DELAY);
 
         return () => window.clearTimeout(timer);
     }, [nameRecordData, isNameTaken, name]);
+
+    function addRecentSearch(name: string, nameRecordData: NameRecordData) {
+        const MAX_RECENT = 4;
+        setRecentSearches((previousSearches) => {
+            const updatedRecentSearches = [
+                { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
+                ...previousSearches.filter((search) => search.searchedName !== name),
+            ].slice(0, MAX_RECENT);
+            persistRecentSearches(updatedRecentSearches);
+            return updatedRecentSearches;
+        });
+    }
 
     function removeRecentSearch(searchedNameToRemove: string) {
         setRecentSearches((previousSearches) => {
