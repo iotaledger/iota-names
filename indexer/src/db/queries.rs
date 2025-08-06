@@ -95,7 +95,7 @@ pub fn get_auctions_for_bidder(
     Ok(query.load(conn)?)
 }
 
-pub fn get_names_for_bidder_count(conn: &mut SqliteConnection, bidder_id: i32) -> Result<usize> {
+pub fn get_auctions_for_bidder_count(conn: &mut SqliteConnection, bidder_id: i32) -> Result<usize> {
     Ok(bids::table
         .inner_join(names::table)
         .group_by(names::id)

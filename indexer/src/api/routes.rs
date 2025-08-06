@@ -53,7 +53,7 @@ async fn get_auctions_for_address(
     let mut conn = state.pool.get_connection()?;
     let mut total_items = 0;
     let names = if let Some(bidder) = queries::get_bidder_by_address(&mut conn, &address_str)? {
-        total_items = queries::get_names_for_bidder_count(&mut conn, bidder.id)?;
+        total_items = queries::get_auctions_for_bidder_count(&mut conn, bidder.id)?;
 
         if total_items > 0 {
             queries::get_auctions_for_bidder(&mut conn, bidder.id, page, page_size, sort)?
