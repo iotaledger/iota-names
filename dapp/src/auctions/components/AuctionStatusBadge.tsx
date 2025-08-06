@@ -33,7 +33,6 @@ export function AuctionStatusBadge({ status }: AuctionStatusBadgeProps) {
                     label: 'Lost',
                     type: BadgeType.Neutral,
                 };
-            case 'unknown':
             default:
                 return {
                     label: 'Unknown',
