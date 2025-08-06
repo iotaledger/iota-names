@@ -44,7 +44,8 @@ interface AvailabilityCheckProps {
 }
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
-const DEBOUNCE_DELAY = 500;
+const SEARCH_DEBOUNCE_DELAY = 500;
+const PERSIST_DEBOUNCE_DELAY = 2000;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const [searchValue, setSearchValue] = useState<string>('');
@@ -87,6 +88,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
+    // Search debounce
     useEffect(() => {
         if (!searchValue || validationError) {
             return;
@@ -97,25 +99,30 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                 const newName = `${searchValue}.iota`;
                 return current === newName ? current : newName;
             });
-        }, DEBOUNCE_DELAY);
+        }, SEARCH_DEBOUNCE_DELAY);
 
         return () => window.clearTimeout(timer);
     }, [searchValue, validationError]);
 
+    // Persist debounce
     useEffect(() => {
         if (!name || !nameRecordData) return;
 
-        const MAX_RECENT = 4;
+        const timer = window.setTimeout(() => {
+            const MAX_RECENT = 4;
 
-        // Persist the name once it has been loaded
-        setRecentSearches((previousSearches) => {
-            const updatedRecentSearches = [
-                { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
-                ...previousSearches.filter((search) => search.searchedName !== name),
-            ].slice(0, MAX_RECENT);
-            persistRecentSearches(updatedRecentSearches);
-            return updatedRecentSearches;
-        });
+            // Persist the name once it has been loaded
+            setRecentSearches((previousSearches) => {
+                const updatedRecentSearches = [
+                    { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
+                    ...previousSearches.filter((search) => search.searchedName !== name),
+                ].slice(0, MAX_RECENT);
+                persistRecentSearches(updatedRecentSearches);
+                return updatedRecentSearches;
+            });
+        }, PERSIST_DEBOUNCE_DELAY);
+
+        return () => window.clearTimeout(timer);
     }, [nameRecordData, isNameTaken, name]);
 
     function removeRecentSearch(searchedNameToRemove: string) {
