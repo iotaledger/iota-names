@@ -14,6 +14,7 @@ use iota_names::iota_names::IotaNames;
 use iota_names::name_registration::NameRegistration;
 use iota_names::payment::PaymentIntent;
 use iota_names_coupons::coupon_house;
+use iota_names_coupons::coupon;
 use iota_names_coupons::coupons;
 use iota_names_coupons::range;
 use iota_names_coupons::rules;
@@ -654,4 +655,25 @@ fun init_renewal(
     let intent = iota_names::payment::init_renewal(iota_names, nft, years);
 
     intent
+}
+
+#[test]
+fun test_coupon_getters() {
+    let rules = rules::new_coupon_rules(option::none(), option::none(), option::none(), option::none(), option::none(), false);
+    let percentage_coupon = coupon::new_percentage(25, rules);
+    let fixed_coupon = coupon::new_fixed(1000, rules);
+
+    // Test rules getter
+    assert!(percentage_coupon.rules() == &rules);
+    assert!(fixed_coupon.rules() == &rules);
+
+    // Test is_percentage and is_fixed
+    assert!(coupon::is_percentage(&percentage_coupon));
+    assert!(!coupon::is_fixed(&percentage_coupon));
+    assert!(!coupon::is_percentage(&fixed_coupon));
+    assert!(coupon::is_fixed(&fixed_coupon));
+
+    // Test discount getter
+    assert!(coupon::discount(&percentage_coupon) == 25);
+    assert!(coupon::discount(&fixed_coupon) == 1000);
 }
