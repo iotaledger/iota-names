@@ -10,6 +10,7 @@ use crate::db::pool::DbConnectionPool;
 
 mod error;
 mod extractors;
+mod responses;
 mod routes;
 
 #[derive(Clone)]
