@@ -57,7 +57,7 @@ export function ExtendedNameCard({
     const handleButtonClick = () => {
         if (expired) {
             openDialog(NameDialogId.RenewName);
-        } else if (!targetAddress) {
+        } else {
             openDialog(NameDialogId.ConnectToAddress);
         }
     };
