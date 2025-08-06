@@ -25,7 +25,7 @@ pub fn routes() -> Router<ApiState> {
     Router::new()
         .route("/health", get(health_check))
         .route("/auctions", get(get_auctions))
-        .route("/auctions/{address}", get(get_names_for_address))
+        .route("/auctions/{address}", get(get_auctions_for_address))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -38,7 +38,7 @@ async fn health_check() -> &'static str {
     "OK"
 }
 
-async fn get_names_for_address(
+async fn get_auctions_for_address(
     State(state): State<ApiState>,
     Path(address_str): Path<String>,
     BidderNamesPagination {
@@ -56,7 +56,7 @@ async fn get_names_for_address(
         total_items = queries::get_names_for_bidder_count(&mut conn, bidder.id)?;
 
         if total_items > 0 {
-            queries::get_names_for_bidder(&mut conn, bidder.id, page, page_size, sort)?
+            queries::get_auctions_for_bidder(&mut conn, bidder.id, page, page_size, sort)?
         } else {
             Default::default()
         }

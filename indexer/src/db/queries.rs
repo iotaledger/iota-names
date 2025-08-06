@@ -71,7 +71,7 @@ pub fn get_bidder_by_address(conn: &mut SqliteConnection, address: &str) -> Resu
         .optional()?)
 }
 
-pub fn get_names_for_bidder(
+pub fn get_auctions_for_bidder(
     conn: &mut SqliteConnection,
     bidder_id: i32,
     page: Option<usize>,
