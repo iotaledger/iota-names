@@ -98,7 +98,6 @@ pub fn get_auctions_for_bidder(
 pub fn get_auctions_for_bidder_count(conn: &mut SqliteConnection, bidder_id: i32) -> Result<usize> {
     Ok(bids::table
         .inner_join(names::table)
-        .group_by(names::id)
         .select(dsl::count_distinct(names::id))
         .filter(bids::bidder_id.eq(bidder_id))
         .first::<i64>(conn)? as _)
