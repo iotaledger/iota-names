@@ -102,6 +102,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             nft: update.nftId,
                             key: update.key,
                             value: update.value,
+                            isSubname: update.isSubname,
                         });
                         break;
                     case 'unset-data':

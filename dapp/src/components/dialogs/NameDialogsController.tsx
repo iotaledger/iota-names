@@ -8,6 +8,7 @@ import { RegistrationNft } from '@/lib/interfaces';
 import { DeleteNameDialog } from '.';
 import { ConnectToAddressDialog } from './ConnectToAddressDialog';
 import { CreateSubnameDialog } from './CreateSubnameDialog';
+import { EditMetadataDialog } from './EditMetadata';
 import { NameDialogId } from './enums';
 import { GeneralInfoDialog } from './GeneralInfoDialog';
 import { PersonalizeAvatarDialog } from './PersonalizeAvatarDialog';
@@ -46,8 +47,13 @@ export function NameDialogsController({ nft, openDialogId, onClose }: NameDialog
             {openDialogId === NameDialogId.GeneralInfo ? (
                 <GeneralInfoDialog name={nft.name} setOpen={onClose} />
             ) : null}
+
             {openDialogId === NameDialogId.ConnectToAddress ? (
                 <ConnectToAddressDialog name={nft.name} setOpen={onClose} />
+            ) : null}
+
+            {openDialogId === NameDialogId.EditMetadata ? (
+                <EditMetadataDialog name={nft.name} setOpen={onClose} />
             ) : null}
         </Fragment>
     );
