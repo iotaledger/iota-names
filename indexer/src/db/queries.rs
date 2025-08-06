@@ -98,6 +98,24 @@ pub fn get_names_for_bidder_address(
     Ok(query.load(conn)?)
 }
 
+
+pub fn get_total_auctions(
+    conn: &mut SqliteConnection,
+    search: Option<String>,
+) -> Result<i64> {
+    let mut query = names::table
+        .inner_join(bids::table)
+        .count()
+        .into_boxed();
+    if let Some(search) = search {
+        query = query.filter(names::name.like(format!("%{search}%")))
+    }
+
+    Ok(query
+        .get_result::<(i64,)>(conn)?)
+}
+
+
 pub fn get_auctions(
     conn: &mut SqliteConnection,
     page: Option<usize>,
@@ -126,6 +144,7 @@ pub fn get_auctions(
             query.order((dsl::max(bids::bid).desc(), names::id.desc()))
         }
     };
+
     Ok(query
         .load::<(Name, Option<i64>)>(conn)?
         .into_iter()

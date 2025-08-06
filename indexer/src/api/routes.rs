@@ -21,6 +21,7 @@ pub fn routes() -> Router<ApiState> {
     Router::new()
         .route("/health", get(health_check))
         .route("/auctions", get(get_auctions))
+        .route("/auctions/total", get(get_total_auctions))
         .route("/auctions/{address}", get(get_names_for_address))
         .layer(
             CorsLayer::new()
@@ -73,4 +74,18 @@ async fn get_auctions(
         crate::db::queries::get_auctions(&mut conn, page, page_size, sort, sort_by, search)?;
 
     Ok(Json(names))
+}
+
+
+async fn get_total_auctions(
+    State(state): State<ApiState>,
+    AuctionsPagination {
+        search,
+    }: AuctionsPagination,
+) -> Result<Json<i64, ApiError> {
+    let mut conn = state.pool.get_connection()?;
+    let count =
+        crate::db::queries::get_total_auctions(&mut conn, page, page_size, sort, sort_by, search)?;
+
+    Ok(Json(count))
 }
