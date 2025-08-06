@@ -16,7 +16,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
@@ -29,13 +29,18 @@ import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
 import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 
-interface AvailabilityCheckProps {
-    autoFocusInput?: boolean;
-    onCompleted?: () => void;
-}
 interface RecentSearch {
     searchedName: string;
     isNotAvailable: boolean;
+}
+
+function persistRecentSearches(recentSearches: RecentSearch[]) {
+    localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(recentSearches));
+}
+
+interface AvailabilityCheckProps {
+    autoFocusInput?: boolean;
+    onCompleted?: () => void;
 }
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
@@ -48,7 +53,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
         return storedRecentSearches ? (JSON.parse(storedRecentSearches) as RecentSearch[]) : [];
     });
-    const isOnEnterSearchRef = useRef<boolean>(false);
 
     const {
         data: auctionMetadata,
@@ -98,22 +102,21 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         return () => window.clearTimeout(timer);
     }, [searchValue, validationError]);
 
-    function persistRecentSearches(recentSearches: RecentSearch[]) {
-        localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(recentSearches));
-    }
+    useEffect(() => {
+        if (!name || !nameRecordData) return;
 
-    function updateRecentSearch(searchedName: string, isNotAvailable: boolean) {
         const MAX_RECENT = 4;
 
+        // Persist the name once it has been loaded
         setRecentSearches((previousSearches) => {
             const updatedRecentSearches = [
-                { searchedName, isNotAvailable },
-                ...previousSearches.filter((search) => search.searchedName !== searchedName),
+                { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
+                ...previousSearches.filter((search) => search.searchedName !== name),
             ].slice(0, MAX_RECENT);
             persistRecentSearches(updatedRecentSearches);
             return updatedRecentSearches;
         });
-    }
+    }, [nameRecordData, isNameTaken, name]);
 
     function removeRecentSearch(searchedNameToRemove: string) {
         setRecentSearches((previousSearches) => {
@@ -125,33 +128,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         });
     }
 
-    useEffect(() => {
-        if (
-            isOnEnterSearchRef.current &&
-            nameRecordData &&
-            searchValue &&
-            name === `${searchValue}.iota`
-        ) {
-            updateRecentSearch(searchValue, isNameTaken);
-            isOnEnterSearchRef.current = false;
-        }
-    }, [nameRecordData, isNameTaken, name, searchValue]);
-
     function handleRecentClick(value: string) {
         setSearchValue(value);
         setName(`${value}.iota`);
-        updateRecentSearch(value, isNameTaken);
     }
 
-    const handleSearch = useCallback(() => {
-        const fullName = `${searchValue}.iota`;
-        if (fullName === name && nameRecordData) {
-            updateRecentSearch(searchValue, isNameTaken);
-        } else {
-            isOnEnterSearchRef.current = true;
-            setName(fullName);
-        }
-    }, [searchValue, validationError, isNameTaken, name, nameRecordData]);
+    const handleSearch = () => {
+        setName(`${searchValue}.iota`);
+    };
 
     function handleInputChange(inputValue: string) {
         setSearchValue(denormalizeName(inputValue));
