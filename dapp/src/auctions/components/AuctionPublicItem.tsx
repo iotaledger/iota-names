@@ -44,7 +44,10 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
     }
 
     const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
-    const formattedPrice = formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0));
+
+    const formattedPrice = formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
+        showIotaSymbol: false,
+    });
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
@@ -81,7 +84,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
 }
 
 function AuctionTimeRemaining({ auction }: { auction: AuctionDetails }) {
-    // Always call hooks at the top level - never inside conditions
     const timeRemainingMs = getTimeRemaining(auction.metadata);
     const { milliseconds } = useCountdown(timeRemainingMs);
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);

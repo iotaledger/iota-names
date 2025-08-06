@@ -177,15 +177,14 @@ export default function AuctionsPage(): JSX.Element {
                     )}
                 </div>
             </div>
-            <div className="mt-8 flex flex-wrap">
+            <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
                 {displayedAuctions.map((auction) => (
-                    <div key={auction.name} className="w-1/3 md:w-1/4 p-2">
+                    <div key={auction.name} className="w-[220px]">
                         <AuctionPublicItem auction={auction} onBidClick={setBidDialogName} />
                     </div>
                 ))}
             </div>
 
-            {/* Bid Dialog */}
             {bidDialogName && (
                 <AuctionBidDialog
                     name={bidDialogName}

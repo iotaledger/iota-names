@@ -22,6 +22,8 @@ export const AUCTION_ROUTE: Route = {
 
 export const PROTECTED_ROUTES = [MY_NAMES_ROUTE, AUCTION_ROUTE] as const satisfies Route[];
 
+export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE] as const satisfies Route[];
+
 export const CONNECT_ROUTE: Route = {
     path: '/',
 };

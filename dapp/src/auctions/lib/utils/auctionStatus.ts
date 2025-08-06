@@ -38,8 +38,12 @@ function isUserWinner(auctionMetadata: AuctionMetadata | null, userAddress: stri
 
 export function getUserAuctionStatus(
     auctionMetadata: AuctionMetadata | null,
-    userAddress: string,
+    userAddress?: string,
 ): UserAuctionStatus {
+    if (!auctionMetadata || !userAddress) {
+        return 'unknown';
+    }
+
     const isWinner = isUserWinner(auctionMetadata, userAddress);
     const auctionMetadataStatus = getAuctionMetadataStatus(auctionMetadata);
 

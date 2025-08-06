@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { NamesLogoWeb } from '@/components/svgs';
-import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
+import { MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
@@ -28,6 +28,8 @@ export function Navbar() {
         });
     }
 
+    const ROUTES = isConnected ? PROTECTED_ROUTES : PUBLIC_ROUTES;
+
     return (
         <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
             <div className="px-lg py-md flex flex-col gap-y-sm">
@@ -37,20 +39,18 @@ export function Navbar() {
                             <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
                         </Link>
 
-                        {isConnected && (
-                            <div className="flex gap-x-md text-names-neutral-70 text-body-md">
-                                {PROTECTED_ROUTES.map((route) => (
-                                    <Link
-                                        key={route.path}
-                                        href={route.path}
-                                        className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
-                                        data-testid={`${route.id}-link`}
-                                    >
-                                        {route.title}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
+                        <div className="flex gap-x-md text-names-neutral-70 text-body-md">
+                            {ROUTES.map((route) => (
+                                <Link
+                                    key={route.path}
+                                    href={route.path}
+                                    className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
+                                    data-testid={`${route.id}-link`}
+                                >
+                                    {route.title}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
 
                     {showSearch && <SearchInput isBelowMd onFocus={toggleSearchDialog} />}

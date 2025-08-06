@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, LoadingIndicator } from '@iota/apps-ui-kit';
+import { Button, ButtonType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -73,6 +73,7 @@ export function AuctionActionButton({
         return (
             <Button
                 text="Bid Again"
+                type={ButtonType.Outlined}
                 onClick={() => {
                     if (onBidClick) {
                         onBidClick(auction.name);
