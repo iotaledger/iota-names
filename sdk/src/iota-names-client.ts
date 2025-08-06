@@ -2,12 +2,16 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { bcs } from '@iota/iota-sdk/bcs';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { toB64 } from '@iota/iota-sdk/utils';
+import { fromB64, toB64 } from '@iota/iota-sdk/utils';
+import { blake2b } from '@noble/hashes/blake2';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
-import { CoreConfigBcs, NameBcs, PricingConfigBcs } from './bcs.js';
+import { CouponBcs, CouponHouseBcs, DummyFieldBcs, NameBcs } from './bcs.js';
 import { ALLOWED_METADATA, packages } from './constants.js';
+import { applyCouponsToPrice, validateCoupons } from './coupons.js';
 import {
     getConfigType,
     getCoreConfigType,
@@ -18,13 +22,15 @@ import {
     validateYears,
 } from './helpers.js';
 import type {
+    Coupon,
+    CouponHouse,
     IotaNamesClientConfig,
     IotaNamesCoreConfig,
     IotaNamesPriceList,
     NameRecord,
     PackageInfo,
 } from './types.js';
-import { isValidIotaName, normalizeIotaName } from './utils.js';
+import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js';
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -47,10 +53,10 @@ export class IotaNamesClient {
      */
     async getCoreConfig(): Promise<IotaNamesCoreConfig> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const coreConfigBcsB64 = toB64(
-            CoreConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -102,10 +108,10 @@ export class IotaNamesClient {
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const pricingConfigBcsB64 = toB64(
-            PricingConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -168,10 +174,10 @@ export class IotaNamesClient {
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('Price list config not found');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const pricingConfigBcsB64 = toB64(
-            PricingConfigBcs.serialize({
+            DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
         );
@@ -291,7 +297,7 @@ export class IotaNamesClient {
 
         if (nameRecordData) {
             nameRecordData.forEach((field: any) => {
-                if (field.key && field.value) {
+                if (field.key) {
                     data[field.key as string] = field.value;
                 }
             });
@@ -305,6 +311,104 @@ export class IotaNamesClient {
             data,
             avatar: data[ALLOWED_METADATA.avatar],
         };
+    }
+
+    async getCouponHouse(): Promise<CouponHouse> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        if (!this.config.couponsPackageId) throw new Error('Coupon package ID is not set');
+
+        const iotaNamesObjectId = this.config.iotaNamesObjectId;
+        const packageId = this.config.packageId;
+        const couponsPackageId = this.config.couponsPackageId;
+
+        const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
+
+        const couponHouseResponse = await this.graphQlClient.query<{
+            owner: { dynamicField: { value: { bcs: string } } };
+        }>({
+            query: graphql(`
+                query getIotaNamesCouponHouseRegistryKey(
+                    $parentId: IotaAddress!
+                    $name: DynamicFieldName!
+                ) {
+                    owner(address: $parentId) {
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    bcs
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: iotaNamesObjectId,
+                name: {
+                    type: `${packageId}::iota_names::RegistryKey<${couponsPackageId}::coupon_house::CouponHouse>`,
+                    bcs: DummyFieldB64,
+                },
+            },
+        });
+
+        const couponsHouseDynamicFieldBcsValue =
+            couponHouseResponse?.data?.owner?.dynamicField?.value?.bcs;
+
+        if (!couponsHouseDynamicFieldBcsValue) {
+            throw new Error('Coupon house not found or is invalid');
+        }
+
+        return CouponHouseBcs.parse(fromB64(couponsHouseDynamicFieldBcsValue));
+    }
+
+    async resolveCoupon(couponCode: string): Promise<Coupon | null> {
+        const couponHouse = await this.getCouponHouse();
+        const couponsTableId = couponHouse?.coupons?.coupons?.id.id.bytes;
+
+        if (!couponsTableId) {
+            throw new Error('Coupons table ID not found in the coupon house');
+        }
+
+        const couponCodeHash = bytesToHex(blake2b(couponCode, { dkLen: 32 }));
+        const couponCodeBytes = hexToBytes(couponCodeHash);
+
+        const couponCodeB64 = bcs.vector(bcs.u8()).serialize(couponCodeBytes).toBase64();
+
+        const couponResponse = await this.graphQlClient.query<{
+            owner: { dynamicField: { value: { bcs: string } } };
+        }>({
+            query: graphql(`
+                query getCouponBcs($parentId: IotaAddress!, $name: DynamicFieldName!) {
+                    owner(address: $parentId) {
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    bcs
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: couponsTableId,
+                name: {
+                    type: 'vector<u8>',
+                    bcs: couponCodeB64,
+                },
+            },
+        });
+
+        const couponBcsBase64 = couponResponse?.data?.owner?.dynamicField?.value?.bcs;
+
+        if (!couponBcsBase64) {
+            return null;
+        }
+
+        const couponData = CouponBcs.parse(fromB64(couponBcsBase64));
+
+        return { ...couponData, couponCode };
     }
 
     /**
@@ -359,5 +463,49 @@ export class IotaNamesClient {
         }
 
         return price;
+    }
+
+    async calculateDiscountedPrice({
+        coupons,
+        name,
+        years,
+        isRegistration = true,
+        address,
+    }: {
+        coupons: Coupon[] | string[];
+        name: string;
+        years: number;
+        isRegistration?: boolean;
+        address?: string;
+    }) {
+        if (coupons.every((coupon) => typeof coupon === 'string')) {
+            const couponPromises = (coupons as string[]).map(async (couponCode) => {
+                const coupon = await this.resolveCoupon(couponCode);
+                if (!coupon) {
+                    throw new Error(`Coupon not found: ${couponCode}`);
+                }
+
+                return coupon;
+            });
+
+            coupons = (await Promise.all(couponPromises)) as Coupon[];
+        }
+
+        const normalizedName = normalizeIotaName(name, 'dot');
+
+        validateIotaName(normalizedName);
+
+        const nameParts = normalizedName.split('.');
+        const firstNamePart = nameParts[0];
+
+        validateCoupons(coupons, years, firstNamePart.length, address);
+
+        const standardPrice = await this.calculatePrice({
+            name,
+            years,
+            isRegistration,
+        });
+
+        return applyCouponsToPrice(coupons, standardPrice);
     }
 }

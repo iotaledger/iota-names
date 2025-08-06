@@ -41,6 +41,8 @@ jobs:
           pnpm install
 
       - name: Run pnpm build
+        env:
+          NEXT_PUBLIC_NAMES_DISPLAY_API_URL: http://localhost:3000
         run: |
           pnpm turbo build
 

@@ -1,62 +1,35 @@
 import { readFileSync } from 'node:fs';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
 import Fastify from 'fastify';
 import * as z from 'zod';
 
-const BASE = readFileSync('./src/base.svg', 'utf-8');
+import { renderSvg } from './utils/renderSvg.js';
 
-const formatter = new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-});
+const baseSvgTemplate = readFileSync(new URL('./svg/base.svg', import.meta.url), 'utf-8');
+const expiredSvgTemplate = readFileSync(new URL('./svg/expired.svg', import.meta.url), 'utf-8');
 
-function generateSvg({ name, timestamp }: z.infer<typeof Params>): string {
-    const formattedName = normalizeIotaName(name, 'at', {
-        truncateLongParts: true,
-        onlyFirstSubname: true,
-    });
-
-    const date = formatter.format(new Date(timestamp));
-
-    const content = `
-        <text x="0" y="0" fill="white">
-            <tspan x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="17" font-weight="bold">${formattedName}</tspan>
-            <tspan x="150" y="200" font-family="sans-serif" font-size="8">${date}</tspan>
-        </text>
-    `;
-    return BASE.replace('{{ CONTENT }}', content);
-}
-
-const Params = z.object({
+export const Params = z.object({
     name: z.string(),
     timestamp: z.coerce.number(),
 });
 
-const fastify = Fastify({
-    logger: true,
-});
+const fastify = Fastify({ logger: true });
 
-fastify.get('/:name/:timestamp', async (request, reply) => {
+function isExpired(timestamp: number): boolean {
+    return timestamp < Date.now();
+}
+
+fastify.get('/:name/:timestamp', async (req, reply) => {
+    const params = await z.parseAsync(Params, req.params);
+    const templateSvg = isExpired(params.timestamp) ? expiredSvgTemplate : baseSvgTemplate;
     try {
-        const params = await z.parseAsync(Params, request.params);
-        const svg = generateSvg(params);
+        const svg = renderSvg({ ...params, template: templateSvg });
         reply.type('image/svg+xml').code(200);
-
         return svg;
     } catch (e) {
-        console.log(e); // TODO: use pino method
+        console.error(e);
         reply.code(500);
-        return 'cooked';
+        return 'Error generating SVG';
     }
 });
 
-fastify.listen(
-    {
-        host: '0.0.0.0',
-        port: Number(process.env['PORT']) || 3000,
-    },
-    (err) => {
-        if (err) throw err;
-    },
-);
+fastify.listen({ host: '0.0.0.0', port: Number(process.env.PORT) || 3000 });

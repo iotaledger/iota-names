@@ -3,11 +3,11 @@
 
 use anyhow::Result;
 use diesel::{
-    BelongingToDsl, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
+    ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
     SqliteConnection, TextExpressionMethods, dsl, insert_into,
 };
 
-use super::models::{Bid, Bidder, Name, bidders, bids, names};
+use super::models::{Bidder, Name, bidders, bids, names};
 use crate::db::{AuctionSortBy, SortOrder};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
@@ -63,27 +63,44 @@ pub fn add_bids_entry(
     Ok(())
 }
 
-pub fn get_names_for_bidder_address(
-    conn: &mut SqliteConnection,
-    address: &str,
-) -> Result<Vec<String>> {
-    let bidder = bidders::table
+pub fn get_bidder_by_address(conn: &mut SqliteConnection, address: &str) -> Result<Option<Bidder>> {
+    Ok(bidders::table
         .filter(bidders::address.eq(address))
         .select(Bidder::as_select())
         .get_result(conn)
-        .optional()?;
+        .optional()?)
+}
 
-    let bidder = match bidder {
-        Some(bidder) => bidder,
-        // Just return an empty vector if the bidder was not found
-        None => return Ok(vec![]),
-    };
-
-    Ok(Bid::belonging_to(&bidder)
+pub fn get_auctions_for_bidder(
+    conn: &mut SqliteConnection,
+    bidder_id: i32,
+    page: Option<usize>,
+    page_size: usize,
+    sort: SortOrder,
+) -> Result<Vec<String>> {
+    let mut query = bids::table
         .inner_join(names::table)
         .group_by(names::id)
         .select(names::name)
-        .load(conn)?)
+        .filter(bids::bidder_id.eq(bidder_id))
+        .limit(page_size as _)
+        .offset((page.unwrap_or_default() * page_size) as _)
+        .into_boxed();
+
+    query = match sort {
+        SortOrder::Asc => query.order(names::name.asc()),
+        SortOrder::Desc => query.order(names::name.desc()),
+    };
+
+    Ok(query.load(conn)?)
+}
+
+pub fn get_auctions_for_bidder_count(conn: &mut SqliteConnection, bidder_id: i32) -> Result<usize> {
+    Ok(bids::table
+        .inner_join(names::table)
+        .select(dsl::count_distinct(names::id))
+        .filter(bids::bidder_id.eq(bidder_id))
+        .first::<i64>(conn)? as _)
 }
 
 pub fn get_auctions(
@@ -92,7 +109,7 @@ pub fn get_auctions(
     page_size: usize,
     sort: SortOrder,
     sort_by: AuctionSortBy,
-    search: Option<String>,
+    search: Option<&str>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
         .inner_join(bids::table)
@@ -119,6 +136,17 @@ pub fn get_auctions(
         .into_iter()
         .map(|(name, _)| name.name)
         .collect())
+}
+
+pub fn get_auctions_count(conn: &mut SqliteConnection, search: Option<&str>) -> Result<usize> {
+    let mut query = names::table
+        .inner_join(bids::table)
+        .select(dsl::count_distinct(names::id))
+        .into_boxed();
+    if let Some(search) = search {
+        query = query.filter(names::name.like(format!("%{search}%")))
+    }
+    Ok(query.first::<i64>(conn)? as _)
 }
 
 pub fn get_bid_count(conn: &mut SqliteConnection, name_str: &str) -> Result<i64> {
