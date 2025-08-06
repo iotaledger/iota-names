@@ -105,6 +105,7 @@ pub fn get_total_auctions(
 ) -> Result<i64> {
     let mut query = names::table
         .inner_join(bids::table)
+        .group_by(names::id)
         .count()
         .into_boxed();
     if let Some(search) = search {
