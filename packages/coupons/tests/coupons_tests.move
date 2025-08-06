@@ -655,3 +655,26 @@ fun init_renewal(
 
     intent
 }
+
+#[test]
+fun test_coupon_getters() {
+    use iota_names_coupons::coupon;
+    use iota_names_coupons::rules;
+    let rules = rules::new_coupon_rules(option::none(), option::none(), option::none(), option::none(), option::none(), false);
+    let percentage_coupon = coupon::new_percentage(25, rules);
+    let fixed_coupon = coupon::new_fixed(1000, rules);
+
+    // Test rules getter
+    assert!(&coupon::rules(&percentage_coupon) == &percentage_coupon.rules);
+    assert!(&coupon::rules(&fixed_coupon) == &fixed_coupon.rules);
+
+    // Test is_percentage and is_fixed
+    assert!(coupon::is_percentage(&percentage_coupon));
+    assert!(!coupon::is_fixed(&percentage_coupon));
+    assert!(!coupon::is_percentage(&fixed_coupon));
+    assert!(coupon::is_fixed(&fixed_coupon));
+
+    // Test discount getter
+    assert!(coupon::discount(&percentage_coupon) == 25);
+    assert!(coupon::discount(&fixed_coupon) == 1000);
+}
