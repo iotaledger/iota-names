@@ -51,7 +51,7 @@ export function ExtendedNameCard({
         if (expired) {
             return 'Renew Name';
         }
-        return targetAddress ? formatAddress(targetAddress) : 'Connect To Address';
+        return targetAddress ? formatAddress(targetAddress) : 'Connect to address';
     };
 
     const handleButtonClick = () => {
