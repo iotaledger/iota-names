@@ -82,7 +82,7 @@ async fn get_total_auctions(
     AuctionsPagination {
         search,
     }: AuctionsPagination,
-) -> Result<Json<i64, ApiError> {
+) -> Result<Json<i64, ApiError>> {
     let mut conn = state.pool.get_connection()?;
     let count =
         crate::db::queries::get_total_auctions(&mut conn, page, page_size, sort, sort_by, search)?;
