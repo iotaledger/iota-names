@@ -17,7 +17,7 @@ export function AvailabilityCheckDialog() {
             <DialogContent
                 isFixedPosition
                 showCloseOnOverlay
-                customWidth="w-[60vw] h-[clamp(400px,80vh,600px)]"
+                customWidth="w-[60vw] h-[clamp(400px,80vh,700px)]"
             >
                 <div className="flex flex-col gap-md px-48 py-20 flex-1">
                     <AvailabilityCheck {...props} />

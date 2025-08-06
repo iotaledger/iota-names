@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Close } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, SecondaryText } from '@iota/apps-ui-kit';
+import { ButtonUnstyled } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 import { forwardRef, useRef } from 'react';
 
@@ -23,11 +23,9 @@ type InputProps = BaseInputProps & Omit<React.InputHTMLAttributes<HTMLInputEleme
 export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function InputComponent(
     {
         label,
-        caption,
         disabled,
         errorMessage,
         leadingIcon,
-        supportingText,
         trailingElement,
         value,
         onClearInput,
@@ -47,12 +45,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         inputWrapperRef.current?.querySelector('input')?.focus();
     }
     return (
-        <InputWrapper
-            label={label}
-            caption={caption}
-            disabled={disabled}
-            errorMessage={errorMessage}
-        >
+        <InputWrapper label={label} disabled={disabled} errorMessage={errorMessage}>
             <div
                 className={cx(
                     'relative flex flex-row items-center gap-x-3 px-lg py-md rounded-full border-2',
@@ -73,8 +66,6 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
                         {...inputProps}
                     />
                 </div>
-
-                {supportingText && <SecondaryText>{supportingText}</SecondaryText>}
                 {!trailingElement && (
                     <ButtonUnstyled
                         className={cx(

@@ -3,27 +3,17 @@
 
 import { SecondaryText } from '@iota/apps-ui-kit';
 import cx from 'clsx';
-import { createElement } from 'react';
-
-export enum LabelHtmlTag {
-    Label = 'label',
-    Div = 'div',
-}
 
 export interface InputWrapperProps {
     label?: string;
-    caption?: string;
     errorMessage?: string;
     disabled?: boolean;
-    labelHtmlTag?: LabelHtmlTag;
 }
 
 export function InputWrapper({
     label,
-    caption,
     disabled,
     errorMessage,
-    labelHtmlTag = LabelHtmlTag.Label,
     children,
 }: React.PropsWithChildren<InputWrapperProps>) {
     return (
@@ -34,36 +24,18 @@ export function InputWrapper({
                 enabled: !disabled,
             })}
         >
-            {label ? (
-                <LabelWrapper labelHtmlTag={labelHtmlTag}>
-                    {label}
-                    {children}
-                </LabelWrapper>
-            ) : (
-                children
-            )}
-
-            {(errorMessage || caption) && (
+            {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+            {children}
+            {errorMessage && (
                 <div
                     className={cx(
                         'flex flex-row items-center',
-                        caption || errorMessage ? 'justify-between gap-md' : 'justify-end',
+                        errorMessage ? 'justify-between gap-md' : 'justify-end',
                     )}
                 >
-                    {(errorMessage || caption) && (
-                        <SecondaryText hasErrorStyles>{errorMessage || caption}</SecondaryText>
-                    )}
+                    {errorMessage && <SecondaryText hasErrorStyles>{errorMessage}</SecondaryText>}
                 </div>
             )}
         </div>
     );
-}
-
-function LabelWrapper({
-    labelHtmlTag,
-    children,
-}: Required<Pick<InputWrapperProps, 'labelHtmlTag'>> & {
-    children: React.ReactNode;
-}) {
-    return createElement(labelHtmlTag, children);
 }

@@ -160,7 +160,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">
-            <div className="flex flex-col gap-2xl w-full max-w-[744px]">
+            <div className="flex flex-col gap-xl w-full max-w-[744px]">
                 <div className="flex flex-col gap-y-md">
                     <div className="flex gap-x-sm items-baseline justify-center w-full">
                         <SearchStylized
@@ -179,29 +179,29 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                         />
                     </div>
                     {recentSearches?.length > 0 && (
-                        <div className="flex flex-row gap-x-sm items-center">
-                            <span className="text-body-lg text-names-neutral-50">Recent</span>
-                            <div className="flex flex-wrap gap-xs">
-                                {recentSearches.map(({ searchedName, isNotAvailable }) => (
-                                    <Chip
-                                        key={searchedName}
-                                        label={searchedName}
-                                        type={isNotAvailable ? ChipType.Error : ChipType.Elevated}
-                                        trailingElement={
-                                            <div
-                                                className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeRecentSearch(searchedName);
-                                                }}
-                                            >
-                                                <Close />
-                                            </div>
-                                        }
-                                        onClick={() => handleRecentClick(searchedName)}
-                                    />
-                                ))}
-                            </div>
+                        <div className="flex flex-wrap gap-xs">
+                            <span className="text-body-lg text-names-neutral-50 items-center flex mr-md">
+                                Recent
+                            </span>
+                            {recentSearches.map(({ searchedName, isNotAvailable }) => (
+                                <Chip
+                                    key={searchedName}
+                                    label={searchedName}
+                                    type={isNotAvailable ? ChipType.Error : ChipType.Elevated}
+                                    trailingElement={
+                                        <div
+                                            className="[&_svg]:h-4 [&_svg]:w-4 state-layer relative rounded-full cursor-pointer"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeRecentSearch(searchedName);
+                                            }}
+                                        >
+                                            <Close />
+                                        </div>
+                                    }
+                                    onClick={() => handleRecentClick(searchedName)}
+                                />
+                            ))}
                         </div>
                     )}
                 </div>
