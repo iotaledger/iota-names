@@ -109,7 +109,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         if (!name || !nameRecordData) return;
 
         const timer = window.setTimeout(() => {
-            addRecentSearch(name, isNameTaken);
+            addRecentSearch(denormalizeName(name), isNameTaken);
         }, PERSIST_DEBOUNCE_DELAY);
 
         return () => window.clearTimeout(timer);
