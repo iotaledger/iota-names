@@ -109,17 +109,17 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         if (!name || !nameRecordData) return;
 
         const timer = window.setTimeout(() => {
-            addRecentSearch(name, nameRecordData);
+            addRecentSearch(name, isNameTaken);
         }, PERSIST_DEBOUNCE_DELAY);
 
         return () => window.clearTimeout(timer);
     }, [nameRecordData, isNameTaken, name]);
 
-    function addRecentSearch(name: string, nameRecordData: NameRecordData) {
+    function addRecentSearch(name: string, isNotAvailable: boolean) {
         const MAX_RECENT = 4;
         setRecentSearches((previousSearches) => {
             const updatedRecentSearches = [
-                { searchedName: name, isNotAvailable: nameRecordData?.type !== 'available' },
+                { searchedName: name, isNotAvailable },
                 ...previousSearches.filter((search) => search.searchedName !== name),
             ].slice(0, MAX_RECENT);
             persistRecentSearches(updatedRecentSearches);
