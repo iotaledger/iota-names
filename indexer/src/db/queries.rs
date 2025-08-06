@@ -98,22 +98,14 @@ pub fn get_names_for_bidder_address(
     Ok(query.load(conn)?)
 }
 
-
-pub fn get_total_auctions(
-    conn: &mut SqliteConnection,
-    search: Option<String>,
-) -> Result<i64> {
-    let mut query = names::table
-        .count()
-        .into_boxed();
+pub fn get_total_auctions(conn: &mut SqliteConnection, search: Option<String>) -> Result<i64> {
+    let mut query = names::table.count().into_boxed();
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
     }
 
-    Ok(query
-        .get_result::<(i64,)>(conn)?)
+    Ok(query.get_result::<(i64,)>(conn)?)
 }
-
 
 pub fn get_auctions(
     conn: &mut SqliteConnection,
