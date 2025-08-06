@@ -97,7 +97,7 @@ public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, labels
     );
 }
 
-/// Removes all reserved labels for a given Name (except top-level)
+/// Removes all reserved labels for a given name (except top-level)
 public(package) fun remove_reserved_labels_for_name(iota_names: &mut IotaNames, name: &Name) {
     let len = name.number_of_levels();
     let reserved_table_mut = reserved_table_mut(iota_names);
