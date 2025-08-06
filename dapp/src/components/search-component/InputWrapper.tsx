@@ -5,8 +5,6 @@ import { SecondaryText } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 import { createElement } from 'react';
 
-export const LABEL_CLASSES = 'flex flex-col gap-y-2 text-headline-md text-names-neutral-92';
-
 export enum LabelHtmlTag {
     Label = 'label',
     Div = 'div',
@@ -67,5 +65,5 @@ function LabelWrapper({
 }: Required<Pick<InputWrapperProps, 'labelHtmlTag'>> & {
     children: React.ReactNode;
 }) {
-    return createElement(labelHtmlTag, { className: LABEL_CLASSES }, children);
+    return createElement(labelHtmlTag, children);
 }

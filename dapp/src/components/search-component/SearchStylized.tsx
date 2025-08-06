@@ -3,30 +3,22 @@
 
 import { Close } from '@iota/apps-ui-icons';
 import { ButtonUnstyled, SecondaryText } from '@iota/apps-ui-kit';
-import cx, { clsx } from 'clsx';
+import cx from 'clsx';
 import { forwardRef, useRef } from 'react';
 
 import { InputWrapper, InputWrapperProps } from './InputWrapper';
+import { BORDER_GRADIENT_CLASSES, BORDER_LIGHT_CLASSES, INPUT_CLASSES } from './search.classes';
 
-export const INPUT_CLASSES =
-    'w-full input-caret-color bg-transparent text-headline-md text-names-neutral-92 caret-input-caret-color focus:outline-none focus-visible:outline-none disabled:cursor-not-allowed';
-export const INPUT_TEXT_CLASSES = 'input-text-color';
-export const INPUT_PLACEHOLDER_CLASSES = 'input-placeholder-color';
-export const BORDER_CLASSES =
-    'px-lg py-md rounded-full border-2 border-names-neutral-20 input-border-color-disabled group-[.enabled]:cursor-text input-border-error-color hover:group-[.enabled]:input-border-color-hover input-border-color-focus';
-
-export interface BaseInputProps extends InputWrapperProps {
+interface BaseInputProps extends InputWrapperProps {
     leadingIcon?: React.ReactNode;
     supportingText?: string;
-    amountCounter?: string | number;
     trailingElement?: React.ReactNode;
     value?: string;
-    supportingValue?: string | null;
-    defaultValue?: string;
     onClearInput?: () => void;
+    lightSearch?: boolean;
 }
 
-export type InputProps = BaseInputProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
+type InputProps = BaseInputProps & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>;
 
 export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function InputComponent(
     {
@@ -36,22 +28,24 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         errorMessage,
         leadingIcon,
         supportingText,
-        amountCounter,
         trailingElement,
         value,
-        supportingValue,
-        defaultValue,
         onClearInput,
+        lightSearch,
         ...inputProps
     },
     forwardRef,
 ) {
     const inputWrapperRef = useRef<HTMLDivElement | null>(null);
+    const borderClasses = lightSearch ? BORDER_LIGHT_CLASSES : BORDER_GRADIENT_CLASSES;
+    const inputTextSize = lightSearch ? 'text-title-lg' : 'text-headline-md';
+    const placeholderTextColor = lightSearch
+        ? 'placeholder:text-names-neutral-70'
+        : 'input-placeholder-color';
 
     function focusOnInput() {
         inputWrapperRef.current?.querySelector('input')?.focus();
     }
-
     return (
         <InputWrapper
             label={label}
@@ -61,40 +55,38 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         >
             <div
                 className={cx(
-                    'search-container relative flex flex-row items-center gap-x-3 ',
-                    BORDER_CLASSES,
+                    'relative flex flex-row items-center gap-x-3 px-lg py-md rounded-full border-2',
+                    !lightSearch && 'search-container',
+                    borderClasses,
                 )}
                 onClick={focusOnInput}
                 ref={inputWrapperRef}
             >
-                {leadingIcon && <span className="input-icon-color">{leadingIcon}</span>}
+                {leadingIcon && <span className="text-names-neutral-50">{leadingIcon}</span>}
                 <div className="flex flex-1 flex-col items-start">
                     <input
                         ref={forwardRef}
                         type="text"
                         value={value}
-                        defaultValue={defaultValue}
                         disabled={disabled}
-                        className={cx(INPUT_CLASSES, INPUT_TEXT_CLASSES, INPUT_PLACEHOLDER_CLASSES)}
+                        className={cx(inputTextSize, placeholderTextColor, INPUT_CLASSES)}
                         {...inputProps}
                     />
-                    {supportingValue && (
-                        <span className="text-names-neutral-40">{supportingValue}</span>
-                    )}
                 </div>
 
                 {supportingText && <SecondaryText>{supportingText}</SecondaryText>}
-
-                <ButtonUnstyled
-                    className={clsx(
-                        'input-icon-color [&_svg]:h-5 [&_svg]:w-5 p-sm state-layer relative',
-                        !value?.length && 'invisible',
-                    )}
-                    onClick={onClearInput}
-                    tabIndex={-1}
-                >
-                    <Close />
-                </ButtonUnstyled>
+                {!trailingElement && (
+                    <ButtonUnstyled
+                        className={cx(
+                            'text-names-neutral-92 [&_svg]:h-5 [&_svg]:w-5 p-sm state-layer relative rounded-full',
+                            !value?.length && 'invisible',
+                        )}
+                        onClick={onClearInput}
+                        tabIndex={-1}
+                    >
+                        <Close />
+                    </ButtonUnstyled>
+                )}
 
                 {trailingElement}
             </div>
