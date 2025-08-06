@@ -1,16 +1,17 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-'use client';
-
+import { Link } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { formatAddress } from '@iota/iota-sdk/utils';
 
-import { useNameRecord } from '@/hooks';
+import { NameRecordData, useNameRecord } from '@/hooks';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
+import { isNameRecordExpired } from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -39,6 +40,28 @@ export function ExtendedNameCard({
     const menuOptions = getNameMenuOptions(nft, hasSubnames, openDialog, nameRecordData);
     const label = normalizeIotaName(nft.name);
 
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+
+    const targetAddress = nameRecord?.nameRecord?.targetAddress;
+    const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+
+    const getButtonText = () => {
+        if (expired) {
+            return 'Renew Name';
+        }
+        return targetAddress ? formatAddress(targetAddress) : 'Connect To Address';
+    };
+
+    const handleButtonClick = () => {
+        if (expired) {
+            openDialog(NameDialogId.RenewName);
+        } else if (!targetAddress) {
+            openDialog(NameDialogId.ConnectToAddress);
+        }
+    };
+
     return (
         <>
             <NameCard name={nft.name} badge={badge} menuOptions={menuOptions} isSelected={isActive}>
@@ -49,7 +72,12 @@ export function ExtendedNameCard({
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
                     />
 
-                    <Button text="Placeholder" type={ButtonType.Secondary} onClick={() => {}} />
+                    <Button
+                        text={getButtonText()}
+                        type={ButtonType.Secondary}
+                        onClick={handleButtonClick}
+                        icon={targetAddress ? <Link /> : null}
+                    />
                 </NameCardBody>
             </NameCard>
 
