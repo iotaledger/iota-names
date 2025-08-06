@@ -15,7 +15,7 @@ export function useNamesPurchaseMode() {
     const authKeyType = `${iotaNamesClient.config.packageId}::iota_names::AuthKey`;
 
     const paymentType = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::payments::PaymentsAuth>`;
-    const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::'AuctionAuth'>`;
+    const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::AuctionAuth>`;
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
