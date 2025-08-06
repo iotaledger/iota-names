@@ -78,7 +78,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         auctionError?.message || nameError?.message || priceError?.message || validationError || '';
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const isAuctionInProgress = auctionMetadata?.isAuctionActive() ?? false;
+    const isAuctionInProgress = auctionMetadata?.isActive() ?? false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -273,7 +273,7 @@ function BidName({
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata?.isAuctionActive() ?? false;
+    const isAuctionInProgress = auctionMetadata?.isActive() ?? false;
     const isAllowedToBid = isAvailable || (isUnavailable && isAuctionInProgress) || false;
 
     function handleBid() {

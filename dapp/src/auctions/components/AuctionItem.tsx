@@ -82,8 +82,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
     }
 
     const timeRemaining = auction.metadata.getTimeRemaining();
-    const auctionStatus =
-        auction.metadata?.getUserAuctionStatus(account?.address || '') || 'claimed';
+    const auctionStatus = auction.metadata?.getUserStatus(account?.address || '');
 
     const renderActionButton = () => {
         if (auctionStatus === 'claimable') {
@@ -104,7 +103,7 @@ export function AuctionItem({ auction, onBidClick }: AuctionItemProps) {
             );
         }
 
-        if (['outbid', 'top_bidder'].includes(auctionStatus) && timeRemaining > 0) {
+        if ((auctionStatus == 'outbid' || auctionStatus == 'top_bidder') && timeRemaining > 0) {
             return (
                 <Button
                     text="Bid Again"

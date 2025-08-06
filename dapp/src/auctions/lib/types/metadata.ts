@@ -17,19 +17,12 @@ export interface AuctionMetadata {
     getCurrentBidAmount(): bigint;
     getNextBidAmount(): bigint;
     getTimeRemaining(): number;
-    isAuctionActive(): boolean;
-    getAuctionMetadataStatus(): AuctionMetadataStatus;
+    isActive(): boolean;
+    getStatus(): AuctionStatus;
     isUserWinner(address: string): boolean;
-    getUserAuctionStatus(address: string): UserAuctionStatus;
+    getUserStatus(address: string): UserAuctionStatus;
 }
 
-export type AuctionMetadataStatus = 'active' | 'ended' | 'not_found';
+export type AuctionStatus = 'active' | 'ended';
 
-export type UserAuctionStatus =
-    | 'top_bidder'
-    | 'outbid'
-    | 'winner'
-    | 'lost'
-    | 'claimable'
-    | 'claimed'
-    | 'unknown';
+export type UserAuctionStatus = 'top_bidder' | 'outbid' | 'winner' | 'lost' | 'claimable';

@@ -11,7 +11,7 @@ import { queryKey } from '@/hooks';
 import { AuctionFieldBcs } from '../types/bcs';
 import {
     AuctionMetadata,
-    AuctionMetadataStatus,
+    AuctionStatus,
     RawAuctionMetadata,
     UserAuctionStatus,
 } from '../types/metadata';
@@ -109,34 +109,30 @@ function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | nu
             const now = Date.now();
             return Math.max(0, this.endTimestamp.getTime() - now);
         },
-        isAuctionActive(): boolean {
+        isActive(): boolean {
             const now = Date.now();
             return now < this.endTimestamp.getTime();
         },
-        getAuctionMetadataStatus(): AuctionMetadataStatus {
-            if (this.isAuctionActive()) return 'active';
+        getStatus(): AuctionStatus {
+            if (this.isActive()) return 'active';
             return 'ended';
         },
         isUserWinner(userAddress: string): boolean {
             return this.winner === userAddress;
         },
-        getUserAuctionStatus(userAddress: string): UserAuctionStatus {
+        getUserStatus(userAddress: string): UserAuctionStatus {
             const isWinner = this.isUserWinner(userAddress);
-            const auctionMetadataStatus = this.getAuctionMetadataStatus();
+            const auctionMetadataStatus = this.getStatus();
 
             if (auctionMetadataStatus === 'active') {
                 return isWinner ? 'top_bidder' : 'outbid';
-            } else if (auctionMetadataStatus === 'ended') {
+            } else {
                 if (isWinner) {
                     return 'claimable';
                 } else {
                     return 'lost';
                 }
-            } else if (auctionMetadataStatus === 'not_found') {
-                return 'claimed';
             }
-
-            return 'unknown';
         },
     };
 }

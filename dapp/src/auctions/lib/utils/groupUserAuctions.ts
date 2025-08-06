@@ -16,7 +16,7 @@ export enum AuctionCardStatus {
 
 export function groupUserAuctions(auctionDetails: AuctionDetails[], address: string) {
     return auctionDetails.reduce((acc, auctionDetails): AuctionCard[] => {
-        const status = auctionDetails.metadata?.getUserAuctionStatus(address) || 'claimed';
+        const status = auctionDetails.metadata?.getUserStatus(address);
 
         if (status === 'top_bidder' || status === 'outbid') {
             acc.push({ details: auctionDetails, status: AuctionCardStatus.Active });
