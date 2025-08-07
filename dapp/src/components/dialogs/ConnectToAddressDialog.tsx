@@ -86,15 +86,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         ? getNameObject(ownedSubnames ?? [], nameRecord?.nameRecord.name ?? '')
         : nameRecord?.nameRecord.nftId;
 
-    if (hasAddressChange && nftId) {
-        updates.push({
-            type: 'set-target-address',
-            nftId,
-            address: editTargetAddress || undefined,
-            isSubname: !!isNameSubname,
-        });
-    }
-
     if (hasDefaultChange) {
         if (editIsDefaultName) {
             if (allowedToSetDefault) {
@@ -105,6 +96,15 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         } else {
             updates.push({ type: 'unset-default' });
         }
+    }
+
+    if (hasAddressChange && nftId) {
+        updates.push({
+            type: 'set-target-address',
+            nftId,
+            address: editTargetAddress || undefined,
+            isSubname: !!isNameSubname,
+        });
     }
 
     const {
