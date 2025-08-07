@@ -195,6 +195,31 @@ fun try_to_renew_subname() {
     abort 1337
 }
 
+#[test]
+fun test_renew_data_mut() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+
+    // Register a name
+    let name = b"test.iota".to_string();
+    let intent = payment::init_registration(
+        &mut iota_names,
+        name,
+    );
+    let receipt = handle_payment(intent, &mut iota_names, &mut ctx);
+    let nft = receipt.register(&mut iota_names, &clock, &mut ctx);
+
+    // Start renewal process so we can test request_data_mut()
+    let mut intent = payment::init_renewal(&mut iota_names, &nft, 1);
+    let _request_data_mut = intent.request_data_mut(&iota_names, PaymentsAuth {});
+
+    destroy(intent);
+    destroy(iota_names);
+    destroy(nft);
+    destroy(clock);
+}
+
 #[test, expected_failure(abort_code = ::iota_names::payment::ERecordExpired)]
 fun try_renewing_expired_name() {
     let mut ctx = tx_context::dummy();
