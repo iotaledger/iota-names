@@ -40,7 +40,7 @@ export function useNamesPurchaseMode() {
         staleTime: 10 * 60 * 1000,
         initialData: {
             isPaymentAuthorized: false,
-            isAuctionAuthorized: false
+            isAuctionAuthorized: false,
         },
     });
 }
