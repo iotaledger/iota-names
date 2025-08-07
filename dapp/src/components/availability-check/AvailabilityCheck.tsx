@@ -62,9 +62,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         isLoading: isLoadingNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
-    const {
-        data: { isPaymentAuthorized, isAuctionAuthorized },
-    } = useNamesPurchaseMode();
+    const { data: { isPaymentAuthorized, isAuctionAuthorized } = {} } = useNamesPurchaseMode();
 
     const validationError = useMemo(
         () =>
