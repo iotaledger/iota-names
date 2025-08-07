@@ -38,7 +38,7 @@ export function useNamesPurchaseMode() {
         },
         enabled: !!iotaNamesClient && !!iotaClient,
         staleTime: 10 * 60 * 1000,
-        initialData: {
+        placeholderData: {
             isPaymentAuthorized: false,
             isAuctionAuthorized: false,
         },
