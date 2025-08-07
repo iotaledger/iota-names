@@ -22,7 +22,6 @@ type InputProps = BaseInputProps & Omit<React.InputHTMLAttributes<HTMLInputEleme
 
 export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function InputComponent(
     {
-        label,
         disabled,
         errorMessage,
         leadingIcon,
@@ -45,7 +44,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         inputWrapperRef.current?.querySelector('input')?.focus();
     }
     return (
-        <InputWrapper label={label} disabled={disabled} errorMessage={errorMessage}>
+        <InputWrapper disabled={disabled} errorMessage={errorMessage}>
             <div
                 className={cx(
                     'relative flex flex-row items-center gap-x-3 px-lg py-md rounded-full border-2',

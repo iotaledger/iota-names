@@ -5,13 +5,11 @@ import { SecondaryText } from '@iota/apps-ui-kit';
 import cx from 'clsx';
 
 export interface InputWrapperProps {
-    label?: string;
     errorMessage?: string;
     disabled?: boolean;
 }
 
 export function InputWrapper({
-    label,
     disabled,
     errorMessage,
     children,
@@ -24,7 +22,6 @@ export function InputWrapper({
                 enabled: !disabled,
             })}
         >
-            {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
             {children}
             {errorMessage && (
                 <div
