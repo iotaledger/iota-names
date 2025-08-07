@@ -79,6 +79,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const hasDefaultChange = (addressName === name) !== editIsDefaultName;
     const isValidAddressOrEmpty = editTargetAddress === '' || isValidIotaAddress(editTargetAddress);
     const hasChanges = (hasAddressChange && isValidAddressOrEmpty) || hasDefaultChange;
+    const allowedToSetDefault = editTargetAddress === account?.address;
 
     const updates: NameUpdate[] = [];
     const nftId = isNameSubname
@@ -96,7 +97,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     if (hasDefaultChange) {
         if (editIsDefaultName) {
-            updates.push({ type: 'set-default', name });
+            if(allowedToSetDefault) {
+                updates.push({ type: 'set-default', name });
+            } else {
+                setEditIsDefaultName(false);
+            }
         } else {
             updates.push({ type: 'unset-default' });
         }
