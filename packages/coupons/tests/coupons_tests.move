@@ -8,9 +8,9 @@ module iota_names_coupons::coupon_tests;
 use iota::clock::Clock;
 use iota::hash::blake2b256;
 use iota::hex;
-use iota::test_scenario::{Scenario, return_shared};
+use iota::test_scenario::{Scenario, end, return_shared, return_to_sender};
 use iota::test_utils::{Self, destroy};
-use iota_names::iota_names::IotaNames;
+use iota_names::iota_names::{IotaNames, AdminCap};
 use iota_names::name_registration::NameRegistration;
 use iota_names::payment::PaymentIntent;
 use iota_names_coupons::coupon_house;
@@ -24,6 +24,7 @@ use iota_names_coupons::setup::{
     user,
     user_two,
     test_app,
+    admin,
     admin_add_percentage_coupon,
     admin_add_fixed_coupon,
     test_init,
@@ -336,6 +337,32 @@ fun max_years_two_failure() {
         option::none(),
         option::none(),
         option::some(range::new(5, 4)),
+        false,
+    );
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::ENoMoreAvailableClaims)]
+fun decrease_until_no_more_available_claims() {
+    let mut coupon_rules = rules::new_coupon_rules(
+        option::none(),
+        option::some(1),
+        option::none(),
+        option::none(),
+        option::none(),
+        false,
+    );
+    rules::decrease_available_claims(&mut coupon_rules);
+    rules::decrease_available_claims(&mut coupon_rules);
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidAvailableClaims)]
+fun create_no_available_claims() {
+    rules::new_coupon_rules(
+        option::none(),
+        option::some(0),
+        option::none(),
+        option::none(),
+        option::none(),
         false,
     );
 }
@@ -676,4 +703,25 @@ fun test_coupon_getters() {
     // Test discount getter
     assert!(coupon::discount(&percentage_coupon) == 25);
     assert!(coupon::discount(&fixed_coupon) == 1000);
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::coupon_house::EInvalidVersion)]
+fun test_admin_set_version() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    {
+        scenario.next_tx(admin());
+
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let admin_cap = scenario.take_from_sender<AdminCap>();
+
+        coupon_house::set_version(&admin_cap, &mut iota_names, 2);
+
+        let coupon_house = iota_names.registry<coupon_house::CouponHouse>();
+        coupon_house.assert_version_is_valid();
+
+        return_to_sender(scenario, admin_cap);
+        return_shared(iota_names);
+    };
+    end(scenario_val);
 }
