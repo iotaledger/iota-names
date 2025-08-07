@@ -77,7 +77,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
         error: namesError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKeyBase, search, sort, sortBy],
+        queryKey: [...queryKeyBase, search, sort, sortBy, options.page, options.pageSize],
         queryFn: async () => {
             if (!indexerClient) {
                 return NAMES_PLACEHOLDER;

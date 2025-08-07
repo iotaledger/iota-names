@@ -108,27 +108,29 @@ export default function AuctionsPage(): JSX.Element {
         pageSize,
     });
 
-    // Split auctions into active and finished - only include auctions with metadata
-    const { activeAuctions, finishedAuctions } = useMemo(() => {
+    const { allAuctions, activeAuctions, finishedAuctions } = useMemo(() => {
         if (!auctions) {
-            return { activeAuctions: [], finishedAuctions: [] };
+            return { allAuctions: [], activeAuctions: [], finishedAuctions: [] };
         }
 
-        const active: AuctionDetails[] = [];
-        const finished: AuctionDetails[] = [];
+        const allAuctions: AuctionDetails[] = [];
+        const activeAuctions: AuctionDetails[] = [];
+        const finishedAuctions: AuctionDetails[] = [];
 
         auctions.forEach((auction) => {
             // Only include auctions that have metadata and are not loading
             if (!auction.isLoading && auction.metadata) {
+                allAuctions.push(auction);
+
                 if (isAuctionActive(auction.metadata)) {
-                    active.push(auction);
+                    activeAuctions.push(auction);
                 } else {
-                    finished.push(auction);
+                    finishedAuctions.push(auction);
                 }
             }
         });
 
-        return { activeAuctions: active, finishedAuctions: finished };
+        return { allAuctions, activeAuctions, finishedAuctions };
     }, [auctions]);
 
     const typeOptions = useMemo(() => {
@@ -149,17 +151,21 @@ export default function AuctionsPage(): JSX.Element {
                 disabled: finishedAuctions.length === 0,
             },
         ];
-    }, []);
+    }, [allAuctions, activeAuctions, finishedAuctions]);
 
     const displayedAuctions =
-        selectedFilter === TypeFilter.Active ? activeAuctions : finishedAuctions;
+        selectedFilter === TypeFilter.All
+            ? allAuctions
+            : selectedFilter === TypeFilter.Active
+              ? activeAuctions
+              : finishedAuctions;
 
     const paginationOptions: TablePaginationOptions = useMemo(() => {
         const defaultPage = 0;
 
         return {
             hasFirst: page > defaultPage,
-            hasLast: page < totalItems / pageSize,
+            hasLast: page < totalItems / pageSize - 1,
             hasPrev: page > defaultPage,
             hasNext: page < totalItems / pageSize - 1,
             onFirst: () => {
