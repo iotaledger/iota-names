@@ -62,7 +62,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         isLoading: isLoadingNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
-    const { data: purchaseMode } = useNamesPurchaseMode();
+    const { data: { isPaymentAuthorized, isAuctionAuthorized } } = useNamesPurchaseMode();
 
     const validationError = useMemo(
         () =>
@@ -181,10 +181,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         </div>
     );
 
-    const { isPaymentAuthorized, isAuctionAuthorized } = purchaseMode || {
-        isPaymentAuthorized: false,
-        isAuctionAuthorized: false,
-    };
 
     return (
         <div className="flex flex-col items-center w-full space-y-4">

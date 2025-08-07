@@ -19,10 +19,10 @@ export function useNamesPurchaseMode() {
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: queryKey.purchaseConfig(paymentType, auctionType),
+        queryKey: [...queryKey.purchaseConfig(paymentType, auctionType)],
         queryFn: async () => {
             if (!iotaNamesClient || !iotaClient) {
-                return null;
+                throw new Error('Missing clients');
             }
 
             const { data: dynamicFields } = await iotaClient.getDynamicFields({
@@ -38,5 +38,9 @@ export function useNamesPurchaseMode() {
         },
         enabled: !!iotaNamesClient && !!iotaClient,
         staleTime: 10 * 60 * 1000,
+        initialData: {
+            isPaymentAuthorized: false,
+            isAuctionAuthorized: false
+        },
     });
 }
