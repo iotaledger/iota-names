@@ -129,13 +129,10 @@ public fun parent(name: &Name): Option<Name> {
 /// e.g. (`example.iota`, `subname.example.iota`) -> `true`
 public fun is_parent_of(parent: &Name, child: &Name): bool {
     if (number_of_levels(parent) < number_of_levels(child)) {
-        let mut maybe_parent = parent(child);
-        if (maybe_parent.is_some()) {
-            let parent_name = maybe_parent.extract();
-            parent_name.labels == &parent.labels
-        } else {
-            false
-        }
+        // This is safe to extract, because `parent` is guaranteed to be a valid name with 2 labels,
+        // so `child` will always have at least 3 labels here and thus always has a parent.
+        let parent_name = parent(child).extract();
+        parent_name.labels == &parent.labels
     } else {
         false
     }
@@ -432,6 +429,11 @@ fun test_validate_labels_too_long() {
 #[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
 fun test_validate_labels_too_short() {
     new(utf8(b".iota"));
+}
+
+#[test, expected_failure(abort_code = ::iota_names::name::EInvalidName)]
+fun test_validate_name_too_long() {
+    new(utf8(b"236chars-is-one-too-much-236chars-is-one-too-much.236chars-is-one-too-much-236chars-is-one-too-much.236chars-is-one-too-much-236chars-is-one-too-much.236chars-is-one-too-much-236chars-is-one-too-much.236chars-is-one-too-much-236cha.iota"));
 }
 
 #[test]
