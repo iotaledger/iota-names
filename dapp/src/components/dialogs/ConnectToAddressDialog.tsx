@@ -361,15 +361,15 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                     type={isNameDefault ? ChipType.Success : ChipType.Elevated}
                 />
             </div>
-            <div>
+            <div className="flex flex-col">
                 {updates.map((update) => {
                     switch (update.type) {
                         case 'set-default': {
                             return (
                                 <span
                                     key={update.type}
-                                    className="text-title-md text-names-neutral-100"
-                                >{`Set ${cleanName} as display name`}</span>
+                                    className="text-body-md text-names-neutral-70"
+                                >{`${cleanName} is now set as displayed`}</span>
                             );
                         }
 
