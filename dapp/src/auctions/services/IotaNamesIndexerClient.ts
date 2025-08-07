@@ -8,7 +8,7 @@ export class IotaNamesIndexerClient {
         this.host = new URL(host).origin;
     }
 
-    async getUserAuctions(address: string): Promise<string[]> {
+    async getUserAuctions(address: string): Promise<AuctionsResponse> {
         const response = await fetch(`${this.host}/auctions/${address}`);
 
         if (!response.ok) {
@@ -22,7 +22,9 @@ export class IotaNamesIndexerClient {
         search?: string,
         sort?: 'asc' | 'desc',
         sortBy?: 'bid' | 'name',
-    ): Promise<string[]> {
+        page: number = 0,
+        pageSize: number = 50,
+    ): Promise<AuctionsResponse> {
         const url = new URL(`${this.host}/auctions`);
         if (search) {
             url.searchParams.set('search', search);
@@ -33,6 +35,8 @@ export class IotaNamesIndexerClient {
         if (sortBy) {
             url.searchParams.set('sortBy', sortBy);
         }
+        url.searchParams.set('page', page.toString());
+        url.searchParams.set('pageSize', pageSize.toString());
 
         const response = await fetch(url.toString());
 
@@ -42,4 +46,11 @@ export class IotaNamesIndexerClient {
 
         return response.json();
     }
+}
+
+export interface AuctionsResponse {
+    names: string[];
+    page: number;
+    pageSize: number;
+    totalItems: number;
 }

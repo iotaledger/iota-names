@@ -8,6 +8,7 @@ import { queryKey } from '@/hooks';
 
 import { AuctionMetadata } from '../lib/types';
 import { createAuctionMetadataQuery } from '../lib/utils/metadata';
+import { AuctionsResponse } from '../services/IotaNamesIndexerClient';
 import { useAuctionHouse } from './useAuctionHouse';
 
 export interface AuctionDetails {
@@ -39,7 +40,24 @@ export interface UseAuctionsOptions {
      * Only applies when fetching all auctions (not user-specific).
      */
     sortBy?: 'bid' | 'name';
+
+    /**
+     * Current page number.
+     */
+    page?: number;
+
+    /**
+     * Number of items per page.
+     */
+    pageSize?: number;
 }
+
+const NAMES_PLACEHOLDER: AuctionsResponse = {
+    names: [],
+    page: 0,
+    pageSize: 0,
+    totalItems: 0,
+};
 
 export function useAuctions(options: UseAuctionsOptions = {}) {
     const { userAddress, search, sort, sortBy } = options;
@@ -54,21 +72,27 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
 
     // First, get the list of auction names (either user-specific or all)
     const {
-        data: auctionNames = [],
+        data: auctionNames = NAMES_PLACEHOLDER,
         isLoading: isLoadingNames,
         error: namesError,
-    } = useQuery({
+    } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
         queryKey: [...queryKeyBase, search, sort, sortBy],
         queryFn: async () => {
             if (!indexerClient) {
-                return [];
+                return NAMES_PLACEHOLDER;
             }
 
             // Fetch user-specific auctions or all auctions based on filter
             return userAddress
                 ? indexerClient.getUserAuctions(userAddress)
-                : indexerClient.getAuctionList(search, sort, sortBy);
+                : indexerClient.getAuctionList(
+                      search,
+                      sort,
+                      sortBy,
+                      options.page,
+                      options.pageSize,
+                  );
         },
         enabled: !!indexerClient && (!userAddress || !!userAddress),
     });
@@ -78,7 +102,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
 
     // Then, fetch metadata for each auction
     const combinedResult = useQueries({
-        queries: auctionNames.map((name) =>
+        queries: auctionNames.names.map((name) =>
             createAuctionMetadataQuery({
                 name,
                 auctionsTableObjectId,
@@ -87,7 +111,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
             }),
         ),
         combine: (results) => {
-            const auctionDetails: AuctionDetails[] = auctionNames.map((name, index) => {
+            const auctionDetails: AuctionDetails[] = auctionNames.names.map((name, index) => {
                 const result = results[index];
                 return {
                     name,
@@ -103,6 +127,9 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
                 error: !!namesError || results.some((result) => result.error),
                 auctionNames,
                 isUserFiltered: !!userAddress,
+                page: auctionNames.page,
+                pageSize: auctionNames.pageSize,
+                totalItems: auctionNames.totalItems,
             };
         },
     });
