@@ -47,12 +47,12 @@ export function ExtendedNameCard({
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
 
-    const getButtonText = () => {
+    const buttonText = (() => {
         if (expired) {
             return 'Renew Name';
         }
         return targetAddress ? formatAddress(targetAddress) : 'Connect to address';
-    };
+    })();
 
     const handleButtonClick = () => {
         if (expired) {
@@ -73,7 +73,7 @@ export function ExtendedNameCard({
                     />
 
                     <Button
-                        text={getButtonText()}
+                        text={buttonText}
                         type={ButtonType.Secondary}
                         onClick={handleButtonClick}
                         icon={targetAddress ? <Link /> : null}
