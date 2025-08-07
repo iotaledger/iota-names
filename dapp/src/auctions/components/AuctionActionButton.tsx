@@ -69,10 +69,25 @@ export function AuctionActionButton({
         );
     }
 
-    if (['outbid', 'top_bidder'].includes(auctionStatus) && timeRemaining > 0) {
+    if (['top_bidder'].includes(auctionStatus) && timeRemaining > 0) {
         return (
             <Button
                 text="Bid Again"
+                type={ButtonType.Outlined}
+                onClick={() => {
+                    if (onBidClick) {
+                        onBidClick(auction.name);
+                    }
+                }}
+                fullWidth
+            />
+        );
+    }
+
+    if (['outbid'].includes(auctionStatus) && timeRemaining > 0) {
+        return (
+            <Button
+                text="Bid"
                 type={ButtonType.Outlined}
                 onClick={() => {
                     if (onBidClick) {

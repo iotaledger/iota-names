@@ -3,21 +3,18 @@
 
 'use client';
 
-import {
-    ArrowLeft,
-    ArrowRight,
-    DoubleArrowLeft,
-    DoubleArrowRight,
-    FilterList,
-    Search,
-} from '@iota/apps-ui-icons';
+import { FilterList, Info, Loader, Search, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSegment,
     ButtonSegmentType,
-    ButtonSize,
     ButtonType,
+    Chip,
+    ChipType,
     Dropdown,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     ListItem,
@@ -32,6 +29,7 @@ import { AuctionBidDialog, AuctionDetails, isAuctionActive } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getPaginationPages } from '@/lib/utils';
 
 enum TypeFilter {
     All = 'All',
@@ -100,7 +98,12 @@ export default function AuctionsPage(): JSX.Element {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-    const { data: auctions, totalItems } = useAuctions({
+    const {
+        data: auctions,
+        totalItems,
+        isLoading,
+        error: isAuctionsError,
+    } = useAuctions({
         search: debouncedSearchQuery || undefined,
         sort: sortOptions.sort,
         sortBy: sortOptions.sortBy,
@@ -153,12 +156,47 @@ export default function AuctionsPage(): JSX.Element {
         ];
     }, [allAuctions, activeAuctions, finishedAuctions]);
 
+    const infoBox = useMemo(() => {
+        if (isLoading) {
+            return null;
+        }
+
+        if (isAuctionsError) {
+            return (
+                <div className="flex">
+                    <InfoBox
+                        style={InfoBoxStyle.Elevated}
+                        type={InfoBoxType.Error}
+                        supportingText={'Failed to load auctions. Please try again later.'}
+                        icon={<Warning />}
+                    />
+                </div>
+            );
+        }
+
+        if (allAuctions.length === 0) {
+            return (
+                <div className="flex">
+                    <InfoBox
+                        style={InfoBoxStyle.Elevated}
+                        type={InfoBoxType.Default}
+                        supportingText={'There are no auctions available at the moment.'}
+                        icon={<Info />}
+                    />
+                </div>
+            );
+        }
+    }, [isLoading, isAuctionsError, allAuctions.length]);
+
     const displayedAuctions =
         selectedFilter === TypeFilter.All
             ? allAuctions
             : selectedFilter === TypeFilter.Active
               ? activeAuctions
               : finishedAuctions;
+
+    const totalPages = Math.ceil(totalItems / pageSize);
+    const paginationPages = getPaginationPages(page + 1, totalPages, 5);
 
     const paginationOptions: TablePaginationOptions = useMemo(() => {
         const defaultPage = 0;
@@ -180,7 +218,7 @@ export default function AuctionsPage(): JSX.Element {
                 setPage(nextPage);
             },
             onLast: () => {
-                const lastPage = Math.ceil(totalItems / pageSize) - 1;
+                const lastPage = -1;
                 setPage(lastPage);
             },
         };
@@ -248,61 +286,65 @@ export default function AuctionsPage(): JSX.Element {
                     )}
                 </div>
             </div>
-            <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
-                {displayedAuctions.map((auction) => (
-                    <div key={auction.name} className="w-[220px]">
-                        <AuctionPublicItem auction={auction} onBidClick={setBidDialogName} />
-                    </div>
-                ))}
-            </div>
-            <div className="flex justify-between items-center mt-8">
-                <div className="flex gap-2">
-                    {paginationOptions && (
-                        <>
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<DoubleArrowLeft />}
-                                disabled={!paginationOptions.hasFirst}
-                                onClick={paginationOptions.onFirst}
-                            />
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<ArrowLeft />}
-                                disabled={!paginationOptions.hasPrev}
-                                onClick={paginationOptions.onPrev}
-                            />
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<ArrowRight />}
-                                disabled={!paginationOptions.hasNext}
-                                onClick={paginationOptions.onNext}
-                            />
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<DoubleArrowRight />}
-                                disabled={!paginationOptions.hasLast}
-                                onClick={paginationOptions.onLast}
-                            />
-                        </>
+            <div className="flex flex-col flex-1 justify-between">
+                <div>
+                    {infoBox}
+                    {isLoading ? (
+                        <div className="flex w-full justify-center">
+                            <Loader className="animate-spin" data-testid="loading-indicator" />
+                        </div>
+                    ) : (
+                        <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
+                            {displayedAuctions.map((auction) => (
+                                <div key={auction.name} className="w-[220px]">
+                                    <AuctionPublicItem
+                                        auction={auction}
+                                        onBidClick={setBidDialogName}
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     )}
                 </div>
-                <div className="flex">
-                    <Select
-                        value={pageSize.toString()}
-                        options={PAGE_SIZES_RANGE.map((size) => ({
-                            label: `${size} / page`,
-                            id: size.toString(),
-                        }))}
-                        size={SelectSize.Small}
-                        onValueChange={(e) => {
-                            setPageSize(Number(e));
-                            paginationOptions?.onFirst?.();
-                        }}
-                    />
+                <div className="flex justify-between items-center mt-8">
+                    <div className="flex gap-2">
+                        {paginationPages?.map((pageNumber, index) => {
+                            if (pageNumber === '...') {
+                                return (
+                                    <span
+                                        key={`ellipsis-${index}`}
+                                        className="text-names-neutral-92"
+                                    >
+                                        {pageNumber}
+                                    </span>
+                                );
+                            }
+
+                            return (
+                                <Chip
+                                    key={`page-${pageNumber}`}
+                                    type={ChipType.Elevated}
+                                    selected={page === pageNumber - 1}
+                                    onClick={() => setPage(pageNumber - 1)}
+                                    label={pageNumber.toString()}
+                                />
+                            );
+                        })}
+                    </div>
+                    <div className="flex">
+                        <Select
+                            value={pageSize.toString()}
+                            options={PAGE_SIZES_RANGE.map((size) => ({
+                                label: `${size} / page`,
+                                id: size.toString(),
+                            }))}
+                            size={SelectSize.Small}
+                            onValueChange={(e) => {
+                                setPageSize(Number(e));
+                                paginationOptions?.onFirst?.();
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
 

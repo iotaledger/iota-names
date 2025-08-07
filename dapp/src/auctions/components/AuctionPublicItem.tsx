@@ -5,12 +5,15 @@ import { Clock, IotaLogoSmall } from '@iota/apps-ui-icons';
 import { Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { useEffect, useState } from 'react';
 
 import {
     AuctionDetails,
+    AuctionStatusBadge,
     formatTimeRemaining,
     getTimeRemaining,
     getUserAuctionStatus,
+    isAuctionActive,
 } from '@/auctions';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
@@ -26,6 +29,8 @@ interface AuctionublicItemProps {
 }
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
+    const [, setIsActive] = useState(isAuctionActive(auction.metadata));
+
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
         : null;
@@ -48,9 +53,15 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
     const formattedPrice = formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
         showIotaSymbol: false,
     });
+
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
+                {auctionStatus === 'top_bidder' ? (
+                    <div className="absolute top-2 left-2">
+                        <AuctionStatusBadge status={auctionStatus} />
+                    </div>
+                ) : null}
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="text-label-md text-names-neutral-50">Current Bid</div>
@@ -77,16 +88,35 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                 <div className="my-4">
                     <Divider type={DividerType.Horizontal} />
                 </div>
-                <AuctionTimeRemaining auction={auction} />
+                <AuctionTimeRemaining
+                    auction={auction}
+                    onTimeUp={() => {
+                        // Update the button when time is up
+                        setIsActive(false);
+                    }}
+                />
             </NameCardBody>
         </NameCard>
     );
 }
 
-function AuctionTimeRemaining({ auction }: { auction: AuctionDetails }) {
+function AuctionTimeRemaining({
+    auction,
+    onTimeUp,
+}: {
+    auction: AuctionDetails;
+    onTimeUp: () => void;
+}) {
     const timeRemainingMs = getTimeRemaining(auction.metadata);
     const { milliseconds } = useCountdown(timeRemainingMs);
+
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
+
+    useEffect(() => {
+        if (milliseconds <= 0) {
+            onTimeUp();
+        }
+    }, [milliseconds, onTimeUp]);
 
     return (
         <div className="flex items-center justify-between">

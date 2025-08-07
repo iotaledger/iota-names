@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { NamesLogoWeb } from '@/components/svgs';
-import { MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
+import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
@@ -18,8 +18,8 @@ export function Navbar() {
     const pathname = usePathname();
     const { open, close } = useAvailabilityCheckDialog();
 
-    const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
-    const showSearch = isConnected && isOnMyNamesPage;
+    const isAllewedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
+    const showSearch = isConnected && isAllewedSearchOnPage;
 
     function toggleSearchDialog() {
         open({
