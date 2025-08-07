@@ -97,7 +97,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     if (hasDefaultChange) {
         if (editIsDefaultName) {
-            if(allowedToSetDefault) {
+            if (allowedToSetDefault) {
                 updates.push({ type: 'set-default', name });
             } else {
                 setEditIsDefaultName(false);
