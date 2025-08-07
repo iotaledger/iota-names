@@ -246,7 +246,7 @@ export default function AuctionsPage(): JSX.Element {
                 </SegmentedButton>
 
                 <div className="md:flex hidden w-full max-w-[260px] gap-4" ref={dropdownRef}>
-                    <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full">
+                    <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full [&>div]:rounded-full [&_.input-container]:rounded-full">
                         <Input
                             placeholder="Search auction"
                             type={InputType.Text}

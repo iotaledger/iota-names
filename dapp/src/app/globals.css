@@ -33,6 +33,7 @@ body[data-scroll-locked] #top-navbar {
         background-origin: border-box;
         background-clip: padding-box, border-box;
     }
+    
 
     .btn.btn-outlined {
         border-radius: 120px;
@@ -42,6 +43,10 @@ body[data-scroll-locked] #top-navbar {
     .input-container,
     .text-area-container {
         border-radius: 9px;
+    }
+
+    .input-container {
+        border: 1px solid transparent !important;
     }
 
     &.btn-alt-bg .btn.btn-outlined {
