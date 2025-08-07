@@ -22,6 +22,7 @@ import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
+import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -61,6 +62,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         isLoading: isLoadingNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
+    const { data: { isPaymentAuthorized, isAuctionAuthorized } = {} } = useNamesPurchaseMode();
 
     const validationError = useMemo(
         () =>
@@ -98,6 +100,18 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         return () => window.clearTimeout(timer);
     }, [searchValue, validationError]);
 
+    useEffect(() => {
+        if (
+            isOnEnterSearchRef.current &&
+            nameRecordData &&
+            searchValue &&
+            name === `${searchValue}.iota`
+        ) {
+            updateRecentSearch(searchValue, isNameTaken);
+            isOnEnterSearchRef.current = false;
+        }
+    }, [nameRecordData, isNameTaken, name, searchValue]);
+
     function persistRecentSearches(recentSearches: RecentSearch[]) {
         localStorage.setItem(RECENT_SEARCHES_STORAGE_KEY, JSON.stringify(recentSearches));
     }
@@ -124,18 +138,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
             return updatedRecentSearches;
         });
     }
-
-    useEffect(() => {
-        if (
-            isOnEnterSearchRef.current &&
-            nameRecordData &&
-            searchValue &&
-            name === `${searchValue}.iota`
-        ) {
-            updateRecentSearch(searchValue, isNameTaken);
-            isOnEnterSearchRef.current = false;
-        }
-    }, [nameRecordData, isNameTaken, name, searchValue]);
 
     function handleRecentClick(value: string) {
         setSearchValue(value);
@@ -239,17 +241,21 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                     ) : (
                         nameRecordData && (
                             <>
-                                <PurchaseName
-                                    name={name}
-                                    nameRecordData={nameRecordData}
-                                    onCompleted={handleBidOrPurchase}
-                                />
+                                {isPaymentAuthorized && (
+                                    <PurchaseName
+                                        name={name}
+                                        nameRecordData={nameRecordData}
+                                        onCompleted={handleBidOrPurchase}
+                                    />
+                                )}
 
-                                <BidName
-                                    name={name}
-                                    nameRecordData={nameRecordData}
-                                    onCompleted={handleBidOrPurchase}
-                                />
+                                {isAuctionAuthorized && (
+                                    <BidName
+                                        name={name}
+                                        nameRecordData={nameRecordData}
+                                        onCompleted={handleBidOrPurchase}
+                                    />
+                                )}
                             </>
                         )
                     )}
