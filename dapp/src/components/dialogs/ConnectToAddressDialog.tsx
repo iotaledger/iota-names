@@ -116,6 +116,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
 
+    const [appliedUpdates, setAppliedUpdates] = useState<NameUpdate[]>([]);
+
     const {
         mutate: apply,
         isPending: isApplying,
@@ -129,6 +131,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             await iotaClient.waitForTransaction({ digest: txResult.digest });
         },
         onSuccess: () => {
+            setAppliedUpdates(updates);
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
@@ -185,31 +188,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                     <div className="flex flex-col h-full justify-between">
                         <div className="flex flex-col gap-y-md">
                             {isSuccess ? (
-                                <div className="flex flex-col gap-y-md items-center text-center">
-                                    <div className="flex flex-col items-center gap-y-sm">
-                                        {editIsDefaultName ? (
-                                            <span className="text-title-lg text-names-neutral-100">
-                                                {cleanName}
-                                            </span>
-                                        ) : null}
-                                        <Chip
-                                            leadingElement={<Link className="w-4 h-4" />}
-                                            label={formatAddress(account?.address || '')}
-                                            trailingElement={<Copy className="w-4 h-4" />}
-                                            onClick={copyAddressToClipboard}
-                                            type={
-                                                editIsDefaultName
-                                                    ? ChipType.Success
-                                                    : ChipType.Elevated
-                                            }
-                                        />
-                                    </div>
-                                    <span className="text-body-md text-names-neutral-70">
-                                        {editIsDefaultName
-                                            ? 'Address linked successfully'
-                                            : `${cleanName} is no longer linked to an address`}
-                                    </span>
-                                </div>
+                                <UpdatesResult name={name} updates={appliedUpdates} />
                             ) : (
                                 <>
                                     <div className="flex flex-col gap-y-xxs">
@@ -353,5 +332,65 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 </DialogBody>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] }) {
+    const account = useCurrentAccount();
+
+    function copyAddressToClipboard() {
+        if (account?.address) {
+            copyToClipboard(account.address);
+        }
+    }
+
+    const cleanName = normalizeIotaName(name, 'at', {
+        truncateLongParts: true,
+    });
+
+    const isNameDefault = updates.some((update) => update.type === 'set-default');
+
+    return (
+        <div className="text-center flex flex-col gap-y-md">
+            <div className="flex flex-col items-center gap-y-sm">
+                <Chip
+                    leadingElement={<Link className="w-4 h-4" />}
+                    label={formatAddress(account?.address || '')}
+                    trailingElement={<Copy className="w-4 h-4" />}
+                    onClick={copyAddressToClipboard}
+                    type={isNameDefault ? ChipType.Success : ChipType.Elevated}
+                />
+            </div>
+            <div>
+                {updates.map((update) => {
+                    switch (update.type) {
+                        case 'set-default': {
+                            return (
+                                <span
+                                    key={update.type}
+                                    className="text-title-md text-names-neutral-100"
+                                >{`Set ${cleanName} as display name`}</span>
+                            );
+                        }
+
+                        case 'set-target-address': {
+                            return (
+                                <span
+                                    key={update.type}
+                                    className="text-body-md text-names-neutral-70"
+                                >
+                                    {update.address
+                                        ? 'Address linked successfully'
+                                        : `${cleanName} is no longer linked to an address`}
+                                </span>
+                            );
+                        }
+
+                        default:
+                            return null;
+                    }
+                })}
+            </div>
+        </div>
     );
 }
