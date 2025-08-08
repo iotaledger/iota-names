@@ -225,7 +225,7 @@ export default function AuctionsPage(): JSX.Element {
             setPage(nextPage);
         },
         onLast: () => {
-            const lastPage = -1;
+            const lastPage = Math.ceil(totalItems / pageSize) - 1;
             setPage(lastPage);
         },
     };
