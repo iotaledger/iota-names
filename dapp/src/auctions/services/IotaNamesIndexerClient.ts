@@ -18,7 +18,7 @@ export class IotaNamesIndexerClient {
     async getUserAuctions(
         address: string,
         page: number,
-        pageSize: number = 50,
+        pageSize: number = 99999,
     ): Promise<PaginatedUserAuctions> {
         const queryParams = new URLSearchParams({
             page: page.toString(),
