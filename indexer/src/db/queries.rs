@@ -152,6 +152,7 @@ pub fn get_auctions_for_bidder_count(
     Ok(query.first::<i64>(conn)? as _)
 }
 
+#[expect(clippy::too_many_arguments)]
 pub fn get_auctions(
     conn: &mut SqliteConnection,
     page: Option<usize>,
