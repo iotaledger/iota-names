@@ -203,7 +203,7 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
 
                     {rightPanelSelectedName && (
-                        <div className="sticky top-[98px] xl:w-[454px] w-[420px] flex-shrink-0 shadow-lg">
+                        <div className="sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg">
                             <SubnamesPanel
                                 selectedName={rightPanelSelectedName}
                                 onClose={() => setRightPanelSelectedName(null)}

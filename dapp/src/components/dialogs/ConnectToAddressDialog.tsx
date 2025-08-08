@@ -29,7 +29,7 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -50,9 +50,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
 
-    const [editTargetAddress, setEditTargetAddress] = useState<string>('');
-    const [editIsDefaultName, setEditIsDefaultName] = useState<boolean>(false);
-
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     const { data: ownedSubnames } = useRegistrationNfts('subname');
     const { data: addressName } = useGetDefaultName(account?.address ?? '');
@@ -61,19 +58,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const currentTargetAddress = nameRecord?.nameRecord.targetAddress || '';
+
+    const [editTargetAddress, setEditTargetAddress] = useState<string>(() => currentTargetAddress);
+    const [editIsDefaultName, setEditIsDefaultName] = useState<boolean>(() => addressName === name);
+
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
-    const currentTargetAddress = nameRecord?.nameRecord.targetAddress ?? '';
-
-    // Sync name target address
-    useEffect(() => {
-        setEditTargetAddress(currentTargetAddress);
-    }, [currentTargetAddress]);
-
-    // Sync address current default name
-    useEffect(() => {
-        setEditIsDefaultName(addressName === name);
-    }, [addressName]);
 
     const hasAddressChange = editTargetAddress !== currentTargetAddress;
     const hasDefaultChange = (addressName === name) !== editIsDefaultName;
@@ -284,7 +275,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                             {editIsDefaultName && (
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
-                                                        <span className="text-title-lg text-names-neutral-100">
+                                                        <span className="text-title-lg text-names-neutral-100 w-full text-center">
                                                             <TruncatedNameWithTooltip
                                                                 name={name}
                                                                 tooltipPosition={
@@ -305,6 +296,16 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     </div>
                                                 </Panel>
                                             )}
+
+                                            {/* { && (
+                                                <InfoBox
+                                                    type={InfoBoxType.Warning}
+                                                    style={InfoBoxStyle.Default}
+                                                    icon={<Warning />}
+                                                    title="Address has a linked name!"
+                                                    supportingText="Continuing will override the previous address's name"
+                                                />
+                                            )} */}
 
                                             {showAddressWarning && (
                                                 <InfoBox
