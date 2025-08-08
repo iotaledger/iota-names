@@ -1,25 +1,29 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useIotaClient } from '@iota/dapp-kit';
-import { useQuery } from '@tanstack/react-query';
+import { useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
+import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
-import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { buildClaimNameTransaction } from '../lib/utils/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
 
-export function useClaimAuctionTransaction(address: string, name: string) {
-    const client = useIotaClient();
+export function useClaimAuctionTransaction(
+    address: string,
+    name: string,
+    options: UseMutationOptions = {},
+) {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: auctionHouseData } = useAuctionHouse();
+    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+    const iotaClient = useIotaClient();
 
-    return useQuery({
+    return useMutation({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.claimAuction(name, address)],
-        queryFn: async () => {
+        mutationKey: [...queryKey.claimAuction(name, address)],
+        mutationFn: async () => {
             if (!auctionHouseData?.auctionHouseId) {
                 throw new Error('Auction house not available');
             }
@@ -31,26 +35,15 @@ export function useClaimAuctionTransaction(address: string, name: string) {
                 name,
             );
 
-            const builtTransaction = await transaction.build({
-                client,
-            });
-
-            const txDryRun = await client.dryRunTransactionBlock({
-                transactionBlock: builtTransaction,
-            });
-
-            return {
+            const builtTransaction = await signAndExecuteTransaction({
                 transaction,
-                txDryRun,
-            };
+            });
+
+            await iotaClient.waitForTransaction({
+                digest: builtTransaction.digest,
+            });
         },
-        enabled: !!address && !!name && !!auctionHouseData?.auctionHouseId,
         gcTime: 0,
-        select: ({ transaction, txDryRun }) => {
-            return {
-                transaction,
-                gasSummary: getGasSummary(txDryRun),
-            };
-        },
+        ...options,
     });
 }

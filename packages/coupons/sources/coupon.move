@@ -40,7 +40,8 @@ public(package) fun new_fixed(amount: u64, rules: CouponRules): Coupon {
     }
 }
 
-public(package) fun rules(coupon: &Coupon): &CouponRules {
+/// Get the rules of a coupon.
+public fun rules(coupon: &Coupon): &CouponRules {
     &coupon.rules
 }
 
@@ -48,14 +49,17 @@ public(package) fun rules_mut(coupon: &mut Coupon): &mut CouponRules {
     &mut coupon.rules
 }
 
-public(package) fun is_percentage(coupon: &Coupon): bool {
+/// Check whether a coupon applies a percentage discount.
+public fun is_percentage(coupon: &Coupon): bool {
     coupon.kind == PERCENTAGE_COUPON_KIND
 }
 
-public(package) fun is_fixed(coupon: &Coupon): bool {
+/// Check whether a coupon applies a fixed discount.
+public fun is_fixed(coupon: &Coupon): bool {
     coupon.kind == FIXED_COUPON_KIND
 }
 
-public(package) fun discount(coupon: &Coupon): u64 {
+/// Get the discount amount of a coupon.
+public fun discount(coupon: &Coupon): u64 {
     coupon.amount
 }

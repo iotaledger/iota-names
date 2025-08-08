@@ -21,7 +21,7 @@ import { useCurrentAccount } from '@iota/dapp-kit';
 import cx from 'clsx';
 import { useState } from 'react';
 
-import { useGetUserAuctions } from '@/auctions';
+import { useAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
@@ -34,6 +34,7 @@ import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
+    const account = useCurrentAccount();
     const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
         null,
     );
@@ -55,14 +56,14 @@ export default function MyNamesPage(): JSX.Element {
         data: auctionDetails,
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
-    } = useGetUserAuctions();
+    } = useAuctions({
+        userAddress: account?.address,
+    });
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: defaultName } = useGetDefaultName(address);
 
     const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
-
-    const account = useCurrentAccount();
 
     const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
 
@@ -105,7 +106,7 @@ export default function MyNamesPage(): JSX.Element {
 
     return (
         <>
-            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0">
+            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Names
                 </h2>
