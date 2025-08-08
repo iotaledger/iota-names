@@ -12,10 +12,10 @@ import {
     KeyValueInfo,
     TitleSize,
     TooltipPosition,
-    truncate,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { isSubname } from '@iota/iota-names-sdk';
+import { formatAddress } from '@iota/iota-sdk/utils';
 import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -104,7 +104,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                             >
-                                                {truncate(value)}
+                                                {formatAddress(value)}
                                             </Link>
                                         }
                                         fullwidth
