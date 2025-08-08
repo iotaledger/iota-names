@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button, ButtonType, LoadingIndicator } from '@iota/apps-ui-kit';
-import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
-import { Transaction } from '@iota/iota-sdk/transactions';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCurrentAccount } from '@iota/dapp-kit';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { queryKey } from '@/hooks/queryKey';
 
@@ -21,49 +20,35 @@ export function AuctionActionButton({
     auctionStatus: UserAuctionStatus;
     onBidClick?: (targetName: string) => void;
 }) {
-    const iotaClient = useIotaClient();
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const timeRemaining = getTimeRemaining(auction.metadata);
 
-    const { data: claimTransaction, isLoading: isClaimTransactionLoading } =
-        useClaimAuctionTransaction(account?.address || '', auction.name);
-    const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-    const { mutateAsync: handleClaim, isPending: isSigningClaimTransaction } = useMutation({
-        async mutationFn(claimAuctionTransaction: Transaction) {
-            const transactionResult = await signAndExecuteTransaction({
-                transaction: claimAuctionTransaction,
-            });
-
-            await iotaClient.waitForTransaction({
-                digest: transactionResult.digest,
-            });
-        },
-        onSuccess() {
-            queryClient.invalidateQueries({
-                queryKey: queryKey.userAuctionHistory(account?.address),
-            });
-            // Invalidate auction so that it is detected as claimed
-            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.name) });
-            // Refresh owned names so the claimed name appears
-            queryClient.invalidateQueries({
-                queryKey: queryKey.ownedObjects(account?.address || ''),
-            });
-        },
-    });
+    const { mutateAsync: claimTransaction, isPending: isSigningClaimTransaction } =
+        useClaimAuctionTransaction(account?.address || '', auction.name, {
+            onSuccess() {
+                queryClient.invalidateQueries({
+                    queryKey: queryKey.userAuctionHistory(account?.address),
+                });
+                // Invalidate auction so that it is detected as claimed
+                queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.name) });
+                // Refresh owned names so the claimed name appears
+                queryClient.invalidateQueries({
+                    queryKey: queryKey.ownedObjects(account?.address || ''),
+                });
+            },
+        });
     if (auctionStatus === 'claimable') {
-        const isClaimLoading = isSigningClaimTransaction || isClaimTransactionLoading;
+        const isClaimLoading = isSigningClaimTransaction;
 
         return (
             <Button
-                text={isSigningClaimTransaction ? 'Claiming...' : 'Claim'}
+                text={isSigningClaimTransaction ? undefined : 'Claim'}
                 icon={isClaimLoading ? <LoadingIndicator /> : null}
-                onClick={() => {
-                    if (claimTransaction?.transaction) {
-                        handleClaim(claimTransaction.transaction);
-                    }
+                onClick={async () => {
+                    await claimTransaction();
                 }}
-                disabled={isSigningClaimTransaction || !claimTransaction?.transaction}
+                disabled={isSigningClaimTransaction}
                 fullWidth
             />
         );
