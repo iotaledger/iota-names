@@ -3,7 +3,17 @@
 
 'use client';
 
-import { ArrowLeft, ArrowRight, DoubleArrowLeft, DoubleArrowRight, FilterList, Info, Loader, Search, Warning } from '@iota/apps-ui-icons';
+import {
+    ArrowLeft,
+    ArrowRight,
+    DoubleArrowLeft,
+    DoubleArrowRight,
+    FilterList,
+    Info,
+    Loader,
+    Search,
+    Warning,
+} from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSegment,
@@ -124,8 +134,6 @@ export default function AuctionsPage(): JSX.Element {
         auctions.forEach((auction) => {
             // Only include auctions that have metadata and are not loading
             if (!auction.isLoading && auction.metadata) {
-                allAuctions.push(auction);
-
                 if (isAuctionActive(auction.metadata)) {
                     activeAuctions.push(auction);
                 } else {
