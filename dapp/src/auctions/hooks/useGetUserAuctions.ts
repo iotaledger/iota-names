@@ -21,13 +21,15 @@ export function useGetUserAuctions() {
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: auctionHouseData } = useAuctionHouse();
     const {
-        data: userAuctionNames = [],
+        data: auctionsData,
         isLoading: isLoadingNames,
         error: namesError,
     } = useGetAddressAuctionHistory();
 
     const { auctionsTableObjectId } = auctionHouseData || {};
     const { packageId } = iotaNamesClient.config;
+
+    const userAuctionNames = auctionsData?.names || [];
 
     const combinedResult = useQueries({
         queries: userAuctionNames.map((name) =>
