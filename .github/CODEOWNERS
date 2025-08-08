@@ -2,6 +2,7 @@
 * @iotaledger/dev-tools
 
 /.github/workflows/ @iotaledger/dev-tools @iotaledger/tooling
+/.changeset/ @iotaledger/tooling
 
 /build-scripts/ @iotaledger/tooling
 /dapp/ @iotaledger/tooling
