@@ -23,6 +23,7 @@ import {
     Chip,
     ChipType,
     Dropdown,
+    DropdownPosition,
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
@@ -370,6 +371,7 @@ export default function AuctionsPage(): JSX.Element {
                     </div>
                     <div className="flex">
                         <Select
+                            dropdownPosition={DropdownPosition.Top}
                             value={pageSize.toString()}
                             options={PAGE_SIZES_RANGE.map((size) => ({
                                 label: `${size} / page`,
