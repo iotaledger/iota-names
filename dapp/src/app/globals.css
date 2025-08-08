@@ -44,6 +44,10 @@ body[data-scroll-locked] #top-navbar {
         border-radius: 9px;
     }
 
+    .input-container {
+        border: 1px solid transparent !important;
+    }
+
     &.btn-alt-bg .btn.btn-outlined {
         background-image: linear-gradient(#0a0d23, #0a0d23), var(--names-gradient-primary);
     }
