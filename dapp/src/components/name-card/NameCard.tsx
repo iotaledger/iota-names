@@ -27,7 +27,7 @@ export function NameCard({
     return (
         <div
             className={cx(
-                'relative group/name-card rounded-xl shadow-md bg-names-neutral-6 overflow-visible',
+                'relative group/name-card rounded-xl name-card-shadow bg-names-neutral-6 overflow-visible',
                 isSelected && 'name-card-selected',
                 nftDisplayVariants({ size }),
             )}
