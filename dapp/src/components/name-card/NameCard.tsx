@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cx from 'clsx';
+import { useState } from 'react';
 
+import loadingAnimationData from '@/animations/lottie-loading.json';
 import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
+import { LottieAnimation } from '../loaders/Lottie';
 import { AvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface NameCardProps extends NftDisplayProps {
@@ -24,6 +27,8 @@ export function NameCard({
     children,
     displaySrc,
 }: React.PropsWithChildren<NameCardProps>) {
+    const [imageLoaded, setImageLoaded] = useState(false);
+
     return (
         <div
             className={cx(
@@ -33,7 +38,26 @@ export function NameCard({
             )}
         >
             {displaySrc ? (
-                <img src={displaySrc} alt={name} />
+                <div className="w-full aspect-square relative">
+                    {!imageLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <LottieAnimation
+                                animationData={loadingAnimationData}
+                                className="w-16 h-16"
+                            />
+                        </div>
+                    )}
+                    <img
+                        className={cx('w-full', !imageLoaded ? 'block' : 'hidden')}
+                        src="/name-bg.svg"
+                    />
+                    <img
+                        src={displaySrc}
+                        alt={name}
+                        className={cx('w-full absolute inset-0', imageLoaded ? 'block' : 'hidden')}
+                        onLoad={() => setImageLoaded(true)}
+                    />
+                </div>
             ) : (
                 <AvatarDisplay
                     name={name}
