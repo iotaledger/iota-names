@@ -8,5 +8,5 @@
     "baseBranch": "develop",
     "updateInternalDependencies": "minor",
     "privatePackages": false,
-    "ignore": ["dapp", "scripts"]
+    "ignore": ["dapp", "scripts", "names-display"]
 }
