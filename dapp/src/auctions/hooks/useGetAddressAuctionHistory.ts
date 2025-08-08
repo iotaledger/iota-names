@@ -20,12 +20,14 @@ export function useGetAddressAuctionHistory() {
             }
 
             let names: string[] = [];
+            let currentPage = 0;
             let totalItems: number | null = null;
 
             do {
-                const response = await indexerClient.getUserAuctions(account.address);
+                const response = await indexerClient.getUserAuctions(account.address, currentPage);
                 names = names.concat(response.names);
-                totalItems = response.totalItems;
+                totalItems = response.totalItems ?? 0;
+                currentPage = response.page + 1;
             } while (totalItems === null || totalItems > names.length);
 
             return {

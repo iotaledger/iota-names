@@ -15,8 +15,16 @@ export class IotaNamesIndexerClient {
         this.host = new URL(host).origin;
     }
 
-    async getUserAuctions(address: string): Promise<PaginatedUserAuctions> {
-        const response = await fetch(`${this.host}/auctions/${address}`);
+    async getUserAuctions(
+        address: string,
+        page: number,
+        pageSize: number = 50,
+    ): Promise<PaginatedUserAuctions> {
+        const queryParams = new URLSearchParams({
+            page: page.toString(),
+            pageSize: pageSize.toString(),
+        });
+        const response = await fetch(`${this.host}/auctions/${address}?${queryParams.toString()}`);
 
         if (!response.ok) {
             throw new Error(`Failed to fetch auctions: ${response.statusText}`);
