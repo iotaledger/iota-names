@@ -71,9 +71,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                             </div>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-body-lg">{formattedPrice}</span>
-                                {/* <span className="text-label-md text-names-neutral-70">
-                            ${convertedToFiat.toString()}
-                        </span> */}
                             </div>
                         </div>
                     </div>
