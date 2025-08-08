@@ -23,16 +23,7 @@ export function InputWrapper({
             })}
         >
             {children}
-            {errorMessage && (
-                <div
-                    className={cx(
-                        'flex flex-row items-center',
-                        errorMessage ? 'justify-between gap-md' : 'justify-end',
-                    )}
-                >
-                    {errorMessage && <SecondaryText hasErrorStyles>{errorMessage}</SecondaryText>}
-                </div>
-            )}
+            {errorMessage && <SecondaryText hasErrorStyles>{errorMessage}</SecondaryText>}
         </div>
     );
 }
