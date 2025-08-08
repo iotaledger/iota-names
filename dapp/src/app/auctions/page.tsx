@@ -203,7 +203,7 @@ export default function AuctionsPage(): JSX.Element {
               : finishedAuctions;
 
     const totalPages = Math.ceil(totalItems / pageSize);
-    const paginationPages = getPaginationPages(page + 1, totalPages, 5);
+    const paginationPages = getPaginationPages(page + 1, totalPages, 4);
 
     const defaultPage = 0;
     const paginationOptions: TablePaginationOptions = {
