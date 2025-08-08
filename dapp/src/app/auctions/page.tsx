@@ -146,27 +146,25 @@ export default function AuctionsPage(): JSX.Element {
         return { allAuctions, activeAuctions, finishedAuctions };
     }, [auctions]);
 
-    const typeOptions = useMemo(() => {
-        return [
-            {
-                label: TypeFilter.All,
-                value: TypeFilter.All,
-                disabled: false,
-            },
-            {
-                label: TypeFilter.Active,
-                value: TypeFilter.Active,
-                disabled: activeAuctions.length === 0,
-            },
-            {
-                label: TypeFilter.Finished,
-                value: TypeFilter.Finished,
-                disabled: finishedAuctions.length === 0,
-            },
-        ];
-    }, [allAuctions, activeAuctions, finishedAuctions]);
+    const typeOptions = [
+        {
+            label: TypeFilter.All,
+            value: TypeFilter.All,
+            disabled: false,
+        },
+        {
+            label: TypeFilter.Active,
+            value: TypeFilter.Active,
+            disabled: activeAuctions.length === 0,
+        },
+        {
+            label: TypeFilter.Finished,
+            value: TypeFilter.Finished,
+            disabled: finishedAuctions.length === 0,
+        },
+    ];
 
-    const infoBox = useMemo(() => {
+    const infoBox = (() => {
         if (isLoading) {
             return null;
         }
@@ -196,7 +194,7 @@ export default function AuctionsPage(): JSX.Element {
                 </div>
             );
         }
-    }, [isLoading, isAuctionsError, allAuctions.length]);
+    })();
 
     const displayedAuctions =
         selectedFilter === TypeFilter.All
@@ -208,31 +206,28 @@ export default function AuctionsPage(): JSX.Element {
     const totalPages = Math.ceil(totalItems / pageSize);
     const paginationPages = getPaginationPages(page + 1, totalPages, 5);
 
-    const paginationOptions: TablePaginationOptions = useMemo(() => {
-        const defaultPage = 0;
-
-        return {
-            hasFirst: page > defaultPage,
-            hasLast: page < totalItems / pageSize - 1,
-            hasPrev: page > defaultPage,
-            hasNext: page < totalItems / pageSize - 1,
-            onFirst: () => {
-                setPage(defaultPage);
-            },
-            onPrev: () => {
-                const prevPage = page > defaultPage ? page - 1 : defaultPage;
-                setPage(prevPage);
-            },
-            onNext: () => {
-                const nextPage = page < totalItems / pageSize - 1 ? page + 1 : page;
-                setPage(nextPage);
-            },
-            onLast: () => {
-                const lastPage = -1;
-                setPage(lastPage);
-            },
-        };
-    }, [page, pageSize, totalItems]);
+    const defaultPage = 0;
+    const paginationOptions: TablePaginationOptions = {
+        hasFirst: page > defaultPage,
+        hasLast: page < totalItems / pageSize - 1,
+        hasPrev: page > defaultPage,
+        hasNext: page < totalItems / pageSize - 1,
+        onFirst: () => {
+            setPage(defaultPage);
+        },
+        onPrev: () => {
+            const prevPage = page > defaultPage ? page - 1 : defaultPage;
+            setPage(prevPage);
+        },
+        onNext: () => {
+            const nextPage = page < totalItems / pageSize - 1 ? page + 1 : page;
+            setPage(nextPage);
+        },
+        onLast: () => {
+            const lastPage = -1;
+            setPage(lastPage);
+        },
+    };
 
     return (
         <>
@@ -383,7 +378,7 @@ export default function AuctionsPage(): JSX.Element {
                             size={SelectSize.Small}
                             onValueChange={(e) => {
                                 setPageSize(Number(e));
-                                paginationOptions?.onFirst?.();
+                                paginationOptions.onFirst!();
                             }}
                         />
                     </div>

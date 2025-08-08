@@ -1,11 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    useIotaClient,
-    UseIotaClientMutationOptions,
-    useSignAndExecuteTransaction,
-} from '@iota/dapp-kit';
+import { useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
