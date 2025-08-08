@@ -6,8 +6,6 @@
 import {
     ArrowLeft,
     ArrowRight,
-    DoubleArrowLeft,
-    DoubleArrowRight,
     FilterList,
     Info,
     Loader,
@@ -209,8 +207,6 @@ export default function AuctionsPage(): JSX.Element {
 
     const defaultPage = 0;
     const paginationOptions: TablePaginationOptions = {
-        hasFirst: page > defaultPage,
-        hasLast: page < totalItems / pageSize - 1,
         hasPrev: page > defaultPage,
         hasNext: page < totalItems / pageSize - 1,
         onFirst: () => {
@@ -223,10 +219,6 @@ export default function AuctionsPage(): JSX.Element {
         onNext: () => {
             const nextPage = page < totalItems / pageSize - 1 ? page + 1 : page;
             setPage(nextPage);
-        },
-        onLast: () => {
-            const lastPage = Math.ceil(totalItems / pageSize) - 1;
-            setPage(lastPage);
         },
     };
 
@@ -312,16 +304,9 @@ export default function AuctionsPage(): JSX.Element {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-between items-center mt-8">
-                    {paginationOptions && (
+                <div className="flex justify-center items-center mt-8">
+                    <div className="flex flex-1 justify-center">
                         <div className="flex gap-2">
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<DoubleArrowLeft />}
-                                disabled={!paginationOptions.hasFirst}
-                                onClick={paginationOptions.onFirst}
-                            />
                             <Button
                                 type={ButtonType.Secondary}
                                 size={ButtonSize.Small}
@@ -329,6 +314,32 @@ export default function AuctionsPage(): JSX.Element {
                                 disabled={!paginationOptions.hasPrev}
                                 onClick={paginationOptions.onPrev}
                             />
+                        </div>
+                        <div className="flex gap-2 mx-6">
+                            {paginationPages?.map((pageNumber, index) => {
+                                if (pageNumber === '...') {
+                                    return (
+                                        <span
+                                            key={`ellipsis-${index}`}
+                                            className="text-names-neutral-92"
+                                        >
+                                            {pageNumber}
+                                        </span>
+                                    );
+                                }
+
+                                return (
+                                    <Chip
+                                        key={`page-${pageNumber}`}
+                                        type={ChipType.Outline}
+                                        selected={page === pageNumber - 1}
+                                        onClick={() => setPage(pageNumber - 1)}
+                                        label={pageNumber.toString()}
+                                    />
+                                );
+                            })}
+                        </div>
+                        <div className="flex gap-2">
                             <Button
                                 type={ButtonType.Secondary}
                                 size={ButtonSize.Small}
@@ -336,40 +347,9 @@ export default function AuctionsPage(): JSX.Element {
                                 disabled={!paginationOptions.hasNext}
                                 onClick={paginationOptions.onNext}
                             />
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<DoubleArrowRight />}
-                                disabled={!paginationOptions.hasLast}
-                                onClick={paginationOptions.onLast}
-                            />
                         </div>
-                    )}
-                    <div className="flex gap-2">
-                        {paginationPages?.map((pageNumber, index) => {
-                            if (pageNumber === '...') {
-                                return (
-                                    <span
-                                        key={`ellipsis-${index}`}
-                                        className="text-names-neutral-92"
-                                    >
-                                        {pageNumber}
-                                    </span>
-                                );
-                            }
-
-                            return (
-                                <Chip
-                                    key={`page-${pageNumber}`}
-                                    type={ChipType.Outline}
-                                    selected={page === pageNumber - 1}
-                                    onClick={() => setPage(pageNumber - 1)}
-                                    label={pageNumber.toString()}
-                                />
-                            );
-                        })}
                     </div>
-                    <div className="flex">
+                    <div className="flex ml-6">
                         <Select
                             dropdownPosition={DropdownPosition.Top}
                             value={pageSize.toString()}
