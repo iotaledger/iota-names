@@ -9,7 +9,6 @@ export { useAuctions } from './hooks/useAuctions';
 export { useAuctionBid } from './hooks/useAuctionBid';
 export { useAuctionHouse } from './hooks/useAuctionHouse';
 export { useClaimAuctionTransaction } from './hooks/useClaimAuctionTransaction';
-export { useGetAddressAuctionHistory } from './hooks/useGetAddressAuctionHistory';
 export { useGetAuctionMetadata } from './hooks/useGetAuctionMetadata';
 export type { AuctionDetails, UseAuctionsOptions } from './hooks/useAuctions';
 

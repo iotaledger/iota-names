@@ -15,6 +15,27 @@ export class IotaNamesIndexerClient {
         this.host = new URL(host).origin;
     }
 
+    async getAllUserAuctions(address: string): Promise<AuctionsResponse> {
+        let names: string[] = [];
+        let currentPage = 0;
+        let totalItems: number | null = null;
+        const MAX_PAGE_SIZE = 100;
+
+        do {
+            const response = await this.getUserAuctions(address, currentPage, MAX_PAGE_SIZE);
+            names = names.concat(response.names);
+            totalItems = response.totalItems ?? 0;
+            currentPage = response.page + 1;
+        } while (totalItems === null || totalItems > names.length);
+
+        return {
+            names,
+            page: 0,
+            pageSize: 0,
+            totalItems: totalItems || names.length,
+        };
+    }
+
     async getUserAuctions(
         address: string,
         page: number = 0,

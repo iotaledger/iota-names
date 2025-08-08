@@ -85,7 +85,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
 
             // Fetch user-specific auctions or all auctions based on filter
             return userAddress
-                ? indexerClient.getUserAuctions(userAddress)
+                ? indexerClient.getAllUserAuctions(userAddress)
                 : indexerClient.getAuctionList(
                       search,
                       sort,
