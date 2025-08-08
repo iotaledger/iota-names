@@ -134,6 +134,7 @@ export default function AuctionsPage(): JSX.Element {
         auctions.forEach((auction) => {
             // Only include auctions that have metadata and are not loading
             if (!auction.isLoading && auction.metadata) {
+                allAuctions.push(auction);
                 if (isAuctionActive(auction.metadata)) {
                     activeAuctions.push(auction);
                 } else {
