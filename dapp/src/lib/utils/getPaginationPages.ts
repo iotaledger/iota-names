@@ -6,6 +6,7 @@ export const SEPARATOR = '...';
 export function getPaginationPages(
     currentPage: number,
     lastPage: number,
+    // The number of pages to display around the current page
     displayCount: number = 4,
 ): (number | typeof SEPARATOR)[] {
     const pages: (number | typeof SEPARATOR)[] = [];
