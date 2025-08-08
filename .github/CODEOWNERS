@@ -6,7 +6,7 @@
 
 /build-scripts/ @iotaledger/tooling
 /dapp/ @iotaledger/tooling
-/documentation/ @iotaledger/devx
+/documentation/ @iotaledger/devrel
 /indexer/ @iotaledger/dev-tools
 /linting/ @iotaledger/tooling
 /names-display/ @iotaledger/tooling
