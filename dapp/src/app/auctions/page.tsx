@@ -78,7 +78,7 @@ export default function AuctionsPage(): JSX.Element {
     const [areFiltersVisible, setAreFiltersVisible] = useState<boolean>(false);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
     const [page, setPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(50);
+    const [pageSize, setPageSize] = useState<number>(10);
     const [sortOptions, setSortOptions] = useState<{
         sort: 'asc' | 'desc';
         sortBy: 'bid' | 'name';
