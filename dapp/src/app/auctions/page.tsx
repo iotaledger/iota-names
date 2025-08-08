@@ -3,11 +3,12 @@
 
 'use client';
 
-import { FilterList, Info, Loader, Search, Warning } from '@iota/apps-ui-icons';
+import { ArrowLeft, ArrowRight, DoubleArrowLeft, DoubleArrowRight, FilterList, Info, Loader, Search, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSegment,
     ButtonSegmentType,
+    ButtonSize,
     ButtonType,
     Chip,
     ChipType,
@@ -307,6 +308,38 @@ export default function AuctionsPage(): JSX.Element {
                     )}
                 </div>
                 <div className="flex justify-between items-center mt-8">
+                    {paginationOptions && (
+                        <div className="flex gap-2">
+                            <Button
+                                type={ButtonType.Secondary}
+                                size={ButtonSize.Small}
+                                icon={<DoubleArrowLeft />}
+                                disabled={!paginationOptions.hasFirst}
+                                onClick={paginationOptions.onFirst}
+                            />
+                            <Button
+                                type={ButtonType.Secondary}
+                                size={ButtonSize.Small}
+                                icon={<ArrowLeft />}
+                                disabled={!paginationOptions.hasPrev}
+                                onClick={paginationOptions.onPrev}
+                            />
+                            <Button
+                                type={ButtonType.Secondary}
+                                size={ButtonSize.Small}
+                                icon={<ArrowRight />}
+                                disabled={!paginationOptions.hasNext}
+                                onClick={paginationOptions.onNext}
+                            />
+                            <Button
+                                type={ButtonType.Secondary}
+                                size={ButtonSize.Small}
+                                icon={<DoubleArrowRight />}
+                                disabled={!paginationOptions.hasLast}
+                                onClick={paginationOptions.onLast}
+                            />
+                        </div>
+                    )}
                     <div className="flex gap-2">
                         {paginationPages?.map((pageNumber, index) => {
                             if (pageNumber === '...') {
@@ -323,7 +356,7 @@ export default function AuctionsPage(): JSX.Element {
                             return (
                                 <Chip
                                     key={`page-${pageNumber}`}
-                                    type={ChipType.Elevated}
+                                    type={ChipType.Outline}
                                     selected={page === pageNumber - 1}
                                     onClick={() => setPage(pageNumber - 1)}
                                     label={pageNumber.toString()}

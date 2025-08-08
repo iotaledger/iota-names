@@ -15,8 +15,8 @@ export const MY_NAMES_ROUTE: Route = {
 
 export const AUCTION_ROUTE: Route = {
     title: ProtectedRouteTitle.Auction,
-    path: '/auction',
-    id: 'auction',
+    path: '/auctions',
+    id: 'auctions',
     isProtected: true,
 };
 
