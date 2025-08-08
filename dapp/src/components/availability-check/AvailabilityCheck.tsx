@@ -78,7 +78,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         [searchValue, priceList],
     );
 
-    const errorMessage = auctionError?.message || nameError?.message || priceError?.message;
+    const errorMessageRaw = auctionError?.message || nameError?.message || priceError?.message;
+    const errorMessage = errorMessageRaw
+        ? getUserFriendlyErrorMessage(errorMessageRaw)
+        : validationError || '';
+
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
@@ -191,11 +195,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             placeholder="Check name availability"
                             value={searchValue}
                             onChange={({ target: { value } }) => handleInputChange(value)}
-                            errorMessage={
-                                errorMessage
-                                    ? getUserFriendlyErrorMessage(errorMessage)
-                                    : validationError || ''
-                            }
+                            errorMessage={errorMessage}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             leadingIcon={
                                 <p className="text-primary-20 dark:text-primary-80 text-label-lg">
