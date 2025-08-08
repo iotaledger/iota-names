@@ -1,6 +1,13 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+export interface AuctionsResponse {
+    names: string[];
+    page: number;
+    pageSize: number;
+    totalItems: number;
+}
+
 export class IotaNamesIndexerClient {
     private host: string;
 
@@ -8,8 +15,16 @@ export class IotaNamesIndexerClient {
         this.host = new URL(host).origin;
     }
 
-    async getUserAuctions(address: string): Promise<AuctionsResponse> {
-        const response = await fetch(`${this.host}/auctions/${address}`);
+    async getUserAuctions(
+        address: string,
+        page: number = 0,
+        pageSize: number = 50,
+    ): Promise<AuctionsResponse> {
+        const queryParams = new URLSearchParams({
+            page: page.toString(),
+            pageSize: pageSize.toString(),
+        });
+        const response = await fetch(`${this.host}/auctions/${address}?${queryParams.toString()}`);
 
         if (!response.ok) {
             throw new Error(`Failed to fetch auctions: ${response.statusText}`);
@@ -46,11 +61,4 @@ export class IotaNamesIndexerClient {
 
         return response.json();
     }
-}
-
-export interface AuctionsResponse {
-    names: string[];
-    page: number;
-    pageSize: number;
-    totalItems: number;
 }

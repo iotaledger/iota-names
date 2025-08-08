@@ -7,8 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { queryKey } from '@/hooks/queryKey';
 
+import { AuctionDetails } from '../hooks/useAuctions';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
-import { AuctionDetails } from '../hooks/useGetUserAuctions';
 import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
 
 export function AuctionActionButton({

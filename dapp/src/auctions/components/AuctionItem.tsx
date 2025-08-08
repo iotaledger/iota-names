@@ -9,7 +9,7 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 
 import { getNameDisplaySrc } from '../../lib/utils/displayImage';
-import { AuctionDetails } from '../hooks/useGetUserAuctions';
+import { AuctionDetails } from '../hooks/useAuctions';
 import { UserAuctionStatus } from '../lib/utils';
 import { AuctionActionButton } from './AuctionActionButton';
 import { AuctionStatusBadge } from './AuctionStatusBadge';

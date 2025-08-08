@@ -16,10 +16,31 @@ export function useGetAddressAuctionHistory() {
         queryKey: [...queryKey.userAuctionHistory(account?.address)],
         queryFn: async () => {
             if (!account?.address || !indexerClient) {
-                return [];
+                return {
+                    names: [],
+                    totalItems: 0,
+                };
             }
 
-            return indexerClient.getUserAuctions(account.address);
+            let names: string[] = [];
+            let currentPage = 0;
+            let totalItems: number | null = null;
+
+            do {
+                const response = await indexerClient.getUserAuctions(
+                    account.address,
+                    currentPage,
+                    100,
+                );
+                names = names.concat(response.names);
+                totalItems = response.totalItems ?? 0;
+                currentPage = response.page + 1;
+            } while (totalItems === null || totalItems > names.length);
+
+            return {
+                names,
+                totalItems: totalItems || names.length,
+            };
         },
         enabled: !!account?.address && !!indexerClient,
     });
