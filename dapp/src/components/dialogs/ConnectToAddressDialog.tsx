@@ -169,8 +169,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         }
     }
 
-    console.log(updates);
-
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
