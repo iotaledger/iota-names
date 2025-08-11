@@ -306,16 +306,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 </Panel>
                                             )}
 
-                                            {/* { && (
-                                                <InfoBox
-                                                    type={InfoBoxType.Warning}
-                                                    style={InfoBoxStyle.Default}
-                                                    icon={<Warning />}
-                                                    title="Address has a linked name!"
-                                                    supportingText="Continuing will override the previous address's name"
-                                                />
-                                            )} */}
-
                                             {showAddressWarning && (
                                                 <InfoBox
                                                     type={InfoBoxType.Warning}
