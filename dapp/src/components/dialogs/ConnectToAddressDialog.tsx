@@ -79,11 +79,16 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const hasDefaultChange = (addressName === name) !== editIsDefaultName;
     const isValidAddressOrEmpty = editTargetAddress === '' || isValidIotaAddress(editTargetAddress);
     const hasChanges = (hasAddressChange && isValidAddressOrEmpty) || hasDefaultChange;
+    const isTargetingCurrentAddress = editTargetAddress === account?.address;
 
     const updates: NameUpdate[] = [];
     const nftId = isNameSubname
         ? getNameObject(ownedSubnames ?? [], nameRecord?.nameRecord.name ?? '')
         : nameRecord?.nameRecord.nftId;
+
+    if (hasDefaultChange && !editIsDefaultName) {
+        updates.push({ type: 'unset-default' });
+    }
 
     if (hasAddressChange && nftId) {
         updates.push({
@@ -94,11 +99,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         });
     }
 
-    if (hasDefaultChange) {
-        if (editIsDefaultName) {
+    if (hasDefaultChange && editIsDefaultName) {
+        if (isTargetingCurrentAddress) {
             updates.push({ type: 'set-default', name });
         } else {
-            updates.push({ type: 'unset-default' });
+            // Dont allow setting a name as default if the
+            // edit address does not match the current address
+            setEditIsDefaultName(false);
         }
     }
 
@@ -110,6 +117,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
+
+    const [appliedUpdates, setAppliedUpdates] = useState<NameUpdate[]>([]);
 
     const {
         mutate: apply,
@@ -124,6 +133,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             await iotaClient.waitForTransaction({ digest: txResult.digest });
         },
         onSuccess: () => {
+            setAppliedUpdates(updates);
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
@@ -131,7 +141,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             if (editTargetAddress.length === 0) {
                 toast.success(`Successfully disconnected ${cleanName}`);
                 setOpen(false);
-            } else if (editTargetAddress !== account?.address) {
+            } else if (!isTargetingCurrentAddress) {
                 toast.success(
                     `Successfully connected ${cleanName} to address ${formatAddress(editTargetAddress)}`,
                 );
@@ -180,64 +190,41 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                     <div className="flex flex-col h-full justify-between">
                         <div className="flex flex-col gap-y-md">
                             {isSuccess ? (
-                                <div className="flex flex-col gap-y-md items-center text-center">
-                                    <div className="flex flex-col items-center gap-y-sm">
-                                        {editIsDefaultName ? (
-                                            <span className="text-title-lg text-names-neutral-100">
-                                                {cleanName}
-                                            </span>
-                                        ) : null}
-                                        <Chip
-                                            leadingElement={<Link className="w-4 h-4" />}
-                                            label={formatAddress(account?.address || '')}
-                                            trailingElement={<Copy className="w-4 h-4" />}
-                                            onClick={copyAddressToClipboard}
-                                            type={
-                                                editIsDefaultName
-                                                    ? ChipType.Success
-                                                    : ChipType.Elevated
-                                            }
-                                        />
-                                    </div>
-                                    <span className="text-body-md text-names-neutral-70">
-                                        {editIsDefaultName
-                                            ? 'Address linked successfully'
-                                            : `${cleanName} is no longer linked to an address`}
-                                    </span>
-                                </div>
+                                <UpdatesResult name={name} updates={appliedUpdates} />
                             ) : (
                                 <>
                                     <div className="flex flex-col gap-y-xxs">
                                         <span className="text-title-md text-names-neutral-100">
                                             Link to Address
                                         </span>
-                                        <Input
-                                            type={InputType.Text}
-                                            label={`Select a target address to connect to ${cleanName}`}
-                                            placeholder="Enter Address"
-                                            value={editTargetAddress}
-                                            onChange={handleAddressChange}
-                                            onClearInput={() => setEditTargetAddress('')}
-                                            disabled={disableEdit}
-                                            errorMessage={
-                                                editTargetAddress && !isValidAddressOrEmpty
-                                                    ? 'Not a valid IOTA address'
-                                                    : updateNameError?.message
-                                            }
-                                        />
-                                        {account?.address &&
-                                            editTargetAddress !== account.address && (
-                                                <div className="flex justify-start w-full">
-                                                    <Button
-                                                        text="Use Current Address"
-                                                        icon={<Add />}
-                                                        onClick={handleUseCurrent}
-                                                        disabled={disableEdit}
-                                                        size={ButtonSize.Small}
-                                                        type={ButtonType.Ghost}
-                                                    />
-                                                </div>
-                                            )}
+                                        <div className="[&>div>label]:break-words">
+                                            <Input
+                                                type={InputType.Text}
+                                                label={`Select a target address to connect to ${cleanName}`}
+                                                placeholder="Enter Address"
+                                                value={editTargetAddress}
+                                                onChange={handleAddressChange}
+                                                onClearInput={() => setEditTargetAddress('')}
+                                                disabled={disableEdit}
+                                                errorMessage={
+                                                    editTargetAddress && !isValidAddressOrEmpty
+                                                        ? 'Not a valid IOTA address'
+                                                        : updateNameError?.message
+                                                }
+                                            />
+                                        </div>
+                                        {!isTargetingCurrentAddress && (
+                                            <div className="flex justify-start w-full">
+                                                <Button
+                                                    text="Use Current Address"
+                                                    icon={<Add />}
+                                                    onClick={handleUseCurrent}
+                                                    disabled={disableEdit}
+                                                    size={ButtonSize.Small}
+                                                    type={ButtonType.Ghost}
+                                                />
+                                            </div>
+                                        )}
                                         {nameRecord?.nameRecord.targetAddress &&
                                             !hasAddressChange &&
                                             editIsDefaultName && (
@@ -269,8 +256,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Checkbox
                                                     isChecked={editIsDefaultName}
                                                     isDisabled={
-                                                        disableEdit ||
-                                                        editTargetAddress !== account?.address
+                                                        disableEdit || !isTargetingCurrentAddress
                                                     }
                                                     onCheckedChange={(checked) =>
                                                         setEditIsDefaultName(
@@ -282,7 +268,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                             {editIsDefaultName && (
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
-                                                        <span className="text-title-lg text-names-neutral-100">
+                                                        <span className="text-title-lg text-names-neutral-100 w-full text-center">
                                                             <TruncatedNameWithTooltip
                                                                 name={name}
                                                                 tooltipPosition={
@@ -310,7 +296,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     style={InfoBoxStyle.Default}
                                                     icon={<Warning />}
                                                     title="Address has a linked name!"
-                                                    supportingText="Continuing will override the previous address’s name"
+                                                    supportingText="Continuing will override the previous address's name"
                                                 />
                                             )}
                                         </div>
@@ -348,5 +334,65 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 </DialogBody>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] }) {
+    const account = useCurrentAccount();
+
+    function copyAddressToClipboard() {
+        if (account?.address) {
+            copyToClipboard(account.address);
+        }
+    }
+
+    const cleanName = normalizeIotaName(name, 'at', {
+        truncateLongParts: true,
+    });
+
+    const isNameDefault = updates.some((update) => update.type === 'set-default');
+
+    return (
+        <div className="text-center flex flex-col gap-y-md">
+            <div className="flex flex-col items-center gap-y-sm">
+                <Chip
+                    leadingElement={<Link className="w-4 h-4" />}
+                    label={formatAddress(account?.address || '')}
+                    trailingElement={<Copy className="w-4 h-4" />}
+                    onClick={copyAddressToClipboard}
+                    type={isNameDefault ? ChipType.Success : ChipType.Elevated}
+                />
+            </div>
+            <div className="flex flex-col">
+                {updates.map((update) => {
+                    switch (update.type) {
+                        case 'set-default': {
+                            return (
+                                <span
+                                    key={update.type}
+                                    className="text-body-md text-names-neutral-70"
+                                >{`${cleanName} is now set as displayed`}</span>
+                            );
+                        }
+
+                        case 'set-target-address': {
+                            return (
+                                <span
+                                    key={update.type}
+                                    className="text-body-md text-names-neutral-70"
+                                >
+                                    {update.address
+                                        ? 'Address linked successfully'
+                                        : `${cleanName} is no longer linked to an address`}
+                                </span>
+                            );
+                        }
+
+                        default:
+                            return null;
+                    }
+                })}
+            </div>
+        </div>
     );
 }

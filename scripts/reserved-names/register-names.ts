@@ -6,6 +6,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_CLOCK_OBJECT_ID, isValidIotaAddress } from '@iota/iota-sdk/utils';
 
 import { isValidIotaName, normalizeIotaName } from '../../sdk/src/utils';
+import { signAndExecute } from '../utils/utils';
 
 const YEARS_TO_RESERVE = 1;
 
@@ -14,6 +15,7 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
     const fileContent = fs.readFileSync(filePath).toString();
 
     const nameAddressPairs: Record<string, string | undefined> = {};
+    const seen = new Set<string>();
     fileContent
         .split('\n')
         // Ignore comments
@@ -25,6 +27,10 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
             const normalizedName = normalizeIotaName(name + '.iota', 'dot');
             const isValidName = isValidIotaName(normalizedName);
             if (!isValidName) throw new Error(`Invalid name: ${address} | ${name}`);
+            if (seen.has(normalizedName)) {
+                return undefined; // skip duplicates
+            }
+            seen.add(normalizedName);
             if (address) {
                 const isValidAddress = isValidIotaAddress(address);
                 if (!isValidAddress) throw new Error(`Invalid address: ${address} | ${name}`);
@@ -53,6 +59,59 @@ export const registerNames = (
         ],
     });
 };
+
+// Arg size needs to be limited to not exceed protocol limits
+const PURE_ARG_SIZE_LIMIT = 8500;
+
+// Batch and process names from a file
+export async function processNamesFileBatched(
+    filePath: string,
+    packageInfo: {
+        packageId: string;
+        adminCap: string;
+        iotaNamesObjectId: string;
+    },
+    network: string,
+    client: any,
+) {
+    const nameAddressPairs = parseCsvFile(filePath);
+    const allNames = Object.keys(nameAddressPairs);
+    let batch: string[] = [];
+    let batchLen = 0;
+    for (const name of allNames) {
+        const nameLen = name.length + (batch.length > 0 ? 1 : 0);
+        if (batchLen + nameLen > PURE_ARG_SIZE_LIMIT) {
+            await sendNamesBatchTransaction(batch, packageInfo, network, client);
+            batch = [];
+            batchLen = 0;
+        }
+        batch.push(name);
+        batchLen += nameLen;
+    }
+    if (batch.length > 0) {
+        await sendNamesBatchTransaction(batch, packageInfo, network, client);
+    }
+}
+
+async function sendNamesBatchTransaction(
+    batch: string[],
+    packageInfo: { packageId: string; adminCap: string; iotaNamesObjectId: string },
+    network: string,
+    client: any,
+) {
+    const tx = new Transaction();
+    console.log(`Registering ${batch.length} names`);
+    registerNames(
+        tx,
+        batch,
+        packageInfo.packageId,
+        packageInfo.adminCap,
+        packageInfo.iotaNamesObjectId,
+    );
+    const result = await signAndExecute(tx, network);
+    await client.waitForTransaction({ digest: result.digest });
+    console.log(`Transaction digest: ${result.digest}`);
+}
 
 // Run this to see what names would be registered:
 // const nameAddressPairs = parseCsvFile('./init/names-to-register.csv');

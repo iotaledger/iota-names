@@ -7,35 +7,42 @@ export const queryKey = {
     all: ['iota-name'],
 
     // Names
-    nameRecord: (name: string) => [queryKey.all, 'name-record', name],
+    nameRecord: (name: string) => [...queryKey.all, 'name-record', name],
     registerName: (name: string, address?: string) => [
-        queryKey.all,
+        ...queryKey.all,
         'register-name',
         name,
         address,
     ],
-    updateName: (address?: string) => [queryKey.all, 'update-name', address],
+    updateName: (address?: string) => [...queryKey.all, 'update-name', address],
 
     // Address
-    defaultName: (address: string) => [queryKey.all, 'default-name', address],
+    defaultName: (address: string) => [...queryKey.all, 'default-name', address],
 
     // Generic
-    ownedObjects: (address: string) => [queryKey.all, 'owned-objects', address],
+    ownedObjects: (address: string) => [...queryKey.all, 'owned-objects', address],
 
     // Price List
-    priceList: () => [queryKey.all, 'price-list'],
+    priceList: () => [...queryKey.all, 'price-list'],
 
     // Auctions
-    userAuctionHistory: (address?: string) => [queryKey.all, 'user-auction-hist', address],
-    placeBid: (address: string) => [queryKey.all, 'place-bid', address],
-    auctionMetadata: (name: string) => [queryKey.all, 'auction-metadata', name],
+    auctionList: () => [queryKey.all, 'auction-list'],
+    userAuctionHistory: (address?: string) => [...queryKey.all, 'user-auction-hist', address],
+    placeBid: (address: string) => [...queryKey.all, 'place-bid', address],
+    auctionMetadata: (name: string) => [...queryKey.all, 'auction-metadata', name],
     claimAuction: (name: string, address?: string) => [
-        queryKey.all,
+        ...queryKey.all,
         'claim-auction',
         name,
         address,
     ],
 
     // Core Config
-    coreConfig: () => [queryKey.all, 'core-config'],
+    coreConfig: () => [...queryKey.all, 'core-config'],
+    purchaseConfig: (paymentType: string, auctionType: string) => [
+        ...queryKey.all,
+        'purchase-config',
+        paymentType,
+        auctionType,
+    ],
 };
