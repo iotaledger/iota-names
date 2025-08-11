@@ -79,7 +79,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const hasDefaultChange = (addressName === name) !== editIsDefaultName;
     const isValidAddressOrEmpty = editTargetAddress === '' || isValidIotaAddress(editTargetAddress);
     const hasChanges = (hasAddressChange && isValidAddressOrEmpty) || hasDefaultChange;
-    const allowedToSetDefault = editTargetAddress === account?.address;
+    const isTargetingCurrentAddress = editTargetAddress === account?.address;
 
     const updates: NameUpdate[] = [];
     const nftId = isNameSubname
@@ -100,9 +100,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     }
 
     if (hasDefaultChange && editIsDefaultName) {
-        if (allowedToSetDefault) {
+        if (isTargetingCurrentAddress) {
             updates.push({ type: 'set-default', name });
         } else {
+            // Dont allow setting a name as default if the 
+            // edit address does not match the current address
             setEditIsDefaultName(false);
         }
     }
@@ -139,7 +141,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             if (editTargetAddress.length === 0) {
                 toast.success(`Successfully disconnected ${cleanName}`);
                 setOpen(false);
-            } else if (editTargetAddress !== account?.address) {
+            } else if (!isTargetingCurrentAddress) {
                 toast.success(
                     `Successfully connected ${cleanName} to address ${formatAddress(editTargetAddress)}`,
                 );
@@ -209,19 +211,18 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     : updateNameError?.message
                                             }
                                         />
-                                        {account?.address &&
-                                            editTargetAddress !== account.address && (
-                                                <div className="flex justify-start w-full">
-                                                    <Button
-                                                        text="Use Current Address"
-                                                        icon={<Add />}
-                                                        onClick={handleUseCurrent}
-                                                        disabled={disableEdit}
-                                                        size={ButtonSize.Small}
-                                                        type={ButtonType.Ghost}
-                                                    />
-                                                </div>
-                                            )}
+                                        {!isTargetingCurrentAddress && (
+                                            <div className="flex justify-start w-full">
+                                                <Button
+                                                    text="Use Current Address"
+                                                    icon={<Add />}
+                                                    onClick={handleUseCurrent}
+                                                    disabled={disableEdit}
+                                                    size={ButtonSize.Small}
+                                                    type={ButtonType.Ghost}
+                                                />
+                                            </div>
+                                        )}
                                         {nameRecord?.nameRecord.targetAddress &&
                                             !hasAddressChange &&
                                             editIsDefaultName && (
@@ -253,8 +254,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 <Checkbox
                                                     isChecked={editIsDefaultName}
                                                     isDisabled={
-                                                        disableEdit ||
-                                                        editTargetAddress !== account?.address
+                                                        disableEdit || !isTargetingCurrentAddress
                                                     }
                                                     onCheckedChange={(checked) =>
                                                         setEditIsDefaultName(
