@@ -103,7 +103,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         if (isTargetingCurrentAddress) {
             updates.push({ type: 'set-default', name });
         } else {
-            // Dont allow setting a name as default if the 
+            // Dont allow setting a name as default if the
             // edit address does not match the current address
             setEditIsDefaultName(false);
         }
