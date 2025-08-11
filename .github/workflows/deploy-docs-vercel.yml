@@ -1,0 +1,68 @@
+name: Deploy IOTA-Names Docs to Vercel
+
+on:
+  push:
+    branches: [ develop ]
+    paths:
+      - "documentation/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "vercel environment: preview or production"
+        required: true
+        default: "preview"
+
+env:
+  DOCS_DIR: documentation
+  VERCEL_ENV: ${{ github.event.inputs.environment || 'preview' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@latest
+
+      - name: Vercel pull (link & env)
+        run: |
+          vercel pull --yes \
+            --environment=${{ env.VERCEL_ENV == 'production' && 'production' || 'preview' }} \
+            --token=$VERCEL_TOKEN \
+            --cwd $DOCS_DIR
+        env:
+          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
+
+      - name: Install deps (docs)
+        working-directory: ${{ env.DOCS_DIR }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (Vercel)
+        run: vercel build --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+        env:
+          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
+
+      - name: Deploy (prebuilt)
+        id: deploy
+        run: |
+          if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
+            vercel deploy --prebuilt --prod \
+              --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+          else
+            vercel deploy --prebuilt \
+              --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+          fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
+
+      - name: Output URL
+        run: echo "Deployed URL => ${{ steps.deploy.outputs.url || 'see job logs for URL' }}"
