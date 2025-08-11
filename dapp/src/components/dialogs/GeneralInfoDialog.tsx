@@ -82,7 +82,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <AvatarDisplay name={name} />
-                        <span className="text-headline-sm text-names-neutral-92 break-words max-w-full overflow-hidden">
+                        <span className="text-headline-sm text-names-neutral-92 w-full text-center">
                             <TruncatedNameWithTooltip
                                 name={name}
                                 tooltipPosition={TooltipPosition.Bottom}

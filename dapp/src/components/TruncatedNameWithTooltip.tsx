@@ -20,9 +20,11 @@ export function TruncatedNameWithTooltip({
     const content = <span>{truncated}</span>;
 
     return showTooltip ? (
-        <Tooltip text={full} position={tooltipPosition}>
-            {content}
-        </Tooltip>
+        <div className=" w-full [&>div]:break-words [&>div]:w-full">
+            <Tooltip text={full} position={tooltipPosition}>
+                {content}
+            </Tooltip>
+        </div>
     ) : (
         content
     );
