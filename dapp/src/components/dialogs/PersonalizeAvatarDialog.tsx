@@ -163,10 +163,10 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
                 <DialogBody>
                     <div className="flex flex-col gap-md items-center">
-                        <div className="flex flex-col gap-md items-center">
+                        <div className="flex flex-col gap-md items-center w-full">
                             <BrandedAssets className="w-12 h-12" />
-                            <div className="flex flex-col gap-xs text-center">
-                                <span className="text-title-md text-names-neutral-92">
+                            <div className="flex flex-col gap-xs text-center w-full">
+                                <span className="text-title-md text-names-neutral-92 w-full text-center">
                                     <TruncatedNameWithTooltip
                                         name={name}
                                         tooltipPosition={TooltipPosition.Top}

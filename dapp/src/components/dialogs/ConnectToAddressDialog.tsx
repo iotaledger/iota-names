@@ -198,22 +198,24 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         <span className="text-title-md text-names-neutral-100">
                                             Link to Address
                                         </span>
-                                        <Input
-                                            type={InputType.Text}
-                                            label={`Select a target address to connect to ${cleanName}`}
-                                            placeholder="Enter Address"
-                                            value={editTargetAddress}
-                                            onChange={handleAddressChange}
-                                            onClearInput={() => setEditTargetAddress('')}
-                                            disabled={disableEdit}
-                                            errorMessage={
-                                                editTargetAddress && !isValidAddressOrEmpty
-                                                    ? 'Not a valid IOTA address'
-                                                    : getUserFriendlyErrorMessage(
-                                                          updateNameError || '',
-                                                      )
-                                            }
-                                        />
+                                        <div className="[&>div>label]:break-words">
+                                            <Input
+                                                type={InputType.Text}
+                                                label={`Select a target address to connect to ${cleanName}`}
+                                                placeholder="Enter Address"
+                                                value={editTargetAddress}
+                                                onChange={handleAddressChange}
+                                                onClearInput={() => setEditTargetAddress('')}
+                                                disabled={disableEdit}
+                                                errorMessage={
+                                                    editTargetAddress && !isValidAddressOrEmpty
+                                                        ? 'Not a valid IOTA address'
+                                                        : getUserFriendlyErrorMessage(
+                                                              updateNameError || '',
+                                                          )
+                                                }
+                                            />
+                                        </div>
                                         {!isTargetingCurrentAddress && (
                                             <div className="flex justify-start w-full">
                                                 <Button
@@ -269,7 +271,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                             {editIsDefaultName && (
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
-                                                        <span className="text-title-lg text-names-neutral-100">
+                                                        <span className="text-title-lg text-names-neutral-100 w-full text-center">
                                                             <TruncatedNameWithTooltip
                                                                 name={name}
                                                                 tooltipPosition={
@@ -297,7 +299,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     style={InfoBoxStyle.Default}
                                                     icon={<Warning />}
                                                     title="Address has a linked name!"
-                                                    supportingText="Continuing will override the previous address’s name"
+                                                    supportingText="Continuing will override the previous address's name"
                                                 />
                                             )}
                                         </div>

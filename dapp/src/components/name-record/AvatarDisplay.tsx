@@ -3,21 +3,17 @@
 
 import { Loader } from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
-import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
 import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
-import type { NftDisplayProps } from '@/lib/types/components';
 
-import { nftDisplayVariants } from './variants';
-
-interface AvatarDisplayProps extends NftDisplayProps {
-    button?: React.ReactNode;
+interface AvatarDisplayProps {
+    name: string;
     fallbackUrl?: string;
 }
 
-export function AvatarDisplay({ name, size, badge, button, fallbackUrl }: AvatarDisplayProps) {
+export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
     const [showAvatar, setShowAvatar] = useState(false);
 
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
@@ -52,32 +48,18 @@ export function AvatarDisplay({ name, size, badge, button, fallbackUrl }: Avatar
     }, [avatarSrc]);
 
     return (
-        <div
-            className={cx(
-                'flex flex-col relative aspect-square rounded-xl group/display z-0',
-                nftDisplayVariants({ size }),
+        <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
+            {avatarSrc && showAvatar ? (
+                <img
+                    className="absolute inset-0 w-full h-full -z-[1] object-cover"
+                    src={avatarSrc}
+                    alt={name}
+                />
+            ) : (
+                <div className="absolute inset-0 w-full h-full bg-names-neutral-4 flex items-center justify-center">
+                    <Loader className="animate-spin" data-testid="loading-indicator" />
+                </div>
             )}
-        >
-            <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
-                {badge && <div className="absolute top-sm left-sm">{badge}</div>}
-                {button && (
-                    <div className="opacity-0 group-hover/display:opacity-100 transition-opacity absolute w-full top-0 right-0 px-sm py-sm bg-gradient-to-b from-black/80 to-transparent flex justify-end pointer-events-none">
-                        <div className="shadow-xl pointer-events-auto">{button}</div>
-                    </div>
-                )}
-
-                {avatarSrc && showAvatar ? (
-                    <img
-                        className="absolute inset-0 w-full h-full -z-[1] object-cover"
-                        src={avatarSrc}
-                        alt={name}
-                    />
-                ) : (
-                    <div className="absolute inset-0 w-full h-full bg-names-neutral-4 flex items-center justify-center">
-                        <Loader className="animate-spin" data-testid="loading-indicator" />
-                    </div>
-                )}
-            </div>
         </div>
     );
 }
