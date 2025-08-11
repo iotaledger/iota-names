@@ -86,16 +86,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         ? getNameObject(ownedSubnames ?? [], nameRecord?.nameRecord.name ?? '')
         : nameRecord?.nameRecord.nftId;
 
-    if (hasDefaultChange) {
-        if (editIsDefaultName) {
-            if (allowedToSetDefault) {
-                updates.push({ type: 'set-default', name });
-            } else {
-                setEditIsDefaultName(false);
-            }
-        } else {
-            updates.push({ type: 'unset-default' });
-        }
+    if (hasDefaultChange && !editIsDefaultName) {
+        updates.push({ type: 'unset-default' });
     }
 
     if (hasAddressChange && nftId) {
@@ -105,6 +97,14 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             address: editTargetAddress || undefined,
             isSubname: !!isNameSubname,
         });
+    }
+
+    if (hasDefaultChange && editIsDefaultName) {
+        if (allowedToSetDefault) {
+            updates.push({ type: 'set-default', name });
+        } else {
+            setEditIsDefaultName(false);
+        }
     }
 
     const {
@@ -168,6 +168,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             copyToClipboard(account.address);
         }
     }
+
+    console.log(updates);
 
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
