@@ -16,7 +16,7 @@ pub struct BidderNamesPagination {
     pub page: Option<usize>,
     pub page_size: usize,
     pub sort: SortOrder,
-    pub status: AuctionStatus,
+    pub status: Option<AuctionStatus>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
@@ -48,7 +48,8 @@ impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
         let status = query
             .status
             .as_deref()
-            .map_or(Ok(Default::default()), str::parse)
+            .map(str::parse)
+            .transpose()
             .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
 
         Ok(Self {
@@ -69,7 +70,7 @@ pub struct AuctionsPagination {
     pub sort: SortOrder,
     pub sort_by: AuctionSortBy,
     pub search: Option<String>,
-    pub status: AuctionStatus,
+    pub status: Option<AuctionStatus>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
@@ -109,7 +110,8 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
         let status = query
             .status
             .as_deref()
-            .map_or(Ok(Default::default()), str::parse)
+            .map(str::parse)
+            .transpose()
             .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
 
         Ok(Self {

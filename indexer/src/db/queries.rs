@@ -103,7 +103,7 @@ pub fn get_auctions_for_bidder(
     page: Option<usize>,
     page_size: usize,
     sort: SortOrder,
-    status: AuctionStatus,
+    status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
@@ -116,11 +116,17 @@ pub fn get_auctions_for_bidder(
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
 
-    query = match status {
-        AuctionStatus::Active => query.filter(auctions::expiration_timestamp.gt(now.timestamp())),
-        AuctionStatus::Finished => query.filter(auctions::expiration_timestamp.le(now.timestamp())),
-        AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
-    };
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
 
     query = match sort {
         SortOrder::Asc => query.order(names::name.asc()),
@@ -133,7 +139,7 @@ pub fn get_auctions_for_bidder(
 pub fn get_auctions_for_bidder_count(
     conn: &mut SqliteConnection,
     bidder_id: i32,
-    status: AuctionStatus,
+    status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<usize> {
     let mut query = names::table
@@ -143,11 +149,17 @@ pub fn get_auctions_for_bidder_count(
         .filter(bids::bidder_id.eq(bidder_id))
         .into_boxed();
 
-    query = match status {
-        AuctionStatus::Active => query.filter(auctions::expiration_timestamp.gt(now.timestamp())),
-        AuctionStatus::Finished => query.filter(auctions::expiration_timestamp.le(now.timestamp())),
-        AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
-    };
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
 
     Ok(query.first::<i64>(conn)? as _)
 }
@@ -160,7 +172,7 @@ pub fn get_auctions(
     sort: SortOrder,
     sort_by: AuctionSortBy,
     search: Option<&str>,
-    status: AuctionStatus,
+    status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
@@ -174,11 +186,17 @@ pub fn get_auctions(
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
     }
-    query = match status {
-        AuctionStatus::Active => query.filter(auctions::expiration_timestamp.gt(now.timestamp())),
-        AuctionStatus::Finished => query.filter(auctions::expiration_timestamp.le(now.timestamp())),
-        AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
-    };
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
     query = match (sort, sort_by) {
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
         (SortOrder::Desc, AuctionSortBy::Name) => query.order(names::name.desc()),
@@ -199,7 +217,7 @@ pub fn get_auctions(
 pub fn get_auctions_count(
     conn: &mut SqliteConnection,
     search: Option<&str>,
-    status: AuctionStatus,
+    status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<usize> {
     let mut query = names::table
@@ -208,11 +226,17 @@ pub fn get_auctions_count(
         .select(dsl::count_distinct(names::id))
         .into_boxed();
 
-    query = match status {
-        AuctionStatus::Active => query.filter(auctions::expiration_timestamp.gt(now.timestamp())),
-        AuctionStatus::Finished => query.filter(auctions::expiration_timestamp.le(now.timestamp())),
-        AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
-    };
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
 
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
