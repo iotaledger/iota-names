@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import * as z from 'zod';
 
@@ -13,6 +14,11 @@ export const Params = z.object({
 });
 
 const fastify = Fastify({ logger: true });
+
+await fastify.register(cors, {
+    origin: '*',
+    methods: ['GET', 'HEAD'],
+});
 
 function isExpired(timestamp: number): boolean {
     return timestamp < Date.now();
