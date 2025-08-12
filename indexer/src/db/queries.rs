@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use anyhow::Result;
+use chrono::{DateTime, Utc};
 use diesel::{
     ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    SqliteConnection, TextExpressionMethods, dsl, insert_into,
+    SqliteConnection, TextExpressionMethods, dsl, insert_into, update,
 };
 
-use super::models::{Bidder, Name, bidders, bids, names};
-use crate::db::{AuctionSortBy, SortOrder};
+use crate::db::{
+    AuctionSortBy, AuctionStatus, SortOrder,
+    models::{Bidder, Name, auctions, bidders, bids, names},
+};
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -46,12 +49,10 @@ pub fn get_or_create_name(conn: &mut SqliteConnection, name: &str) -> Result<Nam
 
 pub fn add_bids_entry(
     conn: &mut SqliteConnection,
-    bidder_address: &str,
-    name_str: &str,
+    bidder: &Bidder,
+    name: &Name,
     bid: u64,
 ) -> Result<()> {
-    let bidder = get_or_create_bidder(conn, bidder_address)?;
-    let name = get_or_create_name(conn, name_str)?;
     insert_into(bids::table)
         .values((
             bids::bidder_id.eq(bidder.id),
@@ -59,6 +60,31 @@ pub fn add_bids_entry(
             bids::bid.eq(bid as i64),
         ))
         .on_conflict_do_nothing()
+        .execute(conn)?;
+    Ok(())
+}
+
+pub fn upsert_auctions_entry(
+    conn: &mut SqliteConnection,
+    name: &Name,
+    expiration_timestamp: i64,
+) -> Result<()> {
+    insert_into(auctions::table)
+        .values((
+            auctions::name_id.eq(name.id),
+            auctions::expiration_timestamp.eq(expiration_timestamp),
+            auctions::claimed.eq(false),
+        ))
+        .on_conflict(auctions::name_id)
+        .do_update()
+        .set(auctions::expiration_timestamp.eq(expiration_timestamp))
+        .execute(conn)?;
+    Ok(())
+}
+
+pub fn claim_auctions_entry(conn: &mut SqliteConnection, name: &Name) -> Result<()> {
+    update(auctions::table.filter(auctions::name_id.eq(name.id)))
+        .set((auctions::claimed.eq(true),))
         .execute(conn)?;
     Ok(())
 }
@@ -77,15 +103,30 @@ pub fn get_auctions_for_bidder(
     page: Option<usize>,
     page_size: usize,
     sort: SortOrder,
+    status: Option<AuctionStatus>,
+    now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
-    let mut query = bids::table
-        .inner_join(names::table)
+    let mut query = names::table
+        .inner_join(bids::table)
+        .inner_join(auctions::table)
         .group_by(names::id)
         .select(names::name)
         .filter(bids::bidder_id.eq(bidder_id))
         .limit(page_size as _)
         .offset((page.unwrap_or_default() * page_size) as _)
         .into_boxed();
+
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
 
     query = match sort {
         SortOrder::Asc => query.order(names::name.asc()),
@@ -95,14 +136,35 @@ pub fn get_auctions_for_bidder(
     Ok(query.load(conn)?)
 }
 
-pub fn get_auctions_for_bidder_count(conn: &mut SqliteConnection, bidder_id: i32) -> Result<usize> {
-    Ok(bids::table
-        .inner_join(names::table)
+pub fn get_auctions_for_bidder_count(
+    conn: &mut SqliteConnection,
+    bidder_id: i32,
+    status: Option<AuctionStatus>,
+    now: DateTime<Utc>,
+) -> Result<usize> {
+    let mut query = names::table
+        .inner_join(bids::table)
+        .inner_join(auctions::table)
         .select(dsl::count_distinct(names::id))
         .filter(bids::bidder_id.eq(bidder_id))
-        .first::<i64>(conn)? as _)
+        .into_boxed();
+
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
+
+    Ok(query.first::<i64>(conn)? as _)
 }
 
+#[expect(clippy::too_many_arguments)]
 pub fn get_auctions(
     conn: &mut SqliteConnection,
     page: Option<usize>,
@@ -110,9 +172,12 @@ pub fn get_auctions(
     sort: SortOrder,
     sort_by: AuctionSortBy,
     search: Option<&str>,
+    status: Option<AuctionStatus>,
+    now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
     let mut query = names::table
         .inner_join(bids::table)
+        .inner_join(auctions::table)
         .group_by(names::id)
         .select((Name::as_select(), dsl::max(bids::bid)))
         .limit(page_size as _)
@@ -120,6 +185,17 @@ pub fn get_auctions(
         .into_boxed();
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
+    }
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
     }
     query = match (sort, sort_by) {
         (SortOrder::Asc, AuctionSortBy::Name) => query.order(names::name.asc()),
@@ -138,14 +214,34 @@ pub fn get_auctions(
         .collect())
 }
 
-pub fn get_auctions_count(conn: &mut SqliteConnection, search: Option<&str>) -> Result<usize> {
+pub fn get_auctions_count(
+    conn: &mut SqliteConnection,
+    search: Option<&str>,
+    status: Option<AuctionStatus>,
+    now: DateTime<Utc>,
+) -> Result<usize> {
     let mut query = names::table
         .inner_join(bids::table)
+        .inner_join(auctions::table)
         .select(dsl::count_distinct(names::id))
         .into_boxed();
+
+    if let Some(status) = status {
+        query = match status {
+            AuctionStatus::Active => {
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+            }
+            AuctionStatus::Finished => {
+                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+            }
+            AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
+        };
+    }
+
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
     }
+
     Ok(query.first::<i64>(conn)? as _)
 }
 
