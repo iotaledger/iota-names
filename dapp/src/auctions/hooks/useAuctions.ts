@@ -29,7 +29,11 @@ export interface UseAuctionsOptions {
      * Search term to filter auction names.
      * Only applies when fetching all auctions (not user-specific).
      */
-    search?: string;
+    search: string;
+    /**
+     * Status to filter the auctions by.
+     */
+    status: 'all' | 'active' | 'finished';
     /**
      * Sort order for auctions.
      * Only applies when fetching all auctions (not user-specific).
@@ -59,8 +63,15 @@ const NAMES_PLACEHOLDER: AuctionsResponse = {
     totalItems: 0,
 };
 
-export function useAuctions(options: UseAuctionsOptions = {}) {
-    const { userAddress, search, sort, sortBy } = options;
+export function useAuctions({
+    userAddress,
+    search,
+    status,
+    sort,
+    sortBy,
+    page,
+    pageSize,
+}: UseAuctionsOptions) {
     const { iotaNamesClient } = useIotaNamesClient();
     const indexerClient = useIotaNamesIndexerClientContext();
     const { data: auctionHouseData } = useAuctionHouse();
@@ -77,7 +88,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
         error: namesError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKeyBase, search, sort, sortBy, options.page, options.pageSize],
+        queryKey: [...queryKeyBase, search, status, sort, sortBy, page, pageSize],
         queryFn: async () => {
             if (!indexerClient) {
                 return NAMES_PLACEHOLDER;
@@ -86,13 +97,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
             // Fetch user-specific auctions or all auctions based on filter
             return userAddress
                 ? indexerClient.getAllUserAuctions(userAddress)
-                : indexerClient.getAuctionList(
-                      search,
-                      sort,
-                      sortBy,
-                      options.page,
-                      options.pageSize,
-                  );
+                : indexerClient.getAuctionList(search, status, sort, sortBy, page, pageSize);
         },
         enabled: !!indexerClient && (!userAddress || !!userAddress),
     });
