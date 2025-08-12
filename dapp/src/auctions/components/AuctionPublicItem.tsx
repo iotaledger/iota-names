@@ -3,7 +3,7 @@
 
 import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { MouseEvent, useEffect, useState } from 'react';
 
@@ -19,7 +19,6 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { useNameRecord } from '@/hooks';
-import { useNetwork } from '@/hooks/useNetwork';
 import { formatNanosToIota } from '@/lib/utils';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
@@ -107,7 +106,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
 }
 
 function ClaimedAuctionBody({ auction }: { auction: AuctionDetails }) {
-    const network = useNetwork();
+    const { network } = useIotaClientContext();
     const name = auction.name;
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
 
