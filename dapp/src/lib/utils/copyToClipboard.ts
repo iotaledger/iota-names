@@ -3,6 +3,8 @@
 
 import toast from 'react-hot-toast';
 
+import { getUserFriendlyErrorMessage } from './errorMessage';
+
 export async function copyToClipboard(text: string): Promise<boolean> {
     if (typeof navigator === 'undefined' || !navigator.clipboard) {
         return false;
@@ -13,7 +15,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
         toast.success('Copied to clipboard!');
         return true;
     } catch (err) {
-        toast.error('Failed to copy to clipboard. Please try again.');
+        toast.error(getUserFriendlyErrorMessage('FAILED_TO_COPY'));
         return false;
     }
 }
