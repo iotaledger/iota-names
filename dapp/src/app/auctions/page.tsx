@@ -33,19 +33,15 @@ import {
     SelectSize,
     TablePaginationOptions,
 } from '@iota/apps-ui-kit';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { AuctionBidDialog, AuctionDetails, isAuctionActive } from '@/auctions';
+import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
 
-enum TypeFilter {
-    All = 'All',
-    Active = 'Active',
-    Finished = 'Finished',
-}
+export type AuctionStatus = 'all' | 'active' | 'finished';
 
 const SORT_OPTIONS = [
     {
@@ -73,7 +69,7 @@ const SORT_OPTIONS = [
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
 
 export default function AuctionsPage(): JSX.Element {
-    const [selectedFilter, setSelectedFilter] = useState<TypeFilter>(TypeFilter.All);
+    const [selectedStatus, setSelectedStatus] = useState<AuctionStatus>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [areFiltersVisible, setAreFiltersVisible] = useState<boolean>(false);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
@@ -114,52 +110,26 @@ export default function AuctionsPage(): JSX.Element {
         isLoading,
         error: isAuctionsError,
     } = useAuctions({
-        search: debouncedSearchQuery || undefined,
+        search: debouncedSearchQuery,
+        status: selectedStatus,
         sort: sortOptions.sort,
         sortBy: sortOptions.sortBy,
         page,
         pageSize,
     });
 
-    const { allAuctions, activeAuctions, finishedAuctions } = useMemo(() => {
-        if (!auctions) {
-            return { allAuctions: [], activeAuctions: [], finishedAuctions: [] };
-        }
-
-        const allAuctions: AuctionDetails[] = [];
-        const activeAuctions: AuctionDetails[] = [];
-        const finishedAuctions: AuctionDetails[] = [];
-
-        auctions.forEach((auction) => {
-            // Only include auctions that have metadata and are not loading
-            if (!auction.isLoading && auction.metadata) {
-                allAuctions.push(auction);
-                if (isAuctionActive(auction.metadata)) {
-                    activeAuctions.push(auction);
-                } else {
-                    finishedAuctions.push(auction);
-                }
-            }
-        });
-
-        return { allAuctions, activeAuctions, finishedAuctions };
-    }, [auctions]);
-
     const typeOptions = [
         {
-            label: TypeFilter.All,
-            value: TypeFilter.All,
-            disabled: false,
+            label: 'All',
+            value: 'all' as AuctionStatus,
         },
         {
-            label: TypeFilter.Active,
-            value: TypeFilter.Active,
-            disabled: activeAuctions.length === 0,
+            label: 'Active',
+            value: 'active' as AuctionStatus,
         },
         {
-            label: TypeFilter.Finished,
-            value: TypeFilter.Finished,
-            disabled: finishedAuctions.length === 0,
+            label: 'Finished',
+            value: 'finished' as AuctionStatus,
         },
     ];
 
@@ -181,7 +151,7 @@ export default function AuctionsPage(): JSX.Element {
             );
         }
 
-        if (allAuctions.length === 0) {
+        if (auctions.length === 0) {
             return (
                 <div className="flex">
                     <InfoBox
@@ -194,13 +164,6 @@ export default function AuctionsPage(): JSX.Element {
             );
         }
     })();
-
-    const displayedAuctions =
-        selectedFilter === TypeFilter.All
-            ? allAuctions
-            : selectedFilter === TypeFilter.Active
-              ? activeAuctions
-              : finishedAuctions;
 
     const totalPages = Math.ceil(totalItems / pageSize);
     const paginationPages = getPaginationPages(page + 1, totalPages, 4);
@@ -236,9 +199,8 @@ export default function AuctionsPage(): JSX.Element {
                             key={option.value}
                             type={ButtonSegmentType.Rounded}
                             label={option.label}
-                            selected={selectedFilter === option.value}
-                            onClick={() => setSelectedFilter(option.value)}
-                            disabled={option.disabled}
+                            selected={selectedStatus === option.value}
+                            onClick={() => setSelectedStatus(option.value)}
                         />
                     ))}
                 </SegmentedButton>
@@ -293,7 +255,7 @@ export default function AuctionsPage(): JSX.Element {
                         </div>
                     ) : (
                         <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
-                            {displayedAuctions.map((auction) => (
+                            {auctions.map((auction) => (
                                 <div key={auction.name} className="w-[220px]">
                                     <AuctionPublicItem
                                         auction={auction}
