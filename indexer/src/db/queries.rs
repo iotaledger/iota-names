@@ -119,10 +119,10 @@ pub fn get_auctions_for_bidder(
     if let Some(status) = status {
         query = match status {
             AuctionStatus::Active => {
-                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp_millis()))
             }
             AuctionStatus::Finished => {
-                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.le(now.timestamp_millis()))
             }
             AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
         };
@@ -152,10 +152,10 @@ pub fn get_auctions_for_bidder_count(
     if let Some(status) = status {
         query = match status {
             AuctionStatus::Active => {
-                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp_millis()))
             }
             AuctionStatus::Finished => {
-                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.le(now.timestamp_millis()))
             }
             AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
         };
@@ -189,10 +189,10 @@ pub fn get_auctions(
     if let Some(status) = status {
         query = match status {
             AuctionStatus::Active => {
-                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp_millis()))
             }
             AuctionStatus::Finished => {
-                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.le(now.timestamp_millis()))
             }
             AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
         };
@@ -229,10 +229,10 @@ pub fn get_auctions_count(
     if let Some(status) = status {
         query = match status {
             AuctionStatus::Active => {
-                query.filter(auctions::expiration_timestamp.gt(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.gt(now.timestamp_millis()))
             }
             AuctionStatus::Finished => {
-                query.filter(auctions::expiration_timestamp.le(now.timestamp()))
+                query.filter(auctions::expiration_timestamp.le(now.timestamp_millis()))
             }
             AuctionStatus::Claimed => query.filter(auctions::claimed.eq(true)),
         };
