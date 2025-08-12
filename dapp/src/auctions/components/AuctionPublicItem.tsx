@@ -133,7 +133,7 @@ function ClaimedAuctionBody({ auction }: { auction: AuctionDetails }) {
             </div>
             <div>
                 <Button
-                    text="View Nft"
+                    text="View NFT"
                     type={ButtonType.Outlined}
                     onClick={(e) => onViewNftClick(e)}
                     disabled={!nftId}
