@@ -29,7 +29,7 @@ export interface UseAuctionsOptions {
      * Search term to filter auction names.
      * Only applies when fetching all auctions (not user-specific).
      */
-    search: string;
+    search?: string;
     /**
      * Status to filter the auctions by.
      */
@@ -97,7 +97,7 @@ export function useAuctions({
             // Fetch user-specific auctions or all auctions based on filter
             return userAddress
                 ? indexerClient.getAllUserAuctions(userAddress)
-                : indexerClient.getAuctionList(search, status, sort, sortBy, page, pageSize);
+                : indexerClient.getAuctionList(status, search, sort, sortBy, page, pageSize);
         },
         enabled: !!indexerClient && (!userAddress || !!userAddress),
     });

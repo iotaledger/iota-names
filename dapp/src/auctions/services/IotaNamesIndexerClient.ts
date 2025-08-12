@@ -55,8 +55,8 @@ export class IotaNamesIndexerClient {
     }
 
     async getAuctionList(
-        search: string,
         status: 'all' | 'active' | 'finished',
+        search?: string,
         sort?: 'asc' | 'desc',
         sortBy?: 'bid' | 'name',
         page: number = 0,
