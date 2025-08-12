@@ -1,12 +1,15 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Loader } from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
+import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
+import loadingAnimationData from '@/animations/lottie-loading.json';
 import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
+
+import { LottieAnimation } from '../loaders/Lottie';
 
 interface AvatarDisplayProps {
     name: string;
@@ -56,8 +59,14 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
                     alt={name}
                 />
             ) : (
-                <div className="absolute inset-0 w-full h-full bg-names-neutral-4 flex items-center justify-center">
-                    <Loader className="animate-spin" data-testid="loading-indicator" />
+                <div className="w-full aspect-square relative">
+                    <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                        <LottieAnimation
+                            animationData={loadingAnimationData}
+                            className="w-16 h-16"
+                        />
+                    </div>
+                    <img className={cx('w-full', 'block')} src="/name-bg.svg" />
                 </div>
             )}
         </div>
