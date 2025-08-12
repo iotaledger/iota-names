@@ -8,11 +8,11 @@ import type {
     TransactionEffects,
 } from '@iota/iota-sdk/client';
 
-import type { GasSummaryType } from '@/lib/types';
+import type { GasSummary } from '@/lib/types';
 
 export function getGasSummary(
     transaction: IotaTransactionBlockResponse | DryRunTransactionBlockResponse,
-): GasSummaryType {
+): GasSummary {
     const { effects } = transaction;
     if (!effects) return null;
     const totalGas = getTotalGasUsed(effects);
@@ -34,6 +34,9 @@ export function getGasSummary(
         totalGas: totalGas?.toString(),
         isSponsored,
         gasUsed: effects.gasUsed,
+        get gas() {
+            return BigInt(this.totalGas || 0);
+        },
     };
 }
 export function getTotalGasUsed(effects: TransactionEffects): bigint | undefined {

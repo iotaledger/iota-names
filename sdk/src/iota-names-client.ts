@@ -155,7 +155,7 @@ export class IotaNamesClient {
         for (const entry of contents) {
             const { pos0, pos1 } = entry.key;
             const key = [Number(pos0), Number(pos1)]; // Convert keys to numbers
-            const value = Number(entry.value); // Convert value to a number
+            const value = BigInt(entry.value); // Convert value to a bigint
 
             priceMap.set(key, value);
         }
@@ -222,7 +222,7 @@ export class IotaNamesClient {
         for (const entry of contents) {
             const { pos0, pos1 } = entry.key;
             const key = [Number(pos0), Number(pos1)]; // Convert keys to numbers
-            const value = Number(entry.value); // Convert value to a number
+            const value = BigInt(entry.value); // Convert value to a bigint
 
             priceMap.set(key, value);
         }
@@ -443,7 +443,7 @@ export class IotaNamesClient {
         const priceList = await this.getPriceList();
         const renewalPriceList = await this.getRenewalPriceList();
         let yearsRemain = years;
-        let price = 0;
+        let price = 0n;
 
         if (isRegistration) {
             for (const [[minLength, maxLength], pricePerYear] of priceList.entries()) {
@@ -457,7 +457,7 @@ export class IotaNamesClient {
 
         for (const [[minLength, maxLength], pricePerYear] of renewalPriceList.entries()) {
             if (length >= minLength && length <= maxLength) {
-                price += yearsRemain * pricePerYear;
+                price += BigInt(yearsRemain) * pricePerYear;
                 break;
             }
         }

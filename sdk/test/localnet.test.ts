@@ -57,16 +57,16 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     // Expected lists for localnet - these match the configuration in scripts/init/packages.ts
     // From packages.ts lines 104-108: [0.5, 0.1, 0.01] * NANOS_PER_IOTA
     const expectedPriceList = new Map([
-        [[3, 3], 0.5 * Number(NANOS_PER_IOTA)], // 500000000 nanos (0.5 IOTA)
-        [[4, 4], 0.1 * Number(NANOS_PER_IOTA)], // 100000000 nanos (0.1 IOTA)
-        [[5, 63], 0.01 * Number(NANOS_PER_IOTA)], // 10000000 nanos (0.01 IOTA)
+        [[3, 3], BigInt(0.5 * Number(NANOS_PER_IOTA))], // 500000000 nanos (0.5 IOTA)
+        [[4, 4], BigInt(0.1 * Number(NANOS_PER_IOTA))], // 100000000 nanos (0.1 IOTA)
+        [[5, 63], BigInt(0.01 * Number(NANOS_PER_IOTA))], // 10000000 nanos (0.01 IOTA)
     ]);
 
     // From packages.ts lines 126-130: [0.15, 0.05, 0.005] * NANOS_PER_IOTA
     const expectedRenewalPriceList = new Map([
-        [[3, 3], 0.15 * Number(NANOS_PER_IOTA)], // 150000000 nanos (0.15 IOTA)
-        [[4, 4], 0.05 * Number(NANOS_PER_IOTA)], // 50000000 nanos (0.05 IOTA)
-        [[5, 63], 0.005 * Number(NANOS_PER_IOTA)], // 5000000 nanos (0.005 IOTA)
+        [[3, 3], BigInt(0.15 * Number(NANOS_PER_IOTA))], // 150000000 nanos (0.15 IOTA)
+        [[4, 4], BigInt(0.05 * Number(NANOS_PER_IOTA))], // 50000000 nanos (0.05 IOTA)
+        [[5, 63], BigInt(0.005 * Number(NANOS_PER_IOTA))], // 5000000 nanos (0.005 IOTA)
     ]);
 
     expect(priceList).toEqual(expectedPriceList);
@@ -222,13 +222,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
             });
 
             expect(threeLetter).toBe(
-                LOCALNET_PRICING.THREE_LETTER.registration * Number(NANOS_PER_IOTA),
+                BigInt(LOCALNET_PRICING.THREE_LETTER.registration * Number(NANOS_PER_IOTA)),
             );
             expect(fourLetter).toBe(
-                LOCALNET_PRICING.FOUR_LETTER.registration * Number(NANOS_PER_IOTA),
+                BigInt(LOCALNET_PRICING.FOUR_LETTER.registration * Number(NANOS_PER_IOTA)),
             );
             expect(fiveLetter).toBe(
-                LOCALNET_PRICING.FIVE_PLUS_LETTER.registration * Number(NANOS_PER_IOTA),
+                BigInt(LOCALNET_PRICING.FIVE_PLUS_LETTER.registration * Number(NANOS_PER_IOTA)),
             );
         }, 30000);
 
@@ -662,15 +662,15 @@ describe('IOTA Names Localnet Integration Tests', () => {
 });
 
 // Helper functions for better code organization
-function toNanos(iotaAmount: number): number {
-    return iotaAmount * Number(NANOS_PER_IOTA);
+function toNanos(iotaAmount: number): bigint {
+    return BigInt(iotaAmount * Number(NANOS_PER_IOTA));
 }
 
 function calculateMultiYearPrice(
     pricing: { registration: number; renewal: number },
     years: number,
-): number {
+): bigint {
     const registrationCost = toNanos(pricing.registration);
-    const renewalCost = toNanos(pricing.renewal) * (years - 1);
+    const renewalCost = toNanos(pricing.renewal) * (BigInt(years) - 1n);
     return registrationCost + renewalCost;
 }

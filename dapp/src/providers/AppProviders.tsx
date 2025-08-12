@@ -14,6 +14,8 @@ import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
+import '@/lib/utils/pollyfills';
+
 import { ThemeProvider } from './ThemeProvider';
 
 export function AppProviders({ children }: React.PropsWithChildren) {

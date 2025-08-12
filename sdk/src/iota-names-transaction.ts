@@ -32,7 +32,7 @@ export class IotaNamesTransaction {
         const paymentIntent = this.initRegistration(params.name);
 
         const couponCodes = params.couponCodes;
-        let discountedPrice: number | null = null;
+        let discountedPrice: bigint | null = null;
 
         if (couponCodes && couponCodes.length > 0) {
             discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
@@ -67,7 +67,7 @@ export class IotaNamesTransaction {
         const paymentIntent = this.initRenewal(params.nft, params.years);
 
         const couponCodes = params.couponCodes;
-        let discountedPrice: number | null = null;
+        let discountedPrice: bigint | null = null;
 
         if (couponCodes && couponCodes.length > 0) {
             discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({

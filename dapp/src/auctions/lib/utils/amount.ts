@@ -6,7 +6,7 @@ import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { AuctionMetadata } from '../types/metadata';
 
 export function getCurrentBidAmount(auction: AuctionMetadata | null): bigint {
-    if (!auction) return BigInt(0);
+    if (!auction) return 0n;
 
     return auction.currentBidNanos;
 }

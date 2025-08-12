@@ -35,7 +35,7 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
+import { NameRecordData, queryKey, useBalance, useNameRecord } from '@/hooks';
 import {
     GAS_BALANCE_TOO_LOW_ID,
     GAS_BUDGET_ERROR_MESSAGES,
@@ -55,6 +55,7 @@ interface AuctionBidDialogDialogProps {
 export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidDialogDialogProps) {
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
+    const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
     const queryClient = useQueryClient();
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
@@ -86,13 +87,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         error: auctionError,
     } = useAuctionBid({
         name,
-        bidNanos: bidNanos ?? BigInt(0),
+        bidNanos: bidNanos ?? 0n,
     });
-
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        auctionBidTransaction?.builtTx ?? null,
-        Number(bidNanos),
-    );
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
@@ -127,26 +123,25 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     });
 
     const hasEnoughGas =
-        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
-        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
+        !coinBalanceError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !coinBalanceError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
+        !coinBalanceError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
+    const canPay =
+        !!auctionBidTransaction?.gasSummary &&
+        !!bidNanos &&
+        coinBalance?.canPay(auctionBidTransaction.gasSummary.gas + bidNanos);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
     const isBidAboveDecimals = bidNanos === null;
-    const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
+    const isBidBelowMinimum = minBidNanos ? (bidNanos || 0n) < minBidNanos : false;
 
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid =
-        isPending ||
-        isLoading ||
-        isBidBelowMinimum ||
-        !balanceValidation?.hasBalance ||
-        !hasEnoughGas;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum || !canPay || !hasEnoughGas;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -179,8 +174,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return GAS_BUDGET_ERROR_MESSAGES[NOT_ENOUGH_BALANCE_ID];
         } else if (auctionError) {
             return auctionError.message;
-        } else if (balanceValidationError) {
-            return balanceValidationError.message;
+        } else if (coinBalanceError) {
+            return coinBalanceError.message;
         }
     })();
 

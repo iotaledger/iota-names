@@ -13,10 +13,10 @@ interface FormatBalanceOptions {
 }
 
 export function formatNanosToIota(
-    balance: bigint | number | string,
+    balance: bigint | number | string | BigNumber,
     { formatRounded = true, showSign = false, showIotaSymbol = true }: FormatBalanceOptions = {},
 ) {
-    const bn = new BigNumber(balance.toString()).shiftedBy(-1 * IOTA_DECIMALS);
+    const bn = new BigNumber(balance).shiftedBy(-1 * IOTA_DECIMALS);
     let formattedBalance = formatAmount(bn);
 
     if (!formatRounded) {

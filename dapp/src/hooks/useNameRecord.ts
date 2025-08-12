@@ -24,7 +24,7 @@ export type NameRecordData =
       }
     | {
           type: 'available';
-          price: number;
+          price: bigint;
       }
     | {
           // Not priced because of being too short

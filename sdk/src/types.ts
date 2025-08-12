@@ -100,7 +100,7 @@ export type IotaNamesClientNetworkConfig =
           packageInfo: PackageInfo;
       };
 
-export type IotaNamesPriceList = Map<[number, number], number>;
+export type IotaNamesPriceList = Map<[number, number], bigint>;
 
 export type IotaNamesCoreConfig = {
     max_years: number;

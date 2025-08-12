@@ -79,7 +79,7 @@ function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | nu
 
     const auction = rawData.value.value;
 
-    const currentBidNanos = BigInt(auction.current_bid.balance.value || BigInt(0));
+    const currentBidNanos = BigInt(auction.current_bid.balance.value || 0n);
     const minBidNanos = currentBidNanos + NANOS_PER_IOTA;
 
     return {

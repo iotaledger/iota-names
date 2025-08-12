@@ -29,8 +29,8 @@ describe('Single', () => {
                 kind: 1,
                 amount: '1000',
             });
-            const discountedPrice = applyCouponToPrice(1_000_000, coupon);
-            expect(discountedPrice).toBe(999000);
+            const discountedPrice = applyCouponToPrice(coupon, 1_000_000n);
+            expect(discountedPrice).toBe(999000n);
         });
 
         test('should cap at 0, if discounted price is negative', () => {
@@ -38,8 +38,8 @@ describe('Single', () => {
                 kind: 1,
                 amount: '10000',
             });
-            const discountedPrice = applyCouponToPrice(10, coupon);
-            expect(discountedPrice).toBe(0);
+            const discountedPrice = applyCouponToPrice(coupon, 10n);
+            expect(discountedPrice).toBe(0n);
         });
     });
 
@@ -49,8 +49,8 @@ describe('Single', () => {
                 kind: 0,
                 amount: '85',
             });
-            const discountedPrice = applyCouponToPrice(10_000, coupon);
-            expect(discountedPrice).toBe(1_500);
+            const discountedPrice = applyCouponToPrice(coupon, 10_000n);
+            expect(discountedPrice).toBe(1_500n);
         });
     });
 });
@@ -70,8 +70,8 @@ describe('Multiple', () => {
                     can_stack: true,
                 }),
             ];
-            const discountedPrice = applyCouponsToPrice(coupons, 10_000);
-            expect(discountedPrice).toBe(7000);
+            const discountedPrice = applyCouponsToPrice(coupons, 10_000n);
+            expect(discountedPrice).toBe(7000n);
         });
 
         test('should cap at 0, if discounted price is negative', () => {
@@ -87,8 +87,8 @@ describe('Multiple', () => {
                     can_stack: true,
                 }),
             ];
-            const discountedPrice = applyCouponsToPrice(coupons, 10);
-            expect(discountedPrice).toBe(0);
+            const discountedPrice = applyCouponsToPrice(coupons, 10n);
+            expect(discountedPrice).toBe(0n);
         });
     });
 
@@ -106,8 +106,8 @@ describe('Multiple', () => {
                     can_stack: true,
                 }),
             ];
-            const discountedPrice = applyCouponsToPrice(coupons, 10_000);
-            expect(discountedPrice).toBe(7_200);
+            const discountedPrice = applyCouponsToPrice(coupons, 10_000n);
+            expect(discountedPrice).toBe(7_200n);
         });
     });
 
@@ -125,8 +125,8 @@ describe('Multiple', () => {
                     can_stack: true,
                 }),
             ];
-            const discountedPrice = applyCouponsToPrice(coupons, 10_000);
-            expect(discountedPrice).toBe(7_000);
+            const discountedPrice = applyCouponsToPrice(coupons, 10_000n);
+            expect(discountedPrice).toBe(7_000n);
         });
     });
 });

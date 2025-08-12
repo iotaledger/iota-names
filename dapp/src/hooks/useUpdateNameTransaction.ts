@@ -79,7 +79,7 @@ export type NameUpdate =
     | {
           type: 'register-name';
           name: string;
-          price: number;
+          price: bigint;
           setDefault: boolean;
           address?: string;
           couponCodes?: string[];

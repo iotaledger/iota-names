@@ -29,15 +29,15 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     // Expected lists
     const expectedPriceList = new Map([
-        [[3, 3], 500000000],
-        [[4, 4], 100000000],
-        [[5, 63], 10000000],
+        [[3, 3], 500000000n],
+        [[4, 4], 100000000n],
+        [[5, 63], 10000000n],
     ]);
 
     const expectedRenewalPriceList = new Map([
-        [[3, 3], 150000000],
-        [[4, 4], 50000000],
-        [[5, 63], 5000000],
+        [[3, 3], 150000000n],
+        [[4, 4], 50000000n],
+        [[5, 63], 5000000n],
     ]);
 
     expect(priceList).toEqual(expectedPriceList);

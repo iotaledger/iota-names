@@ -7,12 +7,14 @@ type Optional<T> = {
     [K in keyof T]?: T[K];
 };
 
-export type GasSummaryType =
-    | (GasCostSummary &
+export type GasSummary =
+    | ((GasCostSummary &
           Optional<IotaGasData> & {
               isSponsored: boolean;
               gasUsed: GasCostSummary;
               totalGas?: string;
               owner?: string;
-          })
+          }) & {
+          get gas(): bigint;
+      })
     | null;

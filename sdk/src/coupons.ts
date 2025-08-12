@@ -46,7 +46,7 @@ export function validateCoupons(
     }
 }
 
-export function applyCouponsToPrice(coupons: Coupon[], initialPrice: number): number {
+export function applyCouponsToPrice(coupons: Coupon[], initialPrice: bigint): bigint {
     if (!coupons || coupons.length === 0) {
         return initialPrice;
     }
@@ -58,28 +58,28 @@ export function applyCouponsToPrice(coupons: Coupon[], initialPrice: number): nu
             throw new Error('Coupons provided cannot be stacked');
         }
 
-        price = applyCouponToPrice(price, coupon);
+        price = applyCouponToPrice(coupon, price);
     }
 
     return price;
 }
 
-export function applyCouponToPrice(price: number, coupon?: Coupon): number {
+export function applyCouponToPrice(coupon: Coupon, price: bigint): bigint {
     if (!coupon) {
         return price;
     }
 
-    const couponAmount = Number(coupon.amount);
+    const couponAmount = BigInt(coupon.amount);
 
     // 0 => percentage off
     // 1 => fixed amount off,
     if (coupon.kind === 0) {
-        let discountAmount = (price * couponAmount) / 100;
+        let discountAmount = (price * couponAmount) / 100n;
         return price - discountAmount;
     } else if (coupon.kind === 1) {
         const discountedAmount = price - couponAmount;
 
-        return discountedAmount < 0 ? 0 : discountedAmount;
+        return discountedAmount < 0 ? 0n : discountedAmount;
     } else {
         throw new Error(`Unknown coupon kind: ${coupon.kind}`);
     }

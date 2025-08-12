@@ -24,7 +24,6 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import BigNumber from 'bignumber.js';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -78,12 +77,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         },
     });
 
-    const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
+    const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0n;
     const isConnected = !!account?.address;
 
     const updates: NameUpdate[] = [];
 
-    if (nameRecordData?.type === 'available' && price > 0) {
+    if (nameRecordData?.type === 'available' && price > 0n) {
         updates.push({
             type: 'register-name',
             name: name,
@@ -212,10 +211,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     if (!isConnected) return null;
 
     const usingPrice = applyDiscount ? discountedPrice : price;
-    const finalPrice = new BigNumber(usingPrice ?? 0)
-        .plus(updateNameData?.gasSummary?.totalGas ?? 0)
-        .toNumber();
-
+    const finalPrice = (usingPrice ?? 0n) + (updateNameData?.gasSummary?.gas ?? 0n);
     const hasEnoughGas =
         !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
         !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
@@ -223,7 +219,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const canPay =
         isConnected &&
         hasEnoughGas &&
-        Number(coinBalance?.totalBalance) > finalPrice &&
+        coinBalance?.canPay(finalPrice) &&
         nameRecordData?.type === 'available';
 
     const hasErrors = updateNameError || coinBalanceError;
@@ -293,7 +289,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        !isLoadingData && finalPrice > 0 && finalPrice ? (
+                                        !isLoadingData && finalPrice > 0n && finalPrice ? (
                                             formatNanosToIota(finalPrice, { formatRounded: false })
                                         ) : (
                                             <LoadingIndicator />
