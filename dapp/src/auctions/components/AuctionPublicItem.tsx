@@ -116,7 +116,11 @@ function ClaimedAuctionBody({ auction }: { auction: AuctionDetails }) {
     function onViewNftClick(e: MouseEvent) {
         if (nftId) {
             e.preventDefault();
-            window.location.href = `https://explorer.iota.org/object/${nftId}?network=${network}`;
+            window.open(
+                `https://explorer.iota.org/object/${nftId}?network=${network}`,
+                '_blank',
+                'noopener,noreferrer',
+            );
         }
     }
 
