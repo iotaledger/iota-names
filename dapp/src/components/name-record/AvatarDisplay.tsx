@@ -10,6 +10,7 @@ import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
 
 import { LottieAnimation } from '../loaders/Lottie';
+import { NamesLogoBranded } from '../svgs';
 
 interface AvatarDisplayProps {
     name: string;
@@ -52,7 +53,17 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
 
     return (
         <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
-            {avatarSrc && showAvatar ? (
+            {isDataLoading ? (
+                <div className="w-full aspect-square relative">
+                    <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                        <LottieAnimation
+                            animationData={loadingAnimationData}
+                            className="w-16 h-16"
+                        />
+                    </div>
+                    <img className={cx('w-full', 'block')} src="/name-bg.svg" />
+                </div>
+            ) : avatarSrc && showAvatar ? (
                 <img
                     className="absolute inset-0 w-full h-full -z-[1] object-cover"
                     src={avatarSrc}
@@ -61,10 +72,8 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
             ) : (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                        <LottieAnimation
-                            animationData={loadingAnimationData}
-                            className="w-16 h-16"
-                        />
+                        <NamesLogoBranded className="w-[14.71px] h-[22.97px] mr-sm" />
+                        Couldn't load avatar
                     </div>
                     <img className={cx('w-full', 'block')} src="/name-bg.svg" />
                 </div>
