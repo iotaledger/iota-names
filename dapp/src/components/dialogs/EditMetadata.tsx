@@ -31,6 +31,7 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
 interface EditMetadataDialogProps {
@@ -143,7 +144,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 

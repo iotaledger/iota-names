@@ -14,6 +14,7 @@ import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -69,8 +70,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         [searchValue, priceList],
     );
 
-    const errorMessage =
-        auctionError?.message || nameError?.message || priceError?.message || validationError || '';
+    const errorMessageRaw = auctionError?.message || nameError?.message || priceError?.message;
+    const errorMessage = errorMessageRaw
+        ? getUserFriendlyErrorMessage(errorMessageRaw)
+        : validationError || '';
+
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;

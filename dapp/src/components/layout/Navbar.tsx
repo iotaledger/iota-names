@@ -18,8 +18,7 @@ export function Navbar() {
     const pathname = usePathname();
     const { open, close } = useAvailabilityCheckDialog();
 
-    const isAllewedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
-    const showSearch = isConnected && isAllewedSearchOnPage;
+    const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
     function toggleSearchDialog() {
         open({
@@ -53,11 +52,13 @@ export function Navbar() {
                         </div>
                     </div>
 
-                    {showSearch && <SearchInput isBelowMd onFocus={toggleSearchDialog} />}
+                    {isAllowedSearchOnPage && (
+                        <SearchInput isBelowMd onFocus={toggleSearchDialog} />
+                    )}
                     <ConnectButton connectText="Connect" />
                 </div>
 
-                {showSearch && <SearchInput onFocus={toggleSearchDialog} />}
+                {isAllowedSearchOnPage && <SearchInput onFocus={toggleSearchDialog} />}
             </div>
         </nav>
     );
