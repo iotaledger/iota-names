@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient, useIotaNamesIndexerClientContext } from '@/contexts';
 import { queryKey } from '@/hooks';
@@ -100,6 +100,7 @@ export function useAuctions({
                 : indexerClient.getAuctionList(status, search, sort, sortBy, page, pageSize);
         },
         enabled: !!indexerClient && (!userAddress || !!userAddress),
+        placeholderData: keepPreviousData,
     });
 
     const { auctionsTableObjectId } = auctionHouseData || {};
