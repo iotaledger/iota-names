@@ -43,9 +43,8 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
 
     const { data: nameRecordData } = useNameRecord(name);
     const { data: subnames } = useRegistrationNfts('subname');
-
     const network = useNetwork();
-    console.log(`Network: ${network}`);
+
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
