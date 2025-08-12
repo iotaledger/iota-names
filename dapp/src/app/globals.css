@@ -44,14 +44,15 @@ body[data-scroll-locked] #top-navbar {
         border-radius: 9px;
     }
 
-    .input-container {
-        border: 1px solid transparent !important;
-    }
-
     &.btn-alt-bg .btn.btn-outlined {
         background-image: linear-gradient(#0a0d23, #0a0d23), var(--names-gradient-primary);
     }
 }
+
+.name-card-shadow {
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.48);
+}
+
 .search-container:has(input:is(:active, :focus, :focus-visible)) {
     outline: none;
     border: 2px solid transparent !important;

@@ -59,7 +59,6 @@ export function PanelTile({
                             >
                                 <AvatarDisplay
                                     name={name}
-                                    size="full"
                                     fallbackUrl="/subname-card-fallback.png"
                                 />
                             </CardImage>

@@ -200,14 +200,21 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header title="New Subname" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col h-full justify-between">
-                        <div className="flex flex-col h-full items-center gap-y-lg">
-                            <InfoBox
-                                type={InfoBoxType.Default}
-                                style={InfoBoxStyle.Elevated}
-                                icon={<Info />}
-                                supportingText={`Create as many Subnames as you want under ${cleanName}, each with its own profile page and features`}
-                            />
+                    <div className="flex flex-col h-full w-full justify-between">
+                        <div className="flex flex-col h-full w-full items-center gap-y-lg">
+                            <div className="w-full [&>div]:max-w-full [&>div>div]:min-w-0">
+                                <InfoBox
+                                    type={InfoBoxType.Default}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Info />}
+                                    supportingText={
+                                        <div className="break-words max-w-full">
+                                            Create as many Subnames as you want under {cleanName},
+                                            each with its own profile page and features
+                                        </div>
+                                    }
+                                />
+                            </div>
                             <Input
                                 type={InputType.Text}
                                 value={editSubname}
