@@ -258,7 +258,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 <Button
                                     type={ButtonType.Primary}
                                     disabled={disablePlaceBid}
-                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    icon={isLoading || isPending ? <LoadingIndicator /> : null}
                                     text={auctionMetadata ? 'Bid' : 'Start auction'}
                                     onClick={() => {
                                         if (auctionBidTransaction) {
