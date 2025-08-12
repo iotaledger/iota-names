@@ -13,13 +13,12 @@ import {
     TitleSize,
     TooltipPosition,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { isSubname } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 import Link from 'next/link';
 
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
-import { useNetwork } from '@/hooks/useNetwork';
 import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { Collapsible } from '../Collapsible';
@@ -43,7 +42,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
 
     const { data: nameRecordData } = useNameRecord(name);
     const { data: subnames } = useRegistrationNfts('subname');
-    const network = useNetwork();
+    const { network } = useIotaClientContext();
 
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
