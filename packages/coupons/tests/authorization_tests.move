@@ -34,17 +34,17 @@ fun deauthorize_success() {
     {
         scenario.next_tx(admin());
 
-        let mut coupon_house = scenario.take_shared();
+        let mut iota_names = scenario.take_shared();
         let admin_cap = scenario.take_from_sender();
 
         // test app deauthorization.
-        deauthorize<TestAuth>(&admin_cap, &mut coupon_house);
+        deauthorize<TestAuth>(&admin_cap, &mut iota_names);
 
         // test that the app is indeed non authorized
-        assert!(!coupon_house.is_authorized<TestAuth>(), 0);
+        assert!(!iota_names.is_authorized<TestAuth>(), 0);
 
         return_to_sender(scenario, admin_cap);
-        return_shared(coupon_house);
+        return_shared(iota_names);
     };
     end(scenario_val);
 }

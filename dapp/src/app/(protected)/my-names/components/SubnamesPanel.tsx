@@ -67,30 +67,32 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     return (
         <>
             <Panel>
-                <Header
-                    onBack={isAtRoot ? undefined : goBack}
-                    title={headerTitle}
-                    onClose={onClose}
-                />
-
-                <div className="flex flex-col gap-xxs px-sm w-full">
-                    {subnamesRegistrations.map((sub) => (
-                        <NamePanelTile
-                            key={sub.name}
-                            registration={sub}
-                            onClick={() => goDeeper(sub.name)}
-                            hasSubnames={currentNode.subnames.length > 0}
-                        />
-                    ))}
-                </div>
-
-                <div className="flex flex-col items-center justify-center py-sm">
-                    <Button
-                        text="New Subname"
-                        type={ButtonType.Outlined}
-                        onClick={() => setIsAddDialogOpen(true)}
-                        icon={<Add />}
+                <div className="rounded-[inherit] w-full h-full overflow-hidden">
+                    <Header
+                        onBack={isAtRoot ? undefined : goBack}
+                        title={headerTitle}
+                        onClose={onClose}
                     />
+
+                    <div className="flex flex-col gap-xxs px-sm w-full">
+                        {subnamesRegistrations.map((sub) => (
+                            <NamePanelTile
+                                key={sub.name}
+                                registration={sub}
+                                onClick={() => goDeeper(sub.name)}
+                                hasSubnames={currentNode.subnames.length > 0}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center py-sm">
+                        <Button
+                            text="New Subname"
+                            type={ButtonType.Outlined}
+                            onClick={() => setIsAddDialogOpen(true)}
+                            icon={<Add />}
+                        />
+                    </div>
                 </div>
             </Panel>
 

@@ -46,3 +46,26 @@ impl std::str::FromStr for AuctionSortBy {
         })
     }
 }
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Default)]
+pub enum AuctionStatus {
+    #[default]
+    Active,
+    Finished,
+    Claimed,
+}
+
+impl std::str::FromStr for AuctionStatus {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(match s {
+            "active" => AuctionStatus::Active,
+            "finished" => AuctionStatus::Finished,
+            "claimed" => AuctionStatus::Claimed,
+            _ => Err(anyhow::anyhow!(
+                "Invalid status descriptor. Expected `active`, `finished`, or `claimed`, found `{s}`"
+            ))?,
+        })
+    }
+}

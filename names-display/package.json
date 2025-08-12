@@ -2,6 +2,7 @@
     "name": "names-display",
     "version": "1.0.0",
     "description": "",
+    "private": true,
     "main": "index.js",
     "type": "module",
     "scripts": {
@@ -17,6 +18,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@fastify/cors": "^11.1.0",
         "@iota/iota-names-sdk": "workspace:^",
         "@types/text-to-svg": "^3.1.4",
         "fastify": "^5.4.0",

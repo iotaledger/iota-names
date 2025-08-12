@@ -269,14 +269,6 @@ fun assert_is_authorized<A: drop>(coupon_house: &CouponHouse) {
     assert!(coupon_house.is_authorized<A>(), EAppNotAuthorized);
 }
 
-public(package) fun coupons(coupon_house: &CouponHouse): &Coupons {
-    &coupon_house.coupons
-}
-
-public(package) fun coupons_mut(coupon_house: &mut CouponHouse): &mut Coupons {
-    &mut coupon_house.coupons
-}
-
 public(package) fun coupons_table(coupon_house: &CouponHouse): &Table<vector<u8>, Coupon> {
     coupon_house.coupons.coupons()
 }

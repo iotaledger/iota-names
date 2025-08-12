@@ -1,10 +1,12 @@
 import { readFileSync } from 'node:fs';
+import cors from '@fastify/cors';
 import Fastify from 'fastify';
 import * as z from 'zod';
 
 import { renderSvg } from './utils/renderSvg.js';
 
 const baseSvgTemplate = readFileSync(new URL('./svg/base.svg', import.meta.url), 'utf-8');
+const expiredSvgTemplate = readFileSync(new URL('./svg/expired.svg', import.meta.url), 'utf-8');
 
 export const Params = z.object({
     name: z.string(),
@@ -13,10 +15,20 @@ export const Params = z.object({
 
 const fastify = Fastify({ logger: true });
 
+await fastify.register(cors, {
+    origin: '*',
+    methods: ['GET', 'HEAD'],
+});
+
+function isExpired(timestamp: number): boolean {
+    return timestamp < Date.now();
+}
+
 fastify.get('/:name/:timestamp', async (req, reply) => {
     const params = await z.parseAsync(Params, req.params);
+    const templateSvg = isExpired(params.timestamp) ? expiredSvgTemplate : baseSvgTemplate;
     try {
-        const svg = renderSvg({ ...params, template: baseSvgTemplate });
+        const svg = renderSvg({ ...params, template: templateSvg });
         reply.type('image/svg+xml').code(200);
         return svg;
     } catch (e) {

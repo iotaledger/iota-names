@@ -18,10 +18,9 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
-import cx from 'clsx';
 import { useState } from 'react';
 
-import { useGetUserAuctions } from '@/auctions';
+import { useAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
@@ -34,6 +33,7 @@ import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
+    const account = useCurrentAccount();
     const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
         null,
     );
@@ -55,14 +55,14 @@ export default function MyNamesPage(): JSX.Element {
         data: auctionDetails,
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
-    } = useGetUserAuctions();
+    } = useAuctions({
+        userAddress: account?.address,
+    });
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: defaultName } = useGetDefaultName(address);
 
     const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
-
-    const account = useCurrentAccount();
 
     const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
 
@@ -175,14 +175,7 @@ export default function MyNamesPage(): JSX.Element {
 
             {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
-                    <div
-                        className={cx(
-                            'gap-lg w-full',
-                            rightPanelSelectedName
-                                ? 'grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] auto-rows-[1fr]'
-                                : 'flex flex-row items-center flex-wrap',
-                        )}
-                    >
+                    <div className="gap-lg w-full flex flex-row items-center flex-wrap">
                         {filteredNames.map((nft) =>
                             'details' in nft ? (
                                 <ExtendedAuctionCard
@@ -210,7 +203,7 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
 
                     {rightPanelSelectedName && (
-                        <div className="max-w-[420px] w-full">
+                        <div className="sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg">
                             <SubnamesPanel
                                 selectedName={rightPanelSelectedName}
                                 onClose={() => setRightPanelSelectedName(null)}

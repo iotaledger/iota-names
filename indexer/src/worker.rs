@@ -38,10 +38,7 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     config::IotaNamesExtendedConfig,
-    db::{
-        pool::DbConnectionPool,
-        queries::{add_bids_entry, get_bid_count},
-    },
+    db::{pool::DbConnectionPool, queries},
     events::{CouponKind, IotaNamesEvent},
 };
 
@@ -152,22 +149,29 @@ impl IotaNamesWorker {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bids_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &name_str,
-                        event.starting_bid,
-                    )
+                    let bidder = queries::get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::upsert_auctions_entry(conn, &name, event.end_timestamp_ms as _)?;
+                    queries::add_bids_entry(conn, &bidder, &name, event.starting_bid)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bids_entry(conn, &event.bidder.to_string(), &name_str, event.bid)
+                    let bidder = queries::get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::add_bids_entry(conn, &bidder, &name, event.bid)
                 })?;
             }
-            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionExtended(event) => {
+                let name_str = event.name.to_string();
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::upsert_auctions_entry(conn, &name, event.end_timestamp_ms as _)
+                })?;
+            }
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.auctions_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
@@ -176,8 +180,11 @@ impl IotaNamesWorker {
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
-                let bid_count =
-                    conn.transaction::<_, anyhow::Error, _>(|conn| get_bid_count(conn, &name_str))?;
+                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::claim_auctions_entry(conn, &name)?;
+                    queries::get_bid_count(conn, &name_str)
+                })?;
                 self.metrics
                     .auction_bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])

@@ -9,6 +9,7 @@ export type BaseRoute = {
 
 export type PublicRoute = BaseRoute & {
     isProtected?: false;
+    id?: string;
 };
 
 export type ProtectedRoute = BaseRoute & {
