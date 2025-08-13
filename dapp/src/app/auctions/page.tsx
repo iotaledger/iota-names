@@ -104,6 +104,10 @@ export default function AuctionsPage(): JSX.Element {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+    useEffect(() => {
+        setPage(0);
+    }, [pageSize, sortOptions, searchQuery, selectedStatus]);
+
     const {
         data: auctions,
         totalItems,
