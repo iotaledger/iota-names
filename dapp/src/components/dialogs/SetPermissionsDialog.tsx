@@ -26,6 +26,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNamePermissions, getParentObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSetUpdates({
@@ -143,7 +144,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
             closeDialog();
         },
         onError: (error: Error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -198,7 +199,9 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     <InfoBox
                                         type={InfoBoxType.Error}
                                         title="Error"
-                                        supportingText={updateNameError.message}
+                                        supportingText={getUserFriendlyErrorMessage(
+                                            updateNameError,
+                                        )}
                                         style={InfoBoxStyle.Elevated}
                                         icon={
                                             <Warning className="text-error-30 dark:text-error-70" />
