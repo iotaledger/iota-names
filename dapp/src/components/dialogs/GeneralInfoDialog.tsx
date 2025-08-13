@@ -13,7 +13,7 @@ import {
     TitleSize,
     TooltipPosition,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { isSubname } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 import Link from 'next/link';
@@ -42,6 +42,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
 
     const { data: nameRecordData } = useNameRecord(name);
     const { data: subnames } = useRegistrationNfts('subname');
+    const { network } = useIotaClientContext();
 
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
@@ -57,17 +58,17 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Owner',
             value: address,
-            href: `https://explorer.iota.org/address/${address}?network=devnet`,
+            href: `https://explorer.iota.org/address/${address}?network=${network}`,
         },
         targetAddress && {
             key: 'Target address',
             value: targetAddress,
-            href: `https://explorer.iota.org/address/${targetAddress}?network=devnet`,
+            href: `https://explorer.iota.org/address/${targetAddress}?network=${network}`,
         },
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/object/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=${network}`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
