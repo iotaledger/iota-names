@@ -11,14 +11,13 @@ import { useGetObject } from '@/hooks/useGetOwnedObject';
 
 import { LottieAnimation } from '../loaders/Lottie';
 
-interface AvatarDisplayProps {
+const FALLBACK_URL = '/name-bg.svg';
+
+interface NameAvatarDisplay {
     name: string;
-    fallbackUrl?: string;
 }
 
-export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
-    const [showAvatar, setShowAvatar] = useState(false);
-
+export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
     const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
     const isNameSubname = isSubname(name);
@@ -36,9 +35,32 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
     });
 
     const isDataLoading = isNameRecordDataLoading || isSubnamesLoading || isAvatarLoading;
-    const avatarSrc = isDataLoading
-        ? null
-        : (avatarObject?.display?.data?.image_url ?? fallbackUrl);
+
+    return (
+        <AvatarDisplay
+            src={avatarObject?.display?.data?.image_url}
+            isLoadingSrc={isDataLoading}
+            alt={name}
+        ></AvatarDisplay>
+    );
+}
+
+interface AvatarDisplayProps {
+    src?: string;
+    isLoadingSrc?: boolean;
+    alt?: string;
+}
+
+export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
+    const [avatarSrc, setAvatarSrc] = useState<null | string>(null);
+
+    useEffect(() => {
+        if (src) {
+            setAvatarSrc(src);
+        } else if (!isLoadingSrc) {
+            setAvatarSrc(FALLBACK_URL);
+        }
+    }, [src, isLoadingSrc]);
 
     useEffect(() => {
         if (!avatarSrc) return;
@@ -46,19 +68,12 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
         const img = new Image();
         img.src = avatarSrc;
 
-        img.onload = () => setShowAvatar(true);
-        img.onerror = () => setShowAvatar(false);
+        img.onerror = () => setAvatarSrc(FALLBACK_URL);
     }, [avatarSrc]);
 
     return (
         <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
-            {avatarSrc && showAvatar ? (
-                <img
-                    className="absolute inset-0 w-full h-full -z-[1] object-cover"
-                    src={avatarSrc}
-                    alt={name}
-                />
-            ) : (
+            {isLoadingSrc ? (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                         <LottieAnimation
@@ -68,7 +83,18 @@ export function AvatarDisplay({ name, fallbackUrl }: AvatarDisplayProps) {
                     </div>
                     <img className={cx('w-full', 'block')} src="/name-bg.svg" />
                 </div>
-            )}
+            ) : avatarSrc ? (
+                <div className="w-full aspect-square relative">
+                    <img
+                        className="absolute inset-0 w-full h-full object-cover"
+                        src={avatarSrc}
+                        alt={alt}
+                    />
+                    <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                        {avatarSrc === FALLBACK_URL ? <span>No Image</span> : null}
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 }
