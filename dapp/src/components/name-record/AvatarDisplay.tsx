@@ -97,7 +97,7 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
                         alt={alt}
                     />
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                        {avatarSrc === FALLBACK_URL ? <span>No Image</span> : null}
+                        {avatarSrc === FALLBACK_URL ? <span>Couldn’t load avatar</span> : null}
                     </div>
                 </div>
             ) : null}
