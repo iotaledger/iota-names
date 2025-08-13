@@ -122,15 +122,15 @@ export function useAuctions({
                 return {
                     name,
                     metadata: result.data || null,
-                    isLoading: result.isLoading,
+                    isLoading: result.isLoading || result.isPending,
                     error: !!result.error,
                 };
             });
 
             return {
                 data: auctionDetails,
-                isLoading: isLoadingNames || results.some((result) => result.isLoading),
-                error: !!namesError || results.some((result) => result.error),
+                isLoading: isLoadingNames || auctionDetails.some((result) => result.isLoading),
+                error: !!namesError || auctionDetails.some((result) => result.error),
                 auctionNames,
                 isUserFiltered: !!userAddress,
                 page: auctionNames.page,
