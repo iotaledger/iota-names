@@ -53,6 +53,7 @@ interface AvatarDisplayProps {
 
 export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
     const [avatarSrc, setAvatarSrc] = useState<null | string>(null);
+    const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
 
     useEffect(() => {
         if (src) {
@@ -66,16 +67,19 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
     useEffect(() => {
         if (!avatarSrc) return;
 
+        setIsLoadingAvatar(true);
+
         const img = new Image();
         img.src = avatarSrc;
 
+        img.onload = () => setIsLoadingAvatar(false);
         // Render the fallback if the src fails
         img.onerror = () => setAvatarSrc(FALLBACK_URL);
     }, [avatarSrc]);
 
     return (
         <div className="w-full h-full flex flex-col relative rounded-xl overflow-hidden">
-            {isLoadingSrc ? (
+            {isLoadingSrc || isLoadingAvatar ? (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                         <LottieAnimation
