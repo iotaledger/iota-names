@@ -58,6 +58,7 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
         if (src) {
             setAvatarSrc(src);
         } else if (!isLoadingSrc) {
+            // If there is no src even after loading we render the fallback
             setAvatarSrc(FALLBACK_URL);
         }
     }, [src, isLoadingSrc]);
@@ -68,6 +69,7 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
         const img = new Image();
         img.src = avatarSrc;
 
+        // Render the fallback if the src fails
         img.onerror = () => setAvatarSrc(FALLBACK_URL);
     }, [avatarSrc]);
 
