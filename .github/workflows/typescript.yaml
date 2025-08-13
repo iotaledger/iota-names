@@ -43,6 +43,7 @@ jobs:
       - name: Run pnpm build
         env:
           NEXT_PUBLIC_NAMES_DISPLAY_API_URL: http://localhost:3000
+          NEXT_PUBLIC_NAMES_NETWORK: devnet
         run: |
           pnpm turbo build
 

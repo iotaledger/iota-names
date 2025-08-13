@@ -19,8 +19,7 @@ import { ThemeProvider } from './ThemeProvider';
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
     const allNetworks = getAllNetworks();
-    // devnet only atm
-    const defaultNetwork = 'devnet';
+    const defaultNetwork = process.env.NEXT_PUBLIC_NAMES_NETWORK;
 
     function handleNetworkChange() {
         queryClient.resetQueries();
