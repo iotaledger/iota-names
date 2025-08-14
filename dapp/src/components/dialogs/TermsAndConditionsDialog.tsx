@@ -39,7 +39,10 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                                 Effective Date: [RELEASE DATE]
                             </span>
                             <p className="text-body-md text-names-neutral-92">
-                                The IOTA Names Service does not collect, store, or process personal data. All interactions occur on a public blockchain. The Service does not use cookies, track users, or store IP addresses or off-chain identifiers.
+                                The IOTA Names Service does not collect, store, or process personal
+                                data. All interactions occur on a public blockchain. The Service
+                                does not use cookies, track users, or store IP addresses or
+                                off-chain identifiers.
                             </p>
                         </div>
                         <div className="flex flex-row items-center justify-between">
