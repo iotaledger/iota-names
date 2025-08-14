@@ -40,7 +40,7 @@ export function getPaginationPages(
         pages.push(SEPARATOR);
     }
 
-    if (lastPage > 0) {
+    if (lastPage > 1) {
         pages.push(lastPage);
     }
 
