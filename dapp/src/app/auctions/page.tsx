@@ -104,6 +104,11 @@ export default function AuctionsPage(): JSX.Element {
 
     function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
         const params = new URLSearchParams(searchParams.toString());
+
+        // Always go to page 1 if a param is changed
+        // If its changed in the for-loop then it will go to that other page
+        params.set('page', '1');
+
         for (const [key, value] of keys) {
             params.set(key, value.toString());
         }
@@ -113,11 +118,6 @@ export default function AuctionsPage(): JSX.Element {
     function setParam(key: string, value: string | number | boolean) {
         setParams([[key, value]]);
     }
-
-    // Reset the page when any of the filters change
-    useEffect(() => {
-        setParam('page', 1);
-    }, [pageSize, sort, sortBy, searchQuery, selectedStatus]);
 
     const {
         data: auctions,
