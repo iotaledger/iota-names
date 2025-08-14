@@ -129,7 +129,7 @@ export default function AuctionsPage(): JSX.Element {
         status: selectedStatus,
         sort,
         sortBy,
-        page,
+        page: page - 1,
         pageSize,
     });
 
@@ -180,13 +180,13 @@ export default function AuctionsPage(): JSX.Element {
         }
     })();
 
-    const totalPages = Math.ceil(totalItems / pageSize - 1);
+    const totalPages = Math.ceil(totalItems / pageSize);
     const paginationPages = getPaginationPages(page, totalPages, 4);
 
     const defaultPage = 1;
     const paginationOptions: TablePaginationOptions = {
         hasPrev: page > defaultPage,
-        hasNext: page < totalItems / pageSize - 1,
+        hasNext: page < totalItems / pageSize,
         onFirst: () => {
             setParam('page', defaultPage);
         },
