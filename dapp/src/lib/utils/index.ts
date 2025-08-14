@@ -4,3 +4,4 @@
 export * from './format';
 export * from './errorMessage';
 export * from './getPaginationPages';
+export * from './calculateFiatPrice';

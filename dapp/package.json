@@ -14,6 +14,8 @@
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix"
     },
     "dependencies": {
+        "@growthbook/growthbook": "^1.6.1",
+        "@growthbook/growthbook-react": "^1.6.1",
         "@iota/apps-ui-icons": "^0.4.1",
         "@iota/apps-ui-kit": "^0.7.1",
         "@iota/dapp-kit": "^0.5.1",

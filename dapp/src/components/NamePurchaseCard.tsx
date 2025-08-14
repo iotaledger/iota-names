@@ -4,6 +4,8 @@
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
+import { calculatePriceInFiat } from '@/lib/utils';
+
 interface NamePurchaseCardProps {
     name: string;
     statusMessage?: string;
@@ -26,9 +28,9 @@ export function NamePurchaseCard({
     const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
+    const fiatPrice = price ? calculatePriceInFiat(price) : '';
 
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
-
     return (
         <div
             className={clsx(
@@ -78,6 +80,13 @@ export function NamePurchaseCard({
                                         {priceSupportingText}
                                     </p>
                                 )}
+                            </div>
+                        )}
+                        {fiatPrice && (
+                            <div className="flex flex-col items-start">
+                                <span className="text-body-md text-names-neutral-50 items-center flex mr-md">
+                                    ${fiatPrice} USD
+                                </span>
                             </div>
                         )}
                         <div className="flex w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">

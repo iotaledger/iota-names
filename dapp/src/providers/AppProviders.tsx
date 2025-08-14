@@ -3,6 +3,7 @@
 
 'use client';
 
+import { GrowthBook, GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -12,12 +13,31 @@ import { Toaster } from '@/components/Toaster';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
+import { Feature } from '@/lib/enums';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './ThemeProvider';
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
+    const [growthbook] = useState(
+        () =>
+            new GrowthBook({
+                apiHost: 'https://cdn.growthbook.io',
+                clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY || '',
+                enableDevMode: process.env.NODE_ENV === 'development',
+                features: {
+                    [Feature.FiatConversion]: {
+                        defaultValue: {
+                            mainnet: false,
+                            testnet: true,
+                            devnet: true,
+                        },
+                    },
+                },
+            }),
+    );
+
     const allNetworks = getAllNetworks();
     const defaultNetwork = process.env.NEXT_PUBLIC_NAMES_NETWORK;
 
@@ -28,33 +48,35 @@ export function AppProviders({ children }: React.PropsWithChildren) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <IotaClientProvider
-                networks={allNetworks}
-                createClient={createIotaClient}
-                defaultNetwork={defaultNetwork}
-                onNetworkChange={handleNetworkChange}
-            >
-                <KioskClientProvider>
-                    <IotaNamesClientProvider>
-                        <IotaNamesIndexerClientProvider>
-                            <WalletProvider
-                                autoConnect={true}
-                                theme={[
-                                    {
-                                        selector: '.names',
-                                        variables: darkTheme,
-                                    },
-                                ]}
-                            >
-                                <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                    {children}
-                                    <Toaster />
-                                </ThemeProvider>
-                            </WalletProvider>
-                        </IotaNamesIndexerClientProvider>
-                    </IotaNamesClientProvider>
-                </KioskClientProvider>
-            </IotaClientProvider>
+            <GrowthBookProvider growthbook={growthbook}>
+                <IotaClientProvider
+                    networks={allNetworks}
+                    createClient={createIotaClient}
+                    defaultNetwork={defaultNetwork}
+                    onNetworkChange={handleNetworkChange}
+                >
+                    <KioskClientProvider>
+                        <IotaNamesClientProvider>
+                            <IotaNamesIndexerClientProvider>
+                                <WalletProvider
+                                    autoConnect={true}
+                                    theme={[
+                                        {
+                                            selector: '.names',
+                                            variables: darkTheme,
+                                        },
+                                    ]}
+                                >
+                                    <ThemeProvider staticTheme={APP_STATIC_THEME}>
+                                        {children}
+                                        <Toaster />
+                                    </ThemeProvider>
+                                </WalletProvider>
+                            </IotaNamesIndexerClientProvider>
+                        </IotaNamesClientProvider>
+                    </KioskClientProvider>
+                </IotaClientProvider>
+            </GrowthBookProvider>
         </QueryClientProvider>
     );
 }

@@ -3,3 +3,4 @@
 
 export * from './formatNanosToIota';
 export * from './formatNames';
+export * from './formatBalanceToUSD';

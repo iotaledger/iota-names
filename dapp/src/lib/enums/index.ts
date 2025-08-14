@@ -3,3 +3,5 @@
 
 export * from './theme.enums';
 export * from './protectedRouteTitle.enums';
+export * from './fiatTokenName.enums';
+export * from './features.enums';

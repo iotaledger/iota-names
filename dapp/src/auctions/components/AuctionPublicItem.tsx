@@ -19,7 +19,7 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { useNameRecord } from '@/hooks';
-import { formatNanosToIota } from '@/lib/utils';
+import { calculatePriceInFiat, formatNanosToIota } from '@/lib/utils';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { AuctionActionButton } from './AuctionActionButton';
@@ -31,7 +31,6 @@ interface AuctionublicItemProps {
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
     const [, setIsActive] = useState(isAuctionActive(auction.metadata));
-
     const isClaimedAuction = !auction.metadata;
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
@@ -57,6 +56,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
               showIotaSymbol: false,
           })
         : null;
+    const fiatPrice = formattedPrice ? calculatePriceInFiat(formattedPrice) : '';
 
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
@@ -77,6 +77,11 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                                 <div className="flex items-baseline gap-1">
                                     <span className="text-body-lg">{formattedPrice}</span>
                                 </div>
+                                {fiatPrice && (
+                                    <span className="text-body-md text-names-neutral-50">
+                                        ${fiatPrice}
+                                    </span>
+                                )}
                             </div>
                         </div>
                         <div>
