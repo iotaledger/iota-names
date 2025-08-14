@@ -280,8 +280,8 @@ export default function AuctionsPage(): JSX.Element {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-center items-center mt-8">
-                    {paginationPages.length > 0 ? (
+                {paginationPages.length > 0 ? (
+                    <div className="flex justify-center items-center mt-8">
                         <div className="flex flex-1 justify-center">
                             <div className="flex gap-2">
                                 <Button
@@ -326,22 +326,22 @@ export default function AuctionsPage(): JSX.Element {
                                 />
                             </div>
                         </div>
-                    ) : null}
-                    <div className="flex ml-6">
-                        <Select
-                            dropdownPosition={DropdownPosition.Top}
-                            value={pageSize.toString()}
-                            options={PAGE_SIZES_RANGE.map((size) => ({
-                                label: `${size} / page`,
-                                id: size.toString(),
-                            }))}
-                            size={SelectSize.Small}
-                            onValueChange={(e) => {
-                                setParam('size', e);
-                            }}
-                        />
+                        <div className="flex ml-6">
+                            <Select
+                                dropdownPosition={DropdownPosition.Top}
+                                value={pageSize.toString()}
+                                options={PAGE_SIZES_RANGE.map((size) => ({
+                                    label: `${size} / page`,
+                                    id: size.toString(),
+                                }))}
+                                size={SelectSize.Small}
+                                onValueChange={(e) => {
+                                    setParam('size', e);
+                                }}
+                            />
+                        </div>
                     </div>
-                </div>
+                ) : null}
             </div>
 
             {bidDialogName && (
