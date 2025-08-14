@@ -319,13 +319,40 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats
-                                    icon={isLoading ? <LoadingIndicator /> : null}
-                                    label="Registration Expires"
-                                    value={expirationDate}
-                                />
-                            </div>
+                            {!isNameSubname && expirationDate && renewYears && (
+                                <div className="flex flex-row gap-x-sm w-full">
+                                    <DisplayStats
+                                        icon={isLoading ? <LoadingIndicator /> : null}
+                                        label="Registration Expires"
+                                        value={(() => {
+                                            const currentExpiration = new Date(expirationDate);
+                                            const newExpiration = new Date(expirationDate);
+                                            newExpiration.setFullYear(
+                                                currentExpiration.getFullYear() + renewYears,
+                                            );
+                                            return formatExpirationDate(newExpiration);
+                                        })()}
+                                    />
+                                </div>
+                            )}
+                            {isNameSubname && nameRecord && ownedNames && ownedSubnames && (
+                                <div className="flex flex-row gap-x-sm w-full">
+                                    <DisplayStats
+                                        icon={isLoading ? <LoadingIndicator /> : null}
+                                        label="Registration Expires"
+                                        value={(() => {
+                                            const parentObject = getParentObject(
+                                                ownedNames,
+                                                ownedSubnames,
+                                                nameRecord.nameRecord.name,
+                                            );
+                                            return formatExpirationDate(
+                                                new Date(parentObject?.expirationTimestampMs || 0),
+                                            );
+                                        })()}
+                                    />
+                                </div>
+                            )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
