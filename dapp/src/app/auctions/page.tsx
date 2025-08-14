@@ -33,6 +33,7 @@ import {
     SelectSize,
     TablePaginationOptions,
 } from '@iota/apps-ui-kit';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions';
@@ -69,21 +70,18 @@ const SORT_OPTIONS = [
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
 
 export default function AuctionsPage(): JSX.Element {
-    const [selectedStatus, setSelectedStatus] = useState<AuctionStatus>('all');
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [areFiltersVisible, setAreFiltersVisible] = useState<boolean>(false);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
-    const [page, setPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(10);
-    const [sortOptions, setSortOptions] = useState<{
-        sort: 'asc' | 'desc';
-        sortBy: 'bid' | 'name';
-    }>({
-        sort: 'asc',
-        sortBy: 'bid',
-    });
-
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const page = Number(searchParams.get('page') || 1);
+    const selectedStatus = (searchParams.get('status') || 'all') as AuctionStatus;
+    const searchQuery = searchParams.get('search') || '';
+    const pageSize = Number(searchParams.get('size') || 10);
+    const sort = (searchParams.get('sort') || 'asc') as 'asc' | 'desc';
+    const sortBy = (searchParams.get('sortBy') || 'bid') as 'bid' | 'name';
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -104,9 +102,22 @@ export default function AuctionsPage(): JSX.Element {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+    function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
+        const params = new URLSearchParams(searchParams.toString());
+        for (const [key, value] of keys) {
+            params.set(key, value.toString());
+        }
+        router.replace(`?${params}`);
+    }
+
+    function setParam(key: string, value: string | number | boolean) {
+        setParams([[key, value]]);
+    }
+
+    // Reset the page when any of the filters change
     useEffect(() => {
-        setPage(0);
-    }, [pageSize, sortOptions, searchQuery, selectedStatus]);
+        setParam('page', 1);
+    }, [pageSize, sort, sortBy, searchQuery, selectedStatus]);
 
     const {
         data: auctions,
@@ -116,8 +127,8 @@ export default function AuctionsPage(): JSX.Element {
     } = useAuctions({
         search: debouncedSearchQuery,
         status: selectedStatus,
-        sort: sortOptions.sort,
-        sortBy: sortOptions.sortBy,
+        sort,
+        sortBy,
         page,
         pageSize,
     });
@@ -172,20 +183,20 @@ export default function AuctionsPage(): JSX.Element {
     const totalPages = Math.ceil(totalItems / pageSize);
     const paginationPages = getPaginationPages(page + 1, totalPages, 4);
 
-    const defaultPage = 0;
+    const defaultPage = 1;
     const paginationOptions: TablePaginationOptions = {
         hasPrev: page > defaultPage,
-        hasNext: page < totalItems / pageSize - 1,
+        hasNext: page < totalItems / pageSize,
         onFirst: () => {
-            setPage(defaultPage);
+            setParam('page', defaultPage);
         },
         onPrev: () => {
-            const prevPage = page > defaultPage ? page - 1 : defaultPage;
-            setPage(prevPage);
+            const prevPage = page > defaultPage ? page : defaultPage;
+            setParam('page', prevPage);
         },
         onNext: () => {
-            const nextPage = page < totalItems / pageSize - 1 ? page + 1 : page;
-            setPage(nextPage);
+            const nextPage = page < totalItems / pageSize ? page : page;
+            setParam('page', nextPage);
         },
     };
 
@@ -204,7 +215,7 @@ export default function AuctionsPage(): JSX.Element {
                             type={ButtonSegmentType.Rounded}
                             label={option.label}
                             selected={selectedStatus === option.value}
-                            onClick={() => setSelectedStatus(option.value)}
+                            onClick={() => setParam('status', option.value)}
                         />
                     ))}
                 </SegmentedButton>
@@ -215,7 +226,7 @@ export default function AuctionsPage(): JSX.Element {
                             placeholder="Search auction"
                             type={InputType.Text}
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => setParam('search', e.target.value)}
                             trailingElement={<Search className="text-names-neutral-92 w-6 h-6" />}
                         />
                     </div>
@@ -230,16 +241,15 @@ export default function AuctionsPage(): JSX.Element {
                                 {SORT_OPTIONS.map((option) => (
                                     <ListItem
                                         key={`${option.sort}-${option.sortBy}`}
-                                        onClick={() =>
-                                            setSortOptions({
-                                                sort: option.sort,
-                                                sortBy: option.sortBy,
-                                            })
-                                        }
+                                        onClick={() => {
+                                            setParams([
+                                                ['sort', option.sort],
+                                                ['sortBy', option.sortBy],
+                                            ]);
+                                        }}
                                         hideBottomBorder
                                         isHighlighted={
-                                            sortOptions.sort === option.sort &&
-                                            sortOptions.sortBy === option.sortBy
+                                            sort === option.sort && sortBy === option.sortBy
                                         }
                                     >
                                         <span>{option.label}</span>
@@ -296,10 +306,10 @@ export default function AuctionsPage(): JSX.Element {
 
                                 return (
                                     <Chip
-                                        key={`page-${pageNumber}`}
+                                        key={pageNumber}
                                         type={ChipType.Outline}
-                                        selected={page === pageNumber - 1}
-                                        onClick={() => setPage(pageNumber - 1)}
+                                        selected={page === pageNumber}
+                                        onClick={() => setParam('page', pageNumber)}
                                         label={pageNumber.toString()}
                                     />
                                 );
@@ -325,8 +335,7 @@ export default function AuctionsPage(): JSX.Element {
                             }))}
                             size={SelectSize.Small}
                             onValueChange={(e) => {
-                                setPageSize(Number(e));
-                                paginationOptions.onFirst!();
+                                setParam('size', e);
                             }}
                         />
                     </div>
