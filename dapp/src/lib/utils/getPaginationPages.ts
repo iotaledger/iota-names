@@ -16,11 +16,11 @@ export function getPaginationPages(
     }
 
     let startPage = Math.max(2, currentPage - Math.floor(displayCount / 2));
-    let endPage = Math.min(lastPage - 1, currentPage + Math.floor(displayCount / 2));
+    let endPage = Math.min(lastPage, currentPage + Math.floor(displayCount / 2));
 
-    if (endPage - startPage + 1 < displayCount) {
+    if (endPage - startPage < displayCount) {
         if (currentPage <= displayCount) {
-            endPage = Math.min(lastPage - 1, displayCount + 1);
+            endPage = Math.min(lastPage, displayCount);
         } else if (currentPage > lastPage - displayCount) {
             startPage = Math.max(2, lastPage - displayCount);
         }
@@ -40,7 +40,7 @@ export function getPaginationPages(
         pages.push(SEPARATOR);
     }
 
-    if (lastPage > 1) {
+    if (lastPage > 0) {
         pages.push(lastPage);
     }
 
