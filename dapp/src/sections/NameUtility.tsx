@@ -12,7 +12,7 @@ const WHY_IOTA_NAMES = [
     },
     {
         title: 'Unlimited Subnames, Infinite Utility',
-        body: 'Unlimited subnames let you set up custom tags like @wallet.yourname or @dev.yourname – ideal for services, roles, or communities',
+        body: 'Unlimited subnames let you set up custom tags like wallet@yourname or dev@yourname - ideal for services, roles, or communities',
         image: '/landing-page/unlimited-subnames.png',
     },
 ];

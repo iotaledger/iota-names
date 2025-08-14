@@ -302,21 +302,23 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
+                            {!isNameSubname && (
+                                <div className="flex flex-col">
+                                    <div className="self-end">
+                                        <Toggle
+                                            isToggled={applyCoupons}
+                                            onChange={setApplyCoupons}
+                                            label="Add Coupons"
+                                        />
+                                    </div>
+                                    {applyCoupons && (
+                                        <CouponInputSelection
+                                            coupons={coupons}
+                                            onAddCoupon={handleAddCoupon}
+                                        />
+                                    )}
                                 </div>
-                                {applyCoupons && (
-                                    <CouponInputSelection
-                                        coupons={coupons}
-                                        onAddCoupon={handleAddCoupon}
-                                    />
-                                )}
-                            </div>
+                            )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             {!isNameSubname && expirationDate && renewYears && (
