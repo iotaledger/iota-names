@@ -3,6 +3,7 @@
 
 'use client';
 
+import { useAuctions } from '@/auctions';
 import {
     AuctionCarousel,
     BuiltForBuilders,
@@ -11,10 +12,16 @@ import {
     NameUtility,
     WhyIotaNames,
 } from '@/sections';
-import { useActiveAuctionsCarousel } from '@/sections/useActiveAuctionsCarousel';
 
 export default function Home() {
-    const { data: auctions = [], isLoading } = useActiveAuctionsCarousel();
+    const { data: auctions = [], isLoading } = useAuctions({
+        status: 'active',
+        search: '',
+        page: 0,
+        pageSize: 20,
+        sortBy: 'bid',
+        sort: 'desc',
+    });
 
     return (
         <main className="flex flex-col min-h-screen">
