@@ -32,6 +32,7 @@ import { useIotaNamesClient } from '@/contexts';
 import {
     NameRecordData,
     queryKey,
+    useCalculatePriceInFiat,
     useCalculateRenewalPrice,
     useNameRecord,
     useRegistrationNfts,
@@ -40,7 +41,7 @@ import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
-import { calculatePriceInFiat, formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
     getNameObject,
@@ -142,21 +143,16 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
-    const couponCodes = coupons.map((c) => c.code);
-
     const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
-    console.log('renewalPriceInNanos', renewalPriceInNanos);
+    const fiatPriceResult = useCalculatePriceInFiat(
+        renewalPriceInNanos && renewalPriceInNanos > 0 ? renewalPriceInNanos.toString() : '0',
+    );
+    const fiatPrice =
+        renewalPriceInNanos && renewalPriceInNanos > 0
+            ? parseFloat(fiatPriceResult).toString()
+            : '';
 
-    const formattedPrice = renewalPriceInNanos
-        ? formatNanosToIota(renewalPriceInNanos ?? BigInt(0), {
-              formatRounded: false,
-              showIotaSymbol: false,
-          })
-        : null;
-    console.log('formattedPrice', formattedPrice);
-
-    const fiatPrice = calculatePriceInFiat(formattedPrice ?? undefined);
-    console.log('fiatPrice', fiatPrice);
+    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,

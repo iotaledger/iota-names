@@ -13,13 +13,11 @@ export function useCalculateRenewalPrice(name: string, years: number) {
     return useQuery({
         queryKey: [...queryKey.renewalPrice(name, years)],
         queryFn: async () => {
-            const nameRecordPrice = await iotaNamesClient.calculatePrice({
+            return await iotaNamesClient.calculatePrice({
                 name,
                 years: years,
                 isRegistration: false,
             });
-            return nameRecordPrice.toString();
         },
-        staleTime: 60 * 60 * 1000,
     });
 }

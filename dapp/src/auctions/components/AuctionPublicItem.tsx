@@ -18,8 +18,8 @@ import {
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
-import { useNameRecord } from '@/hooks';
-import { calculatePriceInFiat, formatNanosToIota } from '@/lib/utils';
+import { useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import { formatNanosToIota } from '@/lib/utils';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { AuctionActionButton } from './AuctionActionButton';
@@ -56,9 +56,9 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
               showIotaSymbol: false,
           })
         : null;
-    const fiatPrice = formattedPrice
-        ? Math.round(parseFloat(calculatePriceInFiat(formattedPrice))).toString()
-        : '';
+
+    const priceNanos = auction.metadata?.currentBidNanos || BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(priceNanos.toString());
 
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>

@@ -35,13 +35,19 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
+import {
+    NameRecordData,
+    queryKey,
+    useBalanceValidation,
+    useCalculatePriceInFiat,
+    useNameRecord,
+} from '@/hooks';
 import {
     GAS_BALANCE_TOO_LOW_ID,
     INSUFFICIENT_COIN_BALANCE_ID,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
-import { calculatePriceInFiat, formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -71,7 +77,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             ? formatNanosToIota(minBidNanos, { formatRounded: false, showIotaSymbol: false })
             : '');
 
-    const fiatPrice = currentPrice ? parseFloat(calculatePriceInFiat(currentPrice)).toString() : '';
+    const currentPriceInNanos = toNanos(currentPrice) || BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos.toString());
 
     useEffect(() => {
         if (minBidNanos) {
