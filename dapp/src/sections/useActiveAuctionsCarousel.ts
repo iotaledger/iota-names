@@ -8,7 +8,7 @@ import { useAuctions } from '@/auctions/hooks/useAuctions';
  */
 export function useActiveAuctionsCarousel() {
     return useAuctions({
-        status: 'all',
+        status: 'active',
         search: '',
         page: 1,
         pageSize: 20,
