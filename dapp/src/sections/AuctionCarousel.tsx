@@ -10,6 +10,7 @@ import 'react-multi-carousel/lib/styles.css';
 
 import { AuctionBidDialog, AuctionDetails } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
+import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 interface AuctionCarouselProps {
     auctions: AuctionDetails[];
@@ -127,6 +128,7 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
 
 function AuctionCarouselHeader() {
     const router = useRouter();
+    const { open, close } = useAvailabilityCheckDialog();
 
     const handleViewAll = useCallback(() => {
         router.push('/auctions');
@@ -143,7 +145,7 @@ function AuctionCarouselHeader() {
                         text="Start Auction"
                         type={ButtonType.Outlined}
                         size={ButtonSize.Medium}
-                        onClick={handleViewAll}
+                        onClick={() => open({ autoFocusInput: true, onCompleted: close })}
                     />
                     <Button
                         text="View All"
