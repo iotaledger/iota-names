@@ -41,7 +41,7 @@ import {
     INSUFFICIENT_COIN_BALANCE_ID,
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { calculatePriceInFiat, formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -65,7 +65,14 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
 
     const [bidAmountValue, setBidAmountValue] = useState<string | undefined>();
 
-    // Sync the minimum bid amount
+    const currentPrice =
+        bidAmountValue ||
+        (minBidNanos
+            ? formatNanosToIota(minBidNanos, { formatRounded: false, showIotaSymbol: false })
+            : '');
+
+    const fiatPrice = currentPrice ? parseFloat(calculatePriceInFiat(currentPrice)).toString() : '';
+
     useEffect(() => {
         if (minBidNanos) {
             setBidAmountValue(
@@ -232,6 +239,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 label="Your Bid"
                                 min={Number(minBidNanos)}
                                 value={bidAmountValue}
+                                supportingText={fiatPrice ? `$${fiatPrice}` : ''}
                                 onChange={({ target: { value } }) => setBidAmountValue(value)}
                                 errorMessage={errorMessage}
                                 trailingElement={

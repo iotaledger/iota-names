@@ -56,7 +56,9 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
               showIotaSymbol: false,
           })
         : null;
-    const fiatPrice = formattedPrice ? calculatePriceInFiat(formattedPrice) : '';
+    const fiatPrice = formattedPrice
+        ? Math.round(parseFloat(calculatePriceInFiat(formattedPrice))).toString()
+        : '';
 
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
