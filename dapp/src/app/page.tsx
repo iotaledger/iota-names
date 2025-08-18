@@ -20,10 +20,10 @@ export default function Home() {
         <main className="flex flex-col min-h-screen">
             <LandingHero />
             <WhyIotaNames />
+            <FairAuction />
             <section className="container py-14 md:py-20">
                 <AuctionCarousel auctions={auctions} isLoading={isLoading} />
             </section>
-            <FairAuction />
             <NameUtility />
             <BuiltForBuilders />
         </main>
