@@ -328,11 +328,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                         label="Registration Expires"
                                         value={(() => {
                                             const currentExpiration = new Date(expirationDate);
-                                            const newExpiration = new Date(expirationDate);
-                                            newExpiration.setFullYear(
+                                            currentExpiration.setFullYear(
                                                 currentExpiration.getFullYear() + renewYears,
                                             );
-                                            return formatExpirationDate(newExpiration);
+                                            return formatExpirationDate(currentExpiration);
                                         })()}
                                     />
                                 </div>
