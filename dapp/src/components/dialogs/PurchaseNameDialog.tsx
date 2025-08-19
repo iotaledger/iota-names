@@ -31,12 +31,8 @@ import toast from 'react-hot-toast';
 import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    GAS_BUDGET_ERROR_MESSAGES,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
-import { formatNanosToIota } from '@/lib/utils';
+import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -148,7 +144,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             if (onPurchase) onPurchase();
         },
         onError(error) {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -172,7 +168,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                 updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
                 updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
             ) {
-                toast.error(GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]);
+                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
                 const couponMatch = updateNameError.message.match(couponRegex)?.[1];
@@ -232,7 +228,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-
     const expirationDate = getTargetExpirationDate(1);
 
     return (
@@ -268,9 +263,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             {!hasEnoughGas && (
                                 <InfoBox
                                     title="Error"
-                                    supportingText={
-                                        GAS_BUDGET_ERROR_MESSAGES[GAS_BALANCE_TOO_LOW_ID]
-                                    }
+                                    supportingText={getUserFriendlyErrorMessage(
+                                        GAS_BALANCE_TOO_LOW_ID,
+                                    )}
                                     icon={<Warning />}
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
@@ -287,7 +282,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 </div>
                             </Panel>
-
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                                 <DisplayStats

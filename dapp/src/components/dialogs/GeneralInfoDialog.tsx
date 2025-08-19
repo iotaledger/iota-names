@@ -13,7 +13,7 @@ import {
     TitleSize,
     TooltipPosition,
 } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { isSubname } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 import Link from 'next/link';
@@ -22,7 +22,7 @@ import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { Collapsible } from '../Collapsible';
-import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { NameAvatarDisplay } from '../name-record/AvatarDisplay';
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface InfoLinks {
@@ -42,6 +42,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
 
     const { data: nameRecordData } = useNameRecord(name);
     const { data: subnames } = useRegistrationNfts('subname');
+    const { network } = useIotaClientContext();
 
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
@@ -57,17 +58,17 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         {
             key: 'Owner',
             value: address,
-            href: `https://explorer.iota.org/address/${address}?network=devnet`,
+            href: `https://explorer.iota.org/address/${address}?network=${network}`,
         },
         targetAddress && {
             key: 'Target address',
             value: targetAddress,
-            href: `https://explorer.iota.org/address/${targetAddress}?network=devnet`,
+            href: `https://explorer.iota.org/address/${targetAddress}?network=${network}`,
         },
         {
             key: 'Object ID',
             value: id,
-            href: `https://explorer.iota.org/object/${id}?network=devnet`,
+            href: `https://explorer.iota.org/object/${id}?network=${network}`,
         },
     ].filter((item): item is InfoLinks => Boolean(item));
 
@@ -81,7 +82,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
-                        <AvatarDisplay name={name} />
+                        <NameAvatarDisplay name={name} />
                         <span className="text-headline-sm text-names-neutral-92 w-full text-center">
                             <TruncatedNameWithTooltip
                                 name={name}
