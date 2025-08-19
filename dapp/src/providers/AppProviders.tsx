@@ -5,7 +5,7 @@
 
 import { GrowthBook, GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
-import { getAllNetworks } from '@iota/iota-sdk/client';
+import { getAllNetworks, getAppsBackend } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -23,7 +23,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const [growthbook] = useState(
         () =>
             new GrowthBook({
-                apiHost: 'https://cdn.growthbook.io',
+                apiHost: getAppsBackend(),
                 clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY || '',
                 enableDevMode: process.env.NODE_ENV === 'development',
                 features: {
