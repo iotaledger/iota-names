@@ -59,7 +59,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-            isDisabled: !namePermissions.allowChildCreation,
+            isHidden: !namePermissions.allowChildCreation,
         },
         // {
         //     onClick: () => {},
@@ -68,7 +68,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            isDisabled: !namePermissions.allowTimeExtension,
+            isHidden: !namePermissions.allowTimeExtension,
             hideBottomBorder: true,
         },
         {
