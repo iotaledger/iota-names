@@ -6,6 +6,8 @@ import type { Metadata } from 'next';
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
+import { Suspense } from 'react';
+
 import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
 import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
@@ -27,13 +29,15 @@ export default function RootLayout({
         <html lang="en" className={APP_STATIC_THEME}>
             <body className="antialiased">
                 <AppProviders>
-                    <ConnectionGuard>
-                        <Navbar />
-                        {children}
-                        <AvailabilityCheckDialog />
-                        <Footer />
-                        <TermsAndConditionsDialog />
-                    </ConnectionGuard>
+                    <Suspense>
+                        <ConnectionGuard>
+                            <Navbar />
+                            {children}
+                            <AvailabilityCheckDialog />
+                            <Footer />
+                            <TermsAndConditionsDialog />
+                        </ConnectionGuard>
+                    </Suspense>
                 </AppProviders>
             </body>
         </html>
