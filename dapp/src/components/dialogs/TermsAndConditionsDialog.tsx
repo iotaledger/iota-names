@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+'use client';
+
 import {
     Button,
     ButtonType,
@@ -11,27 +13,48 @@ import {
     DialogPosition,
     Header,
 } from '@iota/apps-ui-kit';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
-interface TermsAndConditionsDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}
+import { TermsAndConds } from '@/lib/utils/termsAndConditions';
 
-export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditionsDialogProps) {
-    const [termsAccepted, setTermsAccepted] = useState(false);
+export function TermsAndConditionsDialog() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const modalParam = searchParams.get('modal');
+    const open = modalParam === 'terms_conditions';
+
+    const [termsAccepted, setTermsAccepted] = useState(TermsAndConds.areTermsAndCondsAccepted);
+
+    function handleAccept() {
+        if (termsAccepted) {
+            TermsAndConds.acceptTermsAndConds();
+        }
+        handleClose();
+    }
+
+    function handleClose() {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('modal');
+        router.replace(`${window.location.pathname}/?${params.toString()}`, { scroll: false });
+    }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(open) => {
+                if (!open) {
+                    handleClose();
+                }
+            }}
+        >
             <DialogContent
                 containerId="overlay-portal-container"
                 position={DialogPosition.Center}
                 isFixedPosition
                 customWidth="w-full max-w-md md:max-w-2xl xl:max-w-[744px]"
             >
-                <Header title="Terms & Conditions" onClose={() => onOpenChange(false)} />
+                <Header title="Terms & Conditions" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col gap-xl">
                         <div className="flex flex-col gap-md">
@@ -60,11 +83,11 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                             <Checkbox
                                 name="terms_conditions"
                                 label="I have read, understand, and agree to the Terms of Service"
-                                onCheckedChange={() => setTermsAccepted(true)}
+                                onCheckedChange={(e) => setTermsAccepted(true)}
                                 isChecked={termsAccepted}
                             />
                             <Button
-                                onClick={() => router.push('/')}
+                                onClick={handleAccept}
                                 type={ButtonType.Primary}
                                 disabled={!termsAccepted}
                                 text="Accept"

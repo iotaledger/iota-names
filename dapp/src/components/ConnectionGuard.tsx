@@ -5,10 +5,28 @@
 
 import { LoadingIndicator } from '@iota/apps-ui-kit';
 import { useAutoConnectWallet } from '@iota/dapp-kit';
+import { redirect, usePathname, useSearchParams } from 'next/navigation';
 import { PropsWithChildren } from 'react';
 
+import { PROTECTED_ROUTES } from '@/lib/constants';
+import { TermsAndConds } from '@/lib/utils/termsAndConditions';
+
 export function ConnectionGuard({ children }: PropsWithChildren) {
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const autoConnect = useAutoConnectWallet();
+
+    const areTermsAndCondsAccepted = TermsAndConds.areTermsAndCondsAccepted();
+    const inProtectedRoute = PROTECTED_ROUTES.some((route) => route.path === pathname);
+
+    // Dont allow the user to go to protected routes if the terms and conditions have not been accepted
+    if (
+        !areTermsAndCondsAccepted &&
+        searchParams.get('modal') !== 'terms_conditions' &&
+        inProtectedRoute
+    ) {
+        return redirect('/?modal=terms_conditions');
+    }
 
     if (autoConnect === 'idle') {
         return (

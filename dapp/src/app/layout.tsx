@@ -8,6 +8,7 @@ import './globals.css';
 
 import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
+import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
@@ -31,6 +32,7 @@ export default function RootLayout({
                         {children}
                         <AvailabilityCheckDialog />
                         <Footer />
+                        <TermsAndConditionsDialog />
                     </ConnectionGuard>
                 </AppProviders>
             </body>
