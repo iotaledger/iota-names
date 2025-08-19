@@ -16,7 +16,7 @@ export function ConnectionGuard({ children }: PropsWithChildren) {
     const searchParams = useSearchParams();
     const autoConnect = useAutoConnectWallet();
 
-    const areTermsAndCondsAccepted = TermsAndConds.areTermsAndCondsAccepted();
+    const areTermsAndCondsAccepted = TermsAndConds.areAccepted();
     const inProtectedRoute = PROTECTED_ROUTES.some((route) => route.path === pathname);
 
     // Dont allow the user to go to protected routes if the terms and conditions have not been accepted

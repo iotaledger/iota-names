@@ -9,7 +9,7 @@ export function ConnectButton() {
     const router = useRouter();
 
     function handleClick(ev: React.MouseEvent) {
-        const areTermsAndCondsAccepted = TermsAndConds.areTermsAndCondsAccepted();
+        const areTermsAndCondsAccepted = TermsAndConds.areAccepted();
         if (!areTermsAndCondsAccepted) {
             // Prevent the dapp kit modal from opening
             ev.preventDefault();

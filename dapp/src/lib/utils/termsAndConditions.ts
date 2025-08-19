@@ -1,5 +1,5 @@
 export class TermsAndConds {
-    static areTermsAndCondsAccepted(): boolean {
+    static areAccepted(): boolean {
         if (typeof window === 'undefined') {
             return false;
         }
@@ -12,7 +12,7 @@ export class TermsAndConds {
         }
     }
 
-    static acceptTermsAndConds() {
+    static accept() {
         if (typeof window === 'undefined') return;
         window.localStorage.setItem('terms-and-conditions-accepted', 'true');
     }

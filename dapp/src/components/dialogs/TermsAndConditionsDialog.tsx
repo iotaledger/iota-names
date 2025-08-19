@@ -24,11 +24,11 @@ export function TermsAndConditionsDialog() {
     const modalParam = searchParams.get('modal');
     const open = modalParam === 'terms_conditions';
 
-    const [termsAccepted, setTermsAccepted] = useState(TermsAndConds.areTermsAndCondsAccepted);
+    const [termsAccepted, setTermsAccepted] = useState(TermsAndConds.areAccepted);
 
     function handleAccept() {
         if (termsAccepted) {
-            TermsAndConds.acceptTermsAndConds();
+            TermsAndConds.accept();
         }
         handleClose();
     }
