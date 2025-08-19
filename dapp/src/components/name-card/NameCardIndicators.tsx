@@ -60,18 +60,26 @@ export function SubnameCountIndicator({
             </ButtonUnstyled>
         );
     }
-
-    return (
-        <ButtonUnstyled
-            onClick={onSubnameListClick}
-            className={cx(
-                INDICATOR_PRIMARY_TEXT_COLOR,
-                INDICATOR_COMMON_CLASSES,
-                CLICKABLE_INDICATOR_CLASSES,
-            )}
-        >
-            <Subnames className="h-4 w-4" />
-            {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
-        </ButtonUnstyled>
-    );
+    if (showAddSubnameLink !== false) {
+        return (
+            <ButtonUnstyled
+                onClick={onSubnameListClick}
+                className={cx(
+                    INDICATOR_PRIMARY_TEXT_COLOR,
+                    INDICATOR_COMMON_CLASSES,
+                    CLICKABLE_INDICATOR_CLASSES,
+                )}
+            >
+                <Subnames className="h-4 w-4" />
+                {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
+            </ButtonUnstyled>
+        );
+    } else {
+        return (
+            <span className={cx(INDICATOR_PRIMARY_TEXT_COLOR, INDICATOR_COMMON_CLASSES)}>
+                <Subnames className="h-4 w-4" />
+                {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
+            </span>
+        );
+    }
 }

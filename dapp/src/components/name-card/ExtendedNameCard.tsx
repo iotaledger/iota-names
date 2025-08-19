@@ -3,7 +3,7 @@
 
 import { Link } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { NameRecordData, useNameRecord } from '@/hooks';
@@ -11,7 +11,7 @@ import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -46,6 +46,11 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const isNameSubname = nft ? isSubname(nft.name) : false;
+    const namePermissions =
+        isNameSubname && nameRecord
+            ? getNamePermissions(nameRecord.nameRecord)
+            : { allowChildCreation: true, allowTimeExtension: true };
 
     const buttonText = (() => {
         if (expired) {
@@ -55,7 +60,7 @@ export function ExtendedNameCard({
     })();
 
     const handleButtonClick = () => {
-        if (expired) {
+        if (expired && namePermissions.allowTimeExtension) {
             openDialog(NameDialogId.RenewName);
         } else {
             openDialog(NameDialogId.ConnectToAddress);
@@ -70,6 +75,7 @@ export function ExtendedNameCard({
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
+                        showAddSubnameLink={namePermissions.allowChildCreation}
                     />
 
                     <Button
