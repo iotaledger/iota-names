@@ -20,6 +20,7 @@ import {
     Panel,
     Select,
     SelectOption,
+    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -27,10 +28,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
     getNameObject,
@@ -40,16 +44,25 @@ import {
     isGracePeriodExpired,
 } from '@/lib/utils/names';
 
+import { CouponInputSelection } from '../CouponInputSelection';
+import type { UserSetCoupon } from './PurchaseNameDialog';
+
 function createRenewUpdates({
     nameRecord,
     ownedNames = [],
     ownedSubnames = [],
     renewYears,
+    applyCoupons = false,
+    coupons = [],
+    address,
 }: {
     nameRecord?: NameRecord;
     ownedNames?: RegistrationNft[];
     ownedSubnames?: RegistrationNft[];
     renewYears?: number;
+    applyCoupons?: boolean;
+    coupons?: string[];
+    address?: string;
 }) {
     const isNameSubname = nameRecord?.name ? isSubname(nameRecord.name) : false;
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -67,8 +80,11 @@ function createRenewUpdates({
     ) {
         updates.push({
             type: 'renew-name',
+            name: nameRecord.name,
             nftId: nameRecord.nftId,
             years: renewYears,
+            address,
+            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
         });
     }
 
@@ -95,11 +111,13 @@ function createRenewUpdates({
 interface RenewDialogProps {
     name: string;
     setOpen: (bool: boolean) => void;
+    onRenew?: () => void;
 }
 
-export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
+export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const queryClient = useQueryClient();
     const iotaClient = useIotaClient();
+    const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
     const { data: coreConfig, isLoading: isLoadingcoreConfig } = useCoreConfig();
@@ -112,15 +130,22 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     const [renewYears, setRenewYears] = useState<number | undefined>();
+    const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
+    const [applyCoupons, setApplyCoupons] = useState(false);
 
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
+
+    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
         renewYears,
+        applyCoupons,
+        coupons: couponCodes,
+        address: account?.address,
     });
 
     const {
@@ -148,15 +173,35 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
         },
         onSuccess() {
             setOpen(false);
+            if (onRenew) {
+                onRenew();
+            }
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
             toast.success('Name renewed successfully');
         },
         onError(error) {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
+
+    async function handleAddCoupon(couponCode: string) {
+        if (couponCodes.includes(couponCode)) {
+            setCoupons((currentCoupons) =>
+                currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
+            );
+            return;
+        }
+
+        try {
+            const resolvedCoupon = await iotaNamesClient.resolveCoupon(couponCode);
+            if (!resolvedCoupon) throw new Error();
+            setCoupons((currentCoupons) => [...currentCoupons, { code: couponCode }]);
+        } catch {
+            toast.error('Invalid coupon');
+        }
+    }
 
     function handleCancelRenewName() {
         setOpen(false);
@@ -184,6 +229,33 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
             setRenewYears(1);
         }
     }, [renewOptions, renewYears, renewableYears]);
+
+    useEffect(() => {
+        const handleErroredCoupon = (erroredCoupon: string) => {
+            setCoupons((currentCoupons) =>
+                currentCoupons.map((c) =>
+                    c.code === erroredCoupon ? { ...c, isInvalid: true } : c,
+                ),
+            );
+        };
+        if (updateNameError) {
+            if (
+                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
+                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
+            ) {
+                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
+            } else {
+                const couponRegex = /^Coupon '([^']*)' validation failed/;
+                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+
+                if (couponMatch) {
+                    handleErroredCoupon(couponMatch);
+                }
+
+                toast.error(updateNameError.message);
+            }
+        }
+    }, [updateNameError]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
@@ -219,7 +291,6 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     value={renewYears?.toString()}
                                     onValueChange={handleYearsChange}
                                     disabled={disableEdit}
-                                    errorMessage={updateNameError?.message}
                                 />
                             )}
                             {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
@@ -230,6 +301,23 @@ export function RenewNameDialog({ setOpen, name }: RenewDialogProps) {
                                     style={InfoBoxStyle.Default}
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
+                            )}
+                            {!isNameSubname && (
+                                <div className="flex flex-col">
+                                    <div className="self-end">
+                                        <Toggle
+                                            isToggled={applyCoupons}
+                                            onChange={setApplyCoupons}
+                                            label="Add Coupons"
+                                        />
+                                    </div>
+                                    {applyCoupons && (
+                                        <CouponInputSelection
+                                            coupons={coupons}
+                                            onAddCoupon={handleAddCoupon}
+                                        />
+                                    )}
+                                </div>
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">

@@ -35,6 +35,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -168,7 +169,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             closeDialog();
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -200,14 +201,21 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
                 <Header title="New Subname" onClose={closeDialog} />
                 <DialogBody>
-                    <div className="flex flex-col h-full justify-between">
-                        <div className="flex flex-col h-full items-center gap-y-lg">
-                            <InfoBox
-                                type={InfoBoxType.Default}
-                                style={InfoBoxStyle.Elevated}
-                                icon={<Info />}
-                                supportingText={`Create as many Subnames as you want under ${cleanName}, each with its own profile page and features`}
-                            />
+                    <div className="flex flex-col h-full w-full justify-between">
+                        <div className="flex flex-col h-full w-full items-center gap-y-lg">
+                            <div className="w-full [&>div]:max-w-full [&>div>div]:min-w-0">
+                                <InfoBox
+                                    type={InfoBoxType.Default}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Info />}
+                                    supportingText={
+                                        <div className="break-words max-w-full">
+                                            Create as many Subnames as you want under {cleanName},
+                                            each with its own profile page and features
+                                        </div>
+                                    }
+                                />
+                            </div>
                             <Input
                                 type={InputType.Text}
                                 value={editSubname}
@@ -218,7 +226,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     !isSubnameAvailable && fullSubnameName
                                         ? 'Subname is not available'
                                         : updateNameError
-                                          ? updateNameError.message
+                                          ? getUserFriendlyErrorMessage(updateNameError)
                                           : subnameError
                                             ? subnameError
                                             : undefined

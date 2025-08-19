@@ -23,12 +23,17 @@ const CHARACTERS_TO_SHOW = 6;
 interface NormalizeOptions {
     onlyFirstSubname?: boolean;
     truncateLongParts?: boolean;
+    ellipsisForDeepSubnames?: boolean;
 }
 
 export function normalizeIotaName(
     name: string,
     format: 'at' | 'dot' = 'at',
-    { onlyFirstSubname, truncateLongParts }: NormalizeOptions = {},
+    {
+        onlyFirstSubname,
+        truncateLongParts,
+        ellipsisForDeepSubnames = onlyFirstSubname === true,
+    }: NormalizeOptions = {},
 ): string {
     const lowerCase = name.toLowerCase();
     let parts;
@@ -43,14 +48,17 @@ export function normalizeIotaName(
         throw new Error(`Invalid IOTA name "${name}"`);
     }
 
+    const subnamesEllipsis = format === 'dot' ? '.' : '..';
+
     // Only select the first subname if desired
     let subnames = onlyFirstSubname
         ? [
               // First name from the left (e.g yes.no.no.no.iota)
               parts[0],
-              parts.length > 2 ? (format === 'dot' ? '.' : '..') : '',
+              ellipsisForDeepSubnames && parts.length > 2 ? subnamesEllipsis : '',
           ].filter(Boolean)
         : parts.slice(0, -1);
+
     let parentName = parts[parts.length - 1];
 
     if (truncateLongParts) {
@@ -82,11 +90,11 @@ export function validateIotaSubname(
     if (!name) return null;
     const lowerCase = name.toLowerCase();
 
-    if (!SUBNAME_REGEX.test(lowerCase)) {
-        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
-    }
     if (name.length < minLength || name.length > maxLength) {
         return `Name must be ${minLength}-${maxLength} characters long`;
+    }
+    if (!SUBNAME_REGEX.test(lowerCase)) {
+        return 'Invalid characters. Only a-z, 0-9, and hyphens (not at the beginning or end) are allowed';
     }
     return null;
 }

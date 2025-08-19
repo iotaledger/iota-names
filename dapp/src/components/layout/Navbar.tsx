@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { NamesLogoWeb } from '@/components/svgs';
-import { MY_NAMES_ROUTE, PROTECTED_ROUTES } from '@/lib/constants';
+import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 export function Navbar() {
@@ -18,8 +18,7 @@ export function Navbar() {
     const pathname = usePathname();
     const { open, close } = useAvailabilityCheckDialog();
 
-    const isOnMyNamesPage = pathname === MY_NAMES_ROUTE.path;
-    const showSearch = isConnected && isOnMyNamesPage;
+    const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
     function toggleSearchDialog() {
         open({
@@ -27,6 +26,8 @@ export function Navbar() {
             onCompleted: close,
         });
     }
+
+    const ROUTES = isConnected ? PROTECTED_ROUTES : PUBLIC_ROUTES;
 
     return (
         <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
@@ -37,27 +38,27 @@ export function Navbar() {
                             <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
                         </Link>
 
-                        {isConnected && (
-                            <div className="flex gap-x-md text-names-neutral-70 text-body-md">
-                                {PROTECTED_ROUTES.map((route) => (
-                                    <Link
-                                        key={route.path}
-                                        href={route.path}
-                                        className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
-                                        data-testid={`${route.id}-link`}
-                                    >
-                                        {route.title}
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
+                        <div className="flex gap-x-md text-names-neutral-70 text-body-md">
+                            {ROUTES.map((route) => (
+                                <Link
+                                    key={route.path}
+                                    href={route.path}
+                                    className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
+                                    data-testid={`${route.id}-link`}
+                                >
+                                    {route.title}
+                                </Link>
+                            ))}
+                        </div>
                     </div>
 
-                    {showSearch && <SearchInput isBelowMd onFocus={toggleSearchDialog} />}
+                    {isAllowedSearchOnPage && (
+                        <SearchInput isBelowMd onFocus={toggleSearchDialog} />
+                    )}
                     <ConnectButton connectText="Connect" />
                 </div>
 
-                {showSearch && <SearchInput onFocus={toggleSearchDialog} />}
+                {isAllowedSearchOnPage && <SearchInput onFocus={toggleSearchDialog} />}
             </div>
         </nav>
     );
@@ -69,7 +70,7 @@ function SearchInput({ isBelowMd = false, onFocus }: { isBelowMd?: boolean; onFo
         : 'flex md:hidden w-full justify-center mx-auto';
 
     const containerClass =
-        'w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full';
+        'w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-none rounded-full default-ui-kit-styles';
 
     return (
         <div className={wrapperClass}>

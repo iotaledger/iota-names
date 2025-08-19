@@ -13,7 +13,16 @@ export const MY_NAMES_ROUTE: Route = {
     isProtected: true,
 };
 
-export const PROTECTED_ROUTES = [MY_NAMES_ROUTE] as const satisfies Route[];
+export const AUCTION_ROUTE: Route = {
+    title: ProtectedRouteTitle.Auction,
+    path: '/auctions',
+    id: 'auctions',
+    isProtected: true,
+};
+
+export const PROTECTED_ROUTES = [MY_NAMES_ROUTE, AUCTION_ROUTE] as const satisfies Route[];
+
+export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE] as const satisfies Route[];
 
 export const CONNECT_ROUTE: Route = {
     path: '/',

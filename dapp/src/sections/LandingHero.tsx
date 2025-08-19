@@ -4,8 +4,9 @@
 'use client';
 
 import { Search } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, Input, InputType, Video } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, Video } from '@iota/apps-ui-kit';
 
+import { SearchStylized } from '@/components/search-component/SearchStylized';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 const TITLE = 'Your On-Chain Name';
@@ -30,16 +31,16 @@ export function LandingHero() {
                     <p className="text-title-lg leading-5 -tracking-[0.4px]">{DESCRIPTION}</p>
                 </div>
 
-                <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-shader-neutral-dark-8 rounded-full overflow-hidden border-2 border-names-neutral-100">
-                    <Input
+                <div className="w-full max-w-2xl flex flex-col">
+                    <SearchStylized
                         placeholder="Search for your IOTA name"
-                        type={InputType.Text}
                         onFocus={() => open({ autoFocusInput: true, onCompleted: close })}
                         trailingElement={
                             <ButtonUnstyled className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100">
                                 <Search className="text-names-primary-0" />
                             </ButtonUnstyled>
                         }
+                        lightSearch
                     />
                 </div>
             </div>

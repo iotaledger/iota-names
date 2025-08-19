@@ -38,10 +38,7 @@ use tracing::{debug, info, warn};
 use crate::{
     IotaNamesMetrics,
     config::IotaNamesExtendedConfig,
-    db::{
-        pool::DbConnectionPool,
-        queries::{add_bids_entry, get_bid_count},
-    },
+    db::{pool::DbConnectionPool, queries},
     events::{CouponKind, IotaNamesEvent},
 };
 
@@ -72,6 +69,10 @@ pub(crate) async fn run_iota_names_reader(
     executor.register(worker_pool).await?;
 
     info!("Connecting to {checkpoint_url} to sync checkpoints");
+    let reader_options = ReaderOptions {
+        timeout_secs: 60,
+        ..Default::default()
+    };
     // Localnet does not support remote store, so we use the REST API
     if checkpoint_url.contains("localhost") || checkpoint_url.contains("host.docker.internal") {
         executor
@@ -81,17 +82,17 @@ pub(crate) async fn run_iota_names_reader(
                 Some(format!("{checkpoint_url}/api/v1")),
                 // optional remote store access options.
                 vec![],
-                ReaderOptions::default(),
+                reader_options,
             )
             .await?;
     } else {
         let config = CheckpointReaderConfig {
             remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
-                historical_url: checkpoint_url.to_string(),
+                historical_url: format!("{checkpoint_url}/ingestion/historical"),
                 live_url: Some(format!("{checkpoint_url}/ingestion/live")),
             }),
             ingestion_path: Some(PathBuf::from("./data/chk")),
-            ..Default::default()
+            reader_options,
         };
         executor.run_with_config(config).await?;
     }
@@ -148,22 +149,29 @@ impl IotaNamesWorker {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bids_entry(
-                        conn,
-                        &event.bidder.to_string(),
-                        &name_str,
-                        event.starting_bid,
-                    )
+                    let bidder = queries::get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::upsert_auctions_entry(conn, &name, event.end_timestamp_ms as _)?;
+                    queries::add_bids_entry(conn, &bidder, &name, event.starting_bid)
                 })?;
             }
             IotaNamesEvent::AuctionBid(event) => {
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
                 conn.transaction::<_, anyhow::Error, _>(|conn| {
-                    add_bids_entry(conn, &event.bidder.to_string(), &name_str, event.bid)
+                    let bidder = queries::get_or_create_bidder(conn, &event.bidder.to_string())?;
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::add_bids_entry(conn, &bidder, &name, event.bid)
                 })?;
             }
-            IotaNamesEvent::AuctionExtended(_event) => (),
+            IotaNamesEvent::AuctionExtended(event) => {
+                let name_str = event.name.to_string();
+                let mut conn = self.pool.get_connection()?;
+                conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::upsert_auctions_entry(conn, &name, event.end_timestamp_ms as _)
+                })?;
+            }
             IotaNamesEvent::AuctionFinalized(event) => {
                 self.metrics.auctions_finalized.inc();
                 self.metrics.auction_final_prices.observe(event.winning_bid);
@@ -172,8 +180,11 @@ impl IotaNamesWorker {
                     .observe(event.end_timestamp_ms - event.start_timestamp_ms);
                 let name_str = event.name.to_string();
                 let mut conn = self.pool.get_connection()?;
-                let bid_count =
-                    conn.transaction::<_, anyhow::Error, _>(|conn| get_bid_count(conn, &name_str))?;
+                let bid_count = conn.transaction::<_, anyhow::Error, _>(|conn| {
+                    let name = queries::get_or_create_name(conn, &name_str)?;
+                    queries::claim_auctions_entry(conn, &name)?;
+                    queries::get_bid_count(conn, &name_str)
+                })?;
                 self.metrics
                     .auction_bid_count_distribution
                     .with_label_values(&[&bid_count.to_string()])

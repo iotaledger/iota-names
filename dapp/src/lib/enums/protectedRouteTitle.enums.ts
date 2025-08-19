@@ -3,4 +3,5 @@
 
 export enum ProtectedRouteTitle {
     MyNames = 'Your Names',
+    Auction = 'Auctions',
 }
