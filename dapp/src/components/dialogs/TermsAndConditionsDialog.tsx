@@ -83,7 +83,7 @@ export function TermsAndConditionsDialog() {
                             <Checkbox
                                 name="terms_conditions"
                                 label="I have read, understand, and agree to the Terms of Service"
-                                onCheckedChange={(e) => setTermsAccepted(true)}
+                                onCheckedChange={() => setTermsAccepted(true)}
                                 isChecked={termsAccepted}
                             />
                             <Button
