@@ -97,6 +97,39 @@ public fun remove_blocked_names(iota_names: &mut IotaNames, _: &AdminCap, labels
     );
 }
 
+/// Removes all reserved labels for a given name (except top-level)
+public(package) fun remove_reserved_labels_for_name(iota_names: &mut IotaNames, name: &Name) {
+    let len = name.number_of_levels();
+    let reserved_table_mut = reserved_table_mut(iota_names);
+    let mut index = 1;
+    while (index < len) {
+        let label = name.label(index);
+        if (reserved_table_mut.contains(*label)) {
+            reserved_table_mut.remove(*label);
+        };
+        index = index + 1;
+    };
+}
+
+/// Removes all reserved labels for a vector of names (except top-level)
+public(package) fun remove_reserved_labels_for_names(iota_names: &mut IotaNames, names: &vector<Name>) {
+    let reserved_table_mut = reserved_table_mut(iota_names);
+    let mut i = 0;
+    while (i < names.length()) {
+        let name = &names[i];
+        let len = name.number_of_levels();
+        let mut index = 1;
+        while (index < len) {
+            let label = name.label(index);
+            if (reserved_table_mut.contains(*label)) {
+                reserved_table_mut.remove(*label);
+            };
+            index = index + 1;
+        };
+        i = i + 1;
+    };
+}
+
 /// Gets immutable access to the registry.
 fun deny_list(iota_names: &IotaNames): &DenyList {
     iota_names.registry()
@@ -105,6 +138,11 @@ fun deny_list(iota_names: &IotaNames): &DenyList {
 /// Internal helper to get access to the DenyList object
 fun deny_list_mut(iota_names: &mut IotaNames): &mut DenyList {
     iota_names::auth_registry_mut<DenyListAuth, DenyList>(DenyListAuth {}, iota_names)
+}
+
+/// Getter for a mutable reference to the reserved table
+fun reserved_table_mut(iota_names: &mut IotaNames): &mut Table<String, bool> {
+    &mut deny_list_mut(iota_names).reserved
 }
 
 /// Internal helper to batch add labels to a table.
