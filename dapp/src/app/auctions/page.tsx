@@ -186,16 +186,16 @@ export default function AuctionsPage(): JSX.Element {
     const defaultPage = 1;
     const paginationOptions: TablePaginationOptions = {
         hasPrev: page > defaultPage,
-        hasNext: page < totalItems / pageSize,
+        hasNext: page < totalPages,
         onFirst: () => {
             setParam('page', defaultPage);
         },
         onPrev: () => {
-            const prevPage = page > defaultPage ? page : defaultPage;
+            const prevPage = page > defaultPage ? page - 1 : defaultPage;
             setParam('page', prevPage);
         },
         onNext: () => {
-            const nextPage = page < totalItems / pageSize ? page : page;
+            const nextPage = page < totalPages ? page + 1 : page;
             setParam('page', nextPage);
         },
     };
