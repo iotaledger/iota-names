@@ -55,7 +55,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         isLoading: isLoadingNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
-    const { data: { isPaymentAuthorized, isAuctionAuthorized } = {} } = useNamesPurchaseMode();
 
     const validationError = useMemo(
         () =>
@@ -223,21 +222,17 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                     ) : (
                         nameRecordData && (
                             <>
-                                {isPaymentAuthorized && (
-                                    <PurchaseName
-                                        name={name}
-                                        nameRecordData={nameRecordData}
-                                        onCompleted={handleBidOrPurchase}
-                                    />
-                                )}
+                                <PurchaseName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleBidOrPurchase}
+                                />
 
-                                {isAuctionAuthorized && (
-                                    <BidName
-                                        name={name}
-                                        nameRecordData={nameRecordData}
-                                        onCompleted={handleBidOrPurchase}
-                                    />
-                                )}
+                                <BidName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleBidOrPurchase}
+                                />
                             </>
                         )
                     )}
@@ -256,6 +251,7 @@ function BidName({
     nameRecordData: NameRecordData;
     onCompleted: () => void;
 }) {
+    const { data: { isAuctionAuthorized } = {} } = useNamesPurchaseMode();
     const { isConnected } = useCurrentWallet();
     const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
@@ -263,7 +259,12 @@ function BidName({
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
-    const isAllowedToBid = isAvailable || (isUnavailable && isAuctionInProgress) || false;
+    const isAllowedToBid =
+        (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
+
+    if (!isAllowedToBid && !isAuctionAuthorized) {
+        return null;
+    }
 
     function handleBid() {
         setAuctionDialogOpen(false);
@@ -317,9 +318,14 @@ function PurchaseName({
     nameRecordData: NameRecordData;
     onCompleted: () => void;
 }) {
+    const { data: { isPaymentAuthorized } = {} } = useNamesPurchaseMode();
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
     const [isRenewDialogOpen, setRenewDialgOpen] = useState(false);
+
+    if (!isPaymentAuthorized) {
+        return null;
+    }
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
@@ -348,6 +354,7 @@ function PurchaseName({
                 isAvailable={isAvailable}
                 price={formattedPurchasePrice}
                 priceSupportingText={isAvailable ? 'Price' : undefined}
+                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
             >
                 {isUnavailable ? null : isConnected ? (
                     <Button
