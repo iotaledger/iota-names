@@ -78,7 +78,7 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
     }, [avatarSrc]);
 
     return (
-        <div className="flex flex-col relative rounded-xl overflow-hidden max-h-[220px] max-w-[220px] w-full h-full select-none">
+        <div className="flex flex-col relative rounded-xl overflow-hidden w-full h-full select-none">
             {isLoadingSrc || isLoadingAvatar ? (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
