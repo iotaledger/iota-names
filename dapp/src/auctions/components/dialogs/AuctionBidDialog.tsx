@@ -61,7 +61,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const iotaClient = useIotaClient();
     const account = useCurrentAccount();
     const queryClient = useQueryClient();
-
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
 
     const nameRecord = nameRecordData as Extract<NameRecordData, { type: 'available' }> | undefined;
@@ -80,6 +79,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const currentPriceInNanos = toNanos(currentPrice) || BigInt(0);
     const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos.toString());
 
+    // Sync the minimum bid amount
     useEffect(() => {
         if (minBidNanos) {
             setBidAmountValue(
@@ -92,6 +92,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     }, [minBidNanos]);
 
     const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
+
     const {
         data: auctionBidTransaction,
         isLoading: isAuctionBidLoading,

@@ -31,6 +31,7 @@ interface AuctionublicItemProps {
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
     const [, setIsActive] = useState(isAuctionActive(auction.metadata));
+
     const isClaimedAuction = !auction.metadata;
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
