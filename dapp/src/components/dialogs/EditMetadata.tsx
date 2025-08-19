@@ -302,10 +302,15 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         METADATA_FIELDS.forEach(({ key }) => {
             const field = metadata[key];
             if (field?.selected && field.data) {
-                const error = validateField(key, field.data);
-                if (error) {
-                    errors[key] = error;
+                if (!field.data || field.data.trim() === '') {
+                    errors[key] = 'Field is required';
                     hasErrors = true;
+                } else {
+                    const error = validateField(key, field.data);
+                    if (error) {
+                        errors[key] = error;
+                        hasErrors = true;
+                    }
                 }
             }
         });
@@ -384,18 +389,26 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             [key]: { ...prev[key], data },
         }));
 
-        if (data) {
+        if (data && data.trim() !== '') {
             const error = validateField(key, data);
             setValidationErrors((prev) => ({
                 ...prev,
                 [key]: error || '',
             }));
         } else {
-            setValidationErrors((prev) => {
-                const newErrors = { ...prev };
-                delete newErrors[key];
-                return newErrors;
-            });
+            const field = metadata[key];
+            if (field?.selected) {
+                setValidationErrors((prev) => ({
+                    ...prev,
+                    [key]: 'Field is required',
+                }));
+            } else {
+                setValidationErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors[key];
+                    return newErrors;
+                });
+            }
         }
     }
     function toggleMetadata(key: string) {
@@ -403,6 +416,13 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             ...prev,
             [key]: { ...prev[key], selected: !prev[key].selected },
         }));
+        if (metadata[key]?.selected) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[key];
+                return newErrors;
+            });
+        }
     }
 
     const isLoading = isUpdating || isSigning || isSaving;
