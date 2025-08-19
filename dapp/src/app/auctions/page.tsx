@@ -270,7 +270,7 @@ export default function AuctionsPage(): JSX.Element {
                         </div>
                     )}
                 </div>
-                <div className="flex justify-center items-center mt-8">
+                <div className="mt-8 flex flex-col items-center gap-sm md:relative md:gap-0">
                     <div className="flex flex-1 justify-center">
                         <div className="flex gap-2">
                             <Button
@@ -315,7 +315,10 @@ export default function AuctionsPage(): JSX.Element {
                             />
                         </div>
                     </div>
-                    <div className="flex ml-6">
+                    <div className="flex items-center gap-x-sm md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
+                        <p className="text-label-md whitespace-nowrap text-names-neutral-70">
+                            {totalItems} Total
+                        </p>
                         <Select
                             dropdownPosition={DropdownPosition.Top}
                             value={pageSize.toString()}
