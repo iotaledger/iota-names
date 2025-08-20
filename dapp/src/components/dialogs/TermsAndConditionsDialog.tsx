@@ -11,6 +11,7 @@ import {
     DialogPosition,
     Header,
 } from '@iota/apps-ui-kit';
+import TOS from '@legal/tos.mdx';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -38,12 +39,9 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                             <span className="text-label-md text-names-neutral-70">
                                 Effective Date: [RELEASE DATE]
                             </span>
-                            <p className="text-body-md text-names-neutral-92">
-                                The IOTA Names Service does not collect, store, or process personal
-                                data. All interactions occur on a public blockchain. The Service
-                                does not use cookies, track users, or store IP addresses or
-                                off-chain identifiers.
-                            </p>
+                            <div className="text-body-md text-names-neutral-92">
+                                <TOS />
+                            </div>
                         </div>
                         <div className="flex flex-row items-center justify-between">
                             <Checkbox
