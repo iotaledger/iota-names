@@ -37,7 +37,7 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                     <div className="flex flex-col gap-xl">
                         <div className="flex flex-col gap-md">
                             <span className="text-label-md text-names-neutral-70">
-                                Effective Date: [RELEASE DATE]
+                                Effective Date: 4th of September
                             </span>
                             <div className="text-body-md text-names-neutral-92">
                                 <TOS />
