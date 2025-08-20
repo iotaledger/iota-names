@@ -176,6 +176,12 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             if (onRenew) {
                 onRenew();
             }
+            queryClient.removeQueries({
+                queryKey: queryKey.nameRecord(name),
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
