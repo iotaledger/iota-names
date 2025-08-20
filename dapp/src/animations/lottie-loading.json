@@ -565,7 +565,6 @@
         { "ind": 1, "ty": 3, "parent": 0, "ks": {}, "ip": 0, "op": 121, "st": 0 },
         { "ind": 0, "ty": 3, "ks": {}, "ip": 0, "op": 121, "st": 0 }
     ],
-    "meta": { "g": "https://jitter.video" },
     "op": 120,
     "v": "5.7.4",
     "w": 80
