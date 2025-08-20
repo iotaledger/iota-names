@@ -21,7 +21,7 @@ export const queryKey = {
 
     // Generic
     ownedObjects: (address: string) => [...queryKey.all, 'owned-objects', address],
-    getObject: (name: string) => [...queryKey.all, name],
+    getObject: (name: string) => [...queryKey.all, 'get-object', name],
 
     // Price List
     priceList: () => [...queryKey.all, 'price-list'],
