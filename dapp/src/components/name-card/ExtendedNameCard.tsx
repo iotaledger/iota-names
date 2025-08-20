@@ -3,7 +3,7 @@
 
 import { Link } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { NameRecordData, useNameRecord } from '@/hooks';
@@ -46,11 +46,9 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
-    const isNameSubname = nft ? isSubname(nft.name) : false;
-    const namePermissions =
-        isNameSubname && nameRecord
-            ? getNamePermissions(nameRecord.nameRecord)
-            : { allowChildCreation: true, allowTimeExtension: true };
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
 
     const buttonText = (() => {
         if (expired) {
