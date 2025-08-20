@@ -28,6 +28,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         // {
@@ -44,6 +45,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.PersonalizeAvatar),
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         // {
@@ -54,11 +56,12 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.SetPermissions),
             children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
-            isHidden: !nft.isSubname,
+            isHidden: !nft.isSubname || nft.isExpired,
         },
         {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
+            isHidden: nft.isExpired,
             isDisabled: !namePermissions.allowChildCreation,
         },
         // {
@@ -69,11 +72,13 @@ export function getNameMenuOptions(
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
             isDisabled: !namePermissions.allowTimeExtension,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         {
             onClick: () => onOpen(NameDialogId.EditMetadata),
             children: <DropdownMenuOption icon={<Edit />} label="Edit Metadata" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         {
