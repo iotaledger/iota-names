@@ -13,6 +13,8 @@ jobs:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
+      NAMES_DAPP_DEFAULT_NETWORK: devnet
+      NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

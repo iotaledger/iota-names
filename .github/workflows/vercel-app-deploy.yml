@@ -6,7 +6,13 @@ on:
       VERCEL_ENVIRONMENT:
         type: string
         required: true
-        description: "The Vercel environment to deploy to. Can be 'production', 'preview', or 'staging'."
+        description: "The Vercel environment to deploy to. Can be 'production' or 'preview'."
+      NAMES_DAPP_CONFIG:
+        type: string
+        required: true
+      NAMES_DAPP_DEFAULT_NETWORK:
+        type: string
+        required: true
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -21,6 +27,8 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
+  NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ inputs.NAMES_DAPP_CONFIG }}
+  NEXT_PUBLIC_NAMES_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

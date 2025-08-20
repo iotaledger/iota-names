@@ -1,4 +1,4 @@
-name: Production Deploy for IOTA Names
+name: Production Testnet Deploy for IOTA Names
 
 on:
   workflow_dispatch:
@@ -8,6 +8,8 @@ jobs:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: production
+      NAMES_DAPP_DEFAULT_NETWORK: testnet
+      NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

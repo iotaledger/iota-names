@@ -1,19 +1,15 @@
-name: Staging Deploy for IOTA Names
+name: Production Mainnet Deploy for IOTA Names
 
 on:
-  push:
-    branches:
-      - develop
-    paths:
-      - "dapp/**"
-      - ".github/workflows/iota-names.staging-deploy.yml"
-      - ".github/workflows/vercel-app-deploy.yml"
+  workflow_dispatch:
 
 jobs:
-  deploy-staging:
+  deploy-production:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
-      VERCEL_ENVIRONMENT: staging
+      VERCEL_ENVIRONMENT: production
+      NAMES_DAPP_DEFAULT_NETWORK: mainnet
+      NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
