@@ -42,6 +42,8 @@ import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
 
+import { paramsSchema } from './params';
+
 export type AuctionStatus = 'all' | 'active' | 'finished';
 
 const SORT_OPTIONS = [
@@ -76,12 +78,16 @@ export default function AuctionsPage(): JSX.Element {
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const page = Number(searchParams.get('page') || 1);
-    const selectedStatus = (searchParams.get('status') || 'all') as AuctionStatus;
-    const searchQuery = searchParams.get('search') || '';
-    const pageSize = Number(searchParams.get('size') || 10);
-    const sort = (searchParams.get('sort') || 'asc') as 'asc' | 'desc';
-    const sortBy = (searchParams.get('sortBy') || 'bid') as 'bid' | 'name';
+    const raw = Object.fromEntries(searchParams.entries());
+    const parsed = paramsSchema.safeParse(raw);
+    const {
+        page,
+        status: selectedStatus,
+        search: searchQuery,
+        size: pageSize,
+        sort,
+        sortBy,
+    } = parsed.success ? parsed.data : paramsSchema.parse({});
 
     // Close dropdown when clicking outside
     useEffect(() => {
