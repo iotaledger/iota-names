@@ -58,7 +58,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         refetch: refetchNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
-    const { data: { isPaymentAuthorized, isAuctionAuthorized } = {} } = useNamesPurchaseMode();
 
     const validationError = useMemo(
         () =>
@@ -236,21 +235,17 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                     ) : (
                         nameRecordData && (
                             <>
-                                {isPaymentAuthorized && (
-                                    <PurchaseName
-                                        name={name}
-                                        nameRecordData={nameRecordData}
-                                        onPurchase={handlePurchase}
-                                    />
-                                )}
+                                <PurchaseName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onPurchase={handlePurchase}
+                                />
 
-                                {isAuctionAuthorized && (
-                                    <BidName
-                                        name={name}
-                                        nameRecordData={nameRecordData}
-                                        onCompleted={handleCompletedBidOrPurchase}
-                                    />
-                                )}
+                                <BidName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleCompletedBidOrPurchase}
+                                />
                             </>
                         )
                     )}
@@ -274,6 +269,7 @@ interface BidNameProps {
     onCompleted: () => void;
 }
 function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
+    const { data: { isAuctionAuthorized } = {} } = useNamesPurchaseMode();
     const { isConnected } = useCurrentWallet();
     const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
@@ -281,7 +277,12 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
-    const isAllowedToBid = isAvailable || (isUnavailable && isAuctionInProgress) || false;
+    const isAllowedToBid =
+        (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
+
+    if (!isAllowedToBid && !isAuctionAuthorized) {
+        return null;
+    }
 
     function handleBid() {
         setAuctionDialogOpen(false);
@@ -332,8 +333,13 @@ interface PurchaseNameProps {
     onPurchase: () => void;
 }
 function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
+    const { data: { isPaymentAuthorized } = {} } = useNamesPurchaseMode();
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
+
+    if (!isPaymentAuthorized) {
+        return null;
+    }
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
@@ -357,6 +363,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
                 isAvailable={isAvailable}
                 price={formattedPurchasePrice}
                 priceSupportingText={isAvailable ? 'Price' : undefined}
+                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
             >
                 {isUnavailable ? null : isConnected ? (
                     <Button
