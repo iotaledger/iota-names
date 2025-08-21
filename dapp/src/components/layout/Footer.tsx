@@ -3,24 +3,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { NamesLogoBranded } from '@/components/svgs';
 import { FOOTER_LEGAL_LINKS, FOOTER_SOCIAL_LINKS } from '@/lib/constants';
 
 export function Footer() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const modalParam = searchParams.get('modal');
-
-    const isTermsOpen = modalParam === 'terms_conditions';
-
-    const handleCloseModal = () => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.delete('modal');
-        router.replace(`/?${params.toString()}`, { scroll: false });
-    };
 
     const handleLegalClick = (e: React.MouseEvent, path: string) => {
         const url = new URL(path, window.location.href);
@@ -67,11 +56,6 @@ export function Footer() {
                     {process.env.NEXT_PUBLIC_IOTA_NAMES_REV}
                 </p>
             </div>
-
-            <TermsAndConditionsDialog
-                open={isTermsOpen}
-                onOpenChange={(open) => !open && handleCloseModal()}
-            />
         </footer>
     );
 }

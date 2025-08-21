@@ -33,6 +33,7 @@ import {
     SelectSize,
     TablePaginationOptions,
 } from '@iota/apps-ui-kit';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions';
@@ -40,6 +41,8 @@ import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
+
+import { paramsSchema } from './params';
 
 export type AuctionStatus = 'all' | 'active' | 'finished';
 
@@ -69,21 +72,22 @@ const SORT_OPTIONS = [
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
 
 export default function AuctionsPage(): JSX.Element {
-    const [selectedStatus, setSelectedStatus] = useState<AuctionStatus>('all');
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [areFiltersVisible, setAreFiltersVisible] = useState<boolean>(false);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
-    const [page, setPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(10);
-    const [sortOptions, setSortOptions] = useState<{
-        sort: 'asc' | 'desc';
-        sortBy: 'bid' | 'name';
-    }>({
-        sort: 'asc',
-        sortBy: 'bid',
-    });
-
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const raw = Object.fromEntries(searchParams.entries());
+    const parsed = paramsSchema.safeParse(raw);
+    const {
+        page,
+        status: selectedStatus,
+        search: searchQuery,
+        size: pageSize,
+        sort,
+        sortBy,
+    } = parsed.success ? parsed.data : paramsSchema.parse({});
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -104,9 +108,22 @@ export default function AuctionsPage(): JSX.Element {
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-    useEffect(() => {
-        setPage(0);
-    }, [pageSize, sortOptions, searchQuery, selectedStatus]);
+    function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
+        const params = new URLSearchParams(searchParams.toString());
+
+        // Always go to page 1 if a param is changed
+        // If its changed in the for-loop then it will go to that other page
+        params.set('page', '1');
+
+        for (const [key, value] of keys) {
+            params.set(key, value.toString());
+        }
+        router.replace(`?${params}`);
+    }
+
+    function setParam(key: string, value: string | number | boolean) {
+        setParams([[key, value]]);
+    }
 
     const {
         data: auctions,
@@ -116,9 +133,9 @@ export default function AuctionsPage(): JSX.Element {
     } = useAuctions({
         search: debouncedSearchQuery,
         status: selectedStatus,
-        sort: sortOptions.sort,
-        sortBy: sortOptions.sortBy,
-        page,
+        sort,
+        sortBy,
+        page: page - 1,
         pageSize,
     });
 
@@ -170,22 +187,22 @@ export default function AuctionsPage(): JSX.Element {
     })();
 
     const totalPages = Math.ceil(totalItems / pageSize);
-    const paginationPages = getPaginationPages(page + 1, totalPages, 4);
+    const paginationPages = getPaginationPages(page, totalPages, 4);
 
-    const defaultPage = 0;
+    const defaultPage = 1;
     const paginationOptions: TablePaginationOptions = {
         hasPrev: page > defaultPage,
-        hasNext: page < totalItems / pageSize - 1,
+        hasNext: page < totalPages,
         onFirst: () => {
-            setPage(defaultPage);
+            setParam('page', defaultPage);
         },
         onPrev: () => {
             const prevPage = page > defaultPage ? page - 1 : defaultPage;
-            setPage(prevPage);
+            setParam('page', prevPage);
         },
         onNext: () => {
-            const nextPage = page < totalItems / pageSize - 1 ? page + 1 : page;
-            setPage(nextPage);
+            const nextPage = page < totalPages ? page + 1 : page;
+            setParam('page', nextPage);
         },
     };
 
@@ -204,7 +221,7 @@ export default function AuctionsPage(): JSX.Element {
                             type={ButtonSegmentType.Rounded}
                             label={option.label}
                             selected={selectedStatus === option.value}
-                            onClick={() => setSelectedStatus(option.value)}
+                            onClick={() => setParam('status', option.value)}
                         />
                     ))}
                 </SegmentedButton>
@@ -215,7 +232,7 @@ export default function AuctionsPage(): JSX.Element {
                             placeholder="Search auction"
                             type={InputType.Text}
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => setParam('search', e.target.value)}
                             trailingElement={<Search className="text-names-neutral-92 w-6 h-6" />}
                         />
                     </div>
@@ -230,16 +247,15 @@ export default function AuctionsPage(): JSX.Element {
                                 {SORT_OPTIONS.map((option) => (
                                     <ListItem
                                         key={`${option.sort}-${option.sortBy}`}
-                                        onClick={() =>
-                                            setSortOptions({
-                                                sort: option.sort,
-                                                sortBy: option.sortBy,
-                                            })
-                                        }
+                                        onClick={() => {
+                                            setParams([
+                                                ['sort', option.sort],
+                                                ['sortBy', option.sortBy],
+                                            ]);
+                                        }}
                                         hideBottomBorder
                                         isHighlighted={
-                                            sortOptions.sort === option.sort &&
-                                            sortOptions.sortBy === option.sortBy
+                                            sort === option.sort && sortBy === option.sortBy
                                         }
                                     >
                                         <span>{option.label}</span>
@@ -270,70 +286,71 @@ export default function AuctionsPage(): JSX.Element {
                         </div>
                     )}
                 </div>
-                <div className="mt-8 flex flex-col items-center gap-sm md:relative md:gap-0">
-                    <div className="flex flex-1 justify-center">
-                        <div className="flex gap-2">
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<ArrowLeft />}
-                                disabled={!paginationOptions.hasPrev}
-                                onClick={paginationOptions.onPrev}
-                            />
-                        </div>
-                        <div className="flex gap-2 mx-6">
-                            {paginationPages?.map((pageNumber, index) => {
-                                if (pageNumber === '...') {
-                                    return (
-                                        <span
-                                            key={`ellipsis-${index}`}
-                                            className="text-names-neutral-92"
-                                        >
-                                            {pageNumber}
-                                        </span>
-                                    );
-                                }
+                {paginationPages.length > 0 ? (
+                    <div className="mt-8 flex flex-col items-center gap-sm md:relative md:gap-0">
+                        <div className="flex flex-1 justify-center">
+                            <div className="flex gap-2">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    size={ButtonSize.Small}
+                                    icon={<ArrowLeft />}
+                                    disabled={!paginationOptions.hasPrev}
+                                    onClick={paginationOptions.onPrev}
+                                />
+                            </div>
+                            <div className="flex gap-2 mx-6">
+                                {paginationPages.map((pageNumber, index) => {
+                                    if (pageNumber === '...') {
+                                        return (
+                                            <span
+                                                key={`ellipsis-${index}`}
+                                                className="text-names-neutral-92"
+                                            >
+                                                {pageNumber}
+                                            </span>
+                                        );
+                                    }
 
-                                return (
-                                    <Chip
-                                        key={`page-${pageNumber}`}
-                                        type={ChipType.Outline}
-                                        selected={page === pageNumber - 1}
-                                        onClick={() => setPage(pageNumber - 1)}
-                                        label={pageNumber.toString()}
-                                    />
-                                );
-                            })}
+                                    return (
+                                        <Chip
+                                            key={pageNumber}
+                                            type={ChipType.Outline}
+                                            selected={page === pageNumber}
+                                            onClick={() => setParam('page', pageNumber)}
+                                            label={pageNumber.toString()}
+                                        />
+                                    );
+                                })}
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    size={ButtonSize.Small}
+                                    icon={<ArrowRight />}
+                                    disabled={!paginationOptions.hasNext}
+                                    onClick={paginationOptions.onNext}
+                                />
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button
-                                type={ButtonType.Secondary}
-                                size={ButtonSize.Small}
-                                icon={<ArrowRight />}
-                                disabled={!paginationOptions.hasNext}
-                                onClick={paginationOptions.onNext}
+                        <div className="flex items-center gap-x-sm md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
+                            <p className="text-label-md whitespace-nowrap text-names-neutral-70">
+                                {totalItems} Total
+                            </p>
+                            <Select
+                                dropdownPosition={DropdownPosition.Top}
+                                value={pageSize.toString()}
+                                options={PAGE_SIZES_RANGE.map((size) => ({
+                                    label: `${size} / page`,
+                                    id: size.toString(),
+                                }))}
+                                size={SelectSize.Small}
+                                onValueChange={(e) => {
+                                    setParam('size', e);
+                                }}
                             />
                         </div>
                     </div>
-                    <div className="flex items-center gap-x-sm md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
-                        <p className="text-label-md whitespace-nowrap text-names-neutral-70">
-                            {totalItems} Total
-                        </p>
-                        <Select
-                            dropdownPosition={DropdownPosition.Top}
-                            value={pageSize.toString()}
-                            options={PAGE_SIZES_RANGE.map((size) => ({
-                                label: `${size} / page`,
-                                id: size.toString(),
-                            }))}
-                            size={SelectSize.Small}
-                            onValueChange={(e) => {
-                                setPageSize(Number(e));
-                                paginationOptions.onFirst!();
-                            }}
-                        />
-                    </div>
-                </div>
+                ) : null}
             </div>
 
             {bidDialogName && (
