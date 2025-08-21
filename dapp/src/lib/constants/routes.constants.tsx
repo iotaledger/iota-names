@@ -10,17 +10,15 @@ export const MY_NAMES_ROUTE: Route = {
     title: ProtectedRouteTitle.MyNames,
     path: '/my-names',
     id: 'my-names',
-    isProtected: true,
 };
 
 export const AUCTION_ROUTE: Route = {
     title: ProtectedRouteTitle.Auction,
     path: '/auctions',
     id: 'auctions',
-    isProtected: true,
 };
 
-export const PROTECTED_ROUTES = [MY_NAMES_ROUTE, AUCTION_ROUTE] as const satisfies Route[];
+export const PROTECTED_ROUTES = [MY_NAMES_ROUTE] as const satisfies Route[];
 
 export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE] as const satisfies Route[];
 
@@ -42,7 +40,7 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
 export const FOOTER_LEGAL_LINKS: Route[] = [
     {
         title: 'Terms & Conditions',
-        path: '/?modal=terms_conditions',
+        path: '?modal=terms_conditions',
     },
     {
         title: 'Privacy Policy',
