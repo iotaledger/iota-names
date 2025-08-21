@@ -5,7 +5,7 @@
 
 import { Close } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps-ui-kit';
-import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -18,6 +18,7 @@ import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
+import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
 import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
@@ -310,7 +311,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                         onClick={() => setAuctionDialogOpen(true)}
                     />
                 ) : (
-                    <ConnectButton connectText="Connect" />
+                    <ConnectButton />
                 )}
             </NamePurchaseCard>
 
@@ -364,7 +365,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
                         onClick={() => setPurchaseDialogOpen(true)}
                     />
                 ) : (
-                    <ConnectButton connectText="Connect" />
+                    <ConnectButton />
                 )}
             </NamePurchaseCard>
 

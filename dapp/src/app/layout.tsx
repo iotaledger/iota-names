@@ -4,8 +4,11 @@
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
+import { Suspense } from 'react';
+
 import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
+import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
@@ -22,12 +25,15 @@ export default function RootLayout({
         <html lang="en" className={APP_STATIC_THEME}>
             <body className="antialiased">
                 <AppProviders>
-                    <ConnectionGuard>
-                        <Navbar />
-                        {children}
-                        <AvailabilityCheckDialog />
-                        <Footer />
-                    </ConnectionGuard>
+                    <Suspense>
+                        <ConnectionGuard>
+                            <Navbar />
+                            {children}
+                            <AvailabilityCheckDialog />
+                            <Footer />
+                            <TermsAndConditionsDialog />
+                        </ConnectionGuard>
+                    </Suspense>
                 </AppProviders>
             </body>
         </html>
