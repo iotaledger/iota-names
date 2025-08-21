@@ -28,7 +28,7 @@ interface NamePanelTileProps {
     registration: RegistrationNft;
     hasSubnames: boolean;
     onClick: () => void;
-    onRenewClick?: () => void;
+    onRenewClick: () => void;
 }
 export function NamePanelTile({
     registration,

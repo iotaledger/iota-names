@@ -7,19 +7,21 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
-import { useRegistrationNfts } from '@/hooks';
+import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
+import { getNamePermissions } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
     onClose: () => void;
+    onRenewClick: (name: RegistrationNft) => void;
 }
 
-export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
+export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesPanelProps) {
     const { data: subnames } = useRegistrationNfts('subname');
 
     const initialNameTree = useNameTree(selectedName.name);
@@ -33,6 +35,8 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         () => traverseNameTree(initialNameTree, namePaths),
         [initialNameTree, namePaths],
     );
+    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
+    const nameRecord = nameRecordData?.type === 'unavailable' ? nameRecordData.nameRecord : null;
 
     useEffect(() => {
         if (initialNameTree) {
@@ -49,7 +53,10 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
         'at',
-        { onlyFirstSubname: true, truncateLongParts: true },
+        {
+            onlyFirstSubname: !isAtRoot,
+            truncateLongParts: true,
+        },
     )}`;
 
     const subnamesRegistrations = currentNode.subnames
@@ -81,6 +88,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                                 registration={sub}
                                 onClick={() => goDeeper(sub.name)}
                                 hasSubnames={currentNode.subnames.length > 0}
+                                onRenewClick={() => onRenewClick(sub)}
                             />
                         ))}
                     </div>
@@ -91,6 +99,11 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             type={ButtonType.Outlined}
                             onClick={() => setIsAddDialogOpen(true)}
                             icon={<Add />}
+                            disabled={
+                                nameRecord
+                                    ? getNamePermissions(nameRecord).allowChildCreation === false
+                                    : false
+                            }
                         />
                     </div>
                 </div>
