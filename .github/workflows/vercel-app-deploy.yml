@@ -50,6 +50,9 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm add --global vercel@canary
 
+      - name: Build Project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=${{ inputs.VERCEL_ENVIRONMENT }}
+
       - name: Deploy to Vercel
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
         with:
