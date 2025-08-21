@@ -7,7 +7,7 @@ on:
         type: string
         required: true
         description: "The Vercel environment to deploy to. Can be 'production' or 'preview'."
-      NAMES_DAPP_CONFIG:
+      NAMES_DAPP_DEFAULT_NETWORK:
         type: string
         required: true
     secrets:
@@ -21,14 +21,14 @@ on:
         required: true
       VERCEL_ALIAS:
         required: false
-      NAMES_DAPP_DEFAULT_NETWORK:
+      NAMES_DAPP_CONFIG:
         required: true
 
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
-  NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ inputs.NAMES_DAPP_CONFIG }}
+  NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
   NEXT_PUBLIC_NAMES_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}"
 
 concurrency:
