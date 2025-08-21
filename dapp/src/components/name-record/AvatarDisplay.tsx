@@ -29,7 +29,7 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
                 : (nameRecordData?.nameRecord.avatar ?? nameRecordData.nameRecord.nftId)
             : null;
 
-    const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject({
+    const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject(name, {
         id: avatarId ?? '',
         options: { showDisplay: true, showContent: true },
     });
