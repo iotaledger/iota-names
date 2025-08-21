@@ -46,7 +46,7 @@ export function SubnameCountIndicator({
     onAddSubnameClick,
     showAddSubnameLink = true,
 }: SubnameCountIndicatorProps) {
-    if (subnameCount === 0 && !showAddSubnameLink) {
+    if (subnameCount === 0 && showAddSubnameLink) {
         return (
             <ButtonUnstyled
                 className={cx(
@@ -60,7 +60,7 @@ export function SubnameCountIndicator({
             </ButtonUnstyled>
         );
     }
-    if (!showAddSubnameLink) {
+    if (showAddSubnameLink) {
         return (
             <ButtonUnstyled
                 onClick={onSubnameListClick}
