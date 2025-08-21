@@ -5,7 +5,7 @@
 
 import { Close } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps-ui-kit';
-import { ConnectButton, useCurrentWallet } from '@iota/dapp-kit';
+import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -18,6 +18,7 @@ import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
+import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
 import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
@@ -36,6 +37,7 @@ const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
+    const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
@@ -53,6 +55,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         data: nameRecordData,
         error: nameError,
         isLoading: isLoadingNameRecord,
+        refetch: refetchNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
     const { data: { isPaymentAuthorized, isAuctionAuthorized } = {} } = useNamesPurchaseMode();
@@ -158,7 +161,17 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         }
     }
 
-    function handleBidOrPurchase() {
+    function handlePurchase() {
+        setIsRenewDialogOpen(true);
+        refetchNameRecord();
+    }
+
+    function handleRenew() {
+        setIsRenewDialogOpen(false);
+        handleCompletedBidOrPurchase();
+    }
+
+    function handleCompletedBidOrPurchase() {
         setSearchValue('');
         setName('');
         onCompleted?.();
@@ -219,7 +232,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
-                        ></NamePurchaseCard>
+                        />
                     ) : (
                         nameRecordData && (
                             <>
@@ -227,7 +240,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                     <PurchaseName
                                         name={name}
                                         nameRecordData={nameRecordData}
-                                        onCompleted={handleBidOrPurchase}
+                                        onPurchase={handlePurchase}
                                     />
                                 )}
 
@@ -235,11 +248,19 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                     <BidName
                                         name={name}
                                         nameRecordData={nameRecordData}
-                                        onCompleted={handleBidOrPurchase}
+                                        onCompleted={handleCompletedBidOrPurchase}
                                     />
                                 )}
                             </>
                         )
+                    )}
+
+                    {isRenewDialogOpen && (
+                        <RenewNameDialog
+                            setOpen={setIsRenewDialogOpen}
+                            name={name}
+                            onRenew={handleRenew}
+                        />
                     )}
                 </div>
             </div>
@@ -247,15 +268,12 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     );
 }
 
-function BidName({
-    name,
-    nameRecordData,
-    onCompleted,
-}: {
+interface BidNameProps {
     name: string;
     nameRecordData: NameRecordData;
     onCompleted: () => void;
-}) {
+}
+function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
     const { isConnected } = useCurrentWallet();
     const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
@@ -293,7 +311,7 @@ function BidName({
                         onClick={() => setAuctionDialogOpen(true)}
                     />
                 ) : (
-                    <ConnectButton connectText="Connect" />
+                    <ConnectButton />
                 )}
             </NamePurchaseCard>
 
@@ -308,30 +326,21 @@ function BidName({
     );
 }
 
-function PurchaseName({
-    name,
-    nameRecordData,
-    onCompleted,
-}: {
+interface PurchaseNameProps {
     name: string;
     nameRecordData: NameRecordData;
-    onCompleted: () => void;
-}) {
+    onPurchase: () => void;
+}
+function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
-    const [isRenewDialogOpen, setRenewDialgOpen] = useState(false);
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
+        onPurchase();
         setPurchaseDialogOpen(false);
-        setRenewDialgOpen(true);
-    }
-
-    function handleRenew() {
-        setRenewDialgOpen(false);
-        onCompleted();
     }
 
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
@@ -356,7 +365,7 @@ function PurchaseName({
                         onClick={() => setPurchaseDialogOpen(true)}
                     />
                 ) : (
-                    <ConnectButton connectText="Connect" />
+                    <ConnectButton />
                 )}
             </NamePurchaseCard>
 
@@ -367,9 +376,6 @@ function PurchaseName({
                     setOpen={setPurchaseDialogOpen}
                     onPurchase={handlePurchase}
                 />
-            )}
-            {isRenewDialogOpen && (
-                <RenewNameDialog name={name} setOpen={setRenewDialgOpen} onRenew={handleRenew} />
             )}
         </>
     );
