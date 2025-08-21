@@ -60,6 +60,7 @@ export function SubnameCountIndicator({
             </ButtonUnstyled>
         );
     }
+
     return (
         <ButtonUnstyled
             onClick={onSubnameListClick}
