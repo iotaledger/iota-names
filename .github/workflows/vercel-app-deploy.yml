@@ -10,9 +10,6 @@ on:
       NAMES_DAPP_CONFIG:
         type: string
         required: true
-      NAMES_DAPP_DEFAULT_NETWORK:
-        type: string
-        required: true
     secrets:
       VERCEL_TOKEN:
         required: true
@@ -24,6 +21,8 @@ on:
         required: true
       VERCEL_ALIAS:
         required: false
+      NAMES_DAPP_DEFAULT_NETWORK:
+        required: true
 
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
