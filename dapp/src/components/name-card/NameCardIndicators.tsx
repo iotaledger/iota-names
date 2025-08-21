@@ -37,16 +37,16 @@ interface SubnameCountIndicatorProps {
     subnameCount: number;
     onSubnameListClick: () => void;
     onAddSubnameClick?: () => void;
-    showAddSubnameLink: boolean;
+    showAddSubnameLink?: boolean;
 }
 
 export function SubnameCountIndicator({
     subnameCount,
     onSubnameListClick,
     onAddSubnameClick,
-    showAddSubnameLink = true,
+    showAddSubnameLink,
 }: SubnameCountIndicatorProps) {
-    if (subnameCount === 0 && showAddSubnameLink) {
+    if (subnameCount === 0 && showAddSubnameLink !== false) {
         return (
             <ButtonUnstyled
                 className={cx(
@@ -60,26 +60,17 @@ export function SubnameCountIndicator({
             </ButtonUnstyled>
         );
     }
-    if (showAddSubnameLink) {
-        return (
-            <ButtonUnstyled
-                onClick={onSubnameListClick}
-                className={cx(
-                    INDICATOR_PRIMARY_TEXT_COLOR,
-                    INDICATOR_COMMON_CLASSES,
-                    CLICKABLE_INDICATOR_CLASSES,
-                )}
-            >
-                <Subnames className="h-4 w-4" />
-                {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
-            </ButtonUnstyled>
-        );
-    } else {
-        return (
-            <span className={cx(INDICATOR_PRIMARY_TEXT_COLOR, INDICATOR_COMMON_CLASSES)}>
-                <Subnames className="h-4 w-4" />
-                {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
-            </span>
-        );
-    }
+    return (
+        <ButtonUnstyled
+            onClick={onSubnameListClick}
+            className={cx(
+                INDICATOR_PRIMARY_TEXT_COLOR,
+                INDICATOR_COMMON_CLASSES,
+                CLICKABLE_INDICATOR_CLASSES,
+            )}
+        >
+            <Subnames className="h-4 w-4" />
+            {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}
+        </ButtonUnstyled>
+    );
 }

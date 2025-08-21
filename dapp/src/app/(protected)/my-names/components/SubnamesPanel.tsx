@@ -7,10 +7,11 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
-import { useRegistrationNfts } from '@/hooks';
+import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
+import { getNamePermissions } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -28,6 +29,13 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     const isAtRoot = namePaths.length === 1;
+    const { data: nameRecordData } = useNameRecord(selectedName.name);
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
 
     const currentNode = useMemo(
         () => traverseNameTree(initialNameTree, namePaths),
@@ -84,15 +92,16 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             />
                         ))}
                     </div>
-
-                    <div className="flex flex-col items-center justify-center py-sm">
-                        <Button
-                            text="New Subname"
-                            type={ButtonType.Outlined}
-                            onClick={() => setIsAddDialogOpen(true)}
-                            icon={<Add />}
-                        />
-                    </div>
+                    {namePermissions.allowChildCreation && (
+                        <div className="flex flex-col items-center justify-center py-sm">
+                            <Button
+                                text="New Subname"
+                                type={ButtonType.Outlined}
+                                onClick={() => setIsAddDialogOpen(true)}
+                                icon={<Add />}
+                            />
+                        </div>
+                    )}
                 </div>
             </Panel>
 
