@@ -6,7 +6,7 @@ import { z } from 'zod';
 export const envSchema = z.record(
     z.string(),
     z.object({
-        network: z.enum(['devnet', 'testnet']),
+        network: z.enum(['devnet', 'testnet', 'mainnet']),
         indexerUrl: z.string(),
         namesDisplayUrl: z.string(),
     }),
