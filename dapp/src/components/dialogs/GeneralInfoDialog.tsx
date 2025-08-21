@@ -82,7 +82,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                 <Header title="General Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
-                        <div className=" max-h-[220px] max-w-[220px] w-full h-full">
+                        <div className="max-h-[220px] max-w-[220px] w-full h-full">
                             <NameAvatarDisplay name={name} />
                         </div>
                         <span className="text-headline-sm text-names-neutral-92 w-full text-center">
