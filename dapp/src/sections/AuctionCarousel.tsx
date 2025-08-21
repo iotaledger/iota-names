@@ -20,19 +20,22 @@ interface AuctionCarouselProps {
 // Responsive breakpoints for the carousel
 const responsive = {
     desktop: {
-        breakpoint: { max: 3000, min: 1024 },
+        breakpoint: { max: 3000, min: 1600 },
+        items: 5,
+        slidesToSlide: 1,
+    },
+    tabletLg: {
+        breakpoint: { max: 1600, min: 1024 },
         items: 4,
         slidesToSlide: 1,
     },
     tablet: {
         breakpoint: { max: 1024, min: 768 },
-        items: 2,
-        slidesToSlide: 1,
+        items: 3,
     },
     mobile: {
         breakpoint: { max: 768, min: 0 },
         items: 1,
-        slidesToSlide: 1,
     },
 };
 
@@ -77,42 +80,39 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
 
             <style jsx global>{`
                 .react-multi-carousel-track {
-                    gap: 1rem;
+                    gap: 0;
                 }
                 .react-multi-carousel-item {
                     padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    min-width: 220px !important;
                 }
-                .react-multi-carousel-dot-list {
-                    display: none !important;
-                }
+                .react-multi-carousel-dot-list,
                 .react-multiple-carousel__arrow {
                     display: none !important;
-                }
-                .auction-carousel-container {
-                    position: relative;
                 }
             `}</style>
 
             <div className="relative">
-                <div className="absolute top-0 left-0 w-[60px] md:w-[120px] lg:w-[150px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
-                <div className="absolute top-0 right-0 w-[60px] md:w-[120px] lg:w-[150px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
+                <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
+                <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
                 <Carousel
                     responsive={responsive}
-                    infinite={true}
-                    autoPlay={true}
-                    autoPlaySpeed={3000}
+                    infinite
+                    autoPlay
+                    autoPlaySpeed={2000}
                     keyBoardControl={false}
                     showDots={false}
                     arrows={false}
                     slidesToSlide={1}
+                    pauseOnHover
                     containerClass="auction-carousel-container"
                     itemClass="auction-carousel-item"
-                    customTransition="transform 500ms ease-in-out"
-                    transitionDuration={500}
                 >
                     {auctions.map((auction) => (
-                        <div key={auction.name} className="px-2">
+                        <div key={auction.name} className="px-2 w-[220px]">
                             <AuctionPublicItem auction={auction} onBidClick={onBidClick} />
                         </div>
                     ))}
