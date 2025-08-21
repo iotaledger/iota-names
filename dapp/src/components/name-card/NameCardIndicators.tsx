@@ -37,16 +37,16 @@ interface SubnameCountIndicatorProps {
     subnameCount: number;
     onSubnameListClick: () => void;
     onAddSubnameClick?: () => void;
-    showAddSubnameLink?: boolean;
+    showAddSubnameLink: boolean;
 }
 
 export function SubnameCountIndicator({
     subnameCount,
     onSubnameListClick,
     onAddSubnameClick,
-    showAddSubnameLink,
+    showAddSubnameLink = true,
 }: SubnameCountIndicatorProps) {
-    if (subnameCount === 0 && showAddSubnameLink !== false) {
+    if (subnameCount === 0 && !showAddSubnameLink) {
         return (
             <ButtonUnstyled
                 className={cx(
@@ -60,7 +60,7 @@ export function SubnameCountIndicator({
             </ButtonUnstyled>
         );
     }
-    if (showAddSubnameLink !== false) {
+    if (!showAddSubnameLink) {
         return (
             <ButtonUnstyled
                 onClick={onSubnameListClick}
