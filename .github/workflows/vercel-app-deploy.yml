@@ -50,6 +50,9 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm add --global vercel@canary
 
+      - name: Pull Vercel Environment Information
+        run: vercel pull --token=${{ secrets.VERCEL_TOKEN }} --yes --environment=${{ inputs.VERCEL_ENVIRONMENT }}
+
       - name: Build Project
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=${{ inputs.VERCEL_ENVIRONMENT }}
 
