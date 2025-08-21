@@ -339,24 +339,33 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     />
                                 </div>
                             )}
-                            {isNameSubname && nameRecord && ownedNames && ownedSubnames && (
-                                <div className="flex flex-row gap-x-sm w-full">
-                                    <DisplayStats
-                                        icon={isLoading ? <LoadingIndicator /> : null}
-                                        label="Registration Expires"
-                                        value={(() => {
-                                            const parentObject = getParentObject(
-                                                ownedNames,
-                                                ownedSubnames,
-                                                nameRecord.nameRecord.name,
-                                            );
-                                            return formatExpirationDate(
-                                                new Date(parentObject?.expirationTimestampMs || 0),
-                                            );
-                                        })()}
-                                    />
-                                </div>
-                            )}
+                            {isNameSubname &&
+                                nameRecord &&
+                                ownedNames &&
+                                ownedSubnames &&
+                                expirationDate && (
+                                    <div className="flex flex-row gap-x-sm w-full">
+                                        <DisplayStats
+                                            icon={isLoading ? <LoadingIndicator /> : null}
+                                            label="Registration Expires"
+                                            value={(() => {
+                                                const parentObject = getParentObject(
+                                                    ownedNames,
+                                                    ownedSubnames,
+                                                    nameRecord.nameRecord.name,
+                                                );
+                                                return parentObject
+                                                    ? formatExpirationDate(
+                                                          new Date(
+                                                              parentObject?.expirationTimestampMs ||
+                                                                  0,
+                                                          ),
+                                                      )
+                                                    : expirationDate;
+                                            })()}
+                                        />
+                                    </div>
+                                )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
