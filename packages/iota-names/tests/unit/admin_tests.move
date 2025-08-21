@@ -13,6 +13,8 @@
 module iota_names::admin_tests;
 
 use iota::clock;
+use iota::coin;
+use iota::iota::IOTA;
 use iota::test_utils::assert_eq;
 use iota_names::admin::{Self, AdminAuth};
 use iota_names::constants;
@@ -22,6 +24,7 @@ use iota_names::registry;
 use iota_names::iota_names::{Self, IotaNames, AdminCap};
 use iota_names::name_registration::NameRegistration;
 use iota_names::test_init_utils;
+use iota_names::payment::{Self, PaymentIntent, Receipt};
 use std::string::{utf8, String};
 
 #[test, expected_failure(abort_code = ::iota_names::iota_names::EAppNotAuthorized)]
@@ -492,4 +495,116 @@ fun test_admin_remove_missing_records() {
     clock.destroy_for_testing();
     iota_names.share_for_testing();
     iota_names::burn_admin_cap_for_testing(admin_cap);
+}
+
+#[test]
+fun register_name_removes_reserved_label() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = iota_names::init_for_testing(&mut ctx);
+    let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
+    let mut clock = clock::create_for_testing(&mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &cap, &mut ctx);
+
+    iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+    iota_names::authorize_for_testing<PaymentsAuth>(&mut iota_names);
+
+    let mut reserved_labels: vector<String> = vector::empty();
+    reserved_labels.push_back(utf8(b"reserved"));
+    deny_list::add_reserved_labels(&mut iota_names, &cap, reserved_labels);
+
+    // Register the reserved name as admin
+    let nft = admin::register_name(
+        &cap,
+        &mut iota_names,
+        utf8(b"reserved.iota"),
+        1,
+        &clock,
+        &mut ctx,
+    );
+    nft.burn_for_testing();
+
+    // Move clock past expiration and grace period
+    clock.increment_for_testing(constants::year_ms() + constants::grace_period_ms() + 1);
+
+    // Try to register the same name again without admin
+    let intent = payment::init_registration(&mut iota_names, utf8(b"reserved.iota"));
+    let receipt = handle_payment(intent, &mut iota_names, &mut ctx);
+    let nft2 = receipt.register(&mut iota_names, &clock, &mut ctx);
+    assert!(nft2.name() == name::new(utf8(b"reserved.iota")), 100);
+    assert!(nft2.expiration_timestamp_ms() == clock.timestamp_ms() + constants::year_ms(), 101);
+
+    nft2.burn_for_testing();
+    clock.destroy_for_testing();
+    iota_names::burn_admin_cap_for_testing(cap);
+    iota_names::share_for_testing(iota_names);
+}
+
+#[test]
+fun register_names_removes_reserved_labels() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = iota_names::init_for_testing(&mut ctx);
+    let cap = iota_names::create_admin_cap_for_testing(&mut ctx);
+    let mut clock = clock::create_for_testing(&mut ctx);
+    test_init_utils::setup_for_testing(&mut iota_names, &cap, &mut ctx);
+
+    iota_names::authorize_for_testing<AdminAuth>(&mut iota_names);
+    iota_names::authorize_for_testing<PaymentsAuth>(&mut iota_names);
+
+    let mut reserved_labels: vector<String> = vector::empty();
+    reserved_labels.push_back(utf8(b"foo"));
+    reserved_labels.push_back(utf8(b"bar"));
+    deny_list::add_reserved_labels(&mut iota_names, &cap, reserved_labels);
+
+    // Register both reserved names as admin
+    let nft_foo = admin::register_name(
+        &cap,
+        &mut iota_names,
+        utf8(b"foo.iota"),
+        1,
+        &clock,
+        &mut ctx,
+    );
+    let nft_bar = admin::register_name(
+        &cap,
+        &mut iota_names,
+        utf8(b"bar.iota"),
+        1,
+        &clock,
+        &mut ctx,
+    );
+    nft_foo.burn_for_testing();
+    nft_bar.burn_for_testing();
+
+    // Move clock past expiration and grace period
+    clock.increment_for_testing(constants::year_ms() + constants::grace_period_ms() + 1);
+
+    // Try to register the same names again without admin
+    let intent_foo = payment::init_registration(&mut iota_names, utf8(b"foo.iota"));
+    let receipt_foo = handle_payment(intent_foo, &mut iota_names, &mut ctx);
+    let nft2_foo = receipt_foo.register(&mut iota_names, &clock, &mut ctx);
+    let intent_bar = payment::init_registration(&mut iota_names, utf8(b"bar.iota"));
+    let receipt_bar = handle_payment(intent_bar, &mut iota_names, &mut ctx);
+    let nft2_bar = receipt_bar.register(&mut iota_names, &clock, &mut ctx);
+
+    nft2_foo.burn_for_testing();
+    nft2_bar.burn_for_testing();
+    clock.destroy_for_testing();
+    iota_names::burn_admin_cap_for_testing(cap);
+    iota_names::share_for_testing(iota_names);
+}
+
+/// Authorization witness to call protected functions of `iota_names`.
+public struct PaymentsAuth has drop {}
+
+// handles the payment, and if successful (always in this e2e test), issues the receipt.
+fun handle_payment(
+    intent: PaymentIntent,
+    iota_names: &mut IotaNames,
+    ctx: &mut TxContext,
+): Receipt {
+    // the amount the user needs to pay.
+    let amount = intent.request_data().base_amount();
+    let coin = coin::mint_for_testing<IOTA>(amount, ctx);
+
+    intent.finalize_payment(iota_names, PaymentsAuth {}, coin)
 }
