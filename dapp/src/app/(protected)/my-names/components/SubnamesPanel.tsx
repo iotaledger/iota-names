@@ -29,18 +29,19 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
     const isAtRoot = namePaths.length === 1;
-    const { data: nameRecordData } = useNameRecord(selectedName.name);
+
+    const currentNode = useMemo(
+        () => traverseNameTree(initialNameTree, namePaths),
+        [initialNameTree, namePaths],
+    );
+
+    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
     const namePermissions = nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : { allowChildCreation: true, allowTimeExtension: true };
-
-    const currentNode = useMemo(
-        () => traverseNameTree(initialNameTree, namePaths),
-        [initialNameTree, namePaths],
-    );
 
     useEffect(() => {
         if (initialNameTree) {
