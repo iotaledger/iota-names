@@ -92,16 +92,15 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             />
                         ))}
                     </div>
-                    {namePermissions.allowChildCreation && (
-                        <div className="flex flex-col items-center justify-center py-sm">
-                            <Button
-                                text="New Subname"
-                                type={ButtonType.Outlined}
-                                onClick={() => setIsAddDialogOpen(true)}
-                                icon={<Add />}
-                            />
-                        </div>
-                    )}
+                    <div className="flex flex-col items-center justify-center py-sm">
+                        <Button
+                            text="New Subname"
+                            type={ButtonType.Outlined}
+                            onClick={() => setIsAddDialogOpen(true)}
+                            icon={<Add />}
+                            disabled={!namePermissions.allowChildCreation}
+                        />
+                    </div>
                 </div>
             </Panel>
 
