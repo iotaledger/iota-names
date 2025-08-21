@@ -19,11 +19,7 @@ import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import type { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import {
-    getNamePermissions,
-    isNameRecordCloseToExpiration,
-    isNameRecordExpired,
-} from '@/lib/utils/names';
+import { isNameRecordCloseToExpiration, isNameRecordExpired } from '@/lib/utils/names';
 
 import { PanelTileType } from './enums';
 import { PanelTile } from './PanelTile';
@@ -45,19 +41,14 @@ export function NamePanelTile({
 
     const account = useCurrentAccount();
     const { data: defaultName } = useGetDefaultName(account?.address ?? '');
-    const { data: nameRecordData } = useNameRecord(registration.name);
+    const { data: nameRecord } = useNameRecord(registration.name);
 
-    const nameRecord =
-        nameRecordData?.type === 'unavailable' ? nameRecordData.nameRecord : undefined;
-
-    const linkedAddress = nameRecord?.targetAddress || undefined;
+    const linkedAddress =
+        nameRecord?.type === 'unavailable' ? nameRecord?.nameRecord.targetAddress : undefined;
 
     const isDefaultName = defaultName === registration.name;
     const isCloseToExpiration = isNameRecordCloseToExpiration(registration);
     const isExpired = isNameRecordExpired(registration);
-    const allowTimeExtension = nameRecord
-        ? getNamePermissions(nameRecord).allowTimeExtension
-        : false;
 
     const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog);
 
@@ -81,7 +72,6 @@ export function NamePanelTile({
                 footer={
                     isCloseToExpiration || isExpired ? (
                         <PanelFooter
-                            isRenewDisabled={!allowTimeExtension}
                             isCloseToExpiration={isCloseToExpiration}
                             isExpired={isExpired}
                             expirationDate={expirationDate}
@@ -108,14 +98,12 @@ export function NamePanelTile({
 }
 
 interface PanelFooterProps {
-    isRenewDisabled?: boolean;
     isCloseToExpiration: boolean;
     isExpired: boolean;
     expirationDate: string;
     onRenewClick?: () => void;
 }
 function PanelFooter({
-    isRenewDisabled,
     isCloseToExpiration,
     isExpired,
     expirationDate,
@@ -136,9 +124,8 @@ function PanelFooter({
             </p>
 
             <ButtonUnstyled
-                className="px-xs leading-5 rounded-md enabled:hover:opacity-80 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
+                className="px-xs leading-5 rounded-md hover:opacity-80 transition-opacity"
                 onClick={onRenewClick}
-                disabled={isRenewDisabled}
             >
                 Renew &rarr;
             </ButtonUnstyled>
