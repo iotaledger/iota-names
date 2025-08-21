@@ -22,6 +22,8 @@ on:
         required: true
       VERCEL_SCOPE:
         required: true
+      VERCEL_ALIAS:
+        required: false
 
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -60,3 +62,4 @@ jobs:
           DELETE_EXISTING_COMMENT: true
           VERCEL_TARGET: ${{ inputs.VERCEL_ENVIRONMENT }}
           CREATE_COMMENT: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
+          VERCEL_ALIAS: ${{ inputs.VERCEL_ALIAS || '' }}
