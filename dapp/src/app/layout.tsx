@@ -10,6 +10,7 @@ import { Footer, Navbar } from '@/components/layout';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
+import { Suspense } from 'react';
 
 export const metadata = DEFAULT_METADATA;
 
@@ -26,7 +27,9 @@ export default function RootLayout({
                     {children}
                     <AvailabilityCheckDialog />
                     <Footer />
-                    <TermsAndConditionsDialog />
+                    <Suspense>
+                        <TermsAndConditionsDialog />
+                    </Suspense>
                 </AppProviders>
             </body>
         </html>
