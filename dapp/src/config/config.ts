@@ -14,7 +14,7 @@ function loadConfig(): Config {
         namesDappConfig = JSON.parse(rawNamesDappConfig);
     } catch (error) {
         throw new Error(
-            `Failed to parse IOTA Names Dapp config JSON env var! ${(error as Error)?.message}, condif: ${rawNamesDappConfig}`,
+            `Failed to parse IOTA Names Dapp config JSON env var! ${(error as Error)?.message}, config: ${rawNamesDappConfig}`,
         );
     }
 

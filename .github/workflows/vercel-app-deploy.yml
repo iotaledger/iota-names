@@ -54,6 +54,7 @@ jobs:
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREBUILT: true
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
