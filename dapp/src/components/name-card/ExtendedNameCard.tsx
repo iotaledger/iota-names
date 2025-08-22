@@ -70,6 +70,7 @@ export function ExtendedNameCard({
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
+                        showAddSubnameLink={!expired}
                     />
 
                     <Button
