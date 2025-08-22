@@ -29,7 +29,7 @@ env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
   NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
-  NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}"
+  NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
