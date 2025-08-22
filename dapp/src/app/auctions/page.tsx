@@ -214,17 +214,22 @@ export default function AuctionsPage(): JSX.Element {
                 </h2>
             </div>
             <div className="flex justify-between relative">
-                <SegmentedButton>
-                    {typeOptions.map((option) => (
-                        <ButtonSegment
-                            key={option.value}
-                            type={ButtonSegmentType.Rounded}
-                            label={option.label}
-                            selected={selectedStatus === option.value}
-                            onClick={() => setParam('status', option.value)}
-                        />
-                    ))}
-                </SegmentedButton>
+                <div className="flex items-center gap-md">
+                    <SegmentedButton>
+                        {typeOptions.map((option) => (
+                            <ButtonSegment
+                                key={option.value}
+                                type={ButtonSegmentType.Rounded}
+                                label={option.label}
+                                selected={selectedStatus === option.value}
+                                onClick={() => setParam('status', option.value)}
+                            />
+                        ))}
+                    </SegmentedButton>
+                    <p className="text-label-md whitespace-nowrap text-names-neutral-70">
+                        {totalItems} Total
+                    </p>
+                </div>
 
                 <div className="md:flex hidden w-full max-w-[260px] gap-4" ref={dropdownRef}>
                     <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-transparent rounded-full [&>div]:rounded-full [&_.input-container]:rounded-full">
@@ -287,7 +292,7 @@ export default function AuctionsPage(): JSX.Element {
                     )}
                 </div>
                 {paginationPages.length > 0 ? (
-                    <div className="flex justify-center items-center mt-8">
+                    <div className="mt-8 flex flex-col items-center gap-sm md:relative md:gap-0">
                         <div className="flex flex-1 justify-center">
                             <div className="flex gap-2">
                                 <Button
@@ -332,7 +337,7 @@ export default function AuctionsPage(): JSX.Element {
                                 />
                             </div>
                         </div>
-                        <div className="flex ml-6">
+                        <div className="md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
                             <Select
                                 dropdownPosition={DropdownPosition.Top}
                                 value={pageSize.toString()}
