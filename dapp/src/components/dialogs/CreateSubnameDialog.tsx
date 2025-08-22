@@ -162,7 +162,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             });
             if (fullSubnameName) {
                 toast.success(
-                    `Successfully created subname @${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
+                    `Successfully created subname ${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
                 );
             }
 
