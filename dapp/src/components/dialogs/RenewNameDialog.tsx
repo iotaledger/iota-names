@@ -262,21 +262,24 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = nameRecord?.nameRecord.expirationTimestampMs
+    const expirationTime = nameRecord?.nameRecord.expirationTimestampMs
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : null;
 
-    const parentObject =
-        ownedNames && ownedSubnames && nameRecord
-            ? getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
-            : null;
-
     const nameExpiration =
-        expirationDate && renewYears
-            ? new Date(expirationDate).setFullYear(
-                  new Date(expirationDate).getFullYear() + renewYears,
+        !isNameSubname && expirationTime && renewYears
+            ? new Date(expirationTime).setFullYear(
+                  new Date(expirationTime).getFullYear() + renewYears,
               )
             : null;
+
+    const subnameExpiration =
+        isNameSubname && ownedNames && ownedSubnames && nameRecord && nameRecord.nameRecord
+            ? getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
+                  ?.expirationTimestampMs
+            : null;
+
+    const expirationDate = isNameSubname ? subnameExpiration : nameExpiration;
 
     const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
     const isLoading =
@@ -336,26 +339,13 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {!isNameSubname && nameExpiration && (
-                                <div className="flex flex-row gap-x-sm w-full">
-                                    <DisplayStats
-                                        icon={isLoading ? <LoadingIndicator /> : null}
-                                        label="Registration Expires"
-                                        value={formatExpirationDate(new Date(nameExpiration))}
-                                    />
-                                </div>
-                            )}
-                            {isNameSubname && parentObject && (
-                                <div className="flex flex-row gap-x-sm w-full">
-                                    <DisplayStats
-                                        icon={isLoading ? <LoadingIndicator /> : null}
-                                        label="Registration Expires"
-                                        value={formatExpirationDate(
-                                            new Date(parentObject.expirationTimestampMs),
-                                        )}
-                                    />
-                                </div>
-                            )}
+                            <div className="flex flex-row gap-x-sm w-full">
+                                <DisplayStats
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    label="Registration Expires"
+                                    value={expirationDate}
+                                />
+                            </div>
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
