@@ -78,22 +78,6 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
         <div className="w-full">
             <AuctionCarouselHeader />
 
-            <style jsx global>{`
-                .react-multi-carousel-track {
-                    gap: 0;
-                }
-                .react-multi-carousel-item {
-                    padding: 0;
-                    display: flex;
-                    justify-content: center;
-                    min-width: 220px !important;
-                }
-                .react-multi-carousel-dot-list,
-                .react-multiple-carousel__arrow {
-                    display: none !important;
-                }
-            `}</style>
-
             <div className="relative">
                 <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
                 <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
