@@ -24,11 +24,11 @@ export default function RootLayout({
         <html lang="en" className={APP_STATIC_THEME}>
             <body className="antialiased">
                 <AppProviders>
-                    <Navbar />
-                    {children}
-                    <AvailabilityCheckDialog />
-                    <Footer />
                     <Suspense>
+                        <Navbar />
+                        {children}
+                        <AvailabilityCheckDialog />
+                        <Footer />
                         <TermsAndConditionsDialog />
                     </Suspense>
                 </AppProviders>
