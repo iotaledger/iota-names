@@ -68,4 +68,4 @@ jobs:
           DELETE_EXISTING_COMMENT: true
           VERCEL_TARGET: ${{ inputs.VERCEL_ENVIRONMENT }}
           CREATE_COMMENT: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
-          ALIAS_DOMAINS: ${{ inputs.VERCEL_ALIAS || '' }}
+          ALIAS_DOMAINS: ${{ secrets.VERCEL_ALIAS || '' }}
