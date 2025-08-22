@@ -15,10 +15,10 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
     const pathname = usePathname();
     const autoConnect = useAutoConnectWallet();
     const currentAccount = useCurrentAccount();
-    const { isConnected } = useCurrentWallet();
+    const { isDisconnected } = useCurrentWallet();
 
     useEffect(() => {
-        if (!currentAccount && !isConnected && autoConnect === 'attempted') {
+        if (!currentAccount && isDisconnected && autoConnect === 'attempted') {
             return redirect(CONNECT_ROUTE.path);
         }
 
@@ -26,7 +26,7 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
         if (!areAccepted) {
             redirect('/?modal=terms_conditions');
         }
-    }, [autoConnect, currentAccount, isConnected, pathname]);
+    }, [autoConnect, currentAccount, isDisconnected, pathname]);
 
     if (autoConnect === 'idle') {
         return (
