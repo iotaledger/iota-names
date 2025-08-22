@@ -63,7 +63,6 @@ export function getNameMenuOptions(
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
             isHidden: nft.isExpired,
             isDisabled: !namePermissions.allowChildCreation,
-            isHidden: nft.isExpired,
         },
         // {
         //     onClick: () => {},
