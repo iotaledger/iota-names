@@ -11,7 +11,7 @@ import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { isGracePeriodExpired, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -46,17 +46,23 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
-
+    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
     const buttonText = (() => {
-        if (expired) {
+        if (expired && !isNameGracePeriodExpired) {
             return 'Renew Name';
+        }
+        if (isNameGracePeriodExpired) {
+            return 'Delete Name';
         }
         return targetAddress ? formatAddress(targetAddress) : 'Connect to address';
     })();
 
     const handleButtonClick = () => {
-        if (expired) {
+        if (expired && !isNameGracePeriodExpired) {
             openDialog(NameDialogId.RenewName);
+        }
+        if (isNameGracePeriodExpired) {
+            openDialog(NameDialogId.Delete);
         } else {
             openDialog(NameDialogId.ConnectToAddress);
         }

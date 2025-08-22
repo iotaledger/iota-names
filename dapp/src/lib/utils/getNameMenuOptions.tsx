@@ -72,7 +72,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            isDisabled: !namePermissions.allowTimeExtension || !isNameGracePeriodExpired,
+            isDisabled: !namePermissions.allowTimeExtension || isNameGracePeriodExpired,
             isHidden: isNameGracePeriodExpired,
             hideBottomBorder: true,
         },
