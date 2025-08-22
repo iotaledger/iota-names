@@ -266,6 +266,18 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : null;
 
+    const parentObject =
+        ownedNames && ownedSubnames && nameRecord
+            ? getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
+            : null;
+
+    const nameExpiration =
+        expirationDate && renewYears
+            ? new Date(expirationDate).setFullYear(
+                  new Date(expirationDate).getFullYear() + renewYears,
+              )
+            : null;
+
     const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
@@ -324,48 +336,26 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {!isNameSubname && expirationDate && renewYears && (
+                            {!isNameSubname && nameExpiration && (
                                 <div className="flex flex-row gap-x-sm w-full">
                                     <DisplayStats
                                         icon={isLoading ? <LoadingIndicator /> : null}
                                         label="Registration Expires"
-                                        value={(() => {
-                                            const currentExpiration = new Date(expirationDate);
-                                            currentExpiration.setFullYear(
-                                                currentExpiration.getFullYear() + renewYears,
-                                            );
-                                            return formatExpirationDate(currentExpiration);
-                                        })()}
+                                        value={formatExpirationDate(new Date(nameExpiration))}
                                     />
                                 </div>
                             )}
-                            {isNameSubname &&
-                                nameRecord &&
-                                ownedNames &&
-                                ownedSubnames &&
-                                expirationDate && (
-                                    <div className="flex flex-row gap-x-sm w-full">
-                                        <DisplayStats
-                                            icon={isLoading ? <LoadingIndicator /> : null}
-                                            label="Registration Expires"
-                                            value={(() => {
-                                                const parentObject = getParentObject(
-                                                    ownedNames,
-                                                    ownedSubnames,
-                                                    nameRecord.nameRecord.name,
-                                                );
-                                                return parentObject
-                                                    ? formatExpirationDate(
-                                                          new Date(
-                                                              parentObject?.expirationTimestampMs ||
-                                                                  0,
-                                                          ),
-                                                      )
-                                                    : expirationDate;
-                                            })()}
-                                        />
-                                    </div>
-                                )}
+                            {isNameSubname && parentObject && (
+                                <div className="flex flex-row gap-x-sm w-full">
+                                    <DisplayStats
+                                        icon={isLoading ? <LoadingIndicator /> : null}
+                                        label="Registration Expires"
+                                        value={formatExpirationDate(
+                                            new Date(parentObject.expirationTimestampMs),
+                                        )}
+                                    />
+                                </div>
+                            )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
