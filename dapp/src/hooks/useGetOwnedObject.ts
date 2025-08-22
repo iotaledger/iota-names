@@ -5,10 +5,12 @@ import { useIotaClient } from '@iota/dapp-kit';
 import { GetObjectParams } from '@iota/iota-sdk/client';
 import { useQuery } from '@tanstack/react-query';
 
-export function useGetObject(params: GetObjectParams) {
+import { queryKey } from './queryKey';
+
+export function useGetObject(name: string, params: GetObjectParams) {
     const client = useIotaClient();
     return useQuery({
-        queryKey: ['get-object', params],
+        queryKey: [...queryKey.getObject(name), params],
         queryFn: async () => {
             if (!params.id) {
                 return;
