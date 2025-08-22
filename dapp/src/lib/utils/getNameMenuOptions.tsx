@@ -63,6 +63,7 @@ export function getNameMenuOptions(
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
             isHidden: nft.isExpired,
             isDisabled: !namePermissions.allowChildCreation,
+            isHidden: nft.isExpired,
         },
         // {
         //     onClick: () => {},
@@ -71,7 +72,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            isDisabled: !namePermissions.allowTimeExtension,
+            isDisabled: !namePermissions.allowTimeExtension || nft.isExpired,
             hideBottomBorder: true,
         },
         {
