@@ -8,7 +8,7 @@ import { Config, envSchema } from './config.schema';
 function loadConfig(): Config {
     const rawNamesDappConfig = process.env.NEXT_PUBLIC_NAMES_DAPP_CONFIG || '';
 
-    console.log("config", rawNamesDappConfig)
+    console.log('config', rawNamesDappConfig);
 
     let namesDappConfig: Record<string, unknown> = {};
 
