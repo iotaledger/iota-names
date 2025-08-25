@@ -3,7 +3,7 @@
 
 import { Link } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { NameRecordData, useNameRecord } from '@/hooks';
@@ -46,13 +46,14 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
     const isNameGracePeriodExpired = isGracePeriodExpired(nft);
     const buttonText = (() => {
         if (expired && !isNameGracePeriodExpired) {
             return 'Renew Name';
         }
         if (isNameGracePeriodExpired) {
-            return 'Delete Name';
+            return isNameSubname ? 'Delete Subname' : 'Delete Name';
         }
         return targetAddress ? formatAddress(targetAddress) : 'Connect to address';
     })();
