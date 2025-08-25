@@ -6,8 +6,8 @@ import './globals.css';
 
 import { Suspense } from 'react';
 
+import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
-import { ConnectionGuard } from '@/components/ConnectionGuard';
 import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
