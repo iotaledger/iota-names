@@ -53,11 +53,6 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         }
     }, [initialNameTree]);
 
-    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
-    const nameRecord = nameRecordData as
-        | Extract<NameRecordData, { type: 'unavailable' }>
-        | undefined;
-
     if (!currentNode) return null;
 
     const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
