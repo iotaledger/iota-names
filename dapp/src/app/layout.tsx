@@ -7,6 +7,7 @@ import './globals.css';
 import { Suspense } from 'react';
 
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
+import { ConnectionGuard } from '@/components/ConnectionGuard';
 import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
@@ -25,11 +26,13 @@ export default function RootLayout({
             <body className="antialiased">
                 <AppProviders>
                     <Suspense>
-                        <Navbar />
-                        {children}
-                        <AvailabilityCheckDialog />
-                        <Footer />
-                        <TermsAndConditionsDialog />
+                        <ConnectionGuard>
+                            <Navbar />
+                            {children}
+                            <AvailabilityCheckDialog />
+                            <Footer />
+                            <TermsAndConditionsDialog />
+                        </ConnectionGuard>
                     </Suspense>
                 </AppProviders>
             </body>
