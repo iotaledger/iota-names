@@ -60,7 +60,7 @@ export function TermsAndConditionsDialog() {
                     <div className="flex flex-col gap-xl">
                         <div className="flex flex-col gap-md">
                             <span className="text-label-md text-names-neutral-70">
-                                Effective Date: September 4, 2025
+                                Effective Date: 25 August 2025
                             </span>
                             <div className="text-body-md text-names-neutral-92">
                                 <TOS />
