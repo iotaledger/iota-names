@@ -36,6 +36,7 @@ module.exports = {
         '.next',
         'documentation',
         'packages',
+        'tos.mdx'
     ],
     rules: {
         'no-case-declarations': 'off',
