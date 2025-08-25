@@ -35,14 +35,6 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         [initialNameTree, namePaths],
     );
 
-    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
-    const nameRecord = nameRecordData as
-        | Extract<NameRecordData, { type: 'unavailable' }>
-        | undefined;
-    const namePermissions = nameRecord
-        ? getNamePermissions(nameRecord.nameRecord)
-        : { allowChildCreation: true, allowTimeExtension: true };
-
     useEffect(() => {
         if (initialNameTree) {
             const isNewRoot = namePaths[0] !== initialNameTree.name;
@@ -52,6 +44,14 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
             }
         }
     }, [initialNameTree]);
+
+    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
 
     if (!currentNode) return null;
 
@@ -95,6 +95,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             />
                         ))}
                     </div>
+
                     <div className="flex flex-col items-center justify-center py-sm">
                         <Button
                             text="New Subname"
