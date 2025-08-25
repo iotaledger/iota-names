@@ -16,6 +16,12 @@ This will automatically publish all the packages in the correct order, collect a
 file, as well as do a full on-chain setup (creation of the registry, addition of pricelist, authorization of all apps as well as
 calling their respective setup functions).
 
+If you want to publish (not upgrade) to a network, where an [env] entry already exists in the Move.lock files of the packages, you can run the following script to remove them, otherwise publishing will fail:
+
+```bash
+pnpm ts-node remove-move-envs.ts
+```
+
 Then, you can use these published variables to the SDK and call different actions (e.g. registering names, subnames etc)
 
 > Do not check-in the `Move.lock` and `Move.toml` changes if you are submitting a PR.
