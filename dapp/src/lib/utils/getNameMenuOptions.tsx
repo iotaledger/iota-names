@@ -10,7 +10,7 @@ import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
 
-import { getNamePermissions } from './names';
+import { getNamePermissions, isGracePeriodExpired } from './names';
 
 export function getNameMenuOptions(
     nft: RegistrationNft,
@@ -20,6 +20,7 @@ export function getNameMenuOptions(
 ): MenuListItem[] {
     const nameRecord = record as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
     const isNameSubname = isSubname(nft.name);
+    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
     const namePermissions =
         isNameSubname && nameRecord
             ? getNamePermissions(nameRecord.nameRecord)
@@ -28,6 +29,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
             children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         // {
@@ -44,6 +46,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.PersonalizeAvatar),
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         // {
@@ -54,12 +57,13 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.SetPermissions),
             children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
-            isHidden: !nft.isSubname,
+            isHidden: !nft.isSubname || nft.isExpired,
         },
         {
             onClick: () => onOpen(NameDialogId.CreateSubname),
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
-            isHidden: !namePermissions.allowChildCreation,
+            isHidden: !namePermissions.allowChildCreation || nft.isExpired,
+            isDisabled: !namePermissions.allowChildCreation,
         },
         // {
         //     onClick: () => {},
@@ -68,12 +72,14 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            isHidden: !namePermissions.allowTimeExtension,
+            isHidden: !namePermissions.allowTimeExtension || isNameGracePeriodExpired,
+            isDisabled: !namePermissions.allowTimeExtension,
             hideBottomBorder: true,
         },
         {
             onClick: () => onOpen(NameDialogId.EditMetadata),
             children: <DropdownMenuOption icon={<Edit />} label="Edit Metadata" />,
+            isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
         {
