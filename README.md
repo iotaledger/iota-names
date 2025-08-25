@@ -1,4 +1,4 @@
-> [!NOTE]  
+> [!NOTE]\
 > By using this service, you agree to the Terms & Conditions: testnet.iotanames.com/?modal=terms_conditions.
 
 # IOTA-Names
