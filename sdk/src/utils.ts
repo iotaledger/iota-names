@@ -51,7 +51,7 @@ export function normalizeIotaName(
     const subnamesEllipsis = format === 'dot' ? '.' : '..';
 
     // Only select the first subname if desired
-    let subnames = onlyFirstSubname
+    let subnames = onlyFirstSubname && parts.length >= 2
         ? [
               // First name from the left (e.g yes.no.no.no.iota)
               parts[0],

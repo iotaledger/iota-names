@@ -233,6 +233,12 @@ describe('Name normalization', () => {
                 ellipsisForDeepSubnames: false,
             }),
         ).toEqual('aaaa.bbbb.iota');
+        expect(
+            normalizeIotaName('bbbb.iota', 'dot', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('bbbb.iota');
     });
 
     test('should only select first subname at-style', () => {
@@ -259,5 +265,11 @@ describe('Name normalization', () => {
                 ellipsisForDeepSubnames: false,
             }),
         ).toEqual('aaaa@bbbb');
+        expect(
+            normalizeIotaName('bbbb.iota', 'at', {
+                onlyFirstSubname: true,
+                ellipsisForDeepSubnames: false,
+            }),
+        ).toEqual('@bbbb');
     });
 });
