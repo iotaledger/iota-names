@@ -193,6 +193,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             autoFocus={autoFocusInput}
                             onClearInput={() => {
                                 setSearchValue('');
+                                setName('');
                             }}
                         />
                     </div>
