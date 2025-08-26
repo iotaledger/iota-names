@@ -61,13 +61,8 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
                 <Carousel
                     pauseOnHover
                     items={auctions}
-                    renderItem={(item, index) => (
-                        <AuctionPublicItem
-                            index={index}
-                            key={item.name}
-                            auction={item}
-                            onBidClick={onBidClick}
-                        />
+                    renderItem={(item) => (
+                        <AuctionPublicItem key={item.name} auction={item} onBidClick={onBidClick} />
                     )}
                 ></Carousel>
             </div>

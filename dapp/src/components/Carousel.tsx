@@ -5,38 +5,35 @@
 
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-const __carousel_uid_seq = 0;
+import { AuctionDetails } from '@/auctions';
 
 // Helper type for the render function
-type ItemRenderer<T> = (item: T, index: number) => React.ReactNode;
+type ItemRenderer<T> = (item: T) => React.ReactNode;
 
 // Memoized item wrapper to prevent re-render when item/index unchanged
 const CarouselItem = React.memo(
-    function CarouselItem<T>({
+    function CarouselItem({
         item,
-        index,
         renderItem,
     }: {
-        item: T;
-        index: number;
-        renderItem: ItemRenderer<T>;
+        item: AuctionDetails;
+        renderItem: ItemRenderer<AuctionDetails>;
     }) {
         return (
             <div className="flex-shrink-0" style={{ width: `${ITEM_WIDTH}px` }}>
-                {renderItem(item, index)}
+                {renderItem(item)}
             </div>
         );
     },
     // Re-render only if item reference or index or renderer function changes
-    (prev, next) =>
-        prev.index === next.index && prev.item === next.item && prev.renderItem === next.renderItem,
-) as unknown as <T>(props: { item: T; index: number; renderItem: ItemRenderer<T> }) => JSX.Element;
+    (prev, next) => prev.item.name === next.item.name,
+) as (props: { item: AuctionDetails; renderItem: ItemRenderer<AuctionDetails> }) => JSX.Element;
 
-interface CarouselProps<T = unknown> {
+interface CarouselProps {
     /** Data items to render */
-    items: T[];
+    items: AuctionDetails[];
     /** Render function for each item */
-    renderItem: (item: T, index: number) => ReactNode;
+    renderItem: (item: AuctionDetails) => ReactNode;
     className?: string;
     /** Autoplay enabled */
     autoPlay?: boolean;
@@ -45,7 +42,7 @@ interface CarouselProps<T = unknown> {
     /** Pause autoplay when hovered */
     pauseOnHover?: boolean;
     /** Provide a stable key per data item; defaults to its array index */
-    getItemKey?: (item: T, index: number) => string | number;
+    getItemKey?: (item: AuctionDetails, index: number) => string | number;
 }
 
 const ITEM_WIDTH = 220; // px
@@ -60,13 +57,11 @@ export function calculateVisibleItemsCount(
     itemWidth: number = ITEM_WIDTH,
     itemGap: number = ITEM_GAP,
     minVisible: number = 1,
-    maxVisible?: number,
 ): number {
     if (containerWidth <= 0) return minVisible;
-    const itemsWithGaps = Math.floor((containerWidth + itemGap) / (itemWidth + itemGap));
-    let visibleItems = Math.max(minVisible, itemsWithGaps);
-    if (maxVisible !== undefined) visibleItems = Math.min(visibleItems, maxVisible);
-    return visibleItems;
+    const itemWithGap = itemWidth + itemGap;
+    const itemsWithGaps = Math.floor((containerWidth + itemGap) / itemWithGap);
+    return Math.max(minVisible, itemsWithGaps);
 }
 
 /** Wrap any integer index to [0, total) */
@@ -123,8 +118,11 @@ function getWindow<T>(arr: T[], arraySize: number, currentIndex: number): T[] {
 
     if (n === 0 || arraySize <= 0) return result;
 
+    // normalize currentIndex to 0..n-1
+    const start = ((currentIndex % n) + n) % n;
+
     for (let i = 0; i < arraySize; i++) {
-        const idx = (currentIndex + i) % n;
+        const idx = (start + i) % n; // wrap around
         result.push(arr[idx]);
     }
 
@@ -255,7 +253,7 @@ function defineInitConfig(containerWidth: number) {
     };
 }
 
-export function Carousel<T = unknown>({
+export function Carousel({
     items,
     renderItem,
     className = '',
@@ -263,7 +261,7 @@ export function Carousel<T = unknown>({
     autoPlaySpeed = 2500,
     pauseOnHover = true,
     getItemKey,
-}: CarouselProps<T>) {
+}: CarouselProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
 
@@ -319,7 +317,7 @@ export function Carousel<T = unknown>({
                 // 3. Set new transform (this happens without animation)
                 const translateX = determineTranslateX(containerWidth, itemIndex);
                 setTranslateX(translateX);
-                setVisualIndex(itemIndex);
+                // setVisualIndex(itemIndex);
 
                 // 4. Re-enable transitions after another frame
                 requestAnimationFrame(() => {
@@ -373,10 +371,20 @@ export function Carousel<T = unknown>({
     // Autoplay
     useAutoPlay(autoPlay && canSlide, autoPlaySpeed, pauseOnHover && isHovered, goToNext);
 
-    const itemsToRender = useMemo(
-        () => getSlidingItems(items, committedIndex, visibleItems, BUFFER_SIZE),
-        [items, committedIndex, visibleItems],
-    );
+    const itemsToRender = useMemo(() => {
+        if (items.length === 0 || !containerWidth) return [];
+        const indexes = getWindow(items, visibleItems + BUFFER_SIZE, visualIndex);
+        console.log(indexes);
+
+        return indexes;
+        // console.log('raange', range);
+
+        // return range.map((item, idx) => ({
+        //     item,
+        //     originalIndex: indexes[minIndex + idx] as number,
+        // }));
+        // getSlidingItems(items, committedIndex, visibleItems, BUFFER_SIZE)
+    }, [items, visualIndex, visibleItems]);
 
     // const transform = useMemo(() => {
     //     return `translateX(0px)`;
@@ -414,12 +422,9 @@ export function Carousel<T = unknown>({
         animatingRef.current = null;
     }, []);
 
-    const keyOf = useCallback(
-        (item: T, idx: number) => (getItemKey ? getItemKey(item, idx) : idx),
-        [getItemKey],
-    );
-
     const manualNext = () => {
+        const prevTranslateX = translateX;
+        
         updateTransformWithAnimation(containerWidth, visualIndex + 1);
         console.log('manual next');
     };
@@ -448,13 +453,8 @@ export function Carousel<T = unknown>({
                 }}
                 onTransitionEnd={handleTransitionEnd}
             >
-                {itemsToRender.map(({ item, originalIndex }) => (
-                    <CarouselItem
-                        key={`c${originalIndex}:${String(keyOf(item, originalIndex))}`}
-                        item={item}
-                        index={originalIndex}
-                        renderItem={renderItem}
-                    />
+                {itemsToRender.map((item) => (
+                    <CarouselItem key={item.name} item={item} renderItem={renderItem} />
                 ))}
             </div>
         </div>
