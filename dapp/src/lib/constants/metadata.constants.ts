@@ -3,9 +3,12 @@
 
 import type { Metadata } from 'next';
 
+import { CONFIG } from '@/config';
+
+const BASE_URL = CONFIG.baseUrl;
+
 const DEFAULT_TITLE = 'IOTA Names';
 const DEFAULT_DESCRIPTION = 'Own a unique, human-readable name on IOTA.';
-export const BASE_URL = 'https://iotanames.com';
 const DEFAULT_IMAGE = '/meta_image.png';
 
 export const DEFAULT_METADATA: Metadata = {
