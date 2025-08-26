@@ -50,7 +50,7 @@ export function NamePanelTile({
     const isCloseToExpiration = isNameRecordCloseToExpiration(registration);
     const isExpired = isNameRecordExpired(registration);
 
-    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog);
+    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog, nameRecord);
 
     const panelType = (() => {
         if (isCloseToExpiration) return PanelTileType.Warning;

@@ -7,10 +7,11 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
-import { useRegistrationNfts } from '@/hooks';
+import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
+import { isNameRecordExpired } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -44,7 +45,14 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         }
     }, [initialNameTree]);
 
+    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
+    const nameRecord = nameRecordData as
+        | Extract<NameRecordData, { type: 'unavailable' }>
+        | undefined;
+
     if (!currentNode) return null;
+
+    const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
 
     const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
@@ -91,6 +99,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             type={ButtonType.Outlined}
                             onClick={() => setIsAddDialogOpen(true)}
                             icon={<Add />}
+                            disabled={isExpired}
                         />
                     </div>
                 </div>
