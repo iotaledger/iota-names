@@ -23,13 +23,11 @@ export default function Home() {
         sort: 'desc',
     });
 
-    auctions.length = 10;
-
     return (
         <main className="flex flex-col min-h-screen">
             <LandingHero />
-            <WhyIotaNames />
-            <FairAuction />
+            {/* <WhyIotaNames /> */}
+            {/* <FairAuction /> */}
             <section className="container py-14 md:py-20">
                 <AuctionCarousel auctions={auctions} isLoading={isLoading} />
             </section>

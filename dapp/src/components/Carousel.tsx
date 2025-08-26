@@ -5,6 +5,8 @@
 
 import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+const __carousel_uid_seq = 0;
+
 // Helper type for the render function
 type ItemRenderer<T> = (item: T, index: number) => React.ReactNode;
 
@@ -42,6 +44,8 @@ interface CarouselProps<T = unknown> {
     autoPlaySpeed?: number;
     /** Pause autoplay when hovered */
     pauseOnHover?: boolean;
+    /** Provide a stable key per data item; defaults to its array index */
+    getItemKey?: (item: T, index: number) => string | number;
 }
 
 const ITEM_WIDTH = 220; // px
@@ -216,25 +220,37 @@ export function useCarouselNavigation(
     return { goToNext, goToPrevious, goToIndex, canSlide };
 }
 
+function defineInitTransform(containerWidth: number) {
+    const containerCenter = containerWidth / 2;
+    const itemTotalWidth = ITEM_WIDTH + ITEM_GAP;
+    const centerItemPosition = Math.ceil(containerCenter / itemTotalWidth) + 1;
+    const centerItemPx = centerItemPosition * itemTotalWidth - ITEM_WIDTH / 2 - ITEM_GAP;
+
+    return containerCenter - centerItemPx;
+}
+
 export function Carousel<T = unknown>({
     items,
     renderItem,
     className = '',
-    autoPlay = true,
+    autoPlay = false,
     autoPlaySpeed = 2500,
     pauseOnHover = true,
+    getItemKey,
 }: CarouselProps<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
     const trackRef = useRef<HTMLDivElement>(null);
 
     const [containerWidth, setContainerWidth] = useState(0);
-    const [visibleItems, setVisibleItems] = useState(1);
+    const [visibleItems, setVisibleItems] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const [transform, setTransform] = useState('');
 
-    const [committedIndex, setCommittedIndex] = useState(0); // drives DOM/window (what is rendered)
-    const [visualIndex, setVisualIndex] = useState(0); // drives transform during animation
-    const [withTransition, setWithTransition] = useState(true);
+    const [committedIndex, setCommittedIndex] = useState(BUFFER_SIZE);
+    const [visualIndex, setVisualIndex] = useState(BUFFER_SIZE);
+    const [withTransition, setWithTransition] = useState(false);
     const animatingRef = useRef<null | 1 | -1>(null); // direction of current animation
+    const [hasMeasured, setHasMeasured] = useState(false);
 
     // Resize observer for stable/responsive behavior
     useEffect(() => {
@@ -245,16 +261,42 @@ export function Carousel<T = unknown>({
             const w = entries[0]?.contentRect.width ?? el.offsetWidth;
             setContainerWidth(w);
             setVisibleItems(calculateVisibleItemsCount(w));
+            if (!hasMeasured) setHasMeasured(true);
         });
         ro.observe(el);
         return () => ro.disconnect();
+    }, [hasMeasured]);
+
+    // Add this function before the useEffect
+    const updateTransformWithoutAnimation = useCallback((containerWidth: number) => {
+        // 1. Disable transitions first
+        setWithTransition(false);
+
+        // 2. Use requestAnimationFrame to ensure the transition disable is applied
+        requestAnimationFrame(() => {
+            // 3. Set new transform (this happens without animation)
+            const offset = defineInitTransform(containerWidth);
+            setTransform(`translateX(${offset}px)`);
+
+            // 4. Re-enable transitions after another frame
+            requestAnimationFrame(() => {
+                setWithTransition(true);
+            });
+        });
     }, []);
+
+    useEffect(() => {
+        if (!containerWidth) return;
+
+        // const offset = defineInitTransform(containerWidth);
+        updateTransformWithoutAnimation(containerWidth);
+    }, [containerWidth]);
 
     // Keep committedIndex and visualIndex bounded when items change to avoid large values growing indefinitely
     useEffect(() => {
         if (items.length === 0) {
-            setCommittedIndex(0);
-            setVisualIndex(0);
+            setCommittedIndex(BUFFER_SIZE);
+            setVisualIndex(BUFFER_SIZE);
             return;
         }
         setCommittedIndex((prev) => {
@@ -293,11 +335,16 @@ export function Carousel<T = unknown>({
         [items, committedIndex, visibleItems],
     );
 
-    const transform = useMemo(
-        () =>
-            computeTranslateX(items.length, visibleItems, visualIndex, containerWidth, BUFFER_SIZE),
-        [items.length, visibleItems, visualIndex, containerWidth],
-    );
+    // const transform = useMemo(() => {
+    //     return `translateX(0px)`;
+    //     return computeTranslateX(
+    //         items.length,
+    //         visibleItems,
+    //         visualIndex,
+    //         containerWidth,
+    //         BUFFER_SIZE,
+    //     );
+    // }, [items.length, visibleItems, visualIndex, containerWidth]);
 
     const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(goToNext, goToPrevious);
 
@@ -324,6 +371,15 @@ export function Carousel<T = unknown>({
         animatingRef.current = null;
     }, []);
 
+    const keyOf = useCallback(
+        (item: T, idx: number) => (getItemKey ? getItemKey(item, idx) : idx),
+        [getItemKey],
+    );
+
+    const manualNext = () => {
+        console.log('manual next');
+    };
+
     return (
         <div
             ref={containerRef}
@@ -336,6 +392,7 @@ export function Carousel<T = unknown>({
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
         >
+            <button onClick={manualNext}>next</button>
             {/* Track */}
             <div
                 ref={trackRef}
@@ -343,6 +400,7 @@ export function Carousel<T = unknown>({
                 style={{
                     transform,
                     gap: `${ITEM_GAP}px`,
+                    visibility: hasMeasured ? 'visible' : 'hidden',
                 }}
                 onTransitionEnd={handleTransitionEnd}
             >
@@ -354,7 +412,7 @@ export function Carousel<T = unknown>({
                     ? // Everything fits: render all, centered via computeTranslateX
                       items.map((item, i) => (
                           <CarouselItem
-                              key={`idx-${i}`}
+                              key={`c${i}:${String(keyOf(item, i))}`}
                               item={item}
                               index={i}
                               renderItem={renderItem}
@@ -363,7 +421,7 @@ export function Carousel<T = unknown>({
                     : // Virtualized sliding window
                       itemsToRender.map(({ item, originalIndex }) => (
                           <CarouselItem
-                              key={`idx-${originalIndex}`}
+                              key={`c${originalIndex}:${String(keyOf(item, originalIndex))}`}
                               item={item}
                               index={originalIndex}
                               renderItem={renderItem}
