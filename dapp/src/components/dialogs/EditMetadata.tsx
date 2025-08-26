@@ -214,6 +214,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     style={InfoBoxStyle.Elevated}
                                 />
                             )}
+
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(
                                     ({ key, label }) =>
