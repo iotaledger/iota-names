@@ -42,8 +42,15 @@ jobs:
 
       - name: Run pnpm build
         env:
-          NEXT_PUBLIC_NAMES_DISPLAY_API_URL: http://localhost:3000
-          NEXT_PUBLIC_NAMES_NETWORK: devnet
+          NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: "devnet"
+          NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
+            {
+              "devnet":{
+                  "network": "devnet",
+                  "namesDisplayUrl": "http://localhost",
+                  "indexerUrl": "http://localhost"
+              }
+            }
         run: |
           pnpm turbo build
 
