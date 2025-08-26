@@ -40,7 +40,7 @@
         "node": ">=20"
     },
     "peerDependencies": {
-        "@iota/iota-sdk": "^1.5.0"
+        "@iota/iota-sdk": "^1.6.0"
     },
     "dependencies": {
         "@noble/hashes": "^1.4.0"

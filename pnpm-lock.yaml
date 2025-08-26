@@ -118,8 +118,8 @@ importers:
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: ^1.5.0
-        version: 1.5.0(typescript@5.8.3)
+        specifier: ^1.6.0
+        version: 1.6.0(typescript@5.8.3)
       '@iota/kiosk':
         specifier: ^0.4.6
         version: 0.4.6(typescript@5.8.3)
@@ -322,8 +322,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: ^1.5.0
-        version: 1.5.0(typescript@5.8.3)
+        specifier: ^1.6.0
+        version: 1.6.0(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
