@@ -63,7 +63,7 @@ export function ExtendedNameCard({
     })();
 
     const handleButtonClick = () => {
-        if (expired && (namePermissions.allowTimeExtension || !isNameGracePeriodExpired)) {
+        if (expired && !isNameGracePeriodExpired && namePermissions.allowTimeExtension) {
             openDialog(NameDialogId.RenewName);
         } else if (isNameGracePeriodExpired) {
             openDialog(NameDialogId.Delete);
