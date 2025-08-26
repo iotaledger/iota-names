@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -13,6 +14,9 @@ import {
     DialogContent,
     DialogPosition,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
@@ -31,6 +35,7 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
+import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
@@ -122,7 +127,11 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         return updates;
     })();
 
-    const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
+    const {
+        data: updateTransaction,
+        isLoading: isUpdateNameLoading,
+        error: updateNameError,
+    } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
     });
@@ -162,8 +171,12 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }));
     }
 
-    const isLoading = isUpdating || isSigning || isSaving;
-    const disableApply = isLoading || updates.length === 0;
+    const hasEnoughGas =
+        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
+        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+
+    const isLoading = isUpdateNameLoading || isSigning || isSaving;
+    const disableApply = isLoading || updates.length === 0 || !hasEnoughGas;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -190,7 +203,17 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     />
                                 ))}
                             </div>
-
+                            {!hasEnoughGas && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(
+                                        GAS_BALANCE_TOO_LOW_ID,
+                                    )}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                />
+                            )}
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(
                                     ({ key, label }) =>
@@ -210,7 +233,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         </div>
                     </div>
                 </DialogBody>
-
                 <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
                     <Button
                         type={ButtonType.Secondary}
