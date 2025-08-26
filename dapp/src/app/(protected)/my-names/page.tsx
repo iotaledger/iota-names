@@ -86,6 +86,8 @@ export default function MyNamesPage(): JSX.Element {
         }
     })();
 
+    const totalItemsCount = filteredNames.length;
+
     const noCardToDisplay =
         !isLoadingCards &&
         filteredNames.length === 0 &&
@@ -123,7 +125,7 @@ export default function MyNamesPage(): JSX.Element {
                 />
             </div>
 
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
                 <SegmentedButton>
                     {Object.entries(GroupedNamesFilter).map(([key, value]) => (
                         <ButtonSegment
@@ -140,6 +142,9 @@ export default function MyNamesPage(): JSX.Element {
                         />
                     ))}
                 </SegmentedButton>
+                <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
+                    {totalItemsCount} Total
+                </p>
             </div>
 
             {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
