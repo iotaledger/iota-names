@@ -3,27 +3,53 @@
 
 'use client';
 
-import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-interface CarouselProps {
-    children: ReactNode[];
+// Helper type for the render function
+type ItemRenderer<T> = (item: T, index: number) => React.ReactNode;
+
+// Memoized item wrapper to prevent re-render when item/index unchanged
+const CarouselItem = React.memo(
+    function CarouselItem<T>({
+        item,
+        index,
+        renderItem,
+    }: {
+        item: T;
+        index: number;
+        renderItem: ItemRenderer<T>;
+    }) {
+        return (
+            <div className="flex-shrink-0" style={{ width: `${ITEM_WIDTH}px` }}>
+                {renderItem(item, index)}
+            </div>
+        );
+    },
+    // Re-render only if item reference or index or renderer function changes
+    (prev, next) =>
+        prev.index === next.index && prev.item === next.item && prev.renderItem === next.renderItem,
+) as unknown as <T>(props: { item: T; index: number; renderItem: ItemRenderer<T> }) => JSX.Element;
+
+interface CarouselProps<T = unknown> {
+    /** Data items to render */
+    items: T[];
+    /** Render function for each item */
+    renderItem: (item: T, index: number) => ReactNode;
     className?: string;
+    /** Autoplay enabled */
     autoPlay?: boolean;
+    /** Autoplay interval in ms */
     autoPlaySpeed?: number;
+    /** Pause autoplay when hovered */
     pauseOnHover?: boolean;
 }
 
 const ITEM_WIDTH = 220; // px
 const ITEM_GAP = 24; // px
+const BUFFER_SIZE = 3; // amount of offscreen items rendered left and right
 
 /**
  * Calculate how many carousel items will be visible on the screen
- * @param containerWidth - The width of the carousel container in pixels
- * @param itemWidth - The width of each carousel item in pixels
- * @param itemGap - The gap between carousel items in pixels
- * @param minVisible - Minimum number of items to show (default: 1)
- * @param maxVisible - Maximum number of items to show (optional)
- * @returns The number of items that will be visible
  */
 export function calculateVisibleItemsCount(
     containerWidth: number,
@@ -33,330 +59,316 @@ export function calculateVisibleItemsCount(
     maxVisible?: number,
 ): number {
     if (containerWidth <= 0) return minVisible;
-
-    // Calculate how many items can fit: (containerWidth + gap) / (itemWidth + gap)
-    // We add gap to containerWidth because the last item doesn't need a trailing gap
     const itemsWithGaps = Math.floor((containerWidth + itemGap) / (itemWidth + itemGap));
-
-    // Ensure we show at least minVisible items
     let visibleItems = Math.max(minVisible, itemsWithGaps);
-
-    // Apply maximum limit if specified
-    if (maxVisible !== undefined) {
-        visibleItems = Math.min(visibleItems, maxVisible);
-    }
-
+    if (maxVisible !== undefined) visibleItems = Math.min(visibleItems, maxVisible);
     return visibleItems;
 }
 
-/**
- * Calculate which items should be rendered based on current position
- * @param currentIndex - Current carousel position
- * @param visibleItems - Number of items visible at once
- * @param totalItems - Total number of items in the dataset
- * @param bufferSize - Extra items to render outside viewport (default: 2)
- * @returns Object with startIndex, endIndex, and offset information
- */
-export function calculateVirtualWindow(
-    currentIndex: number,
-    visibleItems: number,
-    totalItems: number,
-    bufferSize: number = 2,
-): {
-    startIndex: number;
-    endIndex: number;
-    renderStartIndex: number;
-    renderEndIndex: number;
-    offsetLeft: number;
-} {
-    if (totalItems <= visibleItems) {
-        return {
-            startIndex: 0,
-            endIndex: totalItems - 1,
-            renderStartIndex: 0,
-            renderEndIndex: totalItems - 1,
-            offsetLeft: 0,
-        };
-    }
-
-    // Calculate the visible window
-    const startIndex = Math.max(0, currentIndex);
-    const endIndex = Math.min(totalItems - 1, currentIndex + visibleItems - 1);
-
-    // Add buffer for smooth scrolling
-    const renderStartIndex = Math.max(0, startIndex - bufferSize);
-    const renderEndIndex = Math.min(totalItems - 1, endIndex + bufferSize);
-
-    // Calculate offset for positioning
-    const offsetLeft = renderStartIndex * (ITEM_WIDTH + ITEM_GAP);
-
-    return {
-        startIndex,
-        endIndex,
-        renderStartIndex,
-        renderEndIndex,
-        offsetLeft,
-    };
+/** Wrap any integer index to [0, total) */
+function wrapIndex(index: number, total: number): number {
+    if (total <= 0) return 0;
+    return ((index % total) + total) % total;
 }
 
 /**
- * Get virtualized items to render
- * @param items - All items array
- * @param virtualWindow - Virtual window calculation result
- * @returns Array of items to render with their original indices
+ * Build a stable sliding window describing which data index belongs to each slide position.
+ * The slide positions are stable so CSS transforms remain smooth while data indices wrap.
  */
-export function getVirtualizedItems<T>(
+export function calculateSlidingWindow(
+    currentIndex: number,
+    visibleItems: number,
+    totalItems: number,
+    bufferSize: number = BUFFER_SIZE,
+): Array<{ originalIndex: number; slidePosition: number }> {
+    if (totalItems === 0) return [];
+
+    const totalSlots =
+        Math.min(totalItems, visibleItems) === totalItems
+            ? totalItems
+            : visibleItems + bufferSize * 2;
+
+    const windowSpec: Array<{ originalIndex: number; slidePosition: number }> = [];
+
+    for (let slidePosition = 0; slidePosition < totalSlots; slidePosition++) {
+        const dataIndex = currentIndex - bufferSize + slidePosition;
+        const wrappedIndex = wrapIndex(dataIndex, totalItems);
+        windowSpec.push({ originalIndex: wrappedIndex, slidePosition });
+    }
+    return windowSpec;
+}
+
+/** Map window spec to actual items */
+export function getSlidingItems<T>(
     items: T[],
-    virtualWindow: ReturnType<typeof calculateVirtualWindow>,
-): Array<{ item: T; originalIndex: number }> {
-    const { renderStartIndex, renderEndIndex } = virtualWindow;
-    const virtualizedItems: Array<{ item: T; originalIndex: number }> = [];
-
-    for (let i = renderStartIndex; i <= renderEndIndex; i++) {
-        virtualizedItems.push({
-            item: items[i],
-            originalIndex: i,
-        });
-    }
-
-    return virtualizedItems;
+    currentIndex: number,
+    visibleItems: number,
+    bufferSize: number = BUFFER_SIZE,
+): Array<{ item: T; originalIndex: number; slidePosition: number }> {
+    const spec = calculateSlidingWindow(currentIndex, visibleItems, items.length, bufferSize);
+    return spec.map(({ originalIndex, slidePosition }) => ({
+        item: items[originalIndex],
+        originalIndex,
+        slidePosition,
+    }));
 }
 
-/**
- * Hook for managing carousel navigation with virtualization support
- */
-export function useCarouselNavigation(
+/** Compute translateX for smooth sliding */
+function computeTranslateX(
     totalItems: number,
     visibleItems: number,
     currentIndex: number,
-    setCurrentIndex: (index: number | ((prev: number) => number)) => void,
-    getInitialOffset: () => number,
-) {
-    const goToNext = useCallback(() => {
-        if (totalItems <= visibleItems) return;
-        setCurrentIndex((prev) => prev + 1);
-    }, [totalItems, visibleItems, setCurrentIndex]);
+    containerWidth: number,
+    bufferSize: number = BUFFER_SIZE,
+): string {
+    // If everything fits, center the whole row
+    if (totalItems <= visibleItems) {
+        const totalWidth = totalItems * ITEM_WIDTH + Math.max(0, totalItems - 1) * ITEM_GAP;
+        const offset = Math.max(0, (containerWidth - totalWidth) / 2);
+        return `translateX(${offset}px)`;
+    }
 
-    const goToPrevious = useCallback(() => {
-        if (totalItems <= visibleItems) return;
-
-        const effectiveIndex =
-            currentIndex >= getInitialOffset() ? currentIndex - getInitialOffset() : 0;
-
-        if (effectiveIndex <= 0) {
-            // Jump to end for infinite loop
-            setCurrentIndex(getInitialOffset() + totalItems - 1);
-        } else {
-            setCurrentIndex((prev) => prev - 1);
-        }
-    }, [totalItems, visibleItems, currentIndex, setCurrentIndex, getInitialOffset]);
-
-    const goToIndex = useCallback(
-        (index: number) => {
-            if (totalItems <= visibleItems) return;
-
-            const targetIndex = getInitialOffset() + (index % totalItems);
-            setCurrentIndex(targetIndex);
-        },
-        [totalItems, visibleItems, setCurrentIndex, getInitialOffset],
-    );
-
-    return {
-        goToNext,
-        goToPrevious,
-        goToIndex,
-    };
+    const baseOffset = bufferSize * (ITEM_WIDTH + ITEM_GAP);
+    const slideOffset = currentIndex * (ITEM_WIDTH + ITEM_GAP);
+    const leftPadding = 0; // we use stable buffers instead
+    return `translateX(${leftPadding + baseOffset - slideOffset}px)`;
 }
 
-export function Carousel({
-    children,
-    className = '',
-    autoPlay = true,
-    autoPlaySpeed = 2000,
-    pauseOnHover = true,
-}: CarouselProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const trackRef = useRef<HTMLDivElement>(null);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [visibleItems, setVisibleItems] = useState(1);
-    const [isHovered, setIsHovered] = useState(false);
-    const [isTransitioning, setIsTransitioning] = useState(true);
+/** Hook to manage autoplay safely */
+function useAutoPlay(enabled: boolean, delay: number, isPaused: boolean, tick: () => void) {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Calculate how many items can fit in the container
-    const calculateVisibleItems = useCallback(() => {
-        if (!containerRef.current) return;
-
-        const containerWidth = containerRef.current.offsetWidth;
-        const newVisibleItems = calculateVisibleItemsCount(containerWidth);
-        setVisibleItems(newVisibleItems);
-    }, []);
-
-    // Initial offset for infinite scrolling positioning
-    const getInitialOffset = useCallback(() => {
-        if (children.length <= visibleItems) return 0;
-        return Math.max(visibleItems + 2, 5); // Buffer for smooth infinite scrolling
-    }, [children.length, visibleItems]);
-
-    // Virtual window calculation - always enabled
-    const virtualWindow = useMemo(() => {
-        if (children.length <= visibleItems) {
-            return null;
-        }
-
-        // Calculate effective index for virtualization
-        const effectiveIndex =
-            currentIndex >= getInitialOffset() ? currentIndex - getInitialOffset() : 0;
-
-        return calculateVirtualWindow(effectiveIndex, visibleItems, children.length);
-    }, [currentIndex, visibleItems, children.length, getInitialOffset]);
-
-    // Get virtualized items to render
-    const itemsToRender = useMemo(() => {
-        if (!virtualWindow || children.length <= visibleItems) {
-            // Small dataset: render all items with original indices
-            return children.map((child, index) => ({
-                item: child,
-                originalIndex: index,
-            }));
-        }
-
-        // Large dataset: render only visible + buffer items
-        return getVirtualizedItems(children, virtualWindow);
-    }, [children, virtualWindow]);
-
-    // Handle window resize
     useEffect(() => {
-        calculateVisibleItems();
-
-        const handleResize = () => {
-            calculateVisibleItems();
-        };
-
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [calculateVisibleItems]);
-
-    // Reset position when children or visibleItems change
-    useEffect(() => {
-        setCurrentIndex(getInitialOffset());
-    }, [getInitialOffset]);
-
-    // Auto-advance carousel
-    const nextSlide = useCallback(() => {
-        if (children.length <= visibleItems) return;
-
-        setCurrentIndex((prevIndex) => prevIndex + 1);
-    }, [children.length, visibleItems]);
-
-    // Handle infinite loop reset
-    useEffect(() => {
-        if (children.length <= visibleItems) return;
-
-        // Calculate effective index for infinite loop management
-        const effectiveIndex =
-            currentIndex >= getInitialOffset() ? currentIndex - getInitialOffset() : 0;
-
-        if (effectiveIndex >= children.length) {
-            // Reset to beginning for infinite loop
-            setIsTransitioning(false);
-            setCurrentIndex(getInitialOffset());
-            requestAnimationFrame(() => {
-                setIsTransitioning(true);
-            });
-        }
-    }, [currentIndex, children.length, visibleItems, getInitialOffset]);
-
-    // Setup auto-play
-    useEffect(() => {
-        if (!autoPlay || children.length <= visibleItems || (pauseOnHover && isHovered)) {
+        if (!enabled || isPaused) {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
             return;
         }
-
-        intervalRef.current = setInterval(nextSlide, autoPlaySpeed);
-
+        intervalRef.current = setInterval(tick, delay);
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
         };
-    }, [
-        autoPlay,
-        autoPlaySpeed,
-        nextSlide,
-        children.length,
-        visibleItems,
-        isHovered,
-        pauseOnHover,
-    ]);
+    }, [enabled, delay, isPaused, tick]);
+}
 
-    // Calculate transform value
-    const getTransformValue = () => {
-        if (children.length <= visibleItems) {
-            // Center items if they all fit
-            const totalWidth = children.length * ITEM_WIDTH + (children.length - 1) * ITEM_GAP;
-            const containerWidth = containerRef.current?.offsetWidth || 0;
-            const offset = Math.max(0, (containerWidth - totalWidth) / 2);
-            return `translateX(${offset}px)`;
+/** Touch swipe support (basic) */
+function useSwipe(onLeft: () => void, onRight: () => void) {
+    const startX = useRef<number | null>(null);
+
+    const onTouchStart = useCallback((e: React.TouchEvent) => {
+        startX.current = e.touches[0]?.clientX ?? null;
+    }, []);
+
+    const onTouchMove = useCallback((e: React.TouchEvent) => {
+        // prevent vertical scroll capture issues minimally
+        if (startX.current !== null) e.stopPropagation();
+    }, []);
+
+    const onTouchEnd = useCallback(
+        (e: React.TouchEvent) => {
+            if (startX.current === null) return;
+            const dx = (e.changedTouches[0]?.clientX ?? startX.current) - startX.current;
+            const threshold = 40; // px
+            if (dx <= -threshold) onLeft();
+            else if (dx >= threshold) onRight();
+            startX.current = null;
+        },
+        [onLeft, onRight],
+    );
+
+    return { onTouchStart, onTouchMove, onTouchEnd };
+}
+
+export function useCarouselNavigation(
+    totalItems: number,
+    visibleItems: number,
+    setCurrentIndex: (updater: number | ((p: number) => number)) => void,
+) {
+    const goToNext = useCallback(() => {
+        if (totalItems <= 0) return;
+        // keep increasing; window mapping wraps the content
+        setCurrentIndex((prev) => prev + 1);
+    }, [setCurrentIndex, totalItems]);
+
+    const goToPrevious = useCallback(() => {
+        if (totalItems <= 0) return;
+        setCurrentIndex((prev) => prev - 1);
+    }, [setCurrentIndex, totalItems]);
+
+    const goToIndex = useCallback(
+        (index: number) => {
+            if (totalItems <= 0) return;
+            // move to absolute position (supports infinite since transform is relative)
+            const safe = Number.isFinite(index) ? Math.trunc(index) : 0;
+            setCurrentIndex(safe);
+        },
+        [setCurrentIndex, totalItems],
+    );
+
+    // prevent movement when not needed
+    const canSlide = totalItems > visibleItems;
+
+    return { goToNext, goToPrevious, goToIndex, canSlide };
+}
+
+export function Carousel<T = unknown>({
+    items,
+    renderItem,
+    className = '',
+    autoPlay = true,
+    autoPlaySpeed = 2500,
+    pauseOnHover = true,
+}: CarouselProps<T>) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [visibleItems, setVisibleItems] = useState(1);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const [committedIndex, setCommittedIndex] = useState(0); // drives DOM/window (what is rendered)
+    const [visualIndex, setVisualIndex] = useState(0); // drives transform during animation
+    const [withTransition, setWithTransition] = useState(true);
+    const animatingRef = useRef<null | 1 | -1>(null); // direction of current animation
+
+    // Resize observer for stable/responsive behavior
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const ro = new ResizeObserver((entries) => {
+            const w = entries[0]?.contentRect.width ?? el.offsetWidth;
+            setContainerWidth(w);
+            setVisibleItems(calculateVisibleItemsCount(w));
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+    // Keep committedIndex and visualIndex bounded when items change to avoid large values growing indefinitely
+    useEffect(() => {
+        if (items.length === 0) {
+            setCommittedIndex(0);
+            setVisualIndex(0);
+            return;
         }
+        setCommittedIndex((prev) => {
+            const maxAbs = items.length * 1000;
+            const safe =
+                prev > maxAbs || prev < -maxAbs
+                    ? ((prev % items.length) + items.length) % items.length
+                    : prev;
+            // keep visual aligned when we clamp
+            setVisualIndex((v) => v - prev + safe);
+            return safe;
+        });
+    }, [items.length]);
 
-        if (virtualWindow) {
-            // Virtualized transform: account for virtual offset
-            const effectiveIndex =
-                currentIndex >= getInitialOffset() ? currentIndex - getInitialOffset() : 0;
-            const baseTranslate = -effectiveIndex * (ITEM_WIDTH + ITEM_GAP);
-            const virtualOffset = virtualWindow.offsetLeft;
-            return `translateX(${baseTranslate + virtualOffset}px)`;
-        }
+    const canSlide = items.length > visibleItems;
 
-        // Fallback for cases without virtual window
-        const effectiveIndex =
-            currentIndex >= getInitialOffset() ? currentIndex - getInitialOffset() : 0;
-        const translateX = -effectiveIndex * (ITEM_WIDTH + ITEM_GAP);
-        return `translateX(${translateX}px)`;
-    };
+    const step = useCallback(
+        (dir: 1 | -1) => {
+            if (!canSlide) return;
+            if (animatingRef.current) return; // already animating
+            animatingRef.current = dir;
+            setWithTransition(true);
+            setVisualIndex((v) => v + dir);
+        },
+        [canSlide],
+    );
 
-    const handleMouseEnter = () => {
-        if (pauseOnHover) {
-            setIsHovered(true);
-        }
-    };
+    const goToNext = useCallback(() => step(1), [step]);
+    const goToPrevious = useCallback(() => step(-1), [step]);
 
-    const handleMouseLeave = () => {
-        if (pauseOnHover) {
-            setIsHovered(false);
-        }
-    };
+    // Autoplay
+    useAutoPlay(autoPlay && canSlide, autoPlaySpeed, pauseOnHover && isHovered, goToNext);
+
+    const itemsToRender = useMemo(
+        () => getSlidingItems(items, committedIndex, visibleItems, BUFFER_SIZE),
+        [items, committedIndex, visibleItems],
+    );
+
+    const transform = useMemo(
+        () =>
+            computeTranslateX(items.length, visibleItems, visualIndex, containerWidth, BUFFER_SIZE),
+        [items.length, visibleItems, visualIndex, containerWidth],
+    );
+
+    const { onTouchStart, onTouchMove, onTouchEnd } = useSwipe(goToNext, goToPrevious);
+
+    const handleKeyDown = useCallback(
+        (e: React.KeyboardEvent) => {
+            if (!canSlide) return;
+            if (e.key === 'ArrowRight') goToNext();
+            if (e.key === 'ArrowLeft') goToPrevious();
+        },
+        [canSlide, goToNext, goToPrevious],
+    );
+
+    const handleTransitionEnd = useCallback(() => {
+        const dir = animatingRef.current;
+        if (!dir) return;
+        // 1) Stop transitions to avoid visible jump when we update the window
+        setWithTransition(false);
+        // 2) Commit the index so the virtualized window shifts (DOM updates happen now)
+        setCommittedIndex((c) => c + dir);
+        // 3) Align visualIndex with the new committedIndex (no visual change since we stayed at end position)
+        setVisualIndex((v) => v);
+        // 4) Re-enable transitions for the next move in the next frame
+        requestAnimationFrame(() => setWithTransition(true));
+        animatingRef.current = null;
+    }, []);
 
     return (
         <div
             ref={containerRef}
-            className={`relative overflow-hidden ${className}`}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            className={`relative overflow-hidden outline-none ${className}`}
+            tabIndex={0}
+            onMouseEnter={() => pauseOnHover && setIsHovered(true)}
+            onMouseLeave={() => pauseOnHover && setIsHovered(false)}
+            onKeyDown={handleKeyDown}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
         >
+            {/* Track */}
             <div
                 ref={trackRef}
-                className={`flex ${isTransitioning ? 'transition-transform duration-500 ease-in-out' : ''}`}
+                className={`flex ${withTransition ? 'transition-transform duration-500 ease-in-out' : ''}`}
                 style={{
-                    transform: getTransformValue(),
+                    transform,
                     gap: `${ITEM_GAP}px`,
                 }}
+                onTransitionEnd={handleTransitionEnd}
             >
-                {itemsToRender.map((renderItem, index) => (
-                    <div
-                        key={`carousel-item-${renderItem.originalIndex}`}
-                        className="flex-shrink-0"
-                        style={{ width: `${ITEM_WIDTH}px` }}
-                    >
-                        {renderItem.item}
-                    </div>
-                ))}
+                {items.length === 0 && (
+                    <div style={{ width: `${ITEM_WIDTH}px` }} className="flex-shrink-0" />
+                )}
+
+                {items.length <= visibleItems
+                    ? // Everything fits: render all, centered via computeTranslateX
+                      items.map((item, i) => (
+                          <CarouselItem
+                              key={`idx-${i}`}
+                              item={item}
+                              index={i}
+                              renderItem={renderItem}
+                          />
+                      ))
+                    : // Virtualized sliding window
+                      itemsToRender.map(({ item, originalIndex }) => (
+                          <CarouselItem
+                              key={`idx-${originalIndex}`}
+                              item={item}
+                              index={originalIndex}
+                              renderItem={renderItem}
+                          />
+                      ))}
             </div>
         </div>
     );

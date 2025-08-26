@@ -27,9 +27,10 @@ import { AuctionActionButton } from './AuctionActionButton';
 interface AuctionublicItemProps {
     auction: AuctionDetails;
     onBidClick: (name: string) => void;
+    index: number;
 }
 
-export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
+export function AuctionPublicItem({ auction, onBidClick, index }: AuctionublicItemProps) {
     const [, setIsActive] = useState(isAuctionActive(auction.metadata));
 
     const isClaimedAuction = !auction.metadata;
@@ -61,6 +62,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
             <NameCardBody name={normalizeIotaName(auction.name)}>
+                {index}
                 {auctionStatus === 'top_bidder' ? (
                     <div className="absolute top-2 left-2">
                         <AuctionStatusBadge status={auctionStatus} />

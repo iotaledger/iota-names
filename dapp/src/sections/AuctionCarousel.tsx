@@ -58,15 +58,20 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
                 <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
                 <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
-                <Carousel autoPlay autoPlaySpeed={2000} pauseOnHover>
-                    {auctions.map((auction) => (
+                <Carousel
+                    autoPlay
+                    autoPlaySpeed={2000}
+                    pauseOnHover
+                    items={auctions}
+                    renderItem={(item, index) => (
                         <AuctionPublicItem
-                            key={auction.name}
-                            auction={auction}
+                            index={index}
+                            key={item.name}
+                            auction={item}
                             onBidClick={onBidClick}
                         />
-                    ))}
-                </Carousel>
+                    )}
+                ></Carousel>
             </div>
 
             {bidDialogName && (
