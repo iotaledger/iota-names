@@ -48,7 +48,8 @@ jobs:
               "devnet":{
                   "network": "devnet",
                   "namesDisplayUrl": "http://localhost",
-                  "indexerUrl": "http://localhost"
+                  "indexerUrl": "http://localhost",
+                  "baseUrl": "http://localhost:3000"
               }
             }
         run: |

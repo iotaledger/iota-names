@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 export class TermsAndConds {
     static areAccepted(): boolean {
         if (typeof window === 'undefined') {

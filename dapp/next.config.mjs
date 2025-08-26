@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { execSync } from 'child_process';
+import nextMdx from '@next/mdx';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
 
@@ -15,11 +16,19 @@ try {
     console.warn('Could not get git revision, using default');
 }
 
+const withMDX = nextMdx();
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withMDX({
     env: {
         NEXT_PUBLIC_IOTA_NAMES_REV,
     },
-};
+    experimental: {
+        mdxRs: true,
+        turbo: {
+            resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
+        },
+    },
+});
 
 export default nextConfig;

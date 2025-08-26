@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - develop
-      - tooling/unify-dapp-config
     paths:
       - "dapp/**"
       - ".github/workflows/iota-names.staging-deploy.yml"
@@ -16,7 +15,7 @@ jobs:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
-      NAMES_DAPP_DEFAULT_NETWORK: testnet
+      NAMES_DAPP_DEFAULT_NETWORK: devnet
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
