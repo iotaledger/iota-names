@@ -117,6 +117,20 @@ export function getSlidingItems<T>(
     }));
 }
 
+function getWindow<T>(arr: T[], arraySize: number, currentIndex: number): T[] {
+    const result: T[] = [];
+    const n = arr.length;
+
+    if (n === 0 || arraySize <= 0) return result;
+
+    for (let i = 0; i < arraySize; i++) {
+        const idx = (currentIndex + i) % n;
+        result.push(arr[idx]);
+    }
+
+    return result;
+}
+
 /** Compute translateX for smooth sliding */
 function computeTranslateX(
     totalItems: number,
@@ -220,13 +234,25 @@ export function useCarouselNavigation(
     return { goToNext, goToPrevious, goToIndex, canSlide };
 }
 
-function defineInitTransform(containerWidth: number) {
+function determineTranslateX(containerWidth: number, itemIndex: number) {
+    const containerCenterPx = containerWidth / 2;
+    const itemTotalWidth = ITEM_WIDTH + ITEM_GAP;
+
+    const itemPositionInOrder = itemIndex + 1;
+    const itemMiddlePx = itemPositionInOrder * itemTotalWidth - ITEM_WIDTH / 2 - ITEM_GAP;
+
+    return containerCenterPx - itemMiddlePx;
+}
+
+function defineInitConfig(containerWidth: number) {
     const containerCenter = containerWidth / 2;
     const itemTotalWidth = ITEM_WIDTH + ITEM_GAP;
-    const centerItemPosition = Math.ceil(containerCenter / itemTotalWidth) + 1;
-    const centerItemPx = centerItemPosition * itemTotalWidth - ITEM_WIDTH / 2 - ITEM_GAP;
+    const centerItemIndex = Math.ceil(containerCenter / itemTotalWidth);
 
-    return containerCenter - centerItemPx;
+    return {
+        translateX: determineTranslateX(containerWidth, centerItemIndex),
+        centerItemIndex: centerItemIndex,
+    };
 }
 
 export function Carousel<T = unknown>({
@@ -244,7 +270,7 @@ export function Carousel<T = unknown>({
     const [containerWidth, setContainerWidth] = useState(0);
     const [visibleItems, setVisibleItems] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
-    const [transform, setTransform] = useState('');
+    const [translateX, setTranslateX] = useState(0);
 
     const [committedIndex, setCommittedIndex] = useState(BUFFER_SIZE);
     const [visualIndex, setVisualIndex] = useState(BUFFER_SIZE);
@@ -275,8 +301,9 @@ export function Carousel<T = unknown>({
         // 2. Use requestAnimationFrame to ensure the transition disable is applied
         requestAnimationFrame(() => {
             // 3. Set new transform (this happens without animation)
-            const offset = defineInitTransform(containerWidth);
-            setTransform(`translateX(${offset}px)`);
+            const { translateX, centerItemIndex } = defineInitConfig(containerWidth);
+            setTranslateX(translateX);
+            setVisualIndex(centerItemIndex);
 
             // 4. Re-enable transitions after another frame
             requestAnimationFrame(() => {
@@ -285,31 +312,47 @@ export function Carousel<T = unknown>({
         });
     }, []);
 
+    const updateTransformWithAnimation = useCallback(
+        (containerWidth: number, itemIndex: number) => {
+            setWithTransition(true);
+            requestAnimationFrame(() => {
+                // 3. Set new transform (this happens without animation)
+                const translateX = determineTranslateX(containerWidth, itemIndex);
+                setTranslateX(translateX);
+                setVisualIndex(itemIndex);
+
+                // 4. Re-enable transitions after another frame
+                requestAnimationFrame(() => {
+                    setWithTransition(false);
+                });
+            });
+        },
+        [],
+    );
+
     useEffect(() => {
         if (!containerWidth) return;
-
-        // const offset = defineInitTransform(containerWidth);
         updateTransformWithoutAnimation(containerWidth);
     }, [containerWidth]);
 
     // Keep committedIndex and visualIndex bounded when items change to avoid large values growing indefinitely
-    useEffect(() => {
-        if (items.length === 0) {
-            setCommittedIndex(BUFFER_SIZE);
-            setVisualIndex(BUFFER_SIZE);
-            return;
-        }
-        setCommittedIndex((prev) => {
-            const maxAbs = items.length * 1000;
-            const safe =
-                prev > maxAbs || prev < -maxAbs
-                    ? ((prev % items.length) + items.length) % items.length
-                    : prev;
-            // keep visual aligned when we clamp
-            setVisualIndex((v) => v - prev + safe);
-            return safe;
-        });
-    }, [items.length]);
+    // useEffect(() => {
+    //     if (items.length === 0) {
+    //         setCommittedIndex(BUFFER_SIZE);
+    //         setVisualIndex(BUFFER_SIZE);
+    //         return;
+    //     }
+    //     setCommittedIndex((prev) => {
+    //         const maxAbs = items.length * 1000;
+    //         const safe =
+    //             prev > maxAbs || prev < -maxAbs
+    //                 ? ((prev % items.length) + items.length) % items.length
+    //                 : prev;
+    //         // keep visual aligned when we clamp
+    //         setVisualIndex((v) => v - prev + safe);
+    //         return safe;
+    //     });
+    // }, [items.length]);
 
     const canSlide = items.length > visibleItems;
 
@@ -377,9 +420,11 @@ export function Carousel<T = unknown>({
     );
 
     const manualNext = () => {
+        updateTransformWithAnimation(containerWidth, visualIndex + 1);
         console.log('manual next');
     };
 
+    const transformRaw = `translateX(${translateX}px)`;
     return (
         <div
             ref={containerRef}
@@ -393,40 +438,24 @@ export function Carousel<T = unknown>({
             onTouchEnd={onTouchEnd}
         >
             <button onClick={manualNext}>next</button>
-            {/* Track */}
             <div
                 ref={trackRef}
                 className={`flex ${withTransition ? 'transition-transform duration-500 ease-in-out' : ''}`}
                 style={{
-                    transform,
+                    transform: transformRaw,
                     gap: `${ITEM_GAP}px`,
                     visibility: hasMeasured ? 'visible' : 'hidden',
                 }}
                 onTransitionEnd={handleTransitionEnd}
             >
-                {items.length === 0 && (
-                    <div style={{ width: `${ITEM_WIDTH}px` }} className="flex-shrink-0" />
-                )}
-
-                {items.length <= visibleItems
-                    ? // Everything fits: render all, centered via computeTranslateX
-                      items.map((item, i) => (
-                          <CarouselItem
-                              key={`c${i}:${String(keyOf(item, i))}`}
-                              item={item}
-                              index={i}
-                              renderItem={renderItem}
-                          />
-                      ))
-                    : // Virtualized sliding window
-                      itemsToRender.map(({ item, originalIndex }) => (
-                          <CarouselItem
-                              key={`c${originalIndex}:${String(keyOf(item, originalIndex))}`}
-                              item={item}
-                              index={originalIndex}
-                              renderItem={renderItem}
-                          />
-                      ))}
+                {itemsToRender.map(({ item, originalIndex }) => (
+                    <CarouselItem
+                        key={`c${originalIndex}:${String(keyOf(item, originalIndex))}`}
+                        item={item}
+                        index={originalIndex}
+                        renderItem={renderItem}
+                    />
+                ))}
             </div>
         </div>
     );
