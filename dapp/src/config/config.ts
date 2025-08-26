@@ -8,7 +8,6 @@ import { Config, envSchema } from './config.schema';
 function loadConfig(): Config {
     const rawNamesDappConfig = process.env.NEXT_PUBLIC_NAMES_DAPP_CONFIG || '';
 
-
     let namesDappConfig: Record<string, unknown> = {};
 
     try {
