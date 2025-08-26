@@ -15,13 +15,15 @@ import {
 
 export default function Home() {
     const { data: auctions = [], isLoading } = useAuctions({
-        status: 'active',
+        status: 'all',
         search: '',
         page: 0,
         pageSize: 20,
         sortBy: 'bid',
         sort: 'desc',
     });
+
+    auctions.length = 10;
 
     return (
         <main className="flex flex-col min-h-screen">

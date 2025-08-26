@@ -4,40 +4,16 @@
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import Carousel from 'react-multi-carousel';
-
-import 'react-multi-carousel/lib/styles.css';
 
 import { AuctionBidDialog, AuctionDetails } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
+import { Carousel } from '@/components';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 interface AuctionCarouselProps {
     auctions: AuctionDetails[];
     isLoading?: boolean;
 }
-
-// Responsive breakpoints for the carousel
-const responsive = {
-    desktop: {
-        breakpoint: { max: 3000, min: 1600 },
-        items: 5,
-        slidesToSlide: 1,
-    },
-    tabletLg: {
-        breakpoint: { max: 1600, min: 1024 },
-        items: 4,
-        slidesToSlide: 1,
-    },
-    tablet: {
-        breakpoint: { max: 1024, min: 768 },
-        items: 3,
-    },
-    mobile: {
-        breakpoint: { max: 768, min: 0 },
-        items: 1,
-    },
-};
 
 export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
@@ -82,23 +58,13 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
                 <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
                 <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
-                <Carousel
-                    responsive={responsive}
-                    infinite
-                    autoPlay
-                    autoPlaySpeed={2000}
-                    keyBoardControl={false}
-                    showDots={false}
-                    arrows={false}
-                    slidesToSlide={1}
-                    pauseOnHover
-                    containerClass="auction-carousel-container"
-                    itemClass="auction-carousel-item"
-                >
+                <Carousel autoPlay autoPlaySpeed={2000} pauseOnHover>
                     {auctions.map((auction) => (
-                        <div key={auction.name} className="px-2 w-[220px]">
-                            <AuctionPublicItem auction={auction} onBidClick={onBidClick} />
-                        </div>
+                        <AuctionPublicItem
+                            key={auction.name}
+                            auction={auction}
+                            onBidClick={onBidClick}
+                        />
                     ))}
                 </Carousel>
             </div>
