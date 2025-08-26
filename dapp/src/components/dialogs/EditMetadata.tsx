@@ -233,6 +233,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         </div>
                     </div>
                 </DialogBody>
+
                 <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
                     <Button
                         type={ButtonType.Secondary}
