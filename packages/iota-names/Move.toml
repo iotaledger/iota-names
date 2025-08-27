@@ -1,6 +1,5 @@
 [package]
 name = "iota_names"
-version = "0.0.2"
 edition = "2024"
 
 [dependencies]

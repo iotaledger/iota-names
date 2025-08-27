@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { useCurrentAccount, useCurrentWallet } from '@iota/dapp-kit';
 import { redirect } from 'next/navigation';
 import { useEffect, type PropsWithChildren } from 'react';
 
@@ -11,11 +11,12 @@ import { CONNECT_ROUTE } from '@/lib/constants';
 
 export default function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
     const currentAccount = useCurrentAccount();
+    const { isConnected } = useCurrentWallet();
     useEffect(() => {
-        if (!currentAccount) {
+        if (!currentAccount && !isConnected) {
             redirect(CONNECT_ROUTE.path);
         }
-    }, [currentAccount]);
+    }, [currentAccount, isConnected]);
 
     return (
         <main className="flex flex-col min-h-screen">

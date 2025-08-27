@@ -4,6 +4,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
 import { IotaNamesIndexerClient } from '@/auctions/services/IotaNamesIndexerClient';
+import { CONFIG } from '@/config';
 
 export const IotaNamesIndexerClientContext = createContext<IotaNamesIndexerClient | null>(null);
 
@@ -12,16 +13,9 @@ export interface IotaNamesIndexerClientProviderProps {
 }
 
 export function IotaNamesIndexerClientProvider({ children }: IotaNamesIndexerClientProviderProps) {
-    const indexerUrl = process.env.NEXT_PUBLIC_INDEXER_URL;
-
     const client = useMemo(() => {
-        if (!indexerUrl) {
-            console.warn('NEXT_PUBLIC_INDEXER_URL is not configured');
-
-            return null;
-        }
-        return new IotaNamesIndexerClient(indexerUrl);
-    }, [indexerUrl]);
+        return new IotaNamesIndexerClient(CONFIG.indexerUrl);
+    }, []);
 
     return (
         <IotaNamesIndexerClientContext.Provider value={client}>

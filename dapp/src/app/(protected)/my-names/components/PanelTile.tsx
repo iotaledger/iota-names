@@ -13,7 +13,7 @@ import {
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
-import { AvatarDisplay } from '@/components/name-record/AvatarDisplay';
+import { NameAvatarDisplay } from '@/components/name-record/AvatarDisplay';
 
 import { PanelTileType } from './enums';
 
@@ -57,10 +57,7 @@ export function PanelTile({
                                 type={ImageType.BgTransparent}
                                 shape={ImageShape.SquareRounded}
                             >
-                                <AvatarDisplay
-                                    name={name}
-                                    fallbackUrl="/subname-card-fallback.png"
-                                />
+                                <NameAvatarDisplay name={name} />
                             </CardImage>
 
                             <div className="flex flex-col gap-xxs w-full min-w-0">

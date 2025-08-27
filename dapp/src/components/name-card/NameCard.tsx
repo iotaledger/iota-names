@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import cx from 'clsx';
-import { useState } from 'react';
 
-import loadingAnimationData from '@/animations/lottie-loading.json';
 import { nftDisplayVariants } from '@/components/name-record/variants';
 import { MenuListItem, type NftDisplayProps } from '@/lib/types/components';
 
 import { ContextMenuButton } from '../buttons/ContextMenuButton';
-import { LottieAnimation } from '../loaders/Lottie';
-import { AvatarDisplay } from '../name-record/AvatarDisplay';
+import { AvatarDisplay, NameAvatarDisplay } from '../name-record/AvatarDisplay';
 
 interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
@@ -27,8 +24,6 @@ export function NameCard({
     children,
     displaySrc,
 }: React.PropsWithChildren<NameCardProps>) {
-    const [imageLoaded, setImageLoaded] = useState(false);
-
     return (
         <div
             className={cx(
@@ -43,31 +38,9 @@ export function NameCard({
                 )}
             >
                 {displaySrc ? (
-                    <div className="w-full relative">
-                        {!imageLoaded && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <LottieAnimation
-                                    animationData={loadingAnimationData}
-                                    className="w-16 h-16"
-                                />
-                            </div>
-                        )}
-                        <img
-                            className={cx('w-full', !imageLoaded ? 'block' : 'hidden')}
-                            src="/name-bg.svg"
-                        />
-                        <img
-                            src={displaySrc}
-                            alt={name}
-                            className={cx(
-                                'w-full absolute inset-0',
-                                imageLoaded ? 'block' : 'hidden',
-                            )}
-                            onLoad={() => setImageLoaded(true)}
-                        />
-                    </div>
+                    <AvatarDisplay src={displaySrc} />
                 ) : (
-                    <AvatarDisplay name={name} />
+                    <NameAvatarDisplay name={name} />
                 )}
 
                 {badge && <div className="absolute top-sm left-sm">{badge}</div>}

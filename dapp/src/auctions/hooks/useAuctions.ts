@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient, useIotaNamesIndexerClientContext } from '@/contexts';
 import { queryKey } from '@/hooks';
@@ -31,6 +31,10 @@ export interface UseAuctionsOptions {
      */
     search?: string;
     /**
+     * Status to filter the auctions by.
+     */
+    status: 'all' | 'active' | 'finished';
+    /**
      * Sort order for auctions.
      * Only applies when fetching all auctions (not user-specific).
      */
@@ -59,8 +63,15 @@ const NAMES_PLACEHOLDER: AuctionsResponse = {
     totalItems: 0,
 };
 
-export function useAuctions(options: UseAuctionsOptions = {}) {
-    const { userAddress, search, sort, sortBy } = options;
+export function useAuctions({
+    userAddress,
+    search,
+    status,
+    sort,
+    sortBy,
+    page,
+    pageSize,
+}: UseAuctionsOptions) {
     const { iotaNamesClient } = useIotaNamesClient();
     const indexerClient = useIotaNamesIndexerClientContext();
     const { data: auctionHouseData } = useAuctionHouse();
@@ -77,7 +88,7 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
         error: namesError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKeyBase, search, sort, sortBy, options.page, options.pageSize],
+        queryKey: [...queryKeyBase, search, status, sort, sortBy, page, pageSize],
         queryFn: async () => {
             if (!indexerClient) {
                 return NAMES_PLACEHOLDER;
@@ -86,15 +97,10 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
             // Fetch user-specific auctions or all auctions based on filter
             return userAddress
                 ? indexerClient.getAllUserAuctions(userAddress)
-                : indexerClient.getAuctionList(
-                      search,
-                      sort,
-                      sortBy,
-                      options.page,
-                      options.pageSize,
-                  );
+                : indexerClient.getAuctionList(status, search, sort, sortBy, page, pageSize);
         },
         enabled: !!indexerClient && (!userAddress || !!userAddress),
+        placeholderData: keepPreviousData,
     });
 
     const { auctionsTableObjectId } = auctionHouseData || {};
@@ -116,15 +122,15 @@ export function useAuctions(options: UseAuctionsOptions = {}) {
                 return {
                     name,
                     metadata: result.data || null,
-                    isLoading: result.isLoading,
+                    isLoading: result.isLoading || result.isPending,
                     error: !!result.error,
                 };
             });
 
             return {
                 data: auctionDetails,
-                isLoading: isLoadingNames || results.some((result) => result.isLoading),
-                error: !!namesError || results.some((result) => result.error),
+                isLoading: isLoadingNames || auctionDetails.some((result) => result.isLoading),
+                error: !!namesError || auctionDetails.some((result) => result.error),
                 auctionNames,
                 isUserFiltered: !!userAddress,
                 page: auctionNames.page,

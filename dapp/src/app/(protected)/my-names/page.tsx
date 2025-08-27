@@ -57,6 +57,7 @@ export default function MyNamesPage(): JSX.Element {
         isLoading: isLoadingAuctions,
     } = useAuctions({
         userAddress: account?.address,
+        status: 'all',
     });
 
     const address = useCurrentAccount()?.address ?? '';
