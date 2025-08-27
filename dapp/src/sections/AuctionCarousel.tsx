@@ -3,77 +3,144 @@
 
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
 import { useRouter } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Autoplay } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
-import { AuctionBidDialog, AuctionDetails } from '@/auctions';
+import { useAuctions } from '@/auctions';
+
+import 'swiper/css';
+import 'swiper/css/pagination';
+
+import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
-import { Carousel } from '@/components';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-interface AuctionCarouselProps {
-    auctions: AuctionDetails[];
-    isLoading?: boolean;
-}
-
-export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
+export function AuctionCarousel() {
+    const containerRef = useRef<HTMLDivElement>(null);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
+
+    const [containerWidth, setContainerWidth] = useState(0);
+    const [hasMeasured, setHasMeasured] = useState(false);
+    
+
+    const { data: auctions = [], isLoading } = useAuctions({
+        status: 'all',
+        search: '',
+        page: 0,
+        pageSize: 2,
+        sortBy: 'bid',
+        sort: 'desc',
+    });
+
+    const isPreparing = isLoading || !hasMeasured || !containerWidth;
+    const hasAuctions = !isLoading && auctions.length > 0;
 
     const onBidClick = useCallback((name: string) => {
         setBidDialogName(name);
     }, []);
 
-    // Memoize the render function to prevent unnecessary re-renders
-    const renderItem = useMemo(
-        () => (item: AuctionDetails) => (
-            <AuctionPublicItem auction={item} onBidClick={onBidClick} />
-        ),
-        [onBidClick],
-    );
+    const slidesPerView = (() => {
+        if (!hasMeasured) return 0;
 
-    if (isLoading) {
-        return (
-            <div className="w-full">
-                <AuctionCarouselHeader />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                        <div key={index} className="animate-pulse">
-                            <div className="bg-names-neutral-12 rounded-lg h-64"></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
+        const AUCTION_WIDTH = 220;
+        const GAP = 16;
 
-    if (!auctions.length) {
-        return (
-            <div className="w-full">
-                <AuctionCarouselHeader />
-                <div className="text-center py-12">
-                    <p className="text-body-lg text-names-neutral-70">
-                        No active auctions at the moment
-                    </p>
-                </div>
-            </div>
-        );
-    }
+        return containerWidth / (AUCTION_WIDTH + GAP);
+    })();
+
+    const auctionsToRender = (() => {
+        if (isPreparing || !hasAuctions) return [];
+
+        const MIN_ITEMS = 10;
+        if (auctions.length < MIN_ITEMS) {
+            return Array.from({ length: MIN_ITEMS }).map((_, i) => {
+                const newItem = auctions[i % auctions.length];
+                const key = `${newItem.name}__${i}`;
+                return { ...newItem, key };
+            });
+        }
+
+        return auctions.map((auction) => ({ ...auction, key: auction.name }));
+    })();
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        const ro = new ResizeObserver((entries) => {
+            const w = entries[0]?.contentRect.width ?? el.offsetWidth;
+            setContainerWidth(w);
+            if (!hasMeasured) setHasMeasured(true);
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, [hasMeasured]);
 
     return (
-        <div className="w-full">
-            <AuctionCarouselHeader />
+        <section className="container py-14 md:py-20" ref={containerRef}>
+            <div className="w-full">
+                <AuctionCarouselHeader />
 
-            <div className="relative">
-                <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
-                <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
+                {isPreparing ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {Array.from({ length: 4 }).map((_, index) => (
+                            <div key={index} className="animate-pulse">
+                                <div className="bg-names-neutral-12 rounded-lg h-64"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : !hasAuctions ? (
+                    <div className="text-center py-12">
+                        <p className="text-body-lg text-names-neutral-70">
+                            No active auctions at the moment
+                        </p>
+                    </div>
+                ) : (
+                    <div className="relative">
+                        <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
+                        <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
-                {/* Carousel with autoplay that pauses on hover and when tab is not visible */}
-                <Carousel autoPlay pauseOnHover items={auctions} renderItem={renderItem} />
+                        {/* Carousel with autoplay that pauses on hover and when tab is not visible */}
+                        {/* <Carousel autoPlay pauseOnHover items={auctions} renderItem={renderItem} /> */}
+
+                        <Swiper
+                            slidesPerView={slidesPerView}
+                            autoplay={{
+                                // disableOnInteraction: true,
+                                delay: 2500,
+                                waitForTransition: true,
+                                pauseOnMouseEnter: true,
+                            }}
+                            centeredSlides
+                            loop
+                            className="mySwiper"
+                            modules={[Autoplay]}
+                        >
+                            {auctionsToRender.map((auction) => (
+                                <SwiperSlide key={auction.key}>
+                                    <div className="flex justify-center">
+                                        <div className="w-[220px]">
+                                            <AuctionPublicItem
+                                                auction={auction}
+                                                onBidClick={onBidClick}
+                                            />
+                                        </div>
+                                    </div>
+                                </SwiperSlide>
+                            ))}
+                        </Swiper>
+                    </div>
+                )}
+
+                {bidDialogName && (
+                    <AuctionBidDialog
+                        name={bidDialogName}
+                        closeDialog={() => setBidDialogName(null)}
+                    />
+                )}
             </div>
-
-            {bidDialogName && (
-                <AuctionBidDialog name={bidDialogName} closeDialog={() => setBidDialogName(null)} />
-            )}
-        </div>
+        </section>
     );
 }
 

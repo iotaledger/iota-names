@@ -3,7 +3,7 @@
 
 'use client';
 
-import { useAuctions } from '@/auctions';
+
 import {
     AuctionCarousel,
     BuiltForBuilders,
@@ -14,25 +14,12 @@ import {
 } from '@/sections';
 
 export default function Home() {
-    const { data: auctions = [], isLoading } = useAuctions({
-        status: 'active',
-        search: '',
-        page: 0,
-        pageSize: 20,
-        sortBy: 'bid',
-        sort: 'desc',
-    });
-
-    console.log('auctions got for page', auctions);
-
     return (
         <main className="flex flex-col min-h-screen">
             <LandingHero />
             <WhyIotaNames />
             <FairAuction />
-            <section className="container py-14 md:py-20">
-                <AuctionCarousel auctions={auctions} isLoading={isLoading} />
-            </section>
+            <AuctionCarousel />
             <NameUtility />
             <BuiltForBuilders />
         </main>
