@@ -32,7 +32,6 @@ import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -243,17 +242,13 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             );
         };
         if (updateNameError) {
-            if (updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID)) {
-                toast.error(getUserFriendlyErrorMessage(updateNameError));
+            const couponRegex = /^Coupon '([^']*)' validation failed/;
+            const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+
+            if (couponMatch) {
+                handleErroredCoupon(couponMatch);
             } else {
-                const couponRegex = /^Coupon '([^']*)' validation failed/;
-                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
-
-                if (couponMatch) {
-                    handleErroredCoupon(couponMatch);
-                }
-
-                toast.error(updateNameError.message);
+                toast.error(getUserFriendlyErrorMessage(updateNameError));
             }
         }
     }, [updateNameError]);
