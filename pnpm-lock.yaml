@@ -303,10 +303,10 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@iota/iota-sdk':
-        specifier: ^1.6.0
+        specifier: ^1.5.0
         version: 1.6.0(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: ^0.4.7
+        specifier: ^0.4.6
         version: 0.4.7(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
