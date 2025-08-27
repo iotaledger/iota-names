@@ -179,6 +179,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.getObject(name),
+            });
             toast.success('Name renewed successfully');
         },
         onError(error) {

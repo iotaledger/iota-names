@@ -178,7 +178,12 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
-
+    const errorMessage =
+        editTargetAddress && !isValidAddressOrEmpty
+            ? 'Not a valid IOTA address'
+            : updateNameError
+              ? getUserFriendlyErrorMessage(updateNameError)
+              : undefined;
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -207,13 +212,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 onChange={handleAddressChange}
                                                 onClearInput={() => setEditTargetAddress('')}
                                                 disabled={disableEdit}
-                                                errorMessage={
-                                                    editTargetAddress && !isValidAddressOrEmpty
-                                                        ? 'Not a valid IOTA address'
-                                                        : getUserFriendlyErrorMessage(
-                                                              updateNameError || '',
-                                                          )
-                                                }
+                                                errorMessage={errorMessage}
                                             />
                                         </div>
                                         {!isTargetingCurrentAddress && (
