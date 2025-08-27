@@ -137,6 +137,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             );
         },
         onError: (error) => {
+            console.log('entro');
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });
@@ -151,6 +152,12 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         if (!updateTransaction) return;
         saveAvatar();
     }
+
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;

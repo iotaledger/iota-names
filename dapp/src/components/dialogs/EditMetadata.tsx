@@ -20,7 +20,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -165,6 +165,12 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             [key]: { ...prev[key], data },
         }));
     }
+
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
 
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
     const disableApply = isLoading || updates.length === 0 || !!updateNameError;

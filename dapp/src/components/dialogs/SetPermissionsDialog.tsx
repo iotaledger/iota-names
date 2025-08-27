@@ -160,6 +160,12 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
         setEditIsAllowSubnames(checked);
     };
 
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
+
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;

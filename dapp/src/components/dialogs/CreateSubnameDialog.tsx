@@ -29,7 +29,7 @@ import {
     validateIotaSubname,
 } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -176,6 +176,13 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     function closeDialog() {
         setOpen(false);
     }
+
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
+
     const handleCancelAddSubname = () => {
         setEditSubname('');
         closeDialog();

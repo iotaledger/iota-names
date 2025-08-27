@@ -101,6 +101,12 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
         setOpen(false);
     }
 
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
+
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
     const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !nft.isExpired;
     const deleteActionNotAllowed = deleteSeconds > 0;
@@ -140,16 +146,6 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                                     supportingText="This action is irreversible and will permanently remove your ownership of the name"
                                 />
                             </div>
-
-                            {updateNameError ? (
-                                <InfoBox
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Default}
-                                    icon={<Warning />}
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                                />
-                            ) : null}
                         </div>
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button

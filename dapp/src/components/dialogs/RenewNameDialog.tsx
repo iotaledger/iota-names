@@ -244,7 +244,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         };
         if (updateNameError) {
             if (updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID)) {
-                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
+                toast.error(getUserFriendlyErrorMessage(updateNameError));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
                 const couponMatch = updateNameError.message.match(couponRegex)?.[1];
