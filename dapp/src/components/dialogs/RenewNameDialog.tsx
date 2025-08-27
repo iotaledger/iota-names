@@ -214,6 +214,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     function handleYearsChange(years: string) {
         setRenewYears(Number(years));
     }
+    const hasEnoughGas = enoughGas(updateNameError);
+
     const renewableYears =
         coreConfig && nameRecord
             ? getNameRenewableYears(
@@ -243,7 +245,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             );
         };
         if (updateNameError) {
-            if (!enoughGas(updateNameError)) {
+            if (!hasEnoughGas) {
                 toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
@@ -301,6 +303,17 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
+                                />
+                            )}
+                            {!hasEnoughGas && (
+                                <InfoBox
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(
+                                        GAS_BALANCE_TOO_LOW_ID,
+                                    )}
+                                    icon={<Warning />}
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
                                 />
                             )}
                             {!isNameSubname && (
