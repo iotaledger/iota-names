@@ -28,6 +28,16 @@ pub struct Bid {
     pub bid: i64,
 }
 
+#[derive(Identifiable, Selectable, Queryable, Associations, Debug)]
+#[diesel(belongs_to(Name))]
+#[diesel(table_name = auctions)]
+#[diesel(primary_key(name_id))]
+pub struct Auction {
+    pub name_id: i32,
+    pub expiration_timestamp: i64,
+    pub claimed: bool,
+}
+
 diesel::table! {
     names (id) {
         id -> Int4,
@@ -57,7 +67,16 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    auctions (name_id) {
+        name_id -> Int4,
+        expiration_timestamp -> Int8,
+        claimed -> Bool
+    }
+}
+
 diesel::joinable!(bids -> names (name_id));
 diesel::joinable!(bids -> bidders (bidder_id));
+diesel::joinable!(auctions -> names (name_id));
 
-diesel::allow_tables_to_appear_in_same_query!(bidders, names, bids);
+diesel::allow_tables_to_appear_in_same_query!(bidders, names, bids, auctions);

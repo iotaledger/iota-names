@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { Toaster } from '@/components/Toaster';
+import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
@@ -19,8 +20,7 @@ import { ThemeProvider } from './ThemeProvider';
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
     const allNetworks = getAllNetworks();
-    // devnet only atm
-    const defaultNetwork = 'devnet';
+    const defaultNetwork = CONFIG.network;
 
     function handleNetworkChange() {
         queryClient.resetQueries();
