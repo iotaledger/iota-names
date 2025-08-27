@@ -96,21 +96,29 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                     nftId,
                     key: ALLOWED_METADATA.avatar,
                     value: action.avatar,
+                    isSubname: isNameSubname,
                 });
             } else if (action.type === 'unset' && currentAvatar) {
                 updates.push({
                     type: 'unset-data',
                     nftId,
                     key: ALLOWED_METADATA.avatar,
+                    isSubname: isNameSubname,
                 });
             }
         }
     }
 
-    const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
+    const {
+        data: updateTransaction,
+        isLoading: isUpdating,
+        error,
+    } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
     });
+
+    const errorMessage = error ? getUserFriendlyErrorMessage(error) : null;
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
@@ -151,7 +159,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
     const disableUnset = !currentAvatar || isLoading || updates.length > 0;
-    const disableSave = isLoading || updates.length === 0;
+    const disableSave = isLoading || updates.length === 0 || !updateTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -177,6 +185,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                 </span>
                             </div>
                         </div>
+
                         {isLoadingData ? (
                             <div className="flex items-center justify-center w-full h-full py-lg">
                                 <LoadingIndicator text="Loading Assets..." />
@@ -227,6 +236,17 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                     </div>
                 </DialogBody>
 
+                {errorMessage && (
+                    <div className="mt-auto w-full px-md--rs">
+                        <InfoBox
+                            title="Error"
+                            supportingText={errorMessage}
+                            icon={<Info />}
+                            type={InfoBoxType.Error}
+                            style={InfoBoxStyle.Elevated}
+                        />
+                    </div>
+                )}
                 <div className="flex w-full flex-row justify-center gap-2 px-md--rs pb-md--rs pt-md--rs">
                     <Button
                         type={ButtonType.Secondary}
