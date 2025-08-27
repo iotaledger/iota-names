@@ -22,13 +22,12 @@ export function AuctionCarousel() {
 
     const [containerWidth, setContainerWidth] = useState(0);
     const [hasMeasured, setHasMeasured] = useState(false);
-    
 
     const { data: auctions = [], isLoading } = useAuctions({
-        status: 'all',
+        status: 'active',
         search: '',
         page: 0,
-        pageSize: 2,
+        pageSize: 20,
         sortBy: 'bid',
         sort: 'desc',
     });
