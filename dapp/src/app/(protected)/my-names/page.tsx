@@ -142,9 +142,11 @@ export default function MyNamesPage(): JSX.Element {
                         />
                     ))}
                 </SegmentedButton>
-                <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
-                    {totalItemsCount} Total
-                </p>
+                {!isLoadingCards && (
+                    <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
+                        {totalItemsCount} Total
+                    </p>
+                )}
             </div>
 
             {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
