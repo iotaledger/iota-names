@@ -34,13 +34,14 @@ export function AuctionCarousel() {
 
     const isPreparing = isLoading || !hasMeasured || !containerWidth;
     const hasAuctions = !isLoading && auctions.length > 0;
+    const canRender = !isPreparing && hasAuctions;
 
     const onBidClick = useCallback((name: string) => {
         setBidDialogName(name);
     }, []);
 
     const slidesPerView = (() => {
-        if (!hasMeasured) return 0;
+        if (!canRender) return 0;
 
         const AUCTION_WIDTH = 220;
         const GAP = 16;
@@ -49,7 +50,7 @@ export function AuctionCarousel() {
     })();
 
     const auctionsToRender = (() => {
-        if (isPreparing || !hasAuctions) return [];
+        if (!canRender) return [];
 
         const MIN_ITEMS = 10;
         if (auctions.length < MIN_ITEMS) {
