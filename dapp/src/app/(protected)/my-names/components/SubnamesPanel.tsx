@@ -11,7 +11,7 @@ import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -49,6 +49,9 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
 
     if (!currentNode) return null;
 
@@ -99,7 +102,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                             type={ButtonType.Outlined}
                             onClick={() => setIsAddDialogOpen(true)}
                             icon={<Add />}
-                            disabled={isExpired}
+                            disabled={isExpired || !namePermissions.allowChildCreation}
                         />
                     </div>
                 </div>
