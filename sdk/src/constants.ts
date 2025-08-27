@@ -51,31 +51,5 @@ export const packages = {
             '0x4a16b7b2a9c194989519c87ee3f1d1007ece8aecb62b9a50a4c10075db0591a3',
         upgradeCap: '0xd64205c4b10eff4b4adb00ab6f754cda8d8e7525985a31307f7e232481dfaf6e',
     },
-
-    // Devnet con expired names
-    // devnet: {
-    //     adminAddress: '0x52733a8e36d2b8b0e6ce7bb4e4ac929f64965db0ac17593b4aa176dcfa849bf6',
-    //     adminCap: '0xa86848d3e7d9fbf58b971d00d204aaea546fcb3f7ee3f03ef2b56222abc04f1a',
-    //     auctionPackageId: '0x31899353533e48998c40ad7ac72c56587709f0db96d83c0b236275b4c1b0e89b',
-    //     auctionHouseObjectId: '0x5fef349667c6580fac73adf08537af5e3fd9fe0e7e5f400aa75a926b0d7ff146',
-    //     coins: {
-    //         IOTA: {
-    //             type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
-    //             metadataId: '0xf7ceb0424ca93f77858c74aebda8bcd5ffe0f32b82ebcc38afb3ba643d03a5f8',
-    //         },
-    //     },
-    //     iotaNamesObjectId: '0x5ded017bb4198f56d585be9c14cb840c1a5e6d7fbaba41b9c27015d2e1e42f99',
-    //     packageId: '0xe41da347640ac9ace37d0ca9e6d2d67f3768232b3ed3cbec7a61e6a5ec85dee2',
-    //     paymentsPackageId: '0x00ebe8ffcec0051dda7f4226aed30e02adc71f48e23d9c08276dc9b1e5e6896d',
-    //     publisherId: '0x785eda9a9aff5baf034dc515e609234b2dc421016e8e4eaf8fcf707ce462dac6',
-    //     registryTableId: '0x097dc75565e293aa7c4fb03f864e076266a87fee4522aac08fdfb8791f3524e2',
-    //     reverseRegistryTableId:
-    //         '0x6e24f34dcedcd3aa831fdf70c107cb97b9d53c3a867b6bf5f338e317d97693f4',
-    //     couponsPackageId: '0x533bed5fb83beafb7d1d1b367f65056921e65a2a79c7dbfa5c9125448d16eab9',
-    //     subnamesPackageId: '0x7543e654d5d311fcfd6c14e9c8ea54751a50a4afef6934487c1a1376f63c89da',
-    //     tempSubnameProxyPackageId:
-    //         '0xf0515d4bb55f84bc60ba5a6962d930f7c98b1956b3ab4a3bc91f399ad8199e28',
-    //     upgradeCap: '0xb4342aec939190e0401705c0f4a4b9a2c8d99ea1df67723f37cf43a07ac45dbe',
-    // },
     // TODO: Support Mainnet and Testnet
 };
