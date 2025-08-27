@@ -3,7 +3,7 @@
 
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { AuctionBidDialog, AuctionDetails } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
@@ -21,6 +21,14 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
     const onBidClick = useCallback((name: string) => {
         setBidDialogName(name);
     }, []);
+
+    // Memoize the render function to prevent unnecessary re-renders
+    const renderItem = useMemo(
+        () => (item: AuctionDetails) => (
+            <AuctionPublicItem auction={item} onBidClick={onBidClick} />
+        ),
+        [onBidClick],
+    );
 
     if (isLoading) {
         return (
@@ -58,14 +66,8 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
                 <div className="absolute top-0 left-0 w-[60px] h-full bg-gradient-to-r from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
                 <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
-                <Carousel
-                    autoPlay
-                    pauseOnHover
-                    items={auctions}
-                    renderItem={(item) => (
-                        <AuctionPublicItem key={item.name} auction={item} onBidClick={onBidClick} />
-                    )}
-                ></Carousel>
+                {/* Carousel with autoplay that pauses on hover and when tab is not visible */}
+                <Carousel autoPlay pauseOnHover items={auctions} renderItem={renderItem} />
             </div>
 
             {bidDialogName && (

@@ -9,6 +9,32 @@ import { AuctionDetails } from '@/auctions';
 
 type ItemRenderer<T> = (item: T) => React.ReactNode;
 
+/** Hook to track page visibility for pausing animations when tab is not active */
+function usePageVisibility() {
+    const [isVisible, setIsVisible] = useState(() => {
+        if (typeof document !== 'undefined') {
+            return !document.hidden;
+        }
+        return true;
+    });
+
+    useEffect(() => {
+        if (typeof document === 'undefined') return;
+
+        const handleVisibilityChange = () => {
+            setIsVisible(!document.hidden);
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, []);
+
+    return isVisible;
+}
+
 // Memoized item wrapper to prevent re-render when item/index unchanged
 const CarouselItem = React.memo(
     function CarouselItem({
@@ -24,7 +50,7 @@ const CarouselItem = React.memo(
             </div>
         );
     },
-    (prev, next) => prev.item.name === next.item.name,
+    (prev, next) => prev.item.name === next.item.name && prev.renderItem === next.renderItem,
 ) as (props: { item: AuctionDetails; renderItem: ItemRenderer<AuctionDetails> }) => JSX.Element;
 
 interface CarouselProps {
@@ -39,6 +65,8 @@ interface CarouselProps {
     autoPlaySpeed?: number;
     /** Pause autoplay when hovered */
     pauseOnHover?: boolean;
+    /** Pause autoplay when page/tab is not visible */
+    pauseOnPageHidden?: boolean;
     /** Provide a stable key per data item; defaults to its array index */
     getItemKey?: (item: AuctionDetails, index: number) => string | number;
 }
@@ -67,6 +95,7 @@ function useAutoPlay(enabled: boolean, delay: number, isPaused: boolean, tick: (
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
+        // Clear existing interval if autoplay is disabled or paused
         if (!enabled || isPaused) {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -74,7 +103,10 @@ function useAutoPlay(enabled: boolean, delay: number, isPaused: boolean, tick: (
             }
             return;
         }
+
+        // Start autoplay interval
         intervalRef.current = setInterval(tick, delay);
+
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -119,6 +151,7 @@ export function Carousel({
     autoPlay = false,
     autoPlaySpeed = 2500,
     pauseOnHover = true,
+    pauseOnPageHidden = true,
     getItemKey,
 }: CarouselProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -129,9 +162,15 @@ export function Carousel({
     const [isHovered, setIsHovered] = useState(false);
     const [translateX, setTranslateX] = useState(0);
 
+    // Track page visibility to pause animation when tab is not active
+    const isPageVisible = usePageVisibility();
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [withTransition, setWithTransition] = useState(false);
     const [hasMeasured, setHasMeasured] = useState(false);
+
+    // Use ref to track transitioning state to avoid dependency loops
+    const isTransitioningRef = useRef(false);
 
     const itemsWithKeys = useMemo(() => {
         if (!visibleItems || !items.length) return [];
@@ -161,33 +200,57 @@ export function Carousel({
         return result;
     }, [itemsWithKeys, currentIndex, visibleItems, containerWidth]);
 
-    const updateTransformWithoutAnimation = useCallback((cb: () => void) => {
-        setWithTransition(false);
-        requestAnimationFrame(() => {
-            cb();
+    const updateTransformWithoutAnimation = useCallback(
+        (cb: () => void) => {
+            if (isTransitioningRef.current) return;
+
+            isTransitioningRef.current = true;
+            setWithTransition(false);
             requestAnimationFrame(() => {
-                setWithTransition(true);
+                cb();
+                // Use setTimeout instead of nested requestAnimationFrame for more stability
+                setTimeout(() => {
+                    setWithTransition(true);
+                    isTransitioningRef.current = false;
+                }, 16);
             });
-        });
-    }, []);
+        },
+        [], // No dependencies needed
+    );
 
-    const handleTransitionEnd = () => {
-        if (!withTransition) return;
-        setWithTransition(false);
+    const onMouseEnter = useCallback(() => {
+        if (pauseOnHover) setIsHovered(true);
+    }, [pauseOnHover]);
 
-        requestAnimationFrame(() => {
+    const onMouseLeave = useCallback(() => {
+        if (pauseOnHover) setIsHovered(false);
+    }, [pauseOnHover]);
+
+    const handleTransitionEnd = useCallback(() => {
+        if (!withTransition || isTransitioningRef.current) return;
+
+        isTransitioningRef.current = true;
+
+        // Use a more stable approach to handle transitions
+        const updateState = () => {
             const { translateX: initialTranslateX } = defineInitConfig(containerWidth);
             setTranslateX(initialTranslateX);
             setCurrentIndex((prev) => (prev + 1) % items.length);
+        };
 
-            requestAnimationFrame(() => {
+        setWithTransition(false);
+        requestAnimationFrame(() => {
+            updateState();
+            // Add a small delay to ensure DOM updates are completed
+            setTimeout(() => {
                 setWithTransition(true);
-            });
+                isTransitioningRef.current = false;
+            }, 16); // Next frame
         });
-    };
+    }, [containerWidth, items.length, withTransition]);
 
     const next = useCallback(() => {
-        if (items.length === 0) return;
+        if (items.length === 0 || isTransitioningRef.current) return;
 
         setWithTransition(true);
         const itemWithGap = ITEM_WIDTH + ITEM_GAP;
@@ -216,23 +279,27 @@ export function Carousel({
         });
     }, [containerWidth, updateTransformWithoutAnimation]);
 
-    useAutoPlay(autoPlay, autoPlaySpeed, pauseOnHover && isHovered, next);
+    // Autoplay with pause conditions: hover + page visibility
+    const shouldPauseAutoplay =
+        (pauseOnHover && isHovered) || (pauseOnPageHidden && !isPageVisible);
+    useAutoPlay(autoPlay, autoPlaySpeed, shouldPauseAutoplay, next);
 
     return (
         <div
             ref={containerRef}
             className={`relative overflow-hidden outline-none ${className}`}
             tabIndex={0}
-            onMouseEnter={() => pauseOnHover && setIsHovered(true)}
-            onMouseLeave={() => pauseOnHover && setIsHovered(false)}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             <div
                 ref={trackRef}
-                className={`flex ${withTransition ? 'transition-transform duration-500 ease-in-out' : ''}`}
+                className="flex"
                 style={{
                     transform: `translateX(${translateX}px)`,
                     gap: `${ITEM_GAP}px`,
                     visibility: hasMeasured ? 'visible' : 'hidden',
+                    transition: withTransition ? 'transform 500ms ease-in-out' : 'none',
                 }}
                 onTransitionEnd={handleTransitionEnd}
             >
