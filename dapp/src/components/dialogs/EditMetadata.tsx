@@ -3,7 +3,6 @@
 
 'use client';
 
-import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -14,9 +13,6 @@ import {
     DialogContent,
     DialogPosition,
     Header,
-    InfoBox,
-    InfoBoxStyle,
-    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
@@ -35,9 +31,7 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
-import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
-import { enoughGas } from '@/lib/utils/enoughGas';
 import { getNameObject } from '@/lib/utils/names';
 
 interface EditMetadataDialogProps {
@@ -172,10 +166,8 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }));
     }
 
-    const hasEnoughGas = enoughGas(updateNameError);
-
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
-    const disableApply = isLoading || updates.length === 0 || !hasEnoughGas;
+    const disableApply = isLoading || updates.length === 0 || !!updateNameError;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -202,17 +194,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     />
                                 ))}
                             </div>
-                            {!hasEnoughGas && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(
-                                        GAS_BALANCE_TOO_LOW_ID,
-                                    )}
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
 
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(

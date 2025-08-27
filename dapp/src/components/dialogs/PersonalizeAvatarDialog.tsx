@@ -34,7 +34,6 @@ import {
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
-import { enoughGas } from '@/lib/utils/enoughGas';
 import { getNameObject } from '@/lib/utils/names';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
@@ -153,11 +152,10 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         saveAvatar();
     }
 
-    const hasEnoughGas = enoughGas(updateNameError);
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
-    const disableUnset = !currentAvatar || isLoading || updates.length > 0 || !hasEnoughGas;
-    const disableSave = isLoading || updates.length === 0 || !hasEnoughGas;
+    const disableUnset = !currentAvatar || isLoading || updates.length > 0 || !!updateNameError;
+    const disableSave = isLoading || updates.length === 0 || !!updateNameError;
 
     return (
         <Dialog open onOpenChange={setOpen}>

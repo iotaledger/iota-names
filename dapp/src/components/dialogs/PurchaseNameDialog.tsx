@@ -3,7 +3,6 @@
 
 'use client';
 
-import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -14,9 +13,6 @@ import {
     DialogPosition,
     DisplayStats,
     Header,
-    InfoBox,
-    InfoBoxStyle,
-    InfoBoxType,
     LoadingIndicator,
     Panel,
     Toggle,
@@ -33,7 +29,6 @@ import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/ho
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { enoughGas } from '@/lib/utils/enoughGas';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -165,7 +160,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         };
 
         if (updateNameError) {
-            if (!hasEnoughGas) {
+            if (updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID)) {
                 toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
@@ -210,10 +205,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
-    const hasEnoughGas = enoughGas(updateNameError);
     const canPay =
         isConnected &&
-        hasEnoughGas &&
+        !!updateNameError &&
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
 
@@ -255,17 +249,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 )}
                             </div>
-                            {!hasEnoughGas && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(
-                                        GAS_BALANCE_TOO_LOW_ID,
-                                    )}
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-10">
