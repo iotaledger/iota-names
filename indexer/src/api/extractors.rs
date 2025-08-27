@@ -6,7 +6,7 @@ use serde::Deserialize;
 
 use crate::{
     api::error::ApiError,
-    db::{AuctionSortBy, SortOrder},
+    db::{AuctionSortBy, AuctionStatus, SortOrder},
 };
 
 const DEFAULT_PAGE_SIZE: usize = 50;
@@ -16,6 +16,7 @@ pub struct BidderNamesPagination {
     pub page: Option<usize>,
     pub page_size: usize,
     pub sort: SortOrder,
+    pub status: Option<AuctionStatus>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
@@ -31,6 +32,7 @@ impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
             page: Option<usize>,
             page_size: Option<usize>,
             sort: Option<String>,
+            status: Option<String>,
         }
 
         let Query(query) = Query::<BidderNamesPaginationQuery>::from_request_parts(parts, state)
@@ -43,6 +45,13 @@ impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
             .map_or(Ok(Default::default()), str::parse)
             .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
 
+        let status = query
+            .status
+            .as_deref()
+            .map(str::parse)
+            .transpose()
+            .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
+
         Ok(Self {
             page: query.page,
             page_size: query
@@ -50,6 +59,7 @@ impl<S: Send + Sync> FromRequestParts<S> for BidderNamesPagination {
                 .unwrap_or(DEFAULT_PAGE_SIZE)
                 .min(MAX_PAGE_SIZE),
             sort,
+            status,
         })
     }
 }
@@ -60,6 +70,7 @@ pub struct AuctionsPagination {
     pub sort: SortOrder,
     pub sort_by: AuctionSortBy,
     pub search: Option<String>,
+    pub status: Option<AuctionStatus>,
 }
 
 impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
@@ -77,6 +88,7 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
             sort: Option<String>,
             sort_by: Option<String>,
             search: Option<String>,
+            status: Option<String>,
         }
 
         let Query(query) = Query::<AuctionsPaginationQuery>::from_request_parts(parts, state)
@@ -95,6 +107,13 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
             .map_or(Ok(Default::default()), str::parse)
             .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
 
+        let status = query
+            .status
+            .as_deref()
+            .map(str::parse)
+            .transpose()
+            .map_err(|e: anyhow::Error| ApiError::BadRequest(e.to_string()))?;
+
         Ok(Self {
             page: query.page,
             page_size: query
@@ -104,6 +123,7 @@ impl<S: Send + Sync> FromRequestParts<S> for AuctionsPagination {
             sort,
             sort_by,
             search: query.search,
+            status,
         })
     }
 }
