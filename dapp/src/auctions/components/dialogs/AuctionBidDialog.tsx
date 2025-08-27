@@ -36,13 +36,10 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    INSUFFICIENT_COIN_BALANCE_ID,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
+import { NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
+import { enoughGas } from '@/lib/utils/enoughGas';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -125,10 +122,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         },
     });
 
-    const hasEnoughGas =
-        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
-        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
+    const hasEnoughGas = enoughGas(balanceValidationError);
 
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);

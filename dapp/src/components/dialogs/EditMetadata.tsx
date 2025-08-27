@@ -35,8 +35,9 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
-import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
+import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { enoughGas } from '@/lib/utils/enoughGas';
 import { getNameObject } from '@/lib/utils/names';
 
 interface EditMetadataDialogProps {
@@ -171,9 +172,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }));
     }
 
-    const hasEnoughGas =
-        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
+    const hasEnoughGas = enoughGas(updateNameError);
 
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
     const disableApply = isLoading || updates.length === 0 || !hasEnoughGas;

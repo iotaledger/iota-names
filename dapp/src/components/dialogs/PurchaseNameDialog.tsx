@@ -31,8 +31,9 @@ import toast from 'react-hot-toast';
 import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
+import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { enoughGas } from '@/lib/utils/enoughGas';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -164,10 +165,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         };
 
         if (updateNameError) {
-            if (
-                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
-                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
-            ) {
+            if (!hasEnoughGas) {
                 toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
             } else {
                 const couponRegex = /^Coupon '([^']*)' validation failed/;
@@ -212,10 +210,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
-    const hasEnoughGas =
-        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
-
+    const hasEnoughGas = enoughGas(updateNameError);
     const canPay =
         isConnected &&
         hasEnoughGas &&
