@@ -265,7 +265,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const expirationDate = (() => {
         if (nameRecord?.nameRecord) {
             if (isNameSubname && ownedNames && ownedSubnames) {
-                // Subnames
                 const expirationTime = getParentObject(
                     ownedNames,
                     ownedSubnames,
@@ -275,7 +274,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                     return new Date(expirationTime);
                 }
             } else if (!isNameSubname && renewYears) {
-                // Names
                 const expirationDate = new Date(nameRecord.nameRecord.expirationTimestampMs);
                 expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
                 return expirationDate;
