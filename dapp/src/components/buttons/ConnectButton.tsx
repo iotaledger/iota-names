@@ -17,7 +17,7 @@ export function ConnectButton() {
             // Prevent the dapp kit modal from opening
             ev.preventDefault();
             ev.stopPropagation();
-            router.replace(`${window.location.pathname}/?modal=terms_conditions`, {
+            router.replace(`${window.location.pathname}/?modal=terms_conditions&redirect=connect`, {
                 scroll: false,
             });
         }
