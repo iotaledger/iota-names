@@ -13,6 +13,7 @@ import {
     DialogPosition,
     Header,
 } from '@iota/apps-ui-kit';
+import { ConnectModal } from '@iota/dapp-kit';
 import TOS from '@legal/tos.mdx';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -22,8 +23,9 @@ import { TermsAndConds } from '@/lib/utils/termsAndConditions';
 export function TermsAndConditionsDialog() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const modalParam = searchParams.get('modal');
-    const open = modalParam === 'terms_conditions';
+    const open = searchParams.get('modal') === 'terms_conditions';
+    const connectOnAccept = searchParams.get('redirect') === 'connect';
+    const [showConnectModal, setShowConnectModal] = useState(false);
 
     const [termsAccepted, setTermsAccepted] = useState(TermsAndConds.areAccepted);
 
@@ -31,13 +33,21 @@ export function TermsAndConditionsDialog() {
         if (termsAccepted) {
             TermsAndConds.accept();
         }
+        if (connectOnAccept) {
+            setShowConnectModal(true);
+        }
         handleClose();
     }
 
     function handleClose() {
         const params = new URLSearchParams(searchParams.toString());
         params.delete('modal');
+        params.delete('redirect');
         router.replace(`${window.location.pathname}/?${params.toString()}`, { scroll: false });
+    }
+
+    if (showConnectModal) {
+        return <ConnectModal open onOpenChange={() => setShowConnectModal(false)} trigger />;
     }
 
     return (
