@@ -42,7 +42,7 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { toNanos } from '@/lib/utils/amount';
+import { parseIotaToNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -76,7 +76,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         }
     }, [minBidNanos]);
 
-    const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
+    const bidNanos = bidAmountValue ? parseIotaToNanos(bidAmountValue) : null;
 
     const {
         data: auctionBidTransaction,
