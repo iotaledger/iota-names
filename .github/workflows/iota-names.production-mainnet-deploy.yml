@@ -1,15 +1,17 @@
-name: Production Deploy for IOTA Names
+name: Production Mainnet Deploy for IOTA Names
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-production:
+  deploy-mainnet-production:
     uses: ./.github/workflows/vercel-app-deploy.yml
     with:
       VERCEL_ENVIRONMENT: production
+      NAMES_DAPP_DEFAULT_NETWORK: mainnet
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
       VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+      NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}

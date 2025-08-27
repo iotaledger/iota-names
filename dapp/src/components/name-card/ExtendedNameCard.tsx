@@ -11,7 +11,7 @@ import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import { isGracePeriodExpired, isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isGracePeriodExpired, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -46,6 +46,10 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
+
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
     const isNameGracePeriodExpired = isGracePeriodExpired(nft);
     const buttonText = (() => {
@@ -59,7 +63,7 @@ export function ExtendedNameCard({
     })();
 
     const handleButtonClick = () => {
-        if (expired && !isNameGracePeriodExpired) {
+        if (expired && !isNameGracePeriodExpired && namePermissions.allowTimeExtension) {
             openDialog(NameDialogId.RenewName);
         } else if (isNameGracePeriodExpired) {
             openDialog(NameDialogId.Delete);
@@ -76,7 +80,7 @@ export function ExtendedNameCard({
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
-                        showAddSubnameLink={!expired}
+                        showAddSubnameLink={!expired && namePermissions.allowChildCreation}
                     />
 
                     <Button

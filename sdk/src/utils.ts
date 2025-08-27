@@ -51,13 +51,14 @@ export function normalizeIotaName(
     const subnamesEllipsis = format === 'dot' ? '.' : '..';
 
     // Only select the first subname if desired
-    let subnames = onlyFirstSubname
-        ? [
-              // First name from the left (e.g yes.no.no.no.iota)
-              parts[0],
-              ellipsisForDeepSubnames && parts.length > 2 ? subnamesEllipsis : '',
-          ].filter(Boolean)
-        : parts.slice(0, -1);
+    let subnames =
+        onlyFirstSubname && parts.length >= 2
+            ? [
+                  // First name from the left (e.g yes.no.no.no.iota)
+                  parts[0],
+                  ellipsisForDeepSubnames && parts.length > 2 ? subnamesEllipsis : '',
+              ].filter(Boolean)
+            : parts.slice(0, -1);
 
     let parentName = parts[parts.length - 1];
 
