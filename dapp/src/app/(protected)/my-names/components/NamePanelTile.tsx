@@ -59,7 +59,7 @@ export function NamePanelTile({
         ? getNamePermissions(nameRecord).allowTimeExtension
         : false;
 
-    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog);
+    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog, nameRecord);
 
     const panelType = (() => {
         if (isCloseToExpiration) return PanelTileType.Warning;

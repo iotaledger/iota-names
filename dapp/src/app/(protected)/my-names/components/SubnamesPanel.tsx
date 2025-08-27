@@ -11,7 +11,7 @@ import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
-import { getNamePermissions } from '@/lib/utils/names';
+import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
@@ -35,8 +35,8 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
         () => traverseNameTree(initialNameTree, namePaths),
         [initialNameTree, namePaths],
     );
-    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
-    const nameRecord = nameRecordData?.type === 'unavailable' ? nameRecordData.nameRecord : null;
+    const { data: nameRecord } = useNameRecord(currentNode?.name ?? '');
+    const nameRecordData = nameRecord?.type === 'unavailable' ? nameRecord.nameRecord : null;
 
     useEffect(() => {
         if (initialNameTree) {
@@ -48,7 +48,13 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
         }
     }, [initialNameTree]);
 
+    const namePermissions = nameRecordData
+        ? getNamePermissions(nameRecordData)
+        : { allowChildCreation: true, allowTimeExtension: true };
+
     if (!currentNode) return null;
+
+    const isExpired = nameRecordData ? isNameRecordExpired(nameRecordData) : false;
 
     const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
@@ -99,11 +105,7 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
                             type={ButtonType.Outlined}
                             onClick={() => setIsAddDialogOpen(true)}
                             icon={<Add />}
-                            disabled={
-                                nameRecord
-                                    ? getNamePermissions(nameRecord).allowChildCreation === false
-                                    : false
-                            }
+                            disabled={isExpired || !namePermissions.allowChildCreation}
                         />
                     </div>
                 </div>

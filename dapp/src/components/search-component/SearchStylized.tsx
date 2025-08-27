@@ -35,7 +35,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
 ) {
     const inputWrapperRef = useRef<HTMLDivElement | null>(null);
     const borderClasses = lightSearch ? BORDER_LIGHT_CLASSES : BORDER_GRADIENT_CLASSES;
-    const inputTextSize = lightSearch ? 'text-title-lg' : 'text-headline-md';
+    const inputTextSize = lightSearch ? 'text-title-lg' : 'text-headline-sm sm:text-headline-md';
     const placeholderTextColor = lightSearch
         ? 'placeholder:text-names-neutral-70'
         : 'input-placeholder-color';
@@ -47,7 +47,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         <InputWrapper disabled={disabled} errorMessage={errorMessage}>
             <div
                 className={cx(
-                    'relative flex flex-row items-center gap-x-3 px-lg py-md rounded-full border-2',
+                    'relative flex flex-row items-center gap-x-3 px-sm py-xs sm:px-lg sm:py-md rounded-full border-2',
                     !lightSearch && 'search-container',
                     borderClasses,
                 )}
