@@ -109,19 +109,19 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
-        specifier: 0.0.0-experimental-20250826090046
-        version: 0.0.0-experimental-20250826090046(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: ^0.5.1
+        version: 0.5.2(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
-        specifier: ^0.9.1
+        specifier: ^0.9.0
         version: 0.9.1(typescript@5.8.3)
       '@iota/iota-names-sdk':
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: ^1.6.0
+        specifier: ^1.5.0
         version: 1.6.0(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: ^0.4.7
+        specifier: ^0.4.6
         version: 0.4.7(typescript@5.8.3)
       '@next/mdx':
         specifier: ^15.5.0
@@ -328,7 +328,7 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: ^1.6.0
+        specifier: ^1.5.0
         version: 1.6.0(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
@@ -338,7 +338,7 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: ^0.9.1
+        specifier: ^0.9.0
         version: 0.9.1(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
@@ -1726,8 +1726,8 @@ packages:
   '@iota/bcs@1.2.0':
     resolution: {integrity: sha512-QdRSR0KpJ87tdjVNmM/j0+0DvE0aTxHIa02337iluaOsMqtJ8OdgUCfSyLduC/3qS+8tJE+UB1KOw55tF+sN2w==}
 
-  '@iota/dapp-kit@0.0.0-experimental-20250826090046':
-    resolution: {integrity: sha512-8hSW+nuOh1ihRpJruQq6G/7x1gnh2iiIdOZ5kOeC/zwzVBAmR0plj2b8Q9KSyZL6poZxS4TjHDlkHLc2gfYbFw==}
+  '@iota/dapp-kit@0.5.2':
+    resolution: {integrity: sha512-RlZVEsOECLXRwJHbdPwZ5zywZZqwvNPugXCAikGdzIT9BQCHZcwQRpRYvk1Qsz8SnB94Ybm1KqWtERnLkVX8+w==}
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
@@ -8583,7 +8583,7 @@ snapshots:
     dependencies:
       bs58: 6.0.0
 
-  '@iota/dapp-kit@0.0.0-experimental-20250826090046(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@iota/dapp-kit@0.5.2(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
       '@iota/iota-sdk': 1.6.0(typescript@5.8.3)
       '@iota/wallet-standard': 0.2.14(typescript@5.8.3)

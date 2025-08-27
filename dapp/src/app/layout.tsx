@@ -26,13 +26,13 @@ export default function RootLayout({
             <body className="antialiased">
                 <AppProviders>
                     <Suspense>
-                        {/* <ConnectionGuard> */}
-                        <Navbar />
-                        {children}
-                        <AvailabilityCheckDialog />
-                        <Footer />
-                        <TermsAndConditionsDialog />
-                        {/* </ConnectionGuard> */}
+                        <ConnectionGuard>
+                            <Navbar />
+                            {children}
+                            <AvailabilityCheckDialog />
+                            <Footer />
+                            <TermsAndConditionsDialog />
+                        </ConnectionGuard>
                     </Suspense>
                 </AppProviders>
             </body>
