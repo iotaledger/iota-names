@@ -42,7 +42,7 @@ export function NamePurchaseCard({
                     bgCard,
                 )}
             >
-                <div className="flex text-headline-md gap-xxs">
+                <div className="flex text-headline-sm sm:text-headline-md gap-xxs">
                     <span className="text-names-neutral-50">@</span>
                     <h2 className={clsx('truncate w-full overflow-hidden', textColorStatus)}>
                         {nameWithOutAt}
