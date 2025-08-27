@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info, Warning } from '@iota/apps-ui-icons';
+import { Info } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -201,19 +201,6 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
-                                {updateNameError ? (
-                                    <InfoBox
-                                        type={InfoBoxType.Error}
-                                        title="Error"
-                                        supportingText={getUserFriendlyErrorMessage(
-                                            updateNameError,
-                                        )}
-                                        style={InfoBoxStyle.Elevated}
-                                        icon={
-                                            <Warning className="text-error-30 dark:text-error-70" />
-                                        }
-                                    />
-                                ) : null}
                             </div>
                         </div>
 
