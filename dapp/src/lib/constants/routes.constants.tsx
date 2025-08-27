@@ -42,8 +42,4 @@ export const FOOTER_LEGAL_LINKS: Route[] = [
         title: 'Terms & Conditions',
         path: '?modal=terms_conditions',
     },
-    {
-        title: 'Privacy Policy',
-        path: '',
-    },
 ];
