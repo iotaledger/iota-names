@@ -18,10 +18,12 @@ export default function Home() {
         status: 'all',
         search: '',
         page: 0,
-        pageSize: 20,
+        pageSize: 10,
         sortBy: 'bid',
         sort: 'desc',
     });
+
+    auctions.length = 1;
 
     return (
         <main className="flex flex-col min-h-screen">
