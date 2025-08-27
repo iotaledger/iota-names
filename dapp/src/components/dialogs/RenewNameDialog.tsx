@@ -262,24 +262,27 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
-    const expirationTime = nameRecord?.nameRecord.expirationTimestampMs
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
-        : null;
-
-    const nameExpiration =
-        !isNameSubname && expirationTime && renewYears
-            ? new Date(expirationTime).setFullYear(
-                  new Date(expirationTime).getFullYear() + renewYears,
-              )
-            : null;
-
-    const subnameExpiration =
-        isNameSubname && ownedNames && ownedSubnames && nameRecord && nameRecord.nameRecord
-            ? getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
-                  ?.expirationTimestampMs
-            : null;
-
-    const expirationDate = isNameSubname ? subnameExpiration : nameExpiration;
+    const expirationDate = (() => {
+        if (nameRecord?.nameRecord) {
+            if (isNameSubname && ownedNames && ownedSubnames) {
+                // Subnames
+                const expirationTime = getParentObject(
+                    ownedNames,
+                    ownedSubnames,
+                    nameRecord.nameRecord.name,
+                )?.expirationTimestampMs;
+                if (expirationTime) {
+                    return new Date(expirationTime);
+                }
+            } else if (!isNameSubname && renewYears) {
+                // Names
+                const expirationDate = new Date(nameRecord.nameRecord.expirationTimestampMs);
+                expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
+                return expirationDate;
+            }
+        }
+    })();
+    const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
     const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
     const isLoading =
@@ -343,7 +346,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                 <DisplayStats
                                     icon={isLoading ? <LoadingIndicator /> : null}
                                     label="Registration Expires"
-                                    value={expirationDate}
+                                    value={formattedExpirationDate}
                                 />
                             </div>
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
