@@ -4,7 +4,7 @@
 'use client';
 
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, truncate } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, Tooltip, truncate } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import clsx from 'clsx';
 import { Fragment } from 'react';
@@ -64,7 +64,13 @@ export function NamePanelTile({
         <>
             <PanelTile
                 type={panelType}
-                icon={isDefaultName ? <StarHex className="w-4 h-4 text-names-primary-80" /> : null}
+                icon={
+                    isDefaultName ? (
+                        <Tooltip text="Default name">
+                            <StarHex className="w-4 h-4 text-names-primary-80" />
+                        </Tooltip>
+                    ) : null
+                }
                 name={registration.name}
                 subtitle={linkedAddress ? truncate(linkedAddress, 4, 4) : undefined}
                 onClick={onClick}
