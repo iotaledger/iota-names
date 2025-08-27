@@ -59,6 +59,7 @@ export function AuctionCarousel({ auctions, isLoading }: AuctionCarouselProps) {
                 <div className="absolute top-0 right-0 w-[60px] h-full bg-gradient-to-l from-[#0b0c23] via-[#0b0c23cc] to-transparent pointer-events-none z-10"></div>
 
                 <Carousel
+                    autoPlay
                     pauseOnHover
                     items={auctions}
                     renderItem={(item) => (

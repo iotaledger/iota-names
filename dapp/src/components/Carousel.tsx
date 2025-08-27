@@ -7,7 +7,6 @@ import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } f
 
 import { AuctionDetails } from '@/auctions';
 
-// Helper type for the render function
 type ItemRenderer<T> = (item: T) => React.ReactNode;
 
 // Memoized item wrapper to prevent re-render when item/index unchanged
@@ -25,7 +24,6 @@ const CarouselItem = React.memo(
             </div>
         );
     },
-    // Re-render only if item reference or index or renderer function changes
     (prev, next) => prev.item.name === next.item.name,
 ) as (props: { item: AuctionDetails; renderItem: ItemRenderer<AuctionDetails> }) => JSX.Element;
 
@@ -136,7 +134,7 @@ export function Carousel({
     const [hasMeasured, setHasMeasured] = useState(false);
 
     const itemsWithKeys = useMemo(() => {
-        if (!visibleItems) return [];
+        if (!visibleItems || !items.length) return [];
 
         if (items.length < visibleItems + BUFFER_SIZE) {
             const requiredLength = visibleItems + BUFFER_SIZE;
@@ -163,10 +161,6 @@ export function Carousel({
         return result;
     }, [itemsWithKeys, currentIndex, visibleItems, containerWidth]);
 
-    const options = {
-        canSlide: items.length > visibleItems,
-    };
-
     const updateTransformWithoutAnimation = useCallback((cb: () => void) => {
         setWithTransition(false);
         requestAnimationFrame(() => {
@@ -192,6 +186,14 @@ export function Carousel({
         });
     };
 
+    const next = useCallback(() => {
+        if (items.length === 0) return;
+
+        setWithTransition(true);
+        const itemWithGap = ITEM_WIDTH + ITEM_GAP;
+        setTranslateX((prev) => prev - itemWithGap);
+    }, [items.length]);
+
     useEffect(() => {
         const el = containerRef.current;
         if (!el) return;
@@ -214,25 +216,7 @@ export function Carousel({
         });
     }, [containerWidth, updateTransformWithoutAnimation]);
 
-    const canSlide = items.length > visibleItems;
-
-    const manualNext = useCallback(() => {
-        if (!canSlide || items.length === 0) return;
-
-        // Enable transition for the visual shift animation
-        setWithTransition(true);
-
-        // Update currentIndex without animation (this triggers DOM virtualization)
-        // The transition will be for the translateX change only
-
-        // Calculate new translateX to shift one item (this will be animated)
-        const itemWithGap = ITEM_WIDTH + ITEM_GAP;
-        setTranslateX((prev) => prev - itemWithGap);
-
-        console.log('manual next');
-    }, [canSlide, items.length]);
-
-    useAutoPlay(autoPlay && canSlide, autoPlaySpeed, pauseOnHover && isHovered, manualNext);
+    useAutoPlay(autoPlay, autoPlaySpeed, pauseOnHover && isHovered, next);
 
     return (
         <div
@@ -242,7 +226,6 @@ export function Carousel({
             onMouseEnter={() => pauseOnHover && setIsHovered(true)}
             onMouseLeave={() => pauseOnHover && setIsHovered(false)}
         >
-            <button onClick={manualNext}>next</button>
             <div
                 ref={trackRef}
                 className={`flex ${withTransition ? 'transition-transform duration-500 ease-in-out' : ''}`}

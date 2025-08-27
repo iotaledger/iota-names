@@ -15,7 +15,7 @@ import {
 
 export default function Home() {
     const { data: auctions = [], isLoading } = useAuctions({
-        status: 'all',
+        status: 'active',
         search: '',
         page: 0,
         pageSize: 10,
@@ -23,13 +23,11 @@ export default function Home() {
         sort: 'desc',
     });
 
-    auctions.length = 1;
-
     return (
         <main className="flex flex-col min-h-screen">
             <LandingHero />
-            {/* <WhyIotaNames /> */}
-            {/* <FairAuction /> */}
+            <WhyIotaNames />
+            <FairAuction />
             <section className="container py-14 md:py-20">
                 <AuctionCarousel auctions={auctions} isLoading={isLoading} />
             </section>
