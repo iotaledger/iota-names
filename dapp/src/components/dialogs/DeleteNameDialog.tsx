@@ -108,7 +108,8 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
     }, [updateNameError]);
 
     const isLoading = isLoadingUpdateNameTransaction || isSaving || isSendingTransaction;
-    const disableDeleteButton = isLoadingUpdateNameTransaction || isLoading || !nft.isExpired;
+    const disableDeleteButton =
+        isLoadingUpdateNameTransaction || isLoading || !nft.isExpired || !!updateNameError;
     const deleteActionNotAllowed = deleteSeconds > 0;
     useEffect(() => {
         if (!deleteActionNotAllowed) return;

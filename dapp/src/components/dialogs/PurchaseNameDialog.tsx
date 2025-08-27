@@ -27,7 +27,6 @@ import toast from 'react-hot-toast';
 import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import { GAS_BALANCE_TOO_LOW_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
@@ -160,18 +159,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         };
 
         if (updateNameError) {
-            if (updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID)) {
-                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
-            } else {
-                const couponRegex = /^Coupon '([^']*)' validation failed/;
-                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+            const couponRegex = /^Coupon '([^']*)' validation failed/;
+            const couponMatch = updateNameError.message.match(couponRegex)?.[1];
 
-                if (couponMatch) {
-                    handleErroredCoupon(couponMatch);
-                }
-
-                toast.error(updateNameError.message);
+            if (couponMatch) {
+                handleErroredCoupon(couponMatch);
             }
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
         }
     }, [updateNameError]);
 

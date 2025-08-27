@@ -172,18 +172,21 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         }
     }
 
+    useEffect(() => {
+        if (updateNameError) {
+            toast.error(getUserFriendlyErrorMessage(updateNameError));
+        }
+    }, [updateNameError]);
+
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
-    const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
+    const disableApply =
+        !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading || !!updateNameError;
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
     const errorMessage =
-        editTargetAddress && !isValidAddressOrEmpty
-            ? 'Not a valid IOTA address'
-            : updateNameError
-              ? getUserFriendlyErrorMessage(updateNameError)
-              : undefined;
+        editTargetAddress && !isValidAddressOrEmpty ? 'Not a valid IOTA address' : undefined;
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>

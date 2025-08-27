@@ -199,7 +199,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isLoading || isExpired || !editSubname;
+    const disableSave =
+        updates.length === 0 || isLoading || isExpired || !editSubname || !!updateNameError;
 
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
@@ -232,11 +233,9 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 errorMessage={
                                     !isSubnameAvailable && fullSubnameName
                                         ? 'Subname is not available'
-                                        : updateNameError
-                                          ? getUserFriendlyErrorMessage(updateNameError)
-                                          : subnameError
-                                            ? subnameError
-                                            : undefined
+                                        : subnameError
+                                          ? subnameError
+                                          : undefined
                                 }
                             />
                             <div className="flex flex-col gap-y-md w-full">

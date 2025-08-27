@@ -169,7 +169,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isLoading || isExpired;
+    const disableSave = updates.length === 0 || isLoading || isExpired || !!updateNameError;
 
     return (
         <Dialog open onOpenChange={setOpen}>
