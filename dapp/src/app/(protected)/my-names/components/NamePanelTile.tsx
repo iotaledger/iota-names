@@ -21,6 +21,7 @@ import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
 import {
     getNamePermissions,
+    isGracePeriodExpired,
     isNameRecordCloseToExpiration,
     isNameRecordExpired,
 } from '@/lib/utils/names';
@@ -59,7 +60,7 @@ export function NamePanelTile({
         ? getNamePermissions(nameRecord).allowTimeExtension
         : false;
 
-    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog, nameRecord);
+    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog, nameRecordData);
 
     const panelType = (() => {
         if (isCloseToExpiration) return PanelTileType.Warning;
@@ -68,6 +69,7 @@ export function NamePanelTile({
     })();
 
     const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
+    const isNameGracePeriodExpired = nameRecord ? isGracePeriodExpired(nameRecord) : undefined;
 
     return (
         <>
@@ -81,7 +83,7 @@ export function NamePanelTile({
                 footer={
                     isCloseToExpiration || isExpired ? (
                         <PanelFooter
-                            isRenewDisabled={!allowTimeExtension}
+                            isRenewDisabled={!allowTimeExtension || isNameGracePeriodExpired}
                             isCloseToExpiration={isCloseToExpiration}
                             isExpired={isExpired}
                             expirationDate={expirationDate}
