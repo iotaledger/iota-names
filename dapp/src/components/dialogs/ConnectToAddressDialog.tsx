@@ -190,8 +190,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 />
 
                 <DialogBody>
-                    <div className="flex flex-col h-full justify-between">
-                        <div className="flex flex-col gap-y-md">
+                    <div className="flex flex-col h-full w-full justify-between">
+                        <div className="flex flex-col h-full w-full items-center gap-y-lg">
                             {isSuccess ? (
                                 <UpdatesResult name={name} updates={appliedUpdates} />
                             ) : (
@@ -239,17 +239,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     />
                                                 </div>
                                             )}
-                                        {updateNameError ? (
-                                            <InfoBox
-                                                type={InfoBoxType.Error}
-                                                style={InfoBoxStyle.Elevated}
-                                                icon={<Warning />}
-                                                title="Error"
-                                                supportingText={getUserFriendlyErrorMessage(
-                                                    updateNameError,
-                                                )}
-                                            />
-                                        ) : null}
                                     </div>
                                     <Panel bgColor="bg-names-neutral-10">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">
@@ -314,7 +303,15 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 </>
                             )}
                         </div>
-
+                        {updateNameError ? (
+                            <InfoBox
+                                type={InfoBoxType.Error}
+                                style={InfoBoxStyle.Elevated}
+                                icon={<Warning />}
+                                title="Error"
+                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                            />
+                        ) : null}
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}

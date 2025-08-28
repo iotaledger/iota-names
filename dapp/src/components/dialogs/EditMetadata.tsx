@@ -198,15 +198,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     />
                                 ))}
                             </div>
-                            {updateNameError ? (
-                                <InfoBox
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                    icon={<Warning />}
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                                />
-                            ) : null}
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(
                                     ({ key, label }) =>
@@ -226,7 +217,17 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         </div>
                     </div>
                 </DialogBody>
-
+                {updateNameError ? (
+                    <div className="px-md--rs">
+                        <InfoBox
+                            type={InfoBoxType.Error}
+                            style={InfoBoxStyle.Elevated}
+                            icon={<Warning />}
+                            title="Error"
+                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                        />
+                    </div>
+                ) : null}
                 <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
                     <Button
                         type={ButtonType.Secondary}

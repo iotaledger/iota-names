@@ -331,15 +331,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     )}
                                 </div>
                             )}
-                            {updateNameError ? (
-                                <InfoBox
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                    icon={<Warning />}
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                                />
-                            ) : null}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">
@@ -349,6 +340,15 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     value={formattedExpirationDate}
                                 />
                             </div>
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}

@@ -185,16 +185,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                             </div>
                         </div>
 
-                        {updateNameError ? (
-                            <InfoBox
-                                type={InfoBoxType.Error}
-                                style={InfoBoxStyle.Elevated}
-                                icon={<Warning />}
-                                title="Error"
-                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                            />
-                        ) : null}
-
                         {isLoadingData ? (
                             <div className="flex items-center justify-center w-full h-full py-lg">
                                 <LoadingIndicator text="Loading Assets..." />
@@ -244,7 +234,17 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                         )}
                     </div>
                 </DialogBody>
-
+                {updateNameError ? (
+                    <div className="px-md--rs">
+                        <InfoBox
+                            type={InfoBoxType.Error}
+                            style={InfoBoxStyle.Elevated}
+                            icon={<Warning />}
+                            title="Error"
+                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                        />
+                    </div>
+                ) : null}
                 <div className="flex w-full flex-row justify-center gap-2 px-md--rs pb-md--rs pt-md--rs">
                     <Button
                         type={ButtonType.Secondary}

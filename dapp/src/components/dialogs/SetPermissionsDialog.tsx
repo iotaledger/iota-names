@@ -195,19 +195,17 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
-                                {updateNameError ? (
-                                    <InfoBox
-                                        type={InfoBoxType.Error}
-                                        style={InfoBoxStyle.Elevated}
-                                        icon={<Warning />}
-                                        title="Error"
-                                        supportingText={getUserFriendlyErrorMessage(
-                                            updateNameError,
-                                        )}
-                                    />
-                                ) : null}
                             </div>
                         </div>
+                        {updateNameError ? (
+                            <InfoBox
+                                type={InfoBoxType.Error}
+                                style={InfoBoxStyle.Elevated}
+                                icon={<Warning />}
+                                title="Error"
+                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                            />
+                        ) : null}
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}

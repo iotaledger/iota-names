@@ -228,6 +228,11 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     </ButtonPill>
                                 }
                             />
+                        </div>
+                        <div className="flex w-full flex-col gap-y-md">
+                            {auctionMetadata && (
+                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                            )}
                             {auctionError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
@@ -237,11 +242,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     supportingText={getUserFriendlyErrorMessage(auctionError)}
                                 />
                             ) : null}
-                        </div>
-                        <div className="flex w-full flex-col gap-y-md">
-                            {auctionMetadata && (
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
-                            )}
                             <div className="flex w-full flex-row gap-x-xs mt-xs">
                                 <Button
                                     type={ButtonType.Secondary}
