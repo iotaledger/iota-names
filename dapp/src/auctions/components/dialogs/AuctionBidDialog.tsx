@@ -164,8 +164,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (auctionError) {
-            return getUserFriendlyErrorMessage(auctionError);
         } else if (balanceValidationError) {
             return getUserFriendlyErrorMessage(balanceValidationError);
         }
@@ -230,6 +228,15 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     </ButtonPill>
                                 }
                             />
+                            {auctionError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(auctionError)}
+                                />
+                            ) : null}
                         </div>
                         <div className="flex w-full flex-col gap-y-md">
                             {auctionMetadata && (
