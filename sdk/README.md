@@ -27,7 +27,7 @@ pnpm add @iota/iota-names-sdk
 
 ## Requirements
 
-- Node.js 16+
+- Node.js 22+
 - `@iota/iota-sdk` as a peer dependency
 
 ## Basic Usage
