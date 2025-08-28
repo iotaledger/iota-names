@@ -1,5 +1,12 @@
 # @iota/iota-names-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- ff921da: Revamped README
+- 55e2646: Fixes to the IOTA Names formatting APIs.
+
 ## 0.1.1
 
 ### Patch Changes
