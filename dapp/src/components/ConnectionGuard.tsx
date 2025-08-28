@@ -3,15 +3,16 @@
 'use client';
 
 import { LoadingIndicator } from '@iota/apps-ui-kit';
-import { useAutoConnectWallet } from '@iota/dapp-kit';
 import { PropsWithChildren } from 'react';
 
-export function ConnectionGuard({ children }: PropsWithChildren) {
-    const autoConnect = useAutoConnectWallet();
+import { useConnectionGuard } from '@/hooks';
 
-    if (autoConnect === 'idle') {
+export function ConnectionGuard({ children }: PropsWithChildren) {
+    const { autoConnect, needRedirect } = useConnectionGuard();
+
+    if (autoConnect === 'idle' || needRedirect) {
         return (
-            <div className="flex h-screen w-full justify-center">
+            <div className="flex h-screen w-full justify-center items-center">
                 <LoadingIndicator size="w-16 h-16" />
             </div>
         );
