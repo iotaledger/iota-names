@@ -279,7 +279,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
 
     const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
-    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
+    const disableSave = isLoading || !canRenew || !wantsToRenew || !updateNameTransaction;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (

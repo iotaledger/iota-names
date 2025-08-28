@@ -194,7 +194,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave =
-        updates.length === 0 || isLoading || isExpired || !editSubname || !!updateNameError;
+        updates.length === 0 || isLoading || isExpired || !editSubname || !updateNameTransaction;
 
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 

@@ -205,7 +205,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const canPay =
         isConnected &&
-        !!updateNameError &&
+        !nameRecordError &&
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
 

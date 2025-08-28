@@ -135,7 +135,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         isLoading ||
         isBidBelowMinimum ||
         !balanceValidation?.hasBalance ||
-        !!auctionError;
+        !auctionBidTransaction;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata

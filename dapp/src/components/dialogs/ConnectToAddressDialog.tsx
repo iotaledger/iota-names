@@ -175,7 +175,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply =
-        !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading || !!updateNameError;
+        !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading || !updateNameTransaction;
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;

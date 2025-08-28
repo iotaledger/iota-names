@@ -110,7 +110,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     }
 
     const {
-        data: updateTransaction,
+        data: updateNameTransaction,
         isLoading: isUpdating,
         error: updateNameError,
     } = useUpdateNameTransaction({
@@ -123,9 +123,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
     const { mutate: saveAvatar, isPending: isSaving } = useMutation({
         async mutationFn() {
-            if (!updateTransaction) return;
+            if (!updateNameTransaction) return;
             const tx = await signAndExecuteTransaction({
-                transaction: updateTransaction.transaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({ digest: tx.digest });
@@ -150,14 +150,15 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     }
 
     function handleSave() {
-        if (!updateTransaction) return;
+        if (!updateNameTransaction) return;
         saveAvatar();
     }
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
-    const disableUnset = !currentAvatar || isLoading || updates.length > 0 || !!updateNameError;
-    const disableSave = isLoading || updates.length === 0 || !!updateNameError;
+    const disableUnset =
+        !currentAvatar || isLoading || updates.length > 0 || !updateNameTransaction;
+    const disableSave = isLoading || updates.length === 0 || !updateNameTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>

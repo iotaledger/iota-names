@@ -127,7 +127,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     })();
 
     const {
-        data: updateTransaction,
+        data: updateNameTransaction,
         isLoading: isUpdateNameLoading,
         error: updateNameError,
     } = useUpdateNameTransaction({
@@ -140,9 +140,9 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
 
     const { mutate: handleApply, isPending: isSaving } = useMutation({
         async mutationFn() {
-            if (!updateTransaction) return;
+            if (!updateNameTransaction) return;
             const tx = await signAndExecuteTransaction({
-                transaction: updateTransaction.transaction,
+                transaction: updateNameTransaction.transaction,
             });
             await iotaClient.waitForTransaction({ digest: tx.digest });
         },
@@ -171,7 +171,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     }
 
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
-    const disableApply = isLoading || updates.length === 0 || !!updateNameError;
+    const disableApply = isLoading || updates.length === 0 || !updateNameTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>
