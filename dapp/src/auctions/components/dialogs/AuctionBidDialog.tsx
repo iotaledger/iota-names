@@ -231,7 +231,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             {auctionError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Default}
+                                    style={InfoBoxStyle.Elevated}
                                     icon={<Warning />}
                                     title="Error"
                                     supportingText={getUserFriendlyErrorMessage(auctionError)}

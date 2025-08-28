@@ -187,7 +187,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                         {updateNameError ? (
                             <InfoBox
                                 type={InfoBoxType.Error}
-                                style={InfoBoxStyle.Default}
+                                style={InfoBoxStyle.Elevated}
                                 icon={<Warning />}
                                 title="Error"
                                 supportingText={getUserFriendlyErrorMessage(updateNameError)}

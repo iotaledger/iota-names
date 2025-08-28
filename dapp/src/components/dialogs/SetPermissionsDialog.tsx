@@ -198,7 +198,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                 {updateNameError ? (
                                     <InfoBox
                                         type={InfoBoxType.Error}
-                                        style={InfoBoxStyle.Default}
+                                        style={InfoBoxStyle.Elevated}
                                         icon={<Warning />}
                                         title="Error"
                                         supportingText={getUserFriendlyErrorMessage(
