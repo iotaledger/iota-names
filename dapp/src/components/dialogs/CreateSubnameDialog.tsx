@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -29,7 +29,7 @@ import {
     validateIotaSubname,
 } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -177,12 +177,6 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
         setOpen(false);
     }
 
-    useEffect(() => {
-        if (updateNameError) {
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
-        }
-    }, [updateNameError]);
-
     const handleCancelAddSubname = () => {
         setEditSubname('');
         closeDialog();
@@ -255,6 +249,17 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
+                                {updateNameError ? (
+                                    <InfoBox
+                                        type={InfoBoxType.Error}
+                                        style={InfoBoxStyle.Default}
+                                        icon={<Warning />}
+                                        title="Error"
+                                        supportingText={getUserFriendlyErrorMessage(
+                                            updateNameError,
+                                        )}
+                                    />
+                                ) : null}
                             </div>
                         </div>
                         <div className="flex w-full flex-row gap-x-xs mt-xs">

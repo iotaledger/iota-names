@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Info, Loader } from '@iota/apps-ui-icons';
+import { Info, Loader, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -139,7 +139,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             );
         },
         onError: (error) => {
-            console.log('entro');
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });
@@ -155,17 +154,10 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         saveAvatar();
     }
 
-    useEffect(() => {
-        if (updateNameError) {
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
-        }
-    }, [updateNameError]);
-
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
-
-    const disableUnset = !currentAvatar || isLoading || updates.length > 0;
-    const disableSave = isLoading || updates.length === 0 || !updateTransaction;
+    const disableUnset = !currentAvatar || isLoading || updates.length > 0 || !!updateNameError;
+    const disableSave = isLoading || updates.length === 0 || !!updateNameError;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -191,6 +183,16 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                 </span>
                             </div>
                         </div>
+
+                        {updateNameError ? (
+                            <InfoBox
+                                type={InfoBoxType.Error}
+                                style={InfoBoxStyle.Default}
+                                icon={<Warning />}
+                                title="Error"
+                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                            />
+                        ) : null}
 
                         {isLoadingData ? (
                             <div className="flex items-center justify-center w-full h-full py-lg">

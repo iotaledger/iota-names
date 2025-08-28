@@ -36,7 +36,6 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
-import { NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -165,8 +164,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (auctionError?.message.includes(NOT_ENOUGH_BALANCE_ID)) {
-            return getUserFriendlyErrorMessage(NOT_ENOUGH_BALANCE_ID);
         } else if (auctionError) {
             return getUserFriendlyErrorMessage(auctionError);
         } else if (balanceValidationError) {

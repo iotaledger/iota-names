@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -160,12 +160,6 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
         setEditIsAllowSubnames(checked);
     };
 
-    useEffect(() => {
-        if (updateNameError) {
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
-        }
-    }, [updateNameError]);
-
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
@@ -201,9 +195,19 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
+                                {updateNameError ? (
+                                    <InfoBox
+                                        type={InfoBoxType.Error}
+                                        style={InfoBoxStyle.Default}
+                                        icon={<Warning />}
+                                        title="Error"
+                                        supportingText={getUserFriendlyErrorMessage(
+                                            updateNameError,
+                                        )}
+                                    />
+                                ) : null}
                             </div>
                         </div>
-
                         <div className="flex w-full flex-row gap-x-xs mt-xs">
                             <Button
                                 type={ButtonType.Secondary}

@@ -247,8 +247,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
             if (couponMatch) {
                 handleErroredCoupon(couponMatch);
+                toast.error(getUserFriendlyErrorMessage(updateNameError));
             }
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
         }
     }, [updateNameError]);
 
@@ -313,6 +313,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
+
                             {!isNameSubname && (
                                 <div className="flex flex-col">
                                     <div className="self-end">
@@ -330,6 +331,15 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     )}
                                 </div>
                             )}
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <div className="flex flex-row gap-x-sm w-full">

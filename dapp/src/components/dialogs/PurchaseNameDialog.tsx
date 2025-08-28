@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -13,6 +14,9 @@ import {
     DialogPosition,
     DisplayStats,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     LoadingIndicator,
     Panel,
     Toggle,
@@ -164,8 +168,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
             if (couponMatch) {
                 handleErroredCoupon(couponMatch);
+                toast.error(getUserFriendlyErrorMessage(updateNameError));
             }
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
         }
     }, [updateNameError]);
 
@@ -243,6 +247,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 )}
                             </div>
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-10">

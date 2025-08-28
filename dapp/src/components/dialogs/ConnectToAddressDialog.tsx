@@ -172,12 +172,6 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         }
     }
 
-    useEffect(() => {
-        if (updateNameError) {
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
-        }
-    }, [updateNameError]);
-
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply =
@@ -245,6 +239,17 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     />
                                                 </div>
                                             )}
+                                        {updateNameError ? (
+                                            <InfoBox
+                                                type={InfoBoxType.Error}
+                                                style={InfoBoxStyle.Default}
+                                                icon={<Warning />}
+                                                title="Error"
+                                                supportingText={getUserFriendlyErrorMessage(
+                                                    updateNameError,
+                                                )}
+                                            />
+                                        ) : null}
                                     </div>
                                     <Panel bgColor="bg-names-neutral-10">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">

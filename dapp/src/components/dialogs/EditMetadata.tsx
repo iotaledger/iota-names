@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -13,6 +14,9 @@ import {
     DialogContent,
     DialogPosition,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
@@ -20,7 +24,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -166,12 +170,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }));
     }
 
-    useEffect(() => {
-        if (updateNameError) {
-            toast.error(getUserFriendlyErrorMessage(updateNameError));
-        }
-    }, [updateNameError]);
-
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
     const disableApply = isLoading || updates.length === 0 || !!updateNameError;
 
@@ -200,7 +198,15 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     />
                                 ))}
                             </div>
-
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Default}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(
                                     ({ key, label }) =>
