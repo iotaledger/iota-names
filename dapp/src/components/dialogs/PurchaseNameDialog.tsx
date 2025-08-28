@@ -168,7 +168,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
             if (couponMatch) {
                 handleErroredCoupon(couponMatch);
-                toast.error(getUserFriendlyErrorMessage(updateNameError));
             }
         }
     }, [updateNameError]);

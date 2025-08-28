@@ -247,7 +247,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
             if (couponMatch) {
                 handleErroredCoupon(couponMatch);
-                toast.error(getUserFriendlyErrorMessage(updateNameError));
             }
         }
     }, [updateNameError]);
