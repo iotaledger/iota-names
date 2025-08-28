@@ -248,6 +248,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                             <Panel bgColor="bg-names-neutral-10">
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
@@ -270,16 +279,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     }
                                 />
                             </div>
-                            {updateNameError ? (
-                                <InfoBox
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                    icon={<Warning />}
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                                />
-                            ) : null}
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

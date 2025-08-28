@@ -303,39 +303,41 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 </>
                             )}
                         </div>
-                        {updateNameError ? (
-                            <InfoBox
-                                type={InfoBoxType.Error}
-                                style={InfoBoxStyle.Elevated}
-                                icon={<Warning />}
-                                title="Error"
-                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                            />
-                        ) : null}
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={handleClose}
-                                fullWidth
-                            />
-                            {isSuccess ? (
+                        <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
-                                    type={ButtonType.Primary}
-                                    text="Finish"
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
                                     onClick={handleClose}
                                     fullWidth
                                 />
-                            ) : (
-                                <Button
-                                    type={ButtonType.Primary}
-                                    text="Apply"
-                                    icon={isLoading ? <LoadingIndicator /> : null}
-                                    onClick={() => apply()}
-                                    disabled={disableApply}
-                                    fullWidth
-                                />
-                            )}
+                                {isSuccess ? (
+                                    <Button
+                                        type={ButtonType.Primary}
+                                        text="Finish"
+                                        onClick={handleClose}
+                                        fullWidth
+                                    />
+                                ) : (
+                                    <Button
+                                        type={ButtonType.Primary}
+                                        text="Apply"
+                                        icon={isLoading ? <LoadingIndicator /> : null}
+                                        onClick={() => apply()}
+                                        disabled={disableApply}
+                                        fullWidth
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </DialogBody>

@@ -233,8 +233,8 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                         )}
                     </div>
                 </DialogBody>
-                {updateNameError ? (
-                    <div className="px-md--rs">
+                <div className="flex flex-col gap-y-md gap-2 p-md--rs">
+                    {updateNameError ? (
                         <InfoBox
                             type={InfoBoxType.Error}
                             style={InfoBoxStyle.Elevated}
@@ -242,39 +242,45 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                             title="Error"
                             supportingText={getUserFriendlyErrorMessage(updateNameError)}
                         />
+                    ) : null}
+                    <div className="flex w-full flex-row gap-x-xs">
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Cancel"
+                            onClick={() => setOpen(false)}
+                            fullWidth
+                        />
+                        <Button
+                            type={ButtonType.Primary}
+                            text="Unset avatar"
+                            onClick={handleUnset}
+                            disabled={disableUnset}
+                            fullWidth
+                            icon={
+                                isLoading ? (
+                                    <Loader
+                                        className="animate-spin"
+                                        data-testid="loading-indicator"
+                                    />
+                                ) : null
+                            }
+                        />
+                        <Button
+                            type={ButtonType.Primary}
+                            text="Save"
+                            onClick={handleSave}
+                            disabled={disableSave}
+                            fullWidth
+                            icon={
+                                isLoading ? (
+                                    <Loader
+                                        className="animate-spin"
+                                        data-testid="loading-indicator"
+                                    />
+                                ) : null
+                            }
+                        />
                     </div>
-                ) : null}
-                <div className="flex w-full flex-row justify-center gap-2 px-md--rs pb-md--rs pt-md--rs">
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Cancel"
-                        onClick={() => setOpen(false)}
-                        fullWidth
-                    />
-                    <Button
-                        type={ButtonType.Primary}
-                        text="Unset avatar"
-                        onClick={handleUnset}
-                        disabled={disableUnset}
-                        fullWidth
-                        icon={
-                            isLoading ? (
-                                <Loader className="animate-spin" data-testid="loading-indicator" />
-                            ) : null
-                        }
-                    />
-                    <Button
-                        type={ButtonType.Primary}
-                        text="Save"
-                        onClick={handleSave}
-                        disabled={disableSave}
-                        fullWidth
-                        icon={
-                            isLoading ? (
-                                <Loader className="animate-spin" data-testid="loading-indicator" />
-                            ) : null
-                        }
-                    />
                 </div>
             </DialogContent>
         </Dialog>

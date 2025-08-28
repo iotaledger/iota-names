@@ -197,29 +197,31 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                 />
                             </div>
                         </div>
-                        {updateNameError ? (
-                            <InfoBox
-                                type={InfoBoxType.Error}
-                                style={InfoBoxStyle.Elevated}
-                                icon={<Warning />}
-                                title="Error"
-                                supportingText={getUserFriendlyErrorMessage(updateNameError)}
-                            />
-                        ) : null}
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={closeDialog}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Save"
-                                disabled={disableSave}
-                                onClick={() => save()}
-                                fullWidth
-                            />
+                        <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={closeDialog}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    text="Save"
+                                    disabled={disableSave}
+                                    onClick={() => save()}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogBody>

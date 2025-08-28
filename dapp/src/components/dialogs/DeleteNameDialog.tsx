@@ -141,6 +141,8 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                                     supportingText="This action is irreversible and will permanently remove your ownership of the name"
                                 />
                             </div>
+                        </div>
+                        <div className="flex flex-col w-full gap-y-md">
                             {updateNameError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
@@ -150,26 +152,26 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
                                     supportingText={getUserFriendlyErrorMessage(updateNameError)}
                                 />
                             ) : null}
-                        </div>
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={closeDialog}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                text={
-                                    deleteActionNotAllowed
-                                        ? `Delete in ${deleteSeconds}s`
-                                        : 'Delete'
-                                }
-                                disabled={disableDeleteButton || deleteActionNotAllowed}
-                                type={ButtonType.Destructive}
-                                onClick={() => deleteName()}
-                                fullWidth
-                            />
+                            <div className="flex w-full flex-row gap-x-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={closeDialog}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    text={
+                                        deleteActionNotAllowed
+                                            ? `Delete in ${deleteSeconds}s`
+                                            : 'Delete'
+                                    }
+                                    disabled={disableDeleteButton || deleteActionNotAllowed}
+                                    type={ButtonType.Destructive}
+                                    onClick={() => deleteName()}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogBody>

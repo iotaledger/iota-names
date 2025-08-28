@@ -217,8 +217,8 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         </div>
                     </div>
                 </DialogBody>
-                {updateNameError ? (
-                    <div className="px-md--rs">
+                <div className="flex flex-col gap-y-md gap-2 p-md--rs">
+                    {updateNameError ? (
                         <InfoBox
                             type={InfoBoxType.Error}
                             style={InfoBoxStyle.Elevated}
@@ -226,23 +226,23 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                             title="Error"
                             supportingText={getUserFriendlyErrorMessage(updateNameError)}
                         />
+                    ) : null}
+                    <div className="flex w-full flex-row gap-x-xs">
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Cancel"
+                            onClick={() => setOpen(false)}
+                            fullWidth
+                        />
+                        <Button
+                            icon={isLoading ? <LoadingIndicator /> : null}
+                            text="Apply"
+                            disabled={disableApply}
+                            type={ButtonType.Primary}
+                            onClick={() => handleApply()}
+                            fullWidth
+                        />
                     </div>
-                ) : null}
-                <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Cancel"
-                        onClick={() => setOpen(false)}
-                        fullWidth
-                    />
-                    <Button
-                        icon={isLoading ? <LoadingIndicator /> : null}
-                        text="Apply"
-                        disabled={disableApply}
-                        type={ButtonType.Primary}
-                        onClick={() => handleApply()}
-                        fullWidth
-                    />
                 </div>
             </DialogContent>
         </Dialog>
