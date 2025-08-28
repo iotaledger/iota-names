@@ -22,13 +22,13 @@ export type NameUpdate =
           nftId: string;
           key: string;
           value: string;
-          isSubname?: boolean;
+          isSubname: boolean;
       }
     | {
           type: 'unset-data';
           nftId: string;
           key: string;
-          isSubname?: boolean;
+          isSubname: boolean;
       }
     | {
           type: 'set-target-address';
