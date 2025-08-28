@@ -156,8 +156,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
-    const disableUnset =
-        !currentAvatar || isLoading || updates.length > 0 || !updateNameTransaction;
+    const disableUnset = !currentAvatar || isLoading || updates.length > 0;
     const disableSave = isLoading || updates.length === 0 || !updateNameTransaction;
 
     return (
