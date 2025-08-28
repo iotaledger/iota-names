@@ -35,25 +35,25 @@ pnpm add @iota/iota-names-sdk
 ### Initialize the Client
 
 ```typescript
+import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getNetwork, Network } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
-import { IotaNamesClient } from '@iota/iota-names-sdk';
 
 // Initialize the SDK client
 const network = getNetwork(Network.Mainnet); // or Network.Testnet, Network.Devnet
 const iotaNamesClient = new IotaNamesClient({
-  graphQlClient: new IotaGraphQLClient({
-    url: network.graphql!,
-  }),
-  network: network.id,
+    graphQlClient: new IotaGraphQLClient({
+        url: network.graphql!,
+    }),
+    network: network.id,
 });
 ```
 
 ### Register a Name
 
 ```typescript
-import { Transaction } from '@iota/iota-sdk/transactions';
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 // Create a transaction to register a name
 const tx = new Transaction();
@@ -62,8 +62,8 @@ const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [10_000_000]);
 
 // Register the name
 const nft = await iotaNamesTx.register({
-  name: "mycoolname.iota",
-  coin,
+    name: 'mycoolname.iota',
+    coin,
 });
 
 // Transfer the NFT to your address
@@ -79,7 +79,7 @@ const transaction = await iotaNamesTx.transaction.build({
 
 ```typescript
 // Get name record
-const nameRecord = await iotaNamesClient.getNameRecord("example.iota");
+const nameRecord = await iotaNamesClient.getNameRecord('example.iota');
 console.log(nameRecord);
 
 // Get price lists
