@@ -226,9 +226,11 @@ export default function AuctionsPage(): JSX.Element {
                             />
                         ))}
                     </SegmentedButton>
-                    <p className="text-label-md whitespace-nowrap text-names-neutral-70">
-                        {totalItems} Total
-                    </p>
+                    {!isLoading && (
+                        <p className="text-label-md whitespace-nowrap text-names-neutral-70">
+                            {totalItems} Total
+                        </p>
+                    )}
                 </div>
 
                 <div className="md:flex hidden w-full max-w-[260px] gap-4" ref={dropdownRef}>
