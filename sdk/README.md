@@ -69,7 +69,7 @@ const nft = await iotaNamesTx.register({
 // Transfer the NFT to your address
 iotaNamesTx.transaction.transferObjects([nft], address);
 
-//Build transaction
+// Build transaction
 const transaction = await iotaNamesTx.transaction.build({
     client,
 });
