@@ -96,12 +96,14 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                     nftId,
                     key: ALLOWED_METADATA.avatar,
                     value: action.avatar,
+                    isSubname: isNameSubname,
                 });
             } else if (action.type === 'unset' && currentAvatar) {
                 updates.push({
                     type: 'unset-data',
                     nftId,
                     key: ALLOWED_METADATA.avatar,
+                    isSubname: isNameSubname,
                 });
             }
         }
@@ -161,8 +163,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
-    const disableUnset = !currentAvatar || isLoading || updates.length > 0 || !!updateNameError;
-    const disableSave = isLoading || updates.length === 0 || !!updateNameError;
+
+    const disableUnset = !currentAvatar || isLoading || updates.length > 0;
+    const disableSave = isLoading || updates.length === 0 || !updateTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -188,6 +191,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                 </span>
                             </div>
                         </div>
+
                         {isLoadingData ? (
                             <div className="flex items-center justify-center w-full h-full py-lg">
                                 <LoadingIndicator text="Loading Assets..." />
