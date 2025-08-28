@@ -191,7 +191,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
                 <DialogBody>
                     <div className="flex flex-col h-full w-full justify-between">
-                        <div className="flex flex-col h-full w-full items-center gap-y-lg">
+                        <div className="flex flex-col h-full w-full gap-y-lg">
                             {isSuccess ? (
                                 <UpdatesResult name={name} updates={appliedUpdates} />
                             ) : (
