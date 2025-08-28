@@ -18,10 +18,13 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
+import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
@@ -34,6 +37,9 @@ import { GroupedNamesFilter } from './filters';
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
     const account = useCurrentAccount();
+    const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
+        null,
+    );
     const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
         null,
     );
@@ -104,6 +110,15 @@ export default function MyNamesPage(): JSX.Element {
 
     function isDefaultName(name: RegistrationNft): boolean {
         return defaultName ? defaultName === name.name : false;
+    }
+
+    function handleNameRenewed(name: RegistrationNft): void {
+        setRightPanelSelectedName(null);
+        toast.success(
+            `${normalizeIotaName(name.name, 'at', {
+                truncateLongParts: true,
+            })} renewed successfully!`,
+        );
     }
 
     return (
@@ -215,10 +230,20 @@ export default function MyNamesPage(): JSX.Element {
                             <SubnamesPanel
                                 selectedName={rightPanelSelectedName}
                                 onClose={() => setRightPanelSelectedName(null)}
+                                onRenewClick={(name) => {
+                                    setSelectedNameForRenewal(name);
+                                }}
                             />
                         </div>
                     )}
                 </div>
+            )}
+            {selectedNameForRenewal && (
+                <RenewNameDialog
+                    name={selectedNameForRenewal.name}
+                    setOpen={() => setSelectedNameForRenewal(null)}
+                    onRenew={() => handleNameRenewed(selectedNameForRenewal)}
+                />
             )}
         </>
     );
