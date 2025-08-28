@@ -69,7 +69,7 @@ const nft = await iotaNamesTx.register({
 // Transfer the NFT to your address
 iotaNamesTx.transaction.transferObjects([nft], address);
 
-// Build transaction
+//Build transaction
 const transaction = await iotaNamesTx.transaction.build({
     client,
 });
@@ -110,7 +110,7 @@ For detailed examples, check the `examples` directory in the repository.
 
 ## API Reference
 
-For complete API documentation, visit the [IOTA-Names Documentation]().
+For complete API documentation, visit the [IOTA-Names Documentation](https://docs.iotanames.com).
 
 ## License
 
@@ -126,4 +126,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-For more information about IOTA-Names, visit the [official documentation]().
+For more information about IOTA-Names, visit the [official documentation](https://docs.iotanames.com).
