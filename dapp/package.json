@@ -16,10 +16,10 @@
     "dependencies": {
         "@iota/apps-ui-icons": "^0.4.1",
         "@iota/apps-ui-kit": "^0.7.2",
-        "@iota/dapp-kit": "^0.5.2",
-        "@iota/graphql-transport": "^0.9.1",
+        "@iota/dapp-kit": "^0.5.3",
+        "@iota/graphql-transport": "^0.9.2",
         "@iota/iota-names-sdk": "workspace:^",
-        "@iota/iota-sdk": "^1.6.0",
+        "@iota/iota-sdk": "^1.6.1",
         "@iota/kiosk": "^0.4.7",
         "@next/mdx": "^15.5.0",
         "@noble/hashes": "^1.4.0",

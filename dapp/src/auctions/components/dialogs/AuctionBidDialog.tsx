@@ -26,7 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, safeParseAmount } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -42,7 +42,6 @@ import {
     NOT_ENOUGH_BALANCE_ID,
 } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { parseIotaToNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -76,7 +75,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         }
     }, [minBidNanos]);
 
-    const bidNanos = bidAmountValue ? parseIotaToNanos(bidAmountValue) : null;
+    const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
 
     const {
         data: auctionBidTransaction,
