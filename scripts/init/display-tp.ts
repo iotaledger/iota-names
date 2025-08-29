@@ -40,10 +40,9 @@ export const createDisplay = ({
         target: `0x2::display::add_multiple`,
         arguments: [
             display,
-            txb.pure.vector('string', ['name', 'link', 'image_url', 'description', 'project_url']),
+            txb.pure.vector('string', ['name', 'image_url', 'description', 'project_url']),
             txb.pure.vector('string', [
                 `{${isSubname ? 'nft.' : ''}name_str}`,
-                `https://{${isSubname ? 'nft.' : ''}name_str}.id`,
                 getImageUrl(isSubname, network),
                 'IOTA-Names - Name It. Own It.',
                 'https://testnet.iotanames.com',
