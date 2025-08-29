@@ -328,8 +328,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: ^1.5.0
-        version: 1.5.0(typescript@5.8.3)
+        specifier: ^1.6.1
+        version: 1.6.1(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
