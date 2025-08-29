@@ -163,7 +163,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isLoading || isExpired;
+    const disableSave = updates.length === 0 || isLoading || isExpired || !updateNameTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -195,36 +195,33 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                                     onCheckedChange={handleAllowRenewChange}
                                     label="Allow Subname to renew expiration"
                                 />
-                                {updateNameError ? (
-                                    <InfoBox
-                                        type={InfoBoxType.Error}
-                                        title="Error"
-                                        supportingText={getUserFriendlyErrorMessage(
-                                            updateNameError,
-                                        )}
-                                        style={InfoBoxStyle.Elevated}
-                                        icon={
-                                            <Warning className="text-error-30 dark:text-error-70" />
-                                        }
-                                    />
-                                ) : null}
                             </div>
                         </div>
-
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={closeDialog}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Save"
-                                disabled={disableSave}
-                                onClick={() => save()}
-                                fullWidth
-                            />
+                        <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={closeDialog}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    text="Save"
+                                    disabled={disableSave}
+                                    onClick={() => save()}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogBody>
