@@ -121,8 +121,8 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: ^0.4.7
-        version: 0.4.7(typescript@5.8.3)
+        specifier: ^0.4.8
+        version: 0.4.8(typescript@5.8.3)
       '@next/mdx':
         specifier: ^15.5.0
         version: 15.5.0(@mdx-js/react@2.3.0(react@18.3.1))
@@ -1739,10 +1739,6 @@ packages:
     resolution: {integrity: sha512-R5Tx78Z3ZMh+P7uAqN3U+JylfY+rbnnzjqEehef+bYatyddkh8uEr7S2l/0++Vrp56bpZnSdLTld1PvKKWyXaQ==}
     engines: {node: '>=20'}
 
-  '@iota/iota-sdk@1.6.0':
-    resolution: {integrity: sha512-SDO8SsleHfHyvN2iK3Mir/6dykCOt5HMwLdYBkBHAOvGbTVF/xqmEHhImK6o7uFhGGAHPD8cl7HCPQk/53i+NA==}
-    engines: {node: '>=20'}
-
   '@iota/iota-sdk@1.6.1':
     resolution: {integrity: sha512-V7rx7m9erCn9lr4hNZVMtwmka2NsoTZ9EFSE4ZqEDO44cWdheM61+i/y5HJhvvmYAb/kkDfSmfdmzLaGTbVVYg==}
     engines: {node: '>=20'}
@@ -1751,8 +1747,8 @@ packages:
     resolution: {integrity: sha512-+caukjLX6Zzuh7c/LjhtTACiU8vEqKwAK7JCkv7ZlGOxzEpn1I7XPv5wby8zWam7xRHjeMVOtYwfVq36zmxIZA==}
     engines: {node: '>=20'}
 
-  '@iota/kiosk@0.4.7':
-    resolution: {integrity: sha512-gPzzxm838woOYc81L3YbvqeHXqFO7Mj3N6Q4WUu3JGoUmx9s0VvCcG+6RNfcFyXrW2xxJIImXcSGeZccREvMoA==}
+  '@iota/kiosk@0.4.8':
+    resolution: {integrity: sha512-QlhaEeqJFotJc8+9MBWxdk6bkH94Z9oT8/i2oECqMf43xaUO/vDM1yjK5jOFdtUF8+Pwxisq7IZ8wxAcEJigXg==}
     engines: {node: '>=20'}
 
   '@iota/wallet-standard@0.2.15':
@@ -8653,26 +8649,6 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/iota-sdk@1.6.0(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.2.0
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      '@suchipi/femver': 1.0.0
-      bech32: 2.0.0
-      bignumber.js: 9.3.0
-      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
-      graphql: 16.11.0
-      tweetnacl: 1.0.3
-      valibot: 0.36.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
   '@iota/iota-sdk@1.6.1(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
@@ -8702,9 +8678,9 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/kiosk@0.4.7(typescript@5.8.3)':
+  '@iota/kiosk@0.4.8(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 1.6.0(typescript@5.8.3)
+      '@iota/iota-sdk': 1.6.1(typescript@5.8.3)
       dotenv: 16.4.7
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
