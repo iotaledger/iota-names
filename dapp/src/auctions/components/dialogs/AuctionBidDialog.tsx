@@ -230,7 +230,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     supportingText={getUserFriendlyErrorMessage(auctionError)}
                                 />
                             ) : null}
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"
