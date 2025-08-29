@@ -35,7 +35,7 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
+import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -83,11 +83,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         bidNanos: bidNanos ?? BigInt(0),
     });
 
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        auctionBidTransaction?.builtTx ?? null,
-        Number(bidNanos),
-    );
-
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -130,12 +125,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid =
-        isPending ||
-        isLoading ||
-        isBidBelowMinimum ||
-        !balanceValidation?.hasBalance ||
-        !auctionBidTransaction;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum || !auctionBidTransaction;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -164,8 +154,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (balanceValidationError) {
-            return getUserFriendlyErrorMessage(balanceValidationError);
         }
     })();
 
