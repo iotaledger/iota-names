@@ -23,7 +23,7 @@ export function Toaster() {
     }
 
     return (
-        <ToasterLib position="bottom-right" containerClassName="!z-[999999] !right-8">
+        <ToasterLib position="bottom-right" containerClassName="!z-[999999] toast-layer !right-8">
             {(t) => (
                 <div style={{ opacity: t.visible ? 1 : 0 }}>
                     <Snackbar

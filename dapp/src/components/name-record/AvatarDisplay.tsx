@@ -24,9 +24,11 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
 
     const avatarId =
         nameRecordData?.type === 'unavailable'
-            ? isNameSubname
-                ? subnames?.find((n) => n.name === name)?.id
-                : (nameRecordData?.nameRecord.avatar ?? nameRecordData.nameRecord.nftId)
+            ? nameRecordData?.nameRecord.avatar
+                ? nameRecordData.nameRecord.avatar
+                : isNameSubname
+                  ? subnames?.find((n) => n.name === name)?.id
+                  : nameRecordData.nameRecord.nftId
             : null;
 
     const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject(name, {
@@ -41,7 +43,7 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
             alt={name}
-        ></AvatarDisplay>
+        />
     );
 }
 
@@ -97,7 +99,7 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
                         alt={alt}
                     />
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center font-roboto-flex text-md font-semibold">
-                        {avatarSrc === FALLBACK_URL ? <span>Couldn’t load avatar</span> : null}
+                        {avatarSrc === FALLBACK_URL ? <span>Couldn't load avatar</span> : null}
                     </div>
                 </div>
             ) : null}
