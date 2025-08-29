@@ -1,3 +1,6 @@
+> [!NOTE]\
+> By using this service, you agree to the [Terms & Conditions](https://testnet.iotanames.com/?modal=terms_conditions).
+
 # IOTA-Names
 
 This repository holds the IOTA-Names contracts (both the core and all system packages).
