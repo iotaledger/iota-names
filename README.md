@@ -77,7 +77,7 @@ All in one:
 ```bash
 docker start postgres || docker run -d --name postgres -e POSTGRES_PASSWORD=postgrespw -e POSTGRES_INITDB_ARGS="-U postgres" -p 5432:5432 postgres:15 -c max_connections=1000
 # Run network in the background without logs
-iota start --force-regenesis --with-faucet --committee-size 1 --with-indexer --with-graphql > /dev/null 2>&1 &
+iota start --force-regenesis --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql > /dev/null 2>&1 &
 iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
 iota client switch --env localnet
 # wait for the network to start
