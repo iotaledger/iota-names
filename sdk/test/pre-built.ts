@@ -79,9 +79,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     let gas;
     if (network.id === Network.Testnet) {
-        250n;
+        gas = 250n;
     } else {
-        6n;
+        gas = 6n;
     }
     const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
         gas * NANOS_PER_IOTA,
