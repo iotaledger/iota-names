@@ -14,8 +14,8 @@ describe('it should work on live networks', () => {
     // 	expect(res.effects.status.status).toEqual('success');
     // });
     it('should work on testnet', async () => {
-    	const res = await e2eLiveNetworkDryRunFlow(Network.Testnet);
-    	expect(res.effects.status.status).toEqual('success');
+        const res = await e2eLiveNetworkDryRunFlow(Network.Testnet);
+        expect(res.effects.status.status).toEqual('success');
     });
     it('should work on devnet', async () => {
         const res = await e2eLiveNetworkDryRunFlow(Network.Devnet);
