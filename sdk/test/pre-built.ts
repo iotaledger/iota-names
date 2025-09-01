@@ -28,17 +28,37 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
 
     // Expected lists
-    const expectedPriceList = new Map([
-        [[3, 3], 500000000],
-        [[4, 4], 100000000],
-        [[5, 63], 10000000],
-    ]);
+    let expectedPriceList;
+    // TODO: Mainnet
+    if (network_id === Network.Testnet) {
+        expectedPriceList = new Map([
+            [[3, 3], 500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else {
+        expectedPriceList = new Map([
+            [[3, 3], 500000000],
+            [[4, 4], 100000000],
+            [[5, 63], 10000000],
+        ]);
+    }
 
-    const expectedRenewalPriceList = new Map([
-        [[3, 3], 150000000],
-        [[4, 4], 50000000],
-        [[5, 63], 5000000],
-    ]);
+    let expectedRenewalPriceList;
+    // TODO: Mainnet
+    if (network_id === Network.Testnet) {
+        expectedRenewalPriceList = new Map([
+            [[3, 3], 500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else {
+        expectedRenewalPriceList = new Map([
+            [[3, 3], 150000000],
+            [[4, 4], 50000000],
+            [[5, 63], 5000000],
+        ]);
+    }
 
     expect(priceList).toEqual(expectedPriceList);
     expect(renewalPriceList).toEqual(expectedRenewalPriceList);
@@ -56,7 +76,6 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // register random name like mclsl9pbdg8324x154cmclsl9pbdg8324x154c.iota for 2 years.
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        years: 2,
         coinConfig: iotaNamesClient.config.coins.IOTA,
         coin: coinInput,
     });
@@ -151,9 +170,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     } else if (network.id === Network.Testnet) {
         tx.setGasPayment([
             {
-                objectId: '0xeb709b97ca3e87e385d019ccb7da4a9bd99f9405f9b0d692f21c9d2e5714f27a',
-                version: '169261602',
-                digest: 'HJehhEV1N8rqjjHbwDgjeCZJkHPRavMmihTvyTJme2rA',
+                objectId: '0xb327721ac64b8fd55543360beacdc2439b55619d84aa763117fbd9a9aa76e9b8',
+                version: '224617333',
+                digest: '93eQcFa8jck9hCNTcvwChPt5x8H13VMhCqPqnvHhC97D',
             },
         ]);
     } else if (network.id === Network.Devnet) {
