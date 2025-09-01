@@ -13,11 +13,10 @@ describe('it should work on live networks', () => {
     // 	const res = await e2eLiveNetworkDryRunFlow('mainnet');
     // 	expect(res.effects.status.status).toEqual('success');
     // });
-    // TODO: enable when it's deployed on testnet
-    // it('should work on testnet', async () => {
-    // 	const res = await e2eLiveNetworkDryRunFlow('testnet');
-    // 	expect(res.effects.status.status).toEqual('success');
-    // });
+    it('should work on testnet', async () => {
+    	const res = await e2eLiveNetworkDryRunFlow(Network.Testnet);
+    	expect(res.effects.status.status).toEqual('success');
+    });
     it('should work on devnet', async () => {
         const res = await e2eLiveNetworkDryRunFlow(Network.Devnet);
         expect(res.effects.status.status).toEqual('success');

@@ -51,5 +51,29 @@ export const packages = {
             '0x4a16b7b2a9c194989519c87ee3f1d1007ece8aecb62b9a50a4c10075db0591a3',
         upgradeCap: '0xd64205c4b10eff4b4adb00ab6f754cda8d8e7525985a31307f7e232481dfaf6e',
     },
+    testnet: {
+        adminAddress: '0x548474360f9769077ccf07ff6e65060eb448470eabc1ae42b9ed371ddbfc23d2',
+        adminCap: '0x541b117cac18fb1c07a293db300acd12b05c01fa81232b37151b005ca7d4f755',
+        auctionPackageId: '0x6f727ea576a00036657fff0ae3a6d7c8171b178bf35112d6b83b2a6272cc5f0d',
+        auctionHouseObjectId: '0x2292ea885039babe8c320f19e0b7546ebdef2b2f6cf2be600bf994cdb51e0050',
+        coins: {
+            IOTA: {
+                type: '0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA',
+                metadataId: '0x6dcda050874e2f160a008afc9e3ca6304a667cc85045e35f25b3c7967282b153',
+            },
+        },
+        iotaNamesObjectId: '0x7cab491740d51e0d75b26bf9984e49ba2e32a2d0694cabcee605543ed13c7dec',
+        packageId: '0x7fff6e95f385349bec98d17121ab2bfa3e134f2f0b1ccefc270313415f7835ea',
+        paymentsPackageId: '0x6b1b01f4c72786a893191d5c6e73d3012f7529f86fdee3bc8c163323cee08441',
+        publisherId: '0x42faed18f40323158fb9b0f38630800addc2e9eea696265756769fc1f0e08ceb',
+        registryTableId: '0x2dfc6f6d46ba55217425643a59dc85fe4d8ed273a9f74077bd0ee280dbb4f590',
+        reverseRegistryTableId:
+            '0x3550bcacb793ef8b776264665e7c99fa3d897695ed664656aac693cf9cf9b76b',
+        couponsPackageId: '0xa7e4e483d79c245470d5eb3c285a4503a78d90a69d36e35e0993012f5c6137ca',
+        subnamesPackageId: '0xd06a5607cc762f2352eeeb8c86c7f962558a06c6023c1eec031a41651d898c87',
+        tempSubnameProxyPackageId:
+            '0x7f34c135e55e5b436b3feaad369eabfe5b6d14c0c57544fefb6921db047e8cbc',
+        upgradeCap: '0x03ac547ee58c268a69b5663a1fdee0e8202206922968d2a387104730627d188e',
+    },
     // TODO: Support Mainnet and Testnet
 };
