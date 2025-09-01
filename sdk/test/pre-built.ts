@@ -172,7 +172,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
             {
                 objectId: '0xc2d3c78eb3dbbedb3675ee7626aafebf9709354f76eec4860d281ce79ec8a13f',
                 version: '377918109',
-                digest: 'EF1JBF27djx6YSitNZbf8BLo69bUnY824eQz4FjuM9He',
+                digest: 'A33F8d9prgQhd39yJN25Czb3aHZCe4pvrb2QyJAdPToY',
             },
         ]);
     } else if (network.id === Network.Devnet) {
