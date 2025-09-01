@@ -31,7 +31,6 @@ import toast from 'react-hot-toast';
 import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
-import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
@@ -136,6 +135,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.removeQueries({
                 queryKey: queryKey.nameRecord(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.defaultName(account?.address || ''),
+            });
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
             );
@@ -164,20 +166,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         };
 
         if (updateNameError) {
-            if (
-                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
-                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
-            ) {
-                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
-            } else {
-                const couponRegex = /^Coupon '([^']*)' validation failed/;
-                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+            const couponRegex = /^Coupon '([^']*)' validation failed/;
+            const couponMatch = updateNameError.message.match(couponRegex)?.[1];
 
-                if (couponMatch) {
-                    handleErroredCoupon(couponMatch);
-                }
-
-                toast.error(updateNameError.message);
+            if (couponMatch) {
+                handleErroredCoupon(couponMatch);
             }
         }
     }, [updateNameError]);
@@ -212,13 +205,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
-    const hasEnoughGas =
-        !updateNameError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !updateNameError?.message.includes(GAS_BALANCE_TOO_LOW_ID);
-
     const canPay =
         isConnected &&
-        hasEnoughGas &&
+        !nameRecordError &&
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
 
@@ -260,19 +249,17 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     />
                                 )}
                             </div>
-                            {!hasEnoughGas && (
-                                <InfoBox
-                                    title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(
-                                        GAS_BALANCE_TOO_LOW_ID,
-                                    )}
-                                    icon={<Warning />}
-                                    type={InfoBoxType.Error}
-                                    style={InfoBoxStyle.Elevated}
-                                />
-                            )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                             <Panel bgColor="bg-names-neutral-10">
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
@@ -295,7 +282,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     }
                                 />
                             </div>
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

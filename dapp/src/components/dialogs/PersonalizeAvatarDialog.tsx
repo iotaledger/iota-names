@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Info, Loader } from '@iota/apps-ui-icons';
+import { Info, Loader, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -109,7 +109,11 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         }
     }
 
-    const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
+    const {
+        data: updateNameTransaction,
+        isLoading: isUpdating,
+        error: updateNameError,
+    } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
     });
@@ -119,9 +123,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
     const { mutate: saveAvatar, isPending: isSaving } = useMutation({
         async mutationFn() {
-            if (!updateTransaction) return;
+            if (!updateNameTransaction) return;
             const tx = await signAndExecuteTransaction({
-                transaction: updateTransaction.transaction,
+                transaction: updateNameTransaction.transaction,
             });
 
             await iotaClient.waitForTransaction({ digest: tx.digest });
@@ -146,14 +150,14 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     }
 
     function handleSave() {
-        if (!updateTransaction) return;
+        if (!updateNameTransaction) return;
         saveAvatar();
     }
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
     const disableUnset = !currentAvatar || isLoading || updates.length > 0;
-    const disableSave = isLoading || updates.length === 0 || !updateTransaction;
+    const disableSave = isLoading || updates.length === 0 || !updateNameTransaction;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -229,38 +233,54 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                         )}
                     </div>
                 </DialogBody>
-
-                <div className="flex w-full flex-row justify-center gap-2 px-md--rs pb-md--rs pt-md--rs">
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Cancel"
-                        onClick={() => setOpen(false)}
-                        fullWidth
-                    />
-                    <Button
-                        type={ButtonType.Primary}
-                        text="Unset avatar"
-                        onClick={handleUnset}
-                        disabled={disableUnset}
-                        fullWidth
-                        icon={
-                            isLoading ? (
-                                <Loader className="animate-spin" data-testid="loading-indicator" />
-                            ) : null
-                        }
-                    />
-                    <Button
-                        type={ButtonType.Primary}
-                        text="Save"
-                        onClick={handleSave}
-                        disabled={disableSave}
-                        fullWidth
-                        icon={
-                            isLoading ? (
-                                <Loader className="animate-spin" data-testid="loading-indicator" />
-                            ) : null
-                        }
-                    />
+                <div className="flex flex-col gap-y-md gap-2 p-md--rs">
+                    {updateNameError ? (
+                        <InfoBox
+                            type={InfoBoxType.Error}
+                            style={InfoBoxStyle.Elevated}
+                            icon={<Warning />}
+                            title="Error"
+                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                        />
+                    ) : null}
+                    <div className="flex w-full flex-row gap-x-xs">
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Cancel"
+                            onClick={() => setOpen(false)}
+                            fullWidth
+                        />
+                        <Button
+                            type={ButtonType.Primary}
+                            text="Unset avatar"
+                            onClick={handleUnset}
+                            disabled={disableUnset}
+                            fullWidth
+                            icon={
+                                isLoading ? (
+                                    <Loader
+                                        className="animate-spin"
+                                        data-testid="loading-indicator"
+                                    />
+                                ) : null
+                            }
+                        />
+                        <Button
+                            type={ButtonType.Primary}
+                            text="Save"
+                            onClick={handleSave}
+                            disabled={disableSave}
+                            fullWidth
+                            icon={
+                                isLoading ? (
+                                    <Loader
+                                        className="animate-spin"
+                                        data-testid="loading-indicator"
+                                    />
+                                ) : null
+                            }
+                        />
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>
