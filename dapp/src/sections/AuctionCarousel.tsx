@@ -118,7 +118,7 @@ export function AuctionCarousel() {
                             modules={[Autoplay]}
                         >
                             {auctionsToRender.map((auction) => (
-                                <SwiperSlide key={auction.key}>
+                                <SwiperSlide key={auction.key} className="pb-xs">
                                     <div className="flex justify-center">
                                         <div className="w-[220px]">
                                             <AuctionPublicItem
