@@ -17,7 +17,12 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
         url: network.graphql!,
     });
 
-    const sender = normalizeIotaAddress('0x2');
+    let sender;
+    if (network_id === 'testnet') {
+        sender = '0x22f44da30397466b5f5ed2bb1af73bf23dcd7248093875e4ca6771848b173f20';
+    } else {
+        sender = normalizeIotaAddress('0x2');
+    }
     const iotaNamesClient = new IotaNamesClient({
         graphQlClient,
         network: network.id,
