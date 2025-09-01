@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Info } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -176,6 +176,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     function closeDialog() {
         setOpen(false);
     }
+
     const handleCancelAddSubname = () => {
         setEditSubname('');
         closeDialog();
@@ -192,7 +193,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const isLoading = isSaving || isLoadingUpdateNameTransaction || isSendingTransaction;
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
-    const disableSave = updates.length === 0 || isLoading || isExpired || !editSubname;
+    const disableSave =
+        updates.length === 0 || isLoading || isExpired || !editSubname || !updateNameTransaction;
 
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
@@ -225,11 +227,9 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 errorMessage={
                                     !isSubnameAvailable && fullSubnameName
                                         ? 'Subname is not available'
-                                        : updateNameError
-                                          ? getUserFriendlyErrorMessage(updateNameError)
-                                          : subnameError
-                                            ? subnameError
-                                            : undefined
+                                        : subnameError
+                                          ? subnameError
+                                          : undefined
                                 }
                             />
                             <div className="flex flex-col gap-y-md w-full">
@@ -251,20 +251,31 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 />
                             </div>
                         </div>
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={handleCancelAddSubname}
-                                fullWidth
-                            />
-                            <Button
-                                icon={isLoading ? <LoadingIndicator /> : null}
-                                text="Create"
-                                disabled={disableSave}
-                                onClick={() => save()}
-                                fullWidth
-                            />
+                        <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
+                                <Button
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
+                                    onClick={handleCancelAddSubname}
+                                    fullWidth
+                                />
+                                <Button
+                                    icon={isLoading ? <LoadingIndicator /> : null}
+                                    text="Create"
+                                    disabled={disableSave}
+                                    onClick={() => save()}
+                                    fullWidth
+                                />
+                            </div>
                         </div>
                     </div>
                 </DialogBody>

@@ -66,7 +66,7 @@ export function PanelTile({
                                         {title}
                                     </div>
 
-                                    {icon && <span className="ml-2">{icon}</span>}
+                                    {icon && <span className="ml-2 flex">{icon}</span>}
                                 </div>
 
                                 {subtitle && (
