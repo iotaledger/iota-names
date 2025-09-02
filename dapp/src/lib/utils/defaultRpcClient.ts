@@ -17,7 +17,7 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
     // If network is not supported, we use assume we are using a custom RPC
     const networkGraphqlUrl = supportedNetwork?.graphql ?? network;
     const networkJsonRpcUrl = supportedNetwork?.url;
-
+    // console.log(RPC_METHODS);
     const client = new IotaClient({
         transport: new IotaClientGraphQLTransport({
             url: networkGraphqlUrl,
@@ -27,6 +27,7 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
                 'getReferenceGasPrice',
                 'getNormalizedMoveFunction',
                 'getOwnedObjects',
+                'dryRunTransactionBlock',
             ],
         }),
     });
