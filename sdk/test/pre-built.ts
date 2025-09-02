@@ -17,7 +17,14 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
         url: network.graphql!,
     });
 
-    const sender = normalizeIotaAddress('0x2');
+    let sender;
+    if (network.id === Network.Testnet) {
+        sender = normalizeIotaAddress(
+            '0x32bc9471570ca24fcd1fe5b201ea6894748aa0ddd44d20c68f1a4f99db513aa2',
+        );
+    } else {
+        sender = normalizeIotaAddress('0x2');
+    }
     const iotaNamesClient = new IotaNamesClient({
         graphQlClient,
         network: network.id,
@@ -28,17 +35,37 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
 
     // Expected lists
-    const expectedPriceList = new Map([
-        [[3, 3], 500000000],
-        [[4, 4], 100000000],
-        [[5, 63], 10000000],
-    ]);
+    let expectedPriceList;
+    // TODO: Mainnet
+    if (network.id === Network.Testnet) {
+        expectedPriceList = new Map([
+            [[3, 3], 500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else {
+        expectedPriceList = new Map([
+            [[3, 3], 500000000],
+            [[4, 4], 100000000],
+            [[5, 63], 10000000],
+        ]);
+    }
 
-    const expectedRenewalPriceList = new Map([
-        [[3, 3], 150000000],
-        [[4, 4], 50000000],
-        [[5, 63], 5000000],
-    ]);
+    let expectedRenewalPriceList;
+    // TODO: Mainnet
+    if (network.id === Network.Testnet) {
+        expectedRenewalPriceList = new Map([
+            [[3, 3], 500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else {
+        expectedRenewalPriceList = new Map([
+            [[3, 3], 150000000],
+            [[4, 4], 50000000],
+            [[5, 63], 5000000],
+        ]);
+    }
 
     expect(priceList).toEqual(expectedPriceList);
     expect(renewalPriceList).toEqual(expectedRenewalPriceList);
@@ -50,13 +77,18 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     const uniqueName =
         (Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
 
+    let gas;
+    if (network.id === Network.Testnet) {
+        gas = 250n;
+    } else {
+        gas = 6n;
+    }
     const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-        6n * NANOS_PER_IOTA,
+        gas * NANOS_PER_IOTA,
     ]);
     // register random name like mclsl9pbdg8324x154cmclsl9pbdg8324x154c.iota for 2 years.
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        years: 2,
         coinConfig: iotaNamesClient.config.coins.IOTA,
         coin: coinInput,
     });
@@ -151,9 +183,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     } else if (network.id === Network.Testnet) {
         tx.setGasPayment([
             {
-                objectId: '0xeb709b97ca3e87e385d019ccb7da4a9bd99f9405f9b0d692f21c9d2e5714f27a',
-                version: '169261602',
-                digest: 'HJehhEV1N8rqjjHbwDgjeCZJkHPRavMmihTvyTJme2rA',
+                objectId: '0x0fc64833fa4961d74f6641cb55b85ee3a85785ff819ba6072a26c3a88285c42e',
+                version: '190872930',
+                digest: '63H9Lnv6U6m5mCW1qsDpFGH8BgQcJdskPxpvKeYSpKyd',
             },
         ]);
     } else if (network.id === Network.Devnet) {
