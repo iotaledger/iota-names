@@ -13,9 +13,9 @@ import { PackageInfo } from '../src/types';
 import { getClient, getGraphQLClient, setupIotaClient, TestToolbox } from './toolbox';
 
 const LOCALNET_PRICING = {
-    THREE_LETTER: { registration: 0.5, renewal: 0.15 },
-    FOUR_LETTER: { registration: 0.1, renewal: 0.05 },
-    FIVE_PLUS_LETTER: { registration: 0.01, renewal: 0.005 },
+    THREE_LETTER: { registration: 500, renewal: 500 },
+    FOUR_LETTER: { registration: 250, renewal: 250 },
+    FIVE_PLUS_LETTER: { registration: 50, renewal: 50 },
 } as const;
 
 /**
@@ -55,18 +55,18 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
 
     // Expected lists for localnet - these match the configuration in scripts/init/packages.ts
-    // From packages.ts lines 104-108: [0.5, 0.1, 0.01] * NANOS_PER_IOTA
+    // From packages.ts lines 104-108: [500, 250, 50] * NANOS_PER_IOTA
     const expectedPriceList = new Map([
-        [[3, 3], 0.5 * Number(NANOS_PER_IOTA)], // 500000000 nanos (0.5 IOTA)
-        [[4, 4], 0.1 * Number(NANOS_PER_IOTA)], // 100000000 nanos (0.1 IOTA)
-        [[5, 63], 0.01 * Number(NANOS_PER_IOTA)], // 10000000 nanos (0.01 IOTA)
+        [[3, 3], 500 * Number(NANOS_PER_IOTA)], // 500000000000 nanos (500 IOTA)
+        [[4, 4], 250 * Number(NANOS_PER_IOTA)], // 250000000000 nanos (250 IOTA)
+        [[5, 63], 50 * Number(NANOS_PER_IOTA)], // 50000000000 nanos (50 IOTA)
     ]);
 
-    // From packages.ts lines 126-130: [0.15, 0.05, 0.005] * NANOS_PER_IOTA
+    // From packages.ts lines 126-130: [500, 250, 50] * NANOS_PER_IOTA
     const expectedRenewalPriceList = new Map([
-        [[3, 3], 0.15 * Number(NANOS_PER_IOTA)], // 150000000 nanos (0.15 IOTA)
-        [[4, 4], 0.05 * Number(NANOS_PER_IOTA)], // 50000000 nanos (0.05 IOTA)
-        [[5, 63], 0.005 * Number(NANOS_PER_IOTA)], // 5000000 nanos (0.005 IOTA)
+        [[3, 3], 500 * Number(NANOS_PER_IOTA)], // 500000000000 nanos (500 IOTA)
+        [[4, 4], 250 * Number(NANOS_PER_IOTA)], // 250000000000 nanos (250 IOTA)
+        [[5, 63], 50 * Number(NANOS_PER_IOTA)], // 50000000000 nanos (50 IOTA)
     ]);
 
     expect(priceList).toEqual(expectedPriceList);
@@ -80,7 +80,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
 
     // Split coins for registration payment
     const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-        10n * NANOS_PER_IOTA,
+        500n * NANOS_PER_IOTA,
     ]);
 
     // Register a name for 2 years
@@ -280,7 +280,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const uniqueName = `test-${Date.now()}.iota`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const nft = await iotaNamesTx.register({
@@ -315,7 +315,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const uniqueName = `meta-${Date.now()}.iota`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const nft = await iotaNamesTx.register({
@@ -367,7 +367,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const parentNft = await iotaNamesTx.register({
@@ -411,7 +411,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const leafName = `leaf.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const parentNft = await iotaNamesTx.register({
@@ -452,7 +452,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const parentNft = await iotaNamesTx.register({
@@ -495,7 +495,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const subname = `sub.${parentName}`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const parentNft = await iotaNamesTx.register({
@@ -541,7 +541,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const rootName = `root-${Date.now()}.iota`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             // Register the root name
@@ -595,7 +595,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const uniqueName = `empty-meta-${Date.now()}.iota`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                10n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const nft = await iotaNamesTx.register({
@@ -630,7 +630,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const uniqueName = `max-years-${Date.now()}.iota`;
 
             const [coinInput] = iotaNamesTx.transaction.splitCoins(iotaNamesTx.transaction.gas, [
-                50n * NANOS_PER_IOTA,
+                500n * NANOS_PER_IOTA,
             ]);
 
             const nft = await iotaNamesTx.register({
