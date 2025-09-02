@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import fs from 'fs';
+import { bcs } from '@iota/iota-sdk/bcs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_CLOCK_OBJECT_ID, isValidIotaAddress } from '@iota/iota-sdk/utils';
 
@@ -43,17 +44,21 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
 
 export const registerNames = (
     txb: Transaction,
-    names: string[],
+    batch: Record<string, string>,
     iotaNamesPackageId: string,
     adminCap: string,
     iotaNamesObjectId: string,
 ) => {
-    return txb.moveCall({
+    var names = Object.keys(batch);
+    var recipients = names.map((name) => batch[name]);
+
+    txb.moveCall({
         target: `${iotaNamesPackageId}::admin::register_names`,
         arguments: [
             txb.object(adminCap),
             txb.object(iotaNamesObjectId),
             txb.pure.vector('string', names),
+            txb.pure(bcs.vector(bcs.Address).serialize(recipients)),
             txb.pure.u8(YEARS_TO_RESERVE),
             txb.object(IOTA_CLOCK_OBJECT_ID),
         ],
@@ -73,34 +78,37 @@ export async function processNamesFileBatched(
     },
     network: string,
     client: any,
+    adminAddress: string,
 ) {
     const nameAddressPairs = parseCsvFile(filePath);
-    const allNames = Object.keys(nameAddressPairs);
-    let batch: string[] = [];
+    console.log(nameAddressPairs);
+    let batch: Record<string, string> = {};
     let batchLen = 0;
-    for (const name of allNames) {
-        const nameLen = name.length + (batch.length > 0 ? 1 : 0);
-        if (batchLen + nameLen > PURE_ARG_SIZE_LIMIT) {
+    for (const [name, address] of Object.entries(nameAddressPairs)) {
+        var recipient = address || adminAddress;
+        const nameLen = name.length + (Object.keys(batch).length > 0 ? 1 : 0);
+        const recipientLen = recipient.length + (Object.keys(batch).length > 0 ? 1 : 0);
+        if (batchLen + nameLen + recipientLen > PURE_ARG_SIZE_LIMIT) {
             await sendNamesBatchTransaction(batch, packageInfo, network, client);
-            batch = [];
+            batch = {};
             batchLen = 0;
         }
-        batch.push(name);
+        batch[name] = recipient;
         batchLen += nameLen;
     }
-    if (batch.length > 0) {
+    if (Object.keys(batch).length > 0) {
         await sendNamesBatchTransaction(batch, packageInfo, network, client);
     }
 }
 
 async function sendNamesBatchTransaction(
-    batch: string[],
+    batch: Record<string, string>,
     packageInfo: { packageId: string; adminCap: string; iotaNamesObjectId: string },
     network: string,
     client: any,
 ) {
     const tx = new Transaction();
-    console.log(`Registering ${batch.length} names`);
+    console.log(`Registering ${Object.keys(batch).length} names`);
     registerNames(
         tx,
         batch,
