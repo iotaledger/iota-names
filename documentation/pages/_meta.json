@@ -5,7 +5,7 @@
     "dashboard": {
         "title": "IOTA-Names Dashboard ↗",
         "type": "page",
-        "href": "https://iota-names.io/",
+        "href": "https://testnet.iotanames.com/",
         "newWindow": true
     }
 }
