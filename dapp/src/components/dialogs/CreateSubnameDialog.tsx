@@ -213,7 +213,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     supportingText={
                                         <div className="break-words max-w-full">
                                             Create as many Subnames as you want under {cleanName},
-                                            each with its own profile page and features
+                                            each with its own features
                                         </div>
                                     }
                                 />
