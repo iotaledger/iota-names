@@ -196,7 +196,7 @@ public fun add_leaf_record(
 
     // Make sure that the parent isn't expired (because leaf record is invalid
     // in that case).
-    // Ignores grace period is it's only there so you don't accidentally forget to
+    // Ignores grace period as it's only there so you don't accidentally forget to
     // renew your name.
     assert!(!parent_name_record.has_expired(clock), ERecordExpired);
 
