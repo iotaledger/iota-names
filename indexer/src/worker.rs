@@ -25,7 +25,6 @@ use iota_types::{
     execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
     object::Object,
-    transaction::{ProgrammableTransaction, TransactionData, TransactionKind},
 };
 use move_core_types::{
     annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
@@ -277,23 +276,6 @@ impl IotaNamesWorker {
         Ok(())
     }
 
-    fn process_ptb(&self, _ptb: &ProgrammableTransaction) -> anyhow::Result<()> {
-        let _module = Identifier::new("payment")?; // TODO: Make const
-        let _function = Identifier::new("register")?;
-
-        // if ptb.commands.iter().any(|cmd| {
-        //     if let Command::MoveCall(call) = cmd {
-        //         call.package == ObjectID::from(self.config.package_address)
-        //             && call.module == module
-        //             && call.function == function
-        //     } else {
-        //         false
-        //     }
-        // }) {}
-
-        Ok(())
-    }
-
     async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
         debug!(
             "Processing checkpoint: {}",
@@ -334,12 +316,6 @@ impl IotaNamesWorker {
                         _ => {}
                     }
                 }
-            }
-
-            let TransactionData::V1(data) = &transaction.transaction.intent_message().value;
-
-            if let TransactionKind::ProgrammableTransaction(ptb) = &data.kind {
-                self.process_ptb(ptb)?;
             }
         }
 
