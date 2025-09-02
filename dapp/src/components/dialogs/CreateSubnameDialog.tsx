@@ -212,8 +212,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     icon={<Info />}
                                     supportingText={
                                         <div className="break-words max-w-full">
-                                            Create as many Subnames as you want under {cleanName},
-                                            each with its own features
+                                            Create as many Subnames as you want under {cleanName}
                                         </div>
                                     }
                                 />
