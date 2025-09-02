@@ -49,7 +49,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
         | undefined;
     const targetAddress = nameRecord?.nameRecord.targetAddress;
     const isNameSubname = isSubname(name);
-    const { id, expirationTimestampMs } =
+    const { id, expirationDate } =
         (isNameSubname
             ? subnames?.find((n) => n.name === name)
             : { id: nameRecord?.nameRecord.nftId, ...nameRecord?.nameRecord }) ?? {};
@@ -119,7 +119,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                             <div className="pb-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
-                                    value={formatDate(expirationTimestampMs)}
+                                    value={formatDate(expirationDate?.getTime())}
                                     fullwidth
                                 />
                             </div>

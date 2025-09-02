@@ -53,8 +53,8 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
                     projectUrl: data?.project_url,
                     isExpired:
                         !!fields?.expiration_timestamp_ms &&
-                        Number(fields?.expiration_timestamp_ms) < Date.now(),
-                    expirationTimestampMs: Number(fields?.expiration_timestamp_ms ?? ''),
+                        new Date(Number(fields?.expiration_timestamp_ms)).getTime() < Date.now(),
+                    expirationDate: new Date(Number(fields?.expiration_timestamp_ms) || 0),
                     id: nameRecord.objectId,
                     isSubname: type === 'subname',
                 } satisfies RegistrationNft;

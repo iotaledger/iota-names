@@ -93,13 +93,12 @@ function createRenewUpdates({
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
             // Only allow extending the expiration time if its less than its parent
-            const expiresBeforeParent =
-                nameRecord.expirationTimestampMs < parentObject?.expirationTimestampMs;
+            const expiresBeforeParent = nameRecord.expirationDate < parentObject?.expirationDate;
             if (expiresBeforeParent) {
                 updates.push({
                     type: 'renew-subname',
                     nftId: objectId,
-                    expirationTimestampMs: parentObject.expirationTimestampMs,
+                    expirationDate: parentObject.expirationDate,
                 });
             }
         }
@@ -125,7 +124,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
-
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     const [renewYears, setRenewYears] = useState<number | undefined>();
@@ -215,10 +213,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
     const renewableYears =
         coreConfig && nameRecord
-            ? getNameRenewableYears(
-                  coreConfig.max_years,
-                  nameRecord.nameRecord.expirationTimestampMs,
-              )
+            ? getNameRenewableYears(coreConfig.max_years, nameRecord.nameRecord.expirationDate)
             : 0;
     const isRenewable = (renewableYears ?? 0) > 0;
 
@@ -260,19 +255,18 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                     ownedNames,
                     ownedSubnames,
                     nameRecord.nameRecord.name,
-                )?.expirationTimestampMs;
+                )?.expirationDate;
                 if (expirationTime) {
-                    return new Date(expirationTime);
+                    return expirationTime;
                 }
             } else if (!isNameSubname && renewYears) {
-                const expirationDate = new Date(nameRecord.nameRecord.expirationTimestampMs);
+                const expirationDate = new Date(nameRecord.nameRecord.expirationDate);
                 expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
                 return expirationDate;
             }
         }
     })();
     const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
-
     const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;

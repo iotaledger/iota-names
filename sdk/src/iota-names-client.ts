@@ -307,7 +307,7 @@ export class IotaNamesClient {
             name,
             nftId: nameRecord?.nft_id,
             targetAddress: nameRecord?.target_address!,
-            expirationTimestampMs: Number(nameRecord?.expiration_timestamp_ms),
+            expirationDate: new Date(Number(nameRecord?.expiration_timestamp_ms)),
             data,
             avatar: data[ALLOWED_METADATA.avatar],
         };

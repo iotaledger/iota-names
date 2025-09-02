@@ -45,7 +45,7 @@ export interface NameRecord {
     name: string;
     nftId: string;
     targetAddress: string;
-    expirationTimestampMs: number;
+    expirationDate: Date;
     data: Record<string, string>;
     avatar?: string;
 }

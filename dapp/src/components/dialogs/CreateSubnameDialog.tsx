@@ -82,12 +82,12 @@ function createSubnameUpdates({
     }
     const updates: NameUpdate[] = [];
 
-    if (nftId && fullSubnameName && isSubnameAvailable) {
+    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationTimeParent: nameRecord?.expirationTimestampMs || 0,
+            expirationTimeParent: nameRecord.expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });
@@ -128,8 +128,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
         name,
         nameRecord: nameRecord?.nameRecord,
-        newSubname: editSubname,
         ownedSubnames,
+        newSubname: editSubname,
         allowTimeExtension: editIsAllowingRenew,
         allowChildCreation: editIsAllowSubnames,
     });
