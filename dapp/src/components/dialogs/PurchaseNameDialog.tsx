@@ -135,6 +135,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.removeQueries({
                 queryKey: queryKey.nameRecord(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.defaultName(account?.address || ''),
+            });
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
             );
