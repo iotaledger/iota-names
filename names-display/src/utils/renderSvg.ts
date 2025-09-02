@@ -21,7 +21,7 @@ const DEBUG_DISPLAY = process.env.DEBUG_DISPLAY === 'true';
 
 export const Params = z.object({
     name: z.string(),
-    timestamp: z.coerce.date(),
+    timestamp: z.coerce.number(),
 });
 
 type RenderSvgParameters = z.infer<typeof Params> & {
