@@ -81,7 +81,6 @@ export async function processNamesFileBatched(
     adminAddress: string,
 ) {
     const nameAddressPairs = parseCsvFile(filePath);
-    console.log(nameAddressPairs);
     let batch: Record<string, string> = {};
     let batchLen = 0;
     for (const [name, address] of Object.entries(nameAddressPairs)) {
