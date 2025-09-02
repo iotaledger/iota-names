@@ -124,6 +124,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
+
     const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : null;
 
     const [renewYears, setRenewYears] = useState<number | undefined>();

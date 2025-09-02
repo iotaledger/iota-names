@@ -128,8 +128,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
         name,
         nameRecord: nameRecord?.nameRecord,
-        ownedSubnames,
         newSubname: editSubname,
+        ownedSubnames,
         allowTimeExtension: editIsAllowingRenew,
         allowChildCreation: editIsAllowSubnames,
     });
