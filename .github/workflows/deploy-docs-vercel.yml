@@ -15,6 +15,7 @@ on:
 env:
   DOCS_DIR: documentation
   VERCEL_ENVIRONMENT: ${{ github.event.inputs.environment || 'preview' }}
+  VERCEL_TELEMETRY_DISABLED: "1"
 
 jobs:
   vercel-deploy:
@@ -39,16 +40,15 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      - name: Vercel pull
+      - name: Link Vercel project
         run: |
-          pnpm dlx vercel@latest pull --yes \
-            --environment=${{ env.VERCEL_ENVIRONMENT }} \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --cwd "${DOCS_DIR}"
+          mkdir -p "$DOCS_DIR/.vercel"
+          cat > "$DOCS_DIR/.vercel/project.json" <<EOF
+          { "orgId": "${VERCEL_ORG_ID}", "projectId": "${IOTA_NAMES_DOCS_VERCEL_PROJECT_ID}" }
+          EOF
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
+          IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
       - name: Deploy (cloud build on Vercel)
         run: |
@@ -61,5 +61,3 @@ jobs:
               --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
