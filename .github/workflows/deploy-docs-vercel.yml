@@ -50,15 +50,21 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Deploy (cloud build on Vercel)
+      - name: Build locally to .vercel/output
+        run: |
+          pnpm dlx vercel@latest build \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
+
+      - name: Deploy prebuilt
         run: |
           if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
-            pnpm dlx vercel@latest deploy --prod \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
+            pnpm dlx vercel@latest deploy --prebuilt --prod \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           else
-            pnpm dlx vercel@latest deploy \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
+            pnpm dlx vercel@latest deploy --prebuilt \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
         env:
