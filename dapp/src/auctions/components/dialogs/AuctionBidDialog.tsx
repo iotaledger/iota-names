@@ -92,9 +92,16 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 transaction: auctionBidTransaction,
             });
 
-            await iotaClient.waitForTransaction({
+            const response = await iotaClient.waitForTransaction({
                 digest: transactionResult.digest,
+                options: {
+                    showEffects: true,
+                },
             });
+
+            if (response?.effects?.status.status !== 'success') {
+                throw new Error('Transaction failed');
+            }
         },
         onSuccess() {
             queryClient.invalidateQueries({
