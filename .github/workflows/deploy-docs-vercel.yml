@@ -1,25 +1,43 @@
-name: Deploy IOTA-Names Docs to Vercel
+name: Docs Deploy to Vercel
 
 on:
-  push:
-    branches: [develop, devx/deploy-docs-vercel]
-    paths:
-      - "documentation/**"
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      environment:
-        description: "vercel environment: preview or production"
+      VERCEL_ENVIRONMENT:
+        type: string
         required: true
-        default: "preview"
+        description: "Vercel env to deploy to: 'production' or 'preview'."
+      DOCS_DIR:
+        type: string
+        required: true
+        default: "documentation"
+        description: "Path to the docs app root."
+      PREBUILT:
+        type: boolean
+        required: false
+        default: false
+        description: "If true, run 'vercel build' and deploy --prebuilt. Otherwise use remote build."
+    secrets:
+      VERCEL_TOKEN:
+        required: true
+      VERCEL_ORG_ID:
+        required: true
+      VERCEL_PROJECT_ID:
+        required: true
+      VERCEL_SCOPE:
+        required: true
+      VERCEL_ALIAS:
+        required: false
 
 env:
-  DOCS_DIR: documentation
-  VERCEL_ENVIRONMENT: ${{ github.event.inputs.environment || 'preview' }}
-  VERCEL_TELEMETRY_DISABLED: "1"
+  VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
+  DOCS_DIR: ${{ inputs.DOCS_DIR }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
 concurrency:
-  group: docs-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ env.VERCEL_ENVIRONMENT != 'production' }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ inputs.DOCS_DIR }}
+  cancel-in-progress: ${{ inputs.VERCEL_ENVIRONMENT != 'production' }}
 
 jobs:
   vercel-deploy:
@@ -27,45 +45,88 @@ jobs:
     permissions:
       contents: read
       deployments: write
+      pull-requests: write
+      issues: write
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4 pinned
         with:
-          node-version: 20
-          cache: pnpm
-          cache-dependency-path: documentation/pnpm-lock.yaml
+          version: 9
 
-      - name: Enable corepack
-        run: corepack enable
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@latest
 
+      # Link project & pull env into ${DOCS_DIR}/.vercel/project.json
+      - name: Pull Vercel Environment Information
+        run: vercel pull \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --yes \
+               --environment="${{ inputs.VERCEL_ENVIRONMENT }}" \
+               --cwd "${DOCS_DIR}"
+
+      # Optional: install deps for lockfile consistency (harmless for remote builds)
       - name: Install deps (docs)
-        working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
-
-
-      - name: Vercel pull (docs project)
         working-directory: ${{ env.DOCS_DIR }}
-        run: npx --yes vercel@latest pull --yes \
-              --environment="${{ env.VERCEL_ENVIRONMENT }}" \
-              --token="${{ secrets.VERCEL_TOKEN }}"
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Deploy (remote build)
+      # --------- PREBUILT path (generates .vercel/output/*) ----------
+      - name: Build (prebuilt, preview)
+        if: ${{ inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'preview' }}
+        run: vercel build \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --target=preview \
+               --cwd "${DOCS_DIR}"
+
+      - name: Build (prebuilt, production)
+        if: ${{ inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'production' }}
+        run: vercel build \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --target=production \
+               --cwd "${DOCS_DIR}"
+
+      # --------- DEPLOY ----------
+      # Remote build (default): avoids routes-manifest checks locally
+      - name: Deploy (remote build, preview)
+        if: ${{ !inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'preview' }}
+        run: vercel deploy \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --scope="${{ secrets.VERCEL_SCOPE }}" \
+               --confirm \
+               --cwd "${DOCS_DIR}"
+      - name: Deploy (remote build, production)
+        if: ${{ !inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'production' }}
+        run: vercel deploy \
+               --prod \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --scope="${{ secrets.VERCEL_SCOPE }}" \
+               --confirm \
+               --cwd "${DOCS_DIR}"
+
+      # Prebuilt deploy (uses .vercel/output from the build steps)
+      - name: Deploy (prebuilt, preview)
+        if: ${{ inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'preview' }}
+        run: vercel deploy \
+               --prebuilt \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --scope="${{ secrets.VERCEL_SCOPE }}" \
+               --confirm \
+               --cwd "${DOCS_DIR}"
+
+      - name: Deploy (prebuilt, production)
+        if: ${{ inputs.PREBUILT && inputs.VERCEL_ENVIRONMENT == 'production' }}
+        run: vercel deploy \
+               --prebuilt \
+               --prod \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --scope="${{ secrets.VERCEL_SCOPE }}" \
+               --confirm \
+               --cwd "${DOCS_DIR}"
+
+      # Optional aliasing for production or preview
+      - name: Alias (optional)
+        if: ${{ secrets.VERCEL_ALIAS != '' }}
+        run: vercel alias set ${{ secrets.VERCEL_ALIAS }} \
+               --token="${{ secrets.VERCEL_TOKEN }}" \
+               --scope="${{ secrets.VERCEL_SCOPE }}"
         working-directory: ${{ env.DOCS_DIR }}
-        run: |
-          if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
-            npx --yes vercel@latest deploy --prod \
-              --token="${{ secrets.VERCEL_TOKEN }}" \
-              --scope="${{ secrets.VERCEL_SCOPE }}"
-          else
-            npx --yes vercel@latest deploy \
-              --token="${{ secrets.VERCEL_TOKEN }}" \
-              --scope="${{ secrets.VERCEL_SCOPE }}"
-          fi
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
