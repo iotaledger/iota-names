@@ -263,6 +263,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             <Panel bgColor="bg-names-neutral-10">
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
+                                        name="set_display_name"
                                         isChecked={isDisplayName}
                                         onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
                                         label="Set name as Display Name"

@@ -236,6 +236,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     Permissions
                                 </span>
                                 <Checkbox
+                                    name="allow_subnames"
                                     isChecked={editIsAllowSubnames}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowSubnameChange}
@@ -243,6 +244,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 />
 
                                 <Checkbox
+                                    name="allow_renew"
                                     isChecked={editIsAllowingRenew}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowRenewChange}
