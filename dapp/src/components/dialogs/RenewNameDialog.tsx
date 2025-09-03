@@ -271,17 +271,22 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             }
         }
     })();
+
+    const renewalTime =
+        expirationDate && nameRecord && nameRecord.nameRecord
+            ? expirationDate.getTime() -
+              new Date(nameRecord.nameRecord.expirationTimestampMs).getTime()
+            : 0;
+
+    const isBelowMinimumRenewalPeriod =
+        renewalTime >= 0 && config?.subnamesConfig
+            ? renewalTime < config.subnamesConfig.minimum_duration
+            : false;
+
     const currentExpirationDate = nameRecord?.nameRecord
         ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
         : null;
     const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
-    const renewalTime =
-        expirationDate && nameRecord
-            ? expirationDate?.getTime() -
-              new Date(nameRecord.nameRecord.expirationTimestampMs).getTime()
-            : 0;
-    const isBelowMinimumRenewalPeriod =
-        renewalTime && config ? renewalTime < config?.subnamesConfig?.minimum_duration : false;
 
     const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
@@ -327,22 +332,19 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            {isNameSubname && isBelowMinimumRenewalPeriod && renewalTime > 0 && (
-                                <InfoBox
+                            {isNameSubname && isBelowMinimumRenewalPeriod && (
+                                /* renewalTime > 0 && */ <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
-                                    title="Your renewal intention is below the minimum renewal period"
+                                    title="Your renewal period is below the minimum"
                                     style={InfoBoxStyle.Default}
                                     supportingText={`You need to renew for a longer period. The minimum renewal period is ${
-                                        config?.subnamesConfig?.minimum_duration
-                                            ? Math.round(
-                                                  config.subnamesConfig.minimum_duration /
-                                                      (1000 * 60 * 60),
-                                              )
-                                            : 24
+                                        (config?.subnamesConfig?.minimum_duration ?? 0) /
+                                        (1000 * 60 * 60)
                                     } hours.`}
                                 />
                             )}
+
                             {!isNameSubname && (
                                 <div className="flex flex-col">
                                     <div className="self-end">

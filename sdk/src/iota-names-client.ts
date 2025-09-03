@@ -108,7 +108,7 @@ export class IotaNamesClient {
         if (!this.config.subnamesPackageId)
             throw new Error('IotaNames subnames package ID is not set');
 
-        const coreConfigBcsB64 = toB64(
+        const subnamesConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -135,7 +135,7 @@ export class IotaNamesClient {
                         this.config.packageId,
                         getSubnamesConfigType(this.config.subnamesPackageId),
                     ),
-                    bcs: coreConfigBcsB64,
+                    bcs: subnamesConfigBcsB64,
                 },
             },
         });
