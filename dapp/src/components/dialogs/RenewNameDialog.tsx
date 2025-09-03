@@ -332,15 +332,14 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            {isNameSubname && isBelowMinimumRenewalPeriod && (
-                                /* renewalTime > 0 && */ <InfoBox
+                            {isNameSubname && isBelowMinimumRenewalPeriod && config && (
+                                <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
                                     title="Your renewal period is below the minimum"
                                     style={InfoBoxStyle.Default}
                                     supportingText={`You need to renew for a longer period. The minimum renewal period is ${
-                                        (config?.subnamesConfig?.minimum_duration ?? 0) /
-                                        (1000 * 60 * 60)
+                                        config.subnamesConfig.minimum_duration / (1000 * 60 * 60)
                                     } hours.`}
                                 />
                             )}
