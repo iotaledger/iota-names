@@ -14,10 +14,12 @@ on:
 
 env:
   DOCS_DIR: documentation
-  VERCEL_ENV: ${{ github.event.inputs.environment || 'preview' }}
+  VERCEL_ENVIRONMENT: ${{ github.event.inputs.environment || 'preview' }}
+  VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
 jobs:
-  deploy:
+  vercel-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +32,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable corepack (use pnpm from packageManager)
+      - name: Enable corepack
         run: |
           corepack enable
           pnpm --version
@@ -39,27 +41,27 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      - name: Vercel pull (link project & env)
+      - name: Pull Vercel env (project linkage)
         run: |
           pnpm dlx vercel@latest pull --yes \
-            --environment=${{ env.VERCEL_ENV == 'production' && 'production' || 'preview' }} \
-            --token "$VERCEL_TOKEN" \
-            --cwd "$DOCS_DIR"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
+            --environment=${{ env.VERCEL_ENVIRONMENT }} \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
 
-      - name: Deploy (cloud build on Vercel)
+      - name: Build (prebuild locally)
         run: |
-          if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
-            pnpm dlx vercel@latest deploy --prod \
-              --token "$VERCEL_TOKEN" \
-              --cwd "$DOCS_DIR"
+          pnpm dlx vercel@latest build \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
+
+      - name: Deploy prebuilt
+        run: |
+          if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
+            pnpm dlx vercel@latest deploy --prebuilt --prod \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
+              --cwd "${DOCS_DIR}"
           else
-            pnpm dlx vercel@latest deploy \
-              --token "$VERCEL_TOKEN" \
-              --cwd "$DOCS_DIR"
+            pnpm dlx vercel@latest deploy --prebuilt \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
+              --cwd "${DOCS_DIR}"
           fi
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
