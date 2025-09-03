@@ -1,5 +1,4 @@
 {
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "outputDirectory": ".vercel/output"
+  "buildCommand": "pnpm build"
 }
