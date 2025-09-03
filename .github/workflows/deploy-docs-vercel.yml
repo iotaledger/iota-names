@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install PNPM first so setup-node's pnpm cache can find it
+      # Install PNPM first so setup-node pnpm cache can find it
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -78,7 +78,7 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      # Remote build deploy (keeps you away from routes-manifest issues)
+      # --- Remote build deploy (no local .vercel/output needed) ---
       - name: Deploy (preview)
         if: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
         working-directory: ${{ env.DOCS_DIR }}
@@ -95,8 +95,22 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      # Optional aliasing
+      # --- Safe alias gating (avoid secrets.* in if:) ---
+      - name: Check alias presence
+        id: alias_check
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.VERCEL_ALIAS }}" ]; then
+            echo "has_alias=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_alias=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Alias
-        if: ${{ secrets.VERCEL_ALIAS != '' }}
+        if: ${{ steps.alias_check.outputs.has_alias == 'true' }}
         working-directory: ${{ env.DOCS_DIR }}
-        run: npx --yes vercel@latest alias set "${{ secrets.VERCEL_ALIAS }}" --token="${{ secrets.VERCEL_TOKEN }}" --scope="${{ secrets.VERCEL_SCOPE }}"
+        env:
+          VERCEL_ALIAS: ${{ secrets.VERCEL_ALIAS }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+        run: npx --yes vercel@latest alias set "$VERCEL_ALIAS" --token="$VERCEL_TOKEN" --scope="$VERCEL_SCOPE"
