@@ -1,14 +1,11 @@
 {
     "index": "IOTA-Names Documentation",
-    "dao": "IOTA-Names DAO",
     "developer": "Developer",
     "user": "User",
-    "node-operator": "Node Operator",
-    "move-registry": "Move Registry (Experimental)",
-    "dashboard": {
-        "title": "IOTA-Names Dashboard ↗",
+    "dapp": {
+        "title": "IOTA-Names Dapp ↗",
         "type": "page",
-        "href": "https://iota-names.io/",
+        "href": "https://testnet.iotanames.com/",
         "newWindow": true
     }
 }
