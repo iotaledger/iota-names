@@ -39,38 +39,40 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
+      # Link project & fetch env/config into .vercel/ using ENV VARS
+      - name: Vercel pull
+        run: |
+          pnpm dlx vercel@latest pull --yes \
+            --environment=${{ env.VERCEL_ENV == 'production' && 'production' || 'preview' }} \
+            --token "$VERCEL_TOKEN" \
+            --cwd "$DOCS_DIR"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
+
       - name: Build (Vercel)
         run: |
           pnpm dlx vercel@latest build \
-            --cwd "$DOCS_DIR" \
-            --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
-            --scope "$VERCEL_SCOPE" \
-            --token "$VERCEL_TOKEN"
+            --token "$VERCEL_TOKEN" \
+            --cwd "$DOCS_DIR"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
-          IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
       - name: Deploy (prebuilt)
         id: deploy
         run: |
           if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
             pnpm dlx vercel@latest deploy --prebuilt --prod \
-              --cwd "$DOCS_DIR" \
-              --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
-              --scope "$VERCEL_SCOPE" \
-              --token "$VERCEL_TOKEN"
+              --token "$VERCEL_TOKEN" \
+              --cwd "$DOCS_DIR"
           else
             pnpm dlx vercel@latest deploy --prebuilt \
-              --cwd "$DOCS_DIR" \
-              --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
-              --scope "$VERCEL_SCOPE" \
-              --token "$VERCEL_TOKEN"
+              --token "$VERCEL_TOKEN" \
+              --cwd "$DOCS_DIR"
           fi
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
-          IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
       - name: Output URL
         run: echo "Deployed URL => (see deploy step logs for the final URL)"
