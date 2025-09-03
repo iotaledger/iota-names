@@ -27,7 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Node for npx (no local deps install)
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,19 +46,35 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      # Cloud build on Vercel (no local build)
-      - name: Deploy (cloud build)
+
+      - name: Deploy (cloud build) and capture URL
+        id: deploy
         run: |
-          if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
-            npx --yes vercel@latest deploy --yes --prod \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
-              --scope "${{ secrets.VERCEL_SCOPE }}" \
-              --cwd "${DOCS_DIR}"
-          else
-            npx --yes vercel@latest deploy --yes \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
-              --scope "${{ secrets.VERCEL_SCOPE }}" \
-              --cwd "${DOCS_DIR}"
-          fi
+          set -euo pipefail
+          PROD_FLAG=""
+          if [ "$VERCEL_ENVIRONMENT" = "production" ]; then PROD_FLAG="--prod"; fi
+
+          TMP="$(mktemp)"
+          npx --yes vercel@latest deploy --yes $PROD_FLAG \
+            --token "${VERCEL_TOKEN}" \
+            --scope "${VERCEL_SCOPE}" \
+            --cwd "${DOCS_DIR}" \
+            --json > "$TMP"
+
+          URL=$(node -e "const fs=require('fs');const o=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));let u=o.url||o.alias||'';if(u&&!/^https?:\/\//.test(u))u='https://'+u;console.log(u);" "$TMP")
+
+          echo "deployment_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to: $URL"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+
+      - name: Post deployment link
+        if: always()
+        run: |
+          echo "### Vercel deployment" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy.outputs.deployment_url }}" >> "$GITHUB_STEP_SUMMARY"
+
+
+      - name: Echo URL
+        run: echo "URL => ${{ steps.deploy.outputs.deployment_url }}"
