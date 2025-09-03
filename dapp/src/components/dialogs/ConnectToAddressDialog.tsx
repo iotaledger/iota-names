@@ -242,7 +242,14 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                     </div>
                                     <Panel bgColor="bg-names-neutral-10">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">
-                                            <div className="flex flex-row items-start gap-x-md">
+                                            <div
+                                                className="flex flex-row items-start gap-x-md"
+                                                onClick={() => {
+                                                    if (!disableEdit && isTargetingCurrentAddress) {
+                                                        setEditIsDefaultName(!editIsDefaultName);
+                                                    }
+                                                }}
+                                            >
                                                 <div className=" flex flex-col gap-y-xxs">
                                                     <span className="text-title-md text-names-neutral-100">
                                                         Set as Display name
