@@ -65,6 +65,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 formatNanosToIota(minBidNanos, {
                     formatRounded: false,
                     showIotaSymbol: false,
+                    hasCommaSeparator: false,
                 }),
             );
         }
