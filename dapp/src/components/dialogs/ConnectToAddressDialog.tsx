@@ -243,7 +243,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                     <Panel bgColor="bg-names-neutral-10">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">
                                             <div
-                                                className="flex flex-row items-start gap-x-md"
+                                                className={`flex flex-row items-start gap-x-md ${
+                                                    !disableEdit && isTargetingCurrentAddress
+                                                        ? 'cursor-pointer'
+                                                        : 'cursor-not-allowed'
+                                                }`}
                                                 onClick={() => {
                                                     if (!disableEdit && isTargetingCurrentAddress) {
                                                         setEditIsDefaultName(!editIsDefaultName);
