@@ -82,18 +82,24 @@ export async function processNamesFileBatched(
 ) {
     const nameAddressPairs = parseCsvFile(filePath);
     let batch: Record<string, string> = {};
-    let batchLen = 0;
+    let batchNameLen = 0;
+    let batchRecipientLen = 0;
     for (const [name, address] of Object.entries(nameAddressPairs)) {
         var recipient = address || adminAddress;
-        const nameLen = name.length + (Object.keys(batch).length > 0 ? 1 : 0);
-        const recipientLen = recipient.length + (Object.keys(batch).length > 0 ? 1 : 0);
-        if (batchLen + nameLen + recipientLen > PURE_ARG_SIZE_LIMIT) {
+        const nameLen = bcs.String.serializedSize(name)!;
+        const recipientLen = bcs.Address.serializedSize(recipient)!;
+        if (
+            batchNameLen + nameLen > PURE_ARG_SIZE_LIMIT ||
+            batchRecipientLen + recipientLen > PURE_ARG_SIZE_LIMIT
+        ) {
             await sendNamesBatchTransaction(batch, packageInfo, network, client);
             batch = {};
-            batchLen = 0;
+            batchNameLen = 0;
+            batchRecipientLen = 0;
         }
         batch[name] = recipient;
-        batchLen += nameLen;
+        batchNameLen += nameLen;
+        batchRecipientLen += recipientLen;
     }
     if (Object.keys(batch).length > 0) {
         await sendNamesBatchTransaction(batch, packageInfo, network, client);
