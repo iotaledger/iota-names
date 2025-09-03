@@ -7,7 +7,7 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
 import { CreateSubnameDialog } from '@/components/dialogs/CreateSubnameDialog';
-import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
+import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { traverseNameTree } from '@/lib/utils/buildNameTree';
@@ -18,9 +18,10 @@ import { NamePanelTile } from './NamePanelTile';
 interface SubnamesPanelProps {
     selectedName: RegistrationNft;
     onClose: () => void;
+    onRenewClick: (name: RegistrationNft) => void;
 }
 
-export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
+export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesPanelProps) {
     const { data: subnames } = useRegistrationNfts('subname');
 
     const initialNameTree = useNameTree(selectedName.name);
@@ -34,6 +35,8 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         () => traverseNameTree(initialNameTree, namePaths),
         [initialNameTree, namePaths],
     );
+    const { data: nameRecord } = useNameRecord(currentNode?.name ?? '');
+    const nameRecordData = nameRecord?.type === 'unavailable' ? nameRecord.nameRecord : null;
 
     useEffect(() => {
         if (initialNameTree) {
@@ -45,22 +48,21 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
         }
     }, [initialNameTree]);
 
-    const { data: nameRecordData } = useNameRecord(currentNode?.name ?? '');
-    const nameRecord = nameRecordData as
-        | Extract<NameRecordData, { type: 'unavailable' }>
-        | undefined;
-    const namePermissions = nameRecord
-        ? getNamePermissions(nameRecord.nameRecord)
+    const namePermissions = nameRecordData
+        ? getNamePermissions(nameRecordData)
         : { allowChildCreation: true, allowTimeExtension: true };
 
     if (!currentNode) return null;
 
-    const isExpired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const isExpired = nameRecordData ? isNameRecordExpired(nameRecordData) : false;
 
     const headerTitle = `Subnames for ${normalizeIotaName(
         isAtRoot ? selectedName.name : currentNode.name,
         'at',
-        { onlyFirstSubname: true, truncateLongParts: true },
+        {
+            onlyFirstSubname: !isAtRoot,
+            truncateLongParts: true,
+        },
     )}`;
 
     const subnamesRegistrations = currentNode.subnames
@@ -92,6 +94,7 @@ export function SubnamesPanel({ selectedName, onClose }: SubnamesPanelProps) {
                                 registration={sub}
                                 onClick={() => goDeeper(sub.name)}
                                 hasSubnames={currentNode.subnames.length > 0}
+                                onRenewClick={() => onRenewClick(sub)}
                             />
                         ))}
                     </div>

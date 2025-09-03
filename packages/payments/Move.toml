@@ -3,7 +3,6 @@ name = "iota_names_payments"
 edition = "2024"
 
 [dependencies]
-Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet" }
 iota_names = { local = "../iota-names" }
 
 [addresses]

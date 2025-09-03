@@ -35,12 +35,7 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    INSUFFICIENT_COIN_BALANCE_ID,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
+import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -88,11 +83,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         bidNanos: bidNanos ?? BigInt(0),
     });
 
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        auctionBidTransaction?.builtTx ?? null,
-        Number(bidNanos),
-    );
-
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -125,11 +115,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         },
     });
 
-    const hasEnoughGas =
-        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
-        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
-
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
@@ -140,12 +125,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid =
-        isPending ||
-        isLoading ||
-        isBidBelowMinimum ||
-        !balanceValidation?.hasBalance ||
-        !hasEnoughGas;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum || !auctionBidTransaction;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -174,12 +154,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
         } else if (isBidBelowMinimum) {
             return `Bid must be ≥ ${minBidLabel}`;
-        } else if (!hasEnoughGas) {
-            return getUserFriendlyErrorMessage(NOT_ENOUGH_BALANCE_ID);
-        } else if (auctionError) {
-            return getUserFriendlyErrorMessage(auctionError);
-        } else if (balanceValidationError) {
-            return getUserFriendlyErrorMessage(balanceValidationError);
         }
     })();
 
@@ -247,7 +221,16 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             {auctionMetadata && (
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                             )}
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            {auctionError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(auctionError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

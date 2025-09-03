@@ -8,7 +8,7 @@ export const getImageUrl = (isSubname: boolean, network: string) => {
     const name = `{${isSubname ? 'nft.' : ''}name_str}`;
     const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
 
-    return `https://iota-names.iota.cafe/${name}/${expiration}`;
+    return `https://display.iotanames.com/${name}/${expiration}`;
 };
 
 /** Creates the display. Should be called for both subnames and names. */
@@ -40,13 +40,12 @@ export const createDisplay = ({
         target: `0x2::display::add_multiple`,
         arguments: [
             display,
-            txb.pure.vector('string', ['name', 'link', 'image_url', 'description', 'project_url']),
+            txb.pure.vector('string', ['name', 'image_url', 'description', 'project_url']),
             txb.pure.vector('string', [
                 `{${isSubname ? 'nft.' : ''}name_str}`,
-                `https://{${isSubname ? 'nft.' : ''}name_str}.id`,
                 getImageUrl(isSubname, network),
                 'IOTA-Names - Name It. Own It.',
-                'https://iota-names.io',
+                'https://testnet.iotanames.com',
             ]),
         ],
         typeArguments: [isSubname ? subnameRegistration : nameRegistration],

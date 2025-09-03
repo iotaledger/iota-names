@@ -13,12 +13,12 @@ const BODY =
 const FAIR_AUCTION = [
     {
         title: '1. Start the Clock',
-        body: 'The first bid triggers a 24-hour countdown',
+        body: 'The first bid triggers a 2-day countdown',
         icon: <Clock />,
     },
     {
         title: '2. Beat the Buzzer',
-        body: 'Every new bid adds 10 minutes to the clock, giving everyone a fair shot',
+        body: 'A bid in the closing 10 minutes adds 10 additional to the clock, giving everyone a fair shot',
         icon: <Activity />,
     },
     {
