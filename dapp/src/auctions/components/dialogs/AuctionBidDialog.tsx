@@ -26,7 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, safeParseAmount } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -36,8 +36,7 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { toNanos } from '@/lib/utils/amount';
+import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -62,16 +61,11 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     // Sync the minimum bid amount
     useEffect(() => {
         if (minBidNanos) {
-            setBidAmountValue(
-                formatNanosToIota(minBidNanos, {
-                    formatRounded: false,
-                    showIotaSymbol: false,
-                }),
-            );
+            setBidAmountValue(parseNanosToIota(minBidNanos).toString());
         }
     }, [minBidNanos]);
 
-    const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
+    const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
 
     const {
         data: auctionBidTransaction,
@@ -119,7 +113,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
-    const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
     const isLoading =
@@ -149,13 +142,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
               showIotaSymbol: false,
           })
         : '--';
-    const errorMessage = (() => {
-        if (isBidAboveDecimals) {
-            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
-        } else if (isBidBelowMinimum) {
-            return `Bid must be ≥ ${minBidLabel}`;
-        }
-    })();
+
+    const errorMessage = isBidBelowMinimum ? `Bid must be ≥ ${minBidLabel}` : undefined;
 
     return (
         <Dialog open onOpenChange={closeDialog}>
