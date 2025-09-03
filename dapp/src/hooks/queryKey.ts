@@ -40,6 +40,8 @@ export const queryKey = {
 
     // Core Config
     coreConfig: () => [...queryKey.all, 'core-config'],
+    subnameConfig: () => [...queryKey.all, 'subname-config'],
+
     purchaseConfig: (paymentType: string, auctionType: string) => [
         ...queryKey.all,
         'purchase-config',

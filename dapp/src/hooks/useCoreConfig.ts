@@ -13,7 +13,10 @@ export function useCoreConfig() {
     return useQuery({
         queryKey: [...queryKey.coreConfig()],
         queryFn: async () => {
-            return await iotaNamesClient.getCoreConfig();
+            return {
+                coreConfig: await iotaNamesClient.getCoreConfig(),
+                subnamesConfig: await iotaNamesClient.getSubnamesConfig(),
+            };
         },
         staleTime: 60 * 60 * 1000,
     });

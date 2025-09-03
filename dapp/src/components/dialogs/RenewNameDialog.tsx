@@ -119,7 +119,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
-    const { data: coreConfig, isLoading: isLoadingcoreConfig } = useCoreConfig();
+    const { data: config, isLoading: isLoadingConfig } = useCoreConfig();
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -214,9 +214,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     }
 
     const renewableYears =
-        coreConfig && nameRecord
+        config?.coreConfig && nameRecord
             ? getNameRenewableYears(
-                  coreConfig.max_years,
+                  config?.coreConfig.max_years,
                   nameRecord.nameRecord.expirationTimestampMs,
               )
             : 0;
@@ -271,14 +271,29 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             }
         }
     })();
+    const currentExpirationDate = nameRecord?.nameRecord
+        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
+        : null;
     const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
+    const renewalTime =
+        expirationDate && nameRecord
+            ? expirationDate?.getTime() -
+              new Date(nameRecord.nameRecord.expirationTimestampMs).getTime()
+            : 0;
+    const isBelowMinimumRenewalPeriod =
+        renewalTime && config ? renewalTime < config?.subnamesConfig?.minimum_duration : false;
 
-    const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
+    const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
 
     const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
-    const disableSave = isLoading || !canRenew || !wantsToRenew || !updateNameTransaction;
+    const disableSave =
+        isLoading ||
+        !canRenew ||
+        !wantsToRenew ||
+        !updateNameTransaction ||
+        isBelowMinimumRenewalPeriod;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (
@@ -303,16 +318,31 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     disabled={disableEdit}
                                 />
                             )}
-                            {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
+                            {renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
                                     title="Renewal Limit Reached"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
+                                    supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-
+                            {isNameSubname && isBelowMinimumRenewalPeriod && renewalTime > 0 && (
+                                <InfoBox
+                                    type={InfoBoxType.Warning}
+                                    icon={<Warning />}
+                                    title="Your renewal intention is below the minimum renewal period"
+                                    style={InfoBoxStyle.Default}
+                                    supportingText={`You need to renew for a longer period. The minimum renewal period is ${
+                                        config?.subnamesConfig?.minimum_duration
+                                            ? Math.round(
+                                                  config.subnamesConfig.minimum_duration /
+                                                      (1000 * 60 * 60),
+                                              )
+                                            : 24
+                                    } hours.`}
+                                />
+                            )}
                             {!isNameSubname && (
                                 <div className="flex flex-col">
                                     <div className="self-end">
@@ -343,8 +373,11 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             ) : null}
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats
-                                    icon={isLoading ? <LoadingIndicator /> : null}
-                                    label="Registration Expires"
+                                    label="Current Registration Expires"
+                                    value={currentExpirationDate}
+                                />
+                                <DisplayStats
+                                    label="Next Expiration Date"
                                     value={formattedExpirationDate}
                                 />
                             </div>

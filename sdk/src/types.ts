@@ -105,3 +105,7 @@ export type IotaNamesPriceList = Map<[number, number], number>;
 export type IotaNamesCoreConfig = {
     max_years: number;
 };
+
+export type IotaNamesSubnamesConfig = {
+    minimum_duration: number;
+};
