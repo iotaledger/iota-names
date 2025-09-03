@@ -6,12 +6,12 @@ import { ImageCard } from '@/components/ImageCard';
 const WHY_IOTA_NAMES = [
     {
         title: 'Establish Your Presence',
-        body: 'Secure a company, product, or service name before someone else does – protect your namespace early',
+        body: 'Secure a company, product, or service name before someone else does - protect your namespace early',
         image: '/landing-page/establish-your-present.png',
     },
     {
         title: 'Own. Transfer. Build On.',
-        body: 'Your IOTA Names is a true on-chain asset – own it, sell it, lease or transfer it',
+        body: 'Your IOTA Names is a true on-chain asset - own it, sell it or transfer it',
         image: '/landing-page/own-transfer.png',
     },
     {
