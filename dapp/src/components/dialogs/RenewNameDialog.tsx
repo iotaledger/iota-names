@@ -323,7 +323,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     disabled={disableEdit}
                                 />
                             )}
-                            {renewOptions.length === 0 && !isLoadingData && (
+                            {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
