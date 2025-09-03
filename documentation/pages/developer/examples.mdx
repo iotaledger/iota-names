@@ -15,7 +15,7 @@ module demo::demo {
     use iota_names::{ 
         iota_names::IotaNames,
         registry::Registry,
-        domain
+        name
     };
 
     /// Different custom error messages.
@@ -29,7 +29,7 @@ module demo::demo {
     /// A function to transfer an object of any type T to a name (for instance `example.iota`)
     public fun send_to_name<T: key + store>(iota_names: &IotaNames, obj: T, name: String, clock: &Clock) {
         // Look up the name on the registry.
-        let mut optional = iota_names.registry<Registry>().lookup(domain::new(name));
+        let mut optional = iota_names.registry<Registry>().lookup(name::new(name));
         // Check that the name indeed exists.
         assert!(optional.is_some(), ENameNotFound);
 
