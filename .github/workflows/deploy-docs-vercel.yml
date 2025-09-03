@@ -54,11 +54,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Install PNPM first so setup-node pnpm cache can find it
+      # Install PNPM matching the version in the docs' package.json (no 'version' input!)
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
+          package_json_file: ${{ env.DOCS_DIR }}/package.json
 
       - uses: actions/setup-node@v4
         with:
@@ -78,7 +78,7 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      # --- Remote build deploy (no local .vercel/output needed) ---
+      # Remote build deploy (no local .vercel/output / routes-manifest headaches)
       - name: Deploy (preview)
         if: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
         working-directory: ${{ env.DOCS_DIR }}
@@ -95,7 +95,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      # --- Safe alias gating (avoid secrets.* in if:) ---
+      # Safe alias gating (avoid 'secrets' in an if:)
       - name: Check alias presence
         id: alias_check
         shell: bash
