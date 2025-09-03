@@ -212,8 +212,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     icon={<Info />}
                                     supportingText={
                                         <div className="break-words max-w-full">
-                                            Create as many Subnames as you want under {cleanName},
-                                            each with its own profile page and features
+                                            Create as many Subnames as you want under {cleanName}
                                         </div>
                                     }
                                 />
@@ -237,6 +236,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     Permissions
                                 </span>
                                 <Checkbox
+                                    name="allow_subnames"
                                     isChecked={editIsAllowSubnames}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowSubnameChange}
@@ -244,6 +244,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 />
 
                                 <Checkbox
+                                    name="allow_renew"
                                     isChecked={editIsAllowingRenew}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowRenewChange}

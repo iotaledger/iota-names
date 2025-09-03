@@ -19,7 +19,7 @@ const register = async (name: string, years: number) => {
 
     // Build the transaction to register the name, specifying a year from 1 to 5.
     const nft = iotaNamesTx.register({
-        domain: 'myname.iota',
+        name: 'myname.iota',
         years: 3,
         coin: '0xMyCoinObject',
     });
@@ -282,7 +282,7 @@ const composedExample = async (name: string, years: number) => {
 
     // Build the transaction to register the name, specifying a year from 1 to 5.
     const nft = iotaNamesTx.register({
-        domain: 'myname.iota',
+        name: 'myname.iota',
         years,
         coin: '0xMyCoinObject',
     });
