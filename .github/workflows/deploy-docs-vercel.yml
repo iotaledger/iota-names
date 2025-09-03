@@ -1,7 +1,6 @@
 name: Reusable Vercel Deploy (Docs)
 
 on:
-  # Reusable (callable) workflow
   workflow_call:
     inputs:
       VERCEL_ENVIRONMENT:
@@ -25,20 +24,7 @@ on:
       VERCEL_ALIAS:
         required: false
 
-  # Manual dispatch (same inputs, read repo/org secrets directly)
-  workflow_dispatch:
-    inputs:
-      VERCEL_ENVIRONMENT:
-        description: "production or preview"
-        required: true
-        default: "preview"
-      DOCS_DIR:
-        description: "Path to docs app root"
-        required: true
-        default: "documentation"
-
 env:
-  # Works for both workflow_call and workflow_dispatch
   DOCS_DIR: ${{ inputs.DOCS_DIR }}
 
 concurrency:
@@ -57,16 +43,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ✅ Install PNPM FIRST so setup-node's cache: pnpm can find it
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
           cache-dependency-path: ${{ env.DOCS_DIR }}/pnpm-lock.yaml
 
-      - name: Enable corepack (pnpm)
-        run: corepack enable
+      # (optional) corepack not needed now, pnpm is installed above
+      # - name: Enable corepack (optional)
+      #   run: corepack enable
 
-      # Pull project link & env into {DOCS_DIR}/.vercel/
+      # Link project & pull env to {DOCS_DIR}/.vercel
       - name: Vercel pull
         working-directory: ${{ env.DOCS_DIR }}
         run: npx --yes vercel@latest pull --yes --environment="${{ inputs.VERCEL_ENVIRONMENT }}" --token="${{ secrets.VERCEL_TOKEN }}"
@@ -78,7 +71,7 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      # Remote build (no local .vercel/output / routes-manifest headaches)
+      # Remote build deploy (keeps you away from routes-manifest issues)
       - name: Deploy (preview)
         if: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' }}
         working-directory: ${{ env.DOCS_DIR }}
@@ -94,3 +87,9 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # Optional aliasing
+      - name: Alias
+        if: ${{ secrets.VERCEL_ALIAS != '' }}
+        working-directory: ${{ env.DOCS_DIR }}
+        run: npx --yes vercel@latest alias set "${{ secrets.VERCEL_ALIAS }}" --token="${{ secrets.VERCEL_TOKEN }}" --scope="${{ secrets.VERCEL_SCOPE }}"
