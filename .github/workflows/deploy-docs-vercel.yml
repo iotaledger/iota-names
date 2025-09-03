@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Enable corepack (pnpm via packageManager)
+      - name: Enable corepack (use pnpm from packageManager)
         run: |
           corepack enable
           pnpm --version
@@ -39,8 +39,7 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      # Link project & fetch env/config into .vercel/ using ENV VARS
-      - name: Vercel pull
+      - name: Vercel pull (link project & env)
         run: |
           pnpm dlx vercel@latest pull --yes \
             --environment=${{ env.VERCEL_ENV == 'production' && 'production' || 'preview' }} \
@@ -51,28 +50,16 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Build (Vercel)
-        run: |
-          pnpm dlx vercel@latest build \
-            --token "$VERCEL_TOKEN" \
-            --cwd "$DOCS_DIR"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy (prebuilt)
-        id: deploy
+      - name: Deploy (cloud build on Vercel)
         run: |
           if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
-            pnpm dlx vercel@latest deploy --prebuilt --prod \
+            pnpm dlx vercel@latest deploy --prod \
               --token "$VERCEL_TOKEN" \
               --cwd "$DOCS_DIR"
           else
-            pnpm dlx vercel@latest deploy --prebuilt \
+            pnpm dlx vercel@latest deploy \
               --token "$VERCEL_TOKEN" \
               --cwd "$DOCS_DIR"
           fi
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      - name: Output URL
-        run: echo "Deployed URL => (see deploy step logs for the final URL)"
