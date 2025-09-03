@@ -3,15 +3,7 @@
 
 'use client';
 
-import {
-    ArrowLeft,
-    ArrowRight,
-    FilterList,
-    Info,
-    Loader,
-    Search,
-    Warning,
-} from '@iota/apps-ui-icons';
+import { ArrowLeft, ArrowRight, FilterList, Info, Search, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSegment,
@@ -39,6 +31,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
+import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
 
@@ -277,8 +270,8 @@ export default function AuctionsPage(): JSX.Element {
                 <div>
                     {infoBox}
                     {isLoading ? (
-                        <div className="flex w-full justify-center">
-                            <Loader className="animate-spin" data-testid="loading-indicator" />
+                        <div className="flex w-full justify-start mt-8">
+                            <CardSkeletonLoader isAuctionCard />
                         </div>
                     ) : (
                         <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">

@@ -14,7 +14,6 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
-    LoadingIndicator,
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -27,6 +26,7 @@ import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupU
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
+import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
@@ -191,8 +191,8 @@ export default function MyNamesPage(): JSX.Element {
             ) : null}
 
             {isLoadingCards && (
-                <div className="w-full flex-1 flex flex-col items-center justify-center">
-                    <LoadingIndicator size="w-10 h-10" />
+                <div className="flex w-full justify-start">
+                    <CardSkeletonLoader />
                 </div>
             )}
 
