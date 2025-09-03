@@ -1,5 +1,11 @@
 # @iota/iota-names-sdk
 
+## 0.3.0
+
+### Minor Changes
+
+- b7ba27c: Bundle Testnet SC constants
+
 ## 0.2.0
 
 ### Minor Changes
