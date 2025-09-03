@@ -26,6 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -33,36 +38,43 @@ jobs:
       - name: Install Vercel CLI
         run: pnpm add --global vercel@latest
 
-      - name: Vercel pull (link & env)
-        run: |
-          vercel pull --yes \
-            --environment=${{ env.VERCEL_ENV == 'production' && 'production' || 'preview' }} \
-            --token=$VERCEL_TOKEN \
-            --cwd $DOCS_DIR
-        env:
-          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
-
       - name: Install deps (docs)
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
+      # Build with explicit project/scope so it’s clear which Vercel project we target
       - name: Build (Vercel)
-        run: vercel build --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+        run: |
+          vercel build \
+            --cwd "$DOCS_DIR" \
+            --project "$IOTA_NAMES_VERCEL_PROJECT_ID" \
+            --scope "$VERCEL_SCOPE" \
+            --token "$VERCEL_TOKEN"
         env:
-          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          IOTA_NAMES_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
 
       - name: Deploy (prebuilt)
         id: deploy
         run: |
           if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
             vercel deploy --prebuilt --prod \
-              --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+              --cwd "$DOCS_DIR" \
+              --project "$IOTA_NAMES_VERCEL_PROJECT_ID" \
+              --scope "$VERCEL_SCOPE" \
+              --token "$VERCEL_TOKEN"
           else
             vercel deploy --prebuilt \
-              --token=$VERCEL_TOKEN --cwd $DOCS_DIR
+              --cwd "$DOCS_DIR" \
+              --project "$IOTA_NAMES_VERCEL_PROJECT_ID" \
+              --scope "$VERCEL_SCOPE" \
+              --token "$VERCEL_TOKEN"
           fi
         env:
-          VERCEL_TOKEN: ${{ secrets.DOCS_VERCEL_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          IOTA_NAMES_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
 
       - name: Output URL
         run: echo "Deployed URL => ${{ steps.deploy.outputs.url || 'see job logs for URL' }}"
