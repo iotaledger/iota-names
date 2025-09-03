@@ -4,6 +4,7 @@
 'use client';
 
 import { Dialog, DialogContent } from '@iota/apps-ui-kit';
+import { useEffect } from 'react';
 
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -11,6 +12,18 @@ import { AvailabilityCheck } from './AvailabilityCheck';
 
 export function AvailabilityCheckDialog() {
     const { isOpen, close, props } = useAvailabilityCheckDialog();
+
+    useEffect(() => {
+        if (isOpen) {
+            const timer = setTimeout(() => {
+                document.body.style.pointerEvents = '';
+            }, 0);
+
+            return () => clearTimeout(timer);
+        } else {
+            document.body.style.pointerEvents = 'auto';
+        }
+    }, [isOpen]);
 
     return (
         <Dialog open={isOpen} onOpenChange={() => close()}>
