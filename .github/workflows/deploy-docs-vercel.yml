@@ -15,8 +15,6 @@ on:
 env:
   DOCS_DIR: documentation
   VERCEL_ENVIRONMENT: ${{ github.event.inputs.environment || 'preview' }}
-  VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
-  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
 
 jobs:
   vercel-deploy:
@@ -41,27 +39,27 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      - name: Pull Vercel env (project linkage)
+      - name: Vercel pull (link project & env)
         run: |
           pnpm dlx vercel@latest pull --yes \
             --environment=${{ env.VERCEL_ENVIRONMENT }} \
             --token="${{ secrets.VERCEL_TOKEN }}" \
             --cwd "${DOCS_DIR}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Build (prebuild locally)
-        run: |
-          pnpm dlx vercel@latest build \
-            --token="${{ secrets.VERCEL_TOKEN }}" \
-            --cwd "${DOCS_DIR}"
-
-      - name: Deploy prebuilt
+      - name: Deploy (cloud build on Vercel)
         run: |
           if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
-            pnpm dlx vercel@latest deploy --prebuilt --prod \
-              --token="${{ secrets.VERCEL_TOKEN }}" \
+            pnpm dlx vercel@latest deploy --prod \
+              --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           else
-            pnpm dlx vercel@latest deploy --prebuilt \
-              --token="${{ secrets.VERCEL_TOKEN }}" \
+            pnpm dlx vercel@latest deploy \
+              --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
