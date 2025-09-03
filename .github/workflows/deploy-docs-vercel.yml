@@ -2,7 +2,7 @@ name: Deploy IOTA-Names Docs to Vercel
 
 on:
   push:
-    branches: [ develop, devx/deploy-docs-vercel ]
+    branches: [develop, devx/deploy-docs-vercel]
     paths:
       - "documentation/**"
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      - name: Link Vercel project
+      - name: Link Vercel project (no pull)
         run: |
           mkdir -p "$DOCS_DIR/.vercel"
           cat > "$DOCS_DIR/.vercel/project.json" <<EOF
@@ -50,14 +50,30 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Deploy (cloud build on Vercel)
+      - name: Build locally to .vercel/output
+        run: |
+          pnpm dlx vercel@latest build \
+            --token "${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
+
+      - name: Copy routes-manifest.json into Build Output API dir
+        run: |
+          set -e
+          if [ -f "$DOCS_DIR/.next/routes-manifest.json" ]; then
+            mkdir -p "$DOCS_DIR/.vercel/output"
+            cp "$DOCS_DIR/.next/routes-manifest.json" "$DOCS_DIR/.vercel/output/routes-manifest.json"
+          fi
+
+      - name: Deploy prebuilt
         run: |
           if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
-            pnpm dlx vercel@latest deploy --prod \
+            pnpm dlx vercel@latest deploy --prebuilt --prod \
               --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           else
-            pnpm dlx vercel@latest deploy \
+            pnpm dlx vercel@latest deploy --prebuilt \
               --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
