@@ -29,11 +29,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - uses: pnpm/action-setup@v4
         with:
           version: 9
+          run_install: false
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install Vercel CLI
         run: pnpm add --global vercel@latest
@@ -42,7 +50,6 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      # Build with explicit project/scope so it’s clear which Vercel project we target
       - name: Build (Vercel)
         run: |
           vercel build \
@@ -77,4 +84,4 @@ jobs:
           IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
       - name: Output URL
-        run: echo "Deployed URL => ${{ steps.deploy.outputs.url || 'see job logs for URL' }}"
+        run: echo "Deployed URL => (see deploy step logs for the final URL)"
