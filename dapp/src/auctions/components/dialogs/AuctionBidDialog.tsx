@@ -66,7 +66,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     }, [minBidNanos]);
 
     const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
-    const finalAmountInIota = bidNanos ? parseNanosToIota(bidNanos) : null;
 
     const {
         data: auctionBidTransaction,
@@ -97,7 +96,10 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             toast.success(
-                `Successfully placed bid of ${finalAmountInIota} on ${normalizeIotaName(name)}`,
+                `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
+                    formatRounded: false,
+                    showIotaSymbol: true,
+                })} on ${normalizeIotaName(name)}`,
             );
             closeDialog();
             onCompleted?.();
