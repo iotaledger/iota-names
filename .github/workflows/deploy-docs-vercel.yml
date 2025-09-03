@@ -42,26 +42,22 @@ jobs:
 
       - name: Link Vercel project (no pull)
         run: |
-          mkdir -p "$DOCS_DIR/.vercel"
-          cat > "$DOCS_DIR/.vercel/project.json" <<EOF
-          { "orgId": "${VERCEL_ORG_ID}", "projectId": "${IOTA_NAMES_DOCS_VERCEL_PROJECT_ID}" }
-          EOF
+          mkdir -p "${DOCS_DIR}/.vercel"
+          printf '{"orgId":"%s","projectId":"%s"}' "${VERCEL_ORG_ID}" "${IOTA_NAMES_DOCS_VERCEL_PROJECT_ID}" > "${DOCS_DIR}/.vercel/project.json"
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
       - name: Build locally to .vercel/output
-        run: |
-          pnpm dlx vercel@latest build \
-            --token "${{ secrets.VERCEL_TOKEN }}" \
-            --cwd "${DOCS_DIR}"
+        working-directory: ${{ env.DOCS_DIR }}
+        run: pnpm dlx vercel@latest build --token "${{ secrets.VERCEL_TOKEN }}"
 
       - name: Copy routes-manifest.json into Build Output API dir
         run: |
           set -e
-          if [ -f "$DOCS_DIR/.next/routes-manifest.json" ]; then
-            mkdir -p "$DOCS_DIR/.vercel/output"
-            cp "$DOCS_DIR/.next/routes-manifest.json" "$DOCS_DIR/.vercel/output/routes-manifest.json"
+          if [ -f "${DOCS_DIR}/.next/routes-manifest.json" ]; then
+            mkdir -p "${DOCS_DIR}/.vercel/output"
+            cp "${DOCS_DIR}/.next/routes-manifest.json" "${DOCS_DIR}/.vercel/output/routes-manifest.json"
           fi
 
       - name: Deploy prebuilt
@@ -75,5 +71,3 @@ jobs:
               --token "${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
