@@ -40,19 +40,27 @@ jobs:
         working-directory: ${{ env.DOCS_DIR }}
         run: pnpm install --frozen-lockfile
 
-      - name: Link Vercel project (no pull)
+      # REQUIRED: fetch .vercel/project.json + project settings for `vercel build`
+      - name: Vercel pull (link project & env)
         run: |
-          mkdir -p "${DOCS_DIR}/.vercel"
-          printf '{"orgId":"%s","projectId":"%s"}' "${VERCEL_ORG_ID}" "${IOTA_NAMES_DOCS_VERCEL_PROJECT_ID}" > "${DOCS_DIR}/.vercel/project.json"
+          pnpm dlx vercel@latest pull --yes \
+            --environment="${{ env.VERCEL_ENVIRONMENT }}" \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          IOTA_NAMES_DOCS_VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_DOCS_VERCEL_PROJECT_ID }}
 
-      - name: Build locally to .vercel/output
-        working-directory: ${{ env.DOCS_DIR }}
-        run: pnpm dlx vercel@latest build --token "${{ secrets.VERCEL_TOKEN }}"
+      # Build locally into .vercel/output (Build Output API)
+      - name: Build locally
+        run: |
+          pnpm dlx vercel@latest build \
+            --token="${{ secrets.VERCEL_TOKEN }}" \
+            --cwd "${DOCS_DIR}"
 
-      - name: Copy routes-manifest.json into Build Output API dir
+      # Safety: copy Next's routes-manifest.json if Vercel CLI expects it
+      - name: Ensure routes-manifest.json exists
         run: |
           set -e
           if [ -f "${DOCS_DIR}/.next/routes-manifest.json" ]; then
@@ -60,14 +68,17 @@ jobs:
             cp "${DOCS_DIR}/.next/routes-manifest.json" "${DOCS_DIR}/.vercel/output/routes-manifest.json"
           fi
 
+      # Deploy the prebuilt output
       - name: Deploy prebuilt
         run: |
           if [ "${{ env.VERCEL_ENVIRONMENT }}" = "production" ]; then
             pnpm dlx vercel@latest deploy --prebuilt --prod \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           else
             pnpm dlx vercel@latest deploy --prebuilt \
-              --token "${{ secrets.VERCEL_TOKEN }}" \
+              --token="${{ secrets.VERCEL_TOKEN }}" \
               --cwd "${DOCS_DIR}"
           fi
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
