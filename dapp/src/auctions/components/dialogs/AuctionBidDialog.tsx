@@ -99,7 +99,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 },
             });
 
-            if (response?.effects?.status.status !== 'success') {
+            if (response?.effects?.status.status === 'failure') {
                 throw new Error('Transaction failed');
             }
         },
