@@ -36,7 +36,7 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -61,13 +61,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     // Sync the minimum bid amount
     useEffect(() => {
         if (minBidNanos) {
-            setBidAmountValue(
-                formatNanosToIota(minBidNanos, {
-                    formatRounded: false,
-                    showIotaSymbol: false,
-                    hasCommaSeparator: false,
-                }),
-            );
+            setBidAmountValue(parseNanosToIota(minBidNanos).toString());
         }
     }, [minBidNanos]);
 

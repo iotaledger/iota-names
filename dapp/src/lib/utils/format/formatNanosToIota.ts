@@ -6,12 +6,6 @@ import { BigNumber } from 'bignumber.js';
 
 import { IOTA_TOKEN_SYMBOL } from '@/lib/constants';
 
-const defaultConfig = BigNumber.config();
-
-function resetBigNumberConfig() {
-    BigNumber.config(defaultConfig);
-}
-
 interface FormatNanosToIotaOptions {
     formatRounded?: boolean;
     showSign?: boolean;
@@ -25,17 +19,8 @@ export function formatNanosToIota(
         formatRounded = true,
         showSign = false,
         showIotaSymbol = true,
-        hasCommaSeparator = true,
     }: FormatNanosToIotaOptions = {},
 ) {
-    if (!hasCommaSeparator) {
-        BigNumber.config({
-            FORMAT: {
-                groupSeparator: '',
-            },
-        });
-    }
-
     const formattedBalance = formatBalance(
         balance,
         IOTA_DECIMALS,
@@ -43,6 +28,10 @@ export function formatNanosToIota(
         showSign,
     );
 
-    resetBigNumberConfig();
     return showIotaSymbol ? `${formattedBalance} ${IOTA_TOKEN_SYMBOL}` : formattedBalance;
+}
+
+export function parseNanosToIota(balance: bigint | number | string): number {
+    const parsed = new BigNumber(balance.toString()).shiftedBy(-1 * IOTA_DECIMALS);
+    return Number(parsed);
 }
