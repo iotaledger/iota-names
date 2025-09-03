@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCurrentAccount, useIotaClient } from '@iota/dapp-kit';
+import { Transaction } from '@iota/iota-sdk/transactions';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
+import { getGasSummary } from '@/lib/utils/getGasSummary';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '../lib/utils/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
@@ -61,14 +63,29 @@ export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
                       name,
                   );
 
-            const tx = await transaction.build({
+            const txBytes = await transaction.build({
                 client: iotaClient,
             });
+
+            const txDryRun = await iotaClient.dryRunTransactionBlock({
+                transactionBlock: txBytes,
+            });
+
+            if (txDryRun.effects.status.status !== 'success') {
+                throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+            }
+
             return {
-                transaction,
-                builtTx: tx,
+                txBytes,
+                txDryRun,
             };
         },
         enabled: enableAuctionBid,
+        select: ({ txBytes, txDryRun }) => {
+            return {
+                transaction: Transaction.from(txBytes),
+                gasSummary: getGasSummary(txDryRun),
+            };
+        },
     });
 }
