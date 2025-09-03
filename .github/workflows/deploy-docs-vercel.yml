@@ -2,7 +2,7 @@ name: Deploy IOTA-Names Docs to Vercel
 
 on:
   push:
-    branches: [ develop, devx/deploy-docs-vercel ]
+    branches: [develop, devx/deploy-docs-vercel]
     paths:
       - "documentation/**"
   workflow_dispatch:
