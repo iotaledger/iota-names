@@ -2,7 +2,7 @@ name: Deploy IOTA-Names Docs to Vercel
 
 on:
   push:
-    branches: [develop, devx/deploy-docs-vercel]
+    branches: [ develop, devx/deploy-docs-vercel ]
     paths:
       - "documentation/**"
   workflow_dispatch:
@@ -30,21 +30,10 @@ jobs:
         with:
           node-version: 20
 
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-          package_json_file: documentation/package.json
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install Vercel CLI
-        run: pnpm add --global vercel@latest
+      - name: Enable corepack (pnpm via packageManager)
+        run: |
+          corepack enable
+          pnpm --version
 
       - name: Install deps (docs)
         working-directory: ${{ env.DOCS_DIR }}
@@ -52,7 +41,7 @@ jobs:
 
       - name: Build (Vercel)
         run: |
-          vercel build \
+          pnpm dlx vercel@latest build \
             --cwd "$DOCS_DIR" \
             --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
             --scope "$VERCEL_SCOPE" \
@@ -66,13 +55,13 @@ jobs:
         id: deploy
         run: |
           if [ "${{ env.VERCEL_ENV }}" = "production" ]; then
-            vercel deploy --prebuilt --prod \
+            pnpm dlx vercel@latest deploy --prebuilt --prod \
               --cwd "$DOCS_DIR" \
               --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
               --scope "$VERCEL_SCOPE" \
               --token "$VERCEL_TOKEN"
           else
-            vercel deploy --prebuilt \
+            pnpm dlx vercel@latest deploy --prebuilt \
               --cwd "$DOCS_DIR" \
               --project "$IOTA_NAMES_DOCS_VERCEL_PROJECT_ID" \
               --scope "$VERCEL_SCOPE" \
