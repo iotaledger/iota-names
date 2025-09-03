@@ -17,10 +17,15 @@ if (args.length !== 1) {
 }
 const newAddress = args[0]; // First argument should be new address
 
-const network = 'localnet';
-const packageInfo = readPackageInfo(network);
-
 const treasuryClaimAndMoveCapsToFoundation = async () => {
+    const network = process.env.NETWORK;
+    if (!network) {
+        throw new Error(
+            'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+        );
+    }
+    const packageInfo = readPackageInfo(network);
+
     const client = getClient(network);
 
     const objectsToTransfer = await getIotaNamesAdminObjects(packageInfo, client);
@@ -28,7 +33,6 @@ const treasuryClaimAndMoveCapsToFoundation = async () => {
     console.log(objectsToTransfer);
 
     const txb = new Transaction();
-
     profitsToTreasury(txb, packageInfo, newAddress);
 
     txb.transferObjects(objectsToTransfer, txb.pure.address(newAddress));

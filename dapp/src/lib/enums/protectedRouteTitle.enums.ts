@@ -2,6 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export enum ProtectedRouteTitle {
-    MyNames = 'Your Names',
+    MyNames = 'My Names',
     Auction = 'Auctions',
 }

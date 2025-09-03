@@ -168,9 +168,9 @@ export class IotaNamesClient {
      */
     // Format:
     // {
-    // 	[ 3, 3 ] => 500000000,
-    // 	[ 4, 4 ] => 100000000,
-    // 	[ 5, 63 ] => 20000000
+    // 	[ 3, 3 ] => 500000000000,
+    // 	[ 4, 4 ] => 250000000000,
+    // 	[ 5, 63 ] => 50000000000
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
         if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');

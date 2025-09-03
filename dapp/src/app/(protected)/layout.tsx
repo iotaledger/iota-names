@@ -3,20 +3,18 @@
 
 'use client';
 
-import { useCurrentAccount, useCurrentWallet } from '@iota/dapp-kit';
 import { redirect } from 'next/navigation';
 import { useEffect, type PropsWithChildren } from 'react';
 
-import { CONNECT_ROUTE } from '@/lib/constants';
+import { TermsAndConds } from '@/lib/utils/termsAndConditions';
 
-export default function ProtectedLayout({ children }: PropsWithChildren): JSX.Element {
-    const currentAccount = useCurrentAccount();
-    const { isConnected } = useCurrentWallet();
+export default function ProtectedLayout({ children }: PropsWithChildren) {
     useEffect(() => {
-        if (!currentAccount && !isConnected) {
-            redirect(CONNECT_ROUTE.path);
+        const areAccepted = TermsAndConds.areAccepted();
+        if (!areAccepted) {
+            redirect('/?modal=terms_conditions');
         }
-    }, [currentAccount, isConnected]);
+    }, []);
 
     return (
         <main className="flex flex-col min-h-screen">
