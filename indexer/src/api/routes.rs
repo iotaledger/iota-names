@@ -45,6 +45,7 @@ async fn get_auctions_for_address(
         page,
         page_size,
         sort,
+        status,
     }: BidderNamesPagination,
 ) -> Result<AuctionsResponse, ApiError> {
     IotaAddress::from_str(&address_str)
@@ -52,11 +53,14 @@ async fn get_auctions_for_address(
 
     let mut conn = state.pool.get_connection()?;
     let mut total_items = 0;
+    let now = chrono::Utc::now();
     let names = if let Some(bidder) = queries::get_bidder_by_address(&mut conn, &address_str)? {
-        total_items = queries::get_auctions_for_bidder_count(&mut conn, bidder.id)?;
+        total_items = queries::get_auctions_for_bidder_count(&mut conn, bidder.id, status, now)?;
 
         if total_items > 0 {
-            queries::get_auctions_for_bidder(&mut conn, bidder.id, page, page_size, sort)?
+            queries::get_auctions_for_bidder(
+                &mut conn, bidder.id, page, page_size, sort, status, now,
+            )?
         } else {
             Default::default()
         }
@@ -80,12 +84,23 @@ async fn get_auctions(
         sort,
         sort_by,
         search,
+        status,
     }: AuctionsPagination,
 ) -> Result<AuctionsResponse, ApiError> {
     let mut conn = state.pool.get_connection()?;
-    let total_items = queries::get_auctions_count(&mut conn, search.as_deref())?;
+    let now = chrono::Utc::now();
+    let total_items = queries::get_auctions_count(&mut conn, search.as_deref(), status, now)?;
     let names = if total_items > 0 {
-        queries::get_auctions(&mut conn, page, page_size, sort, sort_by, search.as_deref())?
+        queries::get_auctions(
+            &mut conn,
+            page,
+            page_size,
+            sort,
+            sort_by,
+            search.as_deref(),
+            status,
+            now,
+        )?
     } else {
         Default::default()
     };

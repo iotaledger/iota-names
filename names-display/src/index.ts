@@ -13,7 +13,7 @@ export const Params = z.object({
     timestamp: z.coerce.number(),
 });
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: true, maxParamLength: 1000 });
 
 await fastify.register(cors, {
     origin: '*',

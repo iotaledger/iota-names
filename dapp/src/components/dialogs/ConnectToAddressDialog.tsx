@@ -35,6 +35,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -149,7 +150,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             }
         },
         onError: (error) => {
-            toast.error(error.message);
+            toast.error(getUserFriendlyErrorMessage(error));
         },
     });
 
@@ -177,7 +178,12 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
-
+    const errorMessage =
+        editTargetAddress && !isValidAddressOrEmpty
+            ? 'Not a valid IOTA address'
+            : updateNameError
+              ? getUserFriendlyErrorMessage(updateNameError)
+              : undefined;
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -206,11 +212,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 onChange={handleAddressChange}
                                                 onClearInput={() => setEditTargetAddress('')}
                                                 disabled={disableEdit}
-                                                errorMessage={
-                                                    editTargetAddress && !isValidAddressOrEmpty
-                                                        ? 'Not a valid IOTA address'
-                                                        : updateNameError?.message
-                                                }
+                                                errorMessage={errorMessage}
                                             />
                                         </div>
                                         {!isTargetingCurrentAddress && (

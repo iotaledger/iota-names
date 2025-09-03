@@ -55,6 +55,7 @@ export class IotaNamesIndexerClient {
     }
 
     async getAuctionList(
+        status: 'all' | 'active' | 'finished',
         search?: string,
         sort?: 'asc' | 'desc',
         sortBy?: 'bid' | 'name',
@@ -64,6 +65,9 @@ export class IotaNamesIndexerClient {
         const url = new URL(`${this.host}/auctions`);
         if (search) {
             url.searchParams.set('search', search);
+        }
+        if (status !== 'all') {
+            url.searchParams.set('status', status);
         }
         if (sort) {
             url.searchParams.set('sort', sort);

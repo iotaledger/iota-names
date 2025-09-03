@@ -1,11 +1,11 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Clock, IotaLogoSmall } from '@iota/apps-ui-icons';
-import { Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
+import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
+import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 
 import {
     AuctionDetails,
@@ -18,6 +18,7 @@ import {
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
+import { useNameRecord } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
@@ -31,12 +32,13 @@ interface AuctionublicItemProps {
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
     const [, setIsActive] = useState(isAuctionActive(auction.metadata));
 
+    const isClaimedAuction = !auction.metadata;
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
         : null;
     const account = useCurrentAccount();
 
-    if (!auction.metadata || auction.isLoading) {
+    if (auction.isLoading) {
         return (
             <Card type={CardType.Filled}>
                 <div className="animate-pulse space-y-3">
@@ -50,9 +52,11 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
 
     const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
 
-    const formattedPrice = formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
-        showIotaSymbol: false,
-    });
+    const formattedPrice = auction.metadata
+        ? formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
+              showIotaSymbol: false,
+          })
+        : null;
 
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
@@ -62,26 +66,30 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                         <AuctionStatusBadge status={auctionStatus} />
                     </div>
                 ) : null}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="text-label-md text-names-neutral-50">Current Bid</div>
-                        <div className="flex mt-1 items-center gap-2">
-                            <div className="bg-names-solid-blue rounded-full w-5 h-5 flex items-center justify-center">
-                                <IotaLogoSmall className="w-4 h-4" />
-                            </div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-body-lg">{formattedPrice}</span>
+                {!isClaimedAuction ? (
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <div className="text-label-md text-names-neutral-50">Current Bid</div>
+                            <div className="flex mt-1 items-center gap-2">
+                                <div className="bg-names-solid-blue rounded-full w-5 h-5 flex items-center justify-center">
+                                    <IotaLogoSmall className="w-4 h-4" />
+                                </div>
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-body-lg">{formattedPrice}</span>
+                                </div>
                             </div>
                         </div>
+                        <div>
+                            <AuctionActionButton
+                                auction={auction}
+                                auctionStatus={auctionStatus}
+                                onBidClick={onBidClick}
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <AuctionActionButton
-                            auction={auction}
-                            auctionStatus={auctionStatus}
-                            onBidClick={onBidClick}
-                        />
-                    </div>
-                </div>
+                ) : (
+                    <ClaimedAuctionBody auction={auction} />
+                )}
                 <div className="my-4">
                     <Divider type={DividerType.Horizontal} />
                 </div>
@@ -94,6 +102,49 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                 />
             </NameCardBody>
         </NameCard>
+    );
+}
+
+function ClaimedAuctionBody({ auction }: { auction: AuctionDetails }) {
+    const { network } = useIotaClientContext();
+    const name = auction.name;
+    const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
+
+    const nftId = nameRecordData?.type === 'unavailable' ? nameRecordData?.nameRecord?.nftId : null;
+
+    function onViewNftClick(e: MouseEvent) {
+        if (nftId) {
+            e.preventDefault();
+            window.open(
+                `https://explorer.iota.org/object/${nftId}?network=${network}`,
+                '_blank',
+                'noopener,noreferrer',
+            );
+        }
+    }
+
+    return (
+        <div className="flex items-center justify-between">
+            <div>
+                <div className="flex mt-1 items-center gap-2">
+                    <div className="text-label-md text-names-neutral-50">Claimed</div>
+                </div>
+            </div>
+            <div>
+                <Button
+                    text="View NFT"
+                    type={ButtonType.Outlined}
+                    onClick={(e) => onViewNftClick(e)}
+                    disabled={!nftId}
+                    fullWidth
+                    icon={
+                        isNameRecordDataLoading ? (
+                            <Loader className="animate-spin" data-testid="loading-indicator" />
+                        ) : null
+                    }
+                />
+            </div>
+        </div>
     );
 }
 
