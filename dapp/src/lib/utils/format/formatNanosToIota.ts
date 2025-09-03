@@ -10,7 +10,6 @@ interface FormatNanosToIotaOptions {
     formatRounded?: boolean;
     showSign?: boolean;
     showIotaSymbol?: boolean;
-    hasCommaSeparator?: boolean;
 }
 
 export function formatNanosToIota(

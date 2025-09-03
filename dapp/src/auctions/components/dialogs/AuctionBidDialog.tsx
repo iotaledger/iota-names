@@ -66,6 +66,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     }, [minBidNanos]);
 
     const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
+    const finalAmountInIota = bidNanos ? parseNanosToIota(bidNanos) : null;
 
     const {
         data: auctionBidTransaction,
@@ -96,10 +97,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             toast.success(
-                `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
-                    formatRounded: false,
-                    showIotaSymbol: true,
-                })} on ${normalizeIotaName(name)}`,
+                `Successfully placed bid of ${finalAmountInIota} on ${normalizeIotaName(name)}`,
             );
             closeDialog();
             onCompleted?.();
@@ -113,7 +111,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
-    const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
     const isLoading =
@@ -143,13 +140,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
               showIotaSymbol: false,
           })
         : '--';
-    const errorMessage = (() => {
-        if (isBidAboveDecimals) {
-            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
-        } else if (isBidBelowMinimum) {
-            return `Bid must be ≥ ${minBidLabel}`;
-        }
-    })();
+
+    const errorMessage = isBidBelowMinimum ? `Bid must be ≥ ${minBidLabel}` : undefined;
 
     return (
         <Dialog open onOpenChange={closeDialog}>
