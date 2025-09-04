@@ -128,7 +128,7 @@ export function useAuctions({
                         error: !!result.error,
                     };
                 })
-                .filter((auction) => !FORBIDDEN_LIST.some((word) => auction.name.includes(word)))
+                .filter((auction) => !FORBIDDEN_LIST.some((word) => auction.name.includes(word)));
 
             return {
                 data: auctionDetails,
