@@ -47,6 +47,7 @@ export function Navbar() {
                                     href={route.path}
                                     className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
                                     data-testid={`${route.id}-link`}
+                                    {...('isExternal' in route ? { target: '_blank' } : {})}
                                 >
                                     {route.title}
                                 </Link>
