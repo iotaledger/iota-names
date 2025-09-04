@@ -235,6 +235,12 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             isAvailable={false}
                             statusMessage="Name is already taken."
                         />
+                    ) : nameRecordData?.type === 'not-priced' ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            statusMessage="Name is not available."
+                        />
                     ) : (
                         nameRecordData && (
                             <>
