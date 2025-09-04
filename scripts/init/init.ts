@@ -62,7 +62,13 @@ export const init = async (
     // Register names
     let namesToRegisterFile = './init/names-to-register.csv';
     if (fs.existsSync(namesToRegisterFile)) {
-        await processNamesFileBatched(namesToRegisterFile, packageInfo, network, client);
+        await processNamesFileBatched(
+            namesToRegisterFile,
+            packageInfo,
+            network,
+            client,
+            newOwner || packageInfo.adminAddress,
+        );
     }
 
     if (!newOwner) {
