@@ -121,6 +121,10 @@ fun register_names_from_deny_list() {
         utf8(b"one.iota"),
         utf8(b"two.iota"),
     ];
+    let recipients = vector[
+        ctx.sender(),
+        ctx.sender(),
+    ];
     
     {
         scenario.next_tx(ctx.sender());
@@ -143,6 +147,7 @@ fun register_names_from_deny_list() {
             &admin_cap,
             &mut iota_names,
             copy names,
+            recipients,
             1,
             &clock,
             scenario.ctx()
@@ -185,6 +190,12 @@ fun register_multiple() {
         utf8(b"name3.iota"),
         utf8(b"name4.iota")
     ];
+    let recipients = vector[
+        ctx.sender(),
+        ctx.sender(),
+        ctx.sender(),
+        ctx.sender(),
+    ];
     
     {
         scenario.next_tx(ctx.sender());
@@ -201,6 +212,7 @@ fun register_multiple() {
             &admin_cap,
             &mut iota_names,
             copy names,
+            recipients,
             1,
             &clock,
             scenario.ctx()
@@ -242,6 +254,11 @@ fun test_admin_remove_existing_records() {
         utf8(b"name2.iota"),
         utf8(b"name3.iota"),
     ];
+    let recipients = vector[
+        ctx.sender(),
+        ctx.sender(),
+        ctx.sender(),
+    ];
     
     // Register the names first
     {
@@ -259,6 +276,7 @@ fun test_admin_remove_existing_records() {
             &admin_cap,
             &mut iota_names,
             copy names_to_register,
+            recipients,
             1,
             &clock,
             scenario.ctx()
@@ -335,6 +353,10 @@ fun test_admin_remove_mixed_records() {
         utf8(b"existing1.iota"),
         utf8(b"existing2.iota"),
     ];
+    let recipients = vector[
+        ctx.sender(),
+        ctx.sender()
+    ];
     
     let mixed_names = vector[
         utf8(b"existing1.iota"),
@@ -358,6 +380,7 @@ fun test_admin_remove_mixed_records() {
             &admin_cap,
             &mut iota_names,
             copy existing_names,
+            recipients,
             1,
             &clock,
             scenario.ctx()
@@ -445,6 +468,7 @@ fun test_register_names_empty_list_fails() {
             &admin_cap,
             &mut iota_names,
             vector::empty<std::string::String>(),
+            vector::empty<address>(),
             1,
             &clock,
             scenario.ctx()

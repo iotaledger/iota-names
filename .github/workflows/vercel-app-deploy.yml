@@ -23,6 +23,8 @@ on:
         required: false
       NAMES_DAPP_CONFIG:
         required: true
+      NAMES_DAPP_FORBIDDEN_LIST:
+        required: true
 
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -30,6 +32,7 @@ env:
   VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
   NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
   NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}
+  NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

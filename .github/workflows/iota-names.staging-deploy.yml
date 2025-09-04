@@ -23,3 +23,4 @@ jobs:
       VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
       NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
       VERCEL_ALIAS: ${{ secrets.NAMES_DAPP_STAGING_ALIAS }}
+      NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
