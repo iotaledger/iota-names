@@ -50,7 +50,7 @@ export function useNameRecord(
             if (validationError) {
                 throw new Error(validationError);
             }
-            if (!FORBIDDEN_LIST.some((word) => name.includes(word))) {
+            if (FORBIDDEN_LIST.some((word) => name.includes(word))) {
                 throw new Error('Not available.');
             }
 
