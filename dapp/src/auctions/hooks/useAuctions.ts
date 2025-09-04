@@ -119,6 +119,7 @@ export function useAuctions({
         ),
         combine: (results) => {
             const auctionDetails: AuctionDetails[] = auctionNames.names
+                .filter((name) => !FORBIDDEN_LIST.some((word) => name.includes(word)))
                 .map((name, index) => {
                     const result = results[index];
                     return {
@@ -127,8 +128,7 @@ export function useAuctions({
                         isLoading: result.isLoading || result.isPending,
                         error: !!result.error,
                     };
-                })
-                .filter((auction) => !FORBIDDEN_LIST.some((word) => auction.name.includes(word)));
+                });
 
             return {
                 data: auctionDetails,
