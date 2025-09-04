@@ -31,14 +31,31 @@ interface AuctionublicItemProps {
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
     const [, setIsActive] = useState(isAuctionActive(auction.metadata));
+    const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
+        auction.name,
+    );
 
     const isClaimedAuction = !auction.metadata;
-    const auctionDisplayImage = auction.metadata?.nftExpiration
-        ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
-        : null;
+    let auctionDisplayImage = null;
+
+    if (auction.metadata?.nftExpiration) {
+        auctionDisplayImage = getNameDisplaySrc(
+            auction.name,
+            auction.metadata.nftExpiration.getTime(),
+        );
+    } else if (
+        nameRecordData?.type === 'unavailable' &&
+        nameRecordData.nameRecord.expirationTimestampMs
+    ) {
+        auctionDisplayImage = getNameDisplaySrc(
+            auction.name,
+            nameRecordData.nameRecord.expirationTimestampMs,
+        );
+    }
+
     const account = useCurrentAccount();
 
-    if (auction.isLoading) {
+    if (auction.isLoading || isNameRecordDataLoading) {
         return (
             <Card type={CardType.Filled}>
                 <div className="animate-pulse space-y-3">
