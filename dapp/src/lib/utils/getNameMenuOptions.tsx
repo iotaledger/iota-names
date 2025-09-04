@@ -27,7 +27,6 @@ export function getNameMenuOptions(
             ? getNamePermissions(nameRecord.nameRecord)
             : { allowChildCreation: true, allowTimeExtension: true };
 
-    const canRenew = isPaymentAuthorized || false;
     return [
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
@@ -61,7 +60,10 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.RenewName),
             children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
-            isHidden: !canRenew || !namePermissions.allowTimeExtension || isNameGracePeriodExpired,
+            isHidden:
+                !isPaymentAuthorized ||
+                !namePermissions.allowTimeExtension ||
+                isNameGracePeriodExpired,
             isDisabled: !namePermissions.allowTimeExtension,
             hideBottomBorder: true,
         },
