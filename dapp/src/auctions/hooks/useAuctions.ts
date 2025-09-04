@@ -5,6 +5,7 @@ import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient, useIotaNamesIndexerClientContext } from '@/contexts';
 import { queryKey } from '@/hooks';
+import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 
 import { AuctionMetadata } from '../lib/types';
 import { createAuctionMetadataQuery } from '../lib/utils/metadata';
@@ -117,15 +118,17 @@ export function useAuctions({
             }),
         ),
         combine: (results) => {
-            const auctionDetails: AuctionDetails[] = auctionNames.names.map((name, index) => {
-                const result = results[index];
-                return {
-                    name,
-                    metadata: result.data || null,
-                    isLoading: result.isLoading || result.isPending,
-                    error: !!result.error,
-                };
-            });
+            const auctionDetails: AuctionDetails[] = auctionNames.names
+                .filter((name) => !FORBIDDEN_LIST.some((word) => name.includes(word)))
+                .map((name, index) => {
+                    const result = results[index];
+                    return {
+                        name,
+                        metadata: result.data || null,
+                        isLoading: result.isLoading || result.isPending,
+                        error: !!result.error,
+                    };
+                });
 
             return {
                 data: auctionDetails,
