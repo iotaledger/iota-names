@@ -240,7 +240,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 </div>
                                             )}
                                     </div>
-                                    <Panel bgColor="bg-names-neutral-10">
+                                    <Panel bgColor="bg-names-neutral-10 state-layer relative">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">
                                             <div
                                                 className={`flex flex-row items-start gap-x-md ${
