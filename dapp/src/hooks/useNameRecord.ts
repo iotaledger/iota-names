@@ -51,7 +51,9 @@ export function useNameRecord(
                 throw new Error(validationError);
             }
             if (FORBIDDEN_LIST.some((word) => name.includes(word))) {
-                throw new Error('Not available.');
+                return {
+                    nameRecord: null,
+                };
             }
 
             const nameRecord = await iotaNamesClient.getNameRecord(name);
