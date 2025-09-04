@@ -23,6 +23,8 @@ on:
         required: false
       NAMES_DAPP_CONFIG:
         required: true
+      NAMES_DAPP_FORBIDDEN_LIST:
+        required: true
 
 env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
