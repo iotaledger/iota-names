@@ -2,7 +2,7 @@ name: Deploy IOTA-Names Docs to Vercel
 
 on:
   push:
-    branches: [main, develop, devx/deploy-docs-vercel]
+    branches: [develop]
     paths:
       - "documentation/**"
   workflow_dispatch:
@@ -31,9 +31,9 @@ jobs:
         with:
           node-version: 20
 
-      # Force production when building from main
-      - name: Force VERCEL_ENVIRONMENT=production on main
-        if: ${{ github.ref == 'refs/heads/main' }}
+      # Force production when building from develop branch
+      - name: Force VERCEL_ENVIRONMENT=production on develop
+        if: ${{ github.ref == 'refs/heads/develop' }}
         run: echo "VERCEL_ENVIRONMENT=production" >> "$GITHUB_ENV"
 
       # Link Vercel project locally (no vercel pull, no local build)
