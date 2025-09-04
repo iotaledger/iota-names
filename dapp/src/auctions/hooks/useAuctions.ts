@@ -5,7 +5,7 @@ import { keepPreviousData, useQueries, useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient, useIotaNamesIndexerClientContext } from '@/contexts';
 import { queryKey } from '@/hooks';
-import { FORBIDDEN_LIST } from '@/lib/constants/blockList.constants';
+import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 
 import { AuctionMetadata } from '../lib/types';
 import { createAuctionMetadataQuery } from '../lib/utils/metadata';
@@ -128,7 +128,7 @@ export function useAuctions({
                         error: !!result.error,
                     };
                 })
-                .filter((auction) => FORBIDDEN_LIST.includes(auction.name));
+                .filter((auction) => !FORBIDDEN_LIST.some((word) => auction.name.includes(word)));
 
             return {
                 data: auctionDetails,
