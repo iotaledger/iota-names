@@ -42,7 +42,7 @@ export function BuiltForBuilders() {
                         ))}
                     </div>
                     <div className="w-full flex justify-center">
-                        <img src="/landing-page/built-for-builders.png" />
+                        <img src="/landing-page/built-for-builders.png" width={554} />
                     </div>
                 </div>
             </div>
