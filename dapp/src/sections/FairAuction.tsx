@@ -47,7 +47,7 @@ export function FairAuction() {
                             ))}
                         </div>
                     </div>
-                    <img  width={360} src="/landing-page/iota-news.png" />
+                    <img width={360} src="/landing-page/iota-news.png" />
                 </div>
             </div>
         </section>
