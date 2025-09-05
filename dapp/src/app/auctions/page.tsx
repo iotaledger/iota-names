@@ -9,6 +9,7 @@ import {
     FilterList,
     Info,
     Loader,
+    Refresh,
     Search,
     Warning,
 } from '@iota/apps-ui-icons';
@@ -28,6 +29,7 @@ import {
     Input,
     InputType,
     ListItem,
+    LoadingIndicator,
     SegmentedButton,
     Select,
     SelectSize,
@@ -39,6 +41,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
+import { useRefreshAuctions } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
 
@@ -139,6 +142,8 @@ export default function AuctionsPage(): JSX.Element {
         pageSize,
     });
 
+    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctions);
+
     const typeOptions = [
         {
             label: 'All',
@@ -213,7 +218,7 @@ export default function AuctionsPage(): JSX.Element {
                     Auctions
                 </h2>
             </div>
-            <div className="flex justify-between relative">
+            <div className="flex-row md:flex justify-between items-center relative">
                 <div className="flex items-center gap-md">
                     <SegmentedButton>
                         {typeOptions.map((option) => (
@@ -231,9 +236,17 @@ export default function AuctionsPage(): JSX.Element {
                             {totalItems} Total
                         </p>
                     )}
+                    {selectedStatus === 'active' || selectedStatus === 'all' ? (
+                        <Button
+                            type={ButtonType.Outlined}
+                            icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                        />
+                    ) : null}
                 </div>
 
-                <div className="md:flex hidden w-full max-w-[260px] gap-4" ref={dropdownRef}>
+                <div className="mt-4 md:mt-0 flex gap-4 items-center" ref={dropdownRef}>
                     <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-transparent rounded-full [&>div]:rounded-full [&_.input-container]:rounded-full">
                         <Input
                             placeholder="Search auction"
