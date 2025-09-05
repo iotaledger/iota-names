@@ -12,7 +12,7 @@ export function getTargetExpirationDate(renewYears: number): string {
 }
 
 export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
-    return nameRecord.expirationDate.getTime() < Date.now();
+    return nameRecord.expirationDate < new Date();
 }
 
 export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {

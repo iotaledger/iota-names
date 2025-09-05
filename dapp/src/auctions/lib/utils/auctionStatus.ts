@@ -17,8 +17,8 @@ export type UserAuctionStatus =
 export function isAuctionActive(auctionMetadata: AuctionMetadata | null): boolean {
     if (!auctionMetadata) return false;
 
-    const now = Date.now();
-    return now < auctionMetadata.endTimestamp.getTime();
+    const now = new Date();
+    return now < auctionMetadata.endTimestamp;
 }
 
 export function getAuctionMetadataStatus(
