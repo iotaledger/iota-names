@@ -281,7 +281,7 @@ export default function AuctionsPage(): JSX.Element {
                             <Loader className="animate-spin" data-testid="loading-indicator" />
                         </div>
                     ) : (
-                        <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
+                        <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap justify-center sm:justify-start">
                             {auctions.map((auction) => (
                                 <div key={auction.name} className="w-[220px]">
                                     <AuctionPublicItem

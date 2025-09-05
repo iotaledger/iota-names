@@ -80,26 +80,29 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
     return (
         <>
             <Panel>
-                <div className="rounded-[inherit] w-full h-full overflow-hidden">
-                    <Header
-                        onBack={isAtRoot ? undefined : goBack}
-                        title={headerTitle}
-                        onClose={onClose}
-                    />
-
-                    <div className="flex flex-col gap-xxs px-sm w-full">
-                        {subnamesRegistrations.map((sub) => (
-                            <NamePanelTile
-                                key={sub.name}
-                                registration={sub}
-                                onClick={() => goDeeper(sub.name)}
-                                hasSubnames={currentNode.subnames.length > 0}
-                                onRenewClick={() => onRenewClick(sub)}
-                            />
-                        ))}
+                <div className="overflow-hidden rounded-[inherit] min-h-[50vh] md:min-h-full max-h-[90vh] md:max-h-[80vh] w-full flex flex-col">
+                    <div className="[&_.header-bg-color_>.flex-grow]:overflow-hidden [&_.header-bg-color_>.flex-grow_*]:break-words">
+                        <Header
+                            onBack={isAtRoot ? undefined : goBack}
+                            title={headerTitle}
+                            onClose={onClose}
+                        />
+                    </div>
+                    <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+                        <div className="flex flex-col gap-xxs px-sm w-full">
+                            {subnamesRegistrations.map((sub) => (
+                                <NamePanelTile
+                                    key={sub.name}
+                                    registration={sub}
+                                    onClick={() => goDeeper(sub.name)}
+                                    hasSubnames={currentNode.subnames.length > 0}
+                                    onRenewClick={() => onRenewClick(sub)}
+                                />
+                            ))}
+                        </div>
                     </div>
 
-                    <div className="flex flex-col items-center justify-center py-sm">
+                    <div className="shrink-0 flex flex-col items-center justify-center py-sm">
                         <Button
                             text="New Subname"
                             type={ButtonType.Outlined}

@@ -105,7 +105,7 @@ export default function MyNamesPage(): JSX.Element {
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
-        setRightPanelSelectedName(null);
+        closePanel();
     }
 
     function isDefaultName(name: RegistrationNft): boolean {
@@ -113,7 +113,7 @@ export default function MyNamesPage(): JSX.Element {
     }
 
     function handleNameRenewed(name: RegistrationNft): void {
-        setRightPanelSelectedName(null);
+        closePanel();
         toast.success(
             `${normalizeIotaName(name.name, 'at', {
                 truncateLongParts: true,
@@ -121,9 +121,14 @@ export default function MyNamesPage(): JSX.Element {
         );
     }
 
+    function closePanel() {
+        setRightPanelSelectedName(null);
+        document.body.classList.remove('overflow-hidden');
+    }
+
     return (
         <>
-            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
+            <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg ">
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Names
                 </h2>
@@ -198,7 +203,7 @@ export default function MyNamesPage(): JSX.Element {
 
             {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
-                    <div className="gap-lg w-full flex flex-row items-center flex-wrap">
+                    <div className="gap-lg w-full flex flex-row flex-wrap items-center justify-center sm:justify-start">
                         {filteredNames.map((nft) =>
                             'details' in nft ? (
                                 <ExtendedAuctionCard
@@ -210,7 +215,15 @@ export default function MyNamesPage(): JSX.Element {
                                 <ExtendedNameCard
                                     key={nft.name}
                                     nft={nft}
-                                    onSubnameListClick={() => setRightPanelSelectedName(nft)}
+                                    onSubnameListClick={() => {
+                                        setRightPanelSelectedName(nft);
+                                        if (
+                                            typeof window !== 'undefined' &&
+                                            window.innerWidth < 1024
+                                        ) {
+                                            document.body.classList.add('overflow-hidden');
+                                        }
+                                    }}
                                     isActive={rightPanelSelectedName?.name === nft.name}
                                     badge={
                                         isDefaultName(nft) ? (
@@ -226,15 +239,24 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
 
                     {rightPanelSelectedName && (
-                        <div className="sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg">
-                            <SubnamesPanel
-                                selectedName={rightPanelSelectedName}
-                                onClose={() => setRightPanelSelectedName(null)}
-                                onRenewClick={(name) => {
-                                    setSelectedNameForRenewal(name);
-                                }}
+                        <>
+                            <div
+                                className="md:hidden fixed inset-0 bg-iota-primary-0/40 z-40 cursor-pointer"
+                                onClick={closePanel}
                             />
-                        </div>
+                            <div className="fixed max-md:top-1/2 max-md:left-1/2 max-md:-translate-x-1/2 max-md:-translate-y-1/2 max-md:z-50 md:block md:sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg max-md:w-[min(420px,calc(100%-32px))]">
+                                <button
+                                    aria-label="Close"
+                                    className="md:hidden absolute top-md right-md bg-black/40"
+                                    onClick={closePanel}
+                                />
+                                <SubnamesPanel
+                                    selectedName={rightPanelSelectedName}
+                                    onClose={closePanel}
+                                    onRenewClick={(name) => setSelectedNameForRenewal(name)}
+                                />
+                            </div>
+                        </>
                     )}
                 </div>
             )}
