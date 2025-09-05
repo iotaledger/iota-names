@@ -151,5 +151,6 @@ export function createAuctionMetadataQuery({
             return normalizeAuctionData(auctionMetadataBcs);
         },
         enabled: !!auctionsTableObjectId && !!name,
+        // refetchInterval: 10000, // Auto-refresh every 10 seconds
     };
 }

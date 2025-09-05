@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Warning } from '@iota/apps-ui-icons';
+import { Activity, Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -19,6 +19,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -27,7 +28,7 @@ import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupU
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
+import { queryKey, useGetDefaultName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -37,6 +38,7 @@ import { GroupedNamesFilter } from './filters';
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
     const account = useCurrentAccount();
+    const queryClient = useQueryClient();
     const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
         null,
     );
@@ -46,6 +48,7 @@ export default function MyNamesPage(): JSX.Element {
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const {
         data: names,
@@ -121,6 +124,39 @@ export default function MyNamesPage(): JSX.Element {
         );
     }
 
+    async function handleRefresh(): Promise<void> {
+        if (isRefreshing) return;
+
+        setIsRefreshing(true);
+        try {
+            // Invalidate auctions data
+            await queryClient.invalidateQueries({
+                queryKey: queryKey.userAuctionHistory(account?.address),
+            });
+
+            // Invalidate auction metadata
+            await queryClient.invalidateQueries({
+                queryKey: queryKey.auctionList(),
+            });
+
+            // Invalidate auction metadata for specific auctions the user is participating in
+            if (auctionDetails && auctionDetails.length > 0) {
+                const invalidatePromises = auctionDetails.map((auction) =>
+                    queryClient.invalidateQueries({
+                        queryKey: queryKey.auctionMetadata(auction.name),
+                    }),
+                );
+                await Promise.all(invalidatePromises);
+            }
+
+            toast.success('Data refreshed successfully!');
+        } catch (error) {
+            toast.error('Failed to refresh data');
+        } finally {
+            setIsRefreshing(false);
+        }
+    }
+
     return (
         <>
             <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
@@ -128,16 +164,26 @@ export default function MyNamesPage(): JSX.Element {
                     Names
                 </h2>
 
-                <Button
-                    type={ButtonType.Outlined}
-                    text="Name"
-                    icon={<Add />}
-                    onClick={() =>
-                        open({
-                            autoFocusInput: true,
-                        })
-                    }
-                />
+                <div className="flex gap-sm">
+                    <Button
+                        type={ButtonType.Outlined}
+                        text="Name"
+                        icon={<Add />}
+                        onClick={() =>
+                            open({
+                                autoFocusInput: true,
+                            })
+                        }
+                    />
+
+                    <Button
+                        type={ButtonType.Outlined}
+                        text={isRefreshing ? 'Refreshing...' : 'Refresh'}
+                        icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Activity />}
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                    />
+                </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
