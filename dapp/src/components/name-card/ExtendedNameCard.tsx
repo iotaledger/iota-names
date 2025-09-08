@@ -3,15 +3,16 @@
 
 import { Link } from '@iota/apps-ui-icons';
 import { Button, ButtonType } from '@iota/apps-ui-kit';
-import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { NameRecordData, useNameRecord } from '@/hooks';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
+import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import { isNameRecordExpired } from '@/lib/utils/names';
+import { getNamePermissions, isGracePeriodExpired, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -37,7 +38,15 @@ export function ExtendedNameCard({
     const { openDialogId, openDialog, closeDialog } = useNameManageDialog();
 
     const hasSubnames = nameTree ? nameTree?.subnames.length > 0 : false;
-    const menuOptions = getNameMenuOptions(nft, hasSubnames, openDialog, nameRecordData);
+    const { data: paymentMode } = useNamesPurchaseMode();
+
+    const menuOptions = getNameMenuOptions(
+        nft,
+        hasSubnames,
+        openDialog,
+        nameRecordData,
+        paymentMode?.isPaymentAuthorized,
+    );
     const label = normalizeIotaName(nft.name);
 
     const nameRecord = nameRecordData as
@@ -46,17 +55,27 @@ export function ExtendedNameCard({
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const namePermissions = nameRecord
+        ? getNamePermissions(nameRecord.nameRecord)
+        : { allowChildCreation: true, allowTimeExtension: true };
 
+    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
+    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
     const buttonText = (() => {
-        if (expired) {
+        if (expired && !isNameGracePeriodExpired) {
             return 'Renew Name';
+        }
+        if (isNameGracePeriodExpired) {
+            return isNameSubname ? 'Delete Subname' : 'Delete Name';
         }
         return targetAddress ? formatAddress(targetAddress) : 'Connect to address';
     })();
 
     const handleButtonClick = () => {
-        if (expired) {
+        if (expired && !isNameGracePeriodExpired && namePermissions.allowTimeExtension) {
             openDialog(NameDialogId.RenewName);
+        } else if (isNameGracePeriodExpired) {
+            openDialog(NameDialogId.Delete);
         } else {
             openDialog(NameDialogId.ConnectToAddress);
         }
@@ -70,6 +89,7 @@ export function ExtendedNameCard({
                         onSubnameListClick={onSubnameListClick}
                         subnameCount={nameTree?.subnames?.length ?? 0}
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
+                        showAddSubnameLink={!expired && namePermissions.allowChildCreation}
                     />
 
                     <Button

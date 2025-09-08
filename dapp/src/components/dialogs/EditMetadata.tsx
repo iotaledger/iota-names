@@ -3,6 +3,7 @@
 
 'use client';
 
+import { Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -13,6 +14,9 @@ import {
     DialogContent,
     DialogPosition,
     Header,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
     Input,
     InputType,
     LoadingIndicator,
@@ -356,7 +360,11 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         return updates;
     })();
 
-    const { data: updateTransaction, isLoading: isUpdating } = useUpdateNameTransaction({
+    const {
+        data: updateNameTransaction,
+        isLoading: isUpdateNameLoading,
+        error: updateNameError,
+    } = useUpdateNameTransaction({
         address: account?.address || '',
         updates,
     });
@@ -366,10 +374,10 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
 
     const { mutate: handleApply, isPending: isSaving } = useMutation({
         async mutationFn() {
-            if (!updateTransaction) return;
             if (!validateAllFields()) return;
+            if (!updateNameTransaction) return;
             const tx = await signAndExecuteTransaction({
-                transaction: updateTransaction.transaction,
+                transaction: updateNameTransaction.transaction,
             });
             await iotaClient.waitForTransaction({ digest: tx.digest });
         },
@@ -425,9 +433,10 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }
     }
 
-    const isLoading = isUpdating || isSigning || isSaving;
     const hasValidationErrors = Object.values(validationErrors).some((error) => error);
-    const disableApply = isLoading || updates.length === 0 || hasValidationErrors;
+    const isLoading = isUpdateNameLoading || isSigning || isSaving;
+    const disableApply =
+        isLoading || updates.length === 0 || !updateNameTransaction || hasValidationErrors;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -454,7 +463,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                     />
                                 ))}
                             </div>
-
                             <div className="flex flex-col gap-xs">
                                 {METADATA_FIELDS.map(
                                     ({ key, label }) =>
@@ -475,22 +483,32 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                         </div>
                     </div>
                 </DialogBody>
-
-                <div className="flex w-full flex-row gap-x-xs px-md--rs pb-md--rs pt-sm--rs">
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Cancel"
-                        onClick={() => setOpen(false)}
-                        fullWidth
-                    />
-                    <Button
-                        icon={isLoading ? <LoadingIndicator /> : null}
-                        text="Apply"
-                        disabled={disableApply}
-                        type={ButtonType.Primary}
-                        onClick={() => handleApply()}
-                        fullWidth
-                    />
+                <div className="flex flex-col gap-y-md gap-2 p-md--rs">
+                    {updateNameError ? (
+                        <InfoBox
+                            type={InfoBoxType.Error}
+                            style={InfoBoxStyle.Elevated}
+                            icon={<Warning />}
+                            title="Error"
+                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                        />
+                    ) : null}
+                    <div className="flex w-full flex-row gap-x-xs">
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Cancel"
+                            onClick={() => setOpen(false)}
+                            fullWidth
+                        />
+                        <Button
+                            icon={isLoading ? <LoadingIndicator /> : null}
+                            text="Apply"
+                            disabled={disableApply}
+                            type={ButtonType.Primary}
+                            onClick={() => handleApply()}
+                            fullWidth
+                        />
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

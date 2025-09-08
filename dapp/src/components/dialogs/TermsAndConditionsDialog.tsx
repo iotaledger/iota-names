@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+'use client';
+
 import {
     Button,
     ButtonType,
@@ -11,50 +13,68 @@ import {
     DialogPosition,
     Header,
 } from '@iota/apps-ui-kit';
-import { useRouter } from 'next/navigation';
+import { ConnectModal } from '@iota/dapp-kit';
+import TOS from '@legal/tos.mdx';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
-interface TermsAndConditionsDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}
+import { TermsAndConds } from '@/lib/utils/termsAndConditions';
 
-export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditionsDialogProps) {
-    const [termsAccepted, setTermsAccepted] = useState(false);
+export function TermsAndConditionsDialog() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const open = searchParams.get('modal') === 'terms_conditions';
+    const connectOnAccept = searchParams.get('redirect') === 'connect';
+    const [showConnectModal, setShowConnectModal] = useState(false);
+
+    const [termsAccepted, setTermsAccepted] = useState(TermsAndConds.areAccepted);
+
+    function handleAccept() {
+        if (termsAccepted) {
+            TermsAndConds.accept();
+        }
+        if (connectOnAccept) {
+            setShowConnectModal(true);
+        }
+        handleClose();
+    }
+
+    function handleClose() {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete('modal');
+        params.delete('redirect');
+        router.replace(`${window.location.pathname}/?${params.toString()}`, { scroll: false });
+    }
+
+    if (showConnectModal) {
+        return <ConnectModal open onOpenChange={() => setShowConnectModal(false)} trigger />;
+    }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(open) => {
+                if (!open) {
+                    handleClose();
+                }
+            }}
+        >
             <DialogContent
                 containerId="overlay-portal-container"
                 position={DialogPosition.Center}
                 isFixedPosition
                 customWidth="w-full max-w-md md:max-w-2xl xl:max-w-[744px]"
             >
-                <Header title="Terms & Conditions" onClose={() => onOpenChange(false)} />
+                <Header title="Terms & Conditions" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col gap-xl">
                         <div className="flex flex-col gap-md">
                             <span className="text-label-md text-names-neutral-70">
-                                Effective Date: Lorem ipsum
+                                Effective Date: 25 August 2025
                             </span>
-                            <p className="text-body-md text-names-neutral-92">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ac
-                                aliquam neque, quis ullamcorper ipsum. Name ac purus a magna
-                                ullamcorper venenatis ac eu nulla. Integer odio nunc, pretium sed
-                                nibh non, dignissim mattis metus. Donec quis bibendum mi. Donec sed
-                                tortor ullamcorper, tempus urna porta, sollicitudin nulla. Donec
-                                mattis lectus non consectetur sollicitudin. Nunc vel erat sit amet
-                                lectus condimentum fermentum. Vestibulum dapibus eros ut congue
-                                consectetur. Integer laoreet, leo id hendrerit accumsan, nulla
-                                mauris bibendum nisi, id hendrerit erat nunc porttitor erat.
-                                Pellentesque vitae purus ac urna lacinia commodo. In quis nulla
-                                dapibus, mattis metus ac, vulputate arcu. Vestibulum quis velit
-                                risus. Name lacus nisi, lobortis ac tristique eget, viverra ut
-                                libero. Nulla interdum, nibh at egestas fermentum, lorem lectus
-                                consectetur felis, nec rutrum nibh arcu vel lorem. Proin id urna sit
-                                amet odio luctus vulputate vestibulum ut diam.
-                            </p>
+                            <div className="text-body-md text-names-neutral-92">
+                                <TOS />
+                            </div>
                         </div>
                         <div className="flex flex-row items-center justify-between">
                             <Checkbox
@@ -64,7 +84,7 @@ export function TermsAndConditionsDialog({ open, onOpenChange }: TermsAndConditi
                                 isChecked={termsAccepted}
                             />
                             <Button
-                                onClick={() => router.push('/')}
+                                onClick={handleAccept}
                                 type={ButtonType.Primary}
                                 disabled={!termsAccepted}
                                 text="Accept"

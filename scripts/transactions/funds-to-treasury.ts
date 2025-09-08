@@ -17,14 +17,20 @@ if (args.length !== 1) {
 
 const treasuryAddress = args[0]; // First argument should be treasury address
 
-// TODO provide network parameter
 const craftTx = async () => {
-    const txb = new Transaction();
-    const packageInfo = readPackageInfo('devnet');
+    const network = process.env.NETWORK;
+    if (!network) {
+        throw new Error(
+            'Network not defined. Please run `export NETWORK=mainnet|testnet|devnet|localnet`',
+        );
+    }
 
+    const packageInfo = readPackageInfo(network);
+
+    const txb = new Transaction();
     profitsToTreasury(txb, packageInfo, treasuryAddress);
 
-    await prepareMultisigTx(txb, 'devnet', packageInfo.adminAddress);
+    await prepareMultisigTx(txb, network, packageInfo.adminAddress);
 };
 
 craftTx();

@@ -32,7 +32,6 @@ import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { GAS_BALANCE_TOO_LOW_ID, NOT_ENOUGH_BALANCE_ID } from '@/lib/constants';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
@@ -179,6 +178,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.nameRecord(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.getObject(name),
+            });
             toast.success('Name renewed successfully');
         },
         onError(error) {
@@ -210,6 +212,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     function handleYearsChange(years: string) {
         setRenewYears(Number(years));
     }
+
     const renewableYears =
         coreConfig && nameRecord
             ? getNameRenewableYears(
@@ -239,36 +242,43 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             );
         };
         if (updateNameError) {
-            if (
-                updateNameError.message.includes(GAS_BALANCE_TOO_LOW_ID) ||
-                updateNameError.message.includes(NOT_ENOUGH_BALANCE_ID)
-            ) {
-                toast.error(getUserFriendlyErrorMessage(GAS_BALANCE_TOO_LOW_ID));
-            } else {
-                const couponRegex = /^Coupon '([^']*)' validation failed/;
-                const couponMatch = updateNameError.message.match(couponRegex)?.[1];
+            const couponRegex = /^Coupon '([^']*)' validation failed/;
+            const couponMatch = updateNameError.message.match(couponRegex)?.[1];
 
-                if (couponMatch) {
-                    handleErroredCoupon(couponMatch);
-                }
-
-                toast.error(updateNameError.message);
+            if (couponMatch) {
+                handleErroredCoupon(couponMatch);
             }
         }
     }, [updateNameError]);
 
     const wantsToRenew = isNameSubname || !!renewYears;
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = nameRecord?.nameRecord.expirationTimestampMs
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
-        : null;
+    const expirationDate = (() => {
+        if (nameRecord?.nameRecord) {
+            if (isNameSubname && ownedNames && ownedSubnames) {
+                const expirationTime = getParentObject(
+                    ownedNames,
+                    ownedSubnames,
+                    nameRecord.nameRecord.name,
+                )?.expirationTimestampMs;
+                if (expirationTime) {
+                    return new Date(expirationTime);
+                }
+            } else if (!isNameSubname && renewYears) {
+                const expirationDate = new Date(nameRecord.nameRecord.expirationTimestampMs);
+                expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
+                return expirationDate;
+            }
+        }
+    })();
+    const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
     const isLoadingData = isLoadingNameRecord || isLoadingcoreConfig;
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
 
     const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
-    const disableSave = isLoading || !canRenew || !wantsToRenew || !!updateNameError;
+    const disableSave = isLoading || !canRenew || !wantsToRenew || !updateNameTransaction;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (
@@ -302,6 +312,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
+
                             {!isNameSubname && (
                                 <div className="flex flex-col">
                                     <div className="self-end">
@@ -321,14 +332,23 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
                             <div className="flex flex-row gap-x-sm w-full">
                                 <DisplayStats
                                     icon={isLoading ? <LoadingIndicator /> : null}
                                     label="Registration Expires"
-                                    value={expirationDate}
+                                    value={formattedExpirationDate}
                                 />
                             </div>
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

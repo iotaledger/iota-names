@@ -1,10 +1,8 @@
 [package]
 name = "iota_names"
-version = "0.0.2"
 edition = "2024"
 
 [dependencies]
-Iota = { git = "https://github.com/iotaledger/iota.git", subdir = "crates/iota-framework/packages/iota-framework", rev = "framework/testnet" }
 
 [addresses]
 iota_names = "0x0"

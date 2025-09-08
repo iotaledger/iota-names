@@ -22,13 +22,13 @@ export type NameUpdate =
           nftId: string;
           key: string;
           value: string;
-          isSubname?: boolean;
+          isSubname: boolean;
       }
     | {
           type: 'unset-data';
           nftId: string;
           key: string;
-          isSubname?: boolean;
+          isSubname: boolean;
       }
     | {
           type: 'set-target-address';
@@ -187,25 +187,29 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
             }
 
             iotaNamesTx.transaction.setSender(address);
-            const transaction = await iotaNamesTx.transaction.build({
+            const txBytes = await iotaNamesTx.transaction.build({
                 client,
             });
+
             const txDryRun = await client.dryRunTransactionBlock({
-                transactionBlock: transaction,
+                transactionBlock: txBytes,
             });
+
+            if (txDryRun.effects.status.status !== 'success') {
+                throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+            }
+
             return {
-                transaction: iotaNamesTx.transaction,
-                builtTx: transaction,
+                txBytes,
                 txDryRun,
             };
         },
         enabled: !!address && !!updates.length,
         gcTime: 0,
-        select: ({ transaction, txDryRun, builtTx }) => {
+        select: ({ txBytes, txDryRun }) => {
             return {
-                transaction,
+                transaction: Transaction.from(txBytes),
                 gasSummary: getGasSummary(txDryRun),
-                builtTx,
             };
         },
     });
