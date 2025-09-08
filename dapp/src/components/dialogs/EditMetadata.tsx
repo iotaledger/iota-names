@@ -262,7 +262,6 @@ const METADATA_KEYS = [
 const METADATA_FIELDS = METADATA_KEYS.map(({ label, allowedKey }) => ({
     key: ALLOWED_METADATA[allowedKey],
     label,
-    allowedKey,
 }));
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
@@ -277,6 +276,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [metadata, setMetadata] = useState(() => {
         const initial: Record<string, { selected: boolean; data: string }> = {};
         METADATA_FIELDS.forEach(({ key }) => {
@@ -289,40 +289,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         return initial;
     });
 
-    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-    function validateField(key: string, value: string): string | null {
-        const metadataKey = METADATA_KEYS.find((item) =>
-            METADATA_FIELDS.find(
-                (field) => field.key === key && field.allowedKey === item.allowedKey,
-            ),
-        );
-        return metadataKey ? metadataKey.validate(value) : null;
-    }
-
-    function validateAllFields(): boolean {
-        const errors: Record<string, string> = {};
-        let hasErrors = false;
-
-        METADATA_FIELDS.forEach(({ key }) => {
-            const field = metadata[key];
-            if (field?.selected && field.data) {
-                if (!field.data || field.data.trim() === '') {
-                    errors[key] = 'Field is required';
-                    hasErrors = true;
-                } else {
-                    const error = validateField(key, field.data);
-                    if (error) {
-                        errors[key] = error;
-                        hasErrors = true;
-                    }
-                }
-            }
-        });
-
-        setValidationErrors(errors);
-        return !hasErrors;
-    }
-
     const updates: NameUpdate[] = (() => {
         const updates: NameUpdate[] = [];
         const isNameSubname = nameRecord?.nameRecord
@@ -334,7 +300,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 : nameRecord?.nameRecord.nftId;
 
         if (nameRecord && nftId) {
-            METADATA_FIELDS.forEach(({ key, allowedKey }) => {
+            METADATA_FIELDS.forEach(({ key }) => {
                 const field = metadata[key];
                 const currentField = nameRecord.nameRecord.data[key];
 
@@ -374,7 +340,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
 
     const { mutate: handleApply, isPending: isSaving } = useMutation({
         async mutationFn() {
-            if (!validateAllFields()) return;
             if (!updateNameTransaction) return;
             const tx = await signAndExecuteTransaction({
                 transaction: updateNameTransaction.transaction,
@@ -390,6 +355,42 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });
+
+    function validateField(key: string, value: string): string | null {
+        const metadataKey = METADATA_KEYS.find((item) => ALLOWED_METADATA[item.allowedKey] === key);
+        return metadataKey ? metadataKey.validate(value) : null;
+    }
+
+    function validateAllFields(): boolean {
+        const errors: Record<string, string> = {};
+        let hasErrors = false;
+
+        METADATA_FIELDS.forEach(({ key }) => {
+            const field = metadata[key];
+            if (field?.selected) {
+                if (!field.data || field.data.trim() === '') {
+                    errors[key] = 'Field is required';
+                    hasErrors = true;
+                } else {
+                    const error = validateField(key, field.data);
+                    if (error) {
+                        errors[key] = error;
+                        hasErrors = true;
+                    }
+                }
+            }
+        });
+
+        setValidationErrors(errors);
+        return !hasErrors;
+    }
+
+    function hasSelectedEmptyFields(): boolean {
+        return METADATA_FIELDS.some(({ key }) => {
+            const field = metadata[key];
+            return field?.selected && (!field.data || field.data.trim() === '');
+        });
+    }
 
     function updateMetadataData(key: string, data: string) {
         setMetadata((prev) => ({
@@ -419,10 +420,15 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             }
         }
     }
+
     function toggleMetadata(key: string) {
         setMetadata((prev) => ({
             ...prev,
-            [key]: { ...prev[key], selected: !prev[key].selected },
+            [key]: {
+                ...prev[key],
+                selected: !metadata[key]?.selected,
+                data: !metadata[key]?.selected ? prev[key]?.data || '' : '',
+            },
         }));
         if (metadata[key]?.selected) {
             setValidationErrors((prev) => {
@@ -433,10 +439,20 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         }
     }
 
+    function handleApplyClick() {
+        if (!validateAllFields()) return;
+        handleApply();
+    }
+
+    const hasEmptyRequiredFields = hasSelectedEmptyFields();
     const hasValidationErrors = Object.values(validationErrors).some((error) => error);
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
     const disableApply =
-        isLoading || updates.length === 0 || !updateNameTransaction || hasValidationErrors;
+        isLoading ||
+        updates.length === 0 ||
+        !updateNameTransaction ||
+        hasValidationErrors ||
+        hasEmptyRequiredFields;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -505,7 +521,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                             text="Apply"
                             disabled={disableApply}
                             type={ButtonType.Primary}
-                            onClick={() => handleApply()}
+                            onClick={() => handleApplyClick()}
                             fullWidth
                         />
                     </div>
