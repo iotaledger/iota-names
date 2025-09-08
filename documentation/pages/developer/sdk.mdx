@@ -7,22 +7,10 @@ Use the IOTA-Names SDK to interact with the IOTA-Names. Query IOTA-Names data in
 
 ## Installation
 
-<Tabs items={['Using @iota/iota-sdk', 'Using @iota/iota-sdk.js']}>
-    <Tabs.Tab>
-    To use with the latest version of the Typescript SDK, install using:
-    ```sh npm2yarn
-    npm i @iota/iota-names
-    ```
-    </Tabs.Tab>
-      <Tabs.Tab>
-      To use with the older version (prior to 1.x) of the Typescript SDK (0.54.1), install using:
-      ```sh npm2yarn
-    npm i @iota/iota-names@0.0.3
-    ```
-    </Tabs.Tab>
-
-    </Tabs>
-
+To use with the latest version of the TypeScript SDK, install using:
+```sh npm2yarn
+npm i @iota/iota-names-sdk
+```
 
 
 ## `IotaNamesClient`
@@ -45,7 +33,7 @@ or by passing in the constants (usable for any network).
 <Tabs items={['Network initializer', 'Testnet Constants', 'Devnet Constants']}>
     <Tabs.Tab>
 ```js
-import { IotaNamesClient } from '@iota/iota-names';
+import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
  
 // You need an IOTA client. You can re-use the IOTA client of your project
@@ -61,7 +49,7 @@ const iotaNamesClient = new IotaNamesClient({
     </Tabs.Tab>
       <Tabs.Tab>
 ```js
-import { IotaNamesClient } from '@iota/iota-names';
+import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
  
 // You need an IOTA client. You can re-use the IOTA client of your project
@@ -99,7 +87,7 @@ const iotaNamesClient = new IotaNamesClient({
     </Tabs.Tab>
         <Tabs.Tab>
 ```js
-import { IotaNamesClient } from '@iota/iota-names';
+import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getFullnodeUrl, IotaClient } from '@iota/iota-sdk/client';
 
 // You need an IOTA client. You can re-use the IOTA client of your project
