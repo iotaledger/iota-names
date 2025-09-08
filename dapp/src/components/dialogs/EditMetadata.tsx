@@ -361,30 +361,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         return metadataKey ? metadataKey.validate(value) : null;
     }
 
-    function validateAllFields(): boolean {
-        const errors: Record<string, string> = {};
-        let hasErrors = false;
-
-        METADATA_FIELDS.forEach(({ key }) => {
-            const field = metadata[key];
-            if (field?.selected) {
-                if (!field.data || field.data.trim() === '') {
-                    errors[key] = 'Field is required';
-                    hasErrors = true;
-                } else {
-                    const error = validateField(key, field.data);
-                    if (error) {
-                        errors[key] = error;
-                        hasErrors = true;
-                    }
-                }
-            }
-        });
-
-        setValidationErrors(errors);
-        return !hasErrors;
-    }
-
     function hasSelectedEmptyFields(): boolean {
         return METADATA_FIELDS.some(({ key }) => {
             const field = metadata[key];
@@ -437,11 +413,6 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 return newErrors;
             });
         }
-    }
-
-    function handleApplyClick() {
-        if (!validateAllFields()) return;
-        handleApply();
     }
 
     const hasEmptyRequiredFields = hasSelectedEmptyFields();
@@ -521,7 +492,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                             text="Apply"
                             disabled={disableApply}
                             type={ButtonType.Primary}
-                            onClick={() => handleApplyClick()}
+                            onClick={() => handleApply()}
                             fullWidth
                         />
                     </div>
