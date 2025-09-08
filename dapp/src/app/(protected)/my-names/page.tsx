@@ -124,6 +124,7 @@ export default function MyNamesPage(): JSX.Element {
     function closePanel() {
         setRightPanelSelectedName(null);
         document.body.classList.remove('overflow-hidden');
+        delete document.body.dataset.subnamesOpen;
     }
 
     return (
@@ -222,6 +223,7 @@ export default function MyNamesPage(): JSX.Element {
                                             window.innerWidth < 1024
                                         ) {
                                             document.body.classList.add('overflow-hidden');
+                                            document.body.dataset.subnamesOpen = 'true';
                                         }
                                     }}
                                     isActive={rightPanelSelectedName?.name === nft.name}

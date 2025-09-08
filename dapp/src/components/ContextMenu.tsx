@@ -1,10 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-'use client';
-
 import { Dropdown, ListItem } from '@iota/apps-ui-kit';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import { MenuListItem } from '@/lib/types/components';
@@ -13,82 +11,52 @@ interface ContextMenuProps {
     visible: boolean;
     position: { top: number; left: number };
     options: MenuListItem[];
-    dropdownRef: (el: HTMLDivElement | null) => void;
+    dropdownRef?: (el: HTMLDivElement | null) => void;
 }
 
 export function ContextMenuDropdown({ visible, position, options, dropdownRef }: ContextMenuProps) {
-    const [isMobile, setIsMobile] = useState(false);
-    const [style, setStyle] = useState<React.CSSProperties>({});
-    const localRef = useRef<HTMLDivElement | null>(null);
-    const measuredHeightRef = useRef<number>(0);
-
-    useEffect(() => {
-        setIsMobile(window.innerWidth < 900);
-    }, []);
-
-    const recomputePosition = () => {
-        if (!visible) return;
-        const dropdownEl = localRef.current;
-        if (!dropdownEl) return;
-
-        const rect = dropdownEl.getBoundingClientRect();
-        const height = rect.height || measuredHeightRef.current || 0;
-        const { innerHeight } = window;
-        const margin = 8;
-
-        const base: React.CSSProperties = isMobile
-            ? { left: '50%', transform: 'translateX(-50%)', maxWidth: '92vw' }
-            : { left: position.left };
-
-        const safeHeight = height > 0 ? height : 1;
-
-        const isPositionedBelow = position.top + safeHeight + margin <= innerHeight;
-        if (isPositionedBelow) {
-            base.top = position.top;
-        } else {
-            base.top = Math.max(margin, position.top - safeHeight - 50);
-        }
-
-        setStyle(base);
-    };
-
-    useLayoutEffect(() => {
-        if (!visible) return;
-
-        const currentElement = localRef.current;
-        if (!currentElement) return;
-
-        const raf = requestAnimationFrame(() => {
-            const rect = currentElement.getBoundingClientRect();
-            if (rect.height) measuredHeightRef.current = rect.height;
-            recomputePosition();
-        });
-
-        return () => {
-            cancelAnimationFrame(raf);
-        };
-    }, [visible]);
-
+    const lastSent = useRef<HTMLDivElement | null>(null);
     if (!visible) return null;
+
+    const setNode = (node: HTMLDivElement | null) => {
+        if (dropdownRef && lastSent.current !== node) {
+            dropdownRef(node);
+            lastSent.current = node;
+        }
+        if (!node) return;
+
+        const approxHeight = 320;
+        const margin = 8;
+        const GAP_UP = 50;
+        const { innerHeight } = window;
+
+        const isBelowVisibleArea = position.top + approxHeight + margin <= innerHeight;
+
+        node.style.top = '';
+        node.style.bottom = '';
+        node.style.left = `${position.left}px`;
+
+        if (isBelowVisibleArea) {
+            node.style.top = `${position.top + margin}px`;
+        } else {
+            const bottom = innerHeight - position.top + margin + GAP_UP;
+            node.style.bottom = `${bottom}px`;
+        }
+    };
 
     return createPortal(
         <div
-            ref={(dropdownElement) => {
-                localRef.current = dropdownElement;
-                dropdownRef(dropdownElement);
-            }}
-            className="fixed z-50"
-            style={style}
+            ref={setNode}
+            className="fixed z-50 max-h-[calc(100vh-16px)] overflow-y-auto
+                 max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:max-w-[92vw]"
         >
-            <div className="max-w-[92vw] md:max-w-none">
-                <Dropdown>
-                    {options
-                        .filter((option) => !option.isHidden)
-                        .map((item, index) => (
-                            <ListItem key={index} {...item} />
-                        ))}
-                </Dropdown>
-            </div>
+            <Dropdown>
+                {options
+                    .filter((o) => !o.isHidden)
+                    .map((item, i) => (
+                        <ListItem key={i} {...item} />
+                    ))}
+            </Dropdown>
         </div>,
         document.body,
     );
