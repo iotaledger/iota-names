@@ -18,7 +18,7 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
     const lastSent = useRef<HTMLDivElement | null>(null);
     if (!visible) return null;
 
-    const setNode = (node: HTMLDivElement | null) => {
+    const positionContextMenu = (node: HTMLDivElement | null) => {
         if (dropdownRef && lastSent.current !== node) {
             dropdownRef(node);
             lastSent.current = node;
@@ -46,15 +46,15 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
 
     return createPortal(
         <div
-            ref={setNode}
+            ref={positionContextMenu}
             className="fixed z-50 max-h-[calc(100vh-16px)] overflow-y-auto
                  max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:max-w-[92vw]"
         >
             <Dropdown>
                 {options
-                    .filter((o) => !o.isHidden)
-                    .map((item, i) => (
-                        <ListItem key={i} {...item} />
+                    .filter((option) => !option.isHidden)
+                    .map((item, index) => (
+                        <ListItem key={index} {...item} />
                     ))}
             </Dropdown>
         </div>,
