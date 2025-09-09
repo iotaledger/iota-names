@@ -13,8 +13,8 @@ import { NamesLogoWeb } from '@/components/svgs';
 import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { ConnectButton } from '../buttons/ConnectButton';
-import { MobileNavbar } from './Navbar/NavbarMobile';
+import { ConnectButton } from '../../buttons/ConnectButton';
+import { NavbarMobile } from './NavbarMobile';
 
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
@@ -55,9 +55,9 @@ export function Navbar() {
                         </div>
                     </div>
                     <div className="md:hidden">
-                        <MobileNavbar routes={ROUTES}>
+                        <NavbarMobile routes={ROUTES}>
                             <ConnectButton key="connect" />
-                        </MobileNavbar>
+                        </NavbarMobile>
                     </div>
 
                     {isAllowedSearchOnPage && (
