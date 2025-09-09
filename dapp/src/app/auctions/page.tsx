@@ -217,6 +217,14 @@ export default function AuctionsPage(): JSX.Element {
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Auctions
                 </h2>
+                {selectedStatus === 'active' || selectedStatus === 'all' ? (
+                    <Button
+                        type={ButtonType.Outlined}
+                        icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                    />
+                ) : null}
             </div>
             <div className="flex-row md:flex justify-between items-center relative">
                 <div className="flex items-center gap-md">
@@ -236,14 +244,6 @@ export default function AuctionsPage(): JSX.Element {
                             {totalItems} Total
                         </p>
                     )}
-                    {selectedStatus === 'active' || selectedStatus === 'all' ? (
-                        <Button
-                            type={ButtonType.Outlined}
-                            icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
-                            onClick={handleRefresh}
-                            disabled={isRefreshing}
-                        />
-                    ) : null}
                 </div>
 
                 <div className="mt-4 md:mt-0 flex gap-4 items-center" ref={dropdownRef}>
