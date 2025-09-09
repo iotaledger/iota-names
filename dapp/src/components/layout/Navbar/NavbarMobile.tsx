@@ -21,15 +21,16 @@ export function NavbarMobile({ routes, children }: NavbarMobileProps) {
     const [open, setOpen] = useState(false);
 
     function handleOpen() {
-        document.body.classList.add('overflow-hidden');
+        document.documentElement.classList.add('overflow-hidden');
+        document.body.classList.add('overflow-y-scroll');
         setOpen(true);
     }
 
     function handleClose() {
-        document.body.classList.remove('overflow-hidden');
+        document.documentElement.classList.remove('overflow-hidden');
+        document.body.classList.remove('overflow-y-scroll');
         setOpen(false);
     }
-
     return (
         <>
             <button
