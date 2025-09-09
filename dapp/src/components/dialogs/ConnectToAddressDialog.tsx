@@ -174,11 +174,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
 
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
-    const disableApply = !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading;
+    const disableApply =
+        !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading || !updateNameTransaction;
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
     const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
-
+    const errorMessage =
+        editTargetAddress && !isValidAddressOrEmpty ? 'Not a valid IOTA address' : undefined;
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -188,8 +190,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 />
 
                 <DialogBody>
-                    <div className="flex flex-col h-full justify-between">
-                        <div className="flex flex-col gap-y-md">
+                    <div className="flex flex-col h-full w-full justify-between">
+                        <div className="flex flex-col h-full w-full gap-y-lg">
                             {isSuccess ? (
                                 <UpdatesResult name={name} updates={appliedUpdates} />
                             ) : (
@@ -207,13 +209,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 onChange={handleAddressChange}
                                                 onClearInput={() => setEditTargetAddress('')}
                                                 disabled={disableEdit}
-                                                errorMessage={
-                                                    editTargetAddress && !isValidAddressOrEmpty
-                                                        ? 'Not a valid IOTA address'
-                                                        : getUserFriendlyErrorMessage(
-                                                              updateNameError || '',
-                                                          )
-                                                }
+                                                errorMessage={errorMessage}
                                             />
                                         </div>
                                         {!isTargetingCurrentAddress && (
@@ -244,9 +240,20 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 </div>
                                             )}
                                     </div>
-                                    <Panel bgColor="bg-names-neutral-10">
+                                    <Panel bgColor="bg-names-neutral-10 state-layer relative">
                                         <div className="flex flex-col rounded-lg p-md gap-y-md">
-                                            <div className="flex flex-row items-start gap-x-md">
+                                            <div
+                                                className={`flex flex-row items-start gap-x-md ${
+                                                    !disableEdit && isTargetingCurrentAddress
+                                                        ? 'cursor-pointer'
+                                                        : 'cursor-not-allowed'
+                                                }`}
+                                                onClick={() => {
+                                                    if (!disableEdit && isTargetingCurrentAddress) {
+                                                        setEditIsDefaultName(!editIsDefaultName);
+                                                    }
+                                                }}
+                                            >
                                                 <div className=" flex flex-col gap-y-xxs">
                                                     <span className="text-title-md text-names-neutral-100">
                                                         Set as Display name
@@ -307,31 +314,41 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                 </>
                             )}
                         </div>
-
-                        <div className="flex w-full flex-row gap-x-xs mt-xs">
-                            <Button
-                                type={ButtonType.Secondary}
-                                text="Cancel"
-                                onClick={handleClose}
-                                fullWidth
-                            />
-                            {isSuccess ? (
+                        <div className="flex flex-col w-full gap-y-md">
+                            {updateNameError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
-                                    type={ButtonType.Primary}
-                                    text="Finish"
+                                    type={ButtonType.Secondary}
+                                    text="Cancel"
                                     onClick={handleClose}
                                     fullWidth
                                 />
-                            ) : (
-                                <Button
-                                    type={ButtonType.Primary}
-                                    text="Apply"
-                                    icon={isLoading ? <LoadingIndicator /> : null}
-                                    onClick={() => apply()}
-                                    disabled={disableApply}
-                                    fullWidth
-                                />
-                            )}
+                                {isSuccess ? (
+                                    <Button
+                                        type={ButtonType.Primary}
+                                        text="Finish"
+                                        onClick={handleClose}
+                                        fullWidth
+                                    />
+                                ) : (
+                                    <Button
+                                        type={ButtonType.Primary}
+                                        text="Apply"
+                                        icon={isLoading ? <LoadingIndicator /> : null}
+                                        onClick={() => apply()}
+                                        disabled={disableApply}
+                                        fullWidth
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </DialogBody>

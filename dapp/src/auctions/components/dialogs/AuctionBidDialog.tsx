@@ -26,7 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, safeParseAmount } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -35,19 +35,8 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import {
-    NameRecordData,
-    queryKey,
-    useBalanceValidation,
-    useCalculatePriceInFiat,
-    useNameRecord,
-} from '@/hooks';
-import {
-    GAS_BALANCE_TOO_LOW_ID,
-    INSUFFICIENT_COIN_BALANCE_ID,
-    NOT_ENOUGH_BALANCE_ID,
-} from '@/lib/constants';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { NameRecordData, queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
 import { toNanos } from '@/lib/utils/amount';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -82,16 +71,11 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     // Sync the minimum bid amount
     useEffect(() => {
         if (minBidNanos) {
-            setBidAmountValue(
-                formatNanosToIota(minBidNanos, {
-                    formatRounded: false,
-                    showIotaSymbol: false,
-                }),
-            );
+            setBidAmountValue(parseNanosToIota(minBidNanos).toString());
         }
     }, [minBidNanos]);
 
-    const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
+    const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
 
     const {
         data: auctionBidTransaction,
@@ -103,11 +87,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         bidNanos: bidNanos ?? BigInt(0),
     });
 
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        auctionBidTransaction?.builtTx ?? null,
-        Number(bidNanos),
-    );
-
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -117,9 +96,16 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 transaction: auctionBidTransaction,
             });
 
-            await iotaClient.waitForTransaction({
+            const response = await iotaClient.waitForTransaction({
                 digest: transactionResult.digest,
+                options: {
+                    showEffects: true,
+                },
             });
+
+            if (response?.effects?.status.status === 'failure') {
+                throw new Error('Transaction failed');
+            }
         },
         onSuccess() {
             queryClient.invalidateQueries({
@@ -140,27 +126,16 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         },
     });
 
-    const hasEnoughGas =
-        !balanceValidationError?.message.includes(NOT_ENOUGH_BALANCE_ID) &&
-        !balanceValidationError?.message.includes(GAS_BALANCE_TOO_LOW_ID) &&
-        !balanceValidationError?.message.includes(INSUFFICIENT_COIN_BALANCE_ID);
-
     const status = auctionMetadata && getUserAuctionStatus(auctionMetadata, account?.address || '');
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
-    const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid =
-        isPending ||
-        isLoading ||
-        isBidBelowMinimum ||
-        !balanceValidation?.hasBalance ||
-        !hasEnoughGas;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum || !auctionBidTransaction;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -184,19 +159,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
               showIotaSymbol: false,
           })
         : '--';
-    const errorMessage = (() => {
-        if (isBidAboveDecimals) {
-            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
-        } else if (isBidBelowMinimum) {
-            return `Bid must be ≥ ${minBidLabel}`;
-        } else if (!hasEnoughGas) {
-            return getUserFriendlyErrorMessage(NOT_ENOUGH_BALANCE_ID);
-        } else if (auctionError) {
-            return getUserFriendlyErrorMessage(auctionError);
-        } else if (balanceValidationError) {
-            return getUserFriendlyErrorMessage(balanceValidationError);
-        }
-    })();
+
+    const errorMessage = isBidBelowMinimum ? `Bid must be ≥ ${minBidLabel}` : undefined;
 
     return (
         <Dialog open onOpenChange={closeDialog}>
@@ -263,7 +227,16 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             {auctionMetadata && (
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                             )}
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            {auctionError ? (
+                                <InfoBox
+                                    type={InfoBoxType.Error}
+                                    style={InfoBoxStyle.Elevated}
+                                    icon={<Warning />}
+                                    title="Error"
+                                    supportingText={getUserFriendlyErrorMessage(auctionError)}
+                                />
+                            ) : null}
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { Toaster } from '@/components/Toaster';
+import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
@@ -39,7 +40,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     );
 
     const allNetworks = getAllNetworks();
-    const defaultNetwork = process.env.NEXT_PUBLIC_NAMES_NETWORK;
+    const defaultNetwork = CONFIG.network;
 
     function handleNetworkChange() {
         queryClient.resetQueries();

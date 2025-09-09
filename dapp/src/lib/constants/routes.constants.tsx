@@ -3,26 +3,30 @@
 
 import { Discord, SmX } from '@iota/apps-ui-icons';
 
-import { ProtectedRouteTitle } from '../enums';
+import { RouteTitle } from '../enums';
 import type { Route } from '../interfaces';
 
 export const MY_NAMES_ROUTE: Route = {
-    title: ProtectedRouteTitle.MyNames,
+    title: RouteTitle.MyNames,
     path: '/my-names',
     id: 'my-names',
-    isProtected: true,
 };
 
 export const AUCTION_ROUTE: Route = {
-    title: ProtectedRouteTitle.Auction,
+    title: RouteTitle.Auction,
     path: '/auctions',
     id: 'auctions',
-    isProtected: true,
 };
 
-export const PROTECTED_ROUTES = [MY_NAMES_ROUTE, AUCTION_ROUTE] as const satisfies Route[];
+export const DOCS_ROUTE: Route = {
+    title: RouteTitle.Documentation,
+    path: 'https://docs.iotanames.com',
+    isExternal: true,
+};
 
-export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE] as const satisfies Route[];
+export const PROTECTED_ROUTES = [MY_NAMES_ROUTE] as const satisfies Route[];
+
+export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE, DOCS_ROUTE] as const satisfies Route[];
 
 export const CONNECT_ROUTE: Route = {
     path: '/',
@@ -42,10 +46,6 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
 export const FOOTER_LEGAL_LINKS: Route[] = [
     {
         title: 'Terms & Conditions',
-        path: '/?modal=terms_conditions',
-    },
-    {
-        title: 'Privacy Policy',
-        path: '',
+        path: '?modal=terms_conditions',
     },
 ];

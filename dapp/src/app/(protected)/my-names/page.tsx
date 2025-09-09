@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Warning } from '@iota/apps-ui-icons';
+import { Add, Info, Refresh, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -18,13 +18,16 @@ import {
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { useAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
+import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
+import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -34,6 +37,10 @@ import { GroupedNamesFilter } from './filters';
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
     const account = useCurrentAccount();
+
+    const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
+        null,
+    );
     const [rightPanelSelectedName, setRightPanelSelectedName] = useState<RegistrationNft | null>(
         null,
     );
@@ -59,6 +66,8 @@ export default function MyNamesPage(): JSX.Element {
         userAddress: account?.address,
         status: 'all',
     });
+
+    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctionDetails);
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: defaultName } = useGetDefaultName(address);
@@ -86,6 +95,8 @@ export default function MyNamesPage(): JSX.Element {
         }
     })();
 
+    const totalItemsCount = filteredNames.length;
+
     const noCardToDisplay =
         !isLoadingCards &&
         filteredNames.length === 0 &&
@@ -104,6 +115,15 @@ export default function MyNamesPage(): JSX.Element {
         return defaultName ? defaultName === name.name : false;
     }
 
+    function handleNameRenewed(name: RegistrationNft): void {
+        setRightPanelSelectedName(null);
+        toast.success(
+            `${normalizeIotaName(name.name, 'at', {
+                truncateLongParts: true,
+            })} renewed successfully!`,
+        );
+    }
+
     return (
         <>
             <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
@@ -111,19 +131,36 @@ export default function MyNamesPage(): JSX.Element {
                     Names
                 </h2>
 
-                <Button
-                    type={ButtonType.Outlined}
-                    text="Name"
-                    icon={<Add />}
-                    onClick={() =>
-                        open({
-                            autoFocusInput: true,
-                        })
-                    }
-                />
+                <div className="flex gap-sm">
+                    <Button
+                        type={ButtonType.Outlined}
+                        text="Name"
+                        icon={<Add />}
+                        onClick={() =>
+                            open({
+                                autoFocusInput: true,
+                            })
+                        }
+                    />
+                    {selectedFilter === GroupedNamesFilter.InAuction ||
+                    selectedFilter === GroupedNamesFilter.All ? (
+                        <Button
+                            type={ButtonType.Outlined}
+                            icon={
+                                isRefreshing ? (
+                                    <LoadingIndicator size="w-5 h-5" />
+                                ) : (
+                                    <Refresh className="w-5 h-5" />
+                                )
+                            }
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                        />
+                    ) : null}
+                </div>
             </div>
 
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
                 <SegmentedButton>
                     {Object.entries(GroupedNamesFilter).map(([key, value]) => (
                         <ButtonSegment
@@ -140,6 +177,11 @@ export default function MyNamesPage(): JSX.Element {
                         />
                     ))}
                 </SegmentedButton>
+                {!isLoadingCards && (
+                    <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
+                        {totalItemsCount} Total
+                    </p>
+                )}
             </div>
 
             {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
@@ -208,10 +250,20 @@ export default function MyNamesPage(): JSX.Element {
                             <SubnamesPanel
                                 selectedName={rightPanelSelectedName}
                                 onClose={() => setRightPanelSelectedName(null)}
+                                onRenewClick={(name) => {
+                                    setSelectedNameForRenewal(name);
+                                }}
                             />
                         </div>
                     )}
                 </div>
+            )}
+            {selectedNameForRenewal && (
+                <RenewNameDialog
+                    name={selectedNameForRenewal.name}
+                    setOpen={() => setSelectedNameForRenewal(null)}
+                    onRenew={() => handleNameRenewed(selectedNameForRenewal)}
+                />
             )}
         </>
     );
