@@ -7,11 +7,11 @@ import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
 
-export function useCoreConfig() {
+export function useNamesConfig() {
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: [...queryKey.coreConfig()],
+        queryKey: [...queryKey.namesConfig()],
         queryFn: async () => {
             return {
                 coreConfig: await iotaNamesClient.getCoreConfig(),

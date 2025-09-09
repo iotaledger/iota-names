@@ -30,7 +30,7 @@ import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
-import { useCoreConfig } from '@/hooks/useCoreConfig';
+import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
@@ -119,7 +119,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const { data: nameRecordData, isLoading: isLoadingNameRecord } = useNameRecord(name);
-    const { data: config, isLoading: isLoadingConfig } = useCoreConfig();
+    const { data: config, isLoading: isLoadingConfig } = useNamesConfig();
 
     // We are sure that only owned names are passed here
     const nameRecord = nameRecordData as
@@ -300,6 +300,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         !updateNameTransaction ||
         isBelowMinimumRenewalPeriod;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
+    const minimumDuration = config
+        ? config.subnamesConfig.minimum_duration / (1000 * 60 * 60)
+        : '24';
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -332,15 +335,13 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            {isNameSubname && isBelowMinimumRenewalPeriod && config && (
+                            {isNameSubname && isBelowMinimumRenewalPeriod && minimumDuration && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Warning />}
                                     title="Your renewal period is below the minimum"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`You need to renew for a longer period. The minimum renewal period is ${
-                                        config.subnamesConfig.minimum_duration / (1000 * 60 * 60)
-                                    } hours.`}
+                                    supportingText={`You need to renew for a longer period. The minimum renewal period is ${minimumDuration} hours.`}
                                 />
                             )}
 
@@ -377,10 +378,12 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     label="Current Registration Expires"
                                     value={currentExpirationDate}
                                 />
-                                <DisplayStats
-                                    label="Next Expiration Date"
-                                    value={formattedExpirationDate}
-                                />
+                                {canRenew && wantsToRenew && (
+                                    <DisplayStats
+                                        label="Next Expiration Date"
+                                        value={formattedExpirationDate}
+                                    />
+                                )}
                             </div>
                             <div className="flex w-full flex-row gap-x-xs">
                                 <Button
