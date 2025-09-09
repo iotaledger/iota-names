@@ -23,19 +23,11 @@ export function NavbarMobile({ routes, children }: NavbarMobileProps) {
     function handleOpen() {
         document.body.classList.add('overflow-hidden');
         setOpen(true);
-
-        if (window.innerWidth > 500) {
-            document.body.dataset.navbarMobileOpen = 'true';
-        }
     }
 
     function handleClose() {
         document.body.classList.remove('overflow-hidden');
         setOpen(false);
-
-        if (window.innerWidth > 500) {
-            delete document.body.dataset.navbarMobileOpen;
-        }
     }
 
     return (
