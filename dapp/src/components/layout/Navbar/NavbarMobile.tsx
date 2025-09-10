@@ -22,13 +22,11 @@ export function NavbarMobile({ routes, children }: NavbarMobileProps) {
 
     function handleOpen() {
         document.documentElement.classList.add('overflow-hidden');
-        document.body.classList.add('overflow-y-scroll');
         setOpen(true);
     }
 
     function handleClose() {
         document.documentElement.classList.remove('overflow-hidden');
-        document.body.classList.remove('overflow-y-scroll');
         setOpen(false);
     }
     return (
