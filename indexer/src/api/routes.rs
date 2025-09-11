@@ -6,11 +6,8 @@ use std::str::FromStr;
 use axum::{
     Json, Router,
     extract::{Path, State},
-    routing::{delete, get, post},
-};
-use axum_extra::{
-    TypedHeader,
-    headers::{Authorization, authorization::Bearer},
+    middleware::from_extractor,
+    routing::get,
 };
 use iota_types::base_types::IotaAddress;
 use tower_http::cors::{Any, CorsLayer};
@@ -18,6 +15,7 @@ use tower_http::cors::{Any, CorsLayer};
 use crate::{
     api::{
         ApiState,
+        auth::Auth,
         error::ApiError,
         extractors::{AuctionsPagination, BidderNamesPagination},
         responses::{
@@ -34,14 +32,19 @@ pub fn routes() -> Router<ApiState> {
         .route("/auctions", get(get_auctions))
         .route("/auctions/{address}", get(get_auctions_for_address));
 
-    let protected_routes = Router::new()
-        .route("/admin/blocked-strings", post(block_string))
-        .route("/admin/blocked-strings", delete(unblock_string))
-        .route("/admin/blocked-strings", get(get_blocked_strings_list));
+    let protected_routes = Router::new().route(
+        "/blocked-strings",
+        get(get_blocked_strings_list)
+            .post(block_string)
+            .delete(unblock_string),
+    );
 
     Router::new()
         .merge(public_routes)
-        .merge(protected_routes)
+        .nest(
+            "/admin",
+            protected_routes.route_layer(from_extractor::<Auth>()),
+        )
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -52,19 +55,6 @@ pub fn routes() -> Router<ApiState> {
 
 async fn health_check() -> &'static str {
     "OK"
-}
-
-fn validate_admin_auth(auth: TypedHeader<Authorization<Bearer>>) -> Result<(), ApiError> {
-    const ADMIN_API_KEY_ENV: &str = "ADMIN_API_KEY";
-
-    let expected_key = std::env::var(ADMIN_API_KEY_ENV)
-        .map_err(|_| ApiError::Unauthorized("Admin API key not configured".to_string()))?;
-
-    if auth.token() != expected_key {
-        return Err(ApiError::Unauthorized("Invalid API key".to_string()));
-    }
-
-    Ok(())
 }
 
 async fn get_auctions_for_address(
@@ -145,12 +135,9 @@ async fn get_auctions(
 // Admin endpoints for blocking/unblocking strings
 
 async fn block_string(
-    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
     State(state): State<ApiState>,
     Json(payload): Json<BlockStringRequest>,
 ) -> Result<BlockStringResponse, ApiError> {
-    validate_admin_auth(TypedHeader(auth))?;
-
     let mut conn = state.pool.get_connection()?;
 
     match queries::add_blocked_string(&mut conn, &payload.string) {
@@ -178,12 +165,9 @@ async fn block_string(
 }
 
 async fn unblock_string(
-    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
     State(state): State<ApiState>,
     Json(payload): Json<UnblockStringRequest>,
 ) -> Result<BlockStringResponse, ApiError> {
-    validate_admin_auth(TypedHeader(auth))?;
-
     let mut conn = state.pool.get_connection()?;
 
     let removed = queries::remove_blocked_string(&mut conn, &payload.string)?;
@@ -202,11 +186,8 @@ async fn unblock_string(
 }
 
 async fn get_blocked_strings_list(
-    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
     State(state): State<ApiState>,
 ) -> Result<BlockedStringsResponse, ApiError> {
-    validate_admin_auth(TypedHeader(auth))?;
-
     let mut conn = state.pool.get_connection()?;
     let blocked_strings = queries::get_blocked_strings(&mut conn)?;
 

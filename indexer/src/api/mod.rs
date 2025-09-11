@@ -8,6 +8,7 @@ use tracing::info;
 
 use crate::db::pool::DbConnectionPool;
 
+mod auth;
 mod error;
 mod extractors;
 mod responses;
