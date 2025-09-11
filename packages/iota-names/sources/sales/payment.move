@@ -50,6 +50,8 @@ const EVersionMismatch: vector<u8> =
 const ECannotRenewSubname: vector<u8> = b"Cannot renew a subname using the payment system.";
 #[error]
 const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of years.";
+#[error]
+const EYearsMustBePositive: vector<u8> = b"Years must be greater than zero.";
 
 /// The data required to complete a payment request.
 public struct RequestData has drop {
@@ -153,6 +155,7 @@ public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentI
 public fun init_registration_with_years(iota_names: &mut IotaNames, name: String, years: u8): PaymentIntent {
     let name = name::new(name);
     validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
+    assert!(years > 0, EYearsMustBePositive);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
 
     // Calculate price for first year using registration pricing
@@ -188,6 +191,7 @@ public fun init_renewal(
 ): PaymentIntent {
     let name = nft.name();
     assert!(!name.is_subname(), ECannotRenewSubname);
+    assert!(years > 0, EYearsMustBePositive);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
 
     let price = iota_names

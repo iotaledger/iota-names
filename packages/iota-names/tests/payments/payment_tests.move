@@ -483,6 +483,15 @@ fun test_e2e_multi_year_registration() {
     destroy(clock);
 }
 
+#[test, expected_failure(abort_code = ::iota_names::payment::EYearsMustBePositive)]
+fun test_init_registration_with_zero_years() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let name = b"test.iota".to_string();
+    let _intent = payment::init_registration_with_years(&mut iota_names, name, 0);
+    abort 1337
+}
+
 public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
     let (mut iota_names, cap) = iota_names::new_for_testing(ctx);
 
