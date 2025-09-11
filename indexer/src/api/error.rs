@@ -11,6 +11,8 @@ use reqwest::StatusCode;
 pub enum ApiError {
     // Invalid input data (e.g., malformed address)
     BadRequest(String),
+    // Unauthorized access
+    Unauthorized(String),
     // Database connection or query errors
     Database(anyhow::Error),
     // Internal server errors
@@ -26,6 +28,13 @@ impl IntoResponse for ApiError {
                 StatusCode::BAD_REQUEST,
                 Json(serde_json::json!({
                     "error": "Bad Request",
+                    "message": msg
+                })),
+            ),
+            ApiError::Unauthorized(msg) => (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({
+                    "error": "Unauthorized",
                     "message": msg
                 })),
             ),

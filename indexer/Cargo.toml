@@ -11,6 +11,7 @@ description = "IOTA-Names Indexer"
 anyhow = "1.0"
 async-trait = "0.1"
 axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
+axum-extra = { version = "0.10", features = ["typed-header"] }
 bcs = "0.1"
 chrono = "0.4.41"
 clap = { version = "4.4", features = ["derive", "wrap_help", "env"] }

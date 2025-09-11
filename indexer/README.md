@@ -79,3 +79,66 @@ Returns all names that a specific address has bid on.
 ```bash
 curl http://localhost:3030/auctions/0x111111111504e9350e635d65cd38ccd2c029434c6a3a480d8947a9ba6a15b215
 ```
+
+## Admin Endpoints for Blocked Strings
+
+All admin endpoints require an `Authorization: Bearer <API_KEY>` header.
+
+### Block a String
+
+```
+POST /admin/blocked-strings
+```
+
+**Request body:**
+
+```json
+{
+  "string": "badword"
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:3030/admin/blocked-strings \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"string":"badword"}'
+```
+
+### Unblock a String
+
+```
+DELETE /admin/blocked-strings
+```
+
+**Request body:**
+
+```json
+{
+  "string": "badword"
+}
+```
+
+**Example:**
+
+```bash
+curl -X DELETE http://localhost:3030/admin/blocked-strings \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"string":"badword"}'
+```
+
+### List All Blocked Strings
+
+```
+GET /admin/blocked-strings
+```
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:3030/admin/blocked-strings \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY"
+```

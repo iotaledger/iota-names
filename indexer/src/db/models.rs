@@ -38,6 +38,12 @@ pub struct Auction {
     pub claimed: bool,
 }
 
+#[derive(diesel::Insertable)]
+#[diesel(table_name = blocked_strings)]
+pub struct NewBlockedString<'a> {
+    pub blocked_string: &'a str,
+}
+
 diesel::table! {
     names (id) {
         id -> Int4,
@@ -79,4 +85,11 @@ diesel::joinable!(bids -> names (name_id));
 diesel::joinable!(bids -> bidders (bidder_id));
 diesel::joinable!(auctions -> names (name_id));
 
-diesel::allow_tables_to_appear_in_same_query!(bidders, names, bids, auctions);
+diesel::table! {
+    blocked_strings (id) {
+        id -> Integer,
+        blocked_string -> Text,
+    }
+}
+
+diesel::allow_tables_to_appear_in_same_query!(auctions, bidders, bids, blocked_strings, names,);

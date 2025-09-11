@@ -4,9 +4,13 @@
 use std::str::FromStr;
 
 use axum::{
-    Router,
+    Json, Router,
     extract::{Path, State},
-    routing::get,
+    routing::{delete, get, post},
+};
+use axum_extra::{
+    TypedHeader,
+    headers::{Authorization, authorization::Bearer},
 };
 use iota_types::base_types::IotaAddress;
 use tower_http::cors::{Any, CorsLayer};
@@ -16,16 +20,28 @@ use crate::{
         ApiState,
         error::ApiError,
         extractors::{AuctionsPagination, BidderNamesPagination},
-        responses::AuctionsResponse,
+        responses::{
+            AuctionsResponse, BlockStringRequest, BlockStringResponse, BlockedStringsResponse,
+            UnblockStringRequest,
+        },
     },
     db::queries,
 };
 
 pub fn routes() -> Router<ApiState> {
-    Router::new()
+    let public_routes = Router::new()
         .route("/health", get(health_check))
         .route("/auctions", get(get_auctions))
-        .route("/auctions/{address}", get(get_auctions_for_address))
+        .route("/auctions/{address}", get(get_auctions_for_address));
+
+    let protected_routes = Router::new()
+        .route("/admin/blocked-strings", post(block_string))
+        .route("/admin/blocked-strings", delete(unblock_string))
+        .route("/admin/blocked-strings", get(get_blocked_strings_list));
+
+    Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -36,6 +52,19 @@ pub fn routes() -> Router<ApiState> {
 
 async fn health_check() -> &'static str {
     "OK"
+}
+
+fn validate_admin_auth(auth: TypedHeader<Authorization<Bearer>>) -> Result<(), ApiError> {
+    const ADMIN_API_KEY_ENV: &str = "ADMIN_API_KEY";
+
+    let expected_key = std::env::var(ADMIN_API_KEY_ENV)
+        .map_err(|_| ApiError::Unauthorized("Admin API key not configured".to_string()))?;
+
+    if auth.token() != expected_key {
+        return Err(ApiError::Unauthorized("Invalid API key".to_string()));
+    }
+
+    Ok(())
 }
 
 async fn get_auctions_for_address(
@@ -111,4 +140,75 @@ async fn get_auctions(
         page_size,
         total_items,
     })
+}
+
+// Admin endpoints for blocking/unblocking strings
+
+async fn block_string(
+    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+    State(state): State<ApiState>,
+    Json(payload): Json<BlockStringRequest>,
+) -> Result<BlockStringResponse, ApiError> {
+    validate_admin_auth(TypedHeader(auth))?;
+
+    let mut conn = state.pool.get_connection()?;
+
+    match queries::add_blocked_string(&mut conn, &payload.string) {
+        Ok(_) => Ok(BlockStringResponse {
+            success: true,
+            message: format!("String '{}' has been blocked", payload.string),
+        }),
+        Err(e) => {
+            if let Some(diesel_error) = e.downcast_ref::<diesel::result::Error>() {
+                match diesel_error {
+                    diesel::result::Error::DatabaseError(
+                        diesel::result::DatabaseErrorKind::UniqueViolation,
+                        _,
+                    ) => Ok(BlockStringResponse {
+                        success: false,
+                        message: format!("String '{}' is already blocked", payload.string),
+                    }),
+                    _ => Err(ApiError::Database(e)),
+                }
+            } else {
+                Err(ApiError::Database(e))
+            }
+        }
+    }
+}
+
+async fn unblock_string(
+    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+    State(state): State<ApiState>,
+    Json(payload): Json<UnblockStringRequest>,
+) -> Result<BlockStringResponse, ApiError> {
+    validate_admin_auth(TypedHeader(auth))?;
+
+    let mut conn = state.pool.get_connection()?;
+
+    let removed = queries::remove_blocked_string(&mut conn, &payload.string)?;
+
+    if removed {
+        Ok(BlockStringResponse {
+            success: true,
+            message: format!("String '{}' has been unblocked", payload.string),
+        })
+    } else {
+        Ok(BlockStringResponse {
+            success: false,
+            message: format!("String '{}' was not found in blocked list", payload.string),
+        })
+    }
+}
+
+async fn get_blocked_strings_list(
+    TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+    State(state): State<ApiState>,
+) -> Result<BlockedStringsResponse, ApiError> {
+    validate_admin_auth(TypedHeader(auth))?;
+
+    let mut conn = state.pool.get_connection()?;
+    let blocked_strings = queries::get_blocked_strings(&mut conn)?;
+
+    Ok(BlockedStringsResponse { blocked_strings })
 }
