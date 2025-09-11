@@ -382,6 +382,107 @@ fun test_calculate_total_after_discount() {
     destroy(iota_names);
 }
 
+#[test]
+fun test_init_registration_with_years() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+
+    let name = b"test.iota".to_string();
+
+    // Test 1 year registration (should be same as normal registration)
+    let intent_1_year = payment::init_registration_with_years(&mut iota_names, name, 1);
+    assert_eq(intent_1_year.request_data().base_amount(), 100); // registration price for 4-char name
+    assert_eq(intent_1_year.request_data().years(), 1);
+
+    // Test 3 year registration (1 year registration + 2 years renewal)
+    // Registration: 100, Renewal: 10 per year, so total = 100 + (10 * 2) = 120
+    let intent_3_years = payment::init_registration_with_years(&mut iota_names, name, 3);
+    assert_eq(intent_3_years.request_data().base_amount(), 120);
+    assert_eq(intent_3_years.request_data().years(), 3);
+
+    // Test 5 year registration (1 year registration + 4 years renewal)
+    // Registration: 100, Renewal: 10 per year, so total = 100 + (10 * 4) = 140
+    let intent_5_years = payment::init_registration_with_years(&mut iota_names, name, 5);
+    assert_eq(intent_5_years.request_data().base_amount(), 140);
+    assert_eq(intent_5_years.request_data().years(), 5);
+
+    // Clean up
+    destroy(intent_1_year);
+    destroy(intent_3_years);
+    destroy(intent_5_years);
+    destroy(iota_names);
+    destroy(clock);
+}
+
+#[test]
+fun test_init_registration_with_years_different_name_lengths() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+
+    // Test 3-character name for 2 years
+    // Registration: 500, Renewal: 50 per year, so total = 500 + (50 * 1) = 550
+    let intent_3_char = payment::init_registration_with_years(&mut iota_names, b"abc.iota".to_string(), 2);
+    assert_eq(intent_3_char.request_data().base_amount(), 550);
+    assert_eq(intent_3_char.request_data().years(), 2);
+
+    // Test 5+ character name for 3 years
+    // Registration: 20, Renewal: 2 per year, so total = 20 + (2 * 2) = 24
+    let intent_5_char = payment::init_registration_with_years(&mut iota_names, b"testing.iota".to_string(), 3);
+    assert_eq(intent_5_char.request_data().base_amount(), 24);
+    assert_eq(intent_5_char.request_data().years(), 3);
+
+    // Clean up
+    destroy(intent_3_char);
+    destroy(intent_5_char);
+    destroy(iota_names);
+    destroy(clock);
+}
+
+#[test, expected_failure(abort_code = ::iota_names::payment::ECannotExceedMaxYears)]
+fun test_init_registration_with_years_exceed_max() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+
+    let name = b"test.iota".to_string();
+
+    // Try to register for 6 years (max is 5)
+    let _intent = payment::init_registration_with_years(&mut iota_names, name, 6);
+
+    abort 1337
+}
+
+#[test]
+fun test_e2e_multi_year_registration() {
+    let mut ctx = tx_context::dummy();
+    let mut iota_names = setup_iota_names(&mut ctx);
+    let clock = clock::create_for_testing(&mut ctx);
+
+    let name = b"test.iota".to_string();
+
+    // Register for 3 years using the new function
+    let intent = payment::init_registration_with_years(&mut iota_names, name, 3);
+    assert_eq(intent.request_data().base_amount(), 120); // 100 + (10 * 2)
+    assert_eq(intent.request_data().years(), 3);
+
+    // Complete the payment
+    let receipt = handle_payment(intent, &mut iota_names, &mut ctx);
+
+    // Register the name
+    let nft = receipt.register(&mut iota_names, &clock, &mut ctx);
+
+    // Verify the NFT was created with correct details
+    assert_eq(nft.name_str(), name);
+    // Should expire in exactly 3 years
+    assert_eq(nft.expiration_timestamp_ms(), constants::year_ms() * 3);
+
+    // Clean up
+    destroy(iota_names);
+    destroy(nft);
+    destroy(clock);
+}
+
 public fun setup_iota_names(ctx: &mut TxContext): IotaNames {
     let (mut iota_names, cap) = iota_names::new_for_testing(ctx);
 

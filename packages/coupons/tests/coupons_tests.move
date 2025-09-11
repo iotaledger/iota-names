@@ -685,6 +685,190 @@ fun init_renewal(
 }
 
 #[test]
+fun test_coupon_multi_year_registration() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+
+    // Test 25% discount on 2-year registration (within max 2 years limit)
+    // Base price for 4-char name: 200 (registration) + 200*1 (renewal) = 400
+    // 25% discount: 400 * 0.75 = 300
+    test_coupon_multi_year_register(
+        scenario,
+        b"test.iota".to_string(),
+        2,
+        b"25_PERCENT_DISCOUNT_MAX_2_YEARS".to_string(),
+        user(),
+        option::some(300 * nanos_per_iota()),
+    );
+
+    // Test 50% discount on 2-year registration for 5+ character name
+    // Base price: 50 (registration) + 50*1 (renewal) = 100
+    // 50% discount: 100 * 0.5 = 50
+    test_coupon_multi_year_register(
+        scenario,
+        b"testo.iota".to_string(),
+        2,
+        b"50_PERCENT_5_PLUS_NAMES".to_string(),
+        user(),
+        option::some(50 * nanos_per_iota()),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun test_coupon_multi_year_registration_stackable() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+
+    // Add a stackable percentage discount
+    admin_add_percentage_coupon(
+        b"10_PERCENT_STACKABLE".to_string(),
+        10,
+        scenario,
+    );
+
+    // Test stacking two coupons on 2-year registration
+    // Base price for 4-char name: 200 (registration) + 200*1 (renewal) = 400
+    // First apply 5% discount: 400 * 0.95 = 380
+    // Then apply 10% discount: 380 * 0.9 = 342
+    test_multi_coupon_multi_year_register(
+        scenario,
+        b"test.iota".to_string(),
+        2,
+        vector[b"5_DISCOUNT_STACKABLE".to_string(), b"10_PERCENT_STACKABLE".to_string()],
+        user(),
+        option::some(342 * nanos_per_iota()),
+    );
+
+    scenario_val.end();
+}
+
+#[test, expected_failure(abort_code = ::iota_names_coupons::rules::EInvalidYears)]
+fun test_coupon_multi_year_invalid_years() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+
+    // Try to use a coupon that only allows 1-2 years for a 3-year registration
+    test_coupon_multi_year_register(
+        scenario,
+        b"test.iota".to_string(),
+        3,
+        b"25_PERCENT_DISCOUNT_MAX_2_YEARS".to_string(),
+        user(),
+        option::none(),
+    );
+
+    scenario_val.end();
+}
+
+#[test]
+fun test_coupon_multi_year_zero_fee() {
+    let mut scenario_val = test_init();
+    let scenario = &mut scenario_val;
+    populate_coupons(scenario);
+
+    // Add a 100% discount coupon
+    admin_add_percentage_coupon(
+        b"100_PERCENT_OFF".to_string(),
+        100,
+        scenario,
+    );
+
+    // Test 100% discount on 4-year registration should result in 0 cost
+    test_coupon_multi_year_register(
+        scenario,
+        b"test.iota".to_string(),
+        4,
+        b"100_PERCENT_OFF".to_string(),
+        user(),
+        option::some(0),
+    );
+
+    scenario_val.end();
+}
+
+fun test_coupon_multi_year_register(
+    scenario: &mut Scenario,
+    name: String,
+    years: u8,
+    coupon_code: String,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let mut intent = init_registration_with_years(
+            &mut iota_names,
+            name,
+            years,
+        );
+        let clock = scenario.take_shared<Clock>();
+        coupon_house::apply_coupon(
+            &mut intent,
+            &mut iota_names,
+            coupon_code,
+            &clock,
+            scenario.ctx(),
+        );
+        if (amount.is_some()) {
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(intent);
+    };
+}
+
+fun test_multi_coupon_multi_year_register(
+    scenario: &mut Scenario,
+    name: String,
+    years: u8,
+    mut coupon_codes: vector<String>,
+    user: address,
+    amount: Option<u64>, // optional param to test for expected amount
+) {
+    scenario.next_tx(user);
+    {
+        let mut iota_names = scenario.take_shared<IotaNames>();
+        let mut intent = init_registration_with_years(
+            &mut iota_names,
+            name,
+            years,
+        );
+        let clock = scenario.take_shared<Clock>();
+        while (!coupon_codes.is_empty()) {
+            let coupon_code = coupon_codes.pop_back();
+            coupon_house::apply_coupon(
+                &mut intent,
+                &mut iota_names,
+                coupon_code,
+                &clock,
+                scenario.ctx(),
+            );
+        };
+        if (amount.is_some()) {
+            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+        };
+
+        return_shared(iota_names);
+        return_shared(clock);
+        destroy(intent);
+    };
+}
+
+fun init_registration_with_years(iota_names: &mut IotaNames, name: String, years: u8): PaymentIntent {
+    let intent = iota_names::payment::init_registration_with_years(iota_names, name, years);
+
+    intent
+}
+
+#[test]
 fun test_coupon_getters() {
     let rules = rules::new_coupon_rules(option::none(), option::none(), option::none(), option::none(), option::none(), false);
     let percentage_coupon = coupon::new_percentage(25, rules);

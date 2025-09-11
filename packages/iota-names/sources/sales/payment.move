@@ -148,6 +148,37 @@ public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentI
     })
 }
 
+/// Creates a `PaymentIntent` for registering a new name for multiple years.
+/// This is a hot-potato and can only be consumed in a single transaction.
+public fun init_registration_with_years(iota_names: &mut IotaNames, name: String, years: u8): PaymentIntent {
+    let name = name::new(name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
+    assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
+
+    // Calculate price for first year using registration pricing
+    let registration_price = iota_names.get_config<PricingConfig>().calculate_base_price_of_name(name);
+    
+    // Calculate price for additional years using renewal pricing
+    let total_price = if (years == 1) {
+        registration_price
+    } else {
+        let renewal_price = iota_names
+            .get_config<RenewalConfig>()
+            .config()
+            .calculate_base_price_of_name(name);
+        
+        registration_price + (renewal_price * ((years - 1) as u64))
+    };
+
+    PaymentIntent::Registration(RequestData {
+        name,
+        years,
+        base_amount: total_price,
+        metadata: vec_map::empty(),
+        version: constants::payments_version!(),
+    })
+}
+
 /// Creates a `PaymentIntent` for renewing an existing name.
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_renewal(
