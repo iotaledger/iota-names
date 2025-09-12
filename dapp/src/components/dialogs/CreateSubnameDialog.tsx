@@ -87,7 +87,7 @@ function createSubnameUpdates({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationTimeParent: nameRecord.expirationDate,
+            expirationDateParent: nameRecord.expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });
