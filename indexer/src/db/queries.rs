@@ -10,8 +10,31 @@ use diesel::{
 
 use crate::db::{
     AuctionSortBy, AuctionStatus, SortOrder,
-    models::{Bidder, Name, NewBlockedString, auctions, bidders, bids, blocked_strings, names},
+    models::{
+        Bidder, BlockMatchType, BlockedString, Name, NewBlockedString, auctions, bidders, bids,
+        blocked_strings, names,
+    },
 };
+
+fn is_name_blocked(name: &str, blocked_strings: &[BlockedString]) -> bool {
+    for blocked in blocked_strings {
+        let match_type =
+            BlockMatchType::from_str(&blocked.match_type).unwrap_or(BlockMatchType::Substring);
+        match match_type {
+            BlockMatchType::Full => {
+                if name == blocked.blocked_string {
+                    return true;
+                }
+            }
+            BlockMatchType::Substring => {
+                if name.contains(&blocked.blocked_string) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
 
 pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Result<Bidder> {
     let maybe_bidder = insert_into(bidders::table)
@@ -31,9 +54,14 @@ pub fn get_or_create_bidder(conn: &mut SqliteConnection, address: &str) -> Resul
 }
 
 pub fn get_or_create_name(conn: &mut SqliteConnection, name: &str) -> Result<Name> {
+    let blocked_strings = get_blocked_strings_detailed(conn)?;
+    let is_blocked = is_name_blocked(name, &blocked_strings);
+
     let maybe_name = insert_into(names::table)
-        .values(names::name.eq(name))
-        .on_conflict_do_nothing()
+        .values((names::name.eq(name), names::blocked.eq(is_blocked)))
+        .on_conflict(names::name)
+        .do_update()
+        .set(names::blocked.eq(is_blocked))
         .returning(Name::as_returning())
         .get_result(conn)
         .optional()?;
@@ -106,14 +134,13 @@ pub fn get_auctions_for_bidder(
     status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
-    let blocked_strings = get_blocked_strings(conn)?;
-
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
         .group_by(names::id)
         .select(names::name)
         .filter(bids::bidder_id.eq(bidder_id))
+        .filter(names::blocked.eq(false)) // Filter out blocked names using the boolean field
         .into_boxed();
 
     if let Some(status) = status {
@@ -133,26 +160,10 @@ pub fn get_auctions_for_bidder(
         SortOrder::Desc => query.order(names::name.desc()),
     };
 
-    let mut results = query
-        .load::<String>(conn)?
-        .into_iter()
-        .filter(|name| {
-            // Filter out names that contain any blocked string
-            !blocked_strings.iter().any(|blocked| name.contains(blocked))
-        })
-        .collect::<Vec<_>>();
-
-    // Apply pagination after filtering
-    let start = page.unwrap_or_default() * page_size;
-
-    if start < results.len() {
-        results.drain(0..start);
-        results.truncate(page_size);
-    } else {
-        results.clear();
-    }
-
-    Ok(results)
+    Ok(query
+        .limit(page_size as _)
+        .offset((page.unwrap_or_default() * page_size) as _)
+        .load(conn)?)
 }
 
 pub fn get_auctions_for_bidder_count(
@@ -161,14 +172,13 @@ pub fn get_auctions_for_bidder_count(
     status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<usize> {
-    let blocked_strings = get_blocked_strings(conn)?;
-
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
         .select(names::name)
         .distinct()
         .filter(bids::bidder_id.eq(bidder_id))
+        .filter(names::blocked.eq(false)) // Filter out blocked names using the boolean field
         .into_boxed();
 
     if let Some(status) = status {
@@ -183,17 +193,8 @@ pub fn get_auctions_for_bidder_count(
         };
     }
 
-    // Load all names and filter out blocked ones
-    let all_names = query.load::<String>(conn)?;
-    let filtered_count = all_names
-        .iter()
-        .filter(|name| {
-            // Filter out names that contain any blocked string
-            !blocked_strings.iter().any(|blocked| name.contains(blocked))
-        })
-        .count();
-
-    Ok(filtered_count)
+    let count = query.load::<String>(conn)?.len();
+    Ok(count)
 }
 
 #[expect(clippy::too_many_arguments)]
@@ -207,13 +208,12 @@ pub fn get_auctions(
     status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<Vec<String>> {
-    let blocked_strings = get_blocked_strings(conn)?;
-
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
         .group_by(names::id)
         .select((Name::as_select(), dsl::max(bids::bid)))
+        .filter(names::blocked.eq(false)) // Filter out blocked names using the boolean field
         .into_boxed();
     if let Some(search) = search {
         query = query.filter(names::name.like(format!("%{search}%")))
@@ -240,27 +240,13 @@ pub fn get_auctions(
         }
     };
 
-    let mut results = query
+    Ok(query
+        .limit(page_size as _)
+        .offset((page.unwrap_or_default() * page_size) as _)
         .load::<(Name, Option<i64>)>(conn)?
         .into_iter()
         .map(|(name, _)| name.name)
-        .filter(|name| {
-            // Filter out names that contain any blocked string
-            !blocked_strings.iter().any(|blocked| name.contains(blocked))
-        })
-        .collect::<Vec<_>>();
-
-    // Apply pagination after filtering
-    let start = page.unwrap_or_default() * page_size;
-
-    if start < results.len() {
-        results.drain(0..start);
-        results.truncate(page_size);
-    } else {
-        results.clear();
-    }
-
-    Ok(results)
+        .collect())
 }
 
 pub fn get_auctions_count(
@@ -269,13 +255,12 @@ pub fn get_auctions_count(
     status: Option<AuctionStatus>,
     now: DateTime<Utc>,
 ) -> Result<usize> {
-    let blocked_strings = get_blocked_strings(conn)?;
-
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
         .select(names::name)
         .distinct()
+        .filter(names::blocked.eq(false)) // Filter out blocked names using the boolean field
         .into_boxed();
 
     if let Some(status) = status {
@@ -294,17 +279,8 @@ pub fn get_auctions_count(
         query = query.filter(names::name.like(format!("%{search}%")))
     }
 
-    // Load all names and filter out blocked ones
-    let all_names = query.load::<String>(conn)?;
-    let filtered_count = all_names
-        .iter()
-        .filter(|name| {
-            // Filter out names that contain any blocked string
-            !blocked_strings.iter().any(|blocked| name.contains(blocked))
-        })
-        .count();
-
-    Ok(filtered_count)
+    let count = query.load::<String>(conn)?.len();
+    Ok(count)
 }
 
 pub fn get_bid_count(conn: &mut SqliteConnection, name_str: &str) -> Result<i64> {
@@ -318,14 +294,21 @@ pub fn get_bid_count(conn: &mut SqliteConnection, name_str: &str) -> Result<i64>
         .unwrap_or_default())
 }
 
-pub fn add_blocked_string(conn: &mut SqliteConnection, string: &str) -> Result<()> {
+pub fn add_blocked_string(
+    conn: &mut SqliteConnection,
+    string: &str,
+    match_type: BlockMatchType,
+) -> Result<()> {
     let new_blocked_string = NewBlockedString {
         blocked_string: string,
+        match_type: match_type.as_str(),
     };
 
     insert_into(blocked_strings::table)
         .values(&new_blocked_string)
         .execute(conn)?;
+
+    update_existing_names_blocked_status(conn)?;
 
     Ok(())
 }
@@ -337,6 +320,10 @@ pub fn remove_blocked_string(conn: &mut SqliteConnection, string: &str) -> Resul
         delete(blocked_strings::table.filter(blocked_strings::blocked_string.eq(string)))
             .execute(conn)?;
 
+    if deleted_count > 0 {
+        update_existing_names_blocked_status(conn)?;
+    }
+
     Ok(deleted_count > 0)
 }
 
@@ -345,4 +332,27 @@ pub fn get_blocked_strings(conn: &mut SqliteConnection) -> Result<Vec<String>> {
         .select(blocked_strings::blocked_string)
         .load::<String>(conn)
         .map_err(Into::into)
+}
+
+pub fn get_blocked_strings_detailed(conn: &mut SqliteConnection) -> Result<Vec<BlockedString>> {
+    blocked_strings::table
+        .select(BlockedString::as_select())
+        .load::<BlockedString>(conn)
+        .map_err(Into::into)
+}
+
+pub fn update_existing_names_blocked_status(conn: &mut SqliteConnection) -> Result<()> {
+    let blocked_strings = get_blocked_strings_detailed(conn)?;
+    let all_names = names::table.select(Name::as_select()).load::<Name>(conn)?;
+
+    for name in all_names {
+        let should_be_blocked = is_name_blocked(&name.name, &blocked_strings);
+        if name.blocked != should_be_blocked {
+            update(names::table.filter(names::id.eq(name.id)))
+                .set(names::blocked.eq(should_be_blocked))
+                .execute(conn)?;
+        }
+    }
+
+    Ok(())
 }

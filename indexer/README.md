@@ -94,17 +94,27 @@ POST /admin/blocked-strings
 
 ```json
 {
-  "string": "badword"
+  "string": "badword",
+  "matchType": "full"
 }
 ```
 
-**Example:**
+- `matchType`: `"full"` (exact match) or `"substring"` (contains match). Defaults to `"full"`.
+
+**Examples:**
 
 ```bash
+# Block exact name only (default)
 curl -X POST http://localhost:3030/admin/blocked-strings \
   -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"string":"badword"}'
+  -d '{"string":"bad.iota"}'
+
+# Block any name containing the substring
+curl -X POST http://localhost:3030/admin/blocked-strings \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"string":"badword","matchType":"substring"}'
 ```
 
 ### Unblock a String
@@ -140,5 +150,20 @@ GET /admin/blocked-strings
 
 ```bash
 curl -X GET http://localhost:3030/admin/blocked-strings \
+  -H "Authorization: Bearer YOUR_ADMIN_API_KEY"
+```
+
+### List Blocked Strings (Detailed)
+
+```
+GET /admin/blocked-strings/detailed
+```
+
+Returns blocked strings with their match types and IDs.
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:3030/admin/blocked-strings/detailed \
   -H "Authorization: Bearer YOUR_ADMIN_API_KEY"
 ```

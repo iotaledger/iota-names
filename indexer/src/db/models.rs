@@ -3,11 +3,35 @@
 
 use diesel::{Associations, Identifiable, Queryable, Selectable};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BlockMatchType {
+    Full,
+    Substring,
+}
+
+impl BlockMatchType {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BlockMatchType::Full => "full",
+            BlockMatchType::Substring => "substring",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "full" => Some(BlockMatchType::Full),
+            "substring" => Some(BlockMatchType::Substring),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
 #[diesel(table_name = names)]
 pub struct Name {
     pub id: i32,
     pub name: String,
+    pub blocked: bool,
 }
 
 #[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
@@ -38,16 +62,26 @@ pub struct Auction {
     pub claimed: bool,
 }
 
+#[derive(Queryable, Selectable, Identifiable, PartialEq, Debug)]
+#[diesel(table_name = blocked_strings)]
+pub struct BlockedString {
+    pub id: i32,
+    pub blocked_string: String,
+    pub match_type: String,
+}
+
 #[derive(diesel::Insertable)]
 #[diesel(table_name = blocked_strings)]
 pub struct NewBlockedString<'a> {
     pub blocked_string: &'a str,
+    pub match_type: &'a str,
 }
 
 diesel::table! {
     names (id) {
         id -> Int4,
         name -> Text,
+        blocked -> Bool,
     }
 }
 
@@ -89,6 +123,7 @@ diesel::table! {
     blocked_strings (id) {
         id -> Integer,
         blocked_string -> Text,
+        match_type -> Text,
     }
 }
 

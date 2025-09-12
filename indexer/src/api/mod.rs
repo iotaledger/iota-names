@@ -11,6 +11,7 @@ use crate::db::pool::DbConnectionPool;
 mod auth;
 mod error;
 mod extractors;
+mod requests;
 mod responses;
 mod routes;
 

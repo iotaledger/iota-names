@@ -18,12 +18,13 @@ use crate::{
         auth::Auth,
         error::ApiError,
         extractors::{AuctionsPagination, BidderNamesPagination},
+        requests::{BlockStringRequest, UnblockStringRequest},
         responses::{
-            AuctionsResponse, BlockStringRequest, BlockStringResponse, BlockedStringsResponse,
-            UnblockStringRequest,
+            AuctionsResponse, BlockStringResponse, BlockedStringDetail, BlockedStringsResponse,
+            DetailedBlockedStringsResponse,
         },
     },
-    db::queries,
+    db::{models::BlockMatchType, queries},
 };
 
 pub fn routes() -> Router<ApiState> {
@@ -32,12 +33,17 @@ pub fn routes() -> Router<ApiState> {
         .route("/auctions", get(get_auctions))
         .route("/auctions/{address}", get(get_auctions_for_address));
 
-    let protected_routes = Router::new().route(
-        "/blocked-strings",
-        get(get_blocked_strings_list)
-            .post(block_string)
-            .delete(unblock_string),
-    );
+    let protected_routes = Router::new()
+        .route(
+            "/blocked-strings",
+            get(get_blocked_strings_list)
+                .post(block_string)
+                .delete(unblock_string),
+        )
+        .route(
+            "/blocked-strings/detailed",
+            get(get_blocked_strings_detailed),
+        );
 
     Router::new()
         .merge(public_routes)
@@ -140,10 +146,27 @@ async fn block_string(
 ) -> Result<BlockStringResponse, ApiError> {
     let mut conn = state.pool.get_connection()?;
 
-    match queries::add_blocked_string(&mut conn, &payload.string) {
+    // Validate the match type
+    let match_type = match BlockMatchType::from_str(&payload.match_type) {
+        Some(mt) => mt,
+        None => {
+            return Ok(BlockStringResponse {
+                success: false,
+                message: format!(
+                    "Invalid match type '{}'. Expected 'full' or 'substring'",
+                    payload.match_type
+                ),
+            });
+        }
+    };
+
+    match queries::add_blocked_string(&mut conn, &payload.string, match_type) {
         Ok(_) => Ok(BlockStringResponse {
             success: true,
-            message: format!("String '{}' has been blocked", payload.string),
+            message: format!(
+                "String '{}' has been blocked with {} match",
+                payload.string, payload.match_type
+            ),
         }),
         Err(e) => {
             if let Some(diesel_error) = e.downcast_ref::<diesel::result::Error>() {
@@ -192,4 +215,24 @@ async fn get_blocked_strings_list(
     let blocked_strings = queries::get_blocked_strings(&mut conn)?;
 
     Ok(BlockedStringsResponse { blocked_strings })
+}
+
+async fn get_blocked_strings_detailed(
+    State(state): State<ApiState>,
+) -> Result<DetailedBlockedStringsResponse, ApiError> {
+    let mut conn = state.pool.get_connection()?;
+    let blocked_strings = queries::get_blocked_strings_detailed(&mut conn)?;
+
+    let detailed_strings = blocked_strings
+        .into_iter()
+        .map(|bs| BlockedStringDetail {
+            id: bs.id,
+            blocked_string: bs.blocked_string,
+            match_type: bs.match_type,
+        })
+        .collect();
+
+    Ok(DetailedBlockedStringsResponse {
+        blocked_strings: detailed_strings,
+    })
 }

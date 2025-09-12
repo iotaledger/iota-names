@@ -20,18 +20,6 @@ impl axum::response::IntoResponse for AuctionsResponse {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BlockStringRequest {
-    pub string: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct UnblockStringRequest {
-    pub string: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct BlockStringResponse {
     pub success: bool,
     pub message: String,
@@ -50,6 +38,26 @@ pub struct BlockedStringsResponse {
 }
 
 impl axum::response::IntoResponse for BlockedStringsResponse {
+    fn into_response(self) -> axum::response::Response {
+        axum::Json(self).into_response()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockedStringDetail {
+    pub id: i32,
+    pub blocked_string: String,
+    pub match_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DetailedBlockedStringsResponse {
+    pub blocked_strings: Vec<BlockedStringDetail>,
+}
+
+impl axum::response::IntoResponse for DetailedBlockedStringsResponse {
     fn into_response(self) -> axum::response::Response {
         axum::Json(self).into_response()
     }
