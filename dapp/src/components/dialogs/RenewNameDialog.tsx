@@ -261,7 +261,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                     return expirationTime;
                 }
             } else if (!isNameSubname && renewYears) {
-                const expirationDate = new Date(nameRecord.nameRecord.expirationDate);
+                const expirationDate = nameRecord.nameRecord.expirationDate;
                 expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
                 return expirationDate;
             }

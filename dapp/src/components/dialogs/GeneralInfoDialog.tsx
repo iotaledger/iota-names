@@ -119,7 +119,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                             <div className="pb-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
-                                    value={formatDate(expirationDate?.getTime())}
+                                    value={formatDate(expirationDate)}
                                     fullwidth
                                 />
                             </div>
