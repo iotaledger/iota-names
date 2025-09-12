@@ -15,8 +15,10 @@ import { applyCouponsToPrice, validateCoupons } from './coupons.js';
 import {
     getConfigType,
     getCoreConfigType,
+    getDenyListType,
     getNameType,
     getPricelistConfigType,
+    getRegistryKeyType,
     getRenewalPricelistConfigType,
     isSubname,
     validateYears,
@@ -31,6 +33,8 @@ import type {
     PackageInfo,
 } from './types.js';
 import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js';
+
+// const toMoveStringB64 = (s: string) => bcs.string().serialize(s).toBase64();
 
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
@@ -247,6 +251,131 @@ export class IotaNamesClient {
         const defaultName = response?.data?.address?.iotaNamesDefaultName ?? null;
 
         return defaultName;
+    }
+
+    async getDenyListTableIds(): Promise<{
+        reservedTableId: string | null;
+        blockedTableId: string | null;
+    }> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+
+        const iotaNamesObjectId = this.config.iotaNamesObjectId;
+        const packageId = this.config.packageId;
+        const denyListBcsB64 = toB64(
+            DummyFieldBcs.serialize({
+                dummy_field: false,
+            }).toBytes(),
+        );
+
+        const response: any = await this.graphQlClient.query({
+            query: graphql(`
+                query getDenyList($address: IotaAddress!, $type: String!, $bcs: Base64!) {
+                    owner(address: $address) {
+                        dynamicField(name: { type: $type, bcs: $bcs }) {
+                            name {
+                                type {
+                                    repr
+                                }
+                                json
+                            }
+                            value {
+                                ... on MoveValue {
+                                    type {
+                                        repr
+                                    }
+                                    json
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                address: iotaNamesObjectId,
+                type: getRegistryKeyType(packageId, getDenyListType(packageId)),
+                bcs: denyListBcsB64,
+            },
+        });
+
+        const denyList = response?.data?.owner?.dynamicField?.value?.json;
+        return {
+            reservedTableId: denyList?.reserved?.id ?? null,
+            blockedTableId: denyList?.blocked?.id ?? null,
+        };
+    }
+
+    /**
+     * Gets the full reserved/blocked list
+     */
+    async getRestrictedList(type: 'reserved' | 'blocked'): Promise<string[]> {
+        const { reservedTableId, blockedTableId } = await this.getDenyListTableIds();
+        if (type === 'reserved' && !reservedTableId) return [];
+        if (type === 'blocked' && !blockedTableId) return [];
+
+        const tableId = type === 'reserved' ? reservedTableId : blockedTableId;
+
+        const results: string[] = [];
+        let cursor: string | null = null;
+        const pageSize = 50;
+        let hasMorePages = true;
+
+        while (hasMorePages) {
+            const response: any = await this.graphQlClient.query({
+                query: graphql(`
+                    query getReservedListFromTable(
+                        $address: IotaAddress!
+                        $first: Int!
+                        $after: String
+                    ) {
+                        owner(address: $address) {
+                            dynamicFields(first: $first, after: $after) {
+                                pageInfo {
+                                    hasNextPage
+                                    endCursor
+                                }
+                                nodes {
+                                    name {
+                                        json
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `),
+                variables: { address: tableId, first: pageSize, after: cursor },
+            });
+
+            const df = response?.data?.owner?.dynamicFields;
+            const nodes = df?.nodes ?? [];
+
+            for (const n of nodes) {
+                const json = n?.name?.json;
+
+                if (typeof json === 'string' && json.length > 0) {
+                    results.push(json);
+                    continue;
+                }
+
+                const bytes: number[] | undefined = json?.fields?.bytes;
+                if (Array.isArray(bytes) && bytes.length > 0) {
+                    try {
+                        const decoded = new TextDecoder().decode(new Uint8Array(bytes));
+                        if (decoded) results.push(decoded);
+                    } catch {
+                        // ignore undecodable entries
+                    }
+                }
+            }
+            if (!df?.pageInfo?.hasNextPage) {
+                hasMorePages = false;
+            } else {
+                cursor = df.pageInfo.endCursor;
+            }
+            cursor = df.pageInfo.endCursor;
+        }
+
+        return results;
     }
 
     async getNameRecord(name: string): Promise<NameRecord | null> {

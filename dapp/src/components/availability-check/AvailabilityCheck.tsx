@@ -235,6 +235,20 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             isAvailable={false}
                             statusMessage="Name is already taken."
                         />
+                    ) : nameRecordData?.type === 'blocked' ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name contains words that are not allowed."
+                        />
+                    ) : nameRecordData?.type === 'reserved' ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name is reserved and cannot be purchased."
+                        />
                     ) : nameRecordData?.type === 'not-priced' ? (
                         <NamePurchaseCard
                             name={name}

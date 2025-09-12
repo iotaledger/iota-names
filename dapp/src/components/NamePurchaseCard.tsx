@@ -11,6 +11,7 @@ interface NamePurchaseCardProps {
     priceSymbol?: string;
     priceSupportingText?: string;
     isAvailable: boolean;
+    disableHoverEffect?: boolean;
 }
 
 export function NamePurchaseCard({
@@ -21,6 +22,7 @@ export function NamePurchaseCard({
     isAvailable,
     priceSymbol,
     children,
+    disableHoverEffect,
 }: React.PropsWithChildren<NamePurchaseCardProps>): React.JSX.Element {
     const bgCard = isAvailable ? 'bg-names-neutral-10' : 'bg-names-error-20';
     const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
@@ -57,7 +59,9 @@ export function NamePurchaseCard({
                                     'text-names-neutral-70 transition-opacity duration-100',
                                     isAvailable
                                         ? 'opacity-100'
-                                        : 'opacity-0 group-hover:opacity-100',
+                                        : disableHoverEffect
+                                          ? 'opacity-100'
+                                          : 'opacity-0 group-hover:opacity-100',
                                 )}
                             >
                                 {statusMessage}

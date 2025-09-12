@@ -46,4 +46,8 @@ export const queryKey = {
         paymentType,
         auctionType,
     ],
+
+    // Deny List
+    reservedList: () => [...queryKey.all, 'reserved-list'],
+    blockedList: () => [...queryKey.all, 'blocked-list'],
 };
