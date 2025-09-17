@@ -97,14 +97,16 @@ export function SubnamesDialog({ selectedName, onClose, onRenewClick }: Subnames
                     containerId="overlay-portal-container"
                     position={DialogPosition.Right}
                 >
-                    <Header
-                        onBack={isAtRoot ? undefined : goBack}
-                        title={headerTitle}
-                        onClose={onClose}
-                    />
+                    <div className="[&_.header-bg-color_>.flex-grow]:overflow-hidden [&_.header-bg-color_>.flex-grow_*]:break-words">
+                        <Header
+                            onBack={isAtRoot ? undefined : goBack}
+                            title={headerTitle}
+                            onClose={onClose}
+                        />
+                    </div>
                     <DialogBody>
                         <div className="flex-1 min-h-0 overflow-y-auto">
-                            <div className="flex flex-col gap-xxs px-sm w-full z-[100000]">
+                            <div className="flex flex-col gap-xxs w-full">
                                 {subnamesRegistrations.map((sub) => (
                                     <NamePanelTile
                                         key={sub.name}
@@ -117,7 +119,7 @@ export function SubnamesDialog({ selectedName, onClose, onRenewClick }: Subnames
                             </div>
                         </div>
                     </DialogBody>
-                    <div className="flex items-center justify-center py-sm">
+                    <div className="flex items-center justify-center p-md--rs">
                         <Button
                             text="New Subname"
                             type={ButtonType.Outlined}

@@ -53,8 +53,7 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
             onClick={(e) => {
                 e.stopPropagation();
             }}
-            className="fixed z-[110000] pointer-events-auto max-h-[calc(100vh-16px)] overflow-y-auto
-                     max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:max-w-[92vw]"
+            className="fixed z-[110000] pointer-events-auto max-h-[calc(100vh-16px)] overflow-y-auto left-1/2 -translate-x-1/2 max-w-[92vw]"
         >
             <Dropdown>
                 {options
