@@ -2,7 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Add } from '@iota/apps-ui-icons';
-import { Button, ButtonType, Header, Panel } from '@iota/apps-ui-kit';
+import {
+    Button,
+    ButtonType,
+    Dialog,
+    DialogBody,
+    DialogContent,
+    DialogPosition,
+    Header,
+} from '@iota/apps-ui-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -15,13 +23,13 @@ import { getNamePermissions, isNameRecordExpired } from '@/lib/utils/names';
 
 import { NamePanelTile } from './NamePanelTile';
 
-interface SubnamesPanelProps {
+interface SubnamesDialogProps {
     selectedName: RegistrationNft;
     onClose: () => void;
     onRenewClick: (name: RegistrationNft) => void;
 }
 
-export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesPanelProps) {
+export function SubnamesDialog({ selectedName, onClose, onRenewClick }: SubnamesDialogProps) {
     const { data: subnames } = useRegistrationNfts('subname');
 
     const initialNameTree = useNameTree(selectedName.name);
@@ -79,30 +87,37 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
 
     return (
         <>
-            <Panel>
-                <div className="overflow-hidden rounded-[inherit] min-h-[50vh] md:min-h-full max-h-[90vh] md:max-h-[80vh] w-full flex flex-col">
-                    <div className="[&_.header-bg-color_>.flex-grow]:overflow-hidden [&_.header-bg-color_>.flex-grow_*]:break-words">
-                        <Header
-                            onBack={isAtRoot ? undefined : goBack}
-                            title={headerTitle}
-                            onClose={onClose}
-                        />
-                    </div>
-                    <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-                        <div className="flex flex-col gap-xxs px-sm w-full">
-                            {subnamesRegistrations.map((sub) => (
-                                <NamePanelTile
-                                    key={sub.name}
-                                    registration={sub}
-                                    onClick={() => goDeeper(sub.name)}
-                                    hasSubnames={currentNode.subnames.length > 0}
-                                    onRenewClick={() => onRenewClick(sub)}
-                                />
-                            ))}
+            <Dialog
+                open
+                onOpenChange={() => {
+                    onClose();
+                }}
+            >
+                <DialogContent
+                    containerId="overlay-portal-container"
+                    position={DialogPosition.Right}
+                >
+                    <Header
+                        onBack={isAtRoot ? undefined : goBack}
+                        title={headerTitle}
+                        onClose={onClose}
+                    />
+                    <DialogBody>
+                        <div className="flex-1 min-h-0 overflow-y-auto">
+                            <div className="flex flex-col gap-xxs px-sm w-full z-[100000]">
+                                {subnamesRegistrations.map((sub) => (
+                                    <NamePanelTile
+                                        key={sub.name}
+                                        registration={sub}
+                                        onClick={() => goDeeper(sub.name)}
+                                        hasSubnames={currentNode.subnames.length > 0}
+                                        onRenewClick={() => onRenewClick(sub)}
+                                    />
+                                ))}
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="shrink-0 flex flex-col items-center justify-center py-sm">
+                    </DialogBody>
+                    <div className="flex items-center justify-center py-sm">
                         <Button
                             text="New Subname"
                             type={ButtonType.Outlined}
@@ -111,8 +126,8 @@ export function SubnamesPanel({ selectedName, onClose, onRenewClick }: SubnamesP
                             disabled={isExpired || !namePermissions.allowChildCreation}
                         />
                     </div>
-                </div>
-            </Panel>
+                </DialogContent>
+            </Dialog>
 
             {isAddDialogOpen && (
                 <CreateSubnameDialog name={currentNode.name} setOpen={setIsAddDialogOpen} />

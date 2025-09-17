@@ -31,7 +31,7 @@ import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/ho
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { SubnamesPanel } from './components/SubnamesPanel';
+import { SubnamesDialog } from './components/SubnamesDialog';
 import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
@@ -126,8 +126,6 @@ export default function MyNamesPage(): JSX.Element {
 
     function closePanel() {
         setRightPanelSelectedName(null);
-        document.body.classList.remove('overflow-hidden');
-        delete document.body.dataset.subnamesOpen;
     }
 
     return (
@@ -238,13 +236,6 @@ export default function MyNamesPage(): JSX.Element {
                                     nft={nft}
                                     onSubnameListClick={() => {
                                         setRightPanelSelectedName(nft);
-                                        if (
-                                            typeof window !== 'undefined' &&
-                                            window.innerWidth < 1024
-                                        ) {
-                                            document.body.classList.add('overflow-hidden');
-                                            document.body.dataset.subnamesOpen = 'true';
-                                        }
                                     }}
                                     isActive={rightPanelSelectedName?.name === nft.name}
                                     badge={
@@ -262,22 +253,11 @@ export default function MyNamesPage(): JSX.Element {
 
                     {rightPanelSelectedName && (
                         <>
-                            <div
-                                className="md:hidden fixed inset-0 bg-iota-primary-0/40 z-40 cursor-pointer"
-                                onClick={closePanel}
+                            <SubnamesDialog
+                                selectedName={rightPanelSelectedName}
+                                onClose={closePanel}
+                                onRenewClick={(name) => setSelectedNameForRenewal(name)}
                             />
-                            <div className="fixed max-md:top-1/2 max-md:left-1/2 max-md:-translate-x-1/2 max-md:-translate-y-1/2 max-md:z-50 md:block md:sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg max-md:w-[min(420px,calc(100%-32px))]">
-                                <button
-                                    aria-label="Close"
-                                    className="md:hidden absolute top-md right-md bg-black/40"
-                                    onClick={closePanel}
-                                />
-                                <SubnamesPanel
-                                    selectedName={rightPanelSelectedName}
-                                    onClose={closePanel}
-                                    onRenewClick={(name) => setSelectedNameForRenewal(name)}
-                                />
-                            </div>
                         </>
                     )}
                 </div>

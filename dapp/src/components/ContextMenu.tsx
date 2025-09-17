@@ -47,8 +47,14 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
     return createPortal(
         <div
             ref={positionContextMenu}
-            className="fixed z-50 max-h-[calc(100vh-16px)] overflow-y-auto
-                 max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:max-w-[92vw]"
+            onMouseDown={(e) => {
+                e.stopPropagation();
+            }}
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+            className="fixed z-[110000] pointer-events-auto max-h-[calc(100vh-16px)] overflow-y-auto
+                     max-lg:left-1/2 max-lg:-translate-x-1/2 max-lg:max-w-[92vw]"
         >
             <Dropdown>
                 {options

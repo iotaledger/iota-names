@@ -13,11 +13,6 @@ body[data-scroll-locked] #top-navbar {
     padding-right: var(--removed-body-scroll-bar-size);
 }
 
-body[data-subnames-open],
-body[data-subnames-open] #top-navbar {
-    padding-right: 0.875rem !important;
-}
-
 .name-card-selected::before {
     --gradient-border-width: 1px;
     content: '';
