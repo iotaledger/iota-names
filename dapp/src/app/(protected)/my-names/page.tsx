@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Warning } from '@iota/apps-ui-icons';
+import { Add, Info, Refresh, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -27,7 +27,7 @@ import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupU
 import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
-import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
+import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -37,6 +37,7 @@ import { GroupedNamesFilter } from './filters';
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
     const account = useCurrentAccount();
+
     const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
         null,
     );
@@ -65,6 +66,8 @@ export default function MyNamesPage(): JSX.Element {
         userAddress: account?.address,
         status: 'all',
     });
+
+    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctionDetails);
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: defaultName } = useGetDefaultName(address);
@@ -134,16 +137,33 @@ export default function MyNamesPage(): JSX.Element {
                     Names
                 </h2>
 
-                <Button
-                    type={ButtonType.Outlined}
-                    text="Name"
-                    icon={<Add />}
-                    onClick={() =>
-                        open({
-                            autoFocusInput: true,
-                        })
-                    }
-                />
+                <div className="flex gap-sm">
+                    <Button
+                        type={ButtonType.Outlined}
+                        text="Name"
+                        icon={<Add />}
+                        onClick={() =>
+                            open({
+                                autoFocusInput: true,
+                            })
+                        }
+                    />
+                    {selectedFilter === GroupedNamesFilter.InAuction ||
+                    selectedFilter === GroupedNamesFilter.All ? (
+                        <Button
+                            type={ButtonType.Outlined}
+                            icon={
+                                isRefreshing ? (
+                                    <LoadingIndicator size="w-5 h-5" />
+                                ) : (
+                                    <Refresh className="w-5 h-5" />
+                                )
+                            }
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                        />
+                    ) : null}
+                </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
