@@ -37,6 +37,7 @@ import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -55,6 +56,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
     const minBidNanos =
         auctionMetadata?.minBidNanos || (nameRecord ? BigInt(nameRecord.price) : null);
+    const auctionStatus = getUserAuctionStatus(auctionMetadata ?? null, account?.address || '');
 
     const [bidAmountValue, setBidAmountValue] = useState<string | undefined>();
 
@@ -102,6 +104,15 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+
+            if (!auctionMetadata) {
+                ampli.auctionStart({ name });
+            } else if (auctionStatus === 'top_bidder') {
+                ampli.auctionBidAgain({ name });
+            } else {
+                ampli.auctionBid({ name });
+            }
+
             toast.success(
                 `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
                     formatRounded: false,

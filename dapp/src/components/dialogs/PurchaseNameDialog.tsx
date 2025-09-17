@@ -32,6 +32,7 @@ import { useIotaNamesClient } from '@/contexts';
 import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -138,6 +139,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
+            ampli.nameBuy({ name });
+
+            if (isDisplayName) {
+                ampli.nameSetAsDisplayed({ name });
+            }
+
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
             );

@@ -36,6 +36,7 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -161,6 +162,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
             if (fullSubnameName) {
+                ampli.subnameCreate({ name: fullSubnameName });
                 toast.success(
                     `Successfully created subname ${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
                 );

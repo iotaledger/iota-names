@@ -44,6 +44,7 @@ import { useAuctions } from '@/auctions/hooks/useAuctions';
 import { useRefreshAuctions } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 
 import { paramsSchema } from './params';
 
@@ -110,6 +111,11 @@ export default function AuctionsPage(): JSX.Element {
     }, [areFiltersVisible]);
 
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    useEffect(() => {
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+            ampli.auctionFilterNamePerformed({ query: debouncedSearchQuery.trim() });
+        }
+    }, [debouncedSearchQuery]);
 
     function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
         const params = new URLSearchParams(searchParams.toString());

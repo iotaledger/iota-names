@@ -15,6 +15,7 @@ import { isAuctionActive } from '@/auctions/lib/utils';
 import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -82,6 +83,13 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
+
+    useEffect(() => {
+        if (!name) {
+            return;
+        }
+        ampli.searchPerformed({ query: name });
+    }, [name]);
 
     useEffect(() => {
         if (!searchValue || validationError) {

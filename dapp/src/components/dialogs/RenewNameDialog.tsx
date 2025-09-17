@@ -34,6 +34,7 @@ import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
     getNameObject,
@@ -180,6 +181,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             });
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
+            });
+            ampli.nameRenewal({
+                name,
+                duration: `${renewYears || 1} year${(renewYears || 1) > 1 ? 's' : ''}`,
             });
             toast.success('Name renewed successfully');
         },

@@ -11,9 +11,15 @@
         "eslint:check": "eslint --max-warnings=0 .",
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
-        "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix"
+        "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
+        "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/shared/analytics/ampli/index.ts"
     },
     "dependencies": {
+        "@amplitude/analytics-browser": "^2.24.0",
+        "@amplitude/analytics-client-common": "^2.3.41",
+        "@amplitude/analytics-core": "^2.24.0",
+        "@amplitude/analytics-types": "^2.10.0",
+        "@boxfish-studio/react-cookie-manager": "^1.0.2",
         "@iota/apps-ui-icons": "^0.4.1",
         "@iota/apps-ui-kit": "^0.7.2",
         "@iota/dapp-kit": "^0.5.3",
@@ -36,6 +42,7 @@
         "zustand": "^5.0.6"
     },
     "devDependencies": {
+        "@amplitude/ampli": "^1.36.2",
         "@tanstack/eslint-plugin-query": "^5.35.6",
         "@types/mdx": "^2.0.13",
         "@types/node": "^20",

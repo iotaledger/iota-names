@@ -3,16 +3,19 @@
 
 'use client';
 
+import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { Disclaimer } from '@/components/disclaimer/Disclaimer';
 import { Toaster } from '@/components/Toaster';
 import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
+import { initAnalyticsWithCMP } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './ThemeProvider';
@@ -21,6 +24,10 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
+
+    useEffect(() => {
+        initAnalyticsWithCMP();
+    }, []);
 
     function handleNetworkChange() {
         queryClient.resetQueries();
@@ -48,8 +55,11 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                 ]}
                             >
                                 <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                    {children}
-                                    <Toaster />
+                                    <CookieManagerProvider>
+                                        {children}
+                                        <Toaster />
+                                        <Disclaimer />
+                                    </CookieManagerProvider>
                                 </ThemeProvider>
                             </WalletProvider>
                         </IotaNamesIndexerClientProvider>
