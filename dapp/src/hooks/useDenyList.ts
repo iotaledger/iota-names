@@ -44,7 +44,7 @@ export function useDenyList() {
 
     const isNameWithReservedWord = (name: string) => {
         const reservedList = reservedListQuery.data || [];
-        return reservedList.some((reservedWord) => name.includes(reservedWord));
+        return reservedList.some((reservedWord) => name === reservedWord);
     };
 
     return {
