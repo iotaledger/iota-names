@@ -564,7 +564,7 @@ fun test_coupon_register(
     name: String,
     coupon_code: String,
     user: address,
-    amount: Option<u64>, // optional param to test for expected amount
+    mut amount: Option<u64>, // optional param to test for expected amount
 ) {
     scenario.next_tx(user);
     {
@@ -582,7 +582,7 @@ fun test_coupon_register(
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.extract());
         };
 
         return_shared(iota_names);
@@ -596,7 +596,7 @@ fun test_multi_coupon_register(
     name: String,
     mut coupon_codes: vector<String>,
     user: address,
-    amount: Option<u64>, // optional param to test for expected amount
+    mut amount: Option<u64>, // optional param to test for expected amount
 ) {
     scenario.next_tx(user);
     {
@@ -617,7 +617,7 @@ fun test_multi_coupon_register(
             );
         };
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.extract());
         };
 
         return_shared(iota_names);
@@ -632,7 +632,7 @@ fun test_coupon_renewal(
     renewal_years: u8,
     coupon_code: String,
     user: address,
-    amount: Option<u64>, // optional param to test for expected amount
+    mut amount: Option<u64>, // optional param to test for expected amount
 ) {
     scenario.next_tx(user);
     {
@@ -658,7 +658,7 @@ fun test_coupon_renewal(
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.extract());
         };
 
         return_shared(iota_names);
@@ -797,7 +797,7 @@ fun test_coupon_multi_year_register(
     years: u8,
     coupon_code: String,
     user: address,
-    amount: Option<u64>, // optional param to test for expected amount
+    mut amount: Option<u64>, // optional param to test for expected amount
 ) {
     scenario.next_tx(user);
     {
@@ -816,7 +816,7 @@ fun test_coupon_multi_year_register(
             scenario.ctx(),
         );
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.extract());
         };
 
         return_shared(iota_names);
@@ -831,7 +831,7 @@ fun test_multi_coupon_multi_year_register(
     years: u8,
     mut coupon_codes: vector<String>,
     user: address,
-    amount: Option<u64>, // optional param to test for expected amount
+    mut amount: Option<u64>, // optional param to test for expected amount
 ) {
     scenario.next_tx(user);
     {
@@ -853,7 +853,7 @@ fun test_multi_coupon_multi_year_register(
             );
         };
         if (amount.is_some()) {
-            assert!(intent.request_data().base_amount() == amount.get_with_default(0));
+            assert!(intent.request_data().base_amount() == amount.extract());
         };
 
         return_shared(iota_names);
