@@ -26,6 +26,7 @@ import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { z } from 'zod';
 
 import {
     NameRecordData,
@@ -44,220 +45,153 @@ interface EditMetadataDialogProps {
 }
 
 const METADATA_KEYS = [
-    {
-        key: 'twitter/x',
-        label: 'Twitter/X',
-        allowedKey: 'twitterX',
-        validate: (value: string) => {
-            if (!value) return 'Twitter field is empty';
-            if (!value.startsWith('@')) return 'Twitter handle must start with @';
-            if (value.length < 2) return 'Twitter handle too short';
-            if (value.length > 16) return 'Twitter handle too long';
-            if (!/^@[a-zA-Z0-9_]+$/.test(value)) return 'Invalid Twitter handle format';
-            return null;
-        },
-    },
-    {
-        key: 'discord',
-        label: 'Discord',
-        allowedKey: 'discord',
-        validate: (value: string) => {
-            if (!value) return 'Discord field is empty';
-            if (!/^[a-z0-9._]{2,32}(#[0-9]{4})?$/i.test(value))
-                return 'Discord format: username or username#1234';
-            return null;
-        },
-    },
-    {
-        key: 'github',
-        label: 'Github',
-        allowedKey: 'github',
-        validate: (value: string) => {
-            if (!value) return 'Github field is empty';
-            const cleanValue = value.replace(/^@/, '');
-            if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/.test(cleanValue)) {
-                return 'Invalid GitHub username format';
-            }
-            return null;
-        },
-    },
-    {
-        key: 'email',
-        label: 'Email',
-        allowedKey: 'email',
-        validate: (value: string) => {
-            if (!value) return 'Email field is empty';
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(value)) return 'Invalid email format';
-            if (value.length > 254) return 'Email too long';
-            return null;
-        },
-    },
-    {
-        key: 'btc',
-        label: 'BTC',
-        allowedKey: 'btc',
-        validate: (value: string) => {
-            if (!value) return 'BTC field is empty';
-            const legacyRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
-            const bech32Regex = /^bc1[a-z0-9]{39,59}$/;
-            const taproot = /^bc1p[a-z0-9]{58}$/;
-            if (!legacyRegex.test(value) && !bech32Regex.test(value) && !taproot.test(value)) {
-                return 'Invalid Bitcoin address format';
-            }
-            return null;
-        },
-    },
-    {
-        key: 'eth',
-        label: 'ETH',
-        allowedKey: 'eth',
-        validate: (value: string) => {
-            if (!value) return 'ETH field is empty';
-            if (!value.startsWith('0x')) return 'ETH address must start with 0x';
-            if (!/^0x[0-9a-fA-F]{40}$/.test(value)) return 'Invalid Ethereum address format';
-            return null;
-        },
-    },
-    {
-        key: 'ltc',
-        label: 'LTC',
-        allowedKey: 'ltc',
-        validate: (value: string) => {
-            if (!value) return 'LTC field is empty';
-            const legacyRegex = /^[LM3][a-km-zA-HJ-NP-Z1-9]{25,33}$/;
-            const bech32Regex = /^ltc1[a-z0-9]{39,59}$/;
-            if (!legacyRegex.test(value) && !bech32Regex.test(value)) {
-                return 'Invalid Litecoin address format';
-            }
-            return null;
-        },
-    },
-    {
-        key: 'doge',
-        label: 'DOGE',
-        allowedKey: 'doge',
-        validate: (value: string) => {
-            if (!value) return 'DOGE field is empty';
-            if (!/^[DA][5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/.test(value)) {
-                return 'Invalid Dogecoin address format';
-            }
-            return null;
-        },
-    },
-    {
-        key: 'sol',
-        label: 'SOL',
-        allowedKey: 'sol',
-        validate: (value: string) => {
-            if (!value) return 'SOL field is empty';
-            if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(value)) {
-                return 'Invalid Solana address format (32-44 base58 characters)';
-            }
-            return null;
-        },
-    },
-    {
-        key: 'sui',
-        label: 'SUI',
-        allowedKey: 'sui',
-        validate: (value: string) => {
-            if (!value) return 'SUI field is empty';
-            if (!value.startsWith('0x')) return 'SUI address must start with 0x';
-            if (!/^0x[0-9a-fA-F]{64}$/.test(value))
-                return 'Invalid SUI address format (66 characters total)';
-            return null;
-        },
-    },
-    {
-        key: 'website',
-        label: 'Website',
-        allowedKey: 'website',
-        validate: (value: string) => {
-            if (!value) return 'Website field is empty';
-            let urlToValidate = value;
-            if (!value.startsWith('http://') && !value.startsWith('https://')) {
-                urlToValidate = `https://${value}`;
-            }
-            try {
-                const url = new URL(urlToValidate);
-                if (!url.hostname || url.hostname.length === 0) {
-                    return 'Invalid website hostname';
-                }
-                const hostnameRegex =
-                    /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-                if (!hostnameRegex.test(url.hostname)) {
-                    return 'Invalid website format';
-                }
-                const parts = url.hostname.split('.');
-                if (parts.length < 2) {
-                    return 'Website must include a valid domain (e.g., example.com)';
-                }
-                const tld = parts[parts.length - 1];
-                if (tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) {
-                    return 'Invalid top-level domain (TLD)';
-                }
-                return null;
-            } catch (error) {
-                return `Invalid URL format: ${error instanceof Error ? error.message : 'Invalid URL format'}`;
-            }
-        },
-    },
-    {
-        key: 'ipfs',
-        label: 'IPFS',
-        allowedKey: 'ipfs',
-        validate: (value: string) => {
-            if (!value) return 'IPFS field is empty';
-
-            const cidv0Regex = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
-            const cidv1Regex = /^b[a-z2-7]{58}$/;
-            const ipfsUrlRegex =
-                /^(ipfs:\/\/|https?:\/\/.+\/ipfs\/)(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58})$/;
-
-            if (value.includes('ipfs://') || value.includes('/ipfs/')) {
-                if (!ipfsUrlRegex.test(value)) {
-                    return 'Invalid IPFS URL format';
-                }
-                return null;
-            }
-
-            if (!cidv0Regex.test(value) && !cidv1Regex.test(value)) {
-                return 'Invalid IPFS hash. Use CIDv0 (Qm...) or CIDv1 (b...) format';
-            }
-
-            return null;
-        },
-    },
-    {
-        key: 'arweave',
-        label: 'Arweave',
-        allowedKey: 'arweave',
-        validate: (value: string) => {
-            if (!value) return 'Arweave field is empty';
-
-            const arweaveIdRegex = /^[A-Za-z0-9_-]{43}$/;
-            const arweaveUrlRegex =
-                /^https?:\/\/(arweave\.net|ar\.io|arweave\.dev)\/([A-Za-z0-9_-]{43})$/;
-            if (
-                value.includes('arweave.net/') ||
-                value.includes('ar.io/') ||
-                value.includes('arweave.dev/')
-            ) {
-                if (!arweaveUrlRegex.test(value)) {
-                    return 'Invalid Arweave URL format';
-                }
-                return null;
-            }
-
-            if (!arweaveIdRegex.test(value)) {
-                return 'Invalid Arweave transaction ID (43 characters, base64url)';
-            }
-
-            return null;
-        },
-    },
+    { key: 'twitter/x', label: 'Twitter/X', allowedKey: 'twitterX' },
+    { key: 'discord', label: 'Discord', allowedKey: 'discord' },
+    { key: 'github', label: 'Github', allowedKey: 'github' },
+    { key: 'email', label: 'Email', allowedKey: 'email' },
+    { key: 'btc', label: 'BTC', allowedKey: 'btc' },
+    { key: 'eth', label: 'ETH', allowedKey: 'eth' },
+    { key: 'ltc', label: 'LTC', allowedKey: 'ltc' },
+    { key: 'doge', label: 'DOGE', allowedKey: 'doge' },
+    { key: 'sol', label: 'SOL', allowedKey: 'sol' },
+    { key: 'sui', label: 'SUI', allowedKey: 'sui' },
+    { key: 'website', label: 'Website', allowedKey: 'website' },
+    { key: 'ipfs', label: 'IPFS', allowedKey: 'ipfs' },
+    { key: 'arweave', label: 'Arweave', allowedKey: 'arweave' },
 ] as const;
+
+// Zod schemas for validation mapped by allowedKey
+type AllowedKey = (typeof METADATA_KEYS)[number]['allowedKey'];
+const SCHEMAS: Record<AllowedKey, z.ZodString> = {
+    twitterX: z
+        .string()
+        .min(2, 'Twitter handle too short')
+        .max(16, 'Twitter handle too long')
+        .regex(/^@/, 'Twitter handle must start with @')
+        .regex(/^@[a-zA-Z0-9_]+$/, 'Invalid Twitter handle format'),
+    discord: z
+        .string()
+        .regex(/^[a-z0-9._]{2,32}(#[0-9]{4})?$/i, 'Discord format: username or username#1234'),
+    github: z
+        .string()
+        // allow optional leading @, then GitHub username rules
+        .regex(
+            /^@?[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/,
+            'Invalid GitHub username format',
+        ),
+    email: z.string().email('Invalid email format').max(254, 'Email too long'),
+    btc: z.string().refine(
+        (v) => {
+            const legacy = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$/;
+            const bech32 = /^bc1[a-z0-9]{39,59}$/;
+            const taproot = /^bc1p[a-z0-9]{58}$/;
+            return legacy.test(v) || bech32.test(v) || taproot.test(v);
+        },
+        { message: 'Invalid Bitcoin address format' },
+    ),
+    eth: z
+        .string()
+        .regex(/^0x/, 'ETH address must start with 0x')
+        .regex(/^0x[0-9a-fA-F]{40}$/i, 'Invalid Ethereum address format'),
+    ltc: z.string().refine(
+        (v) => {
+            const legacy = /^[LM3][a-km-zA-HJ-NP-Z1-9]{25,33}$/;
+            const bech32 = /^ltc1[a-z0-9]{39,59}$/;
+            return legacy.test(v) || bech32.test(v);
+        },
+        { message: 'Invalid Litecoin address format' },
+    ),
+    doge: z
+        .string()
+        .regex(/^[DA][5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$/, 'Invalid Dogecoin address format'),
+    sol: z
+        .string()
+        .regex(
+            /^[1-9A-HJ-NP-Za-km-z]{32,44}$/,
+            'Invalid Solana address format (32-44 base58 characters)',
+        ),
+    sui: z
+        .string()
+        .regex(/^0x/, 'SUI address must start with 0x')
+        .regex(/^0x[0-9a-fA-F]{64}$/, 'Invalid SUI address format (66 characters total)'),
+    website: z.string().superRefine((v, ctx) => {
+        let urlToValidate = v;
+        if (!v.startsWith('http://') && !v.startsWith('https://')) {
+            urlToValidate = `https://${v}`;
+        }
+        try {
+            const url = new URL(urlToValidate);
+            if (!url.hostname || url.hostname.length === 0) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid website hostname' });
+                return;
+            }
+            const hostnameRegex =
+                /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+            if (!hostnameRegex.test(url.hostname)) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid website format' });
+                return;
+            }
+            const parts = url.hostname.split('.');
+            if (parts.length < 2) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'Website must include a valid domain (e.g., example.com)',
+                });
+                return;
+            }
+            const tld = parts[parts.length - 1];
+            if (tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'Invalid top-level domain (TLD)',
+                });
+            }
+        } catch (error) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Invalid URL format: ${error instanceof Error ? error.message : 'Invalid URL format'}`,
+            });
+        }
+    }),
+    ipfs: z.string().superRefine((v, ctx) => {
+        const cidv0Regex = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
+        const cidv1Regex = /^b[a-z2-7]{58}$/;
+        const ipfsUrlRegex =
+            /^(ipfs:\/\/|https?:\/\/.+\/ipfs\/)(Qm[1-9A-HJ-NP-Za-km-z]{44}|b[a-z2-7]{58})$/;
+        if (v.includes('ipfs://') || v.includes('/ipfs/')) {
+            if (!ipfsUrlRegex.test(v)) {
+                ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid IPFS URL format' });
+            }
+            return;
+        }
+        if (!cidv0Regex.test(v) && !cidv1Regex.test(v)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Invalid IPFS hash. Use CIDv0 (Qm...) or CIDv1 (b...) format',
+            });
+        }
+    }),
+    arweave: z.string().superRefine((v, ctx) => {
+        const arweaveIdRegex = /^[A-Za-z0-9_-]{43}$/;
+        const arweaveUrlRegex =
+            /^https?:\/\/(arweave\.net|ar\.io|arweave\.dev)\/([A-Za-z0-9_-]{43})$/;
+        if (v.includes('arweave.net/') || v.includes('ar.io/') || v.includes('arweave.dev/')) {
+            if (!arweaveUrlRegex.test(v)) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'Invalid Arweave URL format',
+                });
+            }
+            return;
+        }
+        if (!arweaveIdRegex.test(v)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Invalid Arweave transaction ID (43 characters, base64url)',
+            });
+        }
+    }),
+};
 
 const METADATA_FIELDS = METADATA_KEYS.map(({ label, allowedKey }) => ({
     key: ALLOWED_METADATA[allowedKey],
@@ -357,8 +291,13 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     });
 
     function validateField(key: string, value: string): string | null {
-        const metadataKey = METADATA_KEYS.find((item) => ALLOWED_METADATA[item.allowedKey] === key);
-        return metadataKey ? metadataKey.validate(value) : null;
+        const def = METADATA_KEYS.find((item) => ALLOWED_METADATA[item.allowedKey] === key);
+        if (!def) return null;
+        const schema = SCHEMAS[def.allowedKey];
+        if (!schema) return null;
+        const parsed = schema.safeParse(value);
+        if (parsed.success) return null;
+        return parsed.error.issues[0]?.message || 'Invalid value';
     }
 
     function hasSelectedEmptyFields(): boolean {
