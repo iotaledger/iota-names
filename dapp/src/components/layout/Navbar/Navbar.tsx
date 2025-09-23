@@ -56,7 +56,7 @@ export function Navbar() {
                     </div>
                     <div className="md:hidden">
                         <NavbarMobile routes={ROUTES}>
-                            <ConnectButton key="connect" />
+                            <ConnectButton />
                         </NavbarMobile>
                     </div>
 
