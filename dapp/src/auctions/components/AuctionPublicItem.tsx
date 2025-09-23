@@ -55,6 +55,17 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
 
     const account = useCurrentAccount();
 
+    const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
+
+    const formattedPrice = auction.metadata
+        ? formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
+              showIotaSymbol: false,
+          })
+        : null;
+
+    const priceNanos = auction.metadata ? auction.metadata.currentBidNanos : BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(priceNanos.toString());
+
     if (auction.isLoading || isNameRecordDataLoading) {
         return (
             <Card type={CardType.Filled}>
@@ -66,17 +77,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             </Card>
         );
     }
-
-    const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
-
-    const formattedPrice = auction.metadata
-        ? formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
-              showIotaSymbol: false,
-          })
-        : null;
-
-    const priceNanos = auction.metadata?.currentBidNanos || BigInt(0);
-    const fiatPrice = useCalculatePriceInFiat(priceNanos.toString());
 
     return (
         <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
@@ -94,17 +94,20 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                                 <div className="bg-names-solid-blue rounded-full w-5 h-5 flex items-center justify-center">
                                     <IotaLogoSmall className="w-4 h-4" />
                                 </div>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-body-lg">{formattedPrice}</span>
-                                </div>
-                                {fiatPrice && (
-                                    <span className="text-body-md text-names-neutral-50">
-                                        ${fiatPrice}
+                                <div className="flex items-end gap-1">
+                                    <span className="text-body-lg leading-none">
+                                        {formattedPrice}
                                     </span>
-                                )}
+                                    {fiatPrice && (
+                                        <span className="text-body-sm text-names-neutral-50 leading-none">
+                                            ${fiatPrice}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                        <div>
+                        <div className="mr-[-5px]">
+                            {/* To display IOTA price and fiat price correctly when they are larger numbers maybe we should remove 'Again' from 'Bid Again' button */}
                             <AuctionActionButton
                                 auction={auction}
                                 auctionStatus={auctionStatus}

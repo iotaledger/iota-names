@@ -15,5 +15,5 @@ export * from './useFormatCoin';
 export * from './useFeatureEnabledByNetwork';
 export * from './useAppsBackend';
 export * from './useCalculateRenewalPrice';
-export * from './useCalculateFiatPrice';
+export * from './useCalculatePriceInFiat';
 export * from './useRefreshAuctions';

@@ -40,7 +40,7 @@ import {
 import { useCoreConfig } from '@/hooks/useCoreConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
-import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import {
     getNameObject,
@@ -143,14 +143,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
     const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
+    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : 0;
     const fiatPriceResult = useCalculatePriceInFiat(
         renewalPriceInNanos && renewalPriceInNanos > 0 ? renewalPriceInNanos.toString() : '0',
     );
-    const fiatPrice =
-        renewalPriceInNanos && renewalPriceInNanos > 0
-            ? parseFloat(fiatPriceResult).toString()
-            : '';
-
     const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
@@ -312,13 +308,34 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                 </div>
                             </Panel>
                             {!isNameSubname && isRenewable && !isLoadingData && (
-                                <Select
-                                    options={renewOptions}
-                                    value={renewYears?.toString()}
-                                    supportingText={fiatPrice ? `$${fiatPrice}` : ''}
-                                    onValueChange={handleYearsChange}
-                                    disabled={disableEdit}
-                                />
+                                <div className="relative">
+                                    <Select
+                                        options={renewOptions}
+                                        value={renewYears?.toString()}
+                                        // Render custom overlay for amounts; leave supportingText empty to avoid overlap
+                                        supportingText=""
+                                        onValueChange={handleYearsChange}
+                                        disabled={disableEdit}
+                                    />
+                                    {renewalPriceIota ? (
+                                        <span
+                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
+                                            aria-hidden
+                                        >
+                                            <span>
+                                                {String(renewalPriceIota).replace(
+                                                    ' IOTA',
+                                                    '\u00A0IOTA',
+                                                )}
+                                            </span>
+                                            {fiatPriceResult ? (
+                                                <span className="ml-1 text-label-sm text-names-neutral-80">
+                                                    ({fiatPriceResult} USD)
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    ) : null}
+                                </div>
                             )}
                             {!isNameSubname && renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox

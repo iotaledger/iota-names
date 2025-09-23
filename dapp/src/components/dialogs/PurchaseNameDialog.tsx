@@ -25,11 +25,17 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
+import {
+    NameUpdate,
+    queryKey,
+    useBalance,
+    useCalculatePriceInFiat,
+    useUpdateNameTransaction,
+} from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getTargetExpirationDate } from '@/lib/utils/names';
@@ -205,6 +211,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
+    const finalPriceIota = formatNanosToIota(finalPrice, {
+        formatRounded: true,
+    });
+    const fiatPriceResult = useCalculatePriceInFiat(
+        finalPrice && Number(finalPrice) > 0 ? finalPrice.toString() : '0',
+    );
+
     const canPay =
         isConnected &&
         !nameRecordError &&
@@ -275,8 +288,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        !isLoadingData && finalPrice > 0 && finalPrice ? (
-                                            formatNanosToIota(finalPrice, { formatRounded: false })
+                                        !isLoadingData && fiatPriceResult && finalPriceIota ? (
+                                            <>
+                                                {finalPriceIota}
+                                                <span className="text-label-sm text-names-neutral-80">
+                                                    {' '}
+                                                    (${fiatPriceResult} USD)
+                                                </span>
+                                            </>
                                         ) : (
                                             <LoadingIndicator />
                                         )

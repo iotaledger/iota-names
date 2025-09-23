@@ -71,24 +71,24 @@ export function NamePurchaseCard({
                     <div className="flex flex-row gap-md">
                         {price && (
                             <div className="flex flex-col items-start">
-                                <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
-                                    {price}
-                                    <span className="text-names-neutral-70">
-                                        {defaultPriceSymbol}
-                                    </span>
-                                </p>
+                                <div className="flex items-baseline gap-md">
+                                    <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
+                                        {price}
+                                        <span className="text-names-neutral-70">
+                                            {defaultPriceSymbol}
+                                        </span>
+                                    </p>
+                                    {fiatPrice && (
+                                        <span className="text-label-sm text-names-neutral-50 items-center flex mr-md">
+                                            (${fiatPrice} USD)
+                                        </span>
+                                    )}
+                                </div>
                                 {priceSupportingText && (
                                     <p className="text-label-sm text-names-neutral-70">
                                         {priceSupportingText}
                                     </p>
                                 )}
-                            </div>
-                        )}
-                        {fiatPrice && (
-                            <div className="flex flex-col items-start">
-                                <span className="text-body-md text-names-neutral-50 items-center flex mr-md">
-                                    ${fiatPrice} USD
-                                </span>
                             </div>
                         )}
                         <div className="flex w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
