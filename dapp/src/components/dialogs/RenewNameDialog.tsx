@@ -330,7 +330,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                             </span>
                                             {fiatPriceResult ? (
                                                 <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                    ({fiatPriceResult} USD)
+                                                    (${fiatPriceResult} USD)
                                                 </span>
                                             ) : null}
                                         </span>
