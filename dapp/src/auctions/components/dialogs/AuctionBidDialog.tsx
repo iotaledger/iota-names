@@ -36,8 +36,12 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
-import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
-import { toNanos } from '@/lib/utils/amount';
+import {
+    formatNanosToIota,
+    getUserFriendlyErrorMessage,
+    parseIotaToNanos,
+    parseNanosToIota,
+} from '@/lib/utils';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -65,7 +69,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             ? formatNanosToIota(minBidNanos, { formatRounded: false, showIotaSymbol: false })
             : '');
 
-    const currentPriceInNanos = toNanos(currentPrice) || BigInt(0);
+    const currentPriceInNanos = parseIotaToNanos(currentPrice) || BigInt(0);
     const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos.toString());
 
     // Sync the minimum bid amount
