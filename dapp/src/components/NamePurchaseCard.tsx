@@ -5,7 +5,7 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
 import { useCalculatePriceInFiat } from '@/hooks';
-import { toNanos } from '@/lib/utils/amount';
+import { parseIotaToNanos } from '@/lib/utils';
 
 interface NamePurchaseCardProps {
     name: string;
@@ -29,7 +29,7 @@ export function NamePurchaseCard({
     const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
-    const priceInNanos = toNanos(price || '0');
+    const priceInNanos = parseIotaToNanos(price || '0');
     const fiatPrice = useCalculatePriceInFiat(priceInNanos?.toString() || '0');
 
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
