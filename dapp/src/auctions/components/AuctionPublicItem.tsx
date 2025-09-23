@@ -94,20 +94,19 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                                 <div className="bg-names-solid-blue rounded-full w-5 h-5 flex items-center justify-center">
                                     <IotaLogoSmall className="w-4 h-4" />
                                 </div>
-                                <div className="flex items-end gap-1">
-                                    <span className="text-body-lg leading-none">
+                                <div className="flex flex-wrap items-end gap-1">
+                                    <span className="text-body-lg leading-none whitespace-nowrap shrink-0">
                                         {formattedPrice}
                                     </span>
                                     {fiatPrice && (
-                                        <span className="text-body-sm text-names-neutral-50 leading-none">
+                                        <span className="text-body-sm text-names-neutral-50 leading-none whitespace-nowrap shrink-0">
                                             ${fiatPrice}
                                         </span>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <div className="mr-[-5px]">
-                            {/* To display IOTA price and fiat price correctly when they are larger numbers maybe we should remove 'Again' from 'Bid Again' button */}
+                        <div>
                             <AuctionActionButton
                                 auction={auction}
                                 auctionStatus={auctionStatus}
