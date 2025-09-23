@@ -110,7 +110,13 @@ export function NamePanelTile({
             <ContextMenuDropdown
                 visible={isVisible}
                 position={position}
-                options={menuOptions}
+                options={menuOptions.map((option) => ({
+                    ...option,
+                    onClick: () => {
+                        option.onClick?.();
+                        toggleMenu();
+                    },
+                }))}
                 dropdownRef={dropdownRef}
             />
 
