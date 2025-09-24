@@ -8,7 +8,6 @@ import {
     ArrowRight,
     FilterList,
     Info,
-    Loader,
     Refresh,
     Search,
     Warning,
@@ -41,6 +40,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
+import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useRefreshAuctions } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
@@ -290,8 +290,8 @@ export default function AuctionsPage(): JSX.Element {
                 <div>
                     {infoBox}
                     {isLoading ? (
-                        <div className="flex w-full justify-center">
-                            <Loader className="animate-spin" data-testid="loading-indicator" />
+                        <div className="flex w-full justify-start mt-8">
+                            <CardSkeletonLoader isAuctionCard />
                         </div>
                     ) : (
                         <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap justify-center sm:justify-start">
