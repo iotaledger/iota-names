@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Warning } from '@iota/apps-ui-icons';
+import { Info, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonType,
@@ -180,9 +180,6 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     const disableSave =
         isLoading || !canRenew || !updateNameTransaction || isBelowMinimumRenewalPeriod;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
-    const minimumDuration = config
-        ? config.subnamesConfig.minimum_duration / (1000 * 60 * 60)
-        : '24';
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -198,13 +195,13 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                     </span>
                                 </div>
                             </Panel>
-                            {isBelowMinimumRenewalPeriod && minimumDuration && (
+                            {isBelowMinimumRenewalPeriod && (
                                 <InfoBox
-                                    type={InfoBoxType.Warning}
-                                    icon={<Warning />}
-                                    title="Your renewal period is below the minimum"
+                                    type={InfoBoxType.Default}
+                                    icon={<Info />}
+                                    title="Your subname have the same expiration as its parent"
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`You need to renew for a longer period. The minimum renewal period is ${minimumDuration} hours.`}
+                                    supportingText={`You need to renew the parent for a longer period.`}
                                 />
                             )}
                         </div>
