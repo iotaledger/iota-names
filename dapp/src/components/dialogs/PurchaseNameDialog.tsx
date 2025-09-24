@@ -17,6 +17,7 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LabelText,
     LoadingIndicator,
     Panel,
     Toggle,
@@ -212,7 +213,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .toNumber();
 
     const finalPriceIota = formatNanosToIota(finalPrice, {
-        formatRounded: true,
+        formatRounded: false,
     });
     const fiatPriceResult = useCalculatePriceInFiat(
         finalPrice && Number(finalPrice) > 0 ? finalPrice.toString() : '0',
@@ -284,18 +285,18 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 </div>
                             </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
+                                <DisplayStats
+                                    label="Registration Expires"
+                                    value={<LabelText text={expirationDate} label={`\u00A0`} />} // \u00A0 for alignment
+                                />
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        !isLoadingData && fiatPriceResult && finalPriceIota ? (
-                                            <>
-                                                {finalPriceIota}
-                                                <span className="text-label-sm text-names-neutral-80">
-                                                    {' '}
-                                                    (${fiatPriceResult} USD)
-                                                </span>
-                                            </>
+                                        fiatPriceResult && finalPriceIota ? (
+                                            <LabelText
+                                                text={finalPriceIota}
+                                                label={`($${fiatPriceResult} USD)`}
+                                            />
                                         ) : (
                                             <LoadingIndicator />
                                         )
