@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Warning } from '@iota/apps-ui-icons';
+import { Add, Info, Refresh, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -14,6 +14,7 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LoadingIndicator,
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -27,16 +28,17 @@ import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
-import { useGetDefaultName, useRegistrationNfts } from '@/hooks';
+import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { SubnamesPanel } from './components/SubnamesPanel';
+import { SubnamesDialog } from './components/SubnamesDialog';
 import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
     const account = useCurrentAccount();
+
     const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
         null,
     );
@@ -65,6 +67,8 @@ export default function MyNamesPage(): JSX.Element {
         userAddress: account?.address,
         status: 'all',
     });
+
+    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctionDetails);
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: defaultName } = useGetDefaultName(address);
@@ -105,7 +109,7 @@ export default function MyNamesPage(): JSX.Element {
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
-        setRightPanelSelectedName(null);
+        closePanel();
     }
 
     function isDefaultName(name: RegistrationNft): boolean {
@@ -113,12 +117,16 @@ export default function MyNamesPage(): JSX.Element {
     }
 
     function handleNameRenewed(name: RegistrationNft): void {
-        setRightPanelSelectedName(null);
+        closePanel();
         toast.success(
             `${normalizeIotaName(name.name, 'at', {
                 truncateLongParts: true,
             })} renewed successfully!`,
         );
+    }
+
+    function closePanel() {
+        setRightPanelSelectedName(null);
     }
 
     return (
@@ -128,16 +136,33 @@ export default function MyNamesPage(): JSX.Element {
                     Names
                 </h2>
 
-                <Button
-                    type={ButtonType.Outlined}
-                    text="Name"
-                    icon={<Add />}
-                    onClick={() =>
-                        open({
-                            autoFocusInput: true,
-                        })
-                    }
-                />
+                <div className="flex gap-sm">
+                    <Button
+                        type={ButtonType.Outlined}
+                        text="Name"
+                        icon={<Add />}
+                        onClick={() =>
+                            open({
+                                autoFocusInput: true,
+                            })
+                        }
+                    />
+                    {selectedFilter === GroupedNamesFilter.InAuction ||
+                    selectedFilter === GroupedNamesFilter.All ? (
+                        <Button
+                            type={ButtonType.Outlined}
+                            icon={
+                                isRefreshing ? (
+                                    <LoadingIndicator size="w-5 h-5" />
+                                ) : (
+                                    <Refresh className="w-5 h-5" />
+                                )
+                            }
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                        />
+                    ) : null}
+                </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
@@ -198,7 +223,7 @@ export default function MyNamesPage(): JSX.Element {
 
             {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
-                    <div className="gap-lg w-full flex flex-row items-center flex-wrap">
+                    <div className="gap-lg w-full flex flex-row flex-wrap items-center justify-center sm:justify-start">
                         {filteredNames.map((nft) =>
                             'details' in nft ? (
                                 <ExtendedAuctionCard
@@ -210,7 +235,9 @@ export default function MyNamesPage(): JSX.Element {
                                 <ExtendedNameCard
                                     key={nft.name}
                                     nft={nft}
-                                    onSubnameListClick={() => setRightPanelSelectedName(nft)}
+                                    onSubnameListClick={() => {
+                                        setRightPanelSelectedName(nft);
+                                    }}
                                     isActive={rightPanelSelectedName?.name === nft.name}
                                     badge={
                                         isDefaultName(nft) ? (
@@ -226,15 +253,13 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
 
                     {rightPanelSelectedName && (
-                        <div className="sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg">
-                            <SubnamesPanel
+                        <>
+                            <SubnamesDialog
                                 selectedName={rightPanelSelectedName}
-                                onClose={() => setRightPanelSelectedName(null)}
-                                onRenewClick={(name) => {
-                                    setSelectedNameForRenewal(name);
-                                }}
+                                onClose={closePanel}
+                                onRenewClick={(name) => setSelectedNameForRenewal(name)}
                             />
-                        </div>
+                        </>
                     )}
                 </div>
             )}

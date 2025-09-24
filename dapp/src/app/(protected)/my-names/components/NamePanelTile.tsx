@@ -16,6 +16,7 @@ import { useNameRecord } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { useNameContextMenu } from '@/hooks/useNameContextMenu';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
+import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import type { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
@@ -60,7 +61,14 @@ export function NamePanelTile({
         ? getNamePermissions(nameRecord).allowTimeExtension
         : false;
 
-    const menuOptions = getNameMenuOptions(registration, hasSubnames, openDialog, nameRecordData);
+    const { data: paymentsMode } = useNamesPurchaseMode();
+    const menuOptions = getNameMenuOptions(
+        registration,
+        hasSubnames,
+        openDialog,
+        nameRecordData,
+        paymentsMode?.isPaymentAuthorized,
+    );
 
     const panelType = (() => {
         if (isCloseToExpiration) return PanelTileType.Warning;
@@ -102,7 +110,13 @@ export function NamePanelTile({
             <ContextMenuDropdown
                 visible={isVisible}
                 position={position}
-                options={menuOptions}
+                options={menuOptions.map((option) => ({
+                    ...option,
+                    onClick: () => {
+                        option.onClick?.();
+                        toggleMenu();
+                    },
+                }))}
                 dropdownRef={dropdownRef}
             />
 
