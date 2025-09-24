@@ -6,3 +6,4 @@ export * from './WhyIotaNames';
 export * from './FairAuction';
 export * from './NameUtility';
 export * from './BuiltForBuilders';
+export * from './AuctionCarousel';
