@@ -31,7 +31,7 @@ import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/ho
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { SubnamesPanel } from './components/SubnamesPanel';
+import { SubnamesDialog } from './components/SubnamesDialog';
 import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
@@ -108,7 +108,7 @@ export default function MyNamesPage(): JSX.Element {
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
-        setRightPanelSelectedName(null);
+        closePanel();
     }
 
     function isDefaultName(name: RegistrationNft): boolean {
@@ -116,12 +116,16 @@ export default function MyNamesPage(): JSX.Element {
     }
 
     function handleNameRenewed(name: RegistrationNft): void {
-        setRightPanelSelectedName(null);
+        closePanel();
         toast.success(
             `${normalizeIotaName(name.name, 'at', {
                 truncateLongParts: true,
             })} renewed successfully!`,
         );
+    }
+
+    function closePanel() {
+        setRightPanelSelectedName(null);
     }
 
     return (
@@ -218,7 +222,7 @@ export default function MyNamesPage(): JSX.Element {
 
             {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
-                    <div className="gap-lg w-full flex flex-row items-center flex-wrap">
+                    <div className="gap-lg w-full flex flex-row flex-wrap items-center justify-center sm:justify-start">
                         {filteredNames.map((nft) =>
                             'details' in nft ? (
                                 <ExtendedAuctionCard
@@ -230,7 +234,9 @@ export default function MyNamesPage(): JSX.Element {
                                 <ExtendedNameCard
                                     key={nft.name}
                                     nft={nft}
-                                    onSubnameListClick={() => setRightPanelSelectedName(nft)}
+                                    onSubnameListClick={() => {
+                                        setRightPanelSelectedName(nft);
+                                    }}
                                     isActive={rightPanelSelectedName?.name === nft.name}
                                     badge={
                                         isDefaultName(nft) ? (
@@ -246,15 +252,13 @@ export default function MyNamesPage(): JSX.Element {
                     </div>
 
                     {rightPanelSelectedName && (
-                        <div className="sticky top-[98px] xl:w-[442px] w-[420px] flex-shrink-0 shadow-lg">
-                            <SubnamesPanel
+                        <>
+                            <SubnamesDialog
                                 selectedName={rightPanelSelectedName}
-                                onClose={() => setRightPanelSelectedName(null)}
-                                onRenewClick={(name) => {
-                                    setSelectedNameForRenewal(name);
-                                }}
+                                onClose={closePanel}
+                                onRenewClick={(name) => setSelectedNameForRenewal(name)}
                             />
-                        </div>
+                        </>
                     )}
                 </div>
             )}
