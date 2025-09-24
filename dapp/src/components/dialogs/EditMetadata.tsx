@@ -35,7 +35,7 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
-import { METADATA_KEYS, SCHEMAS } from '@/lib/schemas/zod.schemas';
+import { METADATA_KEYS, SCHEMAS } from '@/lib/schemas';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
