@@ -3,7 +3,14 @@
 
 'use client';
 
-import { BuiltForBuilders, FairAuction, LandingHero, NameUtility, WhyIotaNames } from '@/sections';
+import {
+    AuctionCarousel,
+    BuiltForBuilders,
+    FairAuction,
+    LandingHero,
+    NameUtility,
+    WhyIotaNames,
+} from '@/sections';
 
 export default function Home() {
     return (
@@ -11,6 +18,7 @@ export default function Home() {
             <LandingHero />
             <WhyIotaNames />
             <FairAuction />
+            <AuctionCarousel />
             <NameUtility />
             <BuiltForBuilders />
         </main>
