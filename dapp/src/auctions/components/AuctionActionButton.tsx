@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button, ButtonType, LoadingIndicator } from '@iota/apps-ui-kit';
-import { useCurrentAccount } from '@iota/dapp-kit';
+import { ConnectModal, useCurrentAccount } from '@iota/dapp-kit';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { queryKey } from '@/hooks/queryKey';
@@ -30,15 +30,19 @@ export function AuctionActionButton({
                 queryClient.invalidateQueries({
                     queryKey: queryKey.userAuctionHistory(account?.address),
                 });
-                // Invalidate auction so that it is detected as claimed
                 queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(auction.name) });
-                // Refresh owned names so the claimed name appears
                 queryClient.invalidateQueries({
                     queryKey: queryKey.ownedObjects(account?.address || ''),
                 });
             },
         });
-    if (auctionStatus === 'claimable') {
+
+    if (!account?.address) {
+        return (
+            <ConnectModal trigger={<Button text="Bid" type={ButtonType.Outlined} fullWidth />} />
+        );
+    }
+    if (auctionStatus === 'claimable' && auction.metadata?.winner === account?.address) {
         const isClaimLoading = isSigningClaimTransaction;
 
         return (
