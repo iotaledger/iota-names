@@ -1,12 +1,14 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
 import loadingAnimationData from '@/animations/lottie-loading.json';
 import { useNameRecord } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
+import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { LottieAnimation } from '../loaders/Lottie';
 
@@ -18,12 +20,13 @@ interface NameAvatarDisplay {
 
 export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
-
+    const isNameSubname = isSubname(name);
+    // load avatar for names
     const avatarId =
-        nameRecordData?.type === 'unavailable'
+        !isNameSubname && nameRecordData?.type === 'unavailable'
             ? nameRecordData?.nameRecord.avatar
                 ? nameRecordData.nameRecord.avatar
-                : nameRecordData.nameRecord.nftId
+                : null
             : null;
 
     const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject(name, {
@@ -31,9 +34,17 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
         options: { showDisplay: true, showContent: true },
     });
 
+    // load avatar for subnames
+    const avatarSrc =
+        isNameSubname && nameRecordData?.type === 'unavailable'
+            ? getNameDisplaySrc(name, nameRecordData.nameRecord.expirationTimestampMs)
+            : undefined;
+
     const isDataLoading = isNameRecordDataLoading || isAvatarLoading;
 
-    return (
+    return isNameSubname ? (
+        <AvatarDisplay src={avatarSrc} isLoadingSrc={isDataLoading} alt={name} />
+    ) : (
         <AvatarDisplay
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
