@@ -20,10 +20,9 @@ interface NameAvatarDisplay {
 
 export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
-    const isNameSubname = isSubname(name);
-    // load avatar for names
+
     const avatarId =
-        !isNameSubname && nameRecordData?.type === 'unavailable'
+        nameRecordData?.type === 'unavailable'
             ? nameRecordData?.nameRecord.avatar
                 ? nameRecordData.nameRecord.avatar
                 : null
@@ -34,15 +33,15 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
         options: { showDisplay: true, showContent: true },
     });
 
-    // load avatar for subnames
+    // load avatar for !avatarObject
     const avatarSrc =
-        isNameSubname && nameRecordData?.type === 'unavailable'
+        !avatarObject && nameRecordData?.type === 'unavailable'
             ? getNameDisplaySrc(name, nameRecordData.nameRecord.expirationTimestampMs)
             : undefined;
 
     const isDataLoading = isNameRecordDataLoading || isAvatarLoading;
 
-    return isNameSubname ? (
+    return !avatarObject ? (
         <AvatarDisplay src={avatarSrc} isLoadingSrc={isDataLoading} alt={name} />
     ) : (
         <AvatarDisplay
