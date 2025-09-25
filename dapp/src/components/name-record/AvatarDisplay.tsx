@@ -1,7 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
@@ -41,14 +40,14 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
 
     const isDataLoading = isNameRecordDataLoading || isAvatarLoading;
 
-    return !avatarObject ? (
-        <AvatarDisplay src={avatarSrc} isLoadingSrc={isDataLoading} alt={name} />
-    ) : (
+    return avatarObject ? (
         <AvatarDisplay
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
             alt={name}
         />
+    ) : (
+        <AvatarDisplay src={avatarSrc} isLoadingSrc={false} alt={name} />
     );
 }
 
