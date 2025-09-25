@@ -14,7 +14,6 @@ import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
-import { Feature } from '@/lib/enums';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './ThemeProvider';
@@ -27,21 +26,11 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 apiHost: getAppsBackend(),
                 clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY || '',
                 enableDevMode: process.env.NODE_ENV === 'development',
-                features: {
-                    [Feature.FiatConversion]: {
-                        defaultValue: {
-                            mainnet: true,
-                            testnet: false,
-                            devnet: false,
-                        },
-                    },
-                },
             }),
     );
 
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
-
     function handleNetworkChange() {
         queryClient.resetQueries();
         queryClient.clear();
