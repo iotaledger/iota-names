@@ -30,9 +30,9 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 features: {
                     [Feature.FiatConversion]: {
                         defaultValue: {
-                            mainnet: false,
-                            testnet: true,
-                            devnet: true,
+                            mainnet: true,
+                            testnet: false,
+                            devnet: false,
                         },
                     },
                 },
