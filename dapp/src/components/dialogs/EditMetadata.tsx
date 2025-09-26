@@ -35,6 +35,7 @@ import {
     useRegistrationNfts,
     useUpdateNameTransaction,
 } from '@/hooks';
+import { METADATA_KEYS, SCHEMAS } from '@/lib/schemas';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
@@ -43,26 +44,9 @@ interface EditMetadataDialogProps {
     setOpen: (bool: boolean) => void;
 }
 
-const METADATA_KEYS = [
-    { label: 'Twitter/X', allowedKey: 'twitterX' },
-    { label: 'Discord', allowedKey: 'discord' },
-    { label: 'Github', allowedKey: 'github' },
-    { label: 'Email', allowedKey: 'email' },
-    { label: 'Btc', allowedKey: 'btc' },
-    { label: 'Eth', allowedKey: 'eth' },
-    { label: 'Ltc', allowedKey: 'ltc' },
-    { label: 'Doge', allowedKey: 'doge' },
-    { label: 'Sol', allowedKey: 'sol' },
-    { label: 'Sui', allowedKey: 'sui' },
-    { label: 'Website', allowedKey: 'website' },
-    { label: 'Ipfs', allowedKey: 'ipfs' },
-    { label: 'Arweave', allowedKey: 'arweave' },
-] as const satisfies { label: string; allowedKey: keyof typeof ALLOWED_METADATA }[];
-
 const METADATA_FIELDS = METADATA_KEYS.map(({ label, allowedKey }) => ({
     key: ALLOWED_METADATA[allowedKey],
     label,
-    allowedKey,
 }));
 
 export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
@@ -77,6 +61,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [metadata, setMetadata] = useState(() => {
         const initial: Record<string, { selected: boolean; data: string }> = {};
         METADATA_FIELDS.forEach(({ key }) => {
@@ -100,7 +85,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                 : nameRecord?.nameRecord.nftId;
 
         if (nameRecord && nftId) {
-            METADATA_FIELDS.forEach(({ key, allowedKey }) => {
+            METADATA_FIELDS.forEach(({ key }) => {
                 const field = metadata[key];
                 const currentField = nameRecord.nameRecord.data[key];
 
@@ -156,11 +141,21 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
         },
     });
 
-    function toggleMetadata(key: string) {
-        setMetadata((prev) => ({
-            ...prev,
-            [key]: { ...prev[key], selected: !prev[key].selected },
-        }));
+    function validateField(key: string, value: string): string | null {
+        const def = METADATA_KEYS.find((item) => ALLOWED_METADATA[item.allowedKey] === key);
+        if (!def) return null;
+        const schema = SCHEMAS[def.allowedKey];
+        if (!schema) return null;
+        const parsed = schema.safeParse(value);
+        if (parsed.success) return null;
+        return parsed.error.issues[0]?.message || 'Invalid value';
+    }
+
+    function hasSelectedEmptyFields(): boolean {
+        return METADATA_FIELDS.some(({ key }) => {
+            const field = metadata[key];
+            return field?.selected && (!field.data || field.data.trim() === '');
+        });
     }
 
     function updateMetadataData(key: string, data: string) {
@@ -168,10 +163,57 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
             ...prev,
             [key]: { ...prev[key], data },
         }));
+
+        if (data && data.trim() !== '') {
+            const error = validateField(key, data);
+            setValidationErrors((prev) => ({
+                ...prev,
+                [key]: error || '',
+            }));
+        } else {
+            const field = metadata[key];
+            if (field?.selected) {
+                setValidationErrors((prev) => ({
+                    ...prev,
+                    [key]: 'Field is required',
+                }));
+            } else {
+                setValidationErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors[key];
+                    return newErrors;
+                });
+            }
+        }
     }
 
+    function toggleMetadata(key: string) {
+        setMetadata((prev) => ({
+            ...prev,
+            [key]: {
+                ...prev[key],
+                selected: !metadata[key]?.selected,
+                data: !metadata[key]?.selected ? prev[key]?.data || '' : '',
+            },
+        }));
+        if (metadata[key]?.selected) {
+            setValidationErrors((prev) => {
+                const newErrors = { ...prev };
+                delete newErrors[key];
+                return newErrors;
+            });
+        }
+    }
+
+    const hasEmptyRequiredFields = hasSelectedEmptyFields();
+    const hasValidationErrors = Object.values(validationErrors).some((error) => error);
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
-    const disableApply = isLoading || updates.length === 0 || !updateNameTransaction;
+    const disableApply =
+        isLoading ||
+        updates.length === 0 ||
+        !updateNameTransaction ||
+        hasValidationErrors ||
+        hasEmptyRequiredFields;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -210,6 +252,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                                 onChange={({ target: { value } }) =>
                                                     updateMetadataData(key, value)
                                                 }
+                                                errorMessage={validationErrors[key] || undefined}
                                             />
                                         ),
                                 )}
