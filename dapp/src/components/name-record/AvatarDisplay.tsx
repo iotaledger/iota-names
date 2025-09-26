@@ -1,13 +1,13 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { isSubname } from '@iota/iota-names-sdk';
 import cx from 'clsx';
 import { useEffect, useState } from 'react';
 
 import loadingAnimationData from '@/animations/lottie-loading.json';
-import { useNameRecord } from '@/hooks';
+import { useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetObject } from '@/hooks/useGetOwnedObject';
-import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { LottieAnimation } from '../loaders/Lottie';
 
@@ -19,12 +19,16 @@ interface NameAvatarDisplay {
 
 export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
+    const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
+    const isNameSubname = isSubname(name);
 
     const avatarId =
         nameRecordData?.type === 'unavailable'
             ? nameRecordData?.nameRecord.avatar
                 ? nameRecordData.nameRecord.avatar
-                : null
+                : isNameSubname
+                  ? subnames?.find((n) => n.name === name)?.id
+                  : nameRecordData.nameRecord.nftId
             : null;
 
     const { data: avatarObject, isLoading: isAvatarLoading } = useGetObject(name, {
@@ -32,22 +36,14 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
         options: { showDisplay: true, showContent: true },
     });
 
-    // load avatar for !avatarObject
-    const avatarSrc =
-        !avatarObject && nameRecordData?.type === 'unavailable'
-            ? getNameDisplaySrc(name, nameRecordData.nameRecord.expirationTimestampMs)
-            : undefined;
+    const isDataLoading = isNameRecordDataLoading || isSubnamesLoading || isAvatarLoading;
 
-    const isDataLoading = isNameRecordDataLoading || isAvatarLoading;
-
-    return avatarObject ? (
+    return (
         <AvatarDisplay
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
             alt={name}
         />
-    ) : (
-        <AvatarDisplay src={avatarSrc} isLoadingSrc={false} alt={name} />
     );
 }
 
@@ -73,14 +69,35 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
     useEffect(() => {
         if (!avatarSrc) return;
 
-        setIsLoadingAvatar(true);
-
         const img = new Image();
+
+        function handleStartLoad() {
+            setIsLoadingAvatar(true);
+        }
+
+        function handleLoad() {
+            setIsLoadingAvatar(false);
+        }
+
+        function handleError() {
+            setIsLoadingAvatar(false);
+            // Only change to fallback if we are not in the fallback yet
+            if (avatarSrc !== FALLBACK_URL) {
+                setAvatarSrc(FALLBACK_URL);
+            }
+        }
+
+        img.addEventListener('loadstart', handleStartLoad);
+        img.addEventListener('load', handleLoad);
+        img.addEventListener('error', handleError);
+
         img.src = avatarSrc;
 
-        img.onload = () => setIsLoadingAvatar(false);
-        // Render the fallback if the src fails
-        img.onerror = () => setAvatarSrc(FALLBACK_URL);
+        return () => {
+            img.removeEventListener('startload', handleStartLoad);
+            img.removeEventListener('load', handleLoad);
+            img.removeEventListener('error', handleError);
+        };
     }, [avatarSrc]);
 
     return (
