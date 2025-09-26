@@ -54,17 +54,24 @@ interface AvatarDisplayProps {
 }
 
 export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
-    const [avatarSrc, setAvatarSrc] = useState<null | string>(null);
-    const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
+    const [srcStatus, setSrcStatus] = useState<'pending' | 'success' | 'error'>('pending');
+    const [avatarStatus, setAvatarStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
-    useEffect(() => {
-        if (src) {
-            setAvatarSrc(src);
+    const avatarSrc = (() => {
+        if (srcStatus === 'error') {
+            // Avatar src failed
+            return FALLBACK_URL;
+        } else if (src) {
+            // Avatar src exists
+            return src;
         } else if (!isLoadingSrc) {
-            // If there is no src even after loading we render the fallback
-            setAvatarSrc(FALLBACK_URL);
+            // Avatar src doesnt exist and it stopped loading
+            return FALLBACK_URL;
+        } else {
+            // Avatar src doesnt exist and still loading
+            return null;
         }
-    }, [src, isLoadingSrc]);
+    })();
 
     useEffect(() => {
         if (!avatarSrc) return;
@@ -72,19 +79,21 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
         const img = new Image();
 
         function handleStartLoad() {
-            setIsLoadingAvatar(true);
+            setAvatarStatus('loading');
         }
 
         function handleLoad() {
-            setIsLoadingAvatar(false);
+            if (avatarSrc === src) {
+                setSrcStatus('success');
+            }
+            setAvatarStatus('success');
         }
 
         function handleError() {
-            setIsLoadingAvatar(false);
-            // Only change to fallback if we are not in the fallback yet
-            if (avatarSrc !== FALLBACK_URL) {
-                setAvatarSrc(FALLBACK_URL);
+            if (avatarSrc === src) {
+                setSrcStatus('error');
             }
+            setAvatarStatus('error');
         }
 
         img.addEventListener('loadstart', handleStartLoad);
@@ -100,9 +109,11 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
         };
     }, [avatarSrc]);
 
+    const isLoading = srcStatus === 'pending' || avatarStatus === 'loading';
+
     return (
         <div className="flex flex-col relative rounded-xl overflow-hidden w-full h-full select-none">
-            {isLoadingSrc || isLoadingAvatar ? (
+            {isLoadingSrc || isLoading ? (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                         <LottieAnimation
