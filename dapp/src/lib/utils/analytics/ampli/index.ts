@@ -1,3 +1,6 @@
+// Copyright (c) 2024 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 /* tslint:disable */
 /* eslint-disable */
 // @ts-nocheck
@@ -22,181 +25,194 @@ import * as amplitude from '@amplitude/analytics-browser';
 export type Environment = 'iotanames';
 
 export const ApiKey: Record<Environment, string> = {
-  iotanames: '046308c03d97539ea94cefe036142905'
+    iotanames: '046308c03d97539ea94cefe036142905',
 };
 
 /**
  * Default Amplitude configuration options. Contains tracking plan information.
  */
 export const DefaultConfiguration: BrowserOptions = {
-  plan: {
-    version: '1',
-    branch: 'main',
-    source: 'web',
-    versionId: 'd1206ad7-730b-40f8-ab26-ced8dfa98962'
-  },
-  ...{
-    ingestionMetadata: {
-      sourceName: 'browser-typescript-ampli',
-      sourceVersion: '2.0.0'
-    }
-  },
-  serverZone: amplitude.Types.ServerZone.EU
+    plan: {
+        version: '1',
+        branch: 'main',
+        source: 'web',
+        versionId: 'd1206ad7-730b-40f8-ab26-ced8dfa98962',
+    },
+    ...{
+        ingestionMetadata: {
+            sourceName: 'browser-typescript-ampli',
+            sourceVersion: '2.0.0',
+        },
+    },
+    serverZone: amplitude.Types.ServerZone.EU,
 };
 
-export interface LoadOptionsBase { disabled?: boolean }
-
-export type LoadOptionsWithEnvironment = LoadOptionsBase & { environment: Environment; client?: { configuration?: BrowserOptions; }; };
-export type LoadOptionsWithApiKey = LoadOptionsBase & { client: { apiKey: string; configuration?: BrowserOptions; } };
-export type LoadOptionsWithClientInstance = LoadOptionsBase & { client: { instance: BrowserClient; } };
-
-export type LoadOptions = LoadOptionsWithEnvironment | LoadOptionsWithApiKey | LoadOptionsWithClientInstance;
-
-export interface AddressConnectProperties {
-  /**
-   * | Rule | Value |
-   * |---|---|
-   * | Enum Values | current, external |
-   */
-  "connect address type": "current" | "external";
-  name: string;
+export interface LoadOptionsBase {
+    disabled?: boolean;
 }
 
-export interface AuctionBidProperties {
-  name: string;
+export type LoadOptionsWithEnvironment = LoadOptionsBase & {
+    environment: Environment;
+    client?: { configuration?: BrowserOptions };
+};
+export type LoadOptionsWithApiKey = LoadOptionsBase & {
+    client: { apiKey: string; configuration?: BrowserOptions };
+};
+export type LoadOptionsWithClientInstance = LoadOptionsBase & {
+    client: { instance: BrowserClient };
+};
+
+export type LoadOptions =
+    | LoadOptionsWithEnvironment
+    | LoadOptionsWithApiKey
+    | LoadOptionsWithClientInstance;
+
+export interface AppliedAuctionNameFilterProperties {
+    query: string;
 }
 
-export interface AuctionBidAgainProperties {
-  name: string;
+export interface ConnectedAddressProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Enum Values | current, external |
+     */
+    addressType: 'current' | 'external';
+    name: string;
 }
 
-export interface AuctionFilterNamePerformedProperties {
-  query: string;
+export interface CreatedSubnameProperties {
+    name: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Unique Items | true |
+     * | Item Type | string |
+     */
+    subnamePermissions?: ('allow_to_create_additional_subnames' | 'allow_to_renew_expiration')[];
 }
 
-export interface AuctionStartProperties {
-  name: string;
+export interface PerformedSearchProperties {
+    query: string;
 }
 
-export interface NameBuyProperties {
-  name: string;
+export interface PlacedAuctionBidProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    auctionCurrentBidAmount: number;
+    isUserFirstBidOnAuction: boolean;
+    name: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    userBidAmount: number;
+    wasUserTopBidder: boolean;
 }
 
-export interface NameRenewalProperties {
-  duration: string;
-  name: string;
+export interface PurchasedNameProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    amount: number;
+    discountName?: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    discountPercentage?: number;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expiration: number;
+    name: string;
 }
 
-export interface NameSetAsDisplayedProperties {
-  name: string;
+export interface RenewedNameProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expiration: number;
+    name: string;
 }
 
-export interface SearchPerformedProperties {
-  query: string;
+export interface SetNameAsDisplayedProperties {
+    name: string;
 }
 
-export interface SubnameCreateProperties {
-  name: string;
+export class AppliedAuctionNameFilter implements BaseEvent {
+    event_type = 'applied auction name filter';
+
+    constructor(public event_properties: AppliedAuctionNameFilterProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class AddressConnect implements BaseEvent {
-  event_type = 'address connect';
+export class ConnectedAddress implements BaseEvent {
+    event_type = 'connected address';
 
-  constructor(
-    public event_properties: AddressConnectProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: ConnectedAddressProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class AuctionBid implements BaseEvent {
-  event_type = 'auction bid';
+export class CreatedSubname implements BaseEvent {
+    event_type = 'created subname';
 
-  constructor(
-    public event_properties: AuctionBidProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: CreatedSubnameProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class AuctionBidAgain implements BaseEvent {
-  event_type = 'auction bid again';
+export class PerformedSearch implements BaseEvent {
+    event_type = 'performed search';
 
-  constructor(
-    public event_properties: AuctionBidAgainProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: PerformedSearchProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class AuctionFilterNamePerformed implements BaseEvent {
-  event_type = 'auction filter name performed';
+export class PlacedAuctionBid implements BaseEvent {
+    event_type = 'placed auction bid';
 
-  constructor(
-    public event_properties: AuctionFilterNamePerformedProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: PlacedAuctionBidProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class AuctionStart implements BaseEvent {
-  event_type = 'auction start';
+export class PurchasedName implements BaseEvent {
+    event_type = 'purchased name';
 
-  constructor(
-    public event_properties: AuctionStartProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: PurchasedNameProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class NameBuy implements BaseEvent {
-  event_type = 'name buy';
+export class RenewedName implements BaseEvent {
+    event_type = 'renewed name';
 
-  constructor(
-    public event_properties: NameBuyProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: RenewedNameProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
-export class NameRenewal implements BaseEvent {
-  event_type = 'name renewal';
+export class SetNameAsDisplayed implements BaseEvent {
+    event_type = 'set name as displayed';
 
-  constructor(
-    public event_properties: NameRenewalProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
-}
-
-export class NameSetAsDisplayed implements BaseEvent {
-  event_type = 'name set as displayed';
-
-  constructor(
-    public event_properties: NameSetAsDisplayedProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
-}
-
-export class SearchPerformed implements BaseEvent {
-  event_type = 'search performed';
-
-  constructor(
-    public event_properties: SearchPerformedProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
-}
-
-export class SubnameCreate implements BaseEvent {
-  event_type = 'subname create';
-
-  constructor(
-    public event_properties: SubnameCreateProperties,
-  ) {
-    this.event_properties = event_properties;
-  }
+    constructor(public event_properties: SetNameAsDisplayedProperties) {
+        this.event_properties = event_properties;
+    }
 }
 
 export type PromiseResult<T> = { promise: Promise<T | void> };
@@ -309,173 +325,139 @@ export class Ampli {
   }
 
   /**
-   * address connect
+   * applied auction name filter
    *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/address%20connect)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. connect address type)
-   * @param options Amplitude event options.
-   */
-  addressConnect(
-    properties: AddressConnectProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new AddressConnect(properties), options);
-  }
-
-  /**
-   * auction bid
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/auction%20bid)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. name)
-   * @param options Amplitude event options.
-   */
-  auctionBid(
-    properties: AuctionBidProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new AuctionBid(properties), options);
-  }
-
-  /**
-   * auction bid again
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/auction%20bid%20again)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. name)
-   * @param options Amplitude event options.
-   */
-  auctionBidAgain(
-    properties: AuctionBidAgainProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new AuctionBidAgain(properties), options);
-  }
-
-  /**
-   * auction filter name performed
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/auction%20filter%20name%20performed)
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/applied%20auction%20name%20filter)
    *
    * Event has no description in tracking plan.
    *
    * @param properties The event's properties (e.g. query)
    * @param options Amplitude event options.
    */
-  auctionFilterNamePerformed(
-    properties: AuctionFilterNamePerformedProperties,
+  appliedAuctionNameFilter(
+    properties: AppliedAuctionNameFilterProperties,
     options?: EventOptions,
   ) {
-    return this.track(new AuctionFilterNamePerformed(properties), options);
+    return this.track(new AppliedAuctionNameFilter(properties), options);
   }
 
   /**
-   * auction start
+   * connected address
    *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/auction%20start)
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/connected%20address)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. addressType)
+   * @param options Amplitude event options.
+   */
+  connectedAddress(
+    properties: ConnectedAddressProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ConnectedAddress(properties), options);
+  }
+
+  /**
+   * created subname
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/created%20subname)
    *
    * Event has no description in tracking plan.
    *
    * @param properties The event's properties (e.g. name)
    * @param options Amplitude event options.
    */
-  auctionStart(
-    properties: AuctionStartProperties,
+  createdSubname(
+    properties: CreatedSubnameProperties,
     options?: EventOptions,
   ) {
-    return this.track(new AuctionStart(properties), options);
+    return this.track(new CreatedSubname(properties), options);
   }
 
   /**
-   * name buy
+   * performed search
    *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/name%20buy)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. name)
-   * @param options Amplitude event options.
-   */
-  nameBuy(
-    properties: NameBuyProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new NameBuy(properties), options);
-  }
-
-  /**
-   * name renewal
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/name%20renewal)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. duration)
-   * @param options Amplitude event options.
-   */
-  nameRenewal(
-    properties: NameRenewalProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new NameRenewal(properties), options);
-  }
-
-  /**
-   * name set as displayed
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/name%20set%20as%20displayed)
-   *
-   * Event has no description in tracking plan.
-   *
-   * @param properties The event's properties (e.g. name)
-   * @param options Amplitude event options.
-   */
-  nameSetAsDisplayed(
-    properties: NameSetAsDisplayedProperties,
-    options?: EventOptions,
-  ) {
-    return this.track(new NameSetAsDisplayed(properties), options);
-  }
-
-  /**
-   * search performed
-   *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/search%20performed)
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/performed%20search)
    *
    * Event has no description in tracking plan.
    *
    * @param properties The event's properties (e.g. query)
    * @param options Amplitude event options.
    */
-  searchPerformed(
-    properties: SearchPerformedProperties,
+  performedSearch(
+    properties: PerformedSearchProperties,
     options?: EventOptions,
   ) {
-    return this.track(new SearchPerformed(properties), options);
+    return this.track(new PerformedSearch(properties), options);
   }
 
   /**
-   * subname create
+   * placed auction bid
    *
-   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/subname%20create)
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/placed%20auction%20bid)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. auctionCurrentBidAmount)
+   * @param options Amplitude event options.
+   */
+  placedAuctionBid(
+    properties: PlacedAuctionBidProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new PlacedAuctionBid(properties), options);
+  }
+
+  /**
+   * purchased name
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/purchased%20name)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. amount)
+   * @param options Amplitude event options.
+   */
+  purchasedName(
+    properties: PurchasedNameProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new PurchasedName(properties), options);
+  }
+
+  /**
+   * renewed name
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/renewed%20name)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. expiration)
+   * @param options Amplitude event options.
+   */
+  renewedName(
+    properties: RenewedNameProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new RenewedName(properties), options);
+  }
+
+  /**
+   * set name as displayed
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/set%20name%20as%20displayed)
    *
    * Event has no description in tracking plan.
    *
    * @param properties The event's properties (e.g. name)
    * @param options Amplitude event options.
    */
-  subnameCreate(
-    properties: SubnameCreateProperties,
+  setNameAsDisplayed(
+    properties: SetNameAsDisplayedProperties,
     options?: EventOptions,
   ) {
-    return this.track(new SubnameCreate(properties), options);
+    return this.track(new SetNameAsDisplayed(properties), options);
   }
 }
 

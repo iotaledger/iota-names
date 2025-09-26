@@ -88,7 +88,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         if (!name) {
             return;
         }
-        ampli.searchPerformed({ query: name });
+        ampli.performedSearch({ query: name });
     }, [name]);
 
     useEffect(() => {

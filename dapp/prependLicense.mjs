@@ -11,4 +11,4 @@ async function prependLicense(filename) {
     writeFile(filename, LICENSE + content);
 }
 
-prependLicense('src/shared/analytics/ampli/index.ts');
+prependLicense('src/lib/utils/analytics/ampli/index.ts');

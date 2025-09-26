@@ -4,15 +4,16 @@
 'use client';
 
 import {
-    Disclaimer as BfDisclaimer,
+    // Disclaimer as BfDisclaimer,
     CookieManager,
-    DisclaimerConfiguration,
+    // DisclaimerConfiguration,
     useCookieManagerContext,
     type SKCMConfiguration,
 } from '@boxfish-studio/react-cookie-manager';
-import { use, useEffect } from 'react';
 
-import { consentToAnalytics, declineAnalytics } from '@/lib/utils/analytics/amplitude';
+// import { use, useEffect } from 'react';
+
+// import { consentToAnalytics, declineAnalytics } from '@/lib/utils/analytics/amplitude';
 
 interface DisclaimerProps {
     allowCookies?: () => void;
@@ -20,19 +21,22 @@ interface DisclaimerProps {
 }
 
 export function Disclaimer({ allowCookies, declineCookies }: DisclaimerProps) {
-    const { showCookieDisclaimer, servicesInitialized } = useCookieManagerContext();
+    const {
+        // showCookieDisclaimer,
+        servicesInitialized,
+    } = useCookieManagerContext();
 
     // console.log('dd', showCookieDisclaimer.value);
-    const configuration: DisclaimerConfiguration = {
-        title: 'This website uses cookies',
-        body: 'By using this site, you agree with our use of cookies',
-        // theme: {
-        //     primary: '#0f1228',
-        //     dark: '#adafc5',
-        //     medium: '#ffaaff',
-        //     light: '#fff',
-        // },
-    };
+    // const configuration: DisclaimerConfiguration = {
+    // title: 'This website uses cookies',
+    // body: 'By using this site, you agree with our use of cookies',
+    // theme: {
+    //     primary: '#0f1228',
+    //     dark: '#adafc5',
+    //     medium: '#ffaaff',
+    //     light: '#fff',
+    // },
+    // };
 
     const skcmConfig: SKCMConfiguration = {
         disclaimer: {

@@ -182,9 +182,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
-            ampli.nameRenewal({
+            ampli.renewedName({
                 name,
-                duration: `${renewYears || 1} year${(renewYears || 1) > 1 ? 's' : ''}`,
+                expiration: renewYears || 0,
             });
             toast.success('Name renewed successfully');
         },

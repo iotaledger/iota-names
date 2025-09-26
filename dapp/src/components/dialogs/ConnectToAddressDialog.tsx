@@ -145,16 +145,16 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
             if (hasAddressUpdate) {
                 const addressType = isTargetingCurrentAddress ? 'current' : 'external';
-                ampli.addressConnect({
+                ampli.connectedAddress({
                     name: cleanName,
-                    'connect address type': addressType,
+                    addressType: addressType,
                 });
             }
 
             // Track name set as displayed event
             const hasSetDefaultUpdate = updates.some((update) => update.type === 'set-default');
             if (hasSetDefaultUpdate) {
-                ampli.nameSetAsDisplayed({
+                ampli.setNameAsDisplayed({
                     name: cleanName,
                 });
             }

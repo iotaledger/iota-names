@@ -113,7 +113,7 @@ export default function AuctionsPage(): JSX.Element {
     const debouncedSearchQuery = useDebounce(searchQuery, 500);
     useEffect(() => {
         if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
-            ampli.auctionFilterNamePerformed({ query: debouncedSearchQuery.trim() });
+            ampli.appliedAuctionNameFilter({ query: debouncedSearchQuery.trim() });
         }
     }, [debouncedSearchQuery]);
 

@@ -67,6 +67,8 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
         );
     }
 
+    console.log('meta', auction.metadata);
+
     const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
 
     const formattedPrice = auction.metadata

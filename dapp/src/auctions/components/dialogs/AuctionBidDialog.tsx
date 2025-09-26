@@ -106,11 +106,29 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
 
             if (!auctionMetadata) {
-                ampli.auctionStart({ name });
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: false,
+                    isUserFirstBidOnAuction: true,
+                    auctionCurrentBidAmount: 0,
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
             } else if (auctionStatus === 'top_bidder') {
-                ampli.auctionBidAgain({ name });
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: true,
+                    isUserFirstBidOnAuction: false,
+                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
             } else {
-                ampli.auctionBid({ name });
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: false,
+                    isUserFirstBidOnAuction: false,
+                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
             }
 
             toast.success(
