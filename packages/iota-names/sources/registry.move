@@ -345,13 +345,24 @@ public fun lookup(self: &Registry, name: Name): Option<NameRecord> {
 /// Returns the `NameRecord` associated with the given name and ensures that it is not expired,
 /// or None otherwise.
 public fun lookup_verified(self: &Registry, name: Name, clock: &Clock): Option<NameRecord> {
+    let record = self.lookup(name);
+    if (record.is_some()) {
+        // Check that name has not expired.
+        assert!(!record.borrow().has_expired(clock), ERecordExpired);
+    };
+    record
+}
+
+/// Returns the address associated with the given name if one is set and the record is not expired,
+/// or None otherwise.
+public fun lookup_address(self: &Registry, name: Name, clock: &Clock): Option<address> {
     if (self.registry.contains(name)) {
         let record = &self.registry[name];
 
         // Check that name has not expired.
         assert!(!record.has_expired(clock), ERecordExpired);
 
-        some(*record)
+        record.target_address()
     } else {
         none()
     }
