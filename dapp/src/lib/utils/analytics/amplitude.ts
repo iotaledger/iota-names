@@ -23,9 +23,11 @@ export async function initAmplitude(defaultNetwork: string) {
     });
 
     if (ampli.client) {
-        const identify = new amplitude.Identify();
-        identify.set('activeNetwork', defaultNetwork);
-        ampli.client.identify(identify);
+        ampli.identify(undefined, {
+            groups: {
+                activeNetwork: defaultNetwork,
+            },
+        });
     }
 
     window.addEventListener('pagehide', () => {
