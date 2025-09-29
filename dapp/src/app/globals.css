@@ -61,7 +61,6 @@ body[data-scroll-locked] #top-navbar {
     background-clip: padding-box, border-box;
 }
 
-
 #skcm-cookie-disclaimer {
     @apply flex gap-4;
 }
