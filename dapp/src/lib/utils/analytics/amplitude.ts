@@ -11,7 +11,7 @@ const IS_PROD_ENV = process.env.NODE_ENV === 'production';
 
 export const persistableStorage = new PersistableStorage<UserSession>();
 
-export async function initAmplitude() {
+export async function initAmplitude(defaultNetwork: string) {
     await ampli.load({
         environment: 'iotanames',
         disabled: !IS_PROD_ENV,
@@ -21,6 +21,12 @@ export async function initAmplitude() {
             },
         },
     });
+
+    if (ampli.client) {
+        const identify = new amplitude.Identify();
+        identify.set('activeNetwork', defaultNetwork);
+        ampli.client.identify(identify);
+    }
 
     window.addEventListener('pagehide', () => {
         amplitude.setTransport('beacon');
@@ -64,15 +70,15 @@ export function hasAnalyticsConsent(): boolean {
  * Initialize analytics with CMP integration
  * Call this after user interaction or when checking existing consent
  */
-export async function initAnalyticsWithCMP() {
+export async function initAnalyticsWithCMP(defaultNetwork: string) {
     const hasConsent = hasAnalyticsConsent();
 
     if (hasConsent) {
-        await initAmplitude();
+        await initAmplitude(defaultNetwork);
         if (ampli.client) {
             ampli.client.setOptOut(false);
         }
     } else {
-        await initAmplitude();
+        await initAmplitude(defaultNetwork);
     }
 }

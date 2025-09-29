@@ -26,7 +26,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const defaultNetwork = CONFIG.network;
 
     useEffect(() => {
-        initAnalyticsWithCMP();
+        initAnalyticsWithCMP(defaultNetwork);
     }, []);
 
     function handleNetworkChange() {
