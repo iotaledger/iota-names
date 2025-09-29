@@ -54,9 +54,6 @@ const ESubnameReplaced: vector<u8> =
 #[error]
 const EParentChanged: vector<u8> =
     b"Parent for a given subname has changed, hence time extension cannot be done.";
-#[error]
-const ESubnameParentMismatch: vector<u8> =
-    b"Subname provided is not a valid child of the parent name registration.";
 
 /// Enabled metadata value.
 const ACTIVE_METADATA_VALUE: vector<u8> = b"1";
@@ -79,7 +76,6 @@ public fun new_leaf(
     ctx: &mut TxContext,
 ) {
     let subname = name::new(subname);
-    assert!(parent.name().is_parent_of(&subname), ESubnameParentMismatch);
     validation::assert_not_blocked_or_reserved(iota_names, &subname);
     
     // all validation logic for subname creation / management.
@@ -142,7 +138,6 @@ public fun new(
     ctx: &mut TxContext,
 ): SubnameRegistration {
     let subname = name::new(subname);
-    assert!(parent.name().is_parent_of(&subname), ESubnameParentMismatch);
     validation::assert_not_blocked_or_reserved(iota_names, &subname);
     
     // All validation logic for subname creation / management.
