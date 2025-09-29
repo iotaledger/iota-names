@@ -64,9 +64,9 @@ public fun new(
 
 /// Validates that the child name is a valid child for parent.
 public fun assert_is_valid_subname(parent: &Name, child: &Name, config: &SubnameConfig) {
+    assert!(is_valid_label(child, config), EInvalidLabelSize);
     assert!(is_parent_of(parent, child), EInvalidParent);
     assert!(is_valid_tln(child, config), ENotSupportedTLN);
-    assert!(is_valid_label(child, config), EInvalidLabelSize);
     assert!(has_valid_depth(child, config), EDepthExceedsLimit);
 }
 
