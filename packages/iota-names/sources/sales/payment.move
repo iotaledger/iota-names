@@ -50,6 +50,8 @@ const EVersionMismatch: vector<u8> =
 const ECannotRenewSubname: vector<u8> = b"Cannot renew a subname using the payment system.";
 #[error]
 const ECannotExceedMaxYears: vector<u8> = b"Cannot exceed the maximum number of years.";
+#[error]
+const EYearsMustBePositive: vector<u8> = b"Years must be greater than zero.";
 
 /// The data required to complete a payment request.
 public struct RequestData has drop {
@@ -148,6 +150,38 @@ public fun init_registration(iota_names: &mut IotaNames, name: String): PaymentI
     })
 }
 
+/// Creates a `PaymentIntent` for registering a new name for multiple years.
+/// This is a hot-potato and can only be consumed in a single transaction.
+public fun init_registration_with_years(iota_names: &mut IotaNames, name: String, years: u8): PaymentIntent {
+    assert!(years > 0, EYearsMustBePositive);
+    if (years == 1) {
+        return init_registration(iota_names, name)
+    };
+
+    let name = name::new(name);
+    validation::assert_is_valid_for_sale(iota_names.get_config<CoreConfig>(), iota_names, &name);
+    assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
+
+    // Use PricingConfig for the first year
+    let registration_price = iota_names.get_config<PricingConfig>().calculate_base_price_of_name(name);
+    
+    // Calculate price for additional years with the RenewalConfig
+    let renewal_price = iota_names
+            .get_config<RenewalConfig>()
+            .config()
+            .calculate_base_price_of_name(name);
+        
+    let total_price = registration_price + (renewal_price * ((years - 1) as u64));
+
+    PaymentIntent::Registration(RequestData {
+        name,
+        years,
+        base_amount: total_price,
+        metadata: vec_map::empty(),
+        version: constants::payments_version!(),
+    })
+}
+
 /// Creates a `PaymentIntent` for renewing an existing name.
 /// This is a hot-potato and can only be consumed in a single transaction.
 public fun init_renewal(
@@ -157,6 +191,7 @@ public fun init_renewal(
 ): PaymentIntent {
     let name = nft.name();
     assert!(!name.is_subname(), ECannotRenewSubname);
+    assert!(years > 0, EYearsMustBePositive);
     assert!(years <= iota_names.get_config<CoreConfig>().max_years(), ECannotExceedMaxYears);
 
     let price = iota_names
