@@ -36,9 +36,9 @@ import {
     useCalculateRenewalPrice,
     useNameRecord,
 } from '@/hooks';
+import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
 
