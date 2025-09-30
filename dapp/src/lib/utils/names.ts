@@ -12,15 +12,15 @@ export function getTargetExpirationDate(renewYears: number): string {
 }
 
 export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
-    return nameRecord.expirationTimestampMs < Date.now();
+    return nameRecord.expirationDate < new Date();
 }
 
 export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {
-    return nameRecord.expirationTimestampMs + GRACE_PERIOD_MS < Date.now();
+    return nameRecord.expirationDate.getTime() + GRACE_PERIOD_MS < Date.now();
 }
 
 export function isNameRecordCloseToExpiration(nameRecord: NameRecord | RegistrationNft): boolean {
-    const expirationThreshold = nameRecord.expirationTimestampMs - GRACE_PERIOD_MS;
+    const expirationThreshold = nameRecord.expirationDate.getTime() - GRACE_PERIOD_MS;
     return !isNameRecordExpired(nameRecord) && expirationThreshold < Date.now();
 }
 
@@ -87,10 +87,8 @@ export function getNameObject(names: RegistrationNft[], name: string) {
 /**
  * Get the amount of years that this name can be renewed as of now.
  */
-export function getNameRenewableYears(maxYears: number, expirationTimestampMs: number): number {
-    const expirationTime = new Date(expirationTimestampMs);
+export function getNameRenewableYears(maxYears: number, expirationDate: Date): number {
     const inMaxYearsTime = new Date();
     inMaxYearsTime.setFullYear(inMaxYearsTime.getFullYear() + maxYears + 1);
-
-    return inMaxYearsTime.getFullYear() - expirationTime.getFullYear();
+    return inMaxYearsTime.getFullYear() - expirationDate.getFullYear();
 }
