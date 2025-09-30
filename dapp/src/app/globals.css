@@ -1,4 +1,5 @@
 @import '@iota/apps-ui-kit/styles';
+@import '../components/disclaimer/CookieDisclaimer.css';
 
 @tailwind base;
 @tailwind components;
@@ -59,11 +60,4 @@ body[data-scroll-locked] #top-navbar {
     background-image: linear-gradient(#0f1228, #0f1228), var(--names-gradient-primary);
     background-origin: border-box;
     background-clip: padding-box, border-box;
-}
-
-#skcm-cookie-disclaimer {
-    @apply flex gap-4;
-}
-#skcm-cookie-disclaimer a {
-    @apply block;
 }
