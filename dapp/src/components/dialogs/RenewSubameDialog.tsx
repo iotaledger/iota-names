@@ -57,13 +57,12 @@ function createRenewUpdates({
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
             // Only allow extending the expiration time if its less than its parent
-            const expiresBeforeParent =
-                nameRecord.expirationTimestampMs < parentObject?.expirationTimestampMs;
+            const expiresBeforeParent = nameRecord.expirationDate < parentObject?.expirationDate;
             if (expiresBeforeParent) {
                 updates.push({
                     type: 'renew-subname',
                     nftId: objectId,
-                    expirationTimestampMs: parentObject.expirationTimestampMs,
+                    expirationDate: parentObject.expirationDate,
                 });
             }
         }
@@ -150,7 +149,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                 ownedNames,
                 ownedSubnames,
                 nameRecord.nameRecord.name,
-            )?.expirationTimestampMs;
+            )?.expirationDate;
             if (expirationTime) {
                 return new Date(expirationTime);
             }
@@ -159,8 +158,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
 
     const renewalTime =
         expirationDate && nameRecord && nameRecord.nameRecord
-            ? expirationDate.getTime() -
-              new Date(nameRecord.nameRecord.expirationTimestampMs).getTime()
+            ? expirationDate.getTime() - nameRecord.nameRecord.expirationDate.getTime()
             : 0;
 
     const isBelowMinimumRenewalPeriod =
@@ -169,7 +167,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             : false;
 
     const currentExpirationDate = nameRecord?.nameRecord
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationTimestampMs))
+        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationDate))
         : null;
     const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
