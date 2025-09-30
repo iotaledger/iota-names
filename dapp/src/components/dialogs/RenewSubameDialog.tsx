@@ -151,7 +151,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                 nameRecord.nameRecord.name,
             )?.expirationDate;
             if (expirationTime) {
-                return new Date(expirationTime);
+                return expirationTime;
             }
         }
     })();
@@ -167,9 +167,9 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             : false;
 
     const currentExpirationDate = nameRecord?.nameRecord
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationDate))
+        ? formatExpirationDate(nameRecord.nameRecord.expirationDate)
         : null;
-    const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
+    const nextExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
     const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
@@ -221,7 +221,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                 {canRenew && (
                                     <DisplayStats
                                         label="Next Expiration Date"
-                                        value={formattedExpirationDate}
+                                        value={nextExpirationDate}
                                     />
                                 )}
                             </div>

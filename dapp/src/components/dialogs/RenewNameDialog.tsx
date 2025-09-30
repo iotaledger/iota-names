@@ -209,18 +209,18 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     }, [updateNameError]);
 
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = (() => {
-        if (nameRecord && nameRecord?.nameRecord && renewYears) {
-            const expirationDate = nameRecord.nameRecord.expirationDate;
-            expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
-            return expirationDate;
-        }
-    })();
 
     const currentExpirationDate = nameRecord?.nameRecord
-        ? formatExpirationDate(new Date(nameRecord.nameRecord.expirationDate))
+        ? formatExpirationDate(nameRecord.nameRecord.expirationDate as Date)
         : null;
-    const formattedExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
+
+    const nextExpirationDate = (() => {
+        if (nameRecord?.nameRecord?.expirationDate && renewYears) {
+            const expirationDate = new Date(nameRecord.nameRecord.expirationDate);
+            expirationDate.setFullYear(expirationDate.getFullYear() + renewYears);
+            return formatExpirationDate(expirationDate);
+        }
+    })();
 
     const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
@@ -295,7 +295,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                 {canRenew && !!renewYears && (
                                     <DisplayStats
                                         label="Next Expiration Date"
-                                        value={formattedExpirationDate}
+                                        value={nextExpirationDate}
                                     />
                                 )}
                             </div>
