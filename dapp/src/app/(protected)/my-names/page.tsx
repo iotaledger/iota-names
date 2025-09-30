@@ -24,7 +24,7 @@ import toast from 'react-hot-toast';
 
 import { useAuctions } from '@/auctions';
 import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
-import { RenewNameDialog } from '@/components/dialogs/RenewNameDialog';
+import { RenewSubnameDialog } from '@/components/dialogs/RenewSubameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
@@ -264,7 +264,7 @@ export default function MyNamesPage(): JSX.Element {
                 </div>
             )}
             {selectedNameForRenewal && (
-                <RenewNameDialog
+                <RenewSubnameDialog
                     name={selectedNameForRenewal.name}
                     setOpen={() => setSelectedNameForRenewal(null)}
                     onRenew={() => handleNameRenewed(selectedNameForRenewal)}

@@ -7,7 +7,7 @@ export interface RegistrationNft {
     imageUrl?: string;
     link?: string;
     projectUrl?: string;
-    expirationTimestampMs: number;
+    expirationDate: Date;
     isExpired: boolean;
     isSubname: boolean;
     id: string;
