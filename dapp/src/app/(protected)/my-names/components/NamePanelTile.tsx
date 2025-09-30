@@ -76,7 +76,7 @@ export function NamePanelTile({
         return PanelTileType.Default;
     })();
 
-    const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
+    const expirationDate = formatExpirationDate(registration.expirationDate);
     const isNameGracePeriodExpired = nameRecord ? isGracePeriodExpired(nameRecord) : undefined;
 
     return (
