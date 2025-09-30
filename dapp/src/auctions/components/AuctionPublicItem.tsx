@@ -5,7 +5,7 @@ import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useMemo, useState } from 'react';
 
 import {
     AuctionDetails,
@@ -19,7 +19,9 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { useNameRecord } from '@/hooks';
+import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 import { formatNanosToIota } from '@/lib/utils';
+import { censorName } from '@/lib/utils/censorName';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { AuctionActionButton } from './AuctionActionButton';
@@ -34,6 +36,17 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
         auction.name,
     );
+    const account = useCurrentAccount();
+
+    const normalizedName = normalizeIotaName(auction.name);
+    const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
+    const isCensored = normalizedName !== censoredName;
+    const [isRevealed, setIsRevealed] = useState(false);
+    const shouldCensor = isCensored && !isRevealed;
+
+    const handleReveal = () => {
+        setIsRevealed(true);
+    };
 
     const isClaimedAuction = !auction.metadata;
     let auctionDisplayImage = null;
@@ -49,8 +62,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             nameRecordData.nameRecord.expirationDate.getTime(),
         );
     }
-
-    const account = useCurrentAccount();
 
     if (auction.isLoading || isNameRecordDataLoading) {
         return (
@@ -73,8 +84,17 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
         : null;
 
     return (
-        <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
-            <NameCardBody name={normalizeIotaName(auction.name)}>
+        <NameCard
+            name={auction.name}
+            size="full"
+            displaySrc={auctionDisplayImage}
+            blurImage={shouldCensor}
+            onImageClick={shouldCensor ? handleReveal : undefined}
+        >
+            <NameCardBody
+                name={isRevealed ? normalizedName : censoredName}
+                onNameClick={shouldCensor ? handleReveal : undefined}
+            >
                 {auctionStatus === 'top_bidder' ? (
                     <div className="absolute top-2 left-2">
                         <AuctionStatusBadge status={auctionStatus} />
