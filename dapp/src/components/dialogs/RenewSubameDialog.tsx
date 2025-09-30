@@ -197,11 +197,11 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                             </Panel>
                             {isBelowMinimumRenewalPeriod && (
                                 <InfoBox
-                                    type={InfoBoxType.Default}
+                                    type={InfoBoxType.Warning}
                                     icon={<Info />}
-                                    title="Your subname has the same expiration as its parent"
+                                    title="This subname already has the same expiration as its parent."
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`You need to renew the parent for a longer period.`}
+                                    supportingText={`Please extend the parent expiration first.`}
                                 />
                             )}
                         </div>
