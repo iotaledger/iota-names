@@ -3,13 +3,11 @@
 
 'use client';
 
-import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
-import { Disclaimer } from '@/components/disclaimer/Disclaimer';
 import { Toaster } from '@/components/Toaster';
 import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
@@ -55,11 +53,8 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                 ]}
                             >
                                 <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                    <CookieManagerProvider>
-                                        {children}
-                                        <Toaster />
-                                        <Disclaimer />
-                                    </CookieManagerProvider>
+                                    {children}
+                                    <Toaster />
                                 </ThemeProvider>
                             </WalletProvider>
                         </IotaNamesIndexerClientProvider>
