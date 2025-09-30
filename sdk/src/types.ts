@@ -45,7 +45,7 @@ export interface NameRecord {
     name: string;
     nftId: string;
     targetAddress: string;
-    expirationTimestampMs: number;
+    expirationDate: Date;
     data: Record<string, string>;
     avatar?: string;
 }
@@ -104,4 +104,8 @@ export type IotaNamesPriceList = Map<[number, number], number>;
 
 export type IotaNamesCoreConfig = {
     max_years: number;
+};
+
+export type IotaNamesSubnamesConfig = {
+    minimum_duration: number;
 };

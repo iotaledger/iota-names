@@ -18,6 +18,7 @@ import {
     getNameType,
     getPricelistConfigType,
     getRenewalPricelistConfigType,
+    getSubnamesConfigType,
     isSubname,
     validateYears,
 } from './helpers.js';
@@ -27,6 +28,7 @@ import type {
     IotaNamesClientConfig,
     IotaNamesCoreConfig,
     IotaNamesPriceList,
+    IotaNamesSubnamesConfig,
     NameRecord,
     PackageInfo,
 } from './types.js';
@@ -95,6 +97,56 @@ export class IotaNamesClient {
         }
 
         return coreConfig;
+    }
+
+    /**
+     * Returns the subnames config of IOTA Names.
+     */
+    async getSubnamesConfig(): Promise<IotaNamesSubnamesConfig> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        if (!this.config.subnamesPackageId)
+            throw new Error('IotaNames subnames package ID is not set');
+
+        const subnamesConfigBcsB64 = toB64(
+            DummyFieldBcs.serialize({
+                dummy_field: false,
+            }).toBytes(),
+        );
+        const subnamesConfigResponse: any = await this.graphQlClient.query({
+            query: graphql(`
+                query getSubnameConfig($parentId: IotaAddress!, $name: DynamicFieldName!) {
+                    owner(address: $parentId) {
+                        address
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    json
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: this.config.iotaNamesObjectId,
+                name: {
+                    type: getConfigType(
+                        this.config.packageId,
+                        getSubnamesConfigType(this.config.subnamesPackageId),
+                    ),
+                    bcs: subnamesConfigBcsB64,
+                },
+            },
+        });
+
+        const subnamesConfig = subnamesConfigResponse?.data?.owner?.dynamicField?.value?.json;
+
+        if (!subnamesConfig) {
+            throw new Error('Subnames config not found or is invalid');
+        }
+
+        return subnamesConfig;
     }
 
     /**
@@ -307,7 +359,7 @@ export class IotaNamesClient {
             name,
             nftId: nameRecord?.nft_id,
             targetAddress: nameRecord?.target_address!,
-            expirationTimestampMs: Number(nameRecord?.expiration_timestamp_ms),
+            expirationDate: new Date(Number(nameRecord?.expiration_timestamp_ms)),
             data,
             avatar: data[ALLOWED_METADATA.avatar],
         };
