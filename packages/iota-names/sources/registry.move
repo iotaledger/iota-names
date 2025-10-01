@@ -546,7 +546,7 @@ fun handle_invalidate_reverse_record(
 // === Test Functions ===
 
 #[test_only]
-use iota_names::iota_names::{add_registry, IotaNames};
+use iota_names::iota_names::add_registry;
 
 #[test_only]
 public fun init_for_testing(cap: &AdminCap, iota_names: &mut IotaNames, ctx: &mut TxContext) {
