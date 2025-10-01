@@ -9,7 +9,7 @@ use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
 use iota_names::name::Name;
-use iota_names::iota_names::AdminCap;
+use iota_names::iota_names::{AdminCap, IotaNames};
 use iota_names::name_registration::{Self as nft, NameRegistration};
 use iota_names::name_record::{Self, NameRecord};
 use iota_names::subname_registration::{Self, SubnameRegistration};
@@ -366,6 +366,12 @@ public fun lookup_address(self: &Registry, name: Name, clock: &Clock): Option<ad
     }
 }
 
+/// Returns the address associated with the given name if one is set and the record is not expired,
+/// or None otherwise. This function is callable from PTBs unlike `lookup_address`.
+public fun resolve_address(iota_names: &IotaNames, name: Name, clock: &Clock): Option<address> {
+    iota_names.registry<Registry>().lookup_address(name, clock)
+}
+
 /// Returns the `name` associated with the given address or None.
 public fun reverse_lookup(self: &Registry, address: address): Option<Name> {
     if (self.reverse_registry.contains(address)) {
@@ -382,7 +388,7 @@ public fun reverse_lookup_unexpired(self: &Registry, address: address, clock: &C
         let name = self.reverse_registry[address];
 
         if (self.registry[name].has_expired(clock)) {
-            return none();
+            return none()
         };
 
         some(name)
