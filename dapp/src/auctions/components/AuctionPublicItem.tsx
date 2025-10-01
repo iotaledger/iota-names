@@ -181,7 +181,6 @@ function AuctionTimeRemaining({
 
     useEffect(() => {
         if (milliseconds <= 0) {
-            console.log(milliseconds);
             onTimeUp();
         }
     }, [milliseconds, onTimeUp]);
