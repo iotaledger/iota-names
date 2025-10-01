@@ -366,10 +366,12 @@ public fun lookup_address(self: &Registry, name: Name, clock: &Clock): Option<ad
     }
 }
 
-/// Returns the address associated with the given name if one is set and the record is not expired,
-/// or None otherwise. This function is callable from PTBs unlike `lookup_address`.
-public fun resolve_address(iota_names: &IotaNames, name: Name, clock: &Clock): Option<address> {
-    iota_names.registry<Registry>().lookup_address(name, clock)
+/// Returns the address associated with the given name if one is set and the record is not expired. 
+/// This function is callable from PTBs unlike `lookup_address`.
+public fun resolve_address(iota_names: &IotaNames, name: Name, clock: &Clock): address {
+    let mut address = iota_names.registry<Registry>().lookup_address(name, clock);
+    assert!(address.is_some(), ERecordNotFound);
+    address.extract()
 }
 
 /// Returns the `name` associated with the given address or None.
