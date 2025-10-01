@@ -332,11 +332,15 @@ public fun has_record(self: &Registry, name: Name): bool {
     self.registry.contains(name)
 }
 
+/// Checks whether the given `name` is registered in the `Registry`.
+public fun has_unexpired_record(self: &Registry, name: Name, clock: &Clock): bool {
+    self.registry.contains(name) && !self.registry[name].has_expired(clock)
+}
+
 /// Returns the `NameRecord` associated with the given name or None.
 public fun lookup(self: &Registry, name: Name): Option<NameRecord> {
-    if (self.registry.contains(name)) {
-        let record = &self.registry[name];
-        some(*record)
+    if (self.has_record(name)) {
+        some(self.registry[name])
     } else {
         none()
     }
@@ -344,25 +348,19 @@ public fun lookup(self: &Registry, name: Name): Option<NameRecord> {
 
 /// Returns the `NameRecord` associated with the given name and ensures that it is not expired,
 /// or None otherwise.
-public fun lookup_verified(self: &Registry, name: Name, clock: &Clock): Option<NameRecord> {
-    let record = self.lookup(name);
-    if (record.is_some()) {
-        // Check that name has not expired.
-        assert!(!record.borrow().has_expired(clock), ERecordExpired);
-    };
-    record
+public fun lookup_unexpired(self: &Registry, name: Name, clock: &Clock): Option<NameRecord> {
+    if (self.has_unexpired_record(name, clock)) {
+        some(self.registry[name])
+    } else {
+        none()
+    }
 }
 
 /// Returns the address associated with the given name if one is set and the record is not expired,
 /// or None otherwise.
 public fun lookup_address(self: &Registry, name: Name, clock: &Clock): Option<address> {
-    if (self.registry.contains(name)) {
-        let record = &self.registry[name];
-
-        // Check that name has not expired.
-        assert!(!record.has_expired(clock), ERecordExpired);
-
-        record.target_address()
+    if (self.has_unexpired_record(name, clock)) {
+        self.registry[name].target_address()
     } else {
         none()
     }
@@ -379,13 +377,13 @@ public fun reverse_lookup(self: &Registry, address: address): Option<Name> {
 
 /// Returns the `name` associated with the given address and ensures it is not expired,
 /// or None otherwise.
-public fun reverse_lookup_verified(self: &Registry, address: address, clock: &Clock): Option<Name> {
+public fun reverse_lookup_unexpired(self: &Registry, address: address, clock: &Clock): Option<Name> {
     if (self.reverse_registry.contains(address)) {
         let name = self.reverse_registry[address];
-        let record = &self.registry[name];
 
-        // Check that name has not expired.
-        assert!(!record.has_expired(clock), ERecordExpired);
+        if (self.registry[name].has_expired(clock)) {
+            return none();
+        };
 
         some(name)
     } else {
