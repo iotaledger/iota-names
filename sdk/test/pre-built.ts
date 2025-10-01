@@ -18,9 +18,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     });
 
     let sender;
-    if (network.id === Network.Testnet) {
+    if (network.id === Network.Mainnet) {
         sender = normalizeIotaAddress(
-            '0x32bc9471570ca24fcd1fe5b201ea6894748aa0ddd44d20c68f1a4f99db513aa2',
+            '0x96e5664b870afebcef5534732a067b877cfd3a70e83384b3e61e9ab92a4d3bab',
         );
     } else {
         sender = normalizeIotaAddress('0x2');
@@ -175,17 +175,17 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     if (network.id === Network.Mainnet) {
         tx.setGasPayment([
             {
-                objectId: '0xc7fcf957faeb0cdd9809b2ab43e0a8bf7a945cfdac13e8cba527261fecefa4dd',
-                version: '86466933',
-                digest: '2F8iuFVJm55J96FnJ99Th493D254BaJkUccbwz5rHFDc',
+                objectId: '0xec38c03899fd44ed837038f1e3659b38e0cc24fd760db72130486280ee933fe1',
+                version: '1',
+                digest: 'CkJeMaSxggPLp5g9xGA57zf1FeHcuQLVQHJ6Tm7ZME5o',
             },
         ]);
     } else if (network.id === Network.Testnet) {
         tx.setGasPayment([
             {
-                objectId: '0x0fc64833fa4961d74f6641cb55b85ee3a85785ff819ba6072a26c3a88285c42e',
-                version: '190872930',
-                digest: '63H9Lnv6U6m5mCW1qsDpFGH8BgQcJdskPxpvKeYSpKyd',
+                objectId: '0x87d3011396b68cb019b9a539b368e1d57143a89ec8114d6d990ccb8c348ecc3e',
+                version: '499614772',
+                digest: '2F1DFbzvZH5Mb1E9VzuGzQfV7aJt3DvnDnf8w1QvhvAr',
             },
         ]);
     } else if (network.id === Network.Devnet) {
