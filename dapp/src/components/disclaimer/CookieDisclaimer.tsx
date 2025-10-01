@@ -3,39 +3,25 @@
 
 'use client';
 
-import {
-    CookieManager,
-    useCookieManagerContext,
-    type SKCMConfiguration,
-} from '@boxfish-studio/react-cookie-manager';
-import { useEffect } from 'react';
+import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
 
 import { CONFIG } from '@/config';
 import { ApiKey } from '@/lib/utils/analytics/ampli';
-import { consentToAnalytics, initAmplitude } from '@/lib/utils/analytics/amplitude';
+import {
+    consentToAnalytics,
+    declineAnalytics,
+    initAmplitude,
+} from '@/lib/utils/analytics/amplitude';
 
 const defaultNetwork = CONFIG.network;
 
 export function CookieDisclaimer() {
-    const { servicesInitialized, showCookieDisclaimer } = useCookieManagerContext();
-
-    useEffect(() => {
-        if (!servicesInitialized.value || showCookieDisclaimer.value) return;
-
-        (async () => {
-            await initAmplitude(defaultNetwork);
-            consentToAnalytics();
-        })();
-    }, [servicesInitialized.value, showCookieDisclaimer.value]);
-
     const configuration: SKCMConfiguration = {
         disclaimer: {
             title: undefined,
             body: 'By using IOTA Names site, you agree with our use of cookies. ',
             policyText: 'Read our Cookie Policy',
             policyUrl: '/cookie-policy',
-            acceptButtonText: 'Accept',
-            rejectButtonText: 'Decline',
         },
         services: {
             customNecessaryCookies: [
@@ -57,5 +43,16 @@ export function CookieDisclaimer() {
         },
     };
 
-    return <CookieManager configuration={configuration} />;
+    return (
+        <CookieManager
+            onAcceptCookies={() => {
+                initAmplitude(defaultNetwork);
+                consentToAnalytics();
+            }}
+            configuration={configuration}
+            onDeclineCookies={() => {
+                declineAnalytics();
+            }}
+        />
+    );
 }
