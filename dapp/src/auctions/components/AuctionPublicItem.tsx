@@ -6,7 +6,7 @@ import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { MouseEvent, useEffect, useState } from 'react';
+import { MouseEvent, useEffect } from 'react';
 
 import {
     AuctionDetails,
