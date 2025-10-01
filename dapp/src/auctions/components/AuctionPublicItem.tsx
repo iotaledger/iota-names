@@ -112,7 +112,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                     auction={auction}
                     onTimeUp={() => {
                         if (isAuctionActive(auction.metadata)) {
-                            // Update the button when time is up
+                            // Refetch the auction when it has finished
                             queryClient.invalidateQueries({
                                 queryKey: queryKey.auctionMetadata(auction.name),
                             });
