@@ -76,7 +76,7 @@ export function NamePanelTile({
         return PanelTileType.Default;
     })();
 
-    const expirationDate = formatExpirationDate(new Date(registration.expirationTimestampMs));
+    const expirationDate = formatExpirationDate(registration.expirationDate);
     const isNameGracePeriodExpired = nameRecord ? isGracePeriodExpired(nameRecord) : undefined;
 
     return (
@@ -110,7 +110,13 @@ export function NamePanelTile({
             <ContextMenuDropdown
                 visible={isVisible}
                 position={position}
-                options={menuOptions}
+                options={menuOptions.map((option) => ({
+                    ...option,
+                    onClick: () => {
+                        option.onClick?.();
+                        toggleMenu();
+                    },
+                }))}
                 dropdownRef={dropdownRef}
             />
 

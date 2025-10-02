@@ -68,3 +68,7 @@ export function getCoreConfigType(iotaNamesPackageId: string): string {
 export function getDenyListType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::deny_list::DenyList`;
 }
+
+export function getSubnamesConfigType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::config::SubnameConfig`;
+}

@@ -38,8 +38,8 @@ export const queryKey = {
         address,
     ],
 
-    // Core Config
-    coreConfig: () => [...queryKey.all, 'core-config'],
+    // Names Config
+    namesConfig: () => [...queryKey.all, 'names-config'],
     purchaseConfig: (paymentType: string, auctionType: string) => [
         ...queryKey.all,
         'purchase-config',
