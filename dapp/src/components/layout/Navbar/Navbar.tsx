@@ -13,7 +13,8 @@ import { NamesLogoWeb } from '@/components/svgs';
 import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
-import { ConnectButton } from '../buttons/ConnectButton';
+import { ConnectButton } from '../../buttons/ConnectButton';
+import { NavbarMobile } from './NavbarMobile';
 
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
@@ -39,8 +40,7 @@ export function Navbar() {
                         <Link href="/" aria-label="Go to homepage">
                             <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
                         </Link>
-
-                        <div className="flex gap-x-md text-names-neutral-70 text-body-md">
+                        <div className="hidden md:flex gap-x-md text-names-neutral-70 text-body-md">
                             {ROUTES.map((route) => (
                                 <Link
                                     key={route.path}
@@ -54,11 +54,18 @@ export function Navbar() {
                             ))}
                         </div>
                     </div>
+                    <div className="md:hidden">
+                        <NavbarMobile routes={ROUTES}>
+                            <ConnectButton />
+                        </NavbarMobile>
+                    </div>
 
                     {isAllowedSearchOnPage && (
                         <SearchInput isBelowMd onFocus={toggleSearchDialog} />
                     )}
-                    <ConnectButton />
+                    <div className="hidden md:block">
+                        <ConnectButton />
+                    </div>
                 </div>
 
                 {isAllowedSearchOnPage && <SearchInput onFocus={toggleSearchDialog} />}

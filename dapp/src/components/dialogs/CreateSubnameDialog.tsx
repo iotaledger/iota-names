@@ -83,12 +83,12 @@ function createSubnameUpdates({
     }
     const updates: NameUpdate[] = [];
 
-    if (nftId && fullSubnameName && isSubnameAvailable) {
+    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationTimeParent: nameRecord?.expirationTimestampMs || 0,
+            expirationDateParent: nameRecord.expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });

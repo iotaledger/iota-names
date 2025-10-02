@@ -43,13 +43,10 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             auction.name,
             auction.metadata.nftExpiration.getTime(),
         );
-    } else if (
-        nameRecordData?.type === 'unavailable' &&
-        nameRecordData.nameRecord.expirationTimestampMs
-    ) {
+    } else if (nameRecordData?.type === 'unavailable' && nameRecordData.nameRecord.expirationDate) {
         auctionDisplayImage = getNameDisplaySrc(
             auction.name,
-            nameRecordData.nameRecord.expirationTimestampMs,
+            nameRecordData.nameRecord.expirationDate.getTime(),
         );
     }
 
@@ -66,8 +63,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             </Card>
         );
     }
-
-    console.log('meta', auction.metadata);
 
     const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
 
