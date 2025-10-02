@@ -5,7 +5,8 @@ import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { MouseEvent, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { MouseEvent, useEffect } from 'react';
 
 import {
     AuctionDetails,
@@ -18,7 +19,7 @@ import {
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
-import { useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import { queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
 import { formatNanosToIota } from '@/lib/utils';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
@@ -30,10 +31,10 @@ interface AuctionublicItemProps {
 }
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
-    const [, setIsActive] = useState(isAuctionActive(auction.metadata));
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
         auction.name,
     );
+    const queryClient = useQueryClient();
 
     const isClaimedAuction = !auction.metadata;
     let auctionDisplayImage = null;
@@ -120,8 +121,12 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
                 <AuctionTimeRemaining
                     auction={auction}
                     onTimeUp={() => {
-                        // Update the button when time is up
-                        setIsActive(false);
+                        if (isAuctionActive(auction.metadata)) {
+                            // Refetch the auction when it has finished
+                            queryClient.invalidateQueries({
+                                queryKey: queryKey.auctionMetadata(auction.name),
+                            });
+                        }
                     }}
                 />
             </NameCardBody>
