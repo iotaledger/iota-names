@@ -34,8 +34,6 @@ import type {
 } from './types.js';
 import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js';
 
-// const toMoveStringB64 = (s: string) => bcs.string().serialize(s).toBase64();
-
 /// The IotaNamesClient is the main entry point for the IotaNames SDK.
 /// It allows you to interact with IOTA-Names.
 export class IotaNamesClient {

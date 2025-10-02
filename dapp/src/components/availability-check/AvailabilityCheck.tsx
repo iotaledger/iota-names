@@ -12,9 +12,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
-import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
+import {
+    NameRecordData,
+    useBlockedList,
+    useNameRecord,
+    usePriceList,
+    useReservedList,
+} from '@/hooks';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { isNameReserved, isNameWithBlockedWord } from '@/lib/utils/denyList';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -37,6 +44,8 @@ const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
+    const { data: blockedList = [] } = useBlockedList();
+    const { data: reservedList = [] } = useReservedList();
     const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const [name, setName] = useState<string>('');
@@ -235,14 +244,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             isAvailable={false}
                             statusMessage="Name is already taken."
                         />
-                    ) : nameRecordData?.type === 'blocked' ? (
+                    ) : isNameWithBlockedWord(name, blockedList) ? (
                         <NamePurchaseCard
                             name={name}
                             isAvailable={false}
                             disableHoverEffect
                             statusMessage="Name contains words that are not allowed."
                         />
-                    ) : nameRecordData?.type === 'reserved' ? (
+                    ) : isNameReserved(name, reservedList) ? (
                         <NamePurchaseCard
                             name={name}
                             isAvailable={false}

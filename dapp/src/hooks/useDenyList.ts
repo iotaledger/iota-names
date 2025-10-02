@@ -32,27 +32,3 @@ export function useBlockedList() {
         enabled: !!iotaNamesClient,
     });
 }
-
-export function useDenyList() {
-    const reservedListQuery = useReservedList();
-    const blockedListQuery = useBlockedList();
-
-    const isNameWithBlockedWord = (name: string) => {
-        const blockedList = blockedListQuery.data || [];
-        return blockedList.some((blockedWord) => name.includes(blockedWord));
-    };
-
-    const isNameWithReservedWord = (name: string) => {
-        const reservedList = reservedListQuery.data || [];
-        return reservedList.some((reservedWord) => name === reservedWord);
-    };
-
-    return {
-        isNameWithBlockedWord,
-        isNameWithReservedWord,
-        reservedList: reservedListQuery.data || [],
-        blockedList: blockedListQuery.data || [],
-        isLoading: reservedListQuery.isLoading || blockedListQuery.isLoading,
-        error: reservedListQuery.error || blockedListQuery.error,
-    };
-}

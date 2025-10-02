@@ -8,7 +8,6 @@ import { useIotaNamesClient } from '@/contexts';
 import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 
 import { queryKey } from './queryKey';
-import { useDenyList } from './useDenyList';
 
 type PriceOption = {
     years: number;
@@ -31,12 +30,6 @@ export type NameRecordData =
     | {
           // Not priced because of being too short
           type: 'not-priced';
-      }
-    | {
-          type: 'reserved';
-      }
-    | {
-          type: 'blocked';
       };
 
 const DEFAULT_PRICE_OPTION = {
@@ -49,26 +42,14 @@ export function useNameRecord(
     { price = DEFAULT_PRICE_OPTION }: UseNameRecordOptions = {},
 ) {
     const { iotaNamesClient } = useIotaNamesClient();
-    const { reservedList, blockedList } = useDenyList();
 
-    const isNameReserved = reservedList.some((label) => name.includes(label));
-    const isNameBlocked = blockedList.some((label) => name.includes(label));
     return useQuery({
-        queryKey: [...queryKey.nameRecord(name), price, isNameReserved, isNameBlocked],
+        queryKey: [...queryKey.nameRecord(name), price],
         async queryFn() {
             const validationError = validateIotaName(name);
             if (validationError) {
                 throw new Error(validationError);
             }
-
-            if (isNameReserved || isNameBlocked) {
-                return {
-                    nameRecord: null,
-                    isReserved: isNameReserved,
-                    isBlocked: isNameBlocked,
-                };
-            }
-
             if (FORBIDDEN_LIST.some((word) => name.includes(word))) {
                 return {
                     nameRecord: null,
@@ -97,14 +78,6 @@ export function useNameRecord(
                     type: 'unavailable',
                     ...data,
                 } as NameRecordData;
-            } else if (data.isReserved) {
-                return {
-                    type: 'reserved',
-                } as NameRecordData;
-            } else if (data.isBlocked) {
-                return {
-                    type: 'blocked',
-                } as NameRecordData;
             } else if (data.price) {
                 return {
                     type: 'available',
@@ -116,10 +89,6 @@ export function useNameRecord(
                 } as NameRecordData;
             }
         },
-        enabled:
-            !!iotaNamesClient &&
-            name.length > 0 &&
-            reservedList !== undefined &&
-            blockedList !== undefined,
+        enabled: !!iotaNamesClient && name.length > 0,
     });
 }
