@@ -24,10 +24,6 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
 
-    // useEffect(() => {
-    //     initAnalyticsWithCMP(defaultNetwork);
-    // }, []);
-
     function handleNetworkChange() {
         queryClient.resetQueries();
         queryClient.clear();

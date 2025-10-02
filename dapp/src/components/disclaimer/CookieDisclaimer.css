@@ -25,8 +25,6 @@
 
             a {
                 @apply text-names-primary-80;
-                @apply hover:text-opacity-80;
-                @apply transition-colors;
             }
         }
     }

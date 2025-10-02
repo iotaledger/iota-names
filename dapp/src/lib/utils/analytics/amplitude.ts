@@ -18,6 +18,7 @@ export async function initAmplitude(defaultNetwork: string) {
         client: {
             configuration: {
                 optOut: true, // Start with tracking disabled for GDPR compliance
+                autocapture: true,
             },
         },
     });

@@ -6,35 +6,30 @@
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
 
 import { CONFIG } from '@/config';
-import { ApiKey } from '@/lib/utils/analytics/ampli';
 import {
     consentToAnalytics,
     declineAnalytics,
-    initAmplitude,
+    initAnalyticsWithCMP,
 } from '@/lib/utils/analytics/amplitude';
 
 const defaultNetwork = CONFIG.network;
 
 export function CookieDisclaimer() {
+    initAnalyticsWithCMP(defaultNetwork);
+
     const configuration: SKCMConfiguration = {
         disclaimer: {
             title: undefined,
             body: 'By using IOTA Names site, you agree with our use of cookies. ',
             policyText: 'Read our Cookie Policy',
-            policyUrl: '/cookie-policy',
+            policyUrl: '',
         },
         services: {
             customNecessaryCookies: [
                 {
-                    name: 'AMP_' + ApiKey.iotanames.slice(0, 10),
-                    purpose: 'Amplitude Analytics - necessary for basic website functionality',
-                    expiry: '1 year',
-                    type: 'http',
-                    showDisclaimerIfMissing: true,
-                },
-                {
-                    name: 'AMP_' + 'MKTG_' + ApiKey.iotanames.slice(0, 10),
-                    purpose: 'Amplitude Analytics - necessary for basic website functionality',
+                    name: 'AMP_COOKIES_ACEPTED',
+                    purpose:
+                        'Flag indicating that Amplitude analytics cookies may be created after consent',
                     expiry: '1 year',
                     type: 'http',
                     showDisclaimerIfMissing: true,
@@ -46,8 +41,8 @@ export function CookieDisclaimer() {
     return (
         <CookieManager
             onAcceptCookies={() => {
-                initAmplitude(defaultNetwork);
                 consentToAnalytics();
+                document.cookie = 'AMP_COOKIES_ACCEPTED=true; max-age=31536000';
             }}
             configuration={configuration}
             onDeclineCookies={() => {
