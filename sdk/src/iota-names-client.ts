@@ -401,20 +401,9 @@ export class IotaNamesClient {
 
             for (const n of nodes) {
                 const json = n?.name?.json;
-
                 if (typeof json === 'string' && json.length > 0) {
                     results.push(json);
                     continue;
-                }
-
-                const bytes: number[] | undefined = json?.fields?.bytes;
-                if (Array.isArray(bytes) && bytes.length > 0) {
-                    try {
-                        const decoded = new TextDecoder().decode(new Uint8Array(bytes));
-                        if (decoded) results.push(decoded);
-                    } catch {
-                        // ignore undecodable entries
-                    }
                 }
             }
             if (!df?.pageInfo?.hasNextPage) {
