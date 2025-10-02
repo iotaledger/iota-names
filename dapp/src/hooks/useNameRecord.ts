@@ -5,7 +5,6 @@ import { NameRecord, validateIotaName } from '@iota/iota-names-sdk';
 import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
-import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 
 import { queryKey } from './queryKey';
 
@@ -49,11 +48,6 @@ export function useNameRecord(
             const validationError = validateIotaName(name);
             if (validationError) {
                 throw new Error(validationError);
-            }
-            if (FORBIDDEN_LIST.some((word) => name.includes(word))) {
-                return {
-                    nameRecord: null,
-                };
             }
 
             const nameRecord = await iotaNamesClient.getNameRecord(name);
