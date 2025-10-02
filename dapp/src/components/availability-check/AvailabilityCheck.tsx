@@ -47,12 +47,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     });
     const isOnEnterSearchRef = useRef<boolean>(false);
 
-    const name = (() => {
-        if (!debouncedSearchValue) {
-            return '';
-        }
-        return `${debouncedSearchValue}.iota`;
-    })();
+    const name = debouncedSearchValue ? `${debouncedSearchValue}.iota` : '';
 
     const {
         data: auctionMetadata,
