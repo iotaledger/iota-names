@@ -292,10 +292,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 <DisplayStats
                                     label="Total Due"
                                     value={
-                                        fiatPriceResult && finalPriceIota ? (
+                                        finalPriceIota ? (
                                             <LabelText
                                                 text={finalPriceIota}
-                                                label={`($${fiatPriceResult} USD)`}
+                                                label={
+                                                    fiatPriceResult
+                                                        ? `($${fiatPriceResult} USD)`
+                                                        : ''
+                                                }
                                             />
                                         ) : (
                                             <LoadingIndicator />
