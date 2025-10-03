@@ -147,6 +147,10 @@ export interface RenewedNameProperties {
     name: string;
 }
 
+export interface RenewedSubnameProperties {
+    name: string;
+}
+
 export interface SetNameAsDisplayedProperties {
     name: string;
 }
@@ -203,6 +207,14 @@ export class RenewedName implements BaseEvent {
     event_type = 'renewed name';
 
     constructor(public event_properties: RenewedNameProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class RenewedSubname implements BaseEvent {
+    event_type = 'renewed subname';
+
+    constructor(public event_properties: RenewedSubnameProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -441,6 +453,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new RenewedName(properties), options);
+  }
+
+  /**
+   * renewed subname
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/renewed%20subname)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. name)
+   * @param options Amplitude event options.
+   */
+  renewedSubname(
+    properties: RenewedSubnameProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new RenewedSubname(properties), options);
   }
 
   /**

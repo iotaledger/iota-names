@@ -14,12 +14,14 @@ export function useCountdown(initialMilliseconds: number): CountdownReturn {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        if (isActive && milliseconds > 0) {
-            intervalRef.current = setInterval(() => {
-                setMilliseconds((prev) => prev - 1000);
-            }, 1000);
-        } else if (milliseconds === 0) {
-            setIsActive(false);
+        if (isActive) {
+            if (milliseconds > 0) {
+                intervalRef.current = setInterval(() => {
+                    setMilliseconds((prev) => prev - 1000);
+                }, 1000);
+            } else if (milliseconds === 0) {
+                setIsActive(false);
+            }
         }
 
         return () => {
