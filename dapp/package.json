@@ -6,6 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
         "prettier:check": "prettier -c --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "prettier:fix": "prettier -w --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "eslint:check": "eslint --max-warnings=0 .",
@@ -56,6 +58,7 @@
         "eslint-plugin-unused-imports": "^3.2.0",
         "postcss": "^8.4.31",
         "tailwindcss": "^3.3.3",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^2.1.8"
     }
 }

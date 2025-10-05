@@ -15,9 +15,10 @@ const FALLBACK_URL = '/name-bg.svg';
 
 interface NameAvatarDisplay {
     name: string;
+    blur?: boolean;
 }
 
-export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
+export function NameAvatarDisplay({ name, blur }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
     const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
     const isNameSubname = isSubname(name);
@@ -43,6 +44,7 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
             alt={name}
+            blur={blur}
         />
     );
 }
@@ -51,9 +53,10 @@ interface AvatarDisplayProps {
     src?: string;
     isLoadingSrc?: boolean;
     alt?: string;
+    blur?: boolean;
 }
 
-export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
+export function AvatarDisplay({ src, alt, isLoadingSrc, blur }: AvatarDisplayProps) {
     const [srcStatus, setSrcStatus] = useState<'pending' | 'success' | 'error'>('pending');
     const [avatarStatus, setAvatarStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
@@ -126,7 +129,10 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
             ) : avatarSrc ? (
                 <div className="w-full aspect-square relative">
                     <img
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className={cx(
+                            'absolute inset-0 w-full h-full object-cover',
+                            blur && 'blur-sm',
+                        )}
                         src={avatarSrc}
                         alt={alt}
                     />
