@@ -22,7 +22,6 @@ import {
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
-import { isNameReserved, isNameWithBlockedWord } from '@/lib/utils/denyList';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -167,6 +166,10 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         onCompleted?.();
     }
 
+    function isForbiddenName(name: string, forbiddenNames: string[]) {
+        return forbiddenNames.some((w) => name === `${w}.iota`);
+    }
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             <div className="flex flex-col gap-xl w-full max-w-[744px]">
@@ -225,14 +228,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             isAvailable={false}
                             statusMessage="Name is already taken."
                         />
-                    ) : isNameWithBlockedWord(name, blockedList) ? (
+                    ) : isForbiddenName(name, blockedList) ? (
                         <NamePurchaseCard
                             name={name}
                             isAvailable={false}
                             disableHoverEffect
-                            statusMessage="Name contains words that are not allowed."
+                            statusMessage="Name is blocked and cannot be purchased."
                         />
-                    ) : isNameReserved(name, reservedList) ? (
+                    ) : isForbiddenName(name, reservedList) ? (
                         <NamePurchaseCard
                             name={name}
                             isAvailable={false}
