@@ -72,7 +72,7 @@ export function hasAnalyticsConsent(): boolean {
  * Initialize analytics with CMP integration
  * Call this after user interaction or when checking existing consent
  */
-export async function initAnalyticsWithCMP(defaultNetwork: string) {
+export async function initAnalytics(defaultNetwork: string) {
     const hasConsent = hasAnalyticsConsent();
 
     if (hasConsent) {

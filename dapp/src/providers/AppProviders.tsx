@@ -13,7 +13,7 @@ import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
-import { initAnalyticsWithCMP } from '@/lib/utils/analytics/amplitude';
+// import { initAnalytics } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 
 import { ThemeProvider } from './ThemeProvider';
@@ -24,8 +24,9 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const defaultNetwork = CONFIG.network;
 
     useEffect(() => {
-        initAnalyticsWithCMP(defaultNetwork);
-    }, []);
+        // Uncomment init amplitude when we get response from the legal
+        // initAnalytics(defaultNetwork);
+    }, [defaultNetwork]);
 
     function handleNetworkChange() {
         queryClient.resetQueries();
