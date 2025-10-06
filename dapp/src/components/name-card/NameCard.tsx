@@ -13,6 +13,8 @@ interface NameCardProps extends NftDisplayProps {
     menuOptions?: MenuListItem[];
     isSelected?: boolean;
     displaySrc?: string | null;
+    blurImage?: boolean;
+    onImageClick?: () => void;
 }
 
 export function NameCard({
@@ -23,6 +25,8 @@ export function NameCard({
     isSelected,
     children,
     displaySrc,
+    blurImage,
+    onImageClick,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
@@ -35,12 +39,14 @@ export function NameCard({
             <div
                 className={cx(
                     'flex flex-col relative aspect-square rounded-xl group/display z-0 overflow-hidden w-full',
+                    onImageClick && 'cursor-pointer',
                 )}
+                onClick={onImageClick}
             >
                 {displaySrc ? (
-                    <AvatarDisplay src={displaySrc} />
+                    <AvatarDisplay src={displaySrc} blur={blurImage} />
                 ) : (
-                    <NameAvatarDisplay name={name} />
+                    <NameAvatarDisplay name={name} blur={blurImage} />
                 )}
 
                 {badge && <div className="absolute top-sm left-sm">{badge}</div>}
