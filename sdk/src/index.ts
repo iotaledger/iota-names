@@ -16,6 +16,7 @@ export {
     getRenewalPricelistConfigType,
     getNameRegistrationType,
     getSubnameRegistrationType,
+    getDenyListType,
 } from './helpers.js';
 export {
     isValidIotaName,

@@ -12,7 +12,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
-import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
+import {
+    NameRecordData,
+    useBlockedList,
+    useNameRecord,
+    usePriceList,
+    useReservedList,
+} from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
@@ -39,6 +45,8 @@ const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
+    const { data: blockedList = [] } = useBlockedList();
+    const { data: reservedList = [] } = useReservedList();
     const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
@@ -166,6 +174,10 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         onCompleted?.();
     }
 
+    function isForbiddenName(name: string, forbiddenNames: string[]) {
+        return forbiddenNames.some((w) => name === `${w}.iota`);
+    }
+
     return (
         <div className="flex flex-col items-center w-full space-y-4">
             <div className="flex flex-col gap-xl w-full max-w-[744px]">
@@ -223,6 +235,20 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
+                        />
+                    ) : isForbiddenName(name, blockedList) ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name is blocked and cannot be purchased."
+                        />
+                    ) : isForbiddenName(name, reservedList) ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name is reserved and cannot be purchased."
                         />
                     ) : nameRecordData?.type === 'not-priced' ? (
                         <NamePurchaseCard
