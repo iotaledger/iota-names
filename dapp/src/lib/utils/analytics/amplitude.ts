@@ -1,4 +1,4 @@
-// Copyright (c) 2024 IOTA Stiftung
+// Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 import * as amplitude from '@amplitude/analytics-browser';
@@ -18,7 +18,6 @@ export async function initAmplitude(defaultNetwork: string) {
         client: {
             configuration: {
                 optOut: true, // Start with tracking disabled for GDPR compliance
-                autocapture: true,
             },
         },
     });
@@ -73,7 +72,7 @@ export function hasAnalyticsConsent(): boolean {
  * Initialize analytics with CMP integration
  * Call this after user interaction or when checking existing consent
  */
-export async function initAnalyticsWithCMP(defaultNetwork: string) {
+export async function initAnalytics(defaultNetwork: string) {
     const hasConsent = hasAnalyticsConsent();
 
     if (hasConsent) {

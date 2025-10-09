@@ -6,6 +6,8 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
         "prettier:check": "prettier -c --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "prettier:fix": "prettier -w --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "eslint:check": "eslint --max-warnings=0 .",
@@ -15,11 +17,10 @@
         "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/lib/utils/analytics/ampli/index.ts"
     },
     "dependencies": {
-        "@amplitude/analytics-browser": "^2.24.0",
-        "@amplitude/analytics-client-common": "^2.3.41",
-        "@amplitude/analytics-core": "^2.24.0",
+        "@amplitude/analytics-browser": "^2.25.2",
+        "@amplitude/analytics-client-common": "^2.4.3",
+        "@amplitude/analytics-core": "^2.26.2",
         "@amplitude/analytics-types": "^2.10.0",
-        "@boxfish-studio/react-cookie-manager": "^1.0.2",
         "@iota/apps-ui-icons": "^0.4.1",
         "@iota/apps-ui-kit": "^0.7.2",
         "@iota/dapp-kit": "^0.5.3",
@@ -63,6 +64,7 @@
         "eslint-plugin-unused-imports": "^3.2.0",
         "postcss": "^8.4.31",
         "tailwindcss": "^3.3.3",
-        "typescript": "^5"
+        "typescript": "^5",
+        "vitest": "^2.1.8"
     }
 }

@@ -74,6 +74,7 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
+const DEBOUNCE_DELAY = 500;
 
 export default function AuctionsPage(): JSX.Element {
     const searchParams = useSearchParams();
@@ -110,7 +111,8 @@ export default function AuctionsPage(): JSX.Element {
         };
     }, [areFiltersVisible]);
 
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_DELAY);
+
     useEffect(() => {
         if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
             ampli.appliedAuctionNameFilter({ query: debouncedSearchQuery.trim() });

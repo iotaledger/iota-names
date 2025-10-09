@@ -36,18 +36,14 @@ export function CookieDisclaimer() {
                 },
             ],
         },
+        onAcceptCookies: () => {
+            consentToAnalytics();
+            document.cookie = 'AMP_COOKIES_ACCEPTED=true; max-age=31536000';
+        },
+        onDeclineCookies: () => {
+            declineAnalytics();
+        },
     };
 
-    return (
-        <CookieManager
-            onAcceptCookies={() => {
-                consentToAnalytics();
-                document.cookie = 'AMP_COOKIES_ACCEPTED=true; max-age=31536000';
-            }}
-            configuration={configuration}
-            onDeclineCookies={() => {
-                declineAnalytics();
-            }}
-        />
-    );
+    return <CookieManager configuration={configuration} />;
 }

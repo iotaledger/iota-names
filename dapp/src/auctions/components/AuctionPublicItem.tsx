@@ -6,7 +6,7 @@ import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent, useEffect, useMemo } from 'react';
 
 import {
     AuctionDetails,
@@ -20,21 +20,30 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { queryKey, useNameRecord } from '@/hooks';
+import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 import { formatNanosToIota } from '@/lib/utils';
+import { censorName } from '@/lib/utils/censorName';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { AuctionActionButton } from './AuctionActionButton';
 
-interface AuctionublicItemProps {
+interface AuctionPublicItemProps {
     auction: AuctionDetails;
     onBidClick: (name: string) => void;
 }
 
-export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
+export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProps) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
         auction.name,
     );
+    const account = useCurrentAccount();
     const queryClient = useQueryClient();
+
+    const normalizedName = normalizeIotaName(auction.name);
+    const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
+    const isCensored = normalizedName !== censoredName;
+
+    const shouldCensor = isCensored;
 
     const isClaimedAuction = !auction.metadata;
     let auctionDisplayImage = null;
@@ -50,8 +59,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             nameRecordData.nameRecord.expirationDate.getTime(),
         );
     }
-
-    const account = useCurrentAccount();
 
     if (auction.isLoading || isNameRecordDataLoading) {
         return (
@@ -74,8 +81,13 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
         : null;
 
     return (
-        <NameCard name={auction.name} size="full" displaySrc={auctionDisplayImage}>
-            <NameCardBody name={normalizeIotaName(auction.name)}>
+        <NameCard
+            name={auction.name}
+            size="full"
+            displaySrc={auctionDisplayImage}
+            blurImage={shouldCensor}
+        >
+            <NameCardBody name={censoredName}>
                 {auctionStatus === 'top_bidder' ? (
                     <div className="absolute top-2 left-2">
                         <AuctionStatusBadge status={auctionStatus} />
