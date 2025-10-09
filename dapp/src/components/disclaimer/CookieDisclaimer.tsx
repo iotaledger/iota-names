@@ -4,18 +4,21 @@
 'use client';
 
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
+import { useEffect } from 'react';
 
 import { CONFIG } from '@/config';
 import {
     consentToAnalytics,
     declineAnalytics,
-    initAnalyticsWithCMP,
+    initAnalytics,
 } from '@/lib/utils/analytics/amplitude';
 
 const defaultNetwork = CONFIG.network;
 
 export function CookieDisclaimer() {
-    initAnalyticsWithCMP(defaultNetwork);
+    useEffect(() => {
+        initAnalytics(defaultNetwork);
+    }, []);
 
     const configuration: SKCMConfiguration = {
         disclaimer: {
