@@ -44,6 +44,7 @@ import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useRefreshAuctions } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 
 import { paramsSchema } from './params';
 
@@ -111,6 +112,12 @@ export default function AuctionsPage(): JSX.Element {
     }, [areFiltersVisible]);
 
     const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_DELAY);
+
+    useEffect(() => {
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+            ampli.appliedAuctionNameFilter({ query: debouncedSearchQuery.trim() });
+        }
+    }, [debouncedSearchQuery]);
 
     function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
         const params = new URLSearchParams(searchParams.toString());

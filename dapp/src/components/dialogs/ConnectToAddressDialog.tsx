@@ -36,6 +36,7 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
@@ -139,6 +140,23 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
+
+            const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
+            if (hasAddressUpdate) {
+                const addressType = isTargetingCurrentAddress ? 'current' : 'external';
+                ampli.connectedAddress({
+                    name: cleanName,
+                    addressType: addressType,
+                });
+            }
+
+            const hasSetDefaultUpdate = updates.some((update) => update.type === 'set-default');
+            if (hasSetDefaultUpdate) {
+                ampli.setNameAsDisplayed({
+                    name: cleanName,
+                });
+            }
+
             if (editTargetAddress.length === 0) {
                 toast.success(`Successfully disconnected ${cleanName}`);
                 setOpen(false);

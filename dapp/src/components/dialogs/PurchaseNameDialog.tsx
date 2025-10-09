@@ -39,6 +39,7 @@ import {
 } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -54,6 +55,8 @@ type PurchaseNameProps = {
     setOpen: (bool: boolean) => void;
     onPurchase?: () => void;
 };
+
+const EXPIRATION_IN_YEARS = 1;
 
 export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const queryClient = useQueryClient();
@@ -75,7 +78,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: nameRecordError,
     } = useNameRecord(name, {
         price: {
-            years: 1,
+            years: EXPIRATION_IN_YEARS,
             isRegistration: true,
         },
     });
@@ -113,7 +116,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
-                years: 1,
+                years: EXPIRATION_IN_YEARS,
                 isRegistration: true,
                 address: account?.address,
             });
@@ -145,6 +148,19 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
+
+            ampli.purchasedName({
+                name,
+                amount: price ?? 0,
+                expiration: EXPIRATION_IN_YEARS,
+                discountName: couponCodes.join(','),
+                discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
+            });
+
+            if (isDisplayName) {
+                ampli.setNameAsDisplayed({ name });
+            }
+
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
             );
@@ -231,7 +247,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-    const expirationDate = getTargetExpirationDate(1);
+    const expirationDate = getTargetExpirationDate(EXPIRATION_IN_YEARS);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>

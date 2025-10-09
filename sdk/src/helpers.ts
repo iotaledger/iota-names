@@ -37,6 +37,10 @@ export function getConfigType(iotaNamesPackageV1: string, innerType: string): st
     return `${iotaNamesPackageV1}::iota_names::ConfigKey<${innerType}>`;
 }
 
+export function getRegistryKeyType(iotaNamesPackageId: string, innerType: string): string {
+    return `${iotaNamesPackageId}::iota_names::RegistryKey<${innerType}>`;
+}
+
 export function getNameType(iotaNamesPackageV1: string): string {
     return `${iotaNamesPackageV1}::name::Name`;
 }
@@ -59,6 +63,10 @@ export function getSubnameRegistrationType(iotaNamesPackageId: string): string {
 
 export function getCoreConfigType(iotaNamesPackageId: string): string {
     return `${iotaNamesPackageId}::core_config::CoreConfig`;
+}
+
+export function getDenyListType(iotaNamesPackageId: string): string {
+    return `${iotaNamesPackageId}::deny_list::DenyList`;
 }
 
 export function getSubnamesConfigType(iotaNamesPackageId: string): string {

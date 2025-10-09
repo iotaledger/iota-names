@@ -6,7 +6,7 @@ import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { MouseEvent, useEffect, useMemo, useState } from 'react';
+import { MouseEvent, useEffect, useMemo } from 'react';
 
 import {
     AuctionDetails,
@@ -27,12 +27,12 @@ import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
 import { AuctionActionButton } from './AuctionActionButton';
 
-interface AuctionublicItemProps {
+interface AuctionPublicItemProps {
     auction: AuctionDetails;
     onBidClick: (name: string) => void;
 }
 
-export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps) {
+export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProps) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
         auction.name,
     );
@@ -42,12 +42,8 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
     const normalizedName = normalizeIotaName(auction.name);
     const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
     const isCensored = normalizedName !== censoredName;
-    const [isRevealed, setIsRevealed] = useState(false);
-    const shouldCensor = isCensored && !isRevealed;
 
-    const handleReveal = () => {
-        setIsRevealed(true);
-    };
+    const shouldCensor = isCensored;
 
     const isClaimedAuction = !auction.metadata;
     let auctionDisplayImage = null;
@@ -93,12 +89,8 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionublicItemProps
             size="full"
             displaySrc={auctionDisplayImage}
             blurImage={shouldCensor}
-            onImageClick={shouldCensor ? handleReveal : undefined}
         >
-            <NameCardBody
-                name={isRevealed ? normalizedName : censoredName}
-                onNameClick={shouldCensor ? handleReveal : undefined}
-            >
+            <NameCardBody name={censoredName}>
                 {auctionStatus === 'top_bidder' ? (
                     <div className="absolute top-2 left-2">
                         <AuctionStatusBadge status={auctionStatus} />

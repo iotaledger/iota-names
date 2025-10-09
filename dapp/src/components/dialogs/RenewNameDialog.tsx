@@ -39,6 +39,7 @@ import {
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
 
@@ -148,6 +149,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             });
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
+            });
+            ampli.renewedName({
+                name,
+                expiration: renewYears || 0,
             });
             toast.success('Name renewed successfully');
         },
