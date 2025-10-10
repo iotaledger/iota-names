@@ -327,7 +327,7 @@ fun set_target_address() {
     registry.set_target_address(name, some(@0x2));
 
     // try to find a record and then get a record
-    let mut search = registry.lookup(name);
+    let mut search = registry.lookup_unexpired(name, &clock);
     let record = registry.remove_record_for_testing(name);
 
     // make sure the search is a success
@@ -355,7 +355,7 @@ fun set_reverse_lookup() {
     registry.set_reverse_lookup(@0xB0B, name);
 
     // search for the reverse_lookup record
-    let mut search = registry::reverse_lookup(&registry, @0xB0B);
+    let mut search = registry.reverse_lookup_unexpired(@0xB0B, &clock);
 
     assert!(option::is_some(&search), 0);
     assert!(option::extract(&mut search) == name, 0);
@@ -828,6 +828,48 @@ fun test_lookup_nonexistent() {
 }
 
 #[test]
+fun test_lookup_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _name) = setup(&mut ctx);
+
+    let expired_name = name::new(utf8(b"expired.iota"));
+    let nft = registry.add_record(expired_name, 1, &clock, &mut ctx);
+
+    // Move time forward so record expires
+    clock::increment_for_testing(&mut clock, constants::year_ms() + 1);
+    
+    assert!(registry.lookup_unexpired(expired_name, &clock).is_none());
+    assert!(registry.lookup_address(expired_name, &clock).is_none());
+
+    let _ = registry.remove_record_for_testing(expired_name);
+
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
+fun test_reverse_lookup_expired() {
+    let mut ctx = tx_context::dummy();
+    let (mut registry, mut clock, _name) = setup(&mut ctx);
+
+    let expired_name = name::new(utf8(b"expired.iota"));
+    let nft = registry.add_record(expired_name, 1, &clock, &mut ctx);
+    registry.set_target_address(expired_name, some(@0xB0B));
+    registry.set_reverse_lookup(@0xB0B, expired_name);
+
+    // Move time forward so record expires
+    clock::increment_for_testing(&mut clock, constants::year_ms() + 1);
+    
+    assert!(registry.reverse_lookup_unexpired(@0xB0B, &clock).is_none());
+
+    registry.unset_reverse_lookup(@0xB0B);
+    let _ = registry.remove_record_for_testing(expired_name);
+
+    burn_nfts(vector[nft]);
+    wrapup(registry, clock);
+}
+
+#[test]
 fun test_reverse_lookup_nonexistent() {
     let mut ctx = tx_context::dummy();
     let (registry, clock, _name) = setup(&mut ctx);
@@ -848,13 +890,13 @@ fun test_unset_target_address() {
     
     // Set a target address first
     registry.set_target_address(name, some(@0x123));
-    let record = registry.lookup(name).destroy_some();
-    assert_eq(record.target_address(), some(@0x123));
+    let target_address = registry.lookup_address(name, &clock);
+    assert_eq(target_address, some(@0x123));
 
     // Now unset it
     registry.set_target_address(name, none());
-    let record = registry.lookup(name).destroy_some();
-    assert_eq(record.target_address(), none());
+    let target_address = registry.lookup_address(name, &clock);
+    assert_eq(target_address, none());
 
     let _ = registry.remove_record_for_testing(name);
     burn_nfts(vector[nft]);
