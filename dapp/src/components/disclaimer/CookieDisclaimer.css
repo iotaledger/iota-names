@@ -8,7 +8,7 @@
     @apply rounded-none;
     @apply shadow-2xl;
     @apply max-md:px-0;
-    @apply md:flex-row md:space-x-4 md:py-4 md:px-6 md:bottom-6 md:right-6 md:rounded-md md:max-w-md;
+    @apply md:flex-row md:space-x-4 md:py-4 md:px-6 md:bottom-6 md:right-6 md:rounded-md md:max-w-lg;
     background:
         linear-gradient(#0a0d23, #0a0d23) padding-box,
         var(--names-gradient-primary) border-box;

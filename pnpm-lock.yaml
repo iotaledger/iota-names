@@ -115,8 +115,8 @@ importers:
         specifier: ^2.10.0
         version: 2.10.0
       '@boxfish-studio/react-cookie-manager':
-        specifier: ^1.0.4
-        version: 1.0.4
+        specifier: ^1.0.5
+        version: 1.0.5
       '@iota/apps-ui-icons':
         specifier: ^0.4.1
         version: 0.4.1(react@18.3.1)
@@ -1124,8 +1124,8 @@ packages:
     resolution: {integrity: sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg==}
     engines: {node: '>=6.9.0'}
 
-  '@boxfish-studio/react-cookie-manager@1.0.4':
-    resolution: {integrity: sha512-qdPFG0C8BAViCGVdpYCuxuA74tOntst7YZtqnvb3NdI5YlDHOpfNHkYpADf0yGGtUErgzMIWIG09GioSLja8aQ==}
+  '@boxfish-studio/react-cookie-manager@1.0.5':
+    resolution: {integrity: sha512-0NI3lnm0ByfmbvIFD2n/HlFZTxwW4mQ88tqcZBjjOymOzQWGWCqDY/k35Ooj1qo2gqRnEOa945hNuYuiDh207A==}
 
   '@braintree/sanitize-url@6.0.4':
     resolution: {integrity: sha512-s3jaWicZd0pkP0jf5ysyHUI/RE7MHos6qlToFcGWXVp+ykHOy77OUMrfbgJ9it2C5bow7OIQwYYaHjk9XlBQ2A==}
@@ -8998,7 +8998,7 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
 
-  '@boxfish-studio/react-cookie-manager@1.0.4':
+  '@boxfish-studio/react-cookie-manager@1.0.5':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

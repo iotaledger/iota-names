@@ -23,9 +23,8 @@ export function CookieDisclaimer() {
     const configuration: SKCMConfiguration = {
         disclaimer: {
             title: undefined,
-            body: 'By using IOTA Names site, you agree with our use of cookies. ',
-            policyText: 'Read our Cookie Policy',
-            policyUrl: '',
+            body: 'We use cookies and analytics tools to help us improve your experience. Please accept analytics cookies to allow us to collect anonymous usage statistics. You can learn more in our ',
+            policyText: 'Privacy Policy',
         },
         services: {
             customNecessaryCookies: [
