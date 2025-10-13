@@ -184,8 +184,7 @@ jobs:
           pnpm run playwright:install
 
       - name: Run E2E Tests
-        run: |
-          pnpm run test:e2e
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
