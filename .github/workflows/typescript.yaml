@@ -188,12 +188,9 @@ jobs:
           pnpm install
         working-directory: ./
 
-      - name: Build SDK
-        run: |
-          pnpm --filter @iota/iota-names-sdk run build
-
       - name: Build Dapp
-        run: pnpm build
+        run: pnpm dapp build
+        working-directory: ./
 
       - name: Download IOTA Wallet Extension
         env:
@@ -206,6 +203,7 @@ jobs:
           pnpm run playwright:install
 
       - name: Prepare local network & Run Dapp e2e tests
+        working-directory: ./
         run: |
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
           sleep 10
