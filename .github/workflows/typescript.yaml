@@ -221,6 +221,15 @@ jobs:
 
           cat ./package-info/localnet.json
 
+          # Inject localnet config into sdk/src/constants.ts
+          sed -i "/REPLACE PLACEHOLDER/i\\    localnet: $(jq -c . ./package-info/localnet.json)," ../sdk/src/constants.ts
+          echo "✅ Injected localnet config into constants.ts"
+
+          cd ..
+          cat ./sdk/src/constants.ts
+
+          pnpm dapp build
+
           cd ../dapp
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
 
