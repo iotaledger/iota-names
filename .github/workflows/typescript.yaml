@@ -136,12 +136,12 @@ jobs:
     env:
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: {
-        "localnet":{
+        "localnet": {
           "network": "localnet",
           "namesDisplayUrl": "http://localhost",
           "indexerUrl": "http://localhost",
-          "baseUrl": "http://localhost:3000"
-        }
+          "baseUrl": "http://localhost:3000",
+        },
       }
     defaults:
       run:
