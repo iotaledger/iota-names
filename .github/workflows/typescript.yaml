@@ -144,6 +144,21 @@ jobs:
             "baseUrl": "http://localhost:3000"
           }
         }
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespw
+          POSTGRES_DB: iota_indexer
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     defaults:
       run:
         working-directory: ./dapp
@@ -155,6 +170,14 @@ jobs:
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: 20
+
+      - name: Install Homebrew
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+
+      - name: Install IOTA using Homebrew
+        run: brew install iotaledger/tap/iota
 
       - name: Do a global PNPM install
         run: |
@@ -182,8 +205,26 @@ jobs:
         run: |
           pnpm run playwright:install
 
-      - name: Run E2E Tests
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
+      - name: Prepare local network & Run Dapp e2e tests
+        run: |
+          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
+          sleep 10
+
+          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
+          iota client switch --env localnet
+          iota client faucet
+          sleep 5
+
+          cd scripts
+          export NETWORK=localnet
+          pnpm ts-node init/init.ts localnet
+          pnpm ts-node tests/register-name.ts
+          sleep 5
+
+          cat ./package-info/localnet.json
+
+          cd ../dapp
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
