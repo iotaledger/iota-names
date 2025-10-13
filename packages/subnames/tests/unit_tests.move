@@ -46,7 +46,7 @@ fun test_parent_relationships() {
 #[test, expected_failure(abort_code = iota_names_subnames::config::EDepthExceedsLimit)]
 fun test_too_large_subname_failure() {
     assert_is_valid_subname(
-        &new_name(utf8(b"example.iota")),
+        &new_name(utf8(b"sub.sub.sub.sub.sub.sub.sub.sub.example.iota")),
         &new_name(
             utf8(
                 b"sub.sub.sub.sub.sub.sub.sub.sub.sub.example.iota",
