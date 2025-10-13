@@ -29,7 +29,7 @@ export function CookieDisclaimer() {
         services: {
             customNecessaryCookies: [
                 {
-                    name: 'AMP_COOKIES_ACEPTED',
+                    name: 'AMP_COOKIES_ACCEPTED',
                     purpose:
                         'Flag indicating that Amplitude analytics cookies may be created after consent',
                     expiry: '1 year',
