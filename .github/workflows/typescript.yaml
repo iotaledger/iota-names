@@ -133,6 +133,9 @@ jobs:
   dapp_e2e_test:
     name: Run dapp E2E Tests
     runs-on: ubuntu-latest
+    env:
+        NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
+        NEXT_PUBLIC_NAMES_DAPP_CONFIG: { "localnet":{ "network": "localnet", "namesDisplayUrl": "http://localhost", "indexerUrl": "http://localhost", "baseUrl": "http://localhost:3000" } }
     defaults:
       run:
         working-directory: ./dapp
@@ -159,19 +162,7 @@ jobs:
           pnpm --filter @iota/iota-names-sdk run build
 
       - name: Build Dapp
-        env:
-          NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: "localnet"
-          NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
-            {
-              "localnet":{
-                  "network": "localnet",
-                  "namesDisplayUrl": "http://localhost",
-                  "indexerUrl": "http://localhost",
-                  "baseUrl": "http://localhost:3000"
-              }
-            }
-        run: |
-          pnpm build
+        run: pnpm build
 
       - name: Download IOTA Wallet Extension
         env:
