@@ -8,8 +8,8 @@ import BigNumber from 'bignumber.js';
 import { COIN_TYPE_TO_FIAT_TOKEN_NAME } from '../lib/constants';
 import { Feature, FiatTokenName } from '../lib/enums';
 import { useAppsBackend } from './useAppsBackend';
+import { useCoinMetadata } from './useCoinMetadata';
 import { useFeatureEnabledByNetwork } from './useFeatureEnabledByNetwork';
-import { useCoinMetadata } from './useFormatCoin';
 
 type TokenPriceResponse = { price: string | null };
 

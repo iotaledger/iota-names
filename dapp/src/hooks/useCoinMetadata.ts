@@ -4,17 +4,10 @@
 import { useIotaClient } from '@iota/dapp-kit';
 import { CoinMetadata } from '@iota/iota-sdk/client';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { CoinFormat, formatBalance, IOTA_DECIMALS, IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { IOTA_DECIMALS, IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
+import { useQuery } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '../contexts';
-
-type FormattedCoin = [
-    formattedBalance: string,
-    coinSymbol: string,
-    queryResult: UseQueryResult<CoinMetadata | null>,
-];
 
 const ELLIPSIS = '\u{2026}';
 const SYMBOL_TRUNCATE_LENGTH = 5;
@@ -111,40 +104,3 @@ export const IOTA_COIN_METADATA: CoinMetadata = {
     name: 'IOTA',
     symbol: 'IOTA',
 };
-
-interface FormatCoinOptions {
-    balance?: bigint | number | string | null;
-    coinType?: string;
-    format?: CoinFormat;
-    showSign?: boolean;
-}
-// TODO #1: This handles undefined values to make it easier to integrate with
-// the reset of the app as it is today, but it really shouldn't in a perfect world.
-export function useFormatCoin({
-    balance,
-    coinType = IOTA_TYPE_ARG,
-    format = CoinFormat.Rounded,
-    showSign = false,
-}: FormatCoinOptions): FormattedCoin {
-    const fallbackSymbol = useMemo(
-        () => (coinType ? (getCoinSymbol(coinType) ?? '') : ''),
-        [coinType],
-    );
-    const queryResult = useCoinMetadata(coinType);
-    const { isFetched, data } = queryResult;
-
-    const formatted = useMemo(() => {
-        if (typeof balance === 'undefined' || balance === null) return '';
-
-        if (!isFetched) return '...';
-
-        return formatBalance(balance, data?.decimals ?? 0, format, showSign);
-    }, [data?.decimals, isFetched, balance, format]);
-
-    return [formatted, isFetched ? data?.symbol || fallbackSymbol : '', queryResult];
-}
-
-/** @deprecated use coin metadata instead */
-export function getCoinSymbol(coinTypeArg: string) {
-    return coinTypeArg.substring(coinTypeArg.lastIndexOf(':') + 1);
-}

@@ -11,7 +11,7 @@ export * from './queryKey';
 export * from './useGetDefaultName';
 export * from './useUpdateNameTransaction';
 export * from './useTokenPrice';
-export * from './useFormatCoin';
+export * from './useCoinMetadata';
 export * from './useFeatureEnabledByNetwork';
 export * from './useAppsBackend';
 export * from './useCalculateRenewalPrice';
