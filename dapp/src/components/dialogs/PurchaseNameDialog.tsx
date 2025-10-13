@@ -314,7 +314,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                                 label={
                                                     fiatPriceResult
                                                         ? `($${fiatPriceResult} USD)`
-                                                        : ''
+                                                        : '\u00A0'
                                                 }
                                             />
                                         ) : (
