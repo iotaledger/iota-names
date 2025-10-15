@@ -102,10 +102,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const [applyCoupons, setApplyCoupons] = useState(false);
 
     const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
-    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : 0;
-    const fiatPriceResult = useCalculatePriceInFiat(
-        renewalPriceInNanos && renewalPriceInNanos > 0 ? renewalPriceInNanos.toString() : '0',
-    );
+    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
+    const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
     const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
@@ -274,12 +272,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                             className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
                                             aria-hidden
                                         >
-                                            <span>
-                                                {String(renewalPriceIota).replace(
-                                                    ' IOTA',
-                                                    '\u00A0IOTA',
-                                                )}
-                                            </span>
+                                            <span>{renewalPriceIota}</span>
                                             {fiatPriceResult ? (
                                                 <span className="ml-1 text-label-sm text-names-neutral-80">
                                                     (${fiatPriceResult} USD)

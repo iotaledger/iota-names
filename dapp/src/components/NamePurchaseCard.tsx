@@ -32,7 +32,7 @@ export function NamePurchaseCard({
     const textStatus = isAvailable ? 'Available' : 'Unavailable';
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
     const priceInNanos = parseIotaToNanos(price || '0');
-    const fiatPrice = useCalculatePriceInFiat(priceInNanos?.toString() || '0');
+    const fiatPrice = useCalculatePriceInFiat(priceInNanos);
 
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
     return (

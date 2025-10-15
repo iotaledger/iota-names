@@ -69,7 +69,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
         : null;
 
     const priceNanos = auction.metadata ? auction.metadata.currentBidNanos : BigInt(0);
-    const fiatPrice = useCalculatePriceInFiat(priceNanos.toString());
+    const fiatPrice = useCalculatePriceInFiat(priceNanos);
 
     if (auction.isLoading || isNameRecordDataLoading) {
         return (

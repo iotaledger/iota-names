@@ -72,7 +72,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             : '');
 
     const currentPriceInNanos = parseIotaToNanos(currentPrice) || BigInt(0);
-    const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos.toString());
+    const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos);
 
     // Sync the minimum bid amount
     useEffect(() => {
