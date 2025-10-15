@@ -13,7 +13,7 @@ import {
     DialogPosition,
     Header,
 } from '@iota/apps-ui-kit';
-import TOS from '@legal/tos.mdx';
+import CookiePolicy from '@legal/cookiePolicy.mdx';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -67,27 +67,30 @@ export function PrivacyPolicyDialog({ configuration }: { configuration: SKCMConf
                 isFixedPosition
                 customWidth="w-full max-w-md md:max-w-2xl xl:max-w-[744px]"
             >
-                <Header title="Cookie Preferences" onClose={handleClose} />
+                <Header title="Privacy Policy" onClose={handleClose} />
 
                 <DialogBody>
-                    <div className="flex flex-col gap-xl">
+                    <div className="flex flex-col gap-xl mb-lg">
                         <div className="flex flex-col gap-md">
+                            <span className="text-label-md text-names-neutral-70">
+                                Last updated: 9th October 2025
+                            </span>
                             <div className="text-body-md text-names-neutral-92">
-                                <TOS />
+                                <CookiePolicy />
                             </div>
                         </div>
 
-                        <div className="flex flex-row justify-end gap-md mt-lg">
-                            <Button
-                                onClick={handleDecline}
-                                text="Reject all"
-                                type={ButtonType.Secondary}
-                                disabled={loading}
-                            />
+                        <div className="flex flex-row justify-center gap-md">
                             <Button
                                 onClick={handleAccept}
                                 text="Accept all"
                                 type={ButtonType.Primary}
+                                disabled={loading}
+                            />
+                            <Button
+                                onClick={handleDecline}
+                                text="Reject all"
+                                type={ButtonType.Secondary}
                                 disabled={loading}
                             />
                         </div>
