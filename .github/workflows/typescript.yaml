@@ -221,8 +221,8 @@ jobs:
 
           cat ./package-info/localnet.json
 
-          sed -i "/REPLACE PLACEHOLDER/i\\    localnet: $(jq -c . ./package-info/localnet.json)," ../sdk/src/constants.ts
-          echo "✅ Injected localnet config into constants.ts"
+          cd ../dapp
+          pnpm inject-localnet
 
           cd ..
           pnpm dapp build

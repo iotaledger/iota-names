@@ -17,7 +17,8 @@
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
-        "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/lib/utils/analytics/ampli/index.ts"
+        "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/lib/utils/analytics/ampli/index.ts",
+        "inject-localnet": "node scripts/injectLocalnetConfig.mjs"
     },
     "dependencies": {
         "@amplitude/analytics-browser": "^2.25.2",
