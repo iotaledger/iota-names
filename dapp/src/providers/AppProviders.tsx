@@ -3,9 +3,9 @@
 
 'use client';
 
-import { GrowthBook, GrowthBookProvider } from '@growthbook/growthbook-react';
+import { GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
-import { getAllNetworks, getAppsBackend } from '@iota/iota-sdk/client';
+import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 
@@ -16,20 +16,14 @@ import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 // import { initAnalytics } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
+import { growthbook } from '@/lib/utils/growthbook';
 
 import { ThemeProvider } from './ThemeProvider';
 
+growthbook.init();
+
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
-    const [growthbook] = useState(
-        () =>
-            new GrowthBook({
-                apiHost: getAppsBackend(),
-                clientKey: process.env.NEXT_PUBLIC_GROWTHBOOK_CLIENT_KEY || '',
-                enableDevMode: process.env.NODE_ENV === 'development',
-            }),
-    );
-
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
 
