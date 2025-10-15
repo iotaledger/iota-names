@@ -8,13 +8,17 @@
         "start": "next start",
         "test": "vitest",
         "test:ui": "vitest --ui",
+        "test:e2e": "playwright test",
+        "test:prepare": "node scripts/downloadWallet.mjs",
+        "playwright:install": "playwright install --with-deps chromium",
         "prettier:check": "prettier -c --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "prettier:fix": "prettier -w --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
         "eslint:check": "eslint --max-warnings=0 .",
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
-        "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/lib/utils/analytics/ampli/index.ts"
+        "pull-amplitude": "ampli pull web && node prependLicense.mjs && prettier -w ampli.json src/lib/utils/analytics/ampli/index.ts",
+        "inject-localnet": "node scripts/injectLocalnetConfig.mjs"
     },
     "dependencies": {
         "@amplitude/analytics-browser": "^2.25.2",
@@ -45,6 +49,7 @@
     },
     "devDependencies": {
         "@amplitude/ampli": "^1.36.2",
+        "@playwright/test": "^1.56.0",
         "@tanstack/eslint-plugin-query": "^5.35.6",
         "@types/mdx": "^2.0.13",
         "@types/node": "^20",
@@ -52,6 +57,7 @@
         "@types/react-dom": "^18",
         "@typescript-eslint/eslint-plugin": "^6.21.0",
         "@typescript-eslint/parser": "^6.21.0",
+        "dotenv": "^16.3.1",
         "eslint": "8.57.1",
         "eslint-config-next": "14.2.3",
         "eslint-config-prettier": "^9.1.0",
