@@ -7,7 +7,7 @@ import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 import { CookieDisclaimer } from '@/components/disclaimer/CookieDisclaimer';
 import { Toaster } from '@/components/Toaster';
@@ -53,7 +53,9 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                     <CookieManagerProvider>
                                         {children}
                                         <Toaster />
-                                        <CookieDisclaimer />
+                                        <Suspense fallback={null}>
+                                            <CookieDisclaimer />
+                                        </Suspense>
                                     </CookieManagerProvider>
                                 </ThemeProvider>
                             </WalletProvider>
