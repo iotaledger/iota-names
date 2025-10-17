@@ -28,7 +28,7 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
                 'getNormalizedMoveFunction',
                 'getOwnedObjects',
                 'dryRunTransactionBlock',
-                'executeTransactionBlock'
+                'executeTransactionBlock',
             ],
         }),
     });
