@@ -29,10 +29,16 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
+import {
+    NameRecordData,
+    queryKey,
+    useCalculatePriceInFiat,
+    useCalculateRenewalPrice,
+    useNameRecord,
+} from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
@@ -95,6 +101,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
 
+    const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
+    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
+    const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
     const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
@@ -250,12 +259,28 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                 </div>
                             </Panel>
                             {isRenewable && !isLoadingData && (
-                                <Select
-                                    options={renewOptions}
-                                    value={renewYears?.toString()}
-                                    onValueChange={handleYearsChange}
-                                    disabled={disableEdit}
-                                />
+                                <div className="relative">
+                                    <Select
+                                        options={renewOptions}
+                                        value={renewYears?.toString()}
+                                        supportingText=""
+                                        onValueChange={handleYearsChange}
+                                        disabled={disableEdit}
+                                    />
+                                    {renewalPriceIota ? (
+                                        <span
+                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
+                                            aria-hidden
+                                        >
+                                            <span>{renewalPriceIota}</span>
+                                            {fiatPriceResult ? (
+                                                <span className="ml-1 text-label-sm text-names-neutral-80">
+                                                    (${fiatPriceResult} USD)
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    ) : null}
+                                </div>
                             )}
                             {renewOptions.length === 0 && !isLoadingData && (
                                 <InfoBox

@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 import nextMdx from '@next/mdx';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
-
+const NEXT_PUBLIC_BUILD_ENV = process.env.BUILD_ENV;
 try {
     if (process.env.VERCEL_GIT_COMMIT_SHA) {
         NEXT_PUBLIC_IOTA_NAMES_REV = process.env.VERCEL_GIT_COMMIT_SHA;
@@ -22,6 +22,7 @@ const withMDX = nextMdx();
 const nextConfig = withMDX({
     env: {
         NEXT_PUBLIC_IOTA_NAMES_REV,
+        NEXT_PUBLIC_BUILD_ENV,
     },
     experimental: {
         mdxRs: true,

@@ -34,3 +34,8 @@ export function parseNanosToIota(balance: bigint | number | string): number {
     const parsed = new BigNumber(balance.toString()).shiftedBy(-1 * IOTA_DECIMALS);
     return Number(parsed);
 }
+
+export function parseIotaToNanos(balance: bigint | number | string): number {
+    const parsed = new BigNumber(balance.toString()).shiftedBy(IOTA_DECIMALS);
+    return Number(parsed);
+}

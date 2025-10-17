@@ -19,7 +19,7 @@ import {
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
-import { queryKey, useNameRecord } from '@/hooks';
+import { queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
 import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 import { formatNanosToIota } from '@/lib/utils';
 import { censorName } from '@/lib/utils/censorName';
@@ -60,6 +60,17 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
         );
     }
 
+    const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
+
+    const formattedPrice = auction.metadata
+        ? formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
+              showIotaSymbol: false,
+          })
+        : null;
+
+    const priceNanos = auction.metadata ? auction.metadata.currentBidNanos : BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(priceNanos);
+
     if (auction.isLoading || isNameRecordDataLoading) {
         return (
             <Card type={CardType.Filled}>
@@ -71,14 +82,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             </Card>
         );
     }
-
-    const auctionStatus = getUserAuctionStatus(auction.metadata, account?.address || '');
-
-    const formattedPrice = auction.metadata
-        ? formatNanosToIota(auction.metadata.currentBidNanos ?? BigInt(0), {
-              showIotaSymbol: false,
-          })
-        : null;
 
     return (
         <NameCard
@@ -101,8 +104,15 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
                                 <div className="bg-names-solid-blue rounded-full w-5 h-5 flex items-center justify-center">
                                     <IotaLogoSmall className="w-4 h-4" />
                                 </div>
-                                <div className="flex items-baseline gap-1">
-                                    <span className="text-body-lg">{formattedPrice}</span>
+                                <div className="flex flex-wrap items-end gap-1">
+                                    <span className="text-body-lg leading-none whitespace-nowrap shrink-0">
+                                        {formattedPrice}
+                                    </span>
+                                    {fiatPrice && (
+                                        <span className="text-body-sm text-names-neutral-50 leading-none whitespace-nowrap shrink-0">
+                                            ${fiatPrice}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         </div>
