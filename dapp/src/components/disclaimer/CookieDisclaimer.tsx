@@ -52,6 +52,7 @@ export function CookieDisclaimer() {
         },
         onDeclineCookies: () => {
             declineAnalytics();
+            document.cookie = 'AMP_COOKIES_ACCEPTED=false; max-age=31536000 ';
         },
     };
 
