@@ -1,10 +1,10 @@
 {
     "extends": "../build-scripts/tsconfig.shared.json",
-    "include": ["src", "types"],
+    "include": ["src", "types", "test"],
     "compilerOptions": {
         "module": "CommonJS",
         "outDir": "dist/cjs",
-        "rootDir": "src",
+        "rootDir": "./",
         "isolatedModules": true
     }
 }

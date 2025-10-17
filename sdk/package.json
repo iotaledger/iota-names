@@ -26,7 +26,7 @@
     "scripts": {
         "clean": "rm -rf tsconfig.tsbuildinfo ./dist",
         "build": "build-package",
-        "typecheck": "tsc --noEmit --project tsconfig.lint.json",
+        "typecheck": "tsc --noEmit",
         "prepublishOnly": "pnpm build",
         "prettier:check": "prettier -c --ignore-unknown .",
         "prettier:fix": "prettier -w --ignore-unknown .",
