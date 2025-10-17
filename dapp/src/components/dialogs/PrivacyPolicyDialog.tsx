@@ -15,7 +15,6 @@ import {
 } from '@iota/apps-ui-kit';
 import CookiePolicy from '@legal/cookiePolicy.mdx';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
 
 export function PrivacyPolicyDialog({ configuration }: { configuration: SKCMConfiguration }) {
     const router = useRouter();
@@ -24,7 +23,6 @@ export function PrivacyPolicyDialog({ configuration }: { configuration: SKCMConf
 
     const { onAcceptCookies, onDeclineCookies } = configuration;
     const submitNecessaryCookies = useSubmitNecessaryCookies();
-    const [loading, setLoading] = useState(false);
 
     function handleClose() {
         const params = new URLSearchParams(searchParams.toString());
@@ -33,23 +31,19 @@ export function PrivacyPolicyDialog({ configuration }: { configuration: SKCMConf
     }
 
     async function handleAccept() {
-        setLoading(true);
         try {
             onAcceptCookies?.();
             submitNecessaryCookies('true');
         } finally {
-            setLoading(false);
             handleClose();
         }
     }
 
     async function handleDecline() {
-        setLoading(true);
         try {
             onDeclineCookies?.();
             submitNecessaryCookies('false');
         } finally {
-            setLoading(false);
             handleClose();
         }
     }
@@ -85,13 +79,11 @@ export function PrivacyPolicyDialog({ configuration }: { configuration: SKCMConf
                                 onClick={handleAccept}
                                 text="Accept all"
                                 type={ButtonType.Primary}
-                                disabled={loading}
                             />
                             <Button
                                 onClick={handleDecline}
                                 text="Reject all"
                                 type={ButtonType.Secondary}
-                                disabled={loading}
                             />
                         </div>
                     </div>
