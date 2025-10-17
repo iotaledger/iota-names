@@ -35,8 +35,13 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
-import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
+import { NameRecordData, queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import {
+    formatNanosToIota,
+    getUserFriendlyErrorMessage,
+    parseIotaToNanos,
+    parseNanosToIota,
+} from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -59,6 +64,15 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const auctionStatus = getUserAuctionStatus(auctionMetadata ?? null, account?.address || '');
 
     const [bidAmountValue, setBidAmountValue] = useState<string | undefined>();
+
+    const currentPrice =
+        bidAmountValue ||
+        (minBidNanos
+            ? formatNanosToIota(minBidNanos, { formatRounded: false, showIotaSymbol: false })
+            : '');
+
+    const currentPriceInNanos = parseIotaToNanos(currentPrice) || BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos);
 
     // Sync the minimum bid amount
     useEffect(() => {
@@ -230,6 +244,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 label="Your Bid"
                                 min={Number(minBidNanos)}
                                 value={bidAmountValue}
+                                supportingText={fiatPrice ? `$${fiatPrice}` : ''}
                                 onChange={({ target: { value } }) => setBidAmountValue(value)}
                                 errorMessage={errorMessage}
                                 trailingElement={

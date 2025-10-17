@@ -17,6 +17,7 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LabelText,
     LoadingIndicator,
     Panel,
     Toggle,
@@ -25,11 +26,17 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
+import {
+    NameUpdate,
+    queryKey,
+    useBalance,
+    useCalculatePriceInFiat,
+    useUpdateNameTransaction,
+} from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
@@ -221,6 +228,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
+    const finalPriceIota = formatNanosToIota(finalPrice, {
+        formatRounded: false,
+    });
+    const fiatPriceResult = useCalculatePriceInFiat(finalPrice);
+
     const canPay =
         isConnected &&
         !nameRecordError &&
@@ -287,17 +299,35 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 </div>
                             </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
-                                <DisplayStats
-                                    label="Total Due"
-                                    value={
-                                        !isLoadingData && finalPrice > 0 && finalPrice ? (
-                                            formatNanosToIota(finalPrice, { formatRounded: false })
-                                        ) : (
-                                            <LoadingIndicator />
-                                        )
-                                    }
-                                />
+                                {finalPriceIota && fiatPriceResult ? (
+                                    <>
+                                        <DisplayStats
+                                            label="Registration Expires"
+                                            value={
+                                                <LabelText text={expirationDate} label={`\u00A0`} /> // \u00A0 for alignment
+                                            }
+                                        />
+                                        <DisplayStats
+                                            label="Total Due"
+                                            value={
+                                                <LabelText
+                                                    text={finalPriceIota}
+                                                    label={`($${fiatPriceResult} USD)`}
+                                                />
+                                            }
+                                        />
+                                    </>
+                                ) : finalPriceIota && !fiatPriceResult ? (
+                                    <>
+                                        <DisplayStats
+                                            label="Registration Expires"
+                                            value={expirationDate}
+                                        />
+                                        <DisplayStats label="Total Due" value={finalPriceIota} />
+                                    </>
+                                ) : (
+                                    <LoadingIndicator />
+                                )}
                             </div>
 
                             <div className="flex w-full flex-row gap-x-xs">

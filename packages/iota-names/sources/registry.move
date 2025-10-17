@@ -332,7 +332,7 @@ public fun has_record(self: &Registry, name: Name): bool {
     self.registry.contains(name)
 }
 
-/// Checks whether the given `name` is registered in the `Registry`.
+/// Checks whether the given `name` is registered in the `Registry` and not expired.
 public fun has_unexpired_record(self: &Registry, name: Name, clock: &Clock): bool {
     self.registry.contains(name) && !self.registry[name].has_expired(clock)
 }

@@ -75,5 +75,6 @@ export const packages = {
             '0x7f34c135e55e5b436b3feaad369eabfe5b6d14c0c57544fefb6921db047e8cbc',
         upgradeCap: '0x03ac547ee58c268a69b5663a1fdee0e8202206922968d2a387104730627d188e',
     },
+    // REPLACE PLACEHOLDER (don't remove)
     // TODO: Support Mainnet
 };
