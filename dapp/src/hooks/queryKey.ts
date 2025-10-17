@@ -25,6 +25,7 @@ export const queryKey = {
 
     // Price List
     priceList: () => [...queryKey.all, 'price-list'],
+    renewalPrice: (name: string, years: number) => [...queryKey.all, 'renewal-price', name, years],
 
     // Auctions
     auctionList: () => [queryKey.all, 'auction-list'],
