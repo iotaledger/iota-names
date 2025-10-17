@@ -102,6 +102,10 @@ jobs:
         run: |
           pnpm install
 
+      - name: Typecheck Sdk
+        run: pnpm -F @iota/iota-names-sdk typecheck
+        working-directory: ./
+
       - name: Build SDK
         run: |
           pnpm sdk build
