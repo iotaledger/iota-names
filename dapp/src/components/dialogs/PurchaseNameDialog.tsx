@@ -20,6 +20,8 @@ import {
     LabelText,
     LoadingIndicator,
     Panel,
+    Select,
+    SelectOption,
     Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
@@ -56,8 +58,6 @@ type PurchaseNameProps = {
     onPurchase?: () => void;
 };
 
-const EXPIRATION_IN_YEARS = 1;
-
 export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const queryClient = useQueryClient();
     const client = useIotaClient();
@@ -69,6 +69,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
+    const [renewYears, setRenewYears] = useState<number>(1);
 
     const couponCodes = coupons.map((c) => c.code);
 
@@ -78,7 +79,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: nameRecordError,
     } = useNameRecord(name, {
         price: {
-            years: EXPIRATION_IN_YEARS,
+            years: renewYears,
             isRegistration: true,
         },
     });
@@ -111,12 +112,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const applyDiscount = applyCoupons && couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
-        queryKey: [couponCodes, name, account?.address],
+        queryKey: [couponCodes, name, account?.address, renewYears],
         async queryFn() {
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
-                years: EXPIRATION_IN_YEARS,
+                years: renewYears,
                 isRegistration: true,
                 address: account?.address,
             });
@@ -152,7 +153,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             ampli.purchasedName({
                 name,
                 amount: price ?? 0,
-                expiration: EXPIRATION_IN_YEARS,
+                expiration: renewYears,
                 discountName: couponCodes.join(','),
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
             });
@@ -221,6 +222,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         }
     }
 
+    function handleYearsChange(years: string) {
+        setRenewYears(Number(years));
+    }
+
     if (!isConnected) return null;
 
     const usingPrice = applyDiscount ? discountedPrice : price;
@@ -245,7 +250,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-    const expirationDate = getTargetExpirationDate(EXPIRATION_IN_YEARS);
+    const expirationDate = getTargetExpirationDate(renewYears);
+
+    const renewOptions: SelectOption[] = Array.from({ length: 5 }, (_, i) => ({
+        id: String(i + 1),
+        label: `${i + 1} Year${i ? 's' : ''}`,
+    }));
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -261,7 +271,27 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
-
+                            <div className="relative">
+                                <Select
+                                    options={renewOptions}
+                                    value={renewYears?.toString()}
+                                    supportingText=""
+                                    onValueChange={handleYearsChange}
+                                />
+                                {/* {renewalPriceIota ? (
+                                    <span
+                                        className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
+                                        aria-hidden
+                                    >
+                                        <span>{renewalPriceIota}</span>
+                                        {fiatPriceResult ? (
+                                            <span className="ml-1 text-label-sm text-names-neutral-80">
+                                                (${fiatPriceResult} USD)
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                ) : null} */}
+                            </div>
                             <div className="flex flex-col">
                                 <div className="self-end">
                                     <Toggle
