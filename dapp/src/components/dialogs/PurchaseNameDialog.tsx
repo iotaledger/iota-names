@@ -38,6 +38,7 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
+import { captureException } from '@/instrumentation';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
@@ -169,6 +170,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             if (onPurchase) onPurchase();
         },
         onError(error) {
+            captureException(error);
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });

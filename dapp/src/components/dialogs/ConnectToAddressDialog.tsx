@@ -35,6 +35,7 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useGetDefaultName } from '@/hooks/useGetDefaultName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { captureException } from '@/instrumentation';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
@@ -168,6 +169,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             }
         },
         onError: (error) => {
+            captureException(error);
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });

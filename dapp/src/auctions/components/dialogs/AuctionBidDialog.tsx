@@ -36,6 +36,7 @@ import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
 import { NameRecordData, queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import { captureException } from '@/instrumentation';
 import {
     formatNanosToIota,
     getUserFriendlyErrorMessage,
@@ -155,6 +156,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             onCompleted?.();
         },
         onError(err) {
+            captureException(err);
             toast.error(getUserFriendlyErrorMessage(err));
         },
     });

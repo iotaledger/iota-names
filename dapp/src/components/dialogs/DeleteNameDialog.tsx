@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 import { useRegistrationNfts } from '@/hooks';
 import { queryKey } from '@/hooks/queryKey';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
+import { captureException } from '@/instrumentation';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
@@ -93,6 +94,7 @@ export function DeleteNameDialog({ nft, setOpen }: DeleteNameDialogProps) {
             closeDialog();
         },
         onError: (error) => {
+            captureException(error);
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });
