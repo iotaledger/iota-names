@@ -7,6 +7,7 @@ import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-coo
 import { useEffect } from 'react';
 
 import { CONFIG } from '@/config';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import {
     consentToAnalytics,
     declineAnalytics,
@@ -18,9 +19,7 @@ import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
 const defaultNetwork = CONFIG.network;
 
 export function CookieDisclaimer() {
-    useEffect(() => {
-        initAnalytics(defaultNetwork);
-    }, []);
+    useAnalytics();
 
     const configuration: SKCMConfiguration = {
         disclaimer: {
@@ -62,4 +61,14 @@ export function CookieDisclaimer() {
             <PrivacyPolicyDialog configuration={configuration} />
         </>
     );
+}
+
+function useAnalytics() {
+    useEffect(() => {
+        // Skip if already initialized
+        if (ampli.isLoaded) {
+            return;
+        }
+        initAnalytics(defaultNetwork);
+    }, [ampli.isLoaded]);
 }
