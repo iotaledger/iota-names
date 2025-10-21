@@ -635,7 +635,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 10,
+                years: 5,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
