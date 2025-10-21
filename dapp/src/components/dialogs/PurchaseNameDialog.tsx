@@ -40,6 +40,7 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
+import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
@@ -62,6 +63,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
+    const { data: config, isLoading: isLoadingConfig } = useNamesConfig();
 
     const account = useCurrentAccount();
 
@@ -69,7 +71,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
-    const [renewYears, setRenewYears] = useState<number>(1);
+    const [purchaseYears, setPurchaseYears] = useState<number>(1);
 
     const couponCodes = coupons.map((c) => c.code);
 
@@ -79,7 +81,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: nameRecordError,
     } = useNameRecord(name, {
         price: {
-            years: renewYears,
+            years: purchaseYears,
             isRegistration: true,
         },
     });
@@ -112,12 +114,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const applyDiscount = applyCoupons && couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
-        queryKey: [couponCodes, name, account?.address, renewYears],
+        queryKey: [couponCodes, name, account?.address, purchaseYears],
         async queryFn() {
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
-                years: renewYears,
+                years: purchaseYears,
                 isRegistration: true,
                 address: account?.address,
             });
@@ -153,7 +155,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             ampli.purchasedName({
                 name,
                 amount: price ?? 0,
-                expiration: renewYears,
+                expiration: purchaseYears,
                 discountName: couponCodes.join(','),
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
             });
@@ -223,7 +225,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     }
 
     function handleYearsChange(years: string) {
-        setRenewYears(Number(years));
+        setPurchaseYears(Number(years));
     }
 
     if (!isConnected) return null;
@@ -246,13 +248,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
 
     const hasErrors = updateNameError || coinBalanceError;
 
-    const isLoadingData = isNameRecordLoading || isDiscountedPriceLoading || isUpdateNameLoading;
+    const isLoadingData =
+        isNameRecordLoading || isDiscountedPriceLoading || isUpdateNameLoading || isLoadingConfig;
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-    const expirationDate = getTargetExpirationDate(renewYears);
+    const expirationDate = getTargetExpirationDate(purchaseYears);
 
-    const renewOptions: SelectOption[] = Array.from({ length: 5 }, (_, i) => ({
+    const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
+    const purchaseOptions: SelectOption[] = Array.from({ length: purchaseableYears }, (_, i) => ({
         id: String(i + 1),
         label: `${i + 1} Year${i ? 's' : ''}`,
     }));
@@ -273,24 +277,24 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             </Panel>
                             <div className="relative">
                                 <Select
-                                    options={renewOptions}
-                                    value={renewYears?.toString()}
+                                    options={purchaseOptions}
+                                    value={purchaseYears?.toString()}
                                     supportingText=""
                                     onValueChange={handleYearsChange}
                                 />
-                                {/* {renewalPriceIota ? (
+                                {finalPriceIota ? (
                                     <span
                                         className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
                                         aria-hidden
                                     >
-                                        <span>{renewalPriceIota}</span>
+                                        <span>{finalPriceIota}</span>
                                         {fiatPriceResult ? (
                                             <span className="ml-1 text-label-sm text-names-neutral-80">
                                                 (${fiatPriceResult} USD)
                                             </span>
                                         ) : null}
                                     </span>
-                                ) : null} */}
+                                ) : null}
                             </div>
                             <div className="flex flex-col">
                                 <div className="self-end">
