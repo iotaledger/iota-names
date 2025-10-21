@@ -8,7 +8,7 @@
         "start": "next start",
         "test": "vitest",
         "test:ui": "vitest --ui",
-        "test:e2e": "playwright test",
+        "test:e2e": "playwright test --ui",
         "test:prepare": "node scripts/downloadWallet.mjs",
         "playwright:install": "playwright install --with-deps chromium",
         "prettier:check": "prettier -c --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
