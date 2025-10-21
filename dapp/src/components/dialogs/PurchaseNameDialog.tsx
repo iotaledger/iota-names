@@ -95,6 +95,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         updates.push({
             type: 'register-name',
             name: name,
+            years: purchaseYears,
             price: price,
             setDefault: isDisplayName,
             address: account?.address,

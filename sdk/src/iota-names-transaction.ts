@@ -29,7 +29,7 @@ export class IotaNamesTransaction {
      * Registers a name.
      */
     async register(params: RegistrationParams): Promise<TransactionObjectArgument> {
-        const paymentIntent = this.initRegistration(params.name);
+        const paymentIntent = this.initRegistration(params.name, params.years);
 
         const couponCodes = params.couponCodes;
         let discountedPrice: number | null = null;
@@ -38,7 +38,7 @@ export class IotaNamesTransaction {
             discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name: params.name,
-                years: 1,
+                years: params.years,
                 isRegistration: true,
                 address: params.address,
             });
@@ -94,13 +94,14 @@ export class IotaNamesTransaction {
         this.finalizeRenew(receipt, params.nft);
     }
 
-    initRegistration(name: string): TransactionObjectArgument {
+    initRegistration(name: string, years: number): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::init_registration`,
+            target: `${config.packageId}::payment::init_registration_with_years`,
             arguments: [
                 this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.pure.string(name),
+                this.transaction.pure.u8(years),
             ],
         });
     }
