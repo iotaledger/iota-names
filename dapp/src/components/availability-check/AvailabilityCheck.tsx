@@ -328,6 +328,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                 price={formattedBidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
+                idTest="auction-card"
             >
                 {isConnected ? (
                     <Button

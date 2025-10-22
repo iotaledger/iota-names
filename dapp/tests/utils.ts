@@ -8,19 +8,31 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { expect } from './helpers/fixtures';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
-    await page.getByRole('button', { name: 'Connect' }).click();
+    await page.getByRole('button', { name: /Connect/i }).click();
+
+    const termsLabel = page.getByText(
+        'I have read, understand, and agree to the Terms of Service',
+        { exact: true },
+    );
+    const acceptButton = page.getByRole('button', { name: /^Accept$/i });
+
+    await termsLabel.scrollIntoViewIfNeeded();
+    await termsLabel.click();
+    await expect(acceptButton).toBeEnabled({ timeout: 5_000 });
+    await acceptButton.click();
 
     const pagePromise = context.waitForEvent('page', { timeout: 20_000 });
-    await page.getByText(extensionName, { exact: true }).click();
+    const walletButton = page.getByText(new RegExp(extensionName, 'i'));
+
+    await walletButton.click();
     const walletApprovePage = await pagePromise;
-
-    await walletApprovePage.waitForLoadState('load');
-    await walletApprovePage.bringToFront();
-
-    await walletApprovePage.getByRole('button', { name: 'Continue' }).click();
-    await walletApprovePage.getByRole('button', { name: 'Connect' }).click();
-
-    await page.bringToFront();
+    if (walletApprovePage) {
+        await walletApprovePage.waitForLoadState('domcontentloaded');
+        await walletApprovePage.bringToFront();
+        await walletApprovePage.getByRole('button', { name: /Continue/i }).click();
+        await walletApprovePage.getByRole('button', { name: /Connect/i }).click();
+        await page.bringToFront();
+    }
 }
 
 export async function createWallet(page: Page, extensionUrl: string) {

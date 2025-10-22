@@ -18,7 +18,7 @@ export async function getExtensionUrl(browserContext: BrowserContext): Promise<s
 }
 
 /**
- * Wait for the IOTA Wallet extension to load and return its ID
+ * Wait for the IOTA Wallet extension to load and return its url
  */
 export async function waitForExtension(context: BrowserContext): Promise<string> {
     let [background] = context.serviceWorkers();
@@ -28,8 +28,8 @@ export async function waitForExtension(context: BrowserContext): Promise<string>
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const extensionId = background.url().split('/')[2];
-    return extensionId;
+    const extensionUrl = background.url().replace('/background.js', '/ui.html');
+    return extensionUrl;
 }
 
 /**
@@ -38,7 +38,7 @@ export async function waitForExtension(context: BrowserContext): Promise<string>
 export async function createPage(context: BrowserContext, url = '/'): Promise<Page> {
     try {
         const page = await context.newPage();
-        await page.goto(url);
+        await page.goto(url, { waitUntil: 'commit' });
         return page;
     } catch (error) {
         console.error('Failed to create page:', error);

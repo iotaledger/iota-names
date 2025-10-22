@@ -24,6 +24,7 @@ interface SharedState {
     wallet: {
         address?: string;
         mnemonic?: string;
+        page?: Page;
     };
 }
 
@@ -35,7 +36,6 @@ let sharedState: SharedState = { ...DEFAULT_SHARED_STATE };
 export const test = base.extend<{
     sharedState: SharedState;
     extensionId: string;
-    extensionContext: BrowserContext;
     appPage: Page;
     extensionUrl: string;
     extensionName: string;
@@ -55,7 +55,7 @@ export const test = base.extend<{
 
             const context = await chromium.launchPersistentContext('', {
                 headless: isCI,
-                viewport: { width: 720, height: 720 },
+                viewport: { width: 1440, height: 900 },
                 args: [
                     ...COMMON_ARGS,
                     `--disable-extensions-except=${EXTENSION_PATH}`,
@@ -72,35 +72,22 @@ export const test = base.extend<{
         { scope: 'test' },
     ],
 
-    extensionId: async ({ extensionContext }, use) => {
-        const extensionId = await waitForExtension(extensionContext);
-        await use(extensionId);
+    extensionUrl: async ({ context }, use) => {
+        const extensionUrl = await waitForExtension(context);
+        await use(extensionUrl);
     },
 
-    extensionContext: async ({}, use) => {
-        const context = await chromium.launchPersistentContext('', {
-            headless: false,
-            args: [
-                ...COMMON_ARGS,
-                `--disable-extensions-except=${EXTENSION_PATH}`,
-                `--load-extension=${EXTENSION_PATH}`,
-            ],
-        });
-
-        await use(context);
-        await context.close();
-    },
-
-    extensionUrl: async ({ extensionId }, use) => {
-        await use(`chrome-extension://${extensionId}/ui.html`);
+    extensionId: async ({ extensionUrl }, use) => {
+        const id = extensionUrl.split('/')[2];
+        await use(id);
     },
 
     extensionName: async ({}, use) => {
         await use('IOTA Wallet');
     },
 
-    appPage: async ({ extensionContext }, use) => {
-        const page = await createPage(extensionContext, '/');
+    appPage: async ({ context }, use) => {
+        const page = await createPage(context, '/');
         await use(page);
     },
 });
