@@ -22,7 +22,7 @@ export async function initAmplitude(defaultNetwork: string) {
             configuration: {
                 optOut: false, // Enable tracking by default; consent buffer plugin will handle queuing
                 autocapture: true,
-                logLevel: LogLevel.Error,
+                logLevel: LogLevel.None,
             },
         },
     }).promise;
@@ -85,14 +85,6 @@ export function declineAnalytics() {
 
     // Remove any existing Amplitude cookies
     removeAmplitudeCookies();
-}
-
-/**
- * Initialize analytics.
- * Call this after user interaction or when checking existing consent.
- */
-export async function initAnalytics(defaultNetwork: string) {
-    return initAmplitude(defaultNetwork);
 }
 
 /**

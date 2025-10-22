@@ -11,7 +11,7 @@ import { ampli } from '@/lib/utils/analytics/ampli';
 import {
     consentToAnalytics,
     declineAnalytics,
-    initAnalytics,
+    initAmplitude,
 } from '@/lib/utils/analytics/amplitude';
 
 import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
@@ -69,6 +69,6 @@ function useAnalytics() {
         if (ampli.isLoaded) {
             return;
         }
-        initAnalytics(defaultNetwork);
+        initAmplitude(defaultNetwork);
     }, [ampli.isLoaded]);
 }
