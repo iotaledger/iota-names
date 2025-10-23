@@ -9,7 +9,7 @@ use iota::clock::Clock;
 use iota::table::{Self, Table};
 use iota::vec_map::VecMap;
 use iota_names::name::Name;
-use iota_names::iota_names::AdminCap;
+use iota_names::iota_names::{AdminCap, IotaNames};
 use iota_names::name_registration::{Self as nft, NameRegistration};
 use iota_names::name_record::{Self, NameRecord};
 use iota_names::subname_registration::{Self, SubnameRegistration};
@@ -196,7 +196,7 @@ public fun add_leaf_record(
 
     // Make sure that the parent isn't expired (because leaf record is invalid
     // in that case).
-    // Ignores grace period is it's only there so you don't accidently forget to
+    // Ignores grace period as it's only there so you don't accidentally forget to
     // renew your name.
     assert!(!parent_name_record.has_expired(clock), ERecordExpired);
 
@@ -318,7 +318,7 @@ public fun set_expiration_timestamp_ms(
 
 /// Update the `data` of the given `NameRecord` using a `NameRegistration`.
 /// Use with caution and validate(!!) that any system fields are not removed
-/// (accidently),
+/// (accidentally),
 /// when building authorized packages that can write the metadata field.
 public fun set_data(self: &mut Registry, name: Name, data: VecMap<String, String>) {
     let record = &mut self.registry[name];
@@ -332,20 +332,68 @@ public fun has_record(self: &Registry, name: Name): bool {
     self.registry.contains(name)
 }
 
+/// Checks whether the given `name` is registered in the `Registry` and not expired.
+public fun has_unexpired_record(self: &Registry, name: Name, clock: &Clock): bool {
+    self.registry.contains(name) && !self.registry[name].has_expired(clock)
+}
+
 /// Returns the `NameRecord` associated with the given name or None.
 public fun lookup(self: &Registry, name: Name): Option<NameRecord> {
-    if (self.registry.contains(name)) {
-        let record = &self.registry[name];
-        some(*record)
+    if (self.has_record(name)) {
+        some(self.registry[name])
     } else {
         none()
     }
+}
+
+/// Returns the `NameRecord` associated with the given name and ensures that it is not expired,
+/// or None otherwise.
+public fun lookup_unexpired(self: &Registry, name: Name, clock: &Clock): Option<NameRecord> {
+    if (self.has_unexpired_record(name, clock)) {
+        some(self.registry[name])
+    } else {
+        none()
+    }
+}
+
+/// Returns the address associated with the given name if one is set and the record is not expired,
+/// or None otherwise.
+public fun lookup_address(self: &Registry, name: Name, clock: &Clock): Option<address> {
+    if (self.has_unexpired_record(name, clock)) {
+        self.registry[name].target_address()
+    } else {
+        none()
+    }
+}
+
+/// Returns the address associated with the given name if one is set and the record is not expired. 
+/// This function is callable from PTBs unlike `lookup_address`.
+public fun resolve_address(iota_names: &IotaNames, name: Name, clock: &Clock): address {
+    let mut address = iota_names.registry<Registry>().lookup_address(name, clock);
+    assert!(address.is_some(), ERecordNotFound);
+    address.extract()
 }
 
 /// Returns the `name` associated with the given address or None.
 public fun reverse_lookup(self: &Registry, address: address): Option<Name> {
     if (self.reverse_registry.contains(address)) {
         some(self.reverse_registry[address])
+    } else {
+        none()
+    }
+}
+
+/// Returns the `name` associated with the given address and ensures it is not expired,
+/// or None otherwise.
+public fun reverse_lookup_unexpired(self: &Registry, address: address, clock: &Clock): Option<Name> {
+    if (self.reverse_registry.contains(address)) {
+        let name = self.reverse_registry[address];
+
+        if (self.registry[name].has_expired(clock)) {
+            return none()
+        };
+
+        some(name)
     } else {
         none()
     }
@@ -500,7 +548,7 @@ fun handle_invalidate_reverse_record(
 // === Test Functions ===
 
 #[test_only]
-use iota_names::iota_names::{add_registry, IotaNames};
+use iota_names::iota_names::add_registry;
 
 #[test_only]
 public fun init_for_testing(cap: &AdminCap, iota_names: &mut IotaNames, ctx: &mut TxContext) {

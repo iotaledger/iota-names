@@ -54,7 +54,7 @@ export type NameUpdate =
           type: 'new-subname';
           parentNftId: string;
           subname: string;
-          expirationTimeParent: number;
+          expirationDateParent: Date;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
@@ -74,7 +74,7 @@ export type NameUpdate =
     | {
           type: 'renew-subname';
           nftId: string;
-          expirationTimestampMs: number;
+          expirationDate: Date;
       }
     | {
           type: 'register-name';
@@ -137,7 +137,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         const subnameNft = iotaNamesTx.createSubname({
                             parentNft: tx.object(update.parentNftId),
                             name: update.subname,
-                            expirationTimestampMs: update.expirationTimeParent,
+                            expirationTimestampMs: update.expirationDateParent.getTime(),
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
                         });
@@ -162,7 +162,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                     case 'renew-subname':
                         iotaNamesTx.extendExpiration({
                             nft: update.nftId,
-                            expirationTimestampMs: update.expirationTimestampMs,
+                            expirationTimestampMs: update.expirationDate.getTime(),
                         });
                         break;
                     case 'register-name':
@@ -187,25 +187,29 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
             }
 
             iotaNamesTx.transaction.setSender(address);
-            const transaction = await iotaNamesTx.transaction.build({
+            const txBytes = await iotaNamesTx.transaction.build({
                 client,
             });
+
             const txDryRun = await client.dryRunTransactionBlock({
-                transactionBlock: transaction,
+                transactionBlock: txBytes,
             });
+
+            if (txDryRun.effects.status.status !== 'success') {
+                throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+            }
+
             return {
-                transaction: iotaNamesTx.transaction,
-                builtTx: transaction,
+                txBytes,
                 txDryRun,
             };
         },
         enabled: !!address && !!updates.length,
         gcTime: 0,
-        select: ({ transaction, txDryRun, builtTx }) => {
+        select: ({ txBytes, txDryRun }) => {
             return {
-                transaction,
+                transaction: Transaction.from(txBytes),
                 gasSummary: getGasSummary(txDryRun),
-                builtTx,
             };
         },
     });

@@ -26,6 +26,8 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
                 'multiGetObjects',
                 'getReferenceGasPrice',
                 'getNormalizedMoveFunction',
+                'dryRunTransactionBlock',
+                'executeTransactionBlock',
             ],
         }),
     });

@@ -12,9 +12,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { isAuctionActive } from '@/auctions/lib/utils';
-import { NameRecordData, useNameRecord, usePriceList } from '@/hooks';
+import {
+    NameRecordData,
+    useBlockedList,
+    useNameRecord,
+    usePriceList,
+    useReservedList,
+} from '@/hooks';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
@@ -37,14 +45,18 @@ const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
 
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
+    const { data: blockedList = [] } = useBlockedList();
+    const { data: reservedList = [] } = useReservedList();
     const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
-    const [name, setName] = useState<string>('');
+    const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
         const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
         return storedRecentSearches ? (JSON.parse(storedRecentSearches) as RecentSearch[]) : [];
     });
     const isOnEnterSearchRef = useRef<boolean>(false);
+
+    const name = debouncedSearchValue ? `${debouncedSearchValue}.iota` : '';
 
     const {
         data: auctionMetadata,
@@ -84,19 +96,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
     useEffect(() => {
-        if (!searchValue || validationError) {
+        if (!name) {
             return;
         }
-
-        const timer = window.setTimeout(() => {
-            setName((current) => {
-                const newName = `${searchValue}.iota`;
-                return current === newName ? current : newName;
-            });
-        }, DEBOUNCE_DELAY);
-
-        return () => window.clearTimeout(timer);
-    }, [searchValue, validationError]);
+        ampli.performedSearch({ query: name });
+    }, [name]);
 
     useEffect(() => {
         if (
@@ -139,7 +143,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     function handleRecentClick(value: string) {
         setSearchValue(value);
-        setName(`${value}.iota`);
         updateRecentSearch(value, isNameTaken);
     }
 
@@ -149,15 +152,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
             updateRecentSearch(searchValue, isNameTaken);
         } else {
             isOnEnterSearchRef.current = true;
-            setName(fullName);
         }
     }, [searchValue, validationError, isNameTaken, name, nameRecordData]);
 
     function handleInputChange(inputValue: string) {
         setSearchValue(denormalizeName(inputValue));
-        if (name) {
-            setName('');
-        }
     }
 
     function handlePurchase() {
@@ -172,8 +171,11 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     function handleCompletedBidOrPurchase() {
         setSearchValue('');
-        setName('');
         onCompleted?.();
+    }
+
+    function isForbiddenName(name: string, forbiddenNames: string[]) {
+        return forbiddenNames.some((w) => name === `${w}.iota`);
     }
 
     return (
@@ -195,7 +197,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             autoFocus={autoFocusInput}
                             onClearInput={() => {
                                 setSearchValue('');
-                                setName('');
                             }}
                         />
                     </div>
@@ -234,6 +235,26 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
+                        />
+                    ) : isForbiddenName(name, blockedList) ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name is blocked and cannot be purchased."
+                        />
+                    ) : isForbiddenName(name, reservedList) ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            disableHoverEffect
+                            statusMessage="Name is reserved and cannot be purchased."
+                        />
+                    ) : nameRecordData?.type === 'not-priced' ? (
+                        <NamePurchaseCard
+                            name={name}
+                            isAvailable={false}
+                            statusMessage="Name is not available."
                         />
                     ) : (
                         nameRecordData && (

@@ -25,6 +25,7 @@ export const queryKey = {
 
     // Price List
     priceList: () => [...queryKey.all, 'price-list'],
+    renewalPrice: (name: string, years: number) => [...queryKey.all, 'renewal-price', name, years],
 
     // Auctions
     auctionList: () => [queryKey.all, 'auction-list'],
@@ -38,12 +39,16 @@ export const queryKey = {
         address,
     ],
 
-    // Core Config
-    coreConfig: () => [...queryKey.all, 'core-config'],
+    // Names Config
+    namesConfig: () => [...queryKey.all, 'names-config'],
     purchaseConfig: (paymentType: string, auctionType: string) => [
         ...queryKey.all,
         'purchase-config',
         paymentType,
         auctionType,
     ],
+
+    // Deny List
+    reservedList: () => [...queryKey.all, 'reserved-list'],
+    blockedList: () => [...queryKey.all, 'blocked-list'],
 };

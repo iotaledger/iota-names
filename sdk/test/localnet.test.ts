@@ -5,7 +5,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, NANOS_PER_IOTA, safeParseAmount } from '@iota/iota-sdk/utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
@@ -86,7 +86,6 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     // Register a name for 2 years
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        years: 2,
         coinConfig: iotaNamesClient.config.coins.IOTA,
         coin: coinInput,
     });
@@ -285,7 +284,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -320,7 +318,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 2,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -372,7 +369,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -416,7 +412,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -457,7 +452,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -500,7 +494,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -547,7 +540,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
             // Register the root name
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -600,7 +592,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 1,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -635,7 +626,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 5,
                 coinConfig: client.config.coins.IOTA,
                 coin: coinInput,
             });
@@ -662,15 +652,13 @@ describe('IOTA Names Localnet Integration Tests', () => {
 });
 
 // Helper functions for better code organization
-function toNanos(iotaAmount: number): number {
-    return iotaAmount * Number(NANOS_PER_IOTA);
-}
 
 function calculateMultiYearPrice(
     pricing: { registration: number; renewal: number },
     years: number,
 ): number {
-    const registrationCost = toNanos(pricing.registration);
-    const renewalCost = toNanos(pricing.renewal) * (years - 1);
-    return registrationCost + renewalCost;
+    const registrationCost = safeParseAmount(pricing.registration.toString(), IOTA_DECIMALS) ?? 0n;
+    const renewalParsed = safeParseAmount(pricing.renewal.toString(), IOTA_DECIMALS) ?? 0n;
+    const renewalCost = renewalParsed * BigInt(years - 1);
+    return Number(registrationCost + renewalCost);
 }

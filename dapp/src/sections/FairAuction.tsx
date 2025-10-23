@@ -13,7 +13,7 @@ const BODY =
 const FAIR_AUCTION = [
     {
         title: '1. Start the Clock',
-        body: 'The first bid triggers a 24-hour countdown',
+        body: 'The first bid triggers a 2-day countdown',
         icon: <Clock />,
     },
     {
@@ -47,7 +47,7 @@ export function FairAuction() {
                             ))}
                         </div>
                     </div>
-                    <img src="/landing-page/iota-news.png" />
+                    <img width={360} src="/landing-page/iota-news.png" />
                 </div>
             </div>
         </section>

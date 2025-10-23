@@ -26,7 +26,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS } from '@iota/iota-sdk/utils';
+import { IOTA_DECIMALS, safeParseAmount } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -35,9 +35,14 @@ import { useAuctionBid } from '@/auctions/hooks/useAuctionBid';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import { formatTimeRemaining, getTimeRemaining, getUserAuctionStatus } from '@/auctions/lib/utils';
-import { NameRecordData, queryKey, useBalanceValidation, useNameRecord } from '@/hooks';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
-import { toNanos } from '@/lib/utils/amount';
+import { NameRecordData, queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import {
+    formatNanosToIota,
+    getUserFriendlyErrorMessage,
+    parseIotaToNanos,
+    parseNanosToIota,
+} from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 interface AuctionBidDialogDialogProps {
@@ -56,22 +61,27 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const { data: auctionMetadata } = useGetAuctionMetadata(name);
     const minBidNanos =
         auctionMetadata?.minBidNanos || (nameRecord ? BigInt(nameRecord.price) : null);
+    const auctionStatus = getUserAuctionStatus(auctionMetadata ?? null, account?.address || '');
 
     const [bidAmountValue, setBidAmountValue] = useState<string | undefined>();
+
+    const currentPrice =
+        bidAmountValue ||
+        (minBidNanos
+            ? formatNanosToIota(minBidNanos, { formatRounded: false, showIotaSymbol: false })
+            : '');
+
+    const currentPriceInNanos = parseIotaToNanos(currentPrice) || BigInt(0);
+    const fiatPrice = useCalculatePriceInFiat(currentPriceInNanos);
 
     // Sync the minimum bid amount
     useEffect(() => {
         if (minBidNanos) {
-            setBidAmountValue(
-                formatNanosToIota(minBidNanos, {
-                    formatRounded: false,
-                    showIotaSymbol: false,
-                }),
-            );
+            setBidAmountValue(parseNanosToIota(minBidNanos).toString());
         }
     }, [minBidNanos]);
 
-    const bidNanos = bidAmountValue ? toNanos(bidAmountValue) : null;
+    const bidNanos = bidAmountValue ? safeParseAmount(bidAmountValue, IOTA_DECIMALS) : null;
 
     const {
         data: auctionBidTransaction,
@@ -83,11 +93,6 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
         bidNanos: bidNanos ?? BigInt(0),
     });
 
-    const { data: balanceValidation, error: balanceValidationError } = useBalanceValidation(
-        auctionBidTransaction?.builtTx ?? null,
-        Number(bidNanos),
-    );
-
     const { mutateAsync: signAndExecuteTransaction, isPending: isSendingTransaction } =
         useSignAndExecuteTransaction();
 
@@ -97,15 +102,49 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                 transaction: auctionBidTransaction,
             });
 
-            await iotaClient.waitForTransaction({
+            const response = await iotaClient.waitForTransaction({
                 digest: transactionResult.digest,
+                options: {
+                    showEffects: true,
+                },
             });
+
+            if (response?.effects?.status.status === 'failure') {
+                throw new Error('Transaction failed');
+            }
         },
         onSuccess() {
             queryClient.invalidateQueries({
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
+
+            if (!auctionMetadata) {
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: false,
+                    isUserFirstBidOnAuction: true,
+                    auctionCurrentBidAmount: 0,
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
+            } else if (auctionStatus === 'top_bidder') {
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: true,
+                    isUserFirstBidOnAuction: false,
+                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
+            } else {
+                ampli.placedAuctionBid({
+                    name: name,
+                    wasUserTopBidder: false,
+                    isUserFirstBidOnAuction: false,
+                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
+                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                });
+            }
+
             toast.success(
                 `Successfully placed bid of ${formatNanosToIota(bidNanos ?? 0, {
                     formatRounded: false,
@@ -124,18 +163,12 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     const timeRemainingMs = auctionMetadata && getTimeRemaining(auctionMetadata);
     const { milliseconds } = useCountdown(timeRemainingMs || 0);
 
-    const isBidAboveDecimals = bidNanos === null;
     const isBidBelowMinimum = minBidNanos ? (bidNanos || BigInt(0)) < minBidNanos : false;
 
     const isLoading =
         isNameRecordLoading || isAuctionBidLoading || isSendingTransaction || isSigningTransaction;
     const isPending = isAuctionBidPending;
-    const disablePlaceBid =
-        isPending ||
-        isLoading ||
-        isBidBelowMinimum ||
-        !balanceValidation?.hasBalance ||
-        !auctionBidTransaction;
+    const disablePlaceBid = isPending || isLoading || isBidBelowMinimum || !auctionBidTransaction;
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
     const currentBid = auctionMetadata
@@ -159,15 +192,8 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
               showIotaSymbol: false,
           })
         : '--';
-    const errorMessage = (() => {
-        if (isBidAboveDecimals) {
-            return `The value exceeds the maximum decimals (${IOTA_DECIMALS}).`;
-        } else if (isBidBelowMinimum) {
-            return `Bid must be ≥ ${minBidLabel}`;
-        } else if (balanceValidationError) {
-            return getUserFriendlyErrorMessage(balanceValidationError);
-        }
-    })();
+
+    const errorMessage = isBidBelowMinimum ? `Bid must be ≥ ${minBidLabel}` : undefined;
 
     return (
         <Dialog open onOpenChange={closeDialog}>
@@ -218,6 +244,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 label="Your Bid"
                                 min={Number(minBidNanos)}
                                 value={bidAmountValue}
+                                supportingText={fiatPrice ? `$${fiatPrice}` : ''}
                                 onChange={({ target: { value } }) => setBidAmountValue(value)}
                                 errorMessage={errorMessage}
                                 trailingElement={
@@ -242,7 +269,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                     supportingText={getUserFriendlyErrorMessage(auctionError)}
                                 />
                             ) : null}
-                            <div className="flex w-full flex-row gap-x-xs mt-xs">
+                            <div className="flex w-full flex-row gap-x-xs">
                                 <Button
                                     type={ButtonType.Secondary}
                                     text="Cancel"

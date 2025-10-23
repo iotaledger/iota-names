@@ -15,9 +15,10 @@ const FALLBACK_URL = '/name-bg.svg';
 
 interface NameAvatarDisplay {
     name: string;
+    blur?: boolean;
 }
 
-export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
+export function NameAvatarDisplay({ name, blur }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
     const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
     const isNameSubname = isSubname(name);
@@ -43,6 +44,7 @@ export function NameAvatarDisplay({ name }: NameAvatarDisplay) {
             src={avatarObject?.display?.data?.image_url}
             isLoadingSrc={isDataLoading}
             alt={name}
+            blur={blur}
         />
     );
 }
@@ -51,37 +53,70 @@ interface AvatarDisplayProps {
     src?: string;
     isLoadingSrc?: boolean;
     alt?: string;
+    blur?: boolean;
 }
 
-export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
-    const [avatarSrc, setAvatarSrc] = useState<null | string>(null);
-    const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
+export function AvatarDisplay({ src, alt, isLoadingSrc, blur }: AvatarDisplayProps) {
+    const [srcStatus, setSrcStatus] = useState<'pending' | 'success' | 'error'>('pending');
+    const [avatarStatus, setAvatarStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
-    useEffect(() => {
-        if (src) {
-            setAvatarSrc(src);
+    const avatarSrc = (() => {
+        if (srcStatus === 'error') {
+            // Avatar src failed
+            return FALLBACK_URL;
+        } else if (src) {
+            // Avatar src exists
+            return src;
         } else if (!isLoadingSrc) {
-            // If there is no src even after loading we render the fallback
-            setAvatarSrc(FALLBACK_URL);
+            // Avatar src doesnt exist and it stopped loading
+            return FALLBACK_URL;
+        } else {
+            // Avatar src doesnt exist and still loading
+            return null;
         }
-    }, [src, isLoadingSrc]);
+    })();
 
     useEffect(() => {
         if (!avatarSrc) return;
 
-        setIsLoadingAvatar(true);
-
         const img = new Image();
+
+        function handleStartLoad() {
+            setAvatarStatus('loading');
+        }
+
+        function handleLoad() {
+            if (avatarSrc === src) {
+                setSrcStatus('success');
+            }
+            setAvatarStatus('success');
+        }
+
+        function handleError() {
+            if (avatarSrc === src) {
+                setSrcStatus('error');
+            }
+            setAvatarStatus('error');
+        }
+
+        img.addEventListener('loadstart', handleStartLoad);
+        img.addEventListener('load', handleLoad);
+        img.addEventListener('error', handleError);
+
         img.src = avatarSrc;
 
-        img.onload = () => setIsLoadingAvatar(false);
-        // Render the fallback if the src fails
-        img.onerror = () => setAvatarSrc(FALLBACK_URL);
+        return () => {
+            img.removeEventListener('startload', handleStartLoad);
+            img.removeEventListener('load', handleLoad);
+            img.removeEventListener('error', handleError);
+        };
     }, [avatarSrc]);
+
+    const isLoading = srcStatus === 'pending' || avatarStatus === 'loading';
 
     return (
         <div className="flex flex-col relative rounded-xl overflow-hidden w-full h-full select-none">
-            {isLoadingSrc || isLoadingAvatar ? (
+            {isLoadingSrc || isLoading ? (
                 <div className="w-full aspect-square relative">
                     <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                         <LottieAnimation
@@ -94,7 +129,10 @@ export function AvatarDisplay({ src, alt, isLoadingSrc }: AvatarDisplayProps) {
             ) : avatarSrc ? (
                 <div className="w-full aspect-square relative">
                     <img
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className={cx(
+                            'absolute inset-0 w-full h-full object-cover',
+                            blur && 'blur-sm',
+                        )}
                         src={avatarSrc}
                         alt={alt}
                     />

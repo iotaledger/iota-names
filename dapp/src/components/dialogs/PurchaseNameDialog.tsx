@@ -17,6 +17,7 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LabelText,
     LoadingIndicator,
     Panel,
     Toggle,
@@ -25,13 +26,20 @@ import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameUpdate, queryKey, useBalance, useUpdateNameTransaction } from '@/hooks';
+import {
+    NameUpdate,
+    queryKey,
+    useBalance,
+    useCalculatePriceInFiat,
+    useUpdateNameTransaction,
+} from '@/hooks';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
 import { CouponInputSelection } from '../CouponInputSelection';
@@ -47,6 +55,8 @@ type PurchaseNameProps = {
     setOpen: (bool: boolean) => void;
     onPurchase?: () => void;
 };
+
+const EXPIRATION_IN_YEARS = 1;
 
 export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
     const queryClient = useQueryClient();
@@ -68,7 +78,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         error: nameRecordError,
     } = useNameRecord(name, {
         price: {
-            years: 1,
+            years: EXPIRATION_IN_YEARS,
             isRegistration: true,
         },
     });
@@ -106,7 +116,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             return await iotaNamesClient.calculateDiscountedPrice({
                 coupons: couponCodes,
                 name,
-                years: 1,
+                years: EXPIRATION_IN_YEARS,
                 isRegistration: true,
                 address: account?.address,
             });
@@ -138,6 +148,19 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             queryClient.invalidateQueries({
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
+
+            ampli.purchasedName({
+                name,
+                amount: price ?? 0,
+                expiration: EXPIRATION_IN_YEARS,
+                discountName: couponCodes.join(','),
+                discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
+            });
+
+            if (isDisplayName) {
+                ampli.setNameAsDisplayed({ name });
+            }
+
             toast.success(
                 `Successfully registered name ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
             );
@@ -205,6 +228,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
         .toNumber();
 
+    const finalPriceIota = formatNanosToIota(finalPrice, {
+        formatRounded: false,
+    });
+    const fiatPriceResult = useCalculatePriceInFiat(finalPrice);
+
     const canPay =
         isConnected &&
         !nameRecordError &&
@@ -217,7 +245,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
-    const expirationDate = getTargetExpirationDate(1);
+    const expirationDate = getTargetExpirationDate(EXPIRATION_IN_YEARS);
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -263,6 +291,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                             <Panel bgColor="bg-names-neutral-10">
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
+                                        name="set_display_name"
                                         isChecked={isDisplayName}
                                         onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
                                         label="Set name as Display Name"
@@ -270,17 +299,35 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                 </div>
                             </Panel>
                             <div className="flex flex-row gap-x-sm w-full">
-                                <DisplayStats label="Registration Expires" value={expirationDate} />
-                                <DisplayStats
-                                    label="Total Due"
-                                    value={
-                                        !isLoadingData && finalPrice > 0 && finalPrice ? (
-                                            formatNanosToIota(finalPrice, { formatRounded: false })
-                                        ) : (
-                                            <LoadingIndicator />
-                                        )
-                                    }
-                                />
+                                {finalPriceIota && fiatPriceResult ? (
+                                    <>
+                                        <DisplayStats
+                                            label="Registration Expires"
+                                            value={
+                                                <LabelText text={expirationDate} label={`\u00A0`} /> // \u00A0 for alignment
+                                            }
+                                        />
+                                        <DisplayStats
+                                            label="Total Due"
+                                            value={
+                                                <LabelText
+                                                    text={finalPriceIota}
+                                                    label={`($${fiatPriceResult} USD)`}
+                                                />
+                                            }
+                                        />
+                                    </>
+                                ) : finalPriceIota && !fiatPriceResult ? (
+                                    <>
+                                        <DisplayStats
+                                            label="Registration Expires"
+                                            value={expirationDate}
+                                        />
+                                        <DisplayStats label="Total Due" value={finalPriceIota} />
+                                    </>
+                                ) : (
+                                    <LoadingIndicator />
+                                )}
                             </div>
 
                             <div className="flex w-full flex-row gap-x-xs">

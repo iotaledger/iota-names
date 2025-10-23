@@ -36,6 +36,7 @@ import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
 function createSubnameUpdates({
@@ -82,12 +83,12 @@ function createSubnameUpdates({
     }
     const updates: NameUpdate[] = [];
 
-    if (nftId && fullSubnameName && isSubnameAvailable) {
+    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationTimeParent: nameRecord?.expirationTimestampMs || 0,
+            expirationDateParent: nameRecord.expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });
@@ -161,6 +162,20 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
             if (fullSubnameName) {
+                const subnamePermissions: (
+                    | 'allow_to_create_additional_subnames'
+                    | 'allow_to_renew_expiration'
+                )[] = [];
+                if (editIsAllowingRenew) {
+                    subnamePermissions.push('allow_to_renew_expiration');
+                }
+                if (editIsAllowSubnames) {
+                    subnamePermissions.push('allow_to_create_additional_subnames');
+                }
+                ampli.createdSubname({
+                    name: fullSubnameName,
+                    subnamePermissions: subnamePermissions,
+                });
                 toast.success(
                     `Successfully created subname ${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
                 );
@@ -212,8 +227,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     icon={<Info />}
                                     supportingText={
                                         <div className="break-words max-w-full">
-                                            Create as many Subnames as you want under {cleanName},
-                                            each with its own profile page and features
+                                            Create as many Subnames as you want under {cleanName}
                                         </div>
                                     }
                                 />
@@ -237,6 +251,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     Permissions
                                 </span>
                                 <Checkbox
+                                    name="allow_subnames"
                                     isChecked={editIsAllowSubnames}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowSubnameChange}
@@ -244,6 +259,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                 />
 
                                 <Checkbox
+                                    name="allow_renew"
                                     isChecked={editIsAllowingRenew}
                                     isDisabled={disableEdit}
                                     onCheckedChange={handleAllowRenewChange}

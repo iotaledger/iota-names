@@ -8,7 +8,7 @@ import {
     ArrowRight,
     FilterList,
     Info,
-    Loader,
+    Refresh,
     Search,
     Warning,
 } from '@iota/apps-ui-icons';
@@ -28,6 +28,7 @@ import {
     Input,
     InputType,
     ListItem,
+    LoadingIndicator,
     SegmentedButton,
     Select,
     SelectSize,
@@ -39,8 +40,11 @@ import { useEffect, useRef, useState } from 'react';
 import { AuctionBidDialog } from '@/auctions';
 import { AuctionPublicItem } from '@/auctions/components/AuctionPublicItem';
 import { useAuctions } from '@/auctions/hooks/useAuctions';
+import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
+import { useRefreshAuctions } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { getPaginationPages } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 
 import { paramsSchema } from './params';
 
@@ -70,6 +74,7 @@ const SORT_OPTIONS = [
 ];
 
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
+const DEBOUNCE_DELAY = 500;
 
 export default function AuctionsPage(): JSX.Element {
     const searchParams = useSearchParams();
@@ -106,7 +111,13 @@ export default function AuctionsPage(): JSX.Element {
         };
     }, [areFiltersVisible]);
 
-    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+    const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_DELAY);
+
+    useEffect(() => {
+        if (debouncedSearchQuery && debouncedSearchQuery.trim()) {
+            ampli.appliedAuctionNameFilter({ query: debouncedSearchQuery.trim() });
+        }
+    }, [debouncedSearchQuery]);
 
     function setParams(keys: Array<[key: string, value: string | number | boolean]>) {
         const params = new URLSearchParams(searchParams.toString());
@@ -138,6 +149,8 @@ export default function AuctionsPage(): JSX.Element {
         page: page - 1,
         pageSize,
     });
+
+    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctions);
 
     const typeOptions = [
         {
@@ -212,8 +225,16 @@ export default function AuctionsPage(): JSX.Element {
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Auctions
                 </h2>
+                {selectedStatus === 'active' || selectedStatus === 'all' ? (
+                    <Button
+                        type={ButtonType.Outlined}
+                        icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                    />
+                ) : null}
             </div>
-            <div className="flex justify-between relative">
+            <div className="flex-row md:flex justify-between items-center relative">
                 <div className="flex items-center gap-md">
                     <SegmentedButton>
                         {typeOptions.map((option) => (
@@ -233,7 +254,7 @@ export default function AuctionsPage(): JSX.Element {
                     )}
                 </div>
 
-                <div className="md:flex hidden w-full max-w-[260px] gap-4" ref={dropdownRef}>
+                <div className="mt-4 md:mt-0 flex gap-4 items-center" ref={dropdownRef}>
                     <div className="w-full max-w-2xl flex flex-col backdrop-blur-md bg-white/5 overflow-hidden [&_*]:!border-transparent rounded-full [&>div]:rounded-full [&_.input-container]:rounded-full">
                         <Input
                             placeholder="Search auction"
@@ -277,11 +298,11 @@ export default function AuctionsPage(): JSX.Element {
                 <div>
                     {infoBox}
                     {isLoading ? (
-                        <div className="flex w-full justify-center">
-                            <Loader className="animate-spin" data-testid="loading-indicator" />
+                        <div className="flex w-full justify-start mt-8">
+                            <CardSkeletonLoader isAuctionCard />
                         </div>
                     ) : (
-                        <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap">
+                        <div className="mt-8 gap-lg w-full flex flex-row items-center flex-wrap justify-center sm:justify-start">
                             {auctions.map((auction) => (
                                 <div key={auction.name} className="w-[220px]">
                                     <AuctionPublicItem

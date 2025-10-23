@@ -15,9 +15,12 @@ import { applyCouponsToPrice, validateCoupons } from './coupons.js';
 import {
     getConfigType,
     getCoreConfigType,
+    getDenyListType,
     getNameType,
     getPricelistConfigType,
+    getRegistryKeyType,
     getRenewalPricelistConfigType,
+    getSubnamesConfigType,
     isSubname,
     validateYears,
 } from './helpers.js';
@@ -27,6 +30,7 @@ import type {
     IotaNamesClientConfig,
     IotaNamesCoreConfig,
     IotaNamesPriceList,
+    IotaNamesSubnamesConfig,
     NameRecord,
     PackageInfo,
 } from './types.js';
@@ -95,6 +99,56 @@ export class IotaNamesClient {
         }
 
         return coreConfig;
+    }
+
+    /**
+     * Returns the subnames config of IOTA Names.
+     */
+    async getSubnamesConfig(): Promise<IotaNamesSubnamesConfig> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        if (!this.config.subnamesPackageId)
+            throw new Error('IotaNames subnames package ID is not set');
+
+        const subnamesConfigBcsB64 = toB64(
+            DummyFieldBcs.serialize({
+                dummy_field: false,
+            }).toBytes(),
+        );
+        const subnamesConfigResponse: any = await this.graphQlClient.query({
+            query: graphql(`
+                query getSubnameConfig($parentId: IotaAddress!, $name: DynamicFieldName!) {
+                    owner(address: $parentId) {
+                        address
+                        dynamicField(name: $name) {
+                            value {
+                                ... on MoveValue {
+                                    json
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                parentId: this.config.iotaNamesObjectId,
+                name: {
+                    type: getConfigType(
+                        this.config.packageId,
+                        getSubnamesConfigType(this.config.subnamesPackageId),
+                    ),
+                    bcs: subnamesConfigBcsB64,
+                },
+            },
+        });
+
+        const subnamesConfig = subnamesConfigResponse?.data?.owner?.dynamicField?.value?.json;
+
+        if (!subnamesConfig) {
+            throw new Error('Subnames config not found or is invalid');
+        }
+
+        return subnamesConfig;
     }
 
     /**
@@ -249,6 +303,120 @@ export class IotaNamesClient {
         return defaultName;
     }
 
+    async getDenyListTableIds(): Promise<{
+        reservedTableId: string | null;
+        blockedTableId: string | null;
+    }> {
+        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
+        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+
+        const iotaNamesObjectId = this.config.iotaNamesObjectId;
+        const packageId = this.config.packageId;
+        const denyListBcsB64 = toB64(
+            DummyFieldBcs.serialize({
+                dummy_field: false,
+            }).toBytes(),
+        );
+
+        const response: any = await this.graphQlClient.query({
+            query: graphql(`
+                query getDenyList($address: IotaAddress!, $type: String!, $bcs: Base64!) {
+                    owner(address: $address) {
+                        dynamicField(name: { type: $type, bcs: $bcs }) {
+                            name {
+                                type {
+                                    repr
+                                }
+                                json
+                            }
+                            value {
+                                ... on MoveValue {
+                                    type {
+                                        repr
+                                    }
+                                    json
+                                }
+                            }
+                        }
+                    }
+                }
+            `),
+            variables: {
+                address: iotaNamesObjectId,
+                type: getRegistryKeyType(packageId, getDenyListType(packageId)),
+                bcs: denyListBcsB64,
+            },
+        });
+
+        const denyList = response?.data?.owner?.dynamicField?.value?.json;
+        return {
+            reservedTableId: denyList?.reserved?.id ?? null,
+            blockedTableId: denyList?.blocked?.id ?? null,
+        };
+    }
+
+    /**
+     * Gets the full reserved/blocked list
+     */
+    async getRestrictedList(type: 'reserved' | 'blocked'): Promise<string[]> {
+        const { reservedTableId, blockedTableId } = await this.getDenyListTableIds();
+        if (type === 'reserved' && !reservedTableId) return [];
+        if (type === 'blocked' && !blockedTableId) return [];
+
+        const tableId = type === 'reserved' ? reservedTableId : blockedTableId;
+
+        const results: string[] = [];
+        let cursor: string | null = null;
+        const pageSize = 50;
+        let hasMorePages = true;
+
+        while (hasMorePages) {
+            const response: any = await this.graphQlClient.query({
+                query: graphql(`
+                    query getReservedListFromTable(
+                        $address: IotaAddress!
+                        $first: Int!
+                        $after: String
+                    ) {
+                        owner(address: $address) {
+                            dynamicFields(first: $first, after: $after) {
+                                pageInfo {
+                                    hasNextPage
+                                    endCursor
+                                }
+                                nodes {
+                                    name {
+                                        json
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `),
+                variables: { address: tableId, first: pageSize, after: cursor },
+            });
+
+            const df = response?.data?.owner?.dynamicFields;
+            const nodes = df?.nodes ?? [];
+
+            for (const n of nodes) {
+                const json = n?.name?.json;
+                if (typeof json === 'string' && json.length > 0) {
+                    results.push(json);
+                    continue;
+                }
+            }
+            if (!df?.pageInfo?.hasNextPage) {
+                hasMorePages = false;
+            } else {
+                cursor = df.pageInfo.endCursor;
+            }
+            cursor = df.pageInfo.endCursor;
+        }
+
+        return results;
+    }
+
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
         if (!this.config.registryTableId) throw new Error('IotaNames package ID is not set');
@@ -307,7 +475,7 @@ export class IotaNamesClient {
             name,
             nftId: nameRecord?.nft_id,
             targetAddress: nameRecord?.target_address!,
-            expirationTimestampMs: Number(nameRecord?.expiration_timestamp_ms),
+            expirationDate: new Date(Number(nameRecord?.expiration_timestamp_ms)),
             data,
             avatar: data[ALLOWED_METADATA.avatar],
         };

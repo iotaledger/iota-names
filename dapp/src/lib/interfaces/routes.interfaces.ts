@@ -16,4 +16,9 @@ export type ProtectedRoute = BaseRoute & {
     id: string;
 };
 
-export type Route = PublicRoute | ProtectedRoute;
+export type ExternalRoute = BaseRoute & {
+    isExternal: true;
+    id?: string;
+};
+
+export type Route = PublicRoute | ProtectedRoute | ExternalRoute;
