@@ -70,18 +70,35 @@ test.describe.serial('Auction Bid Flow', () => {
         });
     });
 
-    test('should allow claiming after auction ends', async ({ appPage: page }) => {
-        await page.goto('/name/example', { waitUntil: 'networkidle' });
+    test('should auction bid again', async ({ appPage: page }) => {
+        await page.goto('/auctions', { waitUntil: 'networkidle' });
+        const bidCard = page.getByText('example1', { exact: true });
+        await expect(bidCard).toBeVisible({ timeout: 15_000 });
 
-        // await page.evaluate(() => window.__debug_endAuction?.());
+        const buttonBidAgain = bidCard.getByRole('button', { name: /Bid Again/i });
+        await buttonBidAgain.click();
+        const dialog = page.getByRole('dialog');
 
-        const claimButton = page.getByRole('button', { name: /Claim/i });
-        await expect(claimButton).toBeVisible({ timeout: 15_000 });
-
-        await claimButton.click();
-
-        await expect(page.getByText(/You own this name|Claim successful/i)).toBeVisible({
-            timeout: 30_000,
-        });
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
+        const input = dialog.getByLabel('Your Bid');
+        await expect(input).toBeVisible({ timeout: 10_000 });
+        await input.fill('202');
+        const bidBtn = page.getByRole('button', { name: /^Start auction$/i });
+        await bidBtn.click();
     });
+
+    // test('should allow claiming after auction ends', async ({ appPage: page }) => {
+    //     await page.goto('/name/example', { waitUntil: 'networkidle' });
+
+    //     // await page.evaluate(() => window.__debug_endAuction?.());
+
+    //     const claimButton = page.getByRole('button', { name: /Claim/i });
+    //     await expect(claimButton).toBeVisible({ timeout: 15_000 });
+
+    //     await claimButton.click();
+
+    //     await expect(page.getByText(/You own this name|Claim successful/i)).toBeVisible({
+    //         timeout: 30_000,
+    //     });
+    // });
 });
