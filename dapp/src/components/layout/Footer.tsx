@@ -14,7 +14,7 @@ export function Footer() {
     const handleLegalClick = (e: React.MouseEvent, path: string) => {
         const url = new URL(path, window.location.href);
         const modal = url.searchParams.get('modal');
-        if (modal === 'terms_conditions') {
+        if (modal === 'terms_conditions' || modal === 'privacy_policy') {
             e.preventDefault();
             router.replace(path, { scroll: false });
         }
