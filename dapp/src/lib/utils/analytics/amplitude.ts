@@ -55,8 +55,6 @@ export async function initAmplitude(defaultNetwork: string) {
  * - Allow Amplitude to create cookies
  */
 export function consentToAnalytics() {
-    console.log('[Analytics] User consented to analytics');
-
     // Flush queued events and enable tracking
     consentBufferPlugin.flushQueue();
 
@@ -73,8 +71,6 @@ export function consentToAnalytics() {
  * - Remove any existing Amplitude cookies
  */
 export function declineAnalytics() {
-    console.log('[Analytics] User declined analytics');
-
     // Clear queued events
     consentBufferPlugin.clearQueue();
 
@@ -103,6 +99,5 @@ function removeAmplitudeCookies() {
         const cookieName = cookie.split('=')[0];
         // Remove cookie by setting expiry date in the past
         document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
-        console.log(`[Analytics] Removed cookie: ${cookieName}`);
     }
 }

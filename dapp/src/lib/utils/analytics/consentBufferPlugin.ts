@@ -43,15 +43,12 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
         }
     }
 
-    async setup(config: BrowserConfig, client: BrowserClient): Promise<void> {
+    async setup(_config: BrowserConfig, client: BrowserClient): Promise<void> {
         this.client = client;
         this.hasConsent = document.cookie.includes(`${AMP_COOKIES_KEY}=true`);
 
         // If user already has consent, flush any queued events from previous sessions
         if (this.hasConsent && this.eventQueue.length > 0) {
-            console.log(
-                `[ConsentBuffer] User has consent, flushing ${this.eventQueue.length} queued events`,
-            );
             this.flushQueue();
         }
     }
@@ -75,10 +72,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
             }
 
             this.saveQueueToStorage();
-
-            console.log(
-                `[ConsentBuffer] Event queued (${this.eventQueue.length} total): ${event.event_type}`,
-            );
             return null;
         }
 
@@ -98,11 +91,8 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
         this.hasConsent = true;
 
         if (this.eventQueue.length === 0) {
-            console.log('[ConsentBuffer] No events to flush');
             return;
         }
-
-        console.log(`[ConsentBuffer] Flushing ${this.eventQueue.length} queued events`);
 
         const events = [...this.eventQueue];
         this.eventQueue = [];
@@ -114,8 +104,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
                 console.error('[ConsentBuffer] Error flushing event:', error);
             });
         });
-
-        console.log('[ConsentBuffer] All events flushed successfully');
     }
 
     /**
@@ -123,7 +111,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
      * Clears all queued events from memory and localStorage.
      */
     clearQueue(): void {
-        console.log(`[ConsentBuffer] Clearing ${this.eventQueue.length} queued events`);
         this.eventQueue = [];
         this.hasConsent = false;
         this.clearStorage();
@@ -165,9 +152,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
             if (storedData) {
                 const parsed = JSON.parse(storedData) as QueuedEvent[];
                 this.eventQueue = Array.isArray(parsed) ? parsed : [];
-                console.log(
-                    `[ConsentBuffer] Loaded ${this.eventQueue.length} events from localStorage`,
-                );
             }
         } catch (error) {
             console.error('[ConsentBuffer] Error loading events from localStorage:', error);
@@ -221,7 +205,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
 
         try {
             localStorage.removeItem(EVENTS_STORAGE_KEY);
-            console.log('[ConsentBuffer] Cleared localStorage');
         } catch (error) {
             console.error('[ConsentBuffer] Error clearing localStorage:', error);
         }
