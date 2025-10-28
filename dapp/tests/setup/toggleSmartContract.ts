@@ -3,26 +3,23 @@
 
 import { expect } from '@playwright/test';
 
-import {
-    AUCTION_TYPE,
-    getAuthorizedSmartContractTypes,
-    iotaNamesClient,
-    PAYMENT_TYPE,
-    runCommand,
-} from './utils';
+import { getAuthorizedSmartContractTypes, iotaNamesClient, runCommand } from './utils';
 
 function getUpdateAuthCommand(mode: 'enable' | 'disable', type: 'payment' | 'auction') {
     const authorize = mode === 'enable';
-    const typeArg = type === 'payment' ? PAYMENT_TYPE : AUCTION_TYPE;
 
     return [
-        'iota client call',
-        `--package ${iotaNamesClient.config.packageId}`,
-        '--module iota_names',
-        `--function ${authorize ? 'authorize' : 'deauthorize'}`,
-        `--args "${iotaNamesClient.config.adminCap}" "${iotaNamesClient.config.iotaNamesObjectId}"`,
-        `--type-args "${typeArg}"`,
-        `--sender ${iotaNamesClient.config.adminAddress}`,
+        'IOTA_NAMES_PACKAGE_ADDRESS=' + iotaNamesClient.config.packageId,
+        'IOTA_NAMES_OBJECT_ID=' + iotaNamesClient.config.iotaNamesObjectId,
+        'ADMIN_CAP=' + iotaNamesClient.config.adminCap,
+        'IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS=' + iotaNamesClient.config.paymentsPackageId,
+        'ADMIN_ADDRESS=' + iotaNamesClient.config.adminAddress,
+        'IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS=' + iotaNamesClient.config.auctionPackageId,
+        `iota client ptb --move-call $IOTA_NAMES_PACKAGE_ADDRESS::iota_names::${authorize ? 'authorize' : 'deauthorize'}'`,
+        type === 'payment'
+            ? '<$IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS::payments::PaymentsAuth>'
+            : '<$IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS::auction::AuctionAuth>',
+        '@$ADMIN_CAP @$IOTA_NAMES_OBJECT_ID --sender @$ADMIN_ADDRESS',
     ].join(' \\\n  ');
 }
 
