@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable no-empty-pattern */
+
 import path from 'path';
 import { test as base, chromium, Page, type BrowserContext } from '@playwright/test';
 
@@ -11,38 +13,91 @@ const EXTENSION_PATH = path.join(__dirname, '../../wallet-dist');
 
 const COMMON_ARGS = ['--user-agent=Playwright', '--disable-dev-shm-usage', '--no-sandbox'];
 
+const DEFAULT_SHARED_STATE = { extension: {}, wallet: {} };
+
+interface SharedState {
+    sharedContext?: BrowserContext;
+    extension: {
+        url?: string;
+        name?: string;
+    };
+    wallet: {
+        address?: string;
+        mnemonic?: string;
+        page?: Page;
+    };
+}
+
+let sharedState: SharedState = { ...DEFAULT_SHARED_STATE };
+
 /**
  * Extended test with IOTA Wallet extension support
  */
 export const test = base.extend<{
+    sharedState: SharedState;
     extensionId: string;
-    extensionContext: BrowserContext;
     appPage: Page;
+    extensionPage: Page;
+    extensionName: string;
 }>({
-    extensionId: async ({ extensionContext }, use) => {
-        const extensionId = await waitForExtension(extensionContext);
+    sharedState: async ({}, use) => {
+        await use(sharedState);
+    },
+
+    context: [
+        async ({ sharedState }, use) => {
+            const isCI = !!process.env.CI;
+
+            if (sharedState.sharedContext) {
+                await use(sharedState.sharedContext);
+                return;
+            }
+
+            const context = await chromium.launchPersistentContext('', {
+                headless: isCI,
+                viewport: { width: 1440, height: 900 },
+                args: [
+                    ...COMMON_ARGS,
+                    `--disable-extensions-except=${EXTENSION_PATH}`,
+                    `--load-extension=${EXTENSION_PATH}`,
+                    '--window-position=0,0',
+                    ...(isCI ? ['--headless=new', '--disable-gpu'] : []),
+                ],
+            });
+
+            sharedState.sharedContext = context;
+
+            await use(context);
+        },
+        { scope: 'test' },
+    ],
+
+    extensionId: async ({ context }, use) => {
+        const extensionId = await waitForExtension(context);
         await use(extensionId);
     },
 
-    // eslint-disable-next-line no-empty-pattern
-    extensionContext: async ({}, use) => {
-        const context = await chromium.launchPersistentContext('', {
-            headless: false,
-            args: [
-                ...COMMON_ARGS,
-                `--disable-extensions-except=${EXTENSION_PATH}`,
-                `--load-extension=${EXTENSION_PATH}`,
-            ],
-        });
-
-        await use(context);
-        await context.close();
-    },
-
-    appPage: async ({ extensionContext }, use) => {
-        const page = await createPage(extensionContext, '/');
+    extensionPage: async ({ context, extensionId }, use) => {
+        const page = await createPage(context, `chrome-extension://${extensionId}/ui.html`);
         await use(page);
     },
+
+    extensionName: async ({ extensionPage }, use) => {
+        const title = await extensionPage.title();
+        await use(title);
+    },
+
+    appPage: async ({ context }, use) => {
+        const page = await createPage(context, '/');
+        await use(page);
+    },
+});
+
+test.afterAll(async () => {
+    if (sharedState.sharedContext) {
+        await sharedState.sharedContext.close();
+        sharedState = { ...DEFAULT_SHARED_STATE };
+    }
 });
 
 export const expect = test.expect;

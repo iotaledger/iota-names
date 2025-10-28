@@ -9,14 +9,11 @@ test.describe('Basic e2e tests', () => {
         await expect(appPage).toHaveTitle(/IOTA Names/i);
     });
 
-    test('should have IOTA Wallet extension loaded', async ({ extensionId, extensionContext }) => {
+    test('should have IOTA Wallet extension loaded', async ({ extensionId, extensionPage }) => {
         expect(extensionId).toBeTruthy();
         expect(extensionId).toMatch(/^[a-z]{32}$/);
 
         const extensionUrl = `chrome-extension://${extensionId}/ui.html`;
-        const extensionPage = await extensionContext.newPage();
-        await extensionPage.goto(extensionUrl);
-
         await expect(extensionPage).toHaveURL(extensionUrl);
     });
 });
