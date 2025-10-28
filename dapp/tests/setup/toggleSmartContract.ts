@@ -15,11 +15,11 @@ function getUpdateAuthCommand(mode: 'enable' | 'disable', type: 'payment' | 'auc
         'IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS=' + iotaNamesClient.config.paymentsPackageId,
         'ADMIN_ADDRESS=' + iotaNamesClient.config.adminAddress,
         'IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS=' + iotaNamesClient.config.auctionPackageId,
-        `iota client ptb --move-call $IOTA_NAMES_PACKAGE_ADDRESS::iota_names::${authorize ? 'authorize' : 'deauthorize'}` +
+        `iota client ptb --move-call $IOTA_NAMES_PACKAGE_ADDRESS::iota_names::${authorize ? 'authorize' : 'deauthorize'} ` +
             (type === 'payment'
                 ? '<$IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS::payments::PaymentsAuth>'
                 : '<$IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS::auction::AuctionAuth>') +
-            '@$ADMIN_CAP @$IOTA_NAMES_OBJECT_ID --sender @$ADMIN_ADDRESS',
+            ' @$ADMIN_CAP @$IOTA_NAMES_OBJECT_ID --sender @$ADMIN_ADDRESS',
     ].join(' \\\n  ');
 }
 
