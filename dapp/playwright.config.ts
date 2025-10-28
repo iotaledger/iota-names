@@ -52,7 +52,7 @@ export default defineConfig({
     ],
     webServer: {
         command: 'pnpm run dev',
-        port: 3001,
+        port: 3000,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
     },
