@@ -57,9 +57,9 @@ async function getAuthorizedSmartContractTypes() {
     };
 }
 
-function runCommand(cmd: string) {
+function runCommand(cmd: string, envs: Record<string, string> = {}) {
     return new Promise<string>((resolve, reject) => {
-        exec(cmd, (error, stdout, stderr) => {
+        exec(cmd, { env: { ...process.env, ...envs } }, (error, stdout, stderr) => {
             if (error) {
                 const message = [
                     `❌ Command failed: ${cmd}`,

@@ -5,16 +5,19 @@ import { expect } from '@playwright/test';
 
 import { getAuthorizedSmartContractTypes, iotaNamesClient, runCommand } from './utils';
 
+const envs = {
+    IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.config.packageId,
+    IOTA_NAMES_OBJECT_ID: iotaNamesClient.config.iotaNamesObjectId,
+    ADMIN_CAP: iotaNamesClient.config.adminCap,
+    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: iotaNamesClient.config.paymentsPackageId,
+    ADMIN_ADDRESS: iotaNamesClient.config.adminAddress,
+    IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.config.auctionPackageId,
+};
+
 function getUpdateAuthCommand(mode: 'enable' | 'disable', type: 'payment' | 'auction') {
     const authorize = mode === 'enable';
 
     return [
-        'IOTA_NAMES_PACKAGE_ADDRESS=' + iotaNamesClient.config.packageId,
-        'IOTA_NAMES_OBJECT_ID=' + iotaNamesClient.config.iotaNamesObjectId,
-        'ADMIN_CAP=' + iotaNamesClient.config.adminCap,
-        'IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS=' + iotaNamesClient.config.paymentsPackageId,
-        'ADMIN_ADDRESS=' + iotaNamesClient.config.adminAddress,
-        'IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS=' + iotaNamesClient.config.auctionPackageId,
         `iota client ptb --move-call $IOTA_NAMES_PACKAGE_ADDRESS::iota_names::${authorize ? 'authorize' : 'deauthorize'} ` +
             (type === 'payment'
                 ? '"<$IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS::payments::PaymentsAuth>"'
@@ -46,7 +49,7 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     if (currentState.isAuctionAuthorized !== targetState.isAuctionAuthorized) {
         const action = targetState.isAuctionAuthorized ? 'enable' : 'disable';
         const command = allCommands.auction[action];
-        tasksToRun.push(execTryCatch(command));
+        tasksToRun.push(execTryCatch(command, envs));
     }
 
     if (currentState.isPaymentAuthorized !== targetState.isPaymentAuthorized) {
@@ -65,9 +68,9 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     expect(finalState.isPaymentAuthorized).toBe(targetState.isPaymentAuthorized);
 }
 
-async function execTryCatch(command: string) {
+async function execTryCatch(...args: Parameters<typeof runCommand>): Promise<void> {
     try {
-        const output = await runCommand(command);
+        const output = await runCommand(...args);
         console.log('Command output:', output);
     } catch (error) {
         if (error instanceof Error) {
