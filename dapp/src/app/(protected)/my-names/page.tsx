@@ -133,7 +133,7 @@ export default function MyNamesPage(): JSX.Element {
         <>
             <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
-                    Names
+                    My Names
                 </h2>
 
                 <div className="flex gap-sm">

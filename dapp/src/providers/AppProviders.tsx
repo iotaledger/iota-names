@@ -3,18 +3,19 @@
 
 'use client';
 
+import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 
+import { CookieDisclaimer } from '@/components/disclaimer/CookieDisclaimer';
 import { Toaster } from '@/components/Toaster';
 import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
-// import { initAnalytics } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 import { growthbook } from '@/lib/utils/growthbook';
 
@@ -26,11 +27,6 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(() => new QueryClient());
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
-
-    useEffect(() => {
-        // Uncomment init amplitude when we get response from the legal
-        // initAnalytics(defaultNetwork);
-    }, [defaultNetwork]);
 
     function handleNetworkChange() {
         queryClient.resetQueries();
@@ -59,8 +55,13 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                     ]}
                                 >
                                     <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                        {children}
-                                        <Toaster />
+                                        <CookieManagerProvider>
+                                            {children}
+                                            <Toaster />
+                                            <Suspense fallback={null}>
+                                                <CookieDisclaimer />
+                                            </Suspense>
+                                        </CookieManagerProvider>
                                     </ThemeProvider>
                                 </WalletProvider>
                             </IotaNamesIndexerClientProvider>
