@@ -27,7 +27,6 @@ import toast from 'react-hot-toast';
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { captureException } from '@/instrumentation';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
@@ -139,7 +138,6 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             toast.success('Subname renewed successfully');
         },
         onError(error) {
-            captureException(error);
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });

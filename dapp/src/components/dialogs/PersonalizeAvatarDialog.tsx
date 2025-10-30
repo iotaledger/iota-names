@@ -33,7 +33,6 @@ import {
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
-import { captureException } from '@/instrumentation';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { getNameObject } from '@/lib/utils/names';
 
@@ -140,7 +139,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             );
         },
         onError: (error) => {
-            captureException(error);
             toast.error(getUserFriendlyErrorMessage(error));
         },
     });

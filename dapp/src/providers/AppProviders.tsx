@@ -7,7 +7,7 @@ import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, useState } from 'react';
 
 import { CookieDisclaimer } from '@/components/disclaimer/CookieDisclaimer';
@@ -15,6 +15,7 @@ import { Toaster } from '@/components/Toaster';
 import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
+import { captureException } from '@/instrumentation';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 import { growthbook } from '@/lib/utils/growthbook';
@@ -24,7 +25,16 @@ import { ThemeProvider } from './ThemeProvider';
 growthbook.init();
 
 export function AppProviders({ children }: React.PropsWithChildren) {
-    const [queryClient] = useState(() => new QueryClient());
+    const [queryClient] = useState(
+        () =>
+            new QueryClient({
+                queryCache: new QueryCache({
+                    onError: (error) => {
+                        captureException(error);
+                    },
+                }),
+            }),
+    );
     const allNetworks = getAllNetworks();
     const defaultNetwork = CONFIG.network;
 

@@ -6,7 +6,6 @@ import { useMutation, UseMutationOptions } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
 import { queryKey } from '@/hooks/queryKey';
-import { captureException } from '@/instrumentation';
 
 import { buildClaimNameTransaction } from '../lib/utils/transaction';
 import { useAuctionHouse } from './useAuctionHouse';
@@ -47,7 +46,6 @@ export function useClaimAuctionTransaction(
         gcTime: 0,
         ...options,
         onError: (error, ...args) => {
-            captureException(error);
             options.onError?.(error, ...args);
         },
     });
