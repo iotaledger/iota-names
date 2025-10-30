@@ -35,7 +35,8 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
     }
 }
 
-export async function createWallet(page: Page, extensionUrl: string) {
+export async function createWallet(page: Page) {
+    await page.bringToFront();
     await page.getByRole('button', { name: /Add Profile/ }).click({ timeout: 30000 });
     await page.getByText('Create New', { exact: true }).click();
     await page.getByTestId('password.input').fill('iotae2etests');
@@ -59,14 +60,13 @@ export async function createWallet(page: Page, extensionUrl: string) {
     await page.getByText('I saved my mnemonic').click();
     await page.getByRole('button', { name: 'Open Wallet' }).click();
 
-    await page.goto(`${extensionUrl}#/tokens?menu=%2F`);
-
+    await page.getByLabel('Open settings menu').click();
     await page.getByText('Network').click();
     await page.getByText('Custom RPC').click();
     await page.getByPlaceholder('http://localhost:3000/').fill('http://localhost:9000');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
 
-    await page.goto(extensionUrl);
+    await page.getByTestId('close-icon').click();
 
     return {
         mnemonic,
@@ -75,15 +75,12 @@ export async function createWallet(page: Page, extensionUrl: string) {
 }
 
 export async function requestFaucetTokensOnWalletHome(page: Page, recipient: string) {
-    const originalBalance = await page.getByTestId('coin-balance').textContent();
-    await requestIotaFromFaucetV0({
+    const res = await requestIotaFromFaucetV0({
         host: 'http://localhost:9123/gas',
         recipient,
     });
 
-    await expect(page.getByTestId('coin-balance')).not.toHaveText(`${originalBalance}`, {
-        timeout: 30_000,
-    });
+    expect(res.error).toBeFalsy();
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {

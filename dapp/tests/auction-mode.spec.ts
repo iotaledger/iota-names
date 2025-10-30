@@ -7,11 +7,11 @@ import { connectWallet, createWallet, requestFaucetTokensOnWalletHome } from './
 test.describe.serial('Auction Bid Flow', () => {
     test.setTimeout(20_000);
 
-    test.beforeAll(async ({ context, extensionUrl, sharedState, extensionName, appPage }) => {
+    test.beforeAll(async ({ context, sharedState, extensionName, appPage }) => {
         const extensionPage = await context.newPage();
-        await extensionPage.goto(extensionUrl);
+        await appPage.goto('/', { waitUntil: 'commit' });
 
-        const { address, mnemonic } = await createWallet(extensionPage, extensionUrl);
+        const { address, mnemonic } = await createWallet(extensionPage);
         await requestFaucetTokensOnWalletHome(extensionPage, address);
 
         await appPage.bringToFront();

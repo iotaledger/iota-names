@@ -37,7 +37,7 @@ export const test = base.extend<{
     sharedState: SharedState;
     extensionId: string;
     appPage: Page;
-    extensionUrl: string;
+    extensionPage: Page;
     extensionName: string;
 }>({
     sharedState: async ({}, use) => {
@@ -72,18 +72,19 @@ export const test = base.extend<{
         { scope: 'test' },
     ],
 
-    extensionUrl: async ({ context }, use) => {
-        const extensionUrl = await waitForExtension(context);
-        await use(extensionUrl);
+    extensionId: async ({ context }, use) => {
+        const extensionId = await waitForExtension(context);
+        await use(extensionId);
     },
 
-    extensionId: async ({ extensionUrl }, use) => {
-        const id = extensionUrl.split('/')[2];
-        await use(id);
+    extensionPage: async ({ context, extensionId }, use) => {
+        const page = await createPage(context, `chrome-extension://${extensionId}/ui.html`);
+        await use(page);
     },
 
-    extensionName: async ({}, use) => {
-        await use('IOTA Wallet');
+    extensionName: async ({ extensionPage }, use) => {
+        const title = await extensionPage.title();
+        await use(title);
     },
 
     appPage: async ({ context }, use) => {
