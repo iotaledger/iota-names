@@ -4,8 +4,8 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use diesel::{
-    ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl, SelectableHelper,
-    SqliteConnection, TextExpressionMethods, dsl, insert_into, update,
+    AggregateExpressionMethods, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl,
+    SelectableHelper, SqliteConnection, TextExpressionMethods, dsl, insert_into, update,
 };
 
 use crate::db::{
@@ -145,7 +145,7 @@ pub fn get_auctions_for_bidder_count(
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
-        .select(dsl::count_distinct(names::id))
+        .select(dsl::count(names::id).aggregate_distinct())
         .filter(bids::bidder_id.eq(bidder_id))
         .into_boxed();
 
@@ -223,7 +223,7 @@ pub fn get_auctions_count(
     let mut query = names::table
         .inner_join(bids::table)
         .inner_join(auctions::table)
-        .select(dsl::count_distinct(names::id))
+        .select(dsl::count(names::id).aggregate_distinct())
         .into_boxed();
 
     if let Some(status) = status {
