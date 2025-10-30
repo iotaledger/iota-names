@@ -70,7 +70,7 @@ export function getNameMenuOptions(
         {
             onClick: () => onOpen(NameDialogId.EditMetadata),
             children: <DropdownMenuOption icon={<Edit />} label="Edit Metadata" />,
-            isHidden: nft.isExpired,
+            isHidden: true,
             hideBottomBorder: true,
         },
         {
