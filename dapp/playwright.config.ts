@@ -2,8 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PURCHASE_SETUP_PROJECT_NAME = 'Purchase setup';
 const AUCTIONS_SETUP_PROJECT_NAME = 'Auctions setup';
+const MANAGEMENT_SETUP_PROJECT_NAME = 'Management setup';
 const PURCHASE_PROJECT_NAME = 'chromium purchase mode';
 const AUCTIONS_PROJECT_NAME = 'chromium auctions';
+const MANAGEMENT_PROJECT_NAME = 'chromium management';
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -48,6 +50,19 @@ export default defineConfig({
             },
             testDir: './tests/auctions',
             dependencies: [AUCTIONS_SETUP_PROJECT_NAME],
+        },
+        {
+            name: MANAGEMENT_PROJECT_NAME,
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            testDir: './tests/management',
+            dependencies: [MANAGEMENT_SETUP_PROJECT_NAME],
+        },
+        {
+            name: MANAGEMENT_SETUP_PROJECT_NAME,
+            testMatch: /management\.setup\.ts/,
         },
     ],
     webServer: {
