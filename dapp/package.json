@@ -9,6 +9,8 @@
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:e2e": "playwright test",
+        "e2e:management:ui": "playwright test --project='chromium management' --ui",
+        "e2e:management": "playwright test --project='chromium management'",
         "test:prepare": "node scripts/downloadWallet.mjs",
         "playwright:install": "playwright install --with-deps chromium",
         "prettier:check": "prettier -c --ignore-unknown --ignore-path=../.prettierignore --ignore-path=.prettierignore .",
