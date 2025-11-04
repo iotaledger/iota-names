@@ -96,8 +96,10 @@ export class IotaNamesTransaction {
 
     initRegistration(name: string): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
+        // For write operations, prefer v2 (fallback to v1 if not available on this network).
+        const pkgId = this.iotaNamesClient.getPackageIdFor('write');
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::init_registration`,
+            target: `${pkgId}::payment::init_registration_with_years`,
             arguments: [
                 this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.pure.string(name),
@@ -107,8 +109,9 @@ export class IotaNamesTransaction {
 
     initRenewal(nft: TransactionObjectInput, years: number): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
+        const pkgId = this.iotaNamesClient.getPackageIdFor('write');
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::init_renewal`,
+            target: `${pkgId}::payment::init_renewal`,
             arguments: [
                 this.transaction.object(config.iotaNamesObjectId),
                 this.transaction.object(nft),
@@ -132,8 +135,9 @@ export class IotaNamesTransaction {
 
     finalizeRegister(receipt: TransactionObjectArgument): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
+        const pkgId = this.iotaNamesClient.getPackageIdFor('write');
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::register`,
+            target: `${pkgId}::payment::register`,
             arguments: [
                 receipt,
                 this.transaction.object(config.iotaNamesObjectId),
@@ -147,8 +151,9 @@ export class IotaNamesTransaction {
         nft: TransactionObjectInput,
     ): TransactionObjectArgument {
         const config = this.iotaNamesClient.config;
+        const pkgId = this.iotaNamesClient.getPackageIdFor('write');
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::renew`,
+            target: `${pkgId}::payment::renew`,
             arguments: [
                 receipt,
                 this.transaction.object(config.iotaNamesObjectId),
@@ -159,9 +164,9 @@ export class IotaNamesTransaction {
     }
 
     getBasePrice(paymentIntent: TransactionObjectArgument): TransactionObjectArgument {
-        const config = this.iotaNamesClient.config;
+        const pkgId = this.iotaNamesClient.getPackageIdFor('write');
         return this.transaction.moveCall({
-            target: `${config.packageId}::payment::request_base_amount`,
+            target: `${pkgId}::payment::request_base_amount`,
             arguments: [paymentIntent],
         });
     }
@@ -216,7 +221,7 @@ export class IotaNamesTransaction {
         const subNft = this.transaction.moveCall({
             target: isParentSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new`
-                : `${this.iotaNamesClient.config.subnamesPackageId}::subnames::new`,
+                : `${this.iotaNamesClient.getSubnamesPackageIdFor('write')}::subnames::new`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
@@ -257,7 +262,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isParentSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::new_leaf`
-                : `${this.iotaNamesClient.config.subnamesPackageId}::subnames::new_leaf`,
+                : `${this.iotaNamesClient.getSubnamesPackageIdFor('write')}::subnames::new_leaf`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
@@ -285,7 +290,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isParentSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::remove_leaf`
-                : `${this.iotaNamesClient.config.subnamesPackageId}::subnames::remove_leaf`,
+                : `${this.iotaNamesClient.getSubnamesPackageIdFor('write')}::subnames::remove_leaf`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
@@ -313,7 +318,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_target_address`
-                : `${this.iotaNamesClient.config.packageId}::controller::set_target_address`,
+                : `${this.iotaNamesClient.getPackageIdFor('write')}::controller::set_target_address`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
@@ -332,7 +337,7 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
-            target: `${this.iotaNamesClient.config.packageId}::controller::set_reverse_lookup`,
+            target: `${this.iotaNamesClient.getPackageIdFor('write')}::controller::set_reverse_lookup`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.pure.string(normalizeIotaName(name, 'dot')),
@@ -348,7 +353,7 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
-            target: `${this.iotaNamesClient.config.packageId}::controller::unset_reverse_lookup`,
+            target: `${this.iotaNamesClient.getPackageIdFor('write')}::controller::unset_reverse_lookup`,
             arguments: [this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId)],
         });
     }
@@ -379,7 +384,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isParentSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::edit_setup`
-                : `${this.iotaNamesClient.config.subnamesPackageId}::subnames::edit_setup`,
+                : `${this.iotaNamesClient.getSubnamesPackageIdFor('write')}::subnames::edit_setup`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(parentNft),
@@ -407,7 +412,7 @@ export class IotaNamesTransaction {
             throw new Error('Subnames package ID not found');
 
         this.transaction.moveCall({
-            target: `${this.iotaNamesClient.config.subnamesPackageId}::subnames::extend_expiration`,
+            target: `${this.iotaNamesClient.getSubnamesPackageIdFor('write')}::subnames::extend_expiration`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
@@ -440,7 +445,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::set_user_data`
-                : `${this.iotaNamesClient.config.packageId}::controller::set_user_data`,
+                : `${this.iotaNamesClient.getPackageIdFor('write')}::controller::set_user_data`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
@@ -473,7 +478,7 @@ export class IotaNamesTransaction {
         this.transaction.moveCall({
             target: isSubname
                 ? `${this.iotaNamesClient.config.tempSubnameProxyPackageId}::subname_proxy::unset_user_data`
-                : `${this.iotaNamesClient.config.packageId}::controller::unset_user_data`,
+                : `${this.iotaNamesClient.getPackageIdFor('write')}::controller::unset_user_data`,
             arguments: [
                 this.transaction.object(this.iotaNamesClient.config.iotaNamesObjectId),
                 this.transaction.object(nft),
@@ -491,7 +496,7 @@ export class IotaNamesTransaction {
             throw new Error('IOTA-Names Object ID not found');
 
         this.transaction.moveCall({
-            target: `${this.iotaNamesClient.config.packageId}::controller::${
+            target: `${this.iotaNamesClient.getPackageIdFor('write')}::controller::${
                 isSubname ? 'burn_expired_subname' : 'burn_expired'
             }`, // Update this
             arguments: [

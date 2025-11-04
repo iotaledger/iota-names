@@ -41,15 +41,81 @@ import { isValidIotaName, normalizeIotaName, validateIotaName } from './utils.js
 export class IotaNamesClient {
     graphQlClient: IotaGraphQLClient;
     config: PackageInfo;
+    private rawPackageInfo: any;
 
     constructor(config: IotaNamesClientConfig) {
         this.graphQlClient = config.graphQlClient;
+        // Normalize incoming package info to always use V1 ids when versioned structures are provided.
+        const resolveV1 = (id: any): string => {
+            if (typeof id === 'string') return id;
+            if (id && typeof id === 'object') {
+                // Prefer explicit v1, otherwise fall back to latest if present.
+                return id.v1 ?? id.latest ?? '';
+            }
+            return '';
+        };
+
+        const normalizePackageInfo = (raw: any): PackageInfo => {
+            return {
+                ...raw,
+                packageId: resolveV1(raw?.packageId),
+                subnamesPackageId: resolveV1(raw?.subnamesPackageId),
+            } as PackageInfo;
+        };
 
         if ('network' in config) {
-            this.config = packages[config.network as keyof typeof packages];
+            const raw = packages[config.network as keyof typeof packages];
+            this.rawPackageInfo = raw;
+            this.config = normalizePackageInfo(raw);
         } else {
-            this.config = config.packageInfo;
+            this.rawPackageInfo = config.packageInfo;
+            this.config = normalizePackageInfo(config.packageInfo);
         }
+    }
+
+    /**
+     * Returns a packageId for a specific version. Defaults to v1 if available.
+     */
+    getPackageId(version?: 'v1' | 'v2' | 'latest'): string {
+        const source = this.rawPackageInfo?.packageId;
+        if (source && typeof source === 'object') {
+            if (version && source[version]) return source[version];
+            return source.v1 ?? source.latest ?? this.config.packageId;
+        }
+        return this.config.packageId;
+    }
+
+    /**
+     * Returns a subnamesPackageId for a specific version. Defaults to v1 if available.
+     */
+    getSubnamesPackageId(version?: 'v1' | 'v2' | 'latest'): string {
+        const source = this.rawPackageInfo?.subnamesPackageId;
+        if (source && typeof source === 'object') {
+            if (version && source[version]) return source[version];
+            return source.v1 ?? source.latest ?? this.config.subnamesPackageId;
+        }
+        return this.config.subnamesPackageId;
+    }
+
+    /**
+     * Resolve packageId for a logical operation type: 'read' or 'write'.
+     * - read: prefer v1
+     * - write: prefer v2, fallback to v1
+     */
+    getPackageIdFor(op: 'read' | 'write'): string {
+        if (op === 'write') return this.getPackageId('v2') ?? this.getPackageId('v1');
+        return this.getPackageId('v1');
+    }
+
+    /**
+     * Resolve subnamesPackageId for a logical operation type: 'read' or 'write'.
+     * - read: prefer v1
+     * - write: prefer v2, fallback to v1
+     */
+    getSubnamesPackageIdFor(op: 'read' | 'write'): string {
+        if (op === 'write')
+            return this.getSubnamesPackageId('v2') ?? this.getSubnamesPackageId('v1');
+        return this.getSubnamesPackageId('v1');
     }
 
     /**
@@ -84,8 +150,8 @@ export class IotaNamesClient {
                 parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
-                        this.config.packageId,
-                        getCoreConfigType(this.config.packageId),
+                        this.getPackageIdFor('read'),
+                        getCoreConfigType(this.getPackageIdFor('read')),
                     ),
                     bcs: coreConfigBcsB64,
                 },
@@ -134,8 +200,8 @@ export class IotaNamesClient {
                 parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
-                        this.config.packageId,
-                        getSubnamesConfigType(this.config.subnamesPackageId),
+                        this.getPackageIdFor('read'),
+                        getSubnamesConfigType(this.getSubnamesPackageIdFor('read')),
                     ),
                     bcs: subnamesConfigBcsB64,
                 },
@@ -189,8 +255,8 @@ export class IotaNamesClient {
                 parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
-                        this.config.packageId,
-                        getPricelistConfigType(this.config.packageId),
+                        this.getPackageIdFor('read'),
+                        getPricelistConfigType(this.getPackageIdFor('read')),
                     ),
                     bcs: pricingConfigBcsB64,
                 },
@@ -255,8 +321,8 @@ export class IotaNamesClient {
                 parentId: this.config.iotaNamesObjectId,
                 name: {
                     type: getConfigType(
-                        this.config.packageId,
-                        getRenewalPricelistConfigType(this.config.packageId),
+                        this.getPackageIdFor('read'),
+                        getRenewalPricelistConfigType(this.getPackageIdFor('read')),
                     ),
                     bcs: pricingConfigBcsB64,
                 },
@@ -311,7 +377,7 @@ export class IotaNamesClient {
         if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
 
         const iotaNamesObjectId = this.config.iotaNamesObjectId;
-        const packageId = this.config.packageId;
+        const packageId = this.getPackageIdFor('read');
         const denyListBcsB64 = toB64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
@@ -445,7 +511,7 @@ export class IotaNamesClient {
             variables: {
                 parentId: this.config.registryTableId,
                 name: {
-                    type: getNameType(this.config.packageId),
+                    type: getNameType(this.getPackageIdFor('read')),
                     bcs: nameBcsB64,
                 },
             },
@@ -487,7 +553,7 @@ export class IotaNamesClient {
         if (!this.config.couponsPackageId) throw new Error('Coupon package ID is not set');
 
         const iotaNamesObjectId = this.config.iotaNamesObjectId;
-        const packageId = this.config.packageId;
+        const packageId = this.getPackageIdFor('read');
         const couponsPackageId = this.config.couponsPackageId;
 
         const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
