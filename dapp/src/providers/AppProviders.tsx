@@ -7,7 +7,7 @@ import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Suspense, useState } from 'react';
 
 import { CookieDisclaimer } from '@/components/disclaimer/CookieDisclaimer';
@@ -29,6 +29,11 @@ export function AppProviders({ children }: React.PropsWithChildren) {
         () =>
             new QueryClient({
                 queryCache: new QueryCache({
+                    onError: (error) => {
+                        captureException(error);
+                    },
+                }),
+                mutationCache: new MutationCache({
                     onError: (error) => {
                         captureException(error);
                     },
