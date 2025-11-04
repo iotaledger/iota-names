@@ -21,7 +21,7 @@ import Link from 'next/link';
 import { NameRecordData, useNameRecord, useRegistrationNfts } from '@/hooks';
 import { formatDate } from '@/lib/utils/format/formatDate';
 
-import { Collapsible } from '../Collapsible';
+import { ContainerInfo } from '../ContainerInfo';
 import { NameAvatarDisplay } from '../name-record/AvatarDisplay';
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
@@ -79,7 +79,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent isFixedPosition position={DialogPosition.Right}>
-                <Header title="General Info" onClose={handleClose} />
+                <Header title="All Info" onClose={handleClose} />
                 <DialogBody>
                     <div className="flex flex-col justify-center items-center gap-lg">
                         <div className="max-h-[220px] max-w-[220px] w-full h-full">
@@ -93,7 +93,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                         </span>
                     </div>
                     <div className="flex flex-col gap-md mt-lg">
-                        <Collapsible title="Info" titleSize={TitleSize.Small}>
+                        <ContainerInfo title="Info" titleSize={TitleSize.Small}>
                             <div className="flex flex-col pb-xs px-md--rs">
                                 {infoLinks.map(({ key, value, href }) => (
                                     <KeyValueInfo
@@ -113,17 +113,13 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                                         fullwidth
                                     />
                                 ))}
-                            </div>
-                        </Collapsible>
-                        <Collapsible title="Name Object Info" titleSize={TitleSize.Small}>
-                            <div className="pb-xs px-md--rs">
                                 <KeyValueInfo
                                     keyText="Expiration Time"
                                     value={formatDate(expirationDate)}
                                     fullwidth
                                 />
                             </div>
-                        </Collapsible>
+                        </ContainerInfo>
                     </div>
                 </DialogBody>
             </DialogContent>
