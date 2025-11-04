@@ -217,6 +217,7 @@ jobs:
           iota client faucet
           sleep 5
 
+          bash dapp/scripts/update_auctions_duration.sh
           cd scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
