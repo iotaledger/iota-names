@@ -56,14 +56,14 @@ export const test = base.extend<{
             }
 
             const context = await chromium.launchPersistentContext('', {
-                headless: isCI,
+                headless: false,
                 viewport: { width: 1440, height: 900 },
                 args: [
                     ...COMMON_ARGS,
                     `--disable-extensions-except=${EXTENSION_PATH}`,
                     `--load-extension=${EXTENSION_PATH}`,
                     '--window-position=0,0',
-                    ...(isCI ? ['--headless=new', '--disable-gpu'] : []),
+                    ...(isCI ? ['--disable-gpu'] : []),
                 ],
             });
 
