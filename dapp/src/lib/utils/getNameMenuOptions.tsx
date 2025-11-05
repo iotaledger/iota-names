@@ -44,12 +44,13 @@ export function getNameMenuOptions(
             onClick: () => onOpen(NameDialogId.PersonalizeAvatar),
             children: <DropdownMenuOption icon={<Assets />} label="Personalize Avatar" />,
             isHidden: nft.isExpired,
-            hideBottomBorder: true,
+            hideBottomBorder: nft.isSubname,
         },
         {
             onClick: () => onOpen(NameDialogId.SetPermissions),
             children: <DropdownMenuOption icon={<Settings />} label="Set Permissions" />,
             isHidden: !nft.isSubname || nft.isExpired,
+            hideBottomBorder: !namePermissions.allowChildCreation,
         },
         {
             onClick: () => onOpen(NameDialogId.CreateSubname),
