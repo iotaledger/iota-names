@@ -29,14 +29,12 @@ test.describe('Purchase Flow', () => {
 
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
-
-        await appPage.close();
     });
 
     test('Purchase name from Home', async ({ appPage: page, context }) => {
         const nameToPurchase = getPurchaseName();
 
-        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
         await buyNameFromAvailabilityCheckDialog(page, context, nameToPurchase);
 
@@ -46,8 +44,6 @@ test.describe('Purchase Flow', () => {
         await expect(page.getByText(`Successfully registered name ${normalizedName}`)).toBeVisible({
             timeout: 30_000,
         });
-
-        await page.close();
     });
 
     test('Navbar search works', async ({ appPage: page }) => {
@@ -56,15 +52,13 @@ test.describe('Purchase Flow', () => {
 
         const nameToPurchase = getPurchaseName();
 
-        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
         await page.getByPlaceholder('Check name availability').fill(nameToPurchase);
 
         await expect(page.getByText('Available', { exact: true })).toBeVisible();
         await expect(page.getByText(`@${nameToPurchase}`)).toBeVisible({
             timeout: 30_000,
         });
-
-        await page.close();
     });
 
     test('Can renew name from "My Names"', async ({ appPage: page, context }) => {
@@ -75,7 +69,10 @@ test.describe('Purchase Flow', () => {
         if (!nameCard) {
             const nameToPurchase = getPurchaseName();
 
-            await page.getByPlaceholder('Search for your IOTA name').click();
+            await page
+                .getByPlaceholder('Search for your IOTA name')
+                .filter({ visible: true })
+                .click();
 
             await buyNameFromAvailabilityCheckDialog(page, context, nameToPurchase);
 
@@ -101,7 +98,5 @@ test.describe('Purchase Flow', () => {
         await expect(page.getByText(`Name renewed successfully`)).toBeVisible({
             timeout: 30_000,
         });
-
-        await page.close();
     });
 });

@@ -44,22 +44,19 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     };
 
     const currentState = await getAuthorizedSmartContractTypes();
-    const tasksToRun: Promise<void>[] = [];
 
     if (currentState.isAuctionAuthorized !== targetState.isAuctionAuthorized) {
         const action = targetState.isAuctionAuthorized ? 'enable' : 'disable';
         const command = allCommands.auction[action];
-        tasksToRun.push(execTryCatch(command, envs));
+        await execTryCatch(command, envs);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     if (currentState.isPaymentAuthorized !== targetState.isPaymentAuthorized) {
         const action = targetState.isPaymentAuthorized ? 'enable' : 'disable';
         const command = allCommands.payment[action];
-        tasksToRun.push(execTryCatch(command));
-    }
-
-    if (tasksToRun.length > 0) {
-        await Promise.all(tasksToRun);
+        await execTryCatch(command, envs);
     }
 
     const finalState = await getAuthorizedSmartContractTypes();
