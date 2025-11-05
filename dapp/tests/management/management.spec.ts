@@ -99,6 +99,8 @@ test.describe('Management Flow', () => {
         await page.close();
     });
 
+    // * edit metadata is currently hidden: https://github.com/iotaledger/iota-names/pull/837
+    /*
     test('Edit metadata', async ({ appPage: page, context }) => {
         await purchaseName(page, context);
 
@@ -125,6 +127,7 @@ test.describe('Management Flow', () => {
 
         await page.close();
     });
+    */
 
     test('View info', async ({ appPage: page, context }) => {
         await purchaseName(page, context);
