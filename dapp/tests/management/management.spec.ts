@@ -5,7 +5,7 @@ import { formatAddress } from '@iota/iota-sdk/utils';
 import { expect } from '@playwright/test';
 
 import { test } from '../helpers/fixtures';
-import { purchaseName } from '../helpers/helpers';
+import { createSubnameForFirstOwnedName, purchaseName } from '../helpers/helpers';
 import {
     connectWallet,
     createWallet,
@@ -33,34 +33,6 @@ test.describe('Management Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Add a subname', async ({ appPage: page, context }) => {
-        await purchaseName(page, context);
-
-        const nameCard = page.getByTestId('name-card').first();
-        await nameCard.getByTestId('name-card-avatar').hover();
-        const menuButtonLocator = nameCard.getByTestId('menu-button');
-        await expect(menuButtonLocator).toBeVisible();
-        await menuButtonLocator.click();
-
-        await page.getByText('Create Subname', { exact: true }).click();
-
-        const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('New Subname')).toBeVisible();
-
-        const subname = 'sub-' + Math.floor(Math.random() * 1000);
-        await dialog.getByPlaceholder('Enter subname').fill(subname);
-
-        await dialog.getByRole('button', { name: 'Create' }).click();
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
-        await page.bringToFront();
-
-        await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
-            timeout: 30_000,
-        });
-
-        await page.close();
-    });
-
     test('Connect address', async ({ appPage: page, context, sharedState }) => {
         await purchaseName(page, context);
 
@@ -74,7 +46,6 @@ test.describe('Management Flow', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        // Use a different valid IOTA address derived from the same mnemonic
         const mnemonic = sharedState.wallet.mnemonic as string;
         const externalAddress = getAddressByIndexPath(mnemonic, 1);
 
@@ -141,7 +112,6 @@ test.describe('Management Flow', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Edit Metadata')).toBeVisible();
 
-        // Select Website metadata and set a simple valid value
         await dialog.getByRole('button', { name: 'Website' }).click();
         await dialog.getByLabel('Website').fill('example.com');
 
@@ -173,11 +143,69 @@ test.describe('Management Flow', () => {
         await expect(dialog.getByText('Object ID', { exact: false })).toBeVisible();
         await expect(dialog.getByText('Expiration Time', { exact: false })).toBeVisible();
 
-        // Close dialog
         const closeIcon = page.getByTestId('close-icon');
         if (await closeIcon.isVisible().catch(() => false)) {
             await closeIcon.click();
         }
+
+        await page.close();
+    });
+
+    test('Add a subname', async ({ appPage: page, context }) => {
+        await purchaseName(page, context);
+
+        const nameCard = page.getByTestId('name-card').first();
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Create Subname', { exact: true }).click();
+
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('New Subname')).toBeVisible();
+
+        const subname = 'sub-' + Math.floor(Math.random() * 1000);
+        await dialog.getByPlaceholder('Enter subname').fill(subname);
+
+        await dialog.getByRole('button', { name: 'Create' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
+    test('Edit permissions', async ({ appPage: page, context }) => {
+        await purchaseName(page, context);
+        await createSubnameForFirstOwnedName(page, context);
+
+        await page.goto('/my-names', { waitUntil: 'commit' });
+        await page.getByText('Subnames', { exact: true }).click();
+
+        const nameCard = page.getByTestId('name-card').first();
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Set Permissions', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Set permissions')).toBeVisible();
+
+        dialog.getByText('Allow Subname to create additional Subnames').click();
+        dialog.getByText('Allow Subname to renew expiration').click();
+
+        await dialog.getByRole('button', { name: 'Save' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText('Permissions updated successfully', { exact: false }),
+        ).toBeVisible({ timeout: 30_000 });
 
         await page.close();
     });

@@ -65,3 +65,31 @@ export async function purchaseName(page: Page, context: BrowserContext) {
     await page.waitForTimeout(200);
     await page.goto('/my-names', { waitUntil: 'commit' });
 }
+
+export async function createSubnameForFirstOwnedName(
+    page: Page,
+    context: BrowserContext,
+): Promise<string> {
+    const nameCard = page.getByTestId('name-card').first();
+    await nameCard.getByTestId('name-card-avatar').hover();
+    const menuButtonLocator = nameCard.getByTestId('menu-button');
+    await expect(menuButtonLocator).toBeVisible();
+    await menuButtonLocator.click();
+
+    await page.getByText('Create Subname', { exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('New Subname')).toBeVisible();
+
+    const subname = 'sub-' + Math.floor(Math.random() * 1000);
+    await dialog.getByPlaceholder('Enter subname').fill(subname);
+
+    await dialog.getByRole('button', { name: 'Create' }).click();
+    (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+    await page.bringToFront();
+
+    await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+        timeout: 30_000,
+    });
+
+    return subname;
+}
