@@ -198,12 +198,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
     return (
         <Dialog open onOpenChange={closeDialog}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
-                <Header
-                    title="Auction"
-                    titleCentered
-                    onClose={() => closeDialog()}
-                    onBack={() => closeDialog()}
-                />
+                <Header title="Auction" titleCentered onClose={() => closeDialog()} />
 
                 <DialogBody>
                     <div className="flex flex-col justify-between h-full items-center">
