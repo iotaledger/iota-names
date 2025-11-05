@@ -51,7 +51,7 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: 'pnpm run dev',
+        command: process.env.CI ? 'pnpm start' : 'turbo run build -F dapp && pnpm start',
         port: 3005,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
