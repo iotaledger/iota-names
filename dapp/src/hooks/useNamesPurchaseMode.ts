@@ -11,8 +11,9 @@ import { queryKey } from './queryKey';
 export function useNamesPurchaseMode() {
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
+    const packageId = iotaNamesClient.resolvePackageId('v1');
 
-    const authKeyType = `${iotaNamesClient.config.packageId}::iota_names::AuthKey`;
+    const authKeyType = `${packageId}::iota_names::AuthKey`;
 
     const paymentType = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::payments::PaymentsAuth>`;
     const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::AuctionAuth>`;
