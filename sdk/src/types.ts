@@ -18,6 +18,8 @@ export interface CoinConfig {
     type: string;
 }
 
+export type PackageId = string | VersionedPackageId;
+
 export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
@@ -31,12 +33,12 @@ export type PackageInfo = {
     };
     couponsPackageId: string;
     iotaNamesObjectId: string;
-    packageId: string;
+    packageId: PackageId;
     paymentsPackageId: string;
     publisherId: string;
     registryTableId: string;
     reverseRegistryTableId: string;
-    subnamesPackageId: string;
+    subnamesPackageId: PackageId;
     tempSubnameProxyPackageId: string;
     upgradeCap: string;
 };
@@ -54,9 +56,8 @@ export interface NameRecord {
 // -----------------
 
 export type VersionedPackageId = {
-    latest: string;
     v1: string;
-    [key: string]: string;
+    v2: string;
 };
 
 export type BaseParams = {
