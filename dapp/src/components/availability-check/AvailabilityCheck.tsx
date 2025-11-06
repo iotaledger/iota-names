@@ -382,24 +382,25 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
 
     return (
         <>
-            <NamePurchaseCard
-                name={name}
-                isAvailable={isAvailable}
-                price={formattedPurchasePrice}
-                priceSupportingText={isAvailable ? 'Price' : undefined}
-                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
-            >
-                {isUnavailable ? null : isConnected ? (
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Buy"
-                        onClick={() => setPurchaseDialogOpen(true)}
-                    />
-                ) : (
-                    <ConnectButton />
-                )}
-            </NamePurchaseCard>
-
+            {isAvailable && (
+                <NamePurchaseCard
+                    name={name}
+                    isAvailable={isAvailable}
+                    price={formattedPurchasePrice}
+                    priceSupportingText={isAvailable ? 'Price' : undefined}
+                    statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
+                >
+                    {isUnavailable ? null : isConnected ? (
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setPurchaseDialogOpen(true)}
+                        />
+                    ) : (
+                        <ConnectButton />
+                    )}
+                </NamePurchaseCard>
+            )}
             {isPurchaseDialogOpen && (
                 <PurchaseNameDialog
                     name={name}
