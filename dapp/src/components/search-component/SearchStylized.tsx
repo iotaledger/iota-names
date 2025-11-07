@@ -37,7 +37,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
     const borderClasses = lightSearch ? BORDER_LIGHT_CLASSES : BORDER_GRADIENT_CLASSES;
     const inputTextSize = lightSearch
         ? 'text-title-md xs:text-title-lg'
-        : 'text-title-md xs:text-headline-sm sm:text-headline-md';
+        : 'text-title-lg xs:text-headline-sm sm:text-headline-md';
     const placeholderTextColor = lightSearch
         ? 'placeholder:text-names-neutral-70'
         : 'input-placeholder-color';
@@ -48,7 +48,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         <InputWrapper disabled={disabled} errorMessage={errorMessage}>
             <div
                 className={cx(
-                    'relative flex flex-row items-center sm:px-lg sm:py-md py-xs rounded-full border-2',
+                    'relative flex flex-row items-center sm:px-lg sm:py-md py-xs rounded-full border-2 h-16',
                     lightSearch ? 'gap-x-3 px-sm' : 'gap-x-1 px-[14px]',
                     !lightSearch && 'search-container',
                     borderClasses,
@@ -76,7 +76,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
                     <ButtonUnstyled
                         className={cx(
                             'text-names-neutral-92 [&_svg]:h-5 [&_svg]:w-5 p-sm state-layer relative rounded-full',
-                            !value?.length && 'invisible',
+                            !value?.length && 'hidden',
                         )}
                         onClick={onClearInput}
                         tabIndex={-1}
