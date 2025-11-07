@@ -14,12 +14,13 @@ export default defineConfig({
         timeout: 10_000,
     },
     use: {
-        baseURL: 'http://localhost:3000',
+        baseURL: 'http://localhost:3005',
         trace: 'on-first-retry',
     },
     projects: [
         {
-            name: 'chromium',
+            name: 'Chromium',
+            testDir: './tests/common',
             use: {
                 ...devices['Desktop Chrome'],
                 userAgent: 'Playwright',
@@ -27,8 +28,8 @@ export default defineConfig({
         },
     ],
     webServer: {
-        command: 'pnpm run dev',
-        port: 3000,
+        command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
+        port: 3005,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
     },
