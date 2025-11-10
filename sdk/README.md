@@ -1,7 +1,7 @@
 # IOTA-Names SDK
 
 [![npm version](https://img.shields.io/npm/v/@iota/iota-names-sdk.svg)](https://www.npmjs.com/package/@iota/iota-names-sdk)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](../LICENSE)
 
 A TypeScript SDK for interacting with the IOTA Name Service. This SDK provides a convenient wrapper for querying detailed information and building transactions for IOTA-Names.
 
