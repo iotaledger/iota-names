@@ -4,6 +4,7 @@
 import { Button, ButtonType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { ConnectModal, useCurrentAccount } from '@iota/dapp-kit';
 import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 
 import { queryKey } from '@/hooks/queryKey';
 
@@ -20,6 +21,21 @@ export function AuctionActionButton({
     auctionStatus: UserAuctionStatus;
     onBidClick?: (targetName: string) => void;
 }) {
+    const [, setForceUpdate] = useState(0);
+
+    useEffect(() => {
+        if (!auction.metadata) return;
+
+        const timeRemaining = getTimeRemaining(auction.metadata);
+        if (timeRemaining <= 0) return;
+
+        const timeoutId = setTimeout(() => {
+            setForceUpdate((prev) => prev + 1);
+        }, timeRemaining);
+
+        return () => clearTimeout(timeoutId);
+    }, [auction.metadata]);
+
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const timeRemaining = getTimeRemaining(auction.metadata);
@@ -42,7 +58,27 @@ export function AuctionActionButton({
             <ConnectModal trigger={<Button text="Bid" type={ButtonType.Outlined} fullWidth />} />
         );
     }
-    if (auctionStatus === 'claimable' && auction.metadata?.winner === account?.address) {
+
+    const auctionEnded = !isAuctionActive(auction.metadata);
+    const isWinner = auction.metadata?.winner === account?.address;
+
+    if (auctionEnded && isWinner) {
+        const isClaimLoading = isSigningClaimTransaction;
+
+        return (
+            <Button
+                text={isSigningClaimTransaction ? undefined : 'Claim'}
+                icon={isClaimLoading ? <LoadingIndicator /> : null}
+                onClick={async () => {
+                    await claimTransaction();
+                }}
+                disabled={isSigningClaimTransaction}
+                fullWidth
+            />
+        );
+    }
+
+    if (auctionStatus === 'claimable' && isWinner) {
         const isClaimLoading = isSigningClaimTransaction;
 
         return (
