@@ -37,7 +37,7 @@ jobs:
           context: .
           file: names-display/Dockerfile
           push: true
-          tags: iotaledger/names-display:${{ env.VERSION }}
+          tags: iotaledger/iota-names-display:${{ env.VERSION }}
           no-cache: true
 
       - name: Add SSH key
