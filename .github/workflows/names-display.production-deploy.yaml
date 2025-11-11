@@ -44,12 +44,12 @@ jobs:
           no-cache: true
 
       - name: Add SSH key
-        if: ${{ github.event.inputs.deployment }}
+        if: ${{ github.event.inputs.deployment == 'true' }}
         uses: webfactory/ssh-agent@v0.5.2
         with:
           ssh-private-key: ${{ secrets.UPDATER_SSH_PRIVATE_KEY }}
 
       - name: Deploy to Server
-        if: ${{ github.event.inputs.deployment }}
+        if: ${{ github.event.inputs.deployment == 'true' }}
         run: |
           ssh -o StrictHostKeyChecking=no updater@${{ secrets.UPDATER_SSH_HOST }} "prod ${{ env.VERSION }}"
