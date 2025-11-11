@@ -366,7 +366,6 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
     }
 
     const isAvailable = nameRecordData?.type === 'available';
-    const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
         onPurchase();
@@ -390,7 +389,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
                     priceSupportingText={isAvailable ? 'Price' : undefined}
                     statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
                 >
-                    {isUnavailable ? null : isConnected ? (
+                    {isConnected ? (
                         <Button
                             type={ButtonType.Secondary}
                             text="Buy"
