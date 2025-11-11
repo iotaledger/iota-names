@@ -258,42 +258,51 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 </div>
                                             )}
                                     </div>
-                                    <Panel bgColor="bg-names-neutral-10 state-layer relative">
-                                        <div className="flex flex-col rounded-lg p-md gap-y-md">
-                                            <div
-                                                className={`flex flex-row items-start gap-x-md ${
-                                                    !disableEdit && isTargetingCurrentAddress
-                                                        ? 'cursor-pointer'
-                                                        : 'cursor-not-allowed'
-                                                }`}
-                                                onClick={() => {
-                                                    if (!disableEdit && isTargetingCurrentAddress) {
-                                                        setEditIsDefaultName(!editIsDefaultName);
-                                                    }
-                                                }}
-                                            >
-                                                <div className=" flex flex-col gap-y-xxs">
-                                                    <span className="text-title-md text-names-neutral-100">
-                                                        Set as Display name
-                                                    </span>
-                                                    <span className="text-body-md text-names-neutral-90">
-                                                        Use Name publicly across the web instead of
-                                                        current address.
-                                                    </span>
+                                    {isTargetingCurrentAddress && (
+                                        <Panel bgColor="bg-names-neutral-10 state-layer relative">
+                                            <div className="flex flex-col rounded-lg p-md gap-y-md">
+                                                <div
+                                                    className={`flex flex-row items-start gap-x-md ${
+                                                        !disableEdit && isTargetingCurrentAddress
+                                                            ? 'cursor-pointer'
+                                                            : 'cursor-not-allowed'
+                                                    }`}
+                                                    onClick={() => {
+                                                        if (
+                                                            !disableEdit &&
+                                                            isTargetingCurrentAddress
+                                                        ) {
+                                                            setEditIsDefaultName(
+                                                                !editIsDefaultName,
+                                                            );
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className=" flex flex-col gap-y-xxs">
+                                                        <span className="text-title-md text-names-neutral-100">
+                                                            Set as Display name
+                                                        </span>
+                                                        <span className="text-body-md text-names-neutral-90">
+                                                            Use Name publicly across the web instead
+                                                            of current address.
+                                                        </span>
+                                                    </div>
+                                                    <Checkbox
+                                                        isChecked={editIsDefaultName}
+                                                        isDisabled={
+                                                            disableEdit ||
+                                                            !isTargetingCurrentAddress
+                                                        }
+                                                        onCheckedChange={(checked) => {
+                                                            const value = !!checked.target.checked;
+                                                            console.log(
+                                                                'Checkbox Set as Display Name →',
+                                                                value,
+                                                            );
+                                                            setEditIsDefaultName(value);
+                                                        }}
+                                                    />
                                                 </div>
-                                                <Checkbox
-                                                    isChecked={editIsDefaultName}
-                                                    isDisabled={
-                                                        disableEdit || !isTargetingCurrentAddress
-                                                    }
-                                                    onCheckedChange={(checked) =>
-                                                        setEditIsDefaultName(
-                                                            !!checked.target.checked,
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            {editIsDefaultName && (
                                                 <Panel hasBorder bgColor="bg-names-neutral-10">
                                                     <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
                                                         <span className="text-title-lg text-names-neutral-100 w-full text-center">
@@ -316,19 +325,19 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                         />
                                                     </div>
                                                 </Panel>
-                                            )}
 
-                                            {showAddressWarning && (
-                                                <InfoBox
-                                                    type={InfoBoxType.Warning}
-                                                    style={InfoBoxStyle.Default}
-                                                    icon={<Warning />}
-                                                    title="Address has a linked name!"
-                                                    supportingText="Continuing will override the previous address's name"
-                                                />
-                                            )}
-                                        </div>
-                                    </Panel>
+                                                {showAddressWarning && (
+                                                    <InfoBox
+                                                        type={InfoBoxType.Warning}
+                                                        style={InfoBoxStyle.Default}
+                                                        icon={<Warning />}
+                                                        title="Address has a linked name!"
+                                                        supportingText="Continuing will override the previous address's name"
+                                                    />
+                                                )}
+                                            </div>
+                                        </Panel>
+                                    )}
                                 </>
                             )}
                         </div>
