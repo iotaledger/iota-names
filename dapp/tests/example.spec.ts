@@ -24,6 +24,8 @@ test.describe('Basic e2e tests', () => {
     });
 
     test('indexer is up and running', async () => {
+        console.log('[Config]:', JSON.stringify(CONFIG, null, 2));
+        console.log(`Checking indexer health at ${CONFIG.indexerUrl}/health`);
         const res = await fetch(`${CONFIG.indexerUrl}/health`);
         expect(res.ok).toBe(true);
     });
