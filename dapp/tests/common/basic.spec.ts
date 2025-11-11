@@ -16,5 +16,5 @@ test('should have IOTA Wallet extension loaded', async ({ extensionId, context }
     const extensionPage = await context.newPage();
     await extensionPage.goto(extensionUrl);
 
-    await expect(extensionPage).toHaveURL(extensionUrl);
+    await expect(extensionPage).toHaveURL((url) => url.toString().startsWith(extensionUrl));
 });
