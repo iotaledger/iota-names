@@ -39,8 +39,8 @@ jobs:
           file: names-display/Dockerfile
           push: true
           tags: |
-            ghcr.io/iotaledger/iota-names-display:${{ env.VERSION }}
-            ghcr.io/iotaledger/iota-names-display:latest
+            ghcr.io/iotaledger/iota-names/iota-names-display:${{ env.VERSION }}
+            ghcr.io/iotaledger/iota-names/iota-names-display:latest
           no-cache: true
 
       - name: Add SSH key
