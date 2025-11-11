@@ -9,3 +9,5 @@ export const SENTRY_DSN = IS_PROD
 
 export const SENTRY_PROJECT_NAME = IS_PROD ? 'iota-names-dapp' : 'iota-names-dapp-dev';
 export const SENTRY_ORG_NAME = 'iota-foundation-eu';
+
+export const SENTRY_IGNORE_ERRORS = ['Failed to connect to MetaMask', 'Rejected from user'];

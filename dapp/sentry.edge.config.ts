@@ -8,7 +8,7 @@
 
 import * as Sentry from '@sentry/nextjs';
 
-import { IS_PROD, SENTRY_DSN } from './sentry.common.config.mjs';
+import { IS_PROD, SENTRY_DSN, SENTRY_IGNORE_ERRORS } from './sentry.common.config.mjs';
 
 Sentry.init({
     enabled: IS_PROD && Boolean(SENTRY_DSN),
@@ -19,5 +19,5 @@ Sentry.init({
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
     debug: false,
-    ignoreErrors: ['Failed to connect to MetaMask'],
+    ignoreErrors: SENTRY_IGNORE_ERRORS,
 });

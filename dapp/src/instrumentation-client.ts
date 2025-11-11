@@ -7,7 +7,7 @@
 
 import * as Sentry from '@sentry/nextjs';
 
-import { IS_PROD, SENTRY_DSN } from '../sentry.common.config.mjs';
+import { IS_PROD, SENTRY_DSN, SENTRY_IGNORE_ERRORS } from '../sentry.common.config.mjs';
 
 Sentry.init({
     enabled: IS_PROD && Boolean(SENTRY_DSN),
@@ -17,6 +17,7 @@ Sentry.init({
     tracesSampleRate: 0.0025,
     // Enable logs to be sent to Sentry
     enableLogs: true,
+    ignoreErrors: SENTRY_IGNORE_ERRORS,
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
