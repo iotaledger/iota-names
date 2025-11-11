@@ -1,5 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+import 'dotenv/config';
+
+import { CONFIG } from '@/config';
 
 import { expect, test } from './helpers/fixtures';
 
@@ -18,5 +21,10 @@ test.describe('Basic e2e tests', () => {
         await extensionPage.goto(extensionUrl);
 
         await expect(extensionPage).toHaveURL(extensionUrl);
+    });
+
+    test('indexer is up and running', async () => {
+        const res = await fetch(`${CONFIG.indexerUrl}/health`);
+        expect(res.ok).toBe(true);
     });
 });
