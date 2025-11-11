@@ -48,8 +48,8 @@ jobs:
               "devnet":{
                   "network": "devnet",
                   "namesDisplayUrl": "http://localhost",
-                  "indexerUrl": "http://localhost",
-                  "baseUrl": "http://localhost:3000"
+                  "indexerUrl": "http://localhost:3030",
+                  "baseUrl": "http://localhost:3005"
               }
             }
         run: |
@@ -144,8 +144,8 @@ jobs:
           "localnet": {
             "network": "localnet",
             "namesDisplayUrl": "http://localhost",
-            "indexerUrl": "http://localhost",
-            "baseUrl": "http://localhost:3000"
+            "indexerUrl": "http://localhost:3030",
+            "baseUrl": "http://localhost:3005"
           }
         }
     services:
