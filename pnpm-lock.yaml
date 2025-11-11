@@ -133,8 +133,8 @@ importers:
         specifier: ^0.5.3
         version: 0.5.3(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20251021145947
-        version: 0.0.0-experimental-20251021145947(typescript@5.8.3)
+        specifier: ^0.11.0
+        version: 0.11.0(typescript@5.8.3)
       '@iota/iota-names-sdk':
         specifier: workspace:^
         version: link:../sdk
@@ -261,7 +261,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1)
+        version: 2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1)
 
   documentation:
     dependencies:
@@ -291,7 +291,7 @@ importers:
         version: 2.16.0(react@18.3.1)
       tailwindcss:
         specifier: ^3.4.3
-        version: 3.4.17(ts-node@10.9.2(@types/node@22.16.0)(typescript@5.8.3))
+        version: 3.4.17(ts-node@10.9.2(@types/node@24.0.14)(typescript@5.8.3))
 
   names-display:
     dependencies:
@@ -334,7 +334,7 @@ importers:
         version: 5.8.3
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1)
+        version: 2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1)
 
   scripts:
     dependencies:
@@ -377,8 +377,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20251021145947
-        version: 0.0.0-experimental-20251021145947(typescript@5.8.3)
+        specifier: ^0.11.0
+        version: 0.11.0(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -396,7 +396,7 @@ importers:
         version: 6.2.3(@types/node@24.0.14)(jiti@2.4.2)(lightningcss@1.29.2)(sass@1.92.1)(tsx@4.19.3)(yaml@2.8.0)
       vitest:
         specifier: ^2.1.8
-        version: 2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1)
+        version: 2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1)
 
 packages:
 
@@ -1841,18 +1841,17 @@ packages:
   '@iota/bcs@1.2.0':
     resolution: {integrity: sha512-QdRSR0KpJ87tdjVNmM/j0+0DvE0aTxHIa02337iluaOsMqtJ8OdgUCfSyLduC/3qS+8tJE+UB1KOw55tF+sN2w==}
 
+  '@iota/bcs@1.3.0':
+    resolution: {integrity: sha512-R99rbggmRuRIhfPpmmceo87gRrVrfM1oZRhGhK5dmbOk5wooo3rMYzN/a0KzQ9Ieig/FisuV5uDEkFheQXr7WA==}
+
   '@iota/dapp-kit@0.5.3':
     resolution: {integrity: sha512-XdEBM8+ylcQpxcZ/iwIBzvz60/phfaYFCVVK+lewCxXkY+XLRrRggGBp5wA2LLtHPTvoMJpf/hpMcv1xtZ5wTg==}
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
 
-  '@iota/graphql-transport@0.0.0-experimental-20251021145947':
-    resolution: {integrity: sha512-YTAqgFXfErHQDEP9ytaJ202J1tlwiHSzPU1im0CWfAGcI1bTMfqeHqc5L52a84UySWZh7V4XMvtRbT/sdHV35w==}
-
-  '@iota/iota-sdk@0.0.0-experimental-20251021145947':
-    resolution: {integrity: sha512-iDVGXKK+elWmDX8sxd3MRQ5u94AFO310ICAQUI4t+u475KY19clOpHf6FzuFbuxrPWQf+6Gcb/xlJ9L2rkRwnA==}
-    engines: {node: '>=20'}
+  '@iota/graphql-transport@0.11.0':
+    resolution: {integrity: sha512-HsMStdLnG3l7rVSgjW/MRSZd0pMfgRXXJTaRI+12XRNAGMb7LKdY78q+dqmetuFCtO6EsZL7otzbu7Uc5rh/8w==}
 
   '@iota/iota-sdk@1.5.0':
     resolution: {integrity: sha512-R5Tx78Z3ZMh+P7uAqN3U+JylfY+rbnnzjqEehef+bYatyddkh8uEr7S2l/0++Vrp56bpZnSdLTld1PvKKWyXaQ==}
@@ -1860,6 +1859,10 @@ packages:
 
   '@iota/iota-sdk@1.6.1':
     resolution: {integrity: sha512-V7rx7m9erCn9lr4hNZVMtwmka2NsoTZ9EFSE4ZqEDO44cWdheM61+i/y5HJhvvmYAb/kkDfSmfdmzLaGTbVVYg==}
+    engines: {node: '>=20'}
+
+  '@iota/iota-sdk@1.7.1':
+    resolution: {integrity: sha512-ZUGPGldQPI2j9twUkylRuE/JkP9U4T7eOFdid4G8UufCs5VdepTISv76IoTSgn/K27xQhVjULsqx4rhlUWSXeA==}
     engines: {node: '>=20'}
 
   '@iota/kiosk@0.4.6':
@@ -9638,6 +9641,10 @@ snapshots:
     dependencies:
       bs58: 6.0.0
 
+  '@iota/bcs@1.3.0':
+    dependencies:
+      bs58: 6.0.0
+
   '@iota/dapp-kit@0.5.3(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
       '@iota/iota-sdk': 1.6.1(typescript@5.8.3)
@@ -9662,32 +9669,12 @@ snapshots:
       - react-dom
       - typescript
 
-  '@iota/graphql-transport@0.0.0-experimental-20251021145947(typescript@5.8.3)':
+  '@iota/graphql-transport@0.11.0(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.2.0
-      '@iota/iota-sdk': 0.0.0-experimental-20251021145947(typescript@5.8.3)
+      '@iota/bcs': 1.3.0
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
       graphql: 16.11.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
-
-  '@iota/iota-sdk@0.0.0-experimental-20251021145947(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 1.2.0
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      '@suchipi/femver': 1.0.0
-      bech32: 2.0.0
-      bignumber.js: 9.3.0
-      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
-      graphql: 16.11.0
-      tweetnacl: 1.0.3
-      valibot: 0.36.0
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
@@ -9717,6 +9704,26 @@ snapshots:
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
       '@iota/bcs': 1.2.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      '@suchipi/femver': 1.0.0
+      bech32: 2.0.0
+      bignumber.js: 9.3.0
+      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
+      graphql: 16.11.0
+      tweetnacl: 1.0.3
+      valibot: 0.36.0
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
+  '@iota/iota-sdk@1.7.1(typescript@5.8.3)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      '@iota/bcs': 1.3.0
       '@noble/curves': 1.9.1
       '@noble/hashes': 1.8.0
       '@scure/bip32': 1.7.0
@@ -11368,7 +11375,7 @@ snapshots:
       sirv: 3.0.1
       tinyglobby: 0.2.14
       tinyrainbow: 1.2.0
-      vitest: 2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1)
+      vitest: 2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1)
     optional: true
 
   '@vitest/utils@2.1.9':
@@ -15400,13 +15407,13 @@ snapshots:
       postcss: 8.5.3
       ts-node: 10.9.2(@types/node@20.17.27)(typescript@5.8.3)
 
-  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.16.0)(typescript@5.8.3)):
+  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@24.0.14)(typescript@5.8.3)):
     dependencies:
       lilconfig: 3.1.3
       yaml: 2.8.0
     optionalDependencies:
       postcss: 8.5.3
-      ts-node: 10.9.2(@types/node@22.16.0)(typescript@5.8.3)
+      ts-node: 10.9.2(@types/node@24.0.14)(typescript@5.8.3)
 
   postcss-nested@6.2.0(postcss@8.5.3):
     dependencies:
@@ -16239,7 +16246,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  tailwindcss@3.4.17(ts-node@10.9.2(@types/node@22.16.0)(typescript@5.8.3)):
+  tailwindcss@3.4.17(ts-node@10.9.2(@types/node@24.0.14)(typescript@5.8.3)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -16258,7 +16265,7 @@ snapshots:
       postcss: 8.5.3
       postcss-import: 15.1.0(postcss@8.5.3)
       postcss-js: 4.0.1(postcss@8.5.3)
-      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.16.0)(typescript@5.8.3))
+      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@24.0.14)(typescript@5.8.3))
       postcss-nested: 6.2.0(postcss@8.5.3)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.10
@@ -16428,6 +16435,25 @@ snapshots:
       typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
+
+  ts-node@10.9.2(@types/node@24.0.14)(typescript@5.8.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 24.0.14
+      acorn: 8.15.0
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.8.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
 
   ts-retry-promise@0.8.1: {}
 
@@ -16857,7 +16883,7 @@ snapshots:
       tsx: 4.19.3
       yaml: 2.8.0
 
-  vitest@2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1):
+  vitest@2.1.9(@types/node@20.17.27)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(vite@5.4.15(@types/node@20.17.27)(lightningcss@1.29.2)(sass@1.92.1))
@@ -16894,7 +16920,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0)(lightningcss@1.29.2)(sass@1.92.1):
+  vitest@2.1.9(@types/node@24.0.14)(@vitest/ui@2.1.9)(jsdom@26.1.0(canvas@3.1.2))(lightningcss@1.29.2)(sass@1.92.1):
     dependencies:
       '@vitest/expect': 2.1.9
       '@vitest/mocker': 2.1.9(vite@5.4.15(@types/node@24.0.14)(lightningcss@1.29.2)(sass@1.92.1))

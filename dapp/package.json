@@ -31,7 +31,7 @@
         "@iota/apps-ui-icons": "^0.4.1",
         "@iota/apps-ui-kit": "^0.7.2",
         "@iota/dapp-kit": "^0.5.3",
-        "@iota/graphql-transport": "0.0.0-experimental-20251021145947",
+        "@iota/graphql-transport": "^0.11.0",
         "@iota/iota-names-sdk": "workspace:^",
         "@iota/iota-sdk": "^1.6.1",
         "@iota/kiosk": "^0.4.8",
