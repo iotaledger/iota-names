@@ -32,12 +32,7 @@ export async function initAmplitude(defaultNetwork: string) {
         // This ensures the plugin intercepts all events including identify
         await ampli.client.add(consentBufferPlugin).promise;
 
-        // Now identify the user with their group
-        ampli.identify(undefined, {
-            groups: {
-                activeNetwork: defaultNetwork,
-            },
-        });
+        setNetworkGroup(defaultNetwork);
     }
 
     // Flush events before page unload
@@ -45,6 +40,10 @@ export async function initAmplitude(defaultNetwork: string) {
         amplitude.setTransport('beacon');
         amplitude.flush();
     });
+}
+
+function setNetworkGroup(network: string): void {
+    ampli.client.setGroup('activeNetwork', network); // keep `activeNetwork` key for backward compatibility
 }
 
 /**
