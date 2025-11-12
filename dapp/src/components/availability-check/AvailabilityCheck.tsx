@@ -235,6 +235,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
+                            testId="unavailable-purchase-card"
                         />
                     ) : isForbiddenName(name, blockedList) ? (
                         <NamePurchaseCard

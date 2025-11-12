@@ -27,6 +27,15 @@ export default defineConfig({
             },
             fullyParallel: true,
         },
+        {
+            name: 'Purchase flow',
+            testDir: './tests/purchase',
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            fullyParallel: true,
+        },
     ],
     webServer: {
         command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
