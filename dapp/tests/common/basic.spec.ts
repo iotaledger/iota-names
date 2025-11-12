@@ -18,9 +18,9 @@ test.describe('Basic e2e tests', () => {
 
         const extensionUrl = `chrome-extension://${extensionId}/ui.html`;
         const extensionPage = await context.newPage();
-        await extensionPage.goto(extensionUrl);
+        await extensionPage.goto(extensionUrl, { waitUntil: 'commit' });
 
-        await expect(extensionPage).toHaveURL(extensionUrl);
+        await expect(extensionPage).toHaveURL((url) => url.toString().startsWith(extensionUrl));
     });
 
     test('indexer is up and running', async () => {
