@@ -8,8 +8,6 @@ import { expect } from '@playwright/test';
 import { test } from '../helpers/fixtures';
 import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
 
-const getRandomNum = () => Math.floor(Math.random() * 1000);
-
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('Purchase Name Tests', () => {
@@ -31,7 +29,7 @@ test.describe('Purchase Name Tests', () => {
     });
 
     test('Can purchase a name', async ({ appPage: page, context }) => {
-        const nameToPurchase = `e2e-${getRandomNum()}`;
+        const nameToPurchase = `e2e-test-name`;
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
