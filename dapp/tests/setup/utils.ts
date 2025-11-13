@@ -36,14 +36,19 @@ if (!iotaNamesClient.config) {
     throw new Error('IOTA Names Client Config is not properly configured');
 }
 
-const authKeyType = `${iotaNamesClient.config.packageId}::iota_names::AuthKey`;
+const packageId = iotaNamesClient.resolveRead('packageId');
+const paymentsPackageId = iotaNamesClient.resolveRead('paymentsPackageId');
+const auctionPackageId = iotaNamesClient.resolveRead('auctionPackageId');
+const iotaNamesObjectId = iotaNamesClient.resolveRead('iotaNamesObjectId');
 
-const PAYMENT_TYPE = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::payments::PaymentsAuth>`;
-const AUCTION_TYPE = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::AuctionAuth>`;
+const authKeyType = `${packageId}::iota_names::AuthKey`;
+
+const PAYMENT_TYPE = `${authKeyType}<${paymentsPackageId}::payments::PaymentsAuth>`;
+const AUCTION_TYPE = `${authKeyType}<${auctionPackageId}::auction::AuctionAuth>`;
 
 async function getAuthorizedSmartContractTypes() {
     const { data: dynamicFields } = await iotaClient.getDynamicFields({
-        parentId: iotaNamesClient.config.iotaNamesObjectId,
+        parentId: iotaNamesObjectId,
     });
 
     const fieldTypes = dynamicFields.map((field) => field.name.type);
