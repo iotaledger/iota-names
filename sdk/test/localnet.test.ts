@@ -86,7 +86,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     // Register a name for 2 years
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        coinConfig: iotaNamesClient.config.coins.IOTA,
+        coinConfig: iotaNamesClient.config.metadata.coins.IOTA,
         coin: coinInput,
     });
 
@@ -284,7 +284,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -318,7 +318,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -369,7 +369,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -412,7 +412,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -452,7 +452,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -494,7 +494,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -540,7 +540,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             // Register the root name
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -592,7 +592,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
@@ -626,7 +626,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: client.config.metadata.coins.IOTA,
                 coin: coinInput,
             });
 
