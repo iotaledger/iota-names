@@ -36,7 +36,7 @@ export function loadLocalnetConfig(): PackageInfo {
             packages: {
                 ...localnetConfig,
             },
-        };
+        } as PackageInfo;
     } catch (error) {
         throw new Error(
             `Failed to load localnet configuration: ${error instanceof Error ? error.message : String(error)}`,
