@@ -71,6 +71,14 @@ export async function createWallet(page: Page) {
 
     await page.getByTestId('close-icon').click();
 
+    await page.getByLabel('Open settings menu').click();
+    await page.getByText('Network').click();
+    await page.getByText('Custom RPC').click();
+    await page.getByPlaceholder('http://localhost:3000/').fill(CONFIG.baseUrl);
+    await page.getByRole('button', { name: 'Save' }).click();
+
+    await page.getByTestId('close-icon').click();
+
     return {
         mnemonic,
         address,
