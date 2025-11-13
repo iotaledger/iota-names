@@ -89,6 +89,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             size="full"
             displaySrc={auctionDisplayImage}
             blurImage={shouldCensor}
+            testId="auction-name-card"
         >
             <NameCardBody name={censoredName}>
                 {auctionStatus === 'top_bidder' ? (
@@ -212,7 +213,7 @@ function AuctionTimeRemaining({
             <div>
                 <span className="text-label-md text-names-neutral-50">Time left</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" data-testid="auction-time-remaining">
                 <Clock className="w-4 h-4 text-names-neutral-50" />
                 <span className="text-label-md text-names-neutral-50">
                     {formattedTimeRemaining}

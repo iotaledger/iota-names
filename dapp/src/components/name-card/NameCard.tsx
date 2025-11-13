@@ -14,6 +14,7 @@ interface NameCardProps extends NftDisplayProps {
     isSelected?: boolean;
     displaySrc?: string | null;
     blurImage?: boolean;
+    testId?: string;
 }
 
 export function NameCard({
@@ -25,6 +26,7 @@ export function NameCard({
     children,
     displaySrc,
     blurImage,
+    testId,
 }: React.PropsWithChildren<NameCardProps>) {
     return (
         <div
@@ -33,6 +35,7 @@ export function NameCard({
                 isSelected && 'name-card-selected',
                 nftDisplayVariants({ size }),
             )}
+            data-testid={testId}
         >
             <div
                 className={cx(
