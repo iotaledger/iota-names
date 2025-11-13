@@ -11,12 +11,15 @@ import { queryKey } from './queryKey';
 export function useNamesPurchaseMode() {
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
-    const packageId = iotaNamesClient.resolvePackageId('v1');
+    const packageId = iotaNamesClient.resolveForRead('packageId');
+    const paymentsPackageId = iotaNamesClient.resolveForRead('paymentsPackageId');
+    const auctionPackageId = iotaNamesClient.resolveForRead('auctionPackageId');
+    const iotaNamesObjectId = iotaNamesClient.resolveForRead('iotaNamesObjectId');
 
     const authKeyType = `${packageId}::iota_names::AuthKey`;
 
-    const paymentType = `${authKeyType}<${iotaNamesClient.config.paymentsPackageId}::payments::PaymentsAuth>`;
-    const auctionType = `${authKeyType}<${iotaNamesClient.config.auctionPackageId}::auction::AuctionAuth>`;
+    const paymentType = `${authKeyType}<${paymentsPackageId}::payments::PaymentsAuth>`;
+    const auctionType = `${authKeyType}<${auctionPackageId}::auction::AuctionAuth>`;
 
     return useQuery({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
@@ -27,7 +30,7 @@ export function useNamesPurchaseMode() {
             }
 
             const { data: dynamicFields } = await iotaClient.getDynamicFields({
-                parentId: iotaNamesClient.config.iotaNamesObjectId,
+                parentId: iotaNamesObjectId,
             });
 
             const fieldTypes = dynamicFields.map((field) => field.name.type);
