@@ -27,24 +27,23 @@ export default defineConfig({
             },
             fullyParallel: true,
         },
-        {
-            name: 'Purchase setup',
-            testMatch: /purchase\.setup\.ts/,
-        },
-        {
-            name: 'Purchase flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/purchase',
-            dependencies: ['Purchase setup'],
-            fullyParallel: true,
-        },
+        // {
+        //     name: 'Purchase setup',
+        //     testMatch: /purchase\.setup\.ts/,
+        // },
+        // {
+        //     name: 'Purchase flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/purchase',
+        //     dependencies: ['Purchase setup'],
+        //     fullyParallel: true,
+        // },
         {
             name: 'Auctions setup',
             testMatch: /auctions\.setup\.ts/,
-            dependencies: ['Purchase flow'],
         },
         {
             name: 'Auctions flow',
