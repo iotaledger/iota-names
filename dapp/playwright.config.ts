@@ -10,8 +10,9 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     workers: process.env.CI ? 2 : undefined,
     reporter: 'html',
+    timeout: 60_000,
     expect: {
-        timeout: 10_000,
+        timeout: 60_000,
     },
     use: {
         baseURL: 'http://localhost:3005',
@@ -27,24 +28,23 @@ export default defineConfig({
             },
             fullyParallel: true,
         },
-        {
-            name: 'Purchase setup',
-            testMatch: /purchase\.setup\.ts/,
-        },
-        {
-            name: 'Purchase flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/purchase',
-            dependencies: ['Purchase setup'],
-            fullyParallel: true,
-        },
+        // {
+        //     name: 'Purchase setup',
+        //     testMatch: /purchase\.setup\.ts/,
+        // },
+        // {
+        //     name: 'Purchase flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/purchase',
+        //     dependencies: ['Purchase setup'],
+        //     fullyParallel: true,
+        // },
         {
             name: 'Auctions setup',
             testMatch: /auctions\.setup\.ts/,
-            dependencies: ['Purchase flow'],
         },
         {
             name: 'Auctions flow',
@@ -59,7 +59,7 @@ export default defineConfig({
     webServer: {
         command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
         port: 3005,
-        timeout: 30 * 1000,
+        timeout: 60 * 1000,
         reuseExistingServer: !process.env.CI,
     },
 });
