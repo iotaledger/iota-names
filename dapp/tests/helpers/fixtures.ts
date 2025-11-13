@@ -27,6 +27,7 @@ export interface SharedState {
         mnemonic?: string;
         page?: Page;
     };
+    testAuctionName?: string;
 }
 
 const sharedState: SharedState = { ...DEFAULT_SHARED_STATE };
