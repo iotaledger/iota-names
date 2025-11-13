@@ -10,9 +10,9 @@ export default defineConfig({
     retries: process.env.CI ? 1 : 0,
     workers: process.env.CI ? 2 : undefined,
     reporter: 'html',
-    timeout: 60_000,
+    timeout: 20_000,
     expect: {
-        timeout: 60_000,
+        timeout: 20_000,
     },
     use: {
         baseURL: 'http://localhost:3005',
@@ -59,7 +59,7 @@ export default defineConfig({
     webServer: {
         command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
         port: 3005,
-        timeout: 60 * 1000,
+        timeout: 20 * 1000,
         reuseExistingServer: !process.env.CI,
     },
 });

@@ -22,7 +22,7 @@ test.describe.parallel('Auction Bid Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('transaccion para crear una subasta', async ({ sharedState }) => {
+    test('transaction to create an auction', async ({ sharedState }) => {
         try {
             let keypair: Ed25519Keypair;
             if (sharedState.wallet.mnemonic) {
