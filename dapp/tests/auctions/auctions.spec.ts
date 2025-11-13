@@ -1,14 +1,14 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
-
-import { buildCreateAuctionTransaction } from '@/auctions';
-
 import { expect, test } from '../helpers/fixtures';
-import { iotaClient, iotaNamesClient } from '../setup/utils';
-import { connectWallet, createWallet, generateRandomName, requestFaucetTokens } from '../utils';
+import {
+    connectWallet,
+    createWallet,
+    generateRandomName,
+    requestFaucetTokens,
+    transactionToCreateAnAuction,
+} from '../utils';
 
 test.describe.serial('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -25,49 +25,8 @@ test.describe.serial('Auction Bid Flow', () => {
     });
 
     test('create bid on existing auction', async ({ appPage: page, sharedState }) => {
-        try {
-            const { testAuctionName } = sharedState;
-            let keypair: Ed25519Keypair;
-
-            if (sharedState.wallet.mnemonic) {
-                keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic);
-            } else {
-                keypair = new Ed25519Keypair();
-                await requestFaucetTokens(keypair.toIotaAddress());
-            }
-
-            if (!testAuctionName) {
-                throw new Error('testAuctionName is undefined');
-            }
-
-            const tx = buildCreateAuctionTransaction(
-                iotaNamesClient.config.auctionPackageId,
-                iotaNamesClient.config.iotaNamesObjectId,
-                iotaNamesClient.config.auctionHouseObjectId,
-                keypair.toIotaAddress(),
-                BigInt(80) * NANOS_PER_IOTA,
-                testAuctionName,
-            );
-
-            const txBytes = await tx.build({ client: iotaClient });
-            const txDryRun = await iotaClient.dryRunTransactionBlock({ transactionBlock: txBytes });
-
-            if (txDryRun.effects.status.status !== 'success') {
-                throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-            }
-
-            const response = await iotaClient.signAndExecuteTransaction({
-                transaction: txBytes,
-                signer: keypair,
-            });
-
-            console.log('Transaction sent. Block ID:', response.transaction);
-            console.log(`Successfully created auction for name: ${testAuctionName}`);
-        } catch (error) {
-            console.error('Error creating initial auction:', error);
-            throw error;
-        }
-
+        await transactionToCreateAnAuction({ sharedState });
+        await page.waitForTimeout(5000);
         await page.goto('/auctions');
 
         const refreshContainer = page.getByTestId('auctions-refresh-container');
@@ -106,7 +65,7 @@ test.describe.serial('Auction Bid Flow', () => {
 
         await walletPopup.waitForEvent('close', { timeout: 10_000 });
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
-            timeout: 15_000,
+            timeout: 5_000,
         });
     });
 });
