@@ -28,8 +28,10 @@ export function useClaimAuctionTransaction(
                 throw new Error('Auction house not available');
             }
 
+            const auctionPackageId = iotaNamesClient.resolveWrite('auctionPackageId');
+
             const transaction = buildClaimNameTransaction(
-                iotaNamesClient.config.auctionPackageId,
+                auctionPackageId,
                 auctionHouseData.auctionHouseId,
                 address,
                 name,
