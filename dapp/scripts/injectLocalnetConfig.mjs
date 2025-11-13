@@ -14,9 +14,16 @@ const PLACEHOLDER = 'REPLACE PLACEHOLDER';
 
 try {
     const localnetConfig = JSON.parse(readFileSync(LOCALNET_JSON_PATH, 'utf-8'));
-    const localnetConfigStr = JSON.stringify(localnetConfig);
+    const localnetConfigStr = JSON.stringify({
+        metadata: {
+            coins: localnetConfig.coins,
+        },
+        packages: {
+            ...localnetConfig,
+        },
+    });
 
-    const constantsContent = readFileSync(CONSTANTS_TS_PATH, 'utf-8');
+    let constantsContent = readFileSync(CONSTANTS_TS_PATH, 'utf-8');
 
     const lines = constantsContent.split('\n');
     const placeholderIndex = lines.findIndex((line) => line.includes(PLACEHOLDER));
