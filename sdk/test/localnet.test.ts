@@ -29,7 +29,14 @@ export function loadLocalnetConfig(): PackageInfo {
         // Read the generated configuration file
         const localnetConfig = JSON.parse(readFileSync(localnetConfigPath, 'utf8'));
 
-        return localnetConfig;
+        return {
+            metadata: {
+                coins: localnetConfig.coins,
+            },
+            packages: {
+                ...localnetConfig,
+            },
+        };
     } catch (error) {
         throw new Error(
             `Failed to load localnet configuration: ${error instanceof Error ? error.message : String(error)}`,
