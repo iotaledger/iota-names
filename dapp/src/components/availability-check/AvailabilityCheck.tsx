@@ -386,8 +386,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
                     name={name}
                     isAvailable={isAvailable}
                     price={formattedPurchasePrice}
-                    priceSupportingText={isAvailable ? 'Price' : undefined}
-                    statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
+                    priceSupportingText="Price"
                 >
                     {isConnected ? (
                         <Button
