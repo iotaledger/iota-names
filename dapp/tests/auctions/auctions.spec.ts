@@ -27,15 +27,14 @@ test.describe.serial('Auction Bid Flow', () => {
     test('create bid on existing auction', async ({ appPage: page, sharedState }) => {
         await transactionToCreateAnAuction({ sharedState });
         await page.waitForTimeout(5000);
+
         await page.goto('/auctions');
 
         const refreshContainer = page.getByTestId('auctions-refresh-container');
-        await expect(refreshContainer).toBeVisible({ timeout: 10_000 });
+        await expect(refreshContainer).toBeVisible({ timeout: 5000 });
         const refreshButton = refreshContainer.getByRole('button');
         await refreshButton.click();
-        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible({
-            timeout: 15_000,
-        });
+        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible();
 
         const { testAuctionName } = sharedState;
         if (!testAuctionName) {
@@ -44,13 +43,13 @@ test.describe.serial('Auction Bid Flow', () => {
         const displayName = `@${testAuctionName.replace('.iota', '')}`;
 
         const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
-        await expect(nameCard).toBeVisible({ timeout: 30_000 });
+        await expect(nameCard).toBeVisible({ timeout: 5000 });
 
         const bidButton = nameCard.getByRole('button', { name: /Bid Again/i });
         await bidButton.click();
 
         const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 5000 });
 
         const bidBtn = page.getByRole('button', { name: /^Bid$/i });
         await expect(bidBtn).toBeVisible();
@@ -63,7 +62,7 @@ test.describe.serial('Auction Bid Flow', () => {
         const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
         await approveBtn.click();
 
-        await walletPopup.waitForEvent('close', { timeout: 10_000 });
+        await walletPopup.waitForEvent('close', { timeout: 4000 });
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
             timeout: 5_000,
         });
