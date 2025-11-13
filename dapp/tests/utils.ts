@@ -98,3 +98,8 @@ export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
 export function getAddressByIndexPath(mnemonic: string, index: number) {
     return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
 }
+
+export function generateRandomName() {
+    const random = Math.floor(Math.random() * 1_000_000);
+    return `example${random}.iota`;
+}

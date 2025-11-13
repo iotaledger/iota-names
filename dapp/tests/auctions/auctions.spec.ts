@@ -8,9 +8,9 @@ import { buildCreateAuctionTransaction } from '@/auctions';
 
 import { expect, test } from '../helpers/fixtures';
 import { iotaClient, iotaNamesClient } from '../setup/utils';
-import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
+import { connectWallet, createWallet, generateRandomName, requestFaucetTokens } from '../utils';
 
-test.describe.parallel('Auction Bid Flow', () => {
+test.describe.serial('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -20,10 +20,13 @@ test.describe.parallel('Auction Bid Flow', () => {
         await requestFaucetTokens(address);
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
+
+        sharedState.testAuctionName = generateRandomName();
     });
 
     test('transaction to create an auction', async ({ sharedState }) => {
         try {
+            const { testAuctionName } = sharedState;
             let keypair: Ed25519Keypair;
             if (sharedState.wallet.mnemonic) {
                 keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic);
@@ -32,15 +35,17 @@ test.describe.parallel('Auction Bid Flow', () => {
                 await requestFaucetTokens(keypair.toIotaAddress());
             }
 
+            if (!testAuctionName) {
+                throw new Error('testAuctionName is undefined');
+            }
             const tx = buildCreateAuctionTransaction(
                 iotaNamesClient.config.auctionPackageId,
                 iotaNamesClient.config.iotaNamesObjectId,
                 iotaNamesClient.config.auctionHouseObjectId,
                 keypair.toIotaAddress(),
                 BigInt(80) * NANOS_PER_IOTA,
-                'please.iota',
+                testAuctionName,
             );
-            console.log('tx', tx);
             const txBytes = await tx.build({
                 client: iotaClient,
             });
@@ -55,7 +60,6 @@ test.describe.parallel('Auction Bid Flow', () => {
                 signer: keypair,
             });
             console.log('Transaction sent. Block ID:', response.transaction);
-            console.log(JSON.stringify(response, null, 2));
         } catch (error) {
             console.error('Error creating initial auction:', error);
             if (error instanceof Error) console.error(error.stack);
@@ -63,10 +67,15 @@ test.describe.parallel('Auction Bid Flow', () => {
         }
     });
 
-    test('should auction bid again', async ({ appPage: page }) => {
+    test('create bid on existing auction', async ({ appPage: page, sharedState }) => {
+        const { testAuctionName } = sharedState;
+        if (!testAuctionName) {
+            throw new Error('testAuctionName is undefined');
+        }
+        const displayName = `@${testAuctionName.replace('.iota', '')}`;
         await page.goto('/auctions', { waitUntil: 'networkidle' });
 
-        const nameCard = page.getByTestId('body-name').filter({ hasText: '@please' });
+        const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
         await expect(nameCard).toBeVisible({ timeout: 15_000 });
 
         const bidButton = nameCard.getByRole('button', { name: /Bid/i });
@@ -74,9 +83,6 @@ test.describe.parallel('Auction Bid Flow', () => {
 
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
-
-        const input = dialog.getByLabel('Your Bid');
-        await input.fill('81');
 
         const bidBtn = page.getByRole('button', { name: /^Bid$/i });
         await expect(bidBtn).toBeVisible();
