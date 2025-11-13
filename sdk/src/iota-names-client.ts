@@ -82,7 +82,7 @@ export class IotaNamesClient {
     /**
      * Resolve the value of a given package key and the desired version.
      */
-    resolveForRead(key: keyof PackageInfo['packages'], version: 'v1' | 'v2' = 'v1'): string {
+    resolveRead(key: keyof PackageInfo['packages'], version: 'v1' | 'v2' = 'v1'): string {
         const pkg = this.config.packages[key];
 
         // This package is not versioned at all
@@ -118,8 +118,8 @@ export class IotaNamesClient {
      * Returns the core config of IOTA Names.
      */
     async getCoreConfig(): Promise<IotaNamesCoreConfig> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
 
         const coreConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -164,9 +164,9 @@ export class IotaNamesClient {
      * Returns the subnames config of IOTA Names.
      */
     async getSubnamesConfig(): Promise<IotaNamesSubnamesConfig> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
-        const subnamesPackageId = this.resolveForRead('subnamesPackageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
+        const subnamesPackageId = this.resolveRead('subnamesPackageId');
 
         const subnamesConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -216,8 +216,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 20000000
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -279,8 +279,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 50000000000
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -356,8 +356,8 @@ export class IotaNamesClient {
         reservedTableId: string | null;
         blockedTableId: string | null;
     }> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
 
         const denyListBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -466,8 +466,8 @@ export class IotaNamesClient {
 
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
-        const registryTableId = this.resolveForRead('registryTableId');
-        const packageId = this.resolveForRead('packageId');
+        const registryTableId = this.resolveRead('registryTableId');
+        const packageId = this.resolveRead('packageId');
 
         const nameBcsB64 = toB64(
             NameBcs.serialize({
@@ -530,9 +530,9 @@ export class IotaNamesClient {
     }
 
     async getCouponHouse(): Promise<CouponHouse> {
-        const iotaNamesObjectId = this.resolveForRead('iotaNamesObjectId');
-        const packageId = this.resolveForRead('packageId');
-        const couponsPackageId = this.resolveForRead('couponsPackageId');
+        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
+        const packageId = this.resolveRead('packageId');
+        const couponsPackageId = this.resolveRead('couponsPackageId');
 
         const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
 
