@@ -9,7 +9,6 @@ import { formatAddress, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import { expect } from '@playwright/test';
 
 import { buildCreateAuctionTransaction } from '@/auctions';
-import { CONFIG } from '@/config';
 
 import { test } from '../helpers/fixtures';
 import { iotaClient, iotaNamesClient } from '../setup/utils';
