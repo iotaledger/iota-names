@@ -67,7 +67,9 @@ export async function createWallet(page: Page) {
     await page.getByLabel('Open settings menu').click();
     await page.getByText('Network').click();
     await page.getByText('Custom RPC').click();
-    await page.getByPlaceholder('http://localhost:3000/').fill(CONFIG.baseUrl);
+    const networkId = CONFIG.network;
+    const networkConfig = getNetwork(networkId);
+    await page.getByPlaceholder('http://localhost:3000/').fill(networkConfig.url);
     await page.getByRole('button', { name: 'Save' }).click();
 
     await page.getByTestId('close-icon').click();
