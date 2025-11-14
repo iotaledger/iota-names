@@ -42,9 +42,12 @@ export async function checkAuctionPills(
     await page.getByText('Live Auctions').scrollIntoViewIfNeeded();
 
     const carousel = page.getByTestId('auction-carousel');
-    const auctionInCarousel = carousel.getByTestId('auction-name-card').filter({
-        hasText: normalizeIotaName(nameToAuction, 'at'),
-    });
+    const auctionInCarousel = carousel
+        .getByTestId('auction-name-card')
+        .filter({
+            hasText: normalizeIotaName(nameToAuction, 'at'),
+        })
+        .first();
     await expect(auctionInCarousel.getByTestId('auction-status-badge')).toHaveText(status, {
         timeout: 10_000,
     });
