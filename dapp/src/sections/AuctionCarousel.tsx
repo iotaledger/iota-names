@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
+import { useCurrentAccount } from '@iota/dapp-kit';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Autoplay } from 'swiper/modules';
@@ -19,12 +20,15 @@ import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog'
 export function AuctionCarousel() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
+    const account = useCurrentAccount();
 
     const [containerWidth, setContainerWidth] = useState(0);
     const [hasMeasured, setHasMeasured] = useState(false);
 
     const { data: auctions = [], isLoading } = useAuctions({
-        status: 'active',
+        type: 'allAuctions',
+        userAddress: account?.address,
+        status: 'all',
         search: '',
         page: 0,
         pageSize: 20,

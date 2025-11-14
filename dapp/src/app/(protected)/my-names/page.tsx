@@ -64,6 +64,7 @@ export default function MyNamesPage(): JSX.Element {
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
     } = useAuctions({
+        type: 'userAuctions',
         userAddress: account?.address,
         status: 'all',
     });
