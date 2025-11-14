@@ -7,9 +7,14 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
+import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { Signer } from '@iota/iota-sdk/cryptography';
+import { Transaction } from '@iota/iota-sdk/transactions';
+
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
+import { iotaClient, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
@@ -63,11 +68,15 @@ export async function createWallet(page: Page) {
 
     await page.getByText('I saved my mnemonic').click();
     await page.getByRole('button', { name: 'Open Wallet' }).click();
+
     await page.getByLabel('Open settings menu').click();
     await page.getByText('Network').click();
     await page.getByText('Custom RPC').click();
-    await page.getByPlaceholder('http://localhost:3000/').fill(CONFIG.baseUrl);
+    const networkId = CONFIG.network;
+    const networkConfig = getNetwork(networkId);
+    await page.getByPlaceholder('http://localhost:3000/').fill(networkConfig.url);
     await page.getByRole('button', { name: 'Save' }).click();
+
     await page.getByTestId('close-icon').click();
 
     return {
@@ -95,6 +104,40 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
+export async function purchaseName(address: string, signer: Signer) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
+    const name = `mycoolname${Math.floor(Math.random() * 1000)}.iota`;
+    const nft = await iotaNamesTx.register({
+        name,
+        coin,
+        address,
+    });
+    iotaNamesTx.transaction.transferObjects([nft, coin], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Purchased name: ${name} to address: ${address}`);
+    const response = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return { nft, name, response };
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -103,4 +146,9 @@ export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
 
 export function getAddressByIndexPath(mnemonic: string, index: number) {
     return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
+}
+
+export function generateRandomName(name: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${name}${random}.iota`;
 }
