@@ -42,7 +42,6 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
         await page.bringToFront();
     }
 }
-
 export async function createWallet(page: Page) {
     await page.bringToFront();
     await page.getByRole('button', { name: /Add Profile/ }).click({ timeout: 30000 });
@@ -67,13 +66,17 @@ export async function createWallet(page: Page) {
 
     await page.getByText('I saved my mnemonic').click();
     await page.getByRole('button', { name: 'Open Wallet' }).click();
+
     await page.getByLabel('Open settings menu').click();
     await page.getByText('Network').click();
     await page.getByText('Custom RPC').click();
-    await page.getByPlaceholder('http://localhost:3000/').fill(CONFIG.baseUrl);
+    const networkId = CONFIG.network;
+    const networkConfig = getNetwork(networkId);
+    await page.getByPlaceholder('http://localhost:3000/').fill(networkConfig.url);
     await page.getByRole('button', { name: 'Save' }).click();
 
     await page.getByTestId('close-icon').click();
+
     return {
         mnemonic,
         address,
@@ -98,6 +101,7 @@ export async function requestFaucetTokens(recipient: string) {
         throw new Error(`Faucet error: ${res.error}`);
     }
 }
+
 interface TransactionToCreateAuctionParams {
     sharedState: SharedState;
     useNewWallet?: boolean;
@@ -115,6 +119,7 @@ export async function transactionToCreateAnAuction({
         } else {
             keypair = new Ed25519Keypair();
             await requestFaucetTokens(keypair.toIotaAddress());
+            console.log(`Requested faucet tokens for address: ${keypair.toIotaAddress()}`);
         }
 
         if (!testAuctionName) {

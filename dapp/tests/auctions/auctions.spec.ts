@@ -26,7 +26,6 @@ test.describe.serial('Auction Bid Flow', () => {
 
     test('create bid on existing auction', async ({ appPage: page, sharedState }) => {
         await transactionToCreateAnAuction({ sharedState });
-        await page.waitForTimeout(5000);
 
         await page.goto('/auctions');
 
@@ -43,7 +42,7 @@ test.describe.serial('Auction Bid Flow', () => {
         const displayName = `@${testAuctionName.replace('.iota', '')}`;
 
         const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
-        await expect(nameCard).toBeVisible({ timeout: 5000 });
+        await expect(nameCard).toBeVisible({ timeout: 30_000 });
 
         const bidButton = nameCard.getByRole('button', { name: /Bid Again/i });
         await bidButton.click();

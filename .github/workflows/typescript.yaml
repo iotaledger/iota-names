@@ -48,8 +48,8 @@ jobs:
               "devnet":{
                   "network": "devnet",
                   "namesDisplayUrl": "http://localhost",
-                  "indexerUrl": "http://localhost",
-                  "baseUrl": "http://localhost:3000"
+                  "indexerUrl": "http://localhost:3030",
+                  "baseUrl": "http://localhost:3005"
               }
             }
         run: |
@@ -144,8 +144,8 @@ jobs:
           "localnet": {
             "network": "localnet",
             "namesDisplayUrl": "http://localhost",
-            "indexerUrl": "http://localhost",
-            "baseUrl": "http://localhost:3000"
+            "indexerUrl": "http://localhost:3030",
+            "baseUrl": "http://localhost:3005"
           }
         }
     services:
@@ -230,6 +230,22 @@ jobs:
           pnpm inject-localnet
 
           cd ..
+          INDEXER_ENV_FILE="$(mktemp)"
+          pnpm --dir=scripts ts-node utils/envs.ts localnet bash | sed 's/^export //' > "$INDEXER_ENV_FILE"
+
+          docker pull ghcr.io/iotaledger/iota-names/iota-names-indexer:latest
+          docker rm -f localnet-iota-names-indexer || true
+          docker run -d \
+            --name localnet-iota-names-indexer \
+            --env-file "$INDEXER_ENV_FILE" \
+            --add-host host.docker.internal:host-gateway \
+            -p 3030:3030 \
+            -p 9189:9189 \
+            ghcr.io/iotaledger/iota-names/iota-names-indexer:latest \
+            start \
+            --node-url=http://host.docker.internal:9000 \
+            --checkpoint-url=http://host.docker.internal:9000
+
           pnpm dapp build
           cd dapp
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
