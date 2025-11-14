@@ -57,19 +57,13 @@ test.describe('Purchase Name Tests', () => {
     });
 
     test('Availability Dialog opens from all UI elements', async ({ appPage: page }) => {
-        function expectDialogToBeOpen() {
-            return expect(
-                page.getByRole('dialog').getByPlaceholder('Check name availability'),
-            ).toBeVisible({
-                timeout: 5_000,
-            });
-        }
-
         await page.goto('/', { waitUntil: 'domcontentloaded' });
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
-        expectDialogToBeOpen();
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
 
         await page.goto('/auctions', { waitUntil: 'domcontentloaded' });
 
@@ -79,12 +73,16 @@ test.describe('Purchase Name Tests', () => {
             .filter({ visible: true })
             .click();
 
-        expectDialogToBeOpen();
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
 
         await page.goto('/my-names', { waitUntil: 'domcontentloaded' });
 
         await page.getByRole('button', { name: 'Name', exact: true }).click();
 
-        expectDialogToBeOpen();
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
     });
 });
