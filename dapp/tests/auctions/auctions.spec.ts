@@ -69,38 +69,7 @@ test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
     });
 
     expect(result.effects?.status.status).toBe('success');
-
-    for (let i = 0; i < 5; i++) {
-        try {
-            const respo = await fetch(
-                CONFIG.indexerUrl +
-                    (CONFIG.indexerUrl.endsWith('/') ? '' : '/') +
-                    'auctions?search=' +
-                    name,
-            );
-
-            const data: {
-                names: string[];
-                page: number;
-                pageSize: number;
-                totalItems: number;
-            } = await respo.json();
-
-            const auctions = data.names;
-
-            const exists = auctions.some((a) => a === nameToAuction);
-            if (exists) {
-                console.log(`Auction for ${nameToAuction} found.`);
-                break;
-            } else {
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
-        } catch (error) {
-            console.error('Error fetching auction data:', error);
-        }
-        // eslint-disable-next-line no-constant-condition
-    }
-
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await navPromise;
     await page.locator("h2:has-text('Auctions')").waitFor({ state: 'visible', timeout: 10_000 });
 
@@ -145,8 +114,6 @@ test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
     await approvePage.getByRole('button', { name: 'Approve' }).click();
     await approvePage.waitForEvent('close', { timeout: 10_000 });
     await page.bringToFront();
-
-    console.log('Waiting for claiming to complete... Signer is:', sharedState.wallet.address);
 
     await expect(auctionNameCard.getByRole('button', { name: 'Claiming...' })).toBeVisible({
         timeout: 5_000,
