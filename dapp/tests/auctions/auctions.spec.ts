@@ -3,10 +3,12 @@
 
 import { formatAddress } from '@iota/iota-sdk/utils';
 
-import { expect, test } from '../helpers/fixtures';
-import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
+import { denormalizeName } from '@/lib/utils';
 
-test.describe('Auction Name Tests', () => {
+import { expect, test } from '../helpers/fixtures';
+import { connectWallet, createWallet, generateRandomName, requestFaucetTokens } from '../utils';
+
+test.describe.parallel('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -24,24 +26,26 @@ test.describe('Auction Name Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('should display name card and open auction dialog', async ({ appPage: page }) => {
-        const randomSuffix = Math.floor(Math.random() * 10000);
-        const exampleName = `example${randomSuffix}`;
+    test('start an aucttion', async ({ appPage: page }) => {
+        const auctionName = generateRandomName('auction');
+        const displayName = denormalizeName(auctionName);
+        console.log('displayName', displayName);
         const initialSearch = page.getByPlaceholder('Search for your IOTA name');
         await initialSearch.click();
 
         const searchInput = page.getByPlaceholder('Check name availability');
         await expect(searchInput).toBeVisible({ timeout: 15_000 });
 
-        await searchInput.fill(exampleName);
+        await searchInput.fill(displayName);
         await page.keyboard.press('Enter');
 
         const auctionCards = page.getByTestId('auction-card');
         await expect(auctionCards.first()).toBeVisible({ timeout: 15_000 });
 
         const exampleCard = auctionCards.filter({
-            has: page.getByRole('heading', { name: new RegExp(`^${exampleName}$`, 'i') }),
+            has: page.getByRole('heading', { name: new RegExp(`^${displayName}$`, 'i') }),
         });
+        console.log('example', exampleCard);
         await expect(exampleCard).toBeVisible();
 
         await exampleCard.hover();
@@ -51,16 +55,12 @@ test.describe('Auction Name Tests', () => {
 
         const dialog = page.getByRole('dialog').last();
 
-        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
-        const input = dialog.getByLabel('Your Bid');
-        await expect(input).toBeVisible({ timeout: 10_000 });
-        await input.fill('52');
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 10_000 });
         const bidBtn = page.getByRole('button', { name: /^Start auction$/i });
         await expect(bidBtn).toBeVisible();
-        const [walletPopup] = await Promise.all([
-            page.context().waitForEvent('page'),
-            bidBtn.click(),
-        ]);
+        const waitForWalletPopup = page.context().waitForEvent('page');
+        await bidBtn.click();
+        const walletPopup = await waitForWalletPopup;
 
         await walletPopup.waitForLoadState('domcontentloaded');
 
@@ -72,5 +72,11 @@ test.describe('Auction Name Tests', () => {
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
             timeout: 15_000,
         });
+        await page.goto(`/auctions?page=1&search=${displayName}`);
+        const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
+        await expect(nameCard).toBeVisible({ timeout: 10_000 });
+
+        const bidAgainButton = nameCard.getByRole('button', { name: /Bid Again/i });
+        await expect(bidAgainButton).toBeVisible();
     });
 });
