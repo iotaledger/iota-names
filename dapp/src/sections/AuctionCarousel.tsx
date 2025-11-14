@@ -116,6 +116,7 @@ export function AuctionCarousel() {
                             loop
                             className="mySwiper"
                             modules={[Autoplay]}
+                            data-testid="auction-carousel"
                         >
                             {auctionsToRender.map((auction) => (
                                 <SwiperSlide key={auction.key} className="pb-xs">
