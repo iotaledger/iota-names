@@ -192,10 +192,6 @@ jobs:
           pnpm install
         working-directory: ./
 
-      - name: Build Dapp
-        run: pnpm dapp build
-        working-directory: ./
-
       - name: Download IOTA Wallet Extension
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
