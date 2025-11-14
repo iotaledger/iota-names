@@ -8,9 +8,7 @@ import { expect } from '@playwright/test';
 import { test } from '../helpers/fixtures';
 import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
 
-test.describe.configure({ mode: 'parallel' });
-
-test.describe('Purchase Name Tests', () => {
+test.describe.parallel('Purchase Name Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
