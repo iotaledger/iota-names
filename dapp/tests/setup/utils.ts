@@ -5,9 +5,10 @@ import 'dotenv/config';
 
 import { exec } from 'child_process';
 import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
-import { IotaNamesClient } from '@iota/iota-names-sdk';
+import { IotaNamesClient, IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
 const DEFAULT_NETWORK = process.env.NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK as string;
 
@@ -56,6 +57,17 @@ async function getAuthorizedSmartContractTypes() {
         isAuctionAuthorized,
     };
 }
+async function purchaseName() {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [10_000_000]);
+    const name = `mycoolname${Math.floor(Math.random() * 1000)}.iota`;
+    const nft = await iotaNamesTx.register({
+        name,
+        coin,
+    });
+    return { nft, name };
+}
 
 function runCommand(cmd: string, envs: Record<string, string> = {}) {
     return new Promise<string>((resolve, reject) => {
@@ -85,4 +97,5 @@ export {
     AUCTION_TYPE,
     getAuthorizedSmartContractTypes,
     runCommand,
+    purchaseName,
 };

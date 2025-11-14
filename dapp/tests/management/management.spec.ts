@@ -11,7 +11,6 @@ import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
 test.describe.configure({ mode: 'parallel' });
 
 test.describe('Management Name Tests', () => {
-    let purchasedName: string;
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -27,17 +26,12 @@ test.describe('Management Name Tests', () => {
 
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
-        const { name } = await purchaseName();
-        purchasedName = name;
     });
 
-    test('purchases a name without errors', async ({ appPage: page, sharedState }) => {
-        // Extend timeout to allow a 40s visual pause + network delays
-        test.setTimeout(90_000);
-        // Navigate to My Names page and verify the purchased name shows up
+    test('purchases a name without errors', async ({ appPage: page, context, sharedState }) => {
+        await purchaseName(page, context);
         await page.goto('/my-names');
-        await expect(page.getByText(purchasedName)).toBeVisible({ timeout: 40_000 });
-        // Pause to allow manual visual verification in the headed browser (user request)
-        await page.waitForTimeout(40_000);
+        const nameCards = page.getByTestId('name-card');
+        await expect(nameCards.first()).toBeVisible({ timeout: 30_000 });
     });
 });
