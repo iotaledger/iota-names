@@ -1,16 +1,19 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+
 import { expect, test } from '../helpers/fixtures';
 import {
     connectWallet,
+    createAndSendAuctionTransaction,
     createWallet,
     generateRandomName,
     requestFaucetTokens,
-    transactionToCreateAnAuction,
 } from '../utils';
 
-test.describe.serial('Auction Bid Flow', () => {
+test.describe.parallel('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -20,30 +23,34 @@ test.describe.serial('Auction Bid Flow', () => {
         await requestFaucetTokens(address);
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
-
-        sharedState.testAuctionName = generateRandomName();
     });
 
-    test('create bid on existing auction', async ({ sharedState, appPage: page }) => {
-        await transactionToCreateAnAuction({ sharedState, useNewWallet: true });
+    test('create bid on existing auction', async ({ appPage: page }) => {
+        const auctionName = generateRandomName('existing');
 
-        await page.goto('/auctions');
+        const keypair = new Ed25519Keypair();
+        await requestFaucetTokens(keypair.toIotaAddress());
 
+        const response = await createAndSendAuctionTransaction({
+            signer: keypair,
+            name: auctionName,
+        });
+
+        expect(response.effects?.status.status).toBe('success');
+
+        await page.goto(`/auctions?page=1&search=${auctionName}`);
         const refreshContainer = page.getByTestId('auctions-refresh-container');
         await expect(refreshContainer).toBeVisible({ timeout: 10_000 });
         const refreshButton = refreshContainer.getByRole('button');
         await refreshButton.click();
         await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible({
-            timeout: 15_000,
+            timeout: 10_000,
         });
 
-        const { testAuctionName } = sharedState;
-        if (!testAuctionName) throw new Error('testAuctionName is undefined');
-
-        const displayName = `@${testAuctionName.replace('.iota', '')}`;
+        const displayName = normalizeIotaName(auctionName, 'at');
 
         const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
-        await expect(nameCard).toBeVisible({ timeout: 30_000 });
+        await expect(nameCard).toBeVisible({ timeout: 10_000 });
 
         const bidButton = nameCard.getByRole('button', { name: /Bid/i });
         await bidButton.click();
@@ -64,7 +71,7 @@ test.describe.serial('Auction Bid Flow', () => {
 
         await walletPopup.waitForEvent('close', { timeout: 10_000 });
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
-            timeout: 15_000,
+            timeout: 5_000,
         });
     });
 });
