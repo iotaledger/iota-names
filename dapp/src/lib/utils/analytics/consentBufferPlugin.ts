@@ -74,7 +74,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
      * Flushes all queued events to Amplitude and clears localStorage.
      */
     flushQueue(): void {
-        console.log(this.consentCookieStatus, this.eventQueue.length);
         if (
             !this.client ||
             this.consentCookieStatus !== 'accepted' ||
@@ -82,8 +81,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
         ) {
             return;
         }
-
-        console.log('flushing');
 
         const events = [...this.eventQueue];
         this.clearQueue();

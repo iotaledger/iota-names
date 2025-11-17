@@ -9,8 +9,7 @@ import { consentBufferPlugin } from './consentBufferPlugin';
 const IS_PROD_ENV =
     process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
     process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT === 'production';
-console.log('nodenv', process.env.NEXT_PUBLIC_BUILD_ENV);
-console.log('vercelenv', process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT);
+
 /**
  * Initialize Amplitude with consent buffer plugin.
  * This should be called once when the app starts.
