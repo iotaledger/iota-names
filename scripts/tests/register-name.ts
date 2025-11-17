@@ -33,7 +33,7 @@ const registerName = async () => {
 
     const payment = tx.splitCoins(tx.gas, [price]);
     const receipt = tx.moveCall({
-        target: `${packageInfo.paymentsPackageId}::payments::handle_base_payment`,
+        target: `${packageInfo.paymentsPackageId.v1}::payments::handle_base_payment`,
         arguments: [tx.object(packageInfo.iotaNamesObjectId), paymentIntent, payment],
         typeArguments: ['0x2::iota::IOTA'],
     });
