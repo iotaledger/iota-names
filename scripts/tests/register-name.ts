@@ -60,7 +60,7 @@ async function getPrice(client: IotaClient, packageInfo: PackageInfo, name: stri
     });
     let pricingConfigId = '';
     for (const field of allFields.data) {
-        if (field.objectType === `${packageInfo.packageId}::pricing_config::PricingConfig`) {
+        if (field.objectType === `${packageInfo.packageId.v1}::pricing_config::PricingConfig`) {
             pricingConfigId = field.objectId;
             break;
         }
