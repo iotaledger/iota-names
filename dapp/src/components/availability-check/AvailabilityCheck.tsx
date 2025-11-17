@@ -190,7 +190,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             errorMessage={errorMessage}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             leadingIcon={
-                                <p className="text-names-neutral-50 text-headline-sm sm:text-headline-md">
+                                <p className="text-names-neutral-50 text-title-lg xs:text-headline-sm sm:text-headline-md">
                                     @
                                 </p>
                             }
