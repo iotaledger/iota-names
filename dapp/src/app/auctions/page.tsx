@@ -225,16 +225,14 @@ export default function AuctionsPage(): JSX.Element {
                 <h2 className="text-headline-md text-names-neutral-92 font-bold leading-[120%] -tracking-[0.4px]">
                     Auctions
                 </h2>
-                <div
-                    className="w-[40px] h-[40px] flex items-center justify-center"
-                    data-testid="auctions-refresh-container"
-                >
+                <div className="w-[40px] h-[40px] flex items-center justify-center">
                     {selectedStatus === 'active' || selectedStatus === 'all' ? (
                         <Button
                             type={ButtonType.Outlined}
                             icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
                             onClick={handleRefresh}
                             disabled={isRefreshing}
+                            testId="refresh-button"
                         />
                     ) : null}
                 </div>

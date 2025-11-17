@@ -25,7 +25,7 @@ test.describe.parallel('Auction Bid Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('create bid on existing auction', async ({ appPage: page }) => {
+    test('create bid on existing auction', async ({ appPage: page, context }) => {
         const auctionName = generateRandomName('existing');
 
         const keypair = new Ed25519Keypair();
@@ -39,31 +39,23 @@ test.describe.parallel('Auction Bid Flow', () => {
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto(`/auctions?page=1&search=${auctionName}`);
-        const refreshContainer = page.getByTestId('auctions-refresh-container');
-        await expect(refreshContainer).toBeVisible({ timeout: 10_000 });
-        const refreshButton = refreshContainer.getByRole('button');
-        await refreshButton.click();
+        await page.getByTestId('refresh-button').click({ timeout: 10_000 });
+
         await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible({
             timeout: 10_000,
         });
 
         const displayName = normalizeIotaName(auctionName, 'at');
 
-        const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
+        const nameCard = page.getByTestId('name-card-body').filter({ hasText: displayName });
         await expect(nameCard).toBeVisible({ timeout: 10_000 });
 
-        const bidButton = nameCard.getByRole('button', { name: /Bid/i });
-        await bidButton.click();
-
+        await nameCard.getByRole('button', { name: /Bid/i }).click();
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
-
-        const bidBtn = page.getByRole('button', { name: /^Bid$/i });
-        await expect(bidBtn).toBeVisible();
-
-        const waitForWalletPopup = page.context().waitForEvent('page');
-        await bidBtn.click();
-        const walletPopup = await waitForWalletPopup;
+        await page.getByRole('button', { name: /^Bid$/i }).click();
+        const walletConfirmationPage = context.waitForEvent('page');
+        const walletPopup = await walletConfirmationPage;
 
         await walletPopup.waitForLoadState('domcontentloaded');
         const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
