@@ -5,13 +5,7 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { expect, test } from '../helpers/fixtures';
-import {
-    connectWallet,
-    createWallet,
-    getAddressByIndexPath,
-    purchaseName,
-    requestFaucetTokens,
-} from '../utils';
+import { connectWallet, createWallet, purchaseName, requestFaucetTokens } from '../utils';
 
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -30,7 +24,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
-    test('Connect address', async ({ appPage: page, context, sharedState }) => {
+    test('Connect Address and Set Display', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = `e2etest-${Math.floor(Math.random() * 100)}.iota`;
 
@@ -51,17 +45,20 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        const mnemonic = sharedState.wallet.mnemonic as string;
-        const externalAddress = getAddressByIndexPath(mnemonic, 1);
+        await dialog.getByRole('button', { name: /use current address/i }).click();
+        await expect(dialog.getByText('Set as Display name')).toBeVisible();
 
-        await dialog.getByPlaceholder('Enter Address').fill(externalAddress);
+        // "Set as Display name" lives in a clickable panel (div), not a button
+        await dialog.getByText('Set as Display name').click();
+
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Successfully connected', { exact: false })).toBeVisible({
+        await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
+        await dialog.getByRole('button', { name: 'Finish' }).click();
 
         await page.close();
     });
