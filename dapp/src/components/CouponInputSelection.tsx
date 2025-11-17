@@ -41,22 +41,24 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
             </div>
 
             <div className="flex flex-col items-start gap-y-sm">
-                <Input
-                    placeholder={'Have a discount code?'}
-                    type={InputType.Text}
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
-                    onClearInput={() => setCoupon('')}
-                    disabled={coupons.length > 0}
-                />
-                <ButtonUnstyled
-                    className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    onClick={addCoupon}
-                    disabled={coupons.length > 0}
-                >
-                    + Apply Coupon
-                </ButtonUnstyled>
+                {coupons.length === 0 && (
+                    <>
+                        <Input
+                            placeholder={'Have a discount code?'}
+                            type={InputType.Text}
+                            value={coupon}
+                            onChange={(e) => setCoupon(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
+                            onClearInput={() => setCoupon('')}
+                        />
+                        <ButtonUnstyled
+                            className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            onClick={addCoupon}
+                        >
+                            + Apply Coupon
+                        </ButtonUnstyled>
+                    </>
+                )}
             </div>
         </div>
     );
