@@ -8,9 +8,7 @@ import type {
     Event,
 } from '@amplitude/analytics-types';
 
-const AMP_COOKIES_KEY = 'AMP_COOKIES_ACCEPTED';
-const EVENTS_STORAGE_KEY = 'amp_queued_events';
-const MAX_QUEUED_EVENTS = 500; // Maximum number of events to store before auto-cleanup
+import { AMP_COOKIES_KEY, EVENTS_STORAGE_KEY, MAX_QUEUED_EVENTS } from './constants';
 
 interface QueuedEvent {
     event: Event;
@@ -30,32 +28,25 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
     type = 'enrichment' as const;
 
     private eventQueue: QueuedEvent[] = [];
-    private hasConsent: boolean = false;
     private client?: BrowserClient;
 
     constructor() {
-        // Initialize consent status synchronously from cookies
-        // This ensures we have the correct state BEFORE execute() is ever called
         if (typeof document !== 'undefined') {
-            this.hasConsent = document.cookie.includes(`${AMP_COOKIES_KEY}=true`);
-            // Load any previously queued events from localStorage
             this.loadQueueFromStorage();
         }
     }
 
     async setup(_config: BrowserConfig, client: BrowserClient): Promise<void> {
         this.client = client;
-        this.hasConsent = document.cookie.includes(`${AMP_COOKIES_KEY}=true`);
 
         // If user already has consent, flush any queued events from previous sessions
-        if (this.hasConsent && this.eventQueue.length > 0) {
+        if (this.consentCookieStatus === 'accepted' && this.eventQueue.length > 0) {
             this.flushQueue();
         }
     }
 
     async execute(event: Event): Promise<Event | null> {
-        if (!this.hasConsent) {
-            // Queue the event both in memory and localStorage
+        if (this.consentCookieStatus === 'pending') {
             const queuedEvent: QueuedEvent = {
                 event: { ...event },
                 timestamp: Date.now(),
@@ -83,20 +74,16 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
      * Flushes all queued events to Amplitude and clears localStorage.
      */
     flushQueue(): void {
-        if (!this.client) {
-            console.error('[ConsentBuffer] Cannot flush - client not available');
-            return;
-        }
-
-        this.hasConsent = true;
-
-        if (this.eventQueue.length === 0) {
+        if (
+            !this.client ||
+            this.consentCookieStatus !== 'accepted' ||
+            this.eventQueue.length === 0
+        ) {
             return;
         }
 
         const events = [...this.eventQueue];
-        this.eventQueue = [];
-        this.clearStorage();
+        this.clearQueue();
 
         // Send all queued events to Amplitude
         events.forEach(({ event }) => {
@@ -112,7 +99,6 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
      */
     clearQueue(): void {
         this.eventQueue = [];
-        this.hasConsent = false;
         this.clearStorage();
     }
 
@@ -139,8 +125,16 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
         }
     }
 
+    acceptCookies() {
+        document.cookie = `${AMP_COOKIES_KEY}=true; max-age=31536000; path=/; SameSite=Strict`;
+    }
+
+    declineCookies() {
+        document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
+    }
+
     /**
-     * Load queued events from localStorage
+     * Load any previously queued events from localStorage
      */
     private loadQueueFromStorage(): void {
         if (typeof localStorage === 'undefined') {
@@ -208,6 +202,13 @@ class ConsentBufferPlugin implements EnrichmentPlugin {
         } catch (error) {
             console.error('[ConsentBuffer] Error clearing localStorage:', error);
         }
+    }
+
+    get consentCookieStatus() {
+        if (typeof document === 'undefined') return 'pending';
+        if (document.cookie.includes(`${AMP_COOKIES_KEY}=true`)) return 'accepted';
+        if (document.cookie.includes(`${AMP_COOKIES_KEY}=false`)) return 'declined';
+        return 'pending';
     }
 }
 

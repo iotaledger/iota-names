@@ -4,23 +4,16 @@
 'use client';
 
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
-import { useEffect } from 'react';
 
-import { CONFIG } from '@/config';
-import { ampli } from '@/lib/utils/analytics/ampli';
 import {
-    consentToAnalytics,
-    declineAnalytics,
-    initAmplitude,
+    onAmplitudeConsentAccepted,
+    onAmplitudeConsentDeclined,
 } from '@/lib/utils/analytics/amplitude';
+import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
 import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
 
-const defaultNetwork = CONFIG.network;
-
 export function CookieDisclaimer() {
-    useAnalytics();
-
     const configuration: SKCMConfiguration = {
         disclaimer: {
             title: undefined,
@@ -36,7 +29,7 @@ export function CookieDisclaimer() {
         services: {
             customNecessaryCookies: [
                 {
-                    name: 'AMP_COOKIES_ACCEPTED',
+                    name: AMP_COOKIES_KEY,
                     purpose:
                         'Flag indicating that Amplitude analytics cookies may be created after consent',
                     expiry: '1 year',
@@ -46,12 +39,10 @@ export function CookieDisclaimer() {
             ],
         },
         onAcceptCookies: () => {
-            consentToAnalytics();
-            document.cookie = 'AMP_COOKIES_ACCEPTED=true; max-age=31536000';
+            onAmplitudeConsentAccepted();
         },
         onDeclineCookies: () => {
-            declineAnalytics();
-            document.cookie = 'AMP_COOKIES_ACCEPTED=false; max-age=31536000 ';
+            onAmplitudeConsentDeclined();
         },
     };
 
@@ -61,14 +52,4 @@ export function CookieDisclaimer() {
             <PrivacyPolicyDialog configuration={configuration} />
         </>
     );
-}
-
-function useAnalytics() {
-    useEffect(() => {
-        // Skip if already initialized
-        if (ampli.isLoaded) {
-            return;
-        }
-        initAmplitude(defaultNetwork);
-    }, [ampli.isLoaded]);
 }
