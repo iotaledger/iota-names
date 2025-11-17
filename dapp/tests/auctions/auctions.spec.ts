@@ -29,7 +29,6 @@ test.describe.parallel('Auction Bid Flow', () => {
     test('start an aucttion', async ({ appPage: page }) => {
         const auctionName = generateRandomName('auction');
         const displayName = denormalizeName(auctionName);
-        console.log('displayName', displayName);
         const initialSearch = page.getByPlaceholder('Search for your IOTA name');
         await initialSearch.click();
 
@@ -39,19 +38,13 @@ test.describe.parallel('Auction Bid Flow', () => {
         await searchInput.fill(displayName);
         await page.keyboard.press('Enter');
 
-        const auctionCards = page.getByTestId('auction-card');
-        await expect(auctionCards.first()).toBeVisible({ timeout: 15_000 });
-
-        const exampleCard = auctionCards.filter({
+        const auctionCard = page.getByTestId('auction-card').filter({
             has: page.getByRole('heading', { name: new RegExp(`^${displayName}$`, 'i') }),
         });
-        console.log('example', exampleCard);
-        await expect(exampleCard).toBeVisible();
+        await expect(auctionCard).toBeVisible();
 
-        await exampleCard.hover();
-        const bidButton = exampleCard.locator('button:has-text("Bid")');
-        await bidButton.waitFor({ state: 'visible', timeout: 10_000 });
-        await bidButton.click();
+        await auctionCard.hover();
+        await auctionCard.getByRole('button', { name: 'Bid' }).click({ timeout: 10_000 });
 
         const dialog = page.getByRole('dialog').last();
 
@@ -73,7 +66,7 @@ test.describe.parallel('Auction Bid Flow', () => {
             timeout: 15_000,
         });
         await page.goto(`/auctions?page=1&search=${displayName}`);
-        const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
+        const nameCard = page.getByTestId('name-card-body').filter({ hasText: displayName });
         await expect(nameCard).toBeVisible({ timeout: 10_000 });
 
         const bidAgainButton = nameCard.getByRole('button', { name: /Bid Again/i });
