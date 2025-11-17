@@ -1,13 +1,16 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+
 import { expect, test } from '../helpers/fixtures';
 import {
     connectWallet,
+    createAndSendAuctionTransaction,
     createWallet,
     generateRandomName,
     requestFaucetTokens,
-    transactionToCreateAnAuction,
 } from '../utils';
 
 test.describe.serial('Auction Bid Flow', () => {
@@ -20,14 +23,20 @@ test.describe.serial('Auction Bid Flow', () => {
         await requestFaucetTokens(address);
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
-
-        sharedState.testAuctionName = generateRandomName();
     });
 
-    test('create bid on existing auction', async ({ appPage: page, sharedState }) => {
-        await transactionToCreateAnAuction({ sharedState });
+    test('create bid again on an auction test', async ({ appPage: page, sharedState }) => {
+        const auctionName = generateRandomName('again');
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
-        await page.goto('/auctions');
+        const response = await createAndSendAuctionTransaction({
+            signer: keypair,
+            name: auctionName,
+        });
+
+        expect(response.effects?.status.status).toBe('success');
+
+        await page.goto(`/auctions?page=1&search=${auctionName}`);
 
         const refreshContainer = page.getByTestId('auctions-refresh-container');
         await expect(refreshContainer).toBeVisible({ timeout: 5000 });
@@ -35,11 +44,7 @@ test.describe.serial('Auction Bid Flow', () => {
         await refreshButton.click();
         await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible();
 
-        const { testAuctionName } = sharedState;
-        if (!testAuctionName) {
-            throw new Error('testAuctionName is undefined');
-        }
-        const displayName = `@${testAuctionName.replace('.iota', '')}`;
+        const displayName = normalizeIotaName(auctionName, 'at');
 
         const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
         await expect(nameCard).toBeVisible({ timeout: 30_000 });

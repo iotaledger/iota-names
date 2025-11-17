@@ -7,12 +7,13 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
+import { Signer } from '@iota/iota-sdk/cryptography';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { buildCreateAuctionTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
-import { expect, SharedState } from './helpers/fixtures';
+import { expect } from './helpers/fixtures';
 import { iotaClient, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
@@ -102,37 +103,22 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-interface TransactionToCreateAuctionParams {
-    sharedState: SharedState;
-    useNewWallet?: boolean;
+interface CreateAndSendAuctionTransaction {
+    name: string;
+    signer: Signer;
 }
-export async function transactionToCreateAnAuction({
-    sharedState,
-    useNewWallet = false,
-}: TransactionToCreateAuctionParams) {
+export async function createAndSendAuctionTransaction({
+    name,
+    signer,
+}: CreateAndSendAuctionTransaction) {
     try {
-        const { testAuctionName } = sharedState;
-
-        let keypair: Ed25519Keypair;
-        if (!useNewWallet && sharedState.wallet.mnemonic) {
-            keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic);
-        } else {
-            keypair = new Ed25519Keypair();
-            await requestFaucetTokens(keypair.toIotaAddress());
-            console.log(`Requested faucet tokens for address: ${keypair.toIotaAddress()}`);
-        }
-
-        if (!testAuctionName) {
-            throw new Error('testAuctionName is undefined');
-        }
-
         const tx = buildCreateAuctionTransaction(
             iotaNamesClient.config.auctionPackageId,
             iotaNamesClient.config.iotaNamesObjectId,
             iotaNamesClient.config.auctionHouseObjectId,
-            keypair.toIotaAddress(),
-            BigInt(80) * NANOS_PER_IOTA,
-            testAuctionName,
+            signer.toIotaAddress(),
+            BigInt(50) * NANOS_PER_IOTA,
+            name,
         );
 
         const txBytes = await tx.build({ client: iotaClient });
@@ -146,11 +132,14 @@ export async function transactionToCreateAnAuction({
 
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
-            signer: keypair,
+            signer,
+            options: {
+                showEffects: true,
+            },
         });
 
         console.log('Transaction sent. Digest:', response.digest);
-        console.log(`Successfully created auction for name: ${testAuctionName}`);
+        console.log(`Successfully created auction for name: ${name}`);
 
         return response;
     } catch (error) {
@@ -169,7 +158,7 @@ export function getAddressByIndexPath(mnemonic: string, index: number) {
     return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
 }
 
-export function generateRandomName() {
-    const random = Math.floor(Math.random() * 1_000_000);
-    return `example${random}.iota`;
+export function generateRandomName(name: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${name}${random}.iota`;
 }
