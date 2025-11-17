@@ -35,11 +35,12 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
 ) {
     const inputWrapperRef = useRef<HTMLDivElement | null>(null);
     const borderClasses = lightSearch ? BORDER_LIGHT_CLASSES : BORDER_GRADIENT_CLASSES;
-    const inputTextSize = lightSearch ? 'text-title-lg' : 'text-headline-sm sm:text-headline-md';
+    const inputTextSize = lightSearch
+        ? 'text-title-md xs:text-title-lg'
+        : 'text-title-lg xs:text-headline-sm sm:text-headline-md';
     const placeholderTextColor = lightSearch
         ? 'placeholder:text-names-neutral-70'
         : 'input-placeholder-color';
-
     function focusOnInput() {
         inputWrapperRef.current?.querySelector('input')?.focus();
     }
@@ -47,7 +48,8 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
         <InputWrapper disabled={disabled} errorMessage={errorMessage}>
             <div
                 className={cx(
-                    'relative flex flex-row items-center gap-x-3 px-sm py-xs sm:px-lg sm:py-md rounded-full border-2',
+                    'relative flex flex-row items-center sm:px-lg sm:py-md py-xs rounded-full border-2 h-16',
+                    lightSearch ? 'gap-x-3 px-sm' : 'gap-x-1 px-[14px]',
                     !lightSearch && 'search-container',
                     borderClasses,
                 )}
@@ -61,7 +63,12 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
                         type="text"
                         value={value}
                         disabled={disabled}
-                        className={cx(inputTextSize, placeholderTextColor, INPUT_CLASSES)}
+                        className={cx(
+                            inputTextSize,
+                            placeholderTextColor,
+                            INPUT_CLASSES,
+                            'leading-tight',
+                        )}
                         {...inputProps}
                     />
                 </div>
@@ -69,7 +76,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
                     <ButtonUnstyled
                         className={cx(
                             'text-names-neutral-92 [&_svg]:h-5 [&_svg]:w-5 p-sm state-layer relative rounded-full',
-                            !value?.length && 'invisible',
+                            !value?.length && 'hidden',
                         )}
                         onClick={onClearInput}
                         tabIndex={-1}
