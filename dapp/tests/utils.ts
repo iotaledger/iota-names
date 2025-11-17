@@ -104,11 +104,10 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(address: string, signer: Signer) {
+export async function purchaseName(name: string, address: string, signer: Signer) {
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
-    const name = `e2etest-${Math.floor(Math.random() * 100)}.iota`;
     const nft = await iotaNamesTx.register({
         name,
         coin,
