@@ -4,7 +4,6 @@
 interface NameCardBodyProps {
     name: string;
     onNameClick?: () => void;
-    testId?: string;
 }
 
 export function NameCardBody({
