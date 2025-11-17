@@ -8,7 +8,6 @@ import { expect, test } from '../helpers/fixtures';
 import { connectWallet, createWallet, purchaseName, requestFaucetTokens } from '../utils';
 
 test.describe.parallel('Name Management Tests', () => {
-    test.setTimeout(120_000);
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
