@@ -4,7 +4,7 @@
 import * as amplitude from '@amplitude/analytics-browser';
 import { LogLevel } from '@amplitude/analytics-core';
 
-import { ampli } from './ampli';
+import { ampli, ApiKey } from './ampli';
 import { consentBufferPlugin } from './consentBufferPlugin';
 
 const IS_PROD_ENV = process.env.NODE_ENV === 'production';
@@ -15,23 +15,32 @@ const AMP_COOKIE_PREFIX = 'AMP_';
  * This should be called once when the app starts.
  */
 export async function initAmplitude(defaultNetwork: string) {
+    // Get the API key for the 'iotanames' environment
+    const apiKey = ApiKey.iotanames;
+
+    // CRITICAL: Add the consent buffer plugin BEFORE initialization
+    // This ensures the plugin is active before any autocapture events can be created
+    amplitude.add(consentBufferPlugin);
+
+    // Now initialize the Amplitude SDK with autocapture enabled
+    // The consent buffer plugin will intercept all events (including autocapture)
+    // and queue them in localStorage until the user gives consent
+    await amplitude.init(apiKey, {
+        optOut: false, // Enable tracking by default; consent buffer plugin will handle queuing
+        autocapture: true,
+        logLevel: LogLevel.None,
+    }).promise;
+
+    // Now load Ampli with the pre-configured Amplitude instance
     await ampli.load({
         environment: 'iotanames',
         disabled: !IS_PROD_ENV,
         client: {
-            configuration: {
-                optOut: false, // Enable tracking by default; consent buffer plugin will handle queuing
-                autocapture: true,
-                logLevel: LogLevel.None,
-            },
+            instance: amplitude,
         },
     }).promise;
 
     if (ampli.client) {
-        // IMPORTANT: Add the consent buffer plugin BEFORE any tracking calls
-        // This ensures the plugin intercepts all events including identify
-        await ampli.client.add(consentBufferPlugin).promise;
-
         setNetworkGroup(defaultNetwork);
     }
 
