@@ -25,7 +25,7 @@ test.describe.parallel('Auction Bid Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('create bid again on an auction test', async ({ appPage: page, sharedState }) => {
+    test('Bid again on an auction', async ({ appPage: page, sharedState, context }) => {
         const auctionName = generateRandomName('again');
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
@@ -38,29 +38,20 @@ test.describe.parallel('Auction Bid Flow', () => {
 
         await page.goto(`/auctions?page=1&search=${auctionName}`);
 
-        const refreshContainer = page.getByTestId('auctions-refresh-container');
-        await expect(refreshContainer).toBeVisible({ timeout: 5000 });
-        const refreshButton = refreshContainer.getByRole('button');
-        await refreshButton.click();
+        await page.getByTestId('refresh-button').click({ timeout: 10_000 });
         await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible();
 
         const displayName = normalizeIotaName(auctionName, 'at');
 
-        const nameCard = page.getByTestId('body-name').filter({ hasText: displayName });
-        await expect(nameCard).toBeVisible({ timeout: 30_000 });
+        const nameCard = page.getByTestId('name-card-body').filter({ hasText: displayName });
+        await expect(nameCard).toBeVisible({ timeout: 10_000 });
 
-        const bidButton = nameCard.getByRole('button', { name: /Bid Again/i });
-        await bidButton.click();
-
+        await nameCard.getByRole('button', { name: /Bid Again/i }).click();
         const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 5000 });
-
-        const bidBtn = page.getByRole('button', { name: /^Bid$/i });
-        await expect(bidBtn).toBeVisible();
-
-        const waitForWalletPopup = page.context().waitForEvent('page');
-        await bidBtn.click();
-        const walletPopup = await waitForWalletPopup;
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await page.getByRole('button', { name: /^Bid$/i }).click();
+        const walletConfirmationPage = context.waitForEvent('page');
+        const walletPopup = await walletConfirmationPage;
 
         await walletPopup.waitForLoadState('domcontentloaded');
         const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });

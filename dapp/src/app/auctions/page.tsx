@@ -235,6 +235,7 @@ export default function AuctionsPage(): JSX.Element {
                             icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
                             onClick={handleRefresh}
                             disabled={isRefreshing}
+                            testId="refresh-button"
                         />
                     ) : null}
                 </div>
