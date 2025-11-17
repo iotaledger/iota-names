@@ -13,7 +13,7 @@ import {
     requestFaucetTokens,
 } from '../utils';
 
-test.describe.serial('Auction Bid Flow', () => {
+test.describe.parallel('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
