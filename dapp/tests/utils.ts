@@ -108,7 +108,7 @@ export async function purchaseName(address: string, signer: Signer) {
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
-    const name = `mycoolname${Math.floor(Math.random() * 1000)}.iota`;
+    const name = `e2etest-${Math.floor(Math.random() * 100)}.iota`;
     const nft = await iotaNamesTx.register({
         name,
         coin,
@@ -127,7 +127,7 @@ export async function purchaseName(address: string, signer: Signer) {
     if (txDryRun.effects.status.status !== 'success') {
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
-    console.log(`Purchased name: ${name} to address: ${address}`);
+    console.log(`Purchased name: ${name} with address: ${address}`);
     const response = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
