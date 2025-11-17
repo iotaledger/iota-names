@@ -6,8 +6,11 @@ import { LogLevel } from '@amplitude/analytics-core';
 import { ampli } from './ampli';
 import { consentBufferPlugin } from './consentBufferPlugin';
 
-const IS_PROD_ENV = process.env.NODE_ENV === 'production';
-
+const IS_PROD_ENV =
+    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
+    process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT === 'production';
+console.log('nodenv', process.env.NEXT_PUBLIC_BUILD_ENV);
+console.log('vercelenv', process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT);
 /**
  * Initialize Amplitude with consent buffer plugin.
  * This should be called once when the app starts.
@@ -58,9 +61,9 @@ function setNetworkGroup(network: string): void {
  * - Allow Amplitude to create cookies
  */
 export function onAmplitudeConsentAccepted() {
+    consentBufferPlugin.acceptCookies();
     ampli?.client?.setOptOut(false);
     consentBufferPlugin.flushQueue();
-    consentBufferPlugin.acceptCookies();
 }
 
 /**
@@ -71,7 +74,7 @@ export function onAmplitudeConsentAccepted() {
  * - Remove any existing Amplitude cookies
  */
 export function onAmplitudeConsentDeclined() {
+    consentBufferPlugin.declineCookies();
     ampli?.client?.setOptOut(true);
     consentBufferPlugin.clearQueue();
-    consentBufferPlugin.declineCookies();
 }
