@@ -27,7 +27,7 @@ const registerName = async () => {
 
     let tx = new Transaction();
     const paymentIntent = tx.moveCall({
-        target: `${packageInfo.packageId}::payment::init_registration`,
+        target: `${packageInfo.packageId.v1}::payment::init_registration`,
         arguments: [tx.object(packageInfo.iotaNamesObjectId), tx.pure.string(name)],
     });
 
@@ -38,7 +38,7 @@ const registerName = async () => {
         typeArguments: ['0x2::iota::IOTA'],
     });
     const nft = tx.moveCall({
-        target: `${packageInfo.packageId}::payment::register`,
+        target: `${packageInfo.packageId.v1}::payment::register`,
         arguments: [receipt, tx.object(packageInfo.iotaNamesObjectId), tx.object('0x6')],
     });
     const signer = getSigner();
