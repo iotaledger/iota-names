@@ -54,7 +54,7 @@ export class IotaNamesTransaction {
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,
-            coinConfig: params.coinConfig || this.iotaNamesClient.config.metadata.coins.IOTA,
+            coinConfig: params.coinConfig || { type: '0x2::iota::IOTA' },
         });
 
         return this.finalizeRegister(receipt);
@@ -89,7 +89,7 @@ export class IotaNamesTransaction {
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,
-            coinConfig: params.coinConfig || this.iotaNamesClient.config.metadata.coins.IOTA,
+            coinConfig: params.coinConfig || { type: '0x2::iota::IOTA' },
         });
         this.finalizeRenew(receipt, params.nft);
     }

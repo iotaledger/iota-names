@@ -19,30 +19,20 @@ export interface CoinConfig {
 }
 
 export type PackageInfo = {
-    metadata: {
-        coins: {
-            [key: string]: {
-                type: string;
-                metadataId: string;
-            };
-        };
-    };
-    packages: {
-        adminAddress: string;
-        adminCap: string;
-        auctionPackageId: string;
-        auctionHouseObjectId: string;
-        couponsPackageId: string;
-        iotaNamesObjectId: string;
-        packageId: VersionedPackageId;
-        paymentsPackageId: string;
-        publisherId: string;
-        registryTableId: string;
-        reverseRegistryTableId: string;
-        subnamesPackageId: VersionedPackageId;
-        tempSubnameProxyPackageId: string;
-        upgradeCap: string;
-    };
+    adminAddress: string;
+    adminCap: string;
+    auctionPackageId: string;
+    auctionHouseObjectId: string;
+    couponsPackageId: string;
+    iotaNamesObjectId: string;
+    packageId: VersionedPackageId;
+    paymentsPackageId: string;
+    publisherId: string;
+    registryTableId: string;
+    reverseRegistryTableId: string;
+    subnamesPackageId: VersionedPackageId;
+    tempSubnameProxyPackageId: string;
+    upgradeCap: string;
 };
 
 export interface NameRecord {

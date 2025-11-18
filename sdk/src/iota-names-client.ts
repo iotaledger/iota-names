@@ -82,8 +82,8 @@ export class IotaNamesClient {
     /**
      * Resolve the value of a given package key and the desired version.
      */
-    resolveRead(key: keyof PackageInfo['packages'], version: 'v1' | 'v2' = 'v1'): string {
-        const pkg = this.config.packages[key];
+    resolveRead(key: keyof PackageInfo, version: 'v1' | 'v2' = 'v1'): string {
+        const pkg = this.config[key];
 
         // This package is not versioned at all
         if (typeof pkg === 'string') return pkg;
@@ -101,8 +101,8 @@ export class IotaNamesClient {
     /**
      * Resolve the latest available value of a given package key.
      */
-    resolveWrite(key: keyof PackageInfo['packages']): string {
-        const pkg = this.config.packages[key];
+    resolveWrite(key: keyof PackageInfo): string {
+        const pkg = this.config[key];
 
         // This package is not versioned at all
         if (typeof pkg === 'string') return pkg;
