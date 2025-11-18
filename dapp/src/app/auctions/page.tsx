@@ -144,7 +144,6 @@ export default function AuctionsPage(): JSX.Element {
         isLoading,
         error: isAuctionsError,
     } = useAuctions({
-        type: 'allAuctions',
         userAddress: currentAddress,
         search: debouncedSearchQuery,
         status: selectedStatus,

@@ -26,7 +26,6 @@ export function AuctionCarousel() {
     const [hasMeasured, setHasMeasured] = useState(false);
 
     const { data: auctions = [], isLoading } = useAuctions({
-        type: 'allAuctions',
         userAddress: account?.address,
         status: 'active',
         search: '',

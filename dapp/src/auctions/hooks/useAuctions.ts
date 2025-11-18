@@ -28,11 +28,11 @@ export interface UseAuctionsOptions {
     userAddress?: string;
     /**
      * Determines which auctions to fetch.
-     * - allAuctions (default): fetches public auctions and, if a user is provided,
+     * - all (default): fetches public auctions and, if a user is provided,
      *   also fetches user auctions to detect participation.
-     * - userAuctions: fetches only the auctions where the user has participated.
+     * - user: fetches only the auctions where the user has participated.
      */
-    type?: 'allAuctions' | 'userAuctions';
+    type?: 'all' | 'user';
     /**
      * Search term to filter auction names.
      * Only applies when fetching all auctions (not user-specific).
@@ -73,7 +73,7 @@ const NAMES_PLACEHOLDER: AuctionsResponse = {
 
 export function useAuctions({
     userAddress,
-    type = 'allAuctions',
+    type = 'all',
     search,
     status,
     sort,
@@ -85,9 +85,8 @@ export function useAuctions({
     const indexerClient = useIotaNamesIndexerClientContext();
     const { data: auctionHouseData } = useAuctionHouse();
 
-    const shouldFetchAllAuctions = type === 'allAuctions';
-    const shouldFetchUserAuctions =
-        !!userAddress && (type === 'userAuctions' || type === 'allAuctions');
+    const shouldFetchAllAuctions = type === 'all';
+    const shouldFetchUserAuctions = !!userAddress;
 
     const {
         data: allAuctions = NAMES_PLACEHOLDER,
@@ -95,7 +94,16 @@ export function useAuctions({
         error: allAuctionsError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKey.auctionList(), search, status, sort, sortBy, page, pageSize, type],
+        queryKey: [
+            ...queryKey.auctionList(),
+            search,
+            status,
+            sort,
+            sortBy,
+            page,
+            pageSize,
+            shouldFetchAllAuctions,
+        ],
         queryFn: async () => {
             if (!indexerClient || !shouldFetchAllAuctions) {
                 return NAMES_PLACEHOLDER;
@@ -113,16 +121,7 @@ export function useAuctions({
         error: userAuctionsError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [
-            ...queryKey.userAuctionHistory(userAddress),
-            search,
-            status,
-            sort,
-            sortBy,
-            page,
-            pageSize,
-            type,
-        ],
+        queryKey: [...queryKey.userAuctionHistory(userAddress)],
         queryFn: async () => {
             if (!indexerClient || !userAddress || !shouldFetchUserAuctions) {
                 return NAMES_PLACEHOLDER;
@@ -134,12 +133,11 @@ export function useAuctions({
         placeholderData: keepPreviousData,
     });
 
-    const selectedAuctions = type === 'userAuctions' ? userAuctions : allAuctions;
+    const selectedAuctions = type === 'user' ? userAuctions : allAuctions;
     const isLoadingSelectedAuctions =
-        type === 'userAuctions' ? isLoadingUserAuctions : isLoadingAllAuctions;
-    const selectedAuctionsError = type === 'userAuctions' ? userAuctionsError : allAuctionsError;
-    const userParticipationReady =
-        shouldFetchUserAuctions && !isLoadingUserAuctions && !userAuctionsError && !!userAddress;
+        type === 'user' ? isLoadingUserAuctions : isLoadingAllAuctions;
+    const selectedAuctionsError = type === 'user' ? userAuctionsError : allAuctionsError;
+
     const userParticipationSet = new Set(userAuctions.names);
 
     const { auctionsTableObjectId } = auctionHouseData || {};
@@ -163,9 +161,7 @@ export function useAuctions({
                     metadata: result.data || null,
                     isLoading: result.isLoading || result.isPending,
                     error: !!result.error,
-                    hasUserParticipated: userParticipationReady
-                        ? userParticipationSet.has(name)
-                        : undefined,
+                    hasUserParticipated: userParticipationSet.has(name),
                 };
             });
 
@@ -174,8 +170,6 @@ export function useAuctions({
                 isLoading:
                     isLoadingSelectedAuctions || auctionDetails.some((result) => result.isLoading),
                 error: !!selectedAuctionsError || auctionDetails.some((result) => result.error),
-                auctionNames: selectedAuctions,
-                isUserFiltered: type === 'userAuctions',
                 page: selectedAuctions.page,
                 pageSize: selectedAuctions.pageSize,
                 totalItems: selectedAuctions.totalItems,
