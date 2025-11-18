@@ -40,8 +40,9 @@ test.describe.parallel('Name Management Tests', () => {
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
-        const nameCards = page.getByTestId('name-card');
-        await expect(nameCards.first()).toBeVisible({ timeout: 10_000 });
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
 
         const nameCard = page
             .getByTestId('name-card')
