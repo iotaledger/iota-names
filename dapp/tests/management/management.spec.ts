@@ -35,7 +35,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Create subname', async ({ appPage: page, context, sharedState }) => {
+    test('Add subname to a subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
         const subname = generateRandomSubname('subname', name);
