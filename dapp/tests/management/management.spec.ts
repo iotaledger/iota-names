@@ -12,6 +12,7 @@ import {
     connectWallet,
     createWallet,
     generateRandomName,
+    generateRandomSubname,
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
@@ -33,10 +34,11 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
+
     test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
-        const subname = generateRandomName('subdisplay');
+        const subname = generateRandomSubname('subname', name);
         const responsePurchase = await purchaseName(
             name,
             sharedState.wallet.address ?? '',
@@ -75,7 +77,7 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        await dialog.getByPlaceholder('Enter subname').fill(subname);
+        await dialog.getByPlaceholder('Enter subname').fill('subname');
 
         await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
