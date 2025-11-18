@@ -256,7 +256,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                         <div className="flex flex-col w-full gap-y-md">
                             <Panel bgColor="bg-names-neutral-12">
                                 <div className="px-md py-lg">
-                                    <span className="text-names-neutral-100 text-headline-sm break-words overflow-hidden">
+                                    <span
+                                        className="text-names-neutral-100 text-headline-sm break-words overflow-hidden"
+                                        data-testid="name-purchase-title"
+                                    >
                                         {normalizeIotaName(name)}
                                     </span>
                                 </div>
