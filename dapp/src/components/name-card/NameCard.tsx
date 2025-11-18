@@ -33,6 +33,7 @@ export function NameCard({
                 isSelected && 'name-card-selected',
                 nftDisplayVariants({ size }),
             )}
+            data-testid="name-card"
         >
             <div
                 className={cx(
