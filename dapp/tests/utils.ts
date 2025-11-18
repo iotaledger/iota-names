@@ -10,7 +10,9 @@ import 'dotenv/config';
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
+import { buildCreateAuctionTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
@@ -135,6 +137,51 @@ export async function purchaseName(name: string, address: string, signer: Signer
         },
     });
     return { nft, name, response };
+}
+
+interface CreateAndSendAuctionTransaction {
+    name: string;
+    signer: Signer;
+}
+export async function createAndSendAuctionTransaction({
+    name,
+    signer,
+}: CreateAndSendAuctionTransaction) {
+    try {
+        const tx = buildCreateAuctionTransaction(
+            iotaNamesClient.config.auctionPackageId,
+            iotaNamesClient.config.iotaNamesObjectId,
+            iotaNamesClient.config.auctionHouseObjectId,
+            signer.toIotaAddress(),
+            BigInt(50) * NANOS_PER_IOTA,
+            name,
+        );
+
+        const txBytes = await tx.build({ client: iotaClient });
+        const txDryRun = await iotaClient.dryRunTransactionBlock({
+            transactionBlock: txBytes,
+        });
+
+        if (txDryRun.effects.status.status !== 'success') {
+            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+        }
+
+        const response = await iotaClient.signAndExecuteTransaction({
+            transaction: txBytes,
+            signer,
+            options: {
+                showEffects: true,
+            },
+        });
+
+        console.log('Transaction sent. Digest:', response.digest);
+        console.log(`Successfully created auction for name: ${name}`);
+
+        return response;
+    } catch (error) {
+        console.error('Error creating initial auction:', error);
+        throw error;
+    }
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
