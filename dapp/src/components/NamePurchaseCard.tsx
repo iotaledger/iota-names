@@ -44,7 +44,6 @@ export function NamePurchaseCard({
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] gap-y-sm',
                 isAvailable && 'hover:bg-names-gradient-primary',
             )}
-            data-testid={testId}
         >
             <div
                 className={clsx(
