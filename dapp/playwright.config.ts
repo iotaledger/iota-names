@@ -28,6 +28,15 @@ export default defineConfig({
             fullyParallel: true,
         },
         {
+            name: 'Management flow',
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            testDir: './tests/management',
+            fullyParallel: false,
+        },
+        {
             name: 'Purchase setup',
             testMatch: /purchase\.setup\.ts/,
         },
