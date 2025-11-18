@@ -117,10 +117,12 @@ export function getAddressByIndexPath(mnemonic: string, index: number) {
 interface CreateAndSendAuctionTransaction {
     name: string;
     signer: Signer;
+    bigAmountIota?: bigint;
 }
 export async function createAndSendAuctionTransaction({
     name,
     signer,
+    bigAmountIota = BigInt(50),
 }: CreateAndSendAuctionTransaction) {
     try {
         const tx = buildCreateAuctionTransaction(
@@ -128,7 +130,7 @@ export async function createAndSendAuctionTransaction({
             iotaNamesClient.config.iotaNamesObjectId,
             iotaNamesClient.config.auctionHouseObjectId,
             signer.toIotaAddress(),
-            BigInt(80) * NANOS_PER_IOTA,
+            bigAmountIota * NANOS_PER_IOTA,
             name,
         );
 
@@ -162,14 +164,19 @@ export async function createAndSendAuctionTransaction({
 interface BidOnExistingAuction {
     name: string;
     signer: Signer;
+    bidAmountIota?: bigint;
 }
-export async function bidOnExistingAuction({ name, signer }: BidOnExistingAuction) {
+export async function bidOnExistingAuction({
+    name,
+    signer,
+    bidAmountIota = BigInt(51),
+}: BidOnExistingAuction) {
     try {
         const tx = buildPlaceBidTransaction(
             iotaNamesClient.config.auctionPackageId,
             iotaNamesClient.config.auctionHouseObjectId,
             signer.toIotaAddress(),
-            BigInt(81) * NANOS_PER_IOTA,
+            bidAmountIota * NANOS_PER_IOTA,
             name,
         );
 

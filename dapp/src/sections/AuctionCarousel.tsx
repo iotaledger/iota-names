@@ -28,7 +28,7 @@ export function AuctionCarousel() {
     const { data: auctions = [], isLoading } = useAuctions({
         type: 'allAuctions',
         userAddress: account?.address,
-        status: 'all',
+        status: 'active',
         search: '',
         page: 0,
         pageSize: 20,
