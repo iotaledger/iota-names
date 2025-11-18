@@ -6,11 +6,12 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { expect, test } from '../helpers/fixtures';
+import { iotaNamesClient } from '../setup/utils';
 import {
+    connectName,
     connectWallet,
     createWallet,
     generateRandomName,
-    getAddressByIndexPath,
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
@@ -32,11 +33,19 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
-    test('Connect address', async ({ appPage: page, context, sharedState }) => {
+
+    test('Disconnect address', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
+        const address = sharedState.wallet.address ?? '';
 
-        const { response } = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const { responsePurchase } = await purchaseName(name, address, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const { response } = await connectName(name, address, record.nftId, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
@@ -56,15 +65,12 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        const mnemonic = sharedState.wallet.mnemonic as string;
-        const externalAddress = getAddressByIndexPath(mnemonic, 1);
-
-        await dialog.getByPlaceholder('Enter Address').fill(externalAddress);
+        await dialog.getByPlaceholder('Enter Address').fill('');
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Successfully connected', { exact: false })).toBeVisible({
+        await expect(page.getByText(`Successfully disconnected`, { exact: false })).toBeVisible({
             timeout: 30_000,
         });
 
