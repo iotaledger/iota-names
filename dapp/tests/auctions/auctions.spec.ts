@@ -33,7 +33,7 @@ test.describe.parallel('Auction Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('create bid on existing auction', async ({ appPage: page, context }) => {
+    test('Create bid on existing auction', async ({ appPage: page, context }) => {
         const auctionName = generateRandomName('existing');
 
         const keypair = new Ed25519Keypair();
@@ -77,12 +77,13 @@ test.describe.parallel('Auction Flow', () => {
 
     test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
         test.setTimeout(60_000);
-        const name = `claim${Date.now().toString().slice(-6)}`;
+        const name = generateRandomName('claim');
         const nameToAuction = `${name}.iota`;
         await page.bringToFront();
         const navPromise = page.goto(`/auctions?page=1&search=${name}`);
 
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+        await requestFaucetTokens(keypair.toIotaAddress());
 
         const response = await createAndSendAuctionTransaction({
             signer: keypair,
