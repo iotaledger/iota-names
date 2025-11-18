@@ -1,14 +1,16 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { getNetwork } from '@iota/iota-sdk/client';
-import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
-import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
-import { Signer } from '@iota/iota-sdk/cryptography';
+import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { getNetwork } from '@iota/iota-sdk/client';
+import type { Signer } from '@iota/iota-sdk/cryptography';
+import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import type { BrowserContext, Page } from '@playwright/test';
 
 import { buildCreateAuctionTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -104,6 +106,39 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
+export async function purchaseName(name: string, address: string, signer: Signer) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
+    const nft = await iotaNamesTx.register({
+        name,
+        coin,
+        address,
+    });
+    iotaNamesTx.transaction.transferObjects([nft, coin], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Purchased name: ${name} with address: ${address}`);
+    const response = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return { nft, name, response };
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -159,4 +194,9 @@ export async function createAndSendAuctionTransaction({
         console.error('Error creating initial auction:', error);
         throw error;
     }
+}
+
+export function generateRandomName(name: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${name}${random}.iota`;
 }

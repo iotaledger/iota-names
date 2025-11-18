@@ -50,7 +50,7 @@ test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
     await page.getByText('Refreshed successfully!').waitFor({ state: 'visible', timeout: 10_000 });
 
     let auctionNameCard = page
-        .getByTestId('auction-name-card')
+        .getByTestId('name-card')
         .filter({ hasText: normalizeIotaName(nameToAuction, 'at') });
 
     const timeRemainingLocator = auctionNameCard.getByTestId('auction-time-remaining');
@@ -66,7 +66,7 @@ test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
     await page.getByText('Refreshed successfully!').waitFor({ state: 'visible', timeout: 10_000 });
 
     auctionNameCard = page
-        .getByTestId('auction-name-card')
+        .getByTestId('name-card')
         .filter({ hasText: normalizeIotaName(nameToAuction, 'at') });
 
     const claimButton = auctionNameCard.getByRole('button', { name: 'Claim' });
