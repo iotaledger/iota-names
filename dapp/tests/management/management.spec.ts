@@ -39,13 +39,13 @@ test.describe.parallel('Name Management Tests', () => {
         const name = generateRandomName('display');
         const address = sharedState.wallet.address ?? '';
 
-        const { responsePurchase } = await purchaseName(name, address, keypair);
+        const responsePurchase = await purchaseName(name, address, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
 
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
 
-        const { responseConnect } = await connectName(name, address, record.nftId, keypair);
+        const responseConnect = await connectName(name, address, record.nftId, keypair);
         expect(responseConnect.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
