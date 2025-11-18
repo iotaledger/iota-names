@@ -142,7 +142,7 @@ export async function purchaseName(name: string, address: string, signer: Signer
 export async function addSubnameName(
     subname: string,
     parentNftId: string,
-    expirationDate: Date,
+    expiration: Date,
     address: string,
     signer: Signer,
 ) {
@@ -151,7 +151,7 @@ export async function addSubnameName(
     const subnameNft = await iotaNamesTx.createSubname({
         parentNft: tx.object(parentNftId),
         name: subname,
-        expirationTimestampMs: expirationDate.getTime(),
+        expirationTimestampMs: expiration.getTime(),
         allowChildCreation: true,
         allowTimeExtension: true,
     });
@@ -177,6 +177,44 @@ export async function addSubnameName(
         },
     });
     return responsePurchaseSubname;
+}
+
+export async function renewName(
+    name: string,
+    parentNftId: string,
+    address: string,
+    signer: Signer,
+) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    await iotaNamesTx.renew({
+        nft: parentNftId,
+        name: name,
+        years: 1,
+        coin: tx.gas,
+        address: address,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Renewed name: ${name} with address: ${address}`);
+    const responseRenew = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return responseRenew;
 }
 
 interface CreateAndSendAuctionTransaction {

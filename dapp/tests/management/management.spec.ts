@@ -14,10 +14,12 @@ import {
     generateRandomName,
     generateRandomSubname,
     purchaseName,
+    renewName,
     requestFaucetTokens,
 } from '../utils';
 
 test.describe.parallel('Name Management Tests', () => {
+    test.setTimeout(45_000);
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -35,7 +37,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Create subname', async ({ appPage: page, context, sharedState }) => {
+    test('Renew subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
         const subname = generateRandomSubname('subname', name);
@@ -58,6 +60,14 @@ test.describe.parallel('Name Management Tests', () => {
         );
         expect(responsePurchaseSubname.effects?.status.status).toBe('success');
 
+        const responseRenew = await renewName(
+            name,
+            record.nftId,
+            sharedState.wallet.address ?? '',
+            keypair,
+        );
+        expect(responseRenew.effects?.status.status).toBe('success');
+
         await page.goto('/my-names');
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(subname, 'at') }),
@@ -72,18 +82,15 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
 
-        await page.getByText('Create Subname', { exact: true }).click();
-
+        await page.getByText('Renew Name', { exact: true }).click();
         const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('New Subname')).toBeVisible();
+        await expect(dialog.getByText('Renew Name', { exact: true })).toBeVisible();
 
-        await dialog.getByPlaceholder('Enter subname').fill('subname');
-
-        await dialog.getByRole('button', { name: 'Create' }).click();
+        await dialog.getByRole('button', { name: 'Renew' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+        await expect(page.getByText('Subname renewed successfully', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
 
