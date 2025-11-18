@@ -7,9 +7,14 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
+import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { Signer } from '@iota/iota-sdk/cryptography';
+import { Transaction } from '@iota/iota-sdk/transactions';
+
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
+import { iotaClient, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
@@ -97,6 +102,39 @@ export async function requestFaucetTokens(recipient: string) {
     if (res.error) {
         throw new Error(`Faucet error: ${res.error}`);
     }
+}
+
+export async function purchaseName(name: string, address: string, signer: Signer) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
+    const nft = await iotaNamesTx.register({
+        name,
+        coin,
+        address,
+    });
+    iotaNamesTx.transaction.transferObjects([nft, coin], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Purchased name: ${name} with address: ${address}`);
+    const response = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return { nft, name, response };
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
