@@ -328,6 +328,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                 price={formattedBidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
+                testId="auction-card"
             >
                 {isConnected ? (
                     <Button
@@ -387,6 +388,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
                     isAvailable={isAvailable}
                     price={formattedPurchasePrice}
                     priceSupportingText="Price"
+                    testId="purchase-name-card"
                 >
                     {isConnected ? (
                         <Button
