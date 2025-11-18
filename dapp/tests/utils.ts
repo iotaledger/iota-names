@@ -136,7 +136,7 @@ export async function purchaseName(name: string, address: string, signer: Signer
             showEffects: true,
         },
     });
-    return { nft, name, responsePurchase };
+    return responsePurchase;
 }
 
 export async function connectName(name: string, address: string, nft: string, signer: Signer) {
@@ -167,7 +167,7 @@ export async function connectName(name: string, address: string, nft: string, si
             showEffects: true,
         },
     });
-    return { nft, name, responseConnect };
+    return responseConnect;
 }
 
 interface CreateAndSendAuctionTransaction {
