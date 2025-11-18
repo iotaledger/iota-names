@@ -5,14 +5,11 @@ import 'dotenv/config';
 
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import { formatAddress, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { formatAddress } from '@iota/iota-sdk/utils';
 import { expect } from '@playwright/test';
 
-import { buildCreateAuctionTransaction } from '@/auctions';
-
 import { test } from '../helpers/fixtures';
-import { iotaClient, iotaNamesClient } from '../setup/utils';
-import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
+import { connectWallet, createAndSendAuctionTransaction, createWallet } from '../utils';
 
 test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
     const { address, mnemonic } = await createWallet(extensionPage);
@@ -36,38 +33,15 @@ test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
     await page.bringToFront();
     const navPromise = page.goto(`/auctions?page=1&search=${name}`);
 
-    let keypair: Ed25519Keypair;
-    if (sharedState.wallet.mnemonic) {
-        keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic);
-    } else {
-        keypair = new Ed25519Keypair();
-    }
+    const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
-    await requestFaucetTokens(keypair.toIotaAddress());
-    const tx = buildCreateAuctionTransaction(
-        iotaNamesClient.config.auctionPackageId,
-        iotaNamesClient.config.iotaNamesObjectId,
-        iotaNamesClient.config.auctionHouseObjectId,
-        keypair.toIotaAddress(),
-        BigInt(50) * NANOS_PER_IOTA,
-        nameToAuction,
-    );
-
-    const txBuild = await tx.build({
-        client: iotaClient,
-    });
-
-    const result = await iotaClient.signAndExecuteTransaction({
-        transaction: txBuild,
+    const response = await createAndSendAuctionTransaction({
         signer: keypair,
-        options: {
-            showEffects: true,
-            showObjectChanges: true,
-            showEvents: true,
-        },
+        name: nameToAuction,
     });
 
-    expect(result.effects?.status.status).toBe('success');
+    expect(response.effects?.status.status).toBe('success');
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
     await navPromise;
     await page.locator("h2:has-text('Auctions')").waitFor({ state: 'visible', timeout: 10_000 });
