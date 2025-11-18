@@ -4,6 +4,7 @@
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
+import { normalizeIotaName } from '../../../sdk/dist/esm/utils';
 import { expect, test } from '../helpers/fixtures';
 import {
     connectWallet,
@@ -38,8 +39,13 @@ test.describe.parallel('Name Management Tests', () => {
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
-        const nameCard = page.getByTestId('name-card').filter({ hasText: name });
-        await expect(nameCard).toBeVisible({ timeout: 10_000 });
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
 
         await nameCard.getByTestId('name-card-avatar').hover();
         const menuButtonLocator = nameCard.getByTestId('menu-button');
@@ -55,19 +61,10 @@ test.describe.parallel('Name Management Tests', () => {
             await expect(yearSelect).toBeVisible();
         }
 
-        const renewButton = dialog.getByRole('button', { name: /^Renew$/i });
-        await expect(renewButton).toBeEnabled({ timeout: 15_000 });
+        await dialog.getByRole('button', { name: 'Renew' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
 
-        const walletPopupPromise = context.waitForEvent('page');
-        await renewButton.click();
-        const walletPopup = await walletPopupPromise;
-        await walletPopup.waitForLoadState('domcontentloaded');
-        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
-        await expect(approveBtn).toBeVisible({ timeout: 10_000 });
-        await approveBtn.click();
-        await walletPopup.waitForEvent('close', { timeout: 15_000 });
-
-        // Assert success toast
         await expect(page.getByText('Name renewed successfully', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
