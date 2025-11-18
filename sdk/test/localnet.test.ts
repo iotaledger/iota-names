@@ -29,14 +29,7 @@ export function loadLocalnetConfig(): PackageInfo {
         // Read the generated configuration file
         const localnetConfig = JSON.parse(readFileSync(localnetConfigPath, 'utf8'));
 
-        return {
-            metadata: {
-                coins: localnetConfig.coins,
-            },
-            packages: {
-                ...localnetConfig,
-            },
-        } as PackageInfo;
+        return localnetConfig as PackageInfo;
     } catch (error) {
         throw new Error(
             `Failed to load localnet configuration: ${error instanceof Error ? error.message : String(error)}`,
@@ -93,7 +86,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     // Register a name for 2 years
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        coinConfig: iotaNamesClient.config.metadata.coins.IOTA,
+        coinConfig: { type: '0x2::iota::IOTA' },
         coin: coinInput,
     });
 
@@ -291,7 +284,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -325,7 +318,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -376,7 +369,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -419,7 +412,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -459,7 +452,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -501,7 +494,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -547,7 +540,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             // Register the root name
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -599,7 +592,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
@@ -633,7 +626,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: client.config.metadata.coins.IOTA,
+                coinConfig: { type: '0x2::iota::IOTA' },
                 coin: coinInput,
             });
 
