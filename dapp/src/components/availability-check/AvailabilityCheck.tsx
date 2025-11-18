@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { isAuctionActive } from '@/auctions/lib/utils';
 import {
     NameRecordData,
     useBlockedList,
@@ -91,7 +90,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -300,7 +299,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isAllowedToBid =
         (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
 

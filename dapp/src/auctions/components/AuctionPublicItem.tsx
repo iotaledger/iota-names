@@ -5,8 +5,7 @@ import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { useQueryClient } from '@tanstack/react-query';
-import { MouseEvent, useEffect, useMemo } from 'react';
+import { MouseEvent, useMemo } from 'react';
 
 import {
     AuctionDetails,
@@ -14,17 +13,17 @@ import {
     formatTimeRemaining,
     getTimeRemaining,
     getUserAuctionStatus,
-    isAuctionActive,
 } from '@/auctions';
 import { useCountdown } from '@/auctions/hooks/useCountdown';
 import { NameCard } from '@/components/name-card/NameCard';
 import { NameCardBody } from '@/components/name-card/NameCardBody';
-import { queryKey, useCalculatePriceInFiat, useNameRecord } from '@/hooks';
+import { useCalculatePriceInFiat, useNameRecord } from '@/hooks';
 import { FORBIDDEN_LIST } from '@/lib/constants/forbiddenList';
 import { formatNanosToIota } from '@/lib/utils';
 import { censorName } from '@/lib/utils/censorName';
 import { getNameDisplaySrc } from '@/lib/utils/displayImage';
 
+import { useAuctionRefresh } from '../hooks/useAuctionRefresh';
 import { AuctionActionButton } from './AuctionActionButton';
 
 interface AuctionPublicItemProps {
@@ -33,11 +32,11 @@ interface AuctionPublicItemProps {
 }
 
 export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProps) {
+    useAuctionRefresh(auction.metadata);
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(
         auction.name,
     );
     const account = useCurrentAccount();
-    const queryClient = useQueryClient();
 
     const normalizedName = normalizeIotaName(auction.name);
     const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
@@ -130,17 +129,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
                 <div className="my-4">
                     <Divider type={DividerType.Horizontal} />
                 </div>
-                <AuctionTimeRemaining
-                    auction={auction}
-                    onTimeUp={() => {
-                        if (isAuctionActive(auction.metadata)) {
-                            // Refetch the auction when it has finished
-                            queryClient.invalidateQueries({
-                                queryKey: queryKey.auctionMetadata(auction.name),
-                            });
-                        }
-                    }}
-                />
+                <AuctionTimeRemaining auction={auction} />
             </NameCardBody>
         </NameCard>
     );
@@ -189,23 +178,11 @@ function ClaimedAuctionBody({ auction }: { auction: AuctionDetails }) {
     );
 }
 
-function AuctionTimeRemaining({
-    auction,
-    onTimeUp,
-}: {
-    auction: AuctionDetails;
-    onTimeUp: () => void;
-}) {
+function AuctionTimeRemaining({ auction }: { auction: AuctionDetails }) {
     const timeRemainingMs = getTimeRemaining(auction.metadata);
     const { milliseconds } = useCountdown(timeRemainingMs);
 
     const formattedTimeRemaining = formatTimeRemaining(milliseconds);
-
-    useEffect(() => {
-        if (milliseconds <= 0) {
-            onTimeUp();
-        }
-    }, [milliseconds, onTimeUp]);
 
     return (
         <div className="flex items-center justify-between">

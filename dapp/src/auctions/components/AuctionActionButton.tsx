@@ -9,7 +9,7 @@ import { queryKey } from '@/hooks/queryKey';
 
 import { AuctionDetails } from '../hooks/useAuctions';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
-import { getTimeRemaining, isAuctionActive, UserAuctionStatus } from '../lib/utils';
+import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
 
 export function AuctionActionButton({
     auction,
@@ -37,7 +37,7 @@ export function AuctionActionButton({
             },
         });
 
-    if (!account?.address && isAuctionActive(auction.metadata)) {
+    if (!account?.address && auction.metadata?.isActive) {
         return (
             <ConnectModal trigger={<Button text="Bid" type={ButtonType.Outlined} fullWidth />} />
         );
