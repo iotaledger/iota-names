@@ -45,6 +45,7 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
         await page.bringToFront();
     }
 }
+
 export async function createWallet(page: Page) {
     await page.bringToFront();
     await page.getByRole('button', { name: /Add Profile/ }).click({ timeout: 30000 });
