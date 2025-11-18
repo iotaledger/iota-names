@@ -5,7 +5,12 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS, NANOS_PER_IOTA, safeParseAmount } from '@iota/iota-sdk/utils';
+import {
+    IOTA_DECIMALS,
+    IOTA_TYPE_ARG,
+    NANOS_PER_IOTA,
+    safeParseAmount,
+} from '@iota/iota-sdk/utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
@@ -86,7 +91,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     // Register a name for 2 years
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        coinConfig: { type: '0x2::iota::IOTA' },
+        coinConfig: { type: IOTA_TYPE_ARG },
         coin: coinInput,
     });
 
@@ -284,7 +289,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -318,7 +323,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -369,7 +374,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -412,7 +417,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -452,7 +457,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -494,7 +499,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -540,7 +545,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             // Register the root name
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -592,7 +597,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -626,7 +631,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                coinConfig: { type: '0x2::iota::IOTA' },
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 

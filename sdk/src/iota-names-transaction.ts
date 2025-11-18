@@ -8,7 +8,7 @@ import type {
     TransactionObjectArgument,
     TransactionObjectInput,
 } from '@iota/iota-sdk/transactions';
-import { IOTA_CLOCK_OBJECT_ID } from '@iota/iota-sdk/utils';
+import { IOTA_CLOCK_OBJECT_ID, IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 
 import { ALLOWED_METADATA } from './constants.js';
 import { isNestedSubname, isSubname } from './helpers.js';
@@ -54,7 +54,7 @@ export class IotaNamesTransaction {
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,
-            coinConfig: params.coinConfig || { type: '0x2::iota::IOTA' },
+            coinConfig: params.coinConfig || { type: IOTA_TYPE_ARG },
         });
 
         return this.finalizeRegister(receipt);
@@ -89,7 +89,7 @@ export class IotaNamesTransaction {
         const receipt = this.generateReceipt({
             paymentIntent,
             payment,
-            coinConfig: params.coinConfig || { type: '0x2::iota::IOTA' },
+            coinConfig: params.coinConfig || { type: IOTA_TYPE_ARG },
         });
         this.finalizeRenew(receipt, params.nft);
     }

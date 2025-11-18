@@ -3,6 +3,7 @@
 
 import { getNameRegistrationType, getSubnameRegistrationType } from '@iota/iota-names-sdk';
 import { type IotaObjectData } from '@iota/iota-sdk/client';
+import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 
 import { useIotaNamesClient } from '@/contexts';
 import { isKioskOwnerToken } from '@/lib/utils/kiosk';
@@ -13,7 +14,7 @@ import { useKioskClient } from './useKioskClient';
 const FILTER_NONE_STRUCT_TYPES = [
     '0x2::coin::Coin',
     '0x3::staking_pool::StakedIota',
-    '0x2::iota::IOTA',
+    IOTA_TYPE_ARG,
     '0x3::timelocked_staking::TimelockedStakedIota',
     '0x2::timelock::TimeLock<0x2::balance::Balance<0x2::iota::IOTA>>',
 ];

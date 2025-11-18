@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 
 import { PackageInfo, readPackageInfo } from '../package-info/constants';
 import { prepareMultisigTx } from '../utils/utils';
@@ -43,7 +44,7 @@ export async function profitsToTreasury(
     const generalProfits = txb.moveCall({
         target: `${packageInfo.packageId.v1}::iota_names::withdraw`,
         arguments: [txb.object(packageInfo.iotaNamesObjectId), txb.object(packageInfo.adminCap)],
-        typeArguments: ['0x2::iota::IOTA'],
+        typeArguments: [IOTA_TYPE_ARG],
     });
     txb.transferObjects([generalProfits], txb.pure.address(treasuryAddress));
 }
