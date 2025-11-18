@@ -129,14 +129,73 @@ export async function purchaseName(name: string, address: string, signer: Signer
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
     console.log(`Purchased name: ${name} with address: ${address}`);
-    const response = await iotaClient.signAndExecuteTransaction({
+    const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return { nft, name, response };
+    return { nft, name, responsePurchase };
+}
+
+export async function connectName(name: string, address: string, nft: string, signer: Signer) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Connected name: ${name} to address: ${address}`);
+    const responseConnect = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return { nft, name, responseConnect };
+}
+
+export async function setDisplayName(name: string, address: string, signer: Signer) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setDefault(name);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+
+    console.log(`Set name: ${name} as display name for address: ${address}`);
+    const responseSetDisplay = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return { responseSetDisplay };
 }
 
 interface CreateAndSendAuctionTransaction {

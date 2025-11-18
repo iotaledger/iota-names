@@ -6,12 +6,15 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { expect, test } from '../helpers/fixtures';
+import { iotaNamesClient } from '../setup/utils';
 import {
+    connectName,
     connectWallet,
     createWallet,
     generateRandomName,
     purchaseName,
     requestFaucetTokens,
+    setDisplayName,
 } from '../utils';
 
 test.describe.parallel('Name Management Tests', () => {
@@ -31,14 +34,30 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
-    test('Connect Address and Set Display', async ({ appPage: page, context, sharedState }) => {
+    test('Unset Display', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
+        const address = sharedState.wallet.address ?? '';
 
-        const { response } = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
-        expect(response.effects?.status.status).toBe('success');
+        const { responsePurchase } = await purchaseName(
+            name,
+            sharedState.wallet.address ?? '',
+            keypair,
+        );
+        expect(responsePurchase.effects?.status.status).toBe('success');
 
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const { responseConnect } = await connectName(name, address, record.nftId, keypair);
+        expect(responseConnect.effects?.status.status).toBe('success');
+
+        const { responseSetDisplay } = await setDisplayName(name, address, keypair);
+        expect(responseSetDisplay.effects?.status.status).toBe('success');
+
+        await page.waitForTimeout(3_000);
         await page.goto('/my-names');
+        await page.reload();
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
         ).toBeVisible({ timeout: 10_000 });
@@ -56,20 +75,14 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        await dialog.getByRole('button', { name: /use current address/i }).click();
         await expect(dialog.getByText('Set as Display name')).toBeVisible();
-
         await dialog.getByText('Set as Display name').click();
 
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
-            timeout: 30_000,
-        });
         await dialog.getByRole('button', { name: 'Finish' }).click();
-
         await page.close();
     });
 });
