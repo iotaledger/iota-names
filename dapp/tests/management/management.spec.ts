@@ -45,8 +45,8 @@ test.describe.parallel('Name Management Tests', () => {
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
 
-        const { response } = await connectName(name, address, record.nftId, keypair);
-        expect(response.effects?.status.status).toBe('success');
+        const { responseConnect } = await connectName(name, address, record.nftId, keypair);
+        expect(responseConnect.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
         await expect(

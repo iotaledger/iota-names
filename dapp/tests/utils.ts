@@ -160,14 +160,14 @@ export async function connectName(name: string, address: string, nft: string, si
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
     console.log(`Purchased name: ${name} with address: ${address}`);
-    const response = await iotaClient.signAndExecuteTransaction({
+    const responseConnect = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return { nft, name, response };
+    return { nft, name, responseConnect };
 }
 
 interface CreateAndSendAuctionTransaction {
