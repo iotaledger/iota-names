@@ -12,6 +12,7 @@ import {
     connectWallet,
     createAndSendAuctionTransaction,
     createWallet,
+    generateRandomName,
     requestFaucetTokens,
 } from '../utils';
 import { checkAuctionPills } from './auction.utils';
@@ -32,8 +33,7 @@ test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedSt
 });
 
 test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
-    const name = `outbid${Date.now().toString().slice(-6)}`;
-    const nameToAuction = `${name}.iota`;
+    const name = generateRandomName('outbid');
 
     const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
     const newSigner = Ed25519Keypair.deriveKeypair(
@@ -47,33 +47,32 @@ test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
     ]);
 
     const startAuctionResult = await createAndSendAuctionTransaction({
-        name: nameToAuction,
+        name,
         signer: walletSigner,
     });
     expect(startAuctionResult.effects?.status.status).toBe('success');
 
     const bidResult = await bidOnExistingAuction({
-        name: nameToAuction,
+        name,
         signer: newSigner,
     });
     expect(bidResult.effects?.status.status).toBe('success');
 
-    await checkAuctionPills(page, nameToAuction, 'Outbid');
+    await checkAuctionPills(page, name, 'Outbid');
 });
 
 test('Check "Top Bidder" pills', async ({ sharedState, appPage: page }) => {
-    const name = `topbid${Date.now().toString().slice(-6)}`;
-    const nameToAuction = `${name}.iota`;
+    const name = generateRandomName('topbid');
 
     const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
     await requestFaucetTokens(walletSigner.toIotaAddress());
 
     const startAuctionResult = await createAndSendAuctionTransaction({
-        name: nameToAuction,
+        name,
         signer: walletSigner,
     });
     expect(startAuctionResult.effects?.status.status).toBe('success');
 
-    await checkAuctionPills(page, nameToAuction, 'Top Bidder');
+    await checkAuctionPills(page, name, 'Top Bidder');
 });
