@@ -114,13 +114,10 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             }
         },
         onSuccess() {
-            // queryClient.invalidateQueries({
-            //     queryKey: queryKey.userAuctionHistory(account?.address),
-            // });
-            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
             queryClient.invalidateQueries({
-                queryKey: queryKey.auctionList(),
+                queryKey: queryKey.userAuctionHistory(account?.address),
             });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
 
             if (!auctionMetadata) {
                 ampli.placedAuctionBid({
