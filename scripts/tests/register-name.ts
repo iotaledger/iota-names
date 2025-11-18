@@ -27,18 +27,18 @@ const registerName = async () => {
 
     let tx = new Transaction();
     const paymentIntent = tx.moveCall({
-        target: `${packageInfo.packageId}::payment::init_registration`,
+        target: `${packageInfo.packageId.v1}::payment::init_registration`,
         arguments: [tx.object(packageInfo.iotaNamesObjectId), tx.pure.string(name)],
     });
 
     const payment = tx.splitCoins(tx.gas, [price]);
     const receipt = tx.moveCall({
-        target: `${packageInfo.paymentsPackageId}::payments::handle_base_payment`,
+        target: `${packageInfo.paymentsPackageId.v1}::payments::handle_base_payment`,
         arguments: [tx.object(packageInfo.iotaNamesObjectId), paymentIntent, payment],
         typeArguments: ['0x2::iota::IOTA'],
     });
     const nft = tx.moveCall({
-        target: `${packageInfo.packageId}::payment::register`,
+        target: `${packageInfo.packageId.v1}::payment::register`,
         arguments: [receipt, tx.object(packageInfo.iotaNamesObjectId), tx.object('0x6')],
     });
     const signer = getSigner();
@@ -60,7 +60,7 @@ async function getPrice(client: IotaClient, packageInfo: PackageInfo, name: stri
     });
     let pricingConfigId = '';
     for (const field of allFields.data) {
-        if (field.objectType === `${packageInfo.packageId}::pricing_config::PricingConfig`) {
+        if (field.objectType === `${packageInfo.packageId.v1}::pricing_config::PricingConfig`) {
             pricingConfigId = field.objectId;
             break;
         }
