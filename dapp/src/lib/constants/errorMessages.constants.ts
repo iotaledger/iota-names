@@ -17,6 +17,8 @@ export const DEFAULT_ERROR_MESSAGE = 'Something went wrong. Please try again.';
 
 // Common error patterns that should be caught and made user-friendly
 export const ERROR_PATTERNS = {
+    rejected: 'Transaction rejected by user.',
+    'blind signing': 'Enable Blind Signing in the IOTA app settings on your Ledger device.',
     'fetch failed': 'Connection failed. Please check your internet connection and try again.',
     'network error': 'Network error. Please try again later.',
     'signal timed out': 'Request timed out. Please try again.',
@@ -24,7 +26,6 @@ export const ERROR_PATTERNS = {
     'transaction failed': 'Transaction failed. Please try again.',
     'insufficient funds': 'Insufficient funds to complete this transaction.',
     'gas limit exceeded': 'Transaction requires too much gas. Please try again.',
-    'rejected from user': 'Transaction rejected by user.',
     unauthorized: "You don't have permission to perform this action.",
     'access denied': "Access denied. You don't have the required permissions.",
     forbidden: 'This action is not allowed.',
