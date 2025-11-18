@@ -152,12 +152,12 @@ export function getAddressByIndexPath(mnemonic: string, index: number) {
 interface CreateAndSendAuctionTransaction {
     name: string;
     signer: Signer;
-    bigAmountIota?: bigint;
+    bidAmountIota?: bigint;
 }
 export async function createAndSendAuctionTransaction({
     name,
     signer,
-    bigAmountIota = BigInt(50),
+    bidAmountIota = BigInt(50),
 }: CreateAndSendAuctionTransaction) {
     try {
         const tx = buildCreateAuctionTransaction(
@@ -165,7 +165,7 @@ export async function createAndSendAuctionTransaction({
             iotaNamesClient.config.iotaNamesObjectId,
             iotaNamesClient.config.auctionHouseObjectId,
             signer.toIotaAddress(),
-            bigAmountIota * NANOS_PER_IOTA,
+            bidAmountIota * NANOS_PER_IOTA,
             name,
         );
 

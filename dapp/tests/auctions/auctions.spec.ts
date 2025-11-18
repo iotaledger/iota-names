@@ -1,10 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import 'dotenv/config';
-
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { expect, test } from '../helpers/fixtures';
 import {
@@ -17,62 +15,102 @@ import {
 } from '../utils';
 import { checkAuctionPills } from './auction.utils';
 
-test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
-    const { address, mnemonic } = await createWallet(extensionPage);
+test.describe.parallel('Auction Bid Flow', () => {
+    test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
+        const { address, mnemonic } = await createWallet(extensionPage);
 
-    await appPage.bringToFront();
+        await appPage.bringToFront();
+        await connectWallet(appPage, context, extensionName);
 
-    await connectWallet(appPage, context, extensionName);
-
-    await expect(appPage.getByRole('button', { name: formatAddress(address) })).toBeVisible({
-        timeout: 10_000,
+        await requestFaucetTokens(address);
+        sharedState.wallet.address = address;
+        sharedState.wallet.mnemonic = mnemonic;
     });
 
-    sharedState.wallet.address = address;
-    sharedState.wallet.mnemonic = mnemonic;
-});
+    test('create bid on existing auction', async ({ appPage: page, context }) => {
+        const auctionName = generateRandomName('existing');
 
-test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
-    const name = generateRandomName('outbid');
+        const keypair = new Ed25519Keypair();
+        await requestFaucetTokens(keypair.toIotaAddress());
 
-    const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
-    const newSigner = Ed25519Keypair.deriveKeypair(
-        sharedState.wallet.mnemonic!,
-        `m/44'/4218'/0'/0'/1'`,
-    );
+        const response = await createAndSendAuctionTransaction({
+            signer: keypair,
+            name: auctionName,
+        });
 
-    await Promise.all([
-        requestFaucetTokens(walletSigner.toIotaAddress()),
-        requestFaucetTokens(newSigner.toIotaAddress()),
-    ]);
+        expect(response.effects?.status.status).toBe('success');
 
-    const startAuctionResult = await createAndSendAuctionTransaction({
-        name,
-        signer: walletSigner,
+        await page.goto(`/auctions?page=1&search=${auctionName}`);
+        await page.getByTestId('refresh-button').click({ timeout: 10_000 });
+
+        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible({
+            timeout: 10_000,
+        });
+
+        const displayName = normalizeIotaName(auctionName, 'at');
+
+        const nameCard = page.getByTestId('name-card-body').filter({ hasText: displayName });
+        await expect(nameCard).toBeVisible({ timeout: 10_000 });
+
+        await nameCard.getByRole('button', { name: /Bid/i }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await page.getByRole('button', { name: /^Bid$/i }).click();
+        const walletConfirmationPage = context.waitForEvent('page');
+        const walletPopup = await walletConfirmationPage;
+
+        await walletPopup.waitForLoadState('domcontentloaded');
+        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
+        await approveBtn.click();
+
+        await walletPopup.waitForEvent('close', { timeout: 10_000 });
+        await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
+            timeout: 5_000,
+        });
     });
-    expect(startAuctionResult.effects?.status.status).toBe('success');
 
-    const bidResult = await bidOnExistingAuction({
-        name,
-        signer: newSigner,
+    test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('outbid');
+
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+        const newSigner = Ed25519Keypair.deriveKeypair(
+            sharedState.wallet.mnemonic!,
+            `m/44'/4218'/0'/0'/1'`,
+        );
+
+        await Promise.all([
+            requestFaucetTokens(walletSigner.toIotaAddress()),
+            requestFaucetTokens(newSigner.toIotaAddress()),
+        ]);
+
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
+
+        const bidResult = await bidOnExistingAuction({
+            name,
+            signer: newSigner,
+        });
+        expect(bidResult.effects?.status.status).toBe('success');
+
+        await checkAuctionPills(page, name, 'Outbid');
     });
-    expect(bidResult.effects?.status.status).toBe('success');
 
-    await checkAuctionPills(page, name, 'Outbid');
-});
+    test('Check "Top Bidder" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('topbid');
 
-test('Check "Top Bidder" pills', async ({ sharedState, appPage: page }) => {
-    const name = generateRandomName('topbid');
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
-    const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+        await requestFaucetTokens(walletSigner.toIotaAddress());
 
-    await requestFaucetTokens(walletSigner.toIotaAddress());
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
 
-    const startAuctionResult = await createAndSendAuctionTransaction({
-        name,
-        signer: walletSigner,
+        await checkAuctionPills(page, name, 'Top Bidder');
     });
-    expect(startAuctionResult.effects?.status.status).toBe('success');
-
-    await checkAuctionPills(page, name, 'Top Bidder');
 });
