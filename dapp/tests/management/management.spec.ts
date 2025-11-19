@@ -140,6 +140,29 @@ test.describe.parallel('Name Management Tests', () => {
         await menuButtonLocator.click();
 
         await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
+
+        // second way
+        await page.reload();
+
+        const parentNameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') })
+            .filter({ has: page.getByText('1 Subname', { exact: true }) });
+
+        await expect(parentNameCard).toBeVisible({ timeout: 5_000 });
+
+        const parentCountLocator = parentNameCard.getByText('1 Subname', { exact: true });
+        await expect(parentCountLocator).toBeVisible({ timeout: 5_000 });
+        await parentCountLocator.click();
+
+        const subnamesDialog = page.getByRole('dialog');
+        await expect(subnamesDialog).toBeVisible();
+
+        const subnameMenuButton = subnamesDialog.getByTestId('menu-button');
+        await expect(subnameMenuButton).toBeVisible({ timeout: 5_000 });
+        await subnameMenuButton.click();
+
+        await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
         await page.close();
     });
 });
