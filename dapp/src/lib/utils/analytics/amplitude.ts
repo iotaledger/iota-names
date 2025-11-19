@@ -9,9 +9,15 @@ import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
 
 const IS_ENABLED =
-    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' && process.env.AMPLITUDE_ENABLED === 'true';
+    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
+    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
-console.log('AE:', IS_ENABLED, process.env.AMPLITUDE_ENABLED, typeof process.env.AMPLITUDE_ENABLED);
+console.log(
+    'AE:',
+    IS_ENABLED,
+    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
+    typeof process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
+);
 
 /**
  * Check if user has previously given consent for cookies/tracking.

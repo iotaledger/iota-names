@@ -14,8 +14,8 @@ jobs:
     with:
       VERCEL_ENVIRONMENT: preview
       NAMES_DAPP_DEFAULT_NETWORK: devnet
-      AMPLITUDE_ENABLED: true
     secrets:
+      AMPLITUDE_ENABLED: ${{ secrets.AMPLITUDE_ENABLED }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}

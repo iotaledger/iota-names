@@ -6,7 +6,7 @@ import nextMdx from '@next/mdx';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
 const NEXT_PUBLIC_BUILD_ENV = process.env.BUILD_ENV;
-const AMPLITUDE_ENABLED = process.env.AMPLITUDE_ENABLED;
+const AMPLITUDE_ENABLED = process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED;
 
 try {
     if (process.env.VERCEL_GIT_COMMIT_SHA) {

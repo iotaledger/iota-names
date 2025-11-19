@@ -10,12 +10,9 @@ on:
       NAMES_DAPP_DEFAULT_NETWORK:
         type: string
         required: true
-      AMPLITUDE_ENABLED:
-        type: boolean
-        required: false
-        default: false
-        description: "Enable or disable Amplitude analytics."
     secrets:
+      AMPLITUDE_ENABLED:
+        required: false
       VERCEL_TOKEN:
         required: true
       VERCEL_ORG_ID:
@@ -35,7 +32,7 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_ENVIRONMENT: ${{ inputs.VERCEL_ENVIRONMENT }}
-  AMPLITUDE_ENABLED: ${{ inputs.AMPLITUDE_ENABLED }}
+  NEXT_PUBLIC_AMPLITUDE_ENABLED: ${{ secrets.AMPLITUDE_ENABLED }}
   NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
   NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}
   NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
