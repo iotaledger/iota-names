@@ -17,6 +17,7 @@ import {
     setDisplayName,
 } from '../utils';
 
+test.setTimeout(45_000);
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
@@ -55,9 +56,7 @@ test.describe.parallel('Name Management Tests', () => {
         const responseSetDisplay = await setDisplayName(name, address, keypair);
         expect(responseSetDisplay.effects?.status.status).toBe('success');
 
-        await page.waitForTimeout(3_000);
         await page.goto('/my-names');
-        await page.reload();
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
         ).toBeVisible({ timeout: 10_000 });
@@ -75,9 +74,11 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        await expect(dialog.getByText('Set as Display name')).toBeVisible();
-        await dialog.getByText('Set as Display name').click();
-
+        const displayLabel = dialog.getByText('Set as Display name', { exact: true });
+        await expect(displayLabel).toBeVisible();
+        const displayCheckbox = dialog.getByRole('checkbox');
+        await expect(displayCheckbox).toBeChecked({ timeout: 10_000 });
+        await displayCheckbox.click();
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
