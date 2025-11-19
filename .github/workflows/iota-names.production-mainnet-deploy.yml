@@ -9,7 +9,6 @@ jobs:
     with:
       VERCEL_ENVIRONMENT: production
       NAMES_DAPP_DEFAULT_NETWORK: mainnet
-      AMPLITUDE_ENABLED: false
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
