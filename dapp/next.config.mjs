@@ -6,7 +6,7 @@ import nextMdx from '@next/mdx';
 
 let NEXT_PUBLIC_IOTA_NAMES_REV = 'development';
 const NEXT_PUBLIC_BUILD_ENV = process.env.BUILD_ENV;
-const AMPLITUDE_ENABLED = process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED;
+const NEXT_PUBLIC_AMPLITUDE_ENABLED = process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED;
 
 try {
     if (process.env.VERCEL_GIT_COMMIT_SHA) {
@@ -23,7 +23,7 @@ const withMDX = nextMdx();
 /** @type {import('next').NextConfig} */
 const nextConfig = withMDX({
     env: {
-        AMPLITUDE_ENABLED,
+        NEXT_PUBLIC_AMPLITUDE_ENABLED,
         NEXT_PUBLIC_IOTA_NAMES_REV,
         NEXT_PUBLIC_BUILD_ENV,
     },
