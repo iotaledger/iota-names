@@ -15,6 +15,7 @@ interface NamePurchaseCardProps {
     priceSupportingText?: string;
     isAvailable: boolean;
     disableHoverEffect?: boolean;
+    testId?: string;
 }
 
 export function NamePurchaseCard({
@@ -26,6 +27,7 @@ export function NamePurchaseCard({
     priceSymbol,
     children,
     disableHoverEffect,
+    testId,
 }: React.PropsWithChildren<NamePurchaseCardProps>): React.JSX.Element {
     const bgCard = isAvailable ? 'bg-names-neutral-10' : 'bg-names-error-20';
     const textColorStatus = isAvailable ? 'text-names-tertiary-80' : 'text-names-error-80';
@@ -37,6 +39,7 @@ export function NamePurchaseCard({
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
     return (
         <div
+            data-testid={testId}
             className={clsx(
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] gap-y-sm',
                 isAvailable && 'hover:bg-names-gradient-primary',
