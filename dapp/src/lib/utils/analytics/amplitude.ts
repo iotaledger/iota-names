@@ -15,6 +15,7 @@ const IS_ENABLED =
 console.log(
     'AE:',
     IS_ENABLED,
+    process.env.AMPLITUDE_ENABLED,
     process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
     typeof process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
 );
