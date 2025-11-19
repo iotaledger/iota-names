@@ -12,6 +12,9 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
+use iota_protocol_config::Chain;
+use iota_sdk::IotaClientBuilder;
+use iota_types::digests::ChainIdentifier;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info, warn};
@@ -102,7 +105,13 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
-                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_else(|_| {
+                    // If environment variables are not set, determine config from the connected network
+                    let chain = tokio::task::block_in_place(|| {
+                        tokio::runtime::Handle::current().block_on(get_chain_from_node(&node_url))
+                    });
+                    IotaNamesExtendedConfig::from_chain(&chain)
+                });
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
@@ -214,4 +223,43 @@ pub async fn interrupt_or_terminate() -> Result<()> {
     tokio::signal::ctrl_c().await?;
 
     Ok(())
+}
+
+/// Get the chain identifier from the node and determine the chain type
+async fn get_chain_from_node(node_url: &str) -> Chain {
+    match IotaClientBuilder::default().build(node_url).await {
+        Ok(client) => match client.read_api().get_chain_identifier().await {
+            Ok(chain_id_hex) => {
+                info!("Retrieved chain identifier from node: {}", chain_id_hex);
+                match ChainIdentifier::from_chain_short_id(&chain_id_hex) {
+                    Some(chain_identifier) => {
+                        let chain = chain_identifier.chain();
+                        info!("Detected chain: {:?}", chain);
+                        chain
+                    }
+                    None => {
+                        warn!(
+                            "Unknown chain identifier: {}, defaulting to Unknown",
+                            chain_id_hex
+                        );
+                        Chain::Unknown
+                    }
+                }
+            }
+            Err(e) => {
+                warn!(
+                    "Failed to get chain identifier from node: {}, defaulting to Unknown",
+                    e
+                );
+                Chain::Unknown
+            }
+        },
+        Err(e) => {
+            warn!(
+                "Failed to connect to node at {}: {}, defaulting to Unknown",
+                node_url, e
+            );
+            Chain::Unknown
+        }
+    }
 }
