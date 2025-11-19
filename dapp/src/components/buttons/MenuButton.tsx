@@ -26,8 +26,8 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
         return (
             <button
                 className={buttonVariants({ variant })}
-                data-testid="menu-button"
                 ref={ref}
+                data-testid="menu-button"
                 {...props}
             >
                 <MoreHoriz className="w-5 h-5 " />
