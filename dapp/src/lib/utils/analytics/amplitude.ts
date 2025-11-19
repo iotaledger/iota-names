@@ -12,14 +12,6 @@ const IS_ENABLED =
     process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
     process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
-console.log(
-    'AE:',
-    IS_ENABLED,
-    process.env.AMPLITUDE_ENABLED,
-    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
-    typeof process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED,
-);
-
 /**
  * Check if user has previously given consent for cookies/tracking.
  */
@@ -36,7 +28,6 @@ export function getAmplitudeConsentStatus() {
  * Multiple calls to this function are safe - subsequent calls will be ignored.
  */
 export async function initAmplitude() {
-    console.log('initAmplitude called', IS_ENABLED);
     if (ampli.isLoaded) {
         return;
     }
