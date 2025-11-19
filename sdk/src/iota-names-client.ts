@@ -86,7 +86,7 @@ export class IotaNamesClient {
      * - If there are multiple versions available then the version passed as argument will be used to retrieve the package.
      * - If none of above returned a version then the latest will be picked.
      */
-    resolveRead(key: keyof PackageInfo, version: 'v1' | 'v2' = 'v1'): string {
+    resolveRead(key: keyof PackageInfo, version: `v${number}` = 'v1'): string {
         const pkg = this.config[key];
 
         // This package is not versioned at all
