@@ -16,7 +16,7 @@ import { CONFIG } from '@/config';
 import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
-import { initAmplitude } from '@/lib/utils/analytics/amplitude';
+import { getAmplitudeConsentStatus, initAmplitude } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 import { growthbook } from '@/lib/utils/growthbook';
 
@@ -30,7 +30,9 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const defaultNetwork = CONFIG.network;
 
     useEffect(() => {
-        initAmplitude(defaultNetwork);
+        const acs = getAmplitudeConsentStatus();
+        if (acs !== 'accepted') return;
+        initAmplitude();
     }, []);
 
     function handleNetworkChange() {

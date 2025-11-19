@@ -3,45 +3,55 @@
 
 import { LogLevel } from '@amplitude/analytics-core';
 
-import { ampli } from './ampli';
-import { consentBufferPlugin } from './consentBufferPlugin';
+import { CONFIG } from '@/config';
 
-const IS_PROD_ENV =
-    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
-    process.env.NEXT_PUBLIC_VERCEL_ENVIRONMENT === 'production';
+import { ampli } from './ampli';
+import { AMP_COOKIES_KEY } from './constants';
+
+const IS_ENABLED =
+    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' && process.env.AMPLITUDE_ENABLED === 'true';
+
+console.log('AE:', IS_ENABLED, process.env.AMPLITUDE_ENABLED, typeof process.env.AMPLITUDE_ENABLED);
 
 /**
- * Initialize Amplitude with consent buffer plugin.
+ * Check if user has previously given consent for cookies/tracking.
+ */
+export function getAmplitudeConsentStatus() {
+    if (typeof document === 'undefined') return 'pending';
+    if (document.cookie.includes(`${AMP_COOKIES_KEY}=true`)) return 'accepted';
+    if (document.cookie.includes(`${AMP_COOKIES_KEY}=false`)) return 'declined';
+    return 'pending';
+}
+
+/**
+ * Initialize Amplitude.
  * This should be called once when the app starts.
  * Multiple calls to this function are safe - subsequent calls will be ignored.
  */
-export async function initAmplitude(defaultNetwork: string) {
+export async function initAmplitude() {
+    console.log('initAmplitude called', IS_ENABLED);
     if (ampli.isLoaded) {
         return;
     }
 
+    const defaultNetwork = CONFIG.network;
+
     try {
         await ampli.load({
             environment: 'iotanames',
-            disabled: !IS_PROD_ENV,
+            disabled: !IS_ENABLED,
             client: {
                 configuration: {
-                    optOut: false, // Enable tracking by default; consent buffer plugin will handle queuing
                     autocapture: {
-                        pageViews: IS_PROD_ENV,
-                        sessions: IS_PROD_ENV,
+                        pageViews: IS_ENABLED,
+                        sessions: IS_ENABLED,
                     },
                     logLevel: LogLevel.None,
                 },
             },
         }).promise;
 
-        await ampli.client.add(consentBufferPlugin).promise;
         setNetworkGroup(defaultNetwork);
-
-        window.addEventListener('pagehide', () => {
-            consentBufferPlugin.flushQueue();
-        });
     } catch (error) {
         console.error('[Amplitude] Initialization failed:', error);
         throw error;
@@ -54,26 +64,17 @@ function setNetworkGroup(network: string): void {
 
 /**
  * Call this function when user gives consent for cookies/tracking.
- * This will:
- * - Flush all queued events to Amplitude
- * - Enable future event tracking
- * - Allow Amplitude to create cookies
+ * This will enable future event tracking.
  */
-export function onAmplitudeConsentAccepted() {
-    consentBufferPlugin.acceptCookies();
-    ampli?.client?.setOptOut(false);
-    consentBufferPlugin.flushQueue();
+export async function onAmplitudeConsentAccepted() {
+    document.cookie = `${AMP_COOKIES_KEY}=true; max-age=31536000; path=/; SameSite=Strict`;
+    await initAmplitude();
 }
 
 /**
  * Call this function when user declines cookies/tracking.
- * This will:
- * - Clear all queued events
- * - Disable event tracking
- * - Remove any existing Amplitude cookies
+ * This will disable event tracking.
  */
 export function onAmplitudeConsentDeclined() {
-    consentBufferPlugin.declineCookies();
-    ampli?.client?.setOptOut(true);
-    consentBufferPlugin.clearQueue();
+    document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
 }
