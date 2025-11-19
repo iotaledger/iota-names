@@ -25,6 +25,7 @@ test.describe.parallel('Auction Flow', () => {
         await appPage.bringToFront();
 
         await connectWallet(appPage, context, extensionName);
+        await requestFaucetTokens(address);
 
         await expect(appPage.getByRole('button', { name: formatAddress(address) })).toBeVisible({
             timeout: 10_000,
@@ -34,7 +35,7 @@ test.describe.parallel('Auction Flow', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Start an aucttion', async ({ appPage: page }) => {
+    test('Start an auction', async ({ appPage: page }) => {
         const auctionName = generateRandomName('auction');
         const displayName = denormalizeName(auctionName);
         const initialSearch = page.getByPlaceholder('Search for your IOTA name');
@@ -126,21 +127,19 @@ test.describe.parallel('Auction Flow', () => {
     test('Claim an auction', async ({ sharedState, appPage: page, context }) => {
         test.setTimeout(60_000);
         const name = generateRandomName('claim');
-        const nameToAuction = `${name}.iota`;
         await page.bringToFront();
-        const navPromise = page.goto(`/auctions?page=1&search=${name}`);
+        await page.goto(`/auctions?page=1&search=${name}`);
 
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
         await requestFaucetTokens(keypair.toIotaAddress());
 
         const response = await createAndSendAuctionTransaction({
             signer: keypair,
-            name: nameToAuction,
+            name,
         });
         expect(response.effects?.status.status).toBe('success');
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        await navPromise;
         await page
             .locator("h2:has-text('Auctions')")
             .waitFor({ state: 'visible', timeout: 10_000 });
@@ -152,7 +151,7 @@ test.describe.parallel('Auction Flow', () => {
 
         let auctionNameCard = page
             .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(nameToAuction, 'at') });
+            .filter({ hasText: normalizeIotaName(name, 'at') });
 
         const timeRemainingLocator = auctionNameCard.getByTestId('auction-time-remaining');
         const textContent = await timeRemainingLocator.textContent();
@@ -172,7 +171,7 @@ test.describe.parallel('Auction Flow', () => {
 
         auctionNameCard = page
             .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(nameToAuction, 'at') });
+            .filter({ hasText: normalizeIotaName(name, 'at') });
 
         const claimButton = auctionNameCard.getByRole('button', { name: 'Claim' });
         await expect(claimButton).toBeEnabled({
