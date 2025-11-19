@@ -80,7 +80,11 @@ export class IotaNamesClient {
     }
 
     /**
-     * Resolve the value of a given package key and the desired version.
+     * Get the corresponding address for the given package.
+     * Sometimes new versions might contain new types, so its important to use the package they were created on when reading them in e.g GraphQL.
+     * - If the package does not have any versioning then the value is returned directly.
+     * - If there are multiple versions available then the version passed as argument will be used to retrieve the package.
+     * - If none of above returned a version then the latest will be picked.
      */
     resolveRead(key: keyof PackageInfo, version: 'v1' | 'v2' = 'v1'): string {
         const pkg = this.config[key];
@@ -91,15 +95,18 @@ export class IotaNamesClient {
         // Select the versioned package
         if (version in pkg && typeof pkg[version] === 'string') return pkg[version];
 
-        // Fallback to the latest version or instead go back 1 version until one is available
-        const fallback = pkg?.v2 ?? pkg?.v1;
+        // Get the latest available version for that given package
+        const fallback = Object.values(pkg).toReversed()[0];
         if (!fallback) throw new Error(`Package ${key} is not set`);
 
         return fallback;
     }
 
     /**
-     * Resolve the latest available value of a given package key.
+     * Get the latest value for the given package.
+     * This is because transactions must always use the latest available version.
+     * - If the package does not have any versioning then the value is returned directly.
+     * - If there are multiple versions available the latest one will be used.
      */
     resolveWrite(key: keyof PackageInfo): string {
         const pkg = this.config[key];
@@ -108,7 +115,7 @@ export class IotaNamesClient {
         if (typeof pkg === 'string') return pkg;
 
         // Fallback to the latest version or instead of back 1 version until one is available
-        const fallback = pkg?.v2 ?? pkg?.v1;
+        const fallback = Object.values(pkg).toReversed()[0];
         if (!fallback) throw new Error(`Package ${key} is not set`);
 
         return fallback;
