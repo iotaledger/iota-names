@@ -19,7 +19,6 @@ import {
 } from '../utils';
 
 test.describe.parallel('Name Management Tests', () => {
-    // Increase timeout for slower subname permission flows
     test.setTimeout(45_000);
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
@@ -88,7 +87,7 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
 
-        await expect(page.getByText('Create Subname', { exact: true })).toHaveCount(0);
+        await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
         await page.close();
     });
 });
