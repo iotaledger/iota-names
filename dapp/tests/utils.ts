@@ -179,6 +179,47 @@ export async function addSubnameName(
     return responsePurchaseSubname;
 }
 
+export async function editSetup(
+    subname: string,
+    parentNftId: string,
+    allowChildCreation: boolean,
+    allowTimeExtension: boolean,
+    address: string,
+    signer: Signer,
+) {
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.editSetup({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        allowChildCreation,
+        allowTimeExtension,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(
+        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
+    );
+    const responseEditSetup = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return responseEditSetup;
+}
+
 interface CreateAndSendAuctionTransaction {
     name: string;
     signer: Signer;
