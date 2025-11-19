@@ -37,10 +37,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Can not add subname to a subname due permissions', async ({
-        appPage: page,
-        sharedState,
-    }) => {
+    test('Can not renew a subname due permissions', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
         const subname = generateRandomSubname('subname', name);
