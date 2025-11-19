@@ -385,7 +385,7 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
             {isAvailable && (
                 <NamePurchaseCard
                     name={name}
-                    isAvailable={isAvailable}
+                    isAvailable={true}
                     price={formattedPurchasePrice}
                     priceSupportingText="Price"
                     testId="purchase-name-card"
