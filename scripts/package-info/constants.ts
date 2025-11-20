@@ -8,7 +8,7 @@ import path from 'path';
 export type PackageInfo = {
     adminAddress: string;
     adminCap: string;
-    auctionPackageId: string;
+    auctionPackageId: { [version: string]: string };
     auctionHouseObjectId: string;
     coins: {
         [key: string]: {
@@ -16,15 +16,15 @@ export type PackageInfo = {
             metadataId: string;
         };
     };
-    couponsPackageId: string;
+    couponsPackageId: { [version: string]: string };
     iotaNamesObjectId: string;
-    packageId: string;
-    paymentsPackageId: string;
+    packageId: { [version: string]: string };
+    paymentsPackageId: { [version: string]: string };
     publisherId: string;
     registryTableId: string;
     reverseRegistryTableId: string;
-    subnamesPackageId: string;
-    tempSubnameProxyPackageId: string;
+    subnamesPackageId: { [version: string]: string };
+    tempSubnameProxyPackageId: { [version: string]: string };
     upgradeCap: string;
 };
 
