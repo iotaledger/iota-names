@@ -24,7 +24,12 @@ type MenuButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'ref'
 export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
     ({ variant, ...props }, ref) => {
         return (
-            <button className={buttonVariants({ variant })} ref={ref} {...props}>
+            <button
+                className={buttonVariants({ variant })}
+                ref={ref}
+                data-testid="menu-button"
+                {...props}
+            >
                 <MoreHoriz className="w-5 h-5 " />
             </button>
         );

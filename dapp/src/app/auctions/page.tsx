@@ -34,6 +34,7 @@ import {
     SelectSize,
     TablePaginationOptions,
 } from '@iota/apps-ui-kit';
+import { useCurrentAccount } from '@iota/dapp-kit';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -79,6 +80,7 @@ const DEBOUNCE_DELAY = 500;
 export default function AuctionsPage(): JSX.Element {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const currentAddress = useCurrentAccount()?.address;
     const [areFiltersVisible, setAreFiltersVisible] = useState<boolean>(false);
     const [bidDialogName, setBidDialogName] = useState<string | null>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -142,6 +144,7 @@ export default function AuctionsPage(): JSX.Element {
         isLoading,
         error: isAuctionsError,
     } = useAuctions({
+        userAddress: currentAddress,
         search: debouncedSearchQuery,
         status: selectedStatus,
         sort,
@@ -232,6 +235,7 @@ export default function AuctionsPage(): JSX.Element {
                             icon={isRefreshing ? <LoadingIndicator size="w-4 h-4" /> : <Refresh />}
                             onClick={handleRefresh}
                             disabled={isRefreshing}
+                            testId="refresh-button"
                         />
                     ) : null}
                 </div>
