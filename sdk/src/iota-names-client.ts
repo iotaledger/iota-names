@@ -98,7 +98,7 @@ export class IotaNamesClient {
         if (typeof pkg === 'string') return pkg;
 
         // Select the versioned package, only if its not "latest"
-        if (version != 'latest' && version in pkg && typeof pkg[version] === 'string')
+        if (version !== 'latest' && version in pkg && typeof pkg[version] === 'string')
             return pkg[version];
 
         // Get the latest available version for that given package
