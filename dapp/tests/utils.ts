@@ -112,6 +112,7 @@ export async function purchaseName(name: string, address: string, signer: Signer
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
     const nft = await iotaNamesTx.register({
         name,
+        years: 1,
         coin,
         address,
     });
