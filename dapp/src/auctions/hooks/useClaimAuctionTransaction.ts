@@ -45,8 +45,5 @@ export function useClaimAuctionTransaction(
         },
         gcTime: 0,
         ...options,
-        onError: (error, ...args) => {
-            options.onError?.(error, ...args);
-        },
     });
 }
