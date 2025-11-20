@@ -5,7 +5,12 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { IOTA_DECIMALS, NANOS_PER_IOTA, safeParseAmount } from '@iota/iota-sdk/utils';
+import {
+    IOTA_DECIMALS,
+    IOTA_TYPE_ARG,
+    NANOS_PER_IOTA,
+    safeParseAmount,
+} from '@iota/iota-sdk/utils';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
@@ -29,7 +34,7 @@ export function loadLocalnetConfig(): PackageInfo {
         // Read the generated configuration file
         const localnetConfig = JSON.parse(readFileSync(localnetConfigPath, 'utf8'));
 
-        return localnetConfig;
+        return localnetConfig as PackageInfo;
     } catch (error) {
         throw new Error(
             `Failed to load localnet configuration: ${error instanceof Error ? error.message : String(error)}`,
@@ -87,7 +92,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     const nft = await iotaNamesTx.register({
         name: uniqueName,
         years: 2,
-        coinConfig: iotaNamesClient.config.coins.IOTA,
+        coinConfig: { type: IOTA_TYPE_ARG },
         coin: coinInput,
     });
 
@@ -286,7 +291,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -321,7 +326,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -373,7 +378,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -417,7 +422,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -458,7 +463,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -501,7 +506,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -548,7 +553,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -601,7 +606,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 1,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 
@@ -636,7 +641,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
                 years: 5,
-                coinConfig: client.config.coins.IOTA,
+                coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
 

@@ -161,9 +161,9 @@ export async function createAndSendAuctionTransaction({
 }: CreateAndSendAuctionTransaction) {
     try {
         const tx = buildCreateAuctionTransaction(
-            iotaNamesClient.config.auctionPackageId,
-            iotaNamesClient.config.iotaNamesObjectId,
-            iotaNamesClient.config.auctionHouseObjectId,
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('iotaNamesObjectId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
             signer.toIotaAddress(),
             bidAmountIota * NANOS_PER_IOTA,
             name,
@@ -208,8 +208,8 @@ export async function bidOnExistingAuction({
 }: BidOnExistingAuction) {
     try {
         const tx = buildPlaceBidTransaction(
-            iotaNamesClient.config.auctionPackageId,
-            iotaNamesClient.config.auctionHouseObjectId,
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
             signer.toIotaAddress(),
             bidAmountIota * NANOS_PER_IOTA,
             name,
