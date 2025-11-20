@@ -41,6 +41,7 @@ export function NameCard({
                 className={cx(
                     'flex flex-col relative aspect-square rounded-xl group/display z-0 overflow-hidden w-full',
                 )}
+                data-testid="name-card-avatar"
             >
                 {displaySrc ? (
                     <AvatarDisplay src={displaySrc} blur={blurImage} />
