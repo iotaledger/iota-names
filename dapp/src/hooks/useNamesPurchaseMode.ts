@@ -11,10 +11,10 @@ import { queryKey } from './queryKey';
 export function useNamesPurchaseMode() {
     const { iotaNamesClient } = useIotaNamesClient();
     const iotaClient = useIotaClient();
-    const packageId = iotaNamesClient.getPackage('packageId');
-    const paymentsPackageId = iotaNamesClient.getPackage('paymentsPackageId');
-    const auctionPackageId = iotaNamesClient.getPackage('auctionPackageId');
-    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
+    const packageId = iotaNamesClient.getPackage('packageId', 'v1');
+    const paymentsPackageId = iotaNamesClient.getPackage('paymentsPackageId', 'v1');
+    const auctionPackageId = iotaNamesClient.getPackage('auctionPackageId', 'v1');
+    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId', 'v1');
 
     const authKeyType = `${packageId}::iota_names::AuthKey`;
 

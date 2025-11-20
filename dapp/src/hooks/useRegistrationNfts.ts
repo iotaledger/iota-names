@@ -18,7 +18,7 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
     const { iotaNamesClient } = useIotaNamesClient();
     const account = useCurrentAccount();
     const address = account?.address ?? '';
-    const packageId = iotaNamesClient.getPackage('packageId');
+    const packageId = iotaNamesClient.getPackage('packageId', 'v1');
 
     const filter = (() => {
         switch (type) {
