@@ -89,7 +89,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             size="full"
             displaySrc={auctionDisplayImage}
             blurImage={shouldCensor}
-            testId="auction-name-card"
+            testId="name-card"
         >
             <NameCardBody name={censoredName}>
                 {auction.hasUserParticipated ? (
