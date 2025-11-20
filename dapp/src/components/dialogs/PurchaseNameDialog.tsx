@@ -39,6 +39,7 @@ import {
     useCalculatePriceInFiat,
     useUpdateNameTransaction,
 } from '@/hooks';
+import { useIsMethodSupported } from '@/hooks/useIsMethodSupported';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
@@ -72,6 +73,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
     const [purchaseYears, setPurchaseYears] = useState<number>(1);
+    const { data: isRegisterWithYearsSupported, isLoading: isLoadingRegisterWithYears } =
+        useIsMethodSupported({
+            packageId: iotaNamesClient.getPackage('packageId'),
+            module: 'payment',
+            functionName: 'init_registration_with_years',
+        });
 
     const couponCodes = coupons.map((c) => c.code);
 
@@ -95,7 +102,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         updates.push({
             type: 'register-name',
             name: name,
-            years: purchaseYears,
+            years: isRegisterWithYearsSupported ? purchaseYears : undefined,
             price: price,
             setDefault: isDisplayName,
             address: account?.address,
@@ -250,7 +257,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const hasErrors = updateNameError || coinBalanceError;
 
     const isLoadingData =
-        isNameRecordLoading || isDiscountedPriceLoading || isUpdateNameLoading || isLoadingConfig;
+        isNameRecordLoading ||
+        isDiscountedPriceLoading ||
+        isUpdateNameLoading ||
+        isLoadingConfig ||
+        isLoadingRegisterWithYears;
     const isLoading = isLoadingData || isSigning;
 
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
@@ -279,27 +290,29 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                                     </span>
                                 </div>
                             </Panel>
-                            <div className="relative">
-                                <Select
-                                    options={purchaseOptions}
-                                    value={purchaseYears?.toString()}
-                                    supportingText=""
-                                    onValueChange={handleYearsChange}
-                                />
-                                {finalPriceIota ? (
-                                    <span
-                                        className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
-                                        aria-hidden
-                                    >
-                                        <span>{finalPriceIota}</span>
-                                        {fiatPriceResult ? (
-                                            <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                (${fiatPriceResult} USD)
-                                            </span>
-                                        ) : null}
-                                    </span>
-                                ) : null}
-                            </div>
+                            {isRegisterWithYearsSupported ? (
+                                <div className="relative">
+                                    <Select
+                                        options={purchaseOptions}
+                                        value={purchaseYears?.toString()}
+                                        supportingText=""
+                                        onValueChange={handleYearsChange}
+                                    />
+                                    {finalPriceIota ? (
+                                        <span
+                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
+                                            aria-hidden
+                                        >
+                                            <span>{finalPriceIota}</span>
+                                            {fiatPriceResult ? (
+                                                <span className="ml-1 text-label-sm text-names-neutral-80">
+                                                    (${fiatPriceResult} USD)
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    ) : null}
+                                </div>
+                            ) : null}
                             <div className="flex flex-col">
                                 <div className="self-end">
                                     <Toggle

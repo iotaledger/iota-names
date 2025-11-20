@@ -79,7 +79,7 @@ export type NameUpdate =
     | {
           type: 'register-name';
           name: string;
-          years: number;
+          years?: number;
           price: number;
           setDefault: boolean;
           address?: string;
@@ -168,13 +168,23 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         break;
                     case 'register-name':
                         const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
-                        const nft = await iotaNamesTx.register({
-                            name: update.name,
-                            years: update.years,
-                            coin,
-                            address: update.address,
-                            couponCodes: update.couponCodes,
-                        });
+                        let nft;
+                        if (update.years) {
+                            nft = await iotaNamesTx.registerWithYears({
+                                name: update.name,
+                                years: update.years,
+                                coin,
+                                address: update.address,
+                                couponCodes: update.couponCodes,
+                            });
+                        } else {
+                            nft = await iotaNamesTx.register({
+                                name: update.name,
+                                coin,
+                                address: update.address,
+                                couponCodes: update.couponCodes,
+                            });
+                        }
                         if (update.setDefault) {
                             iotaNamesTx.setTargetAddress({
                                 nft: nft,

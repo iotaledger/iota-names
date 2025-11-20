@@ -89,7 +89,7 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     ]);
 
     // Register a name for 2 years
-    const nft = await iotaNamesTx.register({
+    const nft = await iotaNamesTx.registerWithYears({
         name: uniqueName,
         years: 2,
         coinConfig: { type: IOTA_TYPE_ARG },
@@ -290,7 +290,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -325,7 +324,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -377,7 +375,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -421,7 +418,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -462,7 +458,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -505,7 +500,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const parentNft = await iotaNamesTx.register({
                 name: parentName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -552,7 +546,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
             // Register the root name
             const rootNft = await iotaNamesTx.register({
                 name: rootName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -605,7 +598,6 @@ describe('IOTA Names Localnet Integration Tests', () => {
 
             const nft = await iotaNamesTx.register({
                 name: uniqueName,
-                years: 1,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
@@ -638,7 +630,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 500n * NANOS_PER_IOTA,
             ]);
 
-            const nft = await iotaNamesTx.register({
+            const nft = await iotaNamesTx.registerWithYears({
                 name: uniqueName,
                 years: 5,
                 coinConfig: { type: IOTA_TYPE_ARG },

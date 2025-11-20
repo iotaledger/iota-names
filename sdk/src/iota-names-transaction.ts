@@ -13,7 +13,12 @@ import { IOTA_CLOCK_OBJECT_ID, IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 import { ALLOWED_METADATA } from './constants.js';
 import { isNestedSubname, isSubname } from './helpers.js';
 import type { IotaNamesClient } from './iota-names-client.js';
-import type { ReceiptParams, RegistrationParams, RenewalParams } from './types.js';
+import type {
+    ReceiptParams,
+    RegistrationParams,
+    RegistrationWithYearsParams,
+    RenewalParams,
+} from './types.js';
 import { isValidIotaName, normalizeIotaName } from './utils.js';
 
 export class IotaNamesTransaction {
@@ -29,7 +34,44 @@ export class IotaNamesTransaction {
      * Registers a name.
      */
     async register(params: RegistrationParams): Promise<TransactionObjectArgument> {
-        const paymentIntent = this.initRegistration(params.name, params.years);
+        const paymentIntent = this.initRegistration(params.name);
+
+        const couponCodes = params.couponCodes;
+        let discountedPrice: number | null = null;
+
+        if (couponCodes && couponCodes.length > 0) {
+            discountedPrice = await this.iotaNamesClient.calculateDiscountedPrice({
+                coupons: couponCodes,
+                name: params.name,
+                years: 1,
+                isRegistration: true,
+                address: params.address,
+            });
+
+            for (const couponCode of couponCodes) {
+                this.applyCoupon(couponCode, paymentIntent);
+            }
+        }
+
+        const amounts = [discountedPrice ?? this.getBasePrice(paymentIntent)];
+        const payment = this.transaction.splitCoins(this.transaction.object(params.coin), amounts);
+
+        const receipt = this.generateReceipt({
+            paymentIntent,
+            payment,
+            coinConfig: params.coinConfig || { type: IOTA_TYPE_ARG },
+        });
+
+        return this.finalizeRegister(receipt);
+    }
+
+    /**
+     * Registers a name for a given amount of years.
+     */
+    async registerWithYears(
+        params: RegistrationWithYearsParams,
+    ): Promise<TransactionObjectArgument> {
+        const paymentIntent = this.initRegistrationWithYears(params.name, params.years);
 
         const couponCodes = params.couponCodes;
         let discountedPrice: number | null = null;
@@ -94,7 +136,19 @@ export class IotaNamesTransaction {
         this.finalizeRenew(receipt, params.nft);
     }
 
-    initRegistration(name: string, years: number): TransactionObjectArgument {
+    initRegistration(name: string): TransactionObjectArgument {
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId');
+        return this.transaction.moveCall({
+            target: `${packageId}::payment::init_registration`,
+            arguments: [
+                this.transaction.object(iotaNamesObjectId),
+                this.transaction.pure.string(name),
+            ],
+        });
+    }
+
+    initRegistrationWithYears(name: string, years: number): TransactionObjectArgument {
         const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId');
         const packageId = this.iotaNamesClient.getPackage('packageId');
         return this.transaction.moveCall({

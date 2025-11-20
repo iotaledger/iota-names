@@ -62,6 +62,9 @@ export type BaseParams = {
 
 export type RegistrationParams = BaseParams & {
     name: string;
+};
+
+export type RegistrationWithYearsParams = RegistrationParams & {
     years: number;
 };
 
