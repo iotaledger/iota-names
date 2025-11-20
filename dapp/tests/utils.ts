@@ -96,6 +96,7 @@ export async function requestFaucetTokens(recipient: string) {
         throw new Error(`Faucet URL not defined for network: ${currentNetwork}`);
     }
 
+    console.log(`Requesting faucet tokens from ${faucetUrl} to address: ${recipient}`);
     const res = await requestIotaFromFaucetV0({
         host: faucetUrl,
         recipient,
