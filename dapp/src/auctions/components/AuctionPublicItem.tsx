@@ -89,10 +89,11 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             size="full"
             displaySrc={auctionDisplayImage}
             blurImage={shouldCensor}
+            testId="auction-name-card"
         >
             <NameCardBody name={censoredName}>
-                {auctionStatus === 'top_bidder' ? (
-                    <div className="absolute top-2 left-2">
+                {auction.hasUserParticipated ? (
+                    <div className="absolute top-2 left-2" data-testid="auction-status-badge">
                         <AuctionStatusBadge status={auctionStatus} />
                     </div>
                 ) : null}

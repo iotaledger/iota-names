@@ -11,12 +11,14 @@ import { denormalizeName } from '@/lib/utils';
 
 import { expect, test } from '../helpers/fixtures';
 import {
+    bidOnExistingAuction,
     connectWallet,
     createAndSendAuctionTransaction,
     createWallet,
     generateRandomName,
     requestFaucetTokens,
 } from '../utils';
+import { checkAuctionPills } from './auction.utils';
 
 test.describe.parallel('Auction Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -237,5 +239,50 @@ test.describe.parallel('Auction Flow', () => {
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
             timeout: 5_000,
         });
+    });
+
+    test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('outbid');
+
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+        const newSigner = Ed25519Keypair.deriveKeypair(
+            sharedState.wallet.mnemonic!,
+            `m/44'/4218'/0'/0'/1'`,
+        );
+
+        await Promise.all([
+            requestFaucetTokens(walletSigner.toIotaAddress()),
+            requestFaucetTokens(newSigner.toIotaAddress()),
+        ]);
+
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
+
+        const bidResult = await bidOnExistingAuction({
+            name,
+            signer: newSigner,
+        });
+        expect(bidResult.effects?.status.status).toBe('success');
+
+        await checkAuctionPills(page, name, 'Outbid');
+    });
+
+    test('Check "Top Bidder" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('topbid');
+
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+
+        await requestFaucetTokens(walletSigner.toIotaAddress());
+
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
+
+        await checkAuctionPills(page, name, 'Top Bidder');
     });
 });

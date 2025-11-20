@@ -12,7 +12,7 @@ import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 import type { BrowserContext, Page } from '@playwright/test';
 
-import { buildCreateAuctionTransaction } from '@/auctions';
+import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
@@ -192,6 +192,52 @@ export async function createAndSendAuctionTransaction({
         return response;
     } catch (error) {
         console.error('Error creating initial auction:', error);
+        throw error;
+    }
+}
+
+interface BidOnExistingAuction {
+    name: string;
+    signer: Signer;
+    bidAmountIota?: bigint;
+}
+export async function bidOnExistingAuction({
+    name,
+    signer,
+    bidAmountIota = BigInt(51),
+}: BidOnExistingAuction) {
+    try {
+        const tx = buildPlaceBidTransaction(
+            iotaNamesClient.config.auctionPackageId,
+            iotaNamesClient.config.auctionHouseObjectId,
+            signer.toIotaAddress(),
+            bidAmountIota * NANOS_PER_IOTA,
+            name,
+        );
+
+        const txBytes = await tx.build({ client: iotaClient });
+        const txDryRun = await iotaClient.dryRunTransactionBlock({
+            transactionBlock: txBytes,
+        });
+
+        if (txDryRun.effects.status.status !== 'success') {
+            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+        }
+
+        const response = await iotaClient.signAndExecuteTransaction({
+            transaction: txBytes,
+            signer,
+            options: {
+                showEffects: true,
+            },
+        });
+
+        console.log('Transaction sent. Digest:', response.digest);
+        console.log(`Successfully bid on existing auction for name: ${name}`);
+
+        return response;
+    } catch (error) {
+        console.error('Error bidding on auction:', error);
         throw error;
     }
 }
