@@ -104,7 +104,7 @@ export function useAuctions({
     });
 
     const { auctionsTableObjectId } = auctionHouseData || {};
-    const packageId = iotaNamesClient.getPackage('packageId');
+    const packageId = iotaNamesClient.getPackage('packageId', 'v1');
 
     // Then, fetch metadata for each auction
     const combinedResult = useQueries({
