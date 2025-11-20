@@ -74,5 +74,17 @@ export async function onAmplitudeConsentAccepted() {
  * This will disable event tracking.
  */
 export function onAmplitudeConsentDeclined() {
+    cleanAmplitudeCookies();
     document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
+}
+
+export function cleanAmplitudeCookies() {
+    const cookies = document.cookie.split(';');
+    cookies.forEach((cookie) => {
+        const cookieNameOrigin = cookie.split('=')[0].trim();
+        const cookieNameLower = cookieNameOrigin.toLowerCase();
+        if (cookieNameLower.startsWith('amp_')) {
+            document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict`;
+        }
+    });
 }

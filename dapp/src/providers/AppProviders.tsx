@@ -30,8 +30,8 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const defaultNetwork = CONFIG.network;
 
     useEffect(() => {
-        const acs = getAmplitudeConsentStatus();
-        if (acs !== 'accepted') return;
+        const amplitudeConsentStatus = getAmplitudeConsentStatus();
+        if (amplitudeConsentStatus !== 'accepted') return;
         initAmplitude();
     }, []);
 
