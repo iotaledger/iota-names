@@ -12,7 +12,7 @@ import { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { buildCreateAuctionTransaction } from '@/auctions';
+import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
@@ -139,21 +139,33 @@ export async function purchaseName(name: string, address: string, signer: Signer
     return { nft, name, response };
 }
 
+export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
+    const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
+    const address = keypair.getPublicKey().toIotaAddress();
+    return address;
+}
+
+export function getAddressByIndexPath(mnemonic: string, index: number) {
+    return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
+}
+
 interface CreateAndSendAuctionTransaction {
     name: string;
     signer: Signer;
+    bidAmountIota?: bigint;
 }
 export async function createAndSendAuctionTransaction({
     name,
     signer,
+    bidAmountIota = BigInt(50),
 }: CreateAndSendAuctionTransaction) {
     try {
         const tx = buildCreateAuctionTransaction(
-            iotaNamesClient.config.auctionPackageId,
-            iotaNamesClient.config.iotaNamesObjectId,
-            iotaNamesClient.config.auctionHouseObjectId,
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('iotaNamesObjectId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
             signer.toIotaAddress(),
-            BigInt(50) * NANOS_PER_IOTA,
+            bidAmountIota * NANOS_PER_IOTA,
             name,
         );
 
@@ -184,14 +196,50 @@ export async function createAndSendAuctionTransaction({
     }
 }
 
-export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
-    const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
-    const address = keypair.getPublicKey().toIotaAddress();
-    return address;
+interface BidOnExistingAuction {
+    name: string;
+    signer: Signer;
+    bidAmountIota?: bigint;
 }
+export async function bidOnExistingAuction({
+    name,
+    signer,
+    bidAmountIota = BigInt(51),
+}: BidOnExistingAuction) {
+    try {
+        const tx = buildPlaceBidTransaction(
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
+            signer.toIotaAddress(),
+            bidAmountIota * NANOS_PER_IOTA,
+            name,
+        );
 
-export function getAddressByIndexPath(mnemonic: string, index: number) {
-    return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
+        const txBytes = await tx.build({ client: iotaClient });
+        const txDryRun = await iotaClient.dryRunTransactionBlock({
+            transactionBlock: txBytes,
+        });
+
+        if (txDryRun.effects.status.status !== 'success') {
+            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+        }
+
+        const response = await iotaClient.signAndExecuteTransaction({
+            transaction: txBytes,
+            signer,
+            options: {
+                showEffects: true,
+            },
+        });
+
+        console.log('Transaction sent. Digest:', response.digest);
+        console.log(`Successfully bid on existing auction for name: ${name}`);
+
+        return response;
+    } catch (error) {
+        console.error('Error bidding on auction:', error);
+        throw error;
+    }
 }
 
 export function generateRandomName(name: string) {

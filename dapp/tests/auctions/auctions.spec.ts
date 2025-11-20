@@ -8,12 +8,14 @@ import { denormalizeName } from '@/lib/utils';
 
 import { expect, test } from '../helpers/fixtures';
 import {
+    bidOnExistingAuction,
     connectWallet,
     createAndSendAuctionTransaction,
     createWallet,
     generateRandomName,
     requestFaucetTokens,
 } from '../utils';
+import { checkAuctionPills } from './auction.utils';
 
 test.describe.parallel('Auction Bid Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -114,5 +116,88 @@ test.describe.parallel('Auction Bid Flow', () => {
         await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
             timeout: 5_000,
         });
+    });
+
+    test('Bid again on an auction', async ({ appPage: page, sharedState, context }) => {
+        const auctionName = generateRandomName('again');
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+
+        const response = await createAndSendAuctionTransaction({
+            signer: keypair,
+            name: auctionName,
+        });
+
+        expect(response.effects?.status.status).toBe('success');
+
+        await page.goto(`/auctions?page=1&search=${auctionName}`);
+
+        await page.getByTestId('refresh-button').click({ timeout: 10_000 });
+        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible();
+
+        const displayName = normalizeIotaName(auctionName, 'at');
+
+        const nameCard = page.getByTestId('name-card-body').filter({ hasText: displayName });
+        await expect(nameCard).toBeVisible({ timeout: 10_000 });
+
+        await nameCard.getByRole('button', { name: /Bid Again/i }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Auction', { exact: true })).toBeVisible({ timeout: 15_000 });
+        await page.getByRole('button', { name: /^Bid$/i }).click();
+        const walletConfirmationPage = context.waitForEvent('page');
+        const walletPopup = await walletConfirmationPage;
+
+        await walletPopup.waitForLoadState('domcontentloaded');
+        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
+        await approveBtn.click();
+
+        await walletPopup.waitForEvent('close', { timeout: 4000 });
+        await expect(page.getByText(/Successfully placed bid of/i)).toBeVisible({
+            timeout: 5_000,
+        });
+    });
+
+    test('Check "Outbid" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('outbid');
+
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+        const newSigner = Ed25519Keypair.deriveKeypair(
+            sharedState.wallet.mnemonic!,
+            `m/44'/4218'/0'/0'/1'`,
+        );
+
+        await Promise.all([
+            requestFaucetTokens(walletSigner.toIotaAddress()),
+            requestFaucetTokens(newSigner.toIotaAddress()),
+        ]);
+
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
+
+        const bidResult = await bidOnExistingAuction({
+            name,
+            signer: newSigner,
+        });
+        expect(bidResult.effects?.status.status).toBe('success');
+
+        await checkAuctionPills(page, name, 'Outbid');
+    });
+
+    test('Check "Top Bidder" pills', async ({ sharedState, appPage: page }) => {
+        const name = generateRandomName('topbid');
+
+        const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
+
+        await requestFaucetTokens(walletSigner.toIotaAddress());
+
+        const startAuctionResult = await createAndSendAuctionTransaction({
+            name,
+            signer: walletSigner,
+        });
+        expect(startAuctionResult.effects?.status.status).toBe('success');
+
+        await checkAuctionPills(page, name, 'Top Bidder');
     });
 });
