@@ -13,7 +13,8 @@
     },
     "iotaNamesObjectId": "0x7cab491740d51e0d75b26bf9984e49ba2e32a2d0694cabcee605543ed13c7dec",
     "packageId": {
-        "v1": "0x7fff6e95f385349bec98d17121ab2bfa3e134f2f0b1ccefc270313415f7835ea"
+        "v1": "0x7fff6e95f385349bec98d17121ab2bfa3e134f2f0b1ccefc270313415f7835ea",
+        "v2": "0x7aec8176867a0c8d2803d758ebf98226d301ef0f00393879ea718f6bd1554f16"
     },
     "paymentsPackageId": {
         "v1": "0x6b1b01f4c72786a893191d5c6e73d3012f7529f86fdee3bc8c163323cee08441"
@@ -25,7 +26,8 @@
         "v1": "0xa7e4e483d79c245470d5eb3c285a4503a78d90a69d36e35e0993012f5c6137ca"
     },
     "subnamesPackageId": {
-        "v1": "0xd06a5607cc762f2352eeeb8c86c7f962558a06c6023c1eec031a41651d898c87"
+        "v1": "0xd06a5607cc762f2352eeeb8c86c7f962558a06c6023c1eec031a41651d898c87",
+        "v2": "0x3d3139995f0050d31d1f32464df69fe4eff5c7b573adde97ffcb8cb37da33948"
     },
     "tempSubnameProxyPackageId": {
         "v1": "0x7f34c135e55e5b436b3feaad369eabfe5b6d14c0c57544fefb6921db047e8cbc"
