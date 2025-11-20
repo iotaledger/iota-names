@@ -1,16 +1,16 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { getNetwork } from '@iota/iota-sdk/client';
-import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
-import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { Signer } from '@iota/iota-sdk/cryptography';
+import { getNetwork } from '@iota/iota-sdk/client';
+import type { Signer } from '@iota/iota-sdk/cryptography';
+import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import type { BrowserContext, Page } from '@playwright/test';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -96,6 +96,7 @@ export async function requestFaucetTokens(recipient: string) {
         throw new Error(`Faucet URL not defined for network: ${currentNetwork}`);
     }
 
+    console.log(`Requesting faucet tokens from ${faucetUrl} to address: ${recipient}`);
     const res = await requestIotaFromFaucetV0({
         host: faucetUrl,
         recipient,

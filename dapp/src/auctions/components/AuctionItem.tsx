@@ -49,7 +49,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     }
 
     return (
-        <NameCard name={auction.name} displaySrc={auctionDisplayImage} testId="auction-name-card">
+        <NameCard name={auction.name} displaySrc={auctionDisplayImage} testId="name-card">
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />
