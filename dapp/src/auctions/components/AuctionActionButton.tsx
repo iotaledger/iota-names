@@ -1,9 +1,10 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, ButtonType, LoadingIndicator } from '@iota/apps-ui-kit';
+import { Button, ButtonType } from '@iota/apps-ui-kit';
 import { ConnectModal, useCurrentAccount } from '@iota/dapp-kit';
 import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 import { queryKey } from '@/hooks/queryKey';
 
@@ -23,10 +24,12 @@ export function AuctionActionButton({
     const queryClient = useQueryClient();
     const account = useCurrentAccount();
     const timeRemaining = getTimeRemaining(auction.metadata);
+    const [isClaimCompleted, setIsClaimCompleted] = useState(false);
 
     const { mutateAsync: claimTransaction, isPending: isSigningClaimTransaction } =
         useClaimAuctionTransaction(account?.address || '', auction.name, {
             onSuccess() {
+                setIsClaimCompleted(true);
                 queryClient.invalidateQueries({
                     queryKey: queryKey.userAuctionHistory(account?.address),
                 });
@@ -43,12 +46,12 @@ export function AuctionActionButton({
         );
     }
     if (auctionStatus === 'claimable' && auction.metadata?.winner === account?.address) {
-        const isClaimLoading = isSigningClaimTransaction;
-
+        if (isClaimCompleted) {
+            return <Button text="Claimed" type={ButtonType.Outlined} disabled fullWidth />;
+        }
         return (
             <Button
-                text={isSigningClaimTransaction ? undefined : 'Claim'}
-                icon={isClaimLoading ? <LoadingIndicator /> : null}
+                text={isSigningClaimTransaction ? 'Claiming...' : 'Claim'}
                 onClick={async () => {
                     await claimTransaction();
                 }}

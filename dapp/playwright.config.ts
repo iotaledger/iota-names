@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
     testDir: './tests',
-    fullyParallel: true,
+    fullyParallel: false,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
     workers: process.env.CI ? 2 : undefined,
@@ -14,21 +14,60 @@ export default defineConfig({
         timeout: 10_000,
     },
     use: {
-        baseURL: 'http://localhost:3000',
+        baseURL: 'http://localhost:3005',
         trace: 'on-first-retry',
     },
     projects: [
         {
-            name: 'chromium',
+            name: 'Chromium',
+            testDir: './tests/common',
             use: {
                 ...devices['Desktop Chrome'],
                 userAgent: 'Playwright',
             },
+            fullyParallel: true,
+        },
+        {
+            name: 'Management flow',
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            testDir: './tests/management',
+            fullyParallel: false,
+        },
+        {
+            name: 'Purchase setup',
+            testMatch: /purchase\.setup\.ts/,
+        },
+        {
+            name: 'Purchase flow',
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            testDir: './tests/purchase',
+            dependencies: ['Purchase setup'],
+            fullyParallel: true,
+        },
+        {
+            name: 'Auctions setup',
+            testMatch: /auctions\.setup\.ts/,
+            dependencies: ['Purchase flow'],
+        },
+        {
+            name: 'Auctions flow',
+            use: {
+                ...devices['Desktop Chrome'],
+                userAgent: 'Playwright',
+            },
+            testDir: './tests/auctions',
+            dependencies: ['Auctions setup'],
         },
     ],
     webServer: {
-        command: 'pnpm run dev',
-        port: 3000,
+        command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
+        port: 3005,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
     },
