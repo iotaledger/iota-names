@@ -6,6 +6,7 @@
 
 import { IotaClient } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { IOTA_TYPE_ARG } from '@iota/iota-sdk/utils';
 
 import { PackageInfo, readPackageInfo } from '../package-info/constants';
 import { getClient, getSigner, signAndExecute } from '../utils/utils';
@@ -35,7 +36,7 @@ const registerName = async () => {
     const receipt = tx.moveCall({
         target: `${packageInfo.paymentsPackageId.v1}::payments::handle_base_payment`,
         arguments: [tx.object(packageInfo.iotaNamesObjectId), paymentIntent, payment],
-        typeArguments: ['0x2::iota::IOTA'],
+        typeArguments: [IOTA_TYPE_ARG],
     });
     const nft = tx.moveCall({
         target: `${packageInfo.packageId.v1}::payment::register`,
