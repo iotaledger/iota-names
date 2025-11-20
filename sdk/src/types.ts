@@ -27,7 +27,7 @@ export type PackageInfo = {
     iotaNamesObjectId: string;
     packageId: VersionedPackageId;
     paymentsPackageId: VersionedPackageId;
-    publisherId: VersionedPackageId;
+    publisherId: string;
     registryTableId: string;
     reverseRegistryTableId: string;
     subnamesPackageId: VersionedPackageId;

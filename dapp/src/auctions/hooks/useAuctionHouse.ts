@@ -19,7 +19,7 @@ interface AuctionHouseData {
 export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error> {
     const { iotaNamesClient } = useIotaNamesClient();
 
-    const auctionPackageId = iotaNamesClient.resolveRead('auctionPackageId');
+    const auctionPackageId = iotaNamesClient.getPackage('auctionPackageId');
 
     return useQuery({
         queryKey: ['auctionHouse', auctionPackageId],

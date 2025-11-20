@@ -13,7 +13,7 @@ export function useGetAuctionMetadata(name: string) {
     const { data: auctionHouseData } = useAuctionHouse();
 
     const { auctionsTableObjectId } = auctionHouseData || {};
-    const packageId = iotaNamesClient.resolveRead('packageId');
+    const packageId = iotaNamesClient.getPackage('packageId');
 
     const queryConfig = createAuctionMetadataQuery({
         name,

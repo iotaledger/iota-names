@@ -81,40 +81,27 @@ export class IotaNamesClient {
 
     /**
      * Get the corresponding address for the given package.
-     * Sometimes new versions might contain new types, so its important to use the package they were created on when reading them in e.g GraphQL.
+     * Sometimes new versions might contain new types,
+     * so its important to use the package they were created on when reading them in e.g GraphQL.
+     *
      * - If the package does not have any versioning then the value is returned directly.
      * - If there are multiple versions available then the version passed as argument will be used to retrieve the package.
      * - If none of above returned a version then the latest will be picked.
+     *
+     * @argument {string} key - Package key.
+     * @argument {string} [version=v1] - Optionally specify your desired version.
      */
-    resolveRead(key: keyof PackageInfo, version: `v${number}` = 'v1'): string {
+    getPackage(key: keyof PackageInfo, version: `v${number}` | 'latest' = 'v1'): string {
         const pkg = this.config[key];
 
         // This package is not versioned at all
         if (typeof pkg === 'string') return pkg;
 
-        // Select the versioned package
-        if (version in pkg && typeof pkg[version] === 'string') return pkg[version];
+        // Select the versioned package, only if its not "latest"
+        if (version != 'latest' && version in pkg && typeof pkg[version] === 'string')
+            return pkg[version];
 
         // Get the latest available version for that given package
-        const fallback = Object.values(pkg).toReversed()[0];
-        if (!fallback) throw new Error(`Package ${key} is not set`);
-
-        return fallback;
-    }
-
-    /**
-     * Get the latest value for the given package.
-     * This is because transactions must always use the latest available version.
-     * - If the package does not have any versioning then the value is returned directly.
-     * - If there are multiple versions available the latest one will be used.
-     */
-    resolveWrite(key: keyof PackageInfo): string {
-        const pkg = this.config[key];
-
-        // This package is not versioned at all
-        if (typeof pkg === 'string') return pkg;
-
-        // Fallback to the latest version or instead of back 1 version until one is available
         const fallback = Object.values(pkg).toReversed()[0];
         if (!fallback) throw new Error(`Package ${key} is not set`);
 
@@ -125,8 +112,8 @@ export class IotaNamesClient {
      * Returns the core config of IOTA Names.
      */
     async getCoreConfig(): Promise<IotaNamesCoreConfig> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
 
         const coreConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -171,9 +158,9 @@ export class IotaNamesClient {
      * Returns the subnames config of IOTA Names.
      */
     async getSubnamesConfig(): Promise<IotaNamesSubnamesConfig> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
-        const subnamesPackageId = this.resolveRead('subnamesPackageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
+        const subnamesPackageId = this.getPackage('subnamesPackageId');
 
         const subnamesConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -223,8 +210,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 20000000
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -286,8 +273,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 50000000000
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -363,8 +350,8 @@ export class IotaNamesClient {
         reservedTableId: string | null;
         blockedTableId: string | null;
     }> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
 
         const denyListBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -473,8 +460,8 @@ export class IotaNamesClient {
 
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
-        const registryTableId = this.resolveRead('registryTableId');
-        const packageId = this.resolveRead('packageId');
+        const registryTableId = this.getPackage('registryTableId');
+        const packageId = this.getPackage('packageId');
 
         const nameBcsB64 = toB64(
             NameBcs.serialize({
@@ -537,9 +524,9 @@ export class IotaNamesClient {
     }
 
     async getCouponHouse(): Promise<CouponHouse> {
-        const iotaNamesObjectId = this.resolveRead('iotaNamesObjectId');
-        const packageId = this.resolveRead('packageId');
-        const couponsPackageId = this.resolveRead('couponsPackageId');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId');
+        const packageId = this.getPackage('packageId');
+        const couponsPackageId = this.getPackage('couponsPackageId');
 
         const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
 

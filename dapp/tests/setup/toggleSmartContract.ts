@@ -6,12 +6,12 @@ import { expect } from '@playwright/test';
 import { getAuthorizedSmartContractTypes, iotaNamesClient, runCommand } from './utils';
 
 const envs = {
-    IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.resolveRead('packageId'),
-    IOTA_NAMES_OBJECT_ID: iotaNamesClient.resolveRead('iotaNamesObjectId'),
-    ADMIN_CAP: iotaNamesClient.resolveRead('adminCap'),
-    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: iotaNamesClient.resolveRead('paymentsPackageId'),
-    ADMIN_ADDRESS: iotaNamesClient.resolveRead('adminAddress'),
-    IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.resolveRead('auctionPackageId'),
+    IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.getPackage('packageId'),
+    IOTA_NAMES_OBJECT_ID: iotaNamesClient.getPackage('iotaNamesObjectId'),
+    ADMIN_CAP: iotaNamesClient.getPackage('adminCap'),
+    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: iotaNamesClient.getPackage('paymentsPackageId'),
+    ADMIN_ADDRESS: iotaNamesClient.getPackage('adminAddress'),
+    IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.getPackage('auctionPackageId'),
 };
 
 function getUpdateAuthCommand(mode: 'enable' | 'disable', type: 'payment' | 'auction') {

@@ -22,7 +22,7 @@ const FILTER_NONE_STRUCT_TYPES = [
 export function useGetVisualAssets(address: string) {
     const kioskClient = useKioskClient();
     const { iotaNamesClient } = useIotaNamesClient();
-    const packageId = iotaNamesClient.resolveRead('packageId');
+    const packageId = iotaNamesClient.getPackage('packageId');
 
     const iotaNamesStructsToRemove = [
         getNameRegistrationType(packageId),

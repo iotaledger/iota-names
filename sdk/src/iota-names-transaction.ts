@@ -95,8 +95,8 @@ export class IotaNamesTransaction {
     }
 
     initRegistration(name: string): TransactionObjectArgument {
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
         return this.transaction.moveCall({
             target: `${packageId}::payment::init_registration`,
             arguments: [
@@ -107,8 +107,8 @@ export class IotaNamesTransaction {
     }
 
     initRenewal(nft: TransactionObjectInput, years: number): TransactionObjectArgument {
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         return this.transaction.moveCall({
             target: `${packageId}::payment::init_renewal`,
@@ -125,8 +125,8 @@ export class IotaNamesTransaction {
         payment: TransactionObjectArgument,
         paymentType: string,
     ): TransactionObjectArgument {
-        const paymentsPackageId = this.iotaNamesClient.resolveWrite('paymentsPackageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const paymentsPackageId = this.iotaNamesClient.getPackage('paymentsPackageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         return this.transaction.moveCall({
             target: `${paymentsPackageId}::payments::handle_base_payment`,
@@ -136,8 +136,8 @@ export class IotaNamesTransaction {
     }
 
     finalizeRegister(receipt: TransactionObjectArgument): TransactionObjectArgument {
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         return this.transaction.moveCall({
             target: `${packageId}::payment::register`,
@@ -153,8 +153,8 @@ export class IotaNamesTransaction {
         receipt: TransactionObjectArgument,
         nft: TransactionObjectInput,
     ): TransactionObjectArgument {
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         return this.transaction.moveCall({
             target: `${packageId}::payment::renew`,
@@ -168,7 +168,7 @@ export class IotaNamesTransaction {
     }
 
     getBasePrice(paymentIntent: TransactionObjectArgument): TransactionObjectArgument {
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
 
         return this.transaction.moveCall({
             target: `${packageId}::payment::request_base_amount`,
@@ -177,8 +177,8 @@ export class IotaNamesTransaction {
     }
 
     applyCoupon(couponCode: string, paymentIntent: TransactionObjectArgument) {
-        const couponsPackageId = this.iotaNamesClient.resolveWrite('couponsPackageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const couponsPackageId = this.iotaNamesClient.getPackage('couponsPackageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         return this.transaction.moveCall({
             target: `${couponsPackageId}::coupon_house::apply_coupon`,
@@ -218,12 +218,12 @@ export class IotaNamesTransaction {
     }) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
         const isParentSubname = isNestedSubname(name);
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
         const subnamesPackageId = !isParentSubname
-            ? this.iotaNamesClient.resolveWrite('subnamesPackageId')
+            ? this.iotaNamesClient.getPackage('subnamesPackageId', 'latest')
             : null;
         const tempSubnameProxyPackageId = isParentSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         const subNft = this.transaction.moveCall({
@@ -261,12 +261,12 @@ export class IotaNamesTransaction {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
         const isParentSubname = isNestedSubname(name);
 
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
         const subnamesPackageId = !isParentSubname
-            ? this.iotaNamesClient.resolveWrite('subnamesPackageId')
+            ? this.iotaNamesClient.getPackage('subnamesPackageId', 'latest')
             : null;
         const tempSubnameProxyPackageId = isParentSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         this.transaction.moveCall({
@@ -291,12 +291,12 @@ export class IotaNamesTransaction {
         const isParentSubname = isNestedSubname(name);
         if (!isSubname(name)) throw new Error('This can only be invoked for subnames');
 
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
         const subnamesPackageId = !isParentSubname
-            ? this.iotaNamesClient.resolveWrite('subnamesPackageId')
+            ? this.iotaNamesClient.getPackage('subnamesPackageId', 'latest')
             : null;
         const tempSubnameProxyPackageId = isParentSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         this.transaction.moveCall({
@@ -324,10 +324,12 @@ export class IotaNamesTransaction {
         address?: string;
         isSubname?: boolean;
     }) {
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
-        const packageId = !isSubname ? this.iotaNamesClient.resolveWrite('packageId') : null;
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
+        const packageId = !isSubname
+            ? this.iotaNamesClient.getPackage('packageId', 'latest')
+            : null;
         const tempSubnameProxyPackageId = isSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         this.transaction.moveCall({
@@ -348,8 +350,8 @@ export class IotaNamesTransaction {
      */
     setDefault(name: string) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         this.transaction.moveCall({
             target: `${packageId}::controller::set_reverse_lookup`,
@@ -364,8 +366,8 @@ export class IotaNamesTransaction {
      * Unsets a default name for the user.
      */
     unsetDefault() {
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
 
         this.transaction.moveCall({
             target: `${packageId}::controller::unset_reverse_lookup`,
@@ -390,12 +392,12 @@ export class IotaNamesTransaction {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
         const isParentSubname = isNestedSubname(name);
 
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
         const subnamesPackageId = !isParentSubname
-            ? this.iotaNamesClient.resolveWrite('subnamesPackageId')
+            ? this.iotaNamesClient.getPackage('subnamesPackageId', 'latest')
             : null;
         const tempSubnameProxyPackageId = isParentSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         this.transaction.moveCall({
@@ -423,8 +425,8 @@ export class IotaNamesTransaction {
         nft: TransactionObjectInput;
         expirationTimestampMs: number;
     }) {
-        const subnamesPackageId = this.iotaNamesClient.resolveWrite('subnamesPackageId');
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
+        const subnamesPackageId = this.iotaNamesClient.getPackage('subnamesPackageId', 'latest');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
 
         this.transaction.moveCall({
             target: `${subnamesPackageId}::subnames::extend_expiration`,
@@ -450,10 +452,12 @@ export class IotaNamesTransaction {
         key: string;
         isSubname?: boolean;
     }) {
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
-        const packageId = !isSubname ? this.iotaNamesClient.resolveWrite('packageId') : null;
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
+        const packageId = !isSubname
+            ? this.iotaNamesClient.getPackage('packageId', 'latest')
+            : null;
         const tempSubnameProxyPackageId = isSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
@@ -484,10 +488,12 @@ export class IotaNamesTransaction {
         key: string;
         isSubname?: boolean;
     }) {
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
-        const packageId = !isSubname ? this.iotaNamesClient.resolveWrite('packageId') : null;
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
+        const packageId = !isSubname
+            ? this.iotaNamesClient.getPackage('packageId', 'latest')
+            : null;
         const tempSubnameProxyPackageId = isSubname
-            ? this.iotaNamesClient.resolveWrite('tempSubnameProxyPackageId')
+            ? this.iotaNamesClient.getPackage('tempSubnameProxyPackageId', 'latest')
             : null;
 
         if (!Object.values(ALLOWED_METADATA).some((x) => x === key)) throw new Error('Invalid key');
@@ -509,8 +515,8 @@ export class IotaNamesTransaction {
      * Burns an expired NFT to collect storage rebates.
      */
     burnExpired({ nft, isSubname }: { nft: TransactionObjectInput; isSubname?: boolean }) {
-        const iotaNamesObjectId = this.iotaNamesClient.resolveWrite('iotaNamesObjectId');
-        const packageId = this.iotaNamesClient.resolveWrite('packageId');
+        const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
+        const packageId = this.iotaNamesClient.getPackage('packageId', 'latest');
 
         this.transaction.moveCall({
             target: `${packageId}::controller::${

@@ -45,8 +45,8 @@ export function useAuctionBid({ name, bidNanos }: UseActionBidParams) {
         ],
         queryFn: async () => {
             if (!auctionHouse) throw new Error('Auction house not loaded');
-            const auctionPackageId = iotaNamesClient.resolveWrite('auctionPackageId');
-            const iotaNamesObjectId = iotaNamesClient.resolveWrite('iotaNamesObjectId');
+            const auctionPackageId = iotaNamesClient.getPackage('auctionPackageId', 'latest');
+            const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId', 'latest');
             const transaction = !isAuctionPresent
                 ? buildCreateAuctionTransaction(
                       auctionPackageId,
