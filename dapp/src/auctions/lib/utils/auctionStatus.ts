@@ -26,7 +26,7 @@ export function getAuctionMetadataStatus(
 ): AuctionMetadataStatus {
     if (!auctionMetadata) return 'not_found';
 
-    if (isAuctionActive(auctionMetadata)) return 'active';
+    if (auctionMetadata.isActive) return 'active';
     return 'ended';
 }
 
