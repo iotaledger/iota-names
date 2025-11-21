@@ -43,7 +43,7 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
-        const response = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
