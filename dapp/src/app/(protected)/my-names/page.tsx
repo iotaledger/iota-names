@@ -64,6 +64,7 @@ export default function MyNamesPage(): JSX.Element {
         error: isAuctionsErrored,
         isLoading: isLoadingAuctions,
     } = useAuctions({
+        type: 'user',
         userAddress: account?.address,
         status: 'all',
     });
@@ -160,6 +161,7 @@ export default function MyNamesPage(): JSX.Element {
                             }
                             onClick={handleRefresh}
                             disabled={isRefreshing}
+                            testId="refresh-button"
                         />
                     ) : null}
                 </div>
