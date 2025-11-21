@@ -151,7 +151,7 @@ export function createAuctionMetadataQuery({
             return { auctionMetadata };
         },
         select: (
-            data: { auctionMetadata: RawAuctionMetadata | null } | null,
+            data: { auctionMetadata: RawAuctionMetadata | null; isActive: boolean } | null,
         ): AuctionMetadata | null => {
             if (!data?.auctionMetadata?.value?.value) return null;
             return normalizeAuctionData(data.auctionMetadata);
