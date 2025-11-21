@@ -107,7 +107,8 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(name: string, address: string, signer: Signer) {
+export async function purchaseName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
