@@ -82,7 +82,7 @@ export const hasLabelsInFile = (filePath: string): boolean => {
 
 // Type for package info
 export type PackageInfoForLabels = {
-    packageId: string;
+    packageId: { [version: string]: string };
     iotaNamesObjectId: string;
     adminCap: string;
 };
@@ -96,9 +96,9 @@ export function processLabelsBatch(
 ): void {
     const { packageId, iotaNamesObjectId, adminCap } = packageInfo;
     if (action === 'block') {
-        addBlockedLabels(tx, packageId, iotaNamesObjectId, adminCap, labels);
+        addBlockedLabels(tx, packageId.v1, iotaNamesObjectId, adminCap, labels);
     } else {
-        addReservedLabels(tx, packageId, iotaNamesObjectId, adminCap, labels);
+        addReservedLabels(tx, packageId.v1, iotaNamesObjectId, adminCap, labels);
     }
 }
 
