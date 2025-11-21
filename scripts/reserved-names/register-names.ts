@@ -45,7 +45,7 @@ export const parseCsvFile = (filePath: string): Record<string, string | undefine
 export const registerNames = (
     txb: Transaction,
     batch: Record<string, string>,
-    iotaNamesPackageId: string,
+    iotaNamesPackageId: { [version: string]: string },
     adminCap: string,
     iotaNamesObjectId: string,
 ) => {
@@ -53,7 +53,7 @@ export const registerNames = (
     var recipients = names.map((name) => batch[name]);
 
     txb.moveCall({
-        target: `${iotaNamesPackageId}::admin::register_names`,
+        target: `${iotaNamesPackageId.v1}::admin::register_names`,
         arguments: [
             txb.object(adminCap),
             txb.object(iotaNamesObjectId),
@@ -72,7 +72,7 @@ const PURE_ARG_SIZE_LIMIT = 8500;
 export async function processNamesFileBatched(
     filePath: string,
     packageInfo: {
-        packageId: string;
+        packageId: { [version: string]: string };
         adminCap: string;
         iotaNamesObjectId: string;
     },
@@ -108,7 +108,11 @@ export async function processNamesFileBatched(
 
 async function sendNamesBatchTransaction(
     batch: Record<string, string>,
-    packageInfo: { packageId: string; adminCap: string; iotaNamesObjectId: string },
+    packageInfo: {
+        packageId: { [version: string]: string };
+        adminCap: string;
+        iotaNamesObjectId: string;
+    },
     network: string,
     client: any,
 ) {
