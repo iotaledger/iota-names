@@ -108,7 +108,8 @@ impl Command {
                 let iota_names_config = match IotaNamesExtendedConfig::from_env() {
                     Ok(config) => config,
                     Err(_) => {
-                        // If environment variables are not set, determine config from the connected network
+                        // If environment variables are not set, determine config from the connected
+                        // network
                         let chain = async {
                             IotaClientBuilder::default()
                                 .build(&node_url)
@@ -126,9 +127,9 @@ impl Command {
                         .await
                         .unwrap_or_else(|| {
                             warn!(
-                                "Failed to get chain identifier from node, defaulting to Testnet"
+                                "Failed to get chain identifier from node, defaulting to Unknown"
                             );
-                            Chain::Testnet
+                            Chain::Unknown
                         });
                         IotaNamesExtendedConfig::from_chain(&chain)
                     }
