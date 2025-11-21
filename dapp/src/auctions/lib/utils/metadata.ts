@@ -72,7 +72,10 @@ export async function fetchAuctionMetadata({
 /**
  * Converts raw BCS auction data to normalized TypeScript interface
  */
-function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | null {
+function normalizeAuctionData(
+    rawData: RawAuctionMetadata,
+    isActive: boolean,
+): AuctionMetadata | null {
     if (!rawData?.value?.value) {
         return null;
     }
@@ -82,9 +85,6 @@ function normalizeAuctionData(rawData: RawAuctionMetadata): AuctionMetadata | nu
     const currentBidNanos = BigInt(auction.current_bid.balance.value || BigInt(0));
     const minBidNanos = currentBidNanos + NANOS_PER_IOTA;
 
-    const now = new Date();
-    const endTimestamp = new Date(Number(auction?.end_timestamp_ms));
-    const isActive = now < endTimestamp;
     return {
         name: auction.nft.name_str,
         startTimestamp: new Date(Number(auction.start_timestamp_ms)),
@@ -148,16 +148,21 @@ export function createAuctionMetadataQuery({
                 graphQLClient,
             });
             const auctionMetadata = parseAuctionDataBcs(data);
-            return { auctionMetadata };
+            const auction = auctionMetadata?.value.value;
+
+            const now = new Date();
+            const endTimestamp = new Date(Number(auction?.end_timestamp_ms));
+            const isActive = now < endTimestamp;
+
+            return { auctionMetadata, isActive };
         },
         select: (
             data: { auctionMetadata: RawAuctionMetadata | null; isActive: boolean } | null,
         ): AuctionMetadata | null => {
             if (!data?.auctionMetadata?.value?.value) return null;
-            return normalizeAuctionData(data.auctionMetadata);
+            return normalizeAuctionData(data.auctionMetadata, data.isActive || false);
         },
         enabled: !!auctionsTableObjectId && !!name,
         refetchInterval: 10000,
-        structuralSharing: false, //This is necessary because isActive depends on time, not just on-chain data
     };
 }
