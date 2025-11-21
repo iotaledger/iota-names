@@ -16,6 +16,7 @@ export interface AuctionDetails {
     metadata: AuctionMetadata | null;
     isLoading: boolean;
     error: boolean;
+    hasUserParticipated?: boolean;
 }
 
 export interface UseAuctionsOptions {
@@ -25,6 +26,13 @@ export interface UseAuctionsOptions {
      * If not provided, returns all available auctions.
      */
     userAddress?: string;
+    /**
+     * Determines which auctions to fetch.
+     * - all (default): fetches public auctions and, if a user is provided,
+     *   also fetches user auctions to detect participation.
+     * - user: fetches only the auctions where the user has participated.
+     */
+    type?: 'all' | 'user';
     /**
      * Search term to filter auction names.
      * Only applies when fetching all auctions (not user-specific).
@@ -65,6 +73,7 @@ const NAMES_PLACEHOLDER: AuctionsResponse = {
 
 export function useAuctions({
     userAddress,
+    type = 'all',
     search,
     status,
     sort,
@@ -76,39 +85,67 @@ export function useAuctions({
     const indexerClient = useIotaNamesIndexerClientContext();
     const { data: auctionHouseData } = useAuctionHouse();
 
-    // Determine the appropriate query key and fetch function based on filter
-    const queryKeyBase = userAddress
-        ? queryKey.userAuctionHistory(userAddress)
-        : queryKey.auctionList();
+    const shouldFetchAllAuctions = type === 'all';
+    const shouldFetchUserAuctions = !!userAddress;
 
-    // First, get the list of auction names (either user-specific or all)
     const {
-        data: auctionNames = NAMES_PLACEHOLDER,
-        isLoading: isLoadingNames,
-        error: namesError,
+        data: allAuctions = NAMES_PLACEHOLDER,
+        isLoading: isLoadingAllAuctions,
+        error: allAuctionsError,
     } = useQuery<AuctionsResponse>({
         // eslint-disable-next-line @tanstack/query/exhaustive-deps
-        queryKey: [...queryKeyBase, search, status, sort, sortBy, page, pageSize],
+        queryKey: [
+            ...queryKey.auctionList(),
+            search,
+            status,
+            sort,
+            sortBy,
+            page,
+            pageSize,
+            shouldFetchAllAuctions,
+        ],
         queryFn: async () => {
-            if (!indexerClient) {
+            if (!indexerClient || !shouldFetchAllAuctions) {
                 return NAMES_PLACEHOLDER;
             }
 
-            // Fetch user-specific auctions or all auctions based on filter
-            return userAddress
-                ? indexerClient.getAllUserAuctions(userAddress)
-                : indexerClient.getAuctionList(status, search, sort, sortBy, page, pageSize);
+            return indexerClient.getAuctionList(status, search, sort, sortBy, page, pageSize);
         },
-        enabled: !!indexerClient && (!userAddress || !!userAddress),
+        enabled: !!indexerClient && shouldFetchAllAuctions,
         placeholderData: keepPreviousData,
     });
 
+    const {
+        data: userAuctions = NAMES_PLACEHOLDER,
+        isLoading: isLoadingUserAuctions,
+        error: userAuctionsError,
+    } = useQuery<AuctionsResponse>({
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps
+        queryKey: [...queryKey.userAuctionHistory(userAddress)],
+        queryFn: async () => {
+            if (!indexerClient || !userAddress || !shouldFetchUserAuctions) {
+                return NAMES_PLACEHOLDER;
+            }
+
+            return indexerClient.getAllUserAuctions(userAddress);
+        },
+        enabled: !!indexerClient && shouldFetchUserAuctions,
+        placeholderData: keepPreviousData,
+    });
+
+    const selectedAuctions = type === 'user' ? userAuctions : allAuctions;
+    const isLoadingSelectedAuctions =
+        type === 'user' ? isLoadingUserAuctions : isLoadingAllAuctions;
+    const selectedAuctionsError = type === 'user' ? userAuctionsError : allAuctionsError;
+
+    const userParticipationSet = new Set(userAuctions.names);
+
     const { auctionsTableObjectId } = auctionHouseData || {};
-    const { packageId } = iotaNamesClient.config;
+    const packageId = iotaNamesClient.getPackage('packageId', 'v1');
 
     // Then, fetch metadata for each auction
     const combinedResult = useQueries({
-        queries: auctionNames.names.map((name) =>
+        queries: selectedAuctions.names.map((name) =>
             createAuctionMetadataQuery({
                 name,
                 auctionsTableObjectId,
@@ -117,25 +154,25 @@ export function useAuctions({
             }),
         ),
         combine: (results) => {
-            const auctionDetails: AuctionDetails[] = auctionNames.names.map((name, index) => {
+            const auctionDetails: AuctionDetails[] = selectedAuctions.names.map((name, index) => {
                 const result = results[index];
                 return {
                     name,
                     metadata: result.data || null,
                     isLoading: result.isLoading || result.isPending,
                     error: !!result.error,
+                    hasUserParticipated: userParticipationSet.has(name),
                 };
             });
 
             return {
                 data: auctionDetails,
-                isLoading: isLoadingNames || auctionDetails.some((result) => result.isLoading),
-                error: !!namesError || auctionDetails.some((result) => result.error),
-                auctionNames,
-                isUserFiltered: !!userAddress,
-                page: auctionNames.page,
-                pageSize: auctionNames.pageSize,
-                totalItems: auctionNames.totalItems,
+                isLoading:
+                    isLoadingSelectedAuctions || auctionDetails.some((result) => result.isLoading),
+                error: !!selectedAuctionsError || auctionDetails.some((result) => result.error),
+                page: selectedAuctions.page,
+                pageSize: selectedAuctions.pageSize,
+                totalItems: selectedAuctions.totalItems,
             };
         },
     });
