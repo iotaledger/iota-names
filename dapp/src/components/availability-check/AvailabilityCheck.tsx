@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { isAuctionActive } from '@/auctions/lib/utils';
 import {
     NameRecordData,
     useBlockedList,
@@ -93,7 +92,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         debouncedSearchValue &&
         (isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst);
 
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -302,7 +301,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isAllowedToBid =
         (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
 
@@ -369,7 +368,6 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
     }
 
     const isAvailable = nameRecordData?.type === 'available';
-    const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
         onPurchase();
@@ -385,25 +383,25 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
 
     return (
         <>
-            <NamePurchaseCard
-                name={name}
-                isAvailable={isAvailable}
-                price={formattedPurchasePrice}
-                priceSupportingText={isAvailable ? 'Price' : undefined}
-                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
-                testId="purchase-name-card"
-            >
-                {isUnavailable ? null : isConnected ? (
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Buy"
-                        onClick={() => setPurchaseDialogOpen(true)}
-                    />
-                ) : (
-                    <ConnectButton />
-                )}
-            </NamePurchaseCard>
-
+            {isAvailable && (
+                <NamePurchaseCard
+                    name={name}
+                    isAvailable={true}
+                    price={formattedPurchasePrice}
+                    priceSupportingText="Price"
+                    testId="purchase-name-card"
+                >
+                    {isConnected ? (
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setPurchaseDialogOpen(true)}
+                        />
+                    ) : (
+                        <ConnectButton />
+                    )}
+                </NamePurchaseCard>
+            )}
             {isPurchaseDialogOpen && (
                 <PurchaseNameDialog
                     name={name}
