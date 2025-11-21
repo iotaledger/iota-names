@@ -107,7 +107,8 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(name: string, address: string, signer: Signer) {
+export async function purchaseName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
@@ -140,7 +141,8 @@ export async function purchaseName(name: string, address: string, signer: Signer
     return responsePurchase;
 }
 
-export async function connectName(name: string, address: string, nft: string, signer: Signer) {
+export async function connectName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     iotaNamesTx.setTargetAddress({
@@ -171,7 +173,8 @@ export async function connectName(name: string, address: string, nft: string, si
     return responseConnect;
 }
 
-export async function setDisplayName(name: string, address: string, signer: Signer) {
+export async function setDisplayName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     iotaNamesTx.setDefault(name);
