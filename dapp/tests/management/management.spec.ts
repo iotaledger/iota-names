@@ -15,6 +15,7 @@ import {
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
+import { iotaNamesClient } from '../setup/utils';
 
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -33,7 +34,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
-        test('View name info', async ({ appPage: page, sharedState }) => {
+    test('View name info', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
@@ -91,7 +92,7 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
-        const { response } = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');

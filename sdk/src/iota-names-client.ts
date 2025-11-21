@@ -52,12 +52,69 @@ export class IotaNamesClient {
         }
     }
 
+    async isMethodSupported(
+        packageId: string,
+        module: string,
+        functionName: string,
+    ): Promise<boolean> {
+        const methodData = await this.graphQlClient.query<{
+            package: { module: { function: unknown } };
+        }>({
+            query: `query getMethod($package: IotaAddress!, $module: String!, $function: String!) {
+                package(address: $package) {
+                    module(name: $module) {
+                        function(name: $function) {
+                            name
+                        }
+                    }
+                }
+            }`,
+            variables: {
+                package: packageId,
+                module,
+                function: functionName,
+            },
+        });
+
+        return methodData.data?.package?.module?.function != null;
+    }
+
+    /**
+     * Get the corresponding address for the given package.
+     * Sometimes new versions might contain new types,
+     * so its important to use the package they were created on when reading them in e.g GraphQL.
+     *
+     * - If the package does not have any versioning then the value is returned directly.
+     * - If there are multiple versions available then the version passed as argument will be used to retrieve the package.
+     * - If none of above returned a version then the latest will be picked.
+     *
+     * @argument {string} key - Package key.
+     * @argument {string} [version=v1] - Optionally specify your desired version.
+     */
+    getPackage(key: keyof PackageInfo, version: `v${number}` | 'latest' = 'latest'): string {
+        const pkg = this.config[key];
+
+        // This package is not versioned at all
+        if (typeof pkg === 'string') return pkg;
+
+        // Select the versioned package, only if its not "latest"
+        if (version !== 'latest' && version in pkg && typeof pkg[version] === 'string') {
+            return pkg[version];
+        }
+
+        // Get the latest available version for that given package
+        const fallback = Object.values(pkg).toReversed()[0];
+        if (!fallback) throw new Error(`Package ${key} is not set`);
+
+        return fallback;
+    }
+
     /**
      * Returns the core config of IOTA Names.
      */
     async getCoreConfig(): Promise<IotaNamesCoreConfig> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
 
         const coreConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -81,12 +138,9 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNamesObjectId,
+                parentId: iotaNamesObjectId,
                 name: {
-                    type: getConfigType(
-                        this.config.packageId,
-                        getCoreConfigType(this.config.packageId),
-                    ),
+                    type: getConfigType(packageId, getCoreConfigType(packageId)),
                     bcs: coreConfigBcsB64,
                 },
             },
@@ -105,10 +159,9 @@ export class IotaNamesClient {
      * Returns the subnames config of IOTA Names.
      */
     async getSubnamesConfig(): Promise<IotaNamesSubnamesConfig> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
-        if (!this.config.subnamesPackageId)
-            throw new Error('IotaNames subnames package ID is not set');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
+        const subnamesPackageId = this.getPackage('subnamesPackageId', 'v1');
 
         const subnamesConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -131,12 +184,9 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNamesObjectId,
+                parentId: iotaNamesObjectId,
                 name: {
-                    type: getConfigType(
-                        this.config.packageId,
-                        getSubnamesConfigType(this.config.subnamesPackageId),
-                    ),
+                    type: getConfigType(packageId, getSubnamesConfigType(subnamesPackageId)),
                     bcs: subnamesConfigBcsB64,
                 },
             },
@@ -161,8 +211,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 20000000
     // }
     async getPriceList(): Promise<IotaNamesPriceList> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -186,12 +236,9 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNamesObjectId,
+                parentId: iotaNamesObjectId,
                 name: {
-                    type: getConfigType(
-                        this.config.packageId,
-                        getPricelistConfigType(this.config.packageId),
-                    ),
+                    type: getConfigType(packageId, getPricelistConfigType(packageId)),
                     bcs: pricingConfigBcsB64,
                 },
             },
@@ -227,8 +274,8 @@ export class IotaNamesClient {
     // 	[ 5, 63 ] => 50000000000
     // }
     async getRenewalPriceList(): Promise<IotaNamesPriceList> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
 
         const pricingConfigBcsB64 = toB64(
             DummyFieldBcs.serialize({
@@ -252,12 +299,9 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.iotaNamesObjectId,
+                parentId: iotaNamesObjectId,
                 name: {
-                    type: getConfigType(
-                        this.config.packageId,
-                        getRenewalPricelistConfigType(this.config.packageId),
-                    ),
+                    type: getConfigType(packageId, getRenewalPricelistConfigType(packageId)),
                     bcs: pricingConfigBcsB64,
                 },
             },
@@ -307,11 +351,9 @@ export class IotaNamesClient {
         reservedTableId: string | null;
         blockedTableId: string | null;
     }> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
 
-        const iotaNamesObjectId = this.config.iotaNamesObjectId;
-        const packageId = this.config.packageId;
         const denyListBcsB64 = toB64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
@@ -419,7 +461,8 @@ export class IotaNamesClient {
 
     async getNameRecord(name: string): Promise<NameRecord | null> {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA name');
-        if (!this.config.registryTableId) throw new Error('IotaNames package ID is not set');
+        const registryTableId = this.getPackage('registryTableId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
 
         const nameBcsB64 = toB64(
             NameBcs.serialize({
@@ -443,9 +486,9 @@ export class IotaNamesClient {
                 }
             `),
             variables: {
-                parentId: this.config.registryTableId,
+                parentId: registryTableId,
                 name: {
-                    type: getNameType(this.config.packageId),
+                    type: getNameType(packageId),
                     bcs: nameBcsB64,
                 },
             },
@@ -482,13 +525,9 @@ export class IotaNamesClient {
     }
 
     async getCouponHouse(): Promise<CouponHouse> {
-        if (!this.config.iotaNamesObjectId) throw new Error('IotaNames object ID is not set');
-        if (!this.config.packageId) throw new Error('IotaNames package ID is not set');
-        if (!this.config.couponsPackageId) throw new Error('Coupon package ID is not set');
-
-        const iotaNamesObjectId = this.config.iotaNamesObjectId;
-        const packageId = this.config.packageId;
-        const couponsPackageId = this.config.couponsPackageId;
+        const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
+        const packageId = this.getPackage('packageId', 'v1');
+        const couponsPackageId = this.getPackage('couponsPackageId', 'v1');
 
         const DummyFieldB64 = DummyFieldBcs.serialize({ dummy_field: false }).toBase64();
 
