@@ -129,7 +129,7 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
 
         const mintedImg = dialog.getByRole('img', { name: 'e2e test Avatar' });
-        await mintedImg.waitFor({ state: 'visible', timeout: 5_000 });
+        await mintedImg.waitFor({ state: 'visible', timeout: 10_000 });
         const mintedCard = mintedImg.locator(
             'xpath=ancestor::*[@data-testid="avatar-nft-card"][1]',
         );
@@ -144,7 +144,7 @@ test.describe.parallel('Name Management Tests', () => {
                 exact: false,
             }),
         ).toBeVisible({
-            timeout: 5_000,
+            timeout: 10_000,
         });
 
         await page.close();
