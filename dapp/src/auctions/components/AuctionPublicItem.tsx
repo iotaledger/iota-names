@@ -88,10 +88,11 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             size="full"
             displaySrc={auctionDisplayImage}
             blurImage={shouldCensor}
+            testId="name-card"
         >
             <NameCardBody name={censoredName}>
-                {auctionStatus === 'top_bidder' ? (
-                    <div className="absolute top-2 left-2">
+                {auction.hasUserParticipated ? (
+                    <div className="absolute top-2 left-2" data-testid="auction-status-badge">
                         <AuctionStatusBadge status={auctionStatus} />
                     </div>
                 ) : null}
@@ -189,7 +190,7 @@ function AuctionTimeRemaining({ auction }: { auction: AuctionDetails }) {
             <div>
                 <span className="text-label-md text-names-neutral-50">Time left</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1" data-testid="auction-time-remaining">
                 <Clock className="w-4 h-4 text-names-neutral-50" />
                 <span className="text-label-md text-names-neutral-50">
                     {formattedTimeRemaining}
