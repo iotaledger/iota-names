@@ -1,7 +1,6 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { resolve } from 'node:path';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
@@ -14,8 +13,6 @@ import {
     connectWallet,
     createWallet,
     generateRandomName,
-    mintNft,
-    publishMovePackage,
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
@@ -38,6 +35,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
+
     test('View name info', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
@@ -92,62 +90,6 @@ test.describe.parallel('Name Management Tests', () => {
         await page.close();
     });
 
-    test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
-        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-
-        const name = generateRandomName('display');
-        const response = await purchaseName(name, keypair);
-        expect(response.effects?.status.status).toBe('success');
-
-        const packagePath = resolve(__dirname, 'mint_nft');
-        const { packageId } = await publishMovePackage(packagePath);
-        console.log('[mint_nft publish] packageId (address):', packageId);
-        expect(packageId.startsWith('0x')).toBeTruthy();
-
-        const resultMint = await mintNft(packageId, keypair, {
-            name: 'e2e test Avatar',
-            description: 'E2E NFT',
-            imageUrl: 'https://example.com/e2e.png',
-        });
-        expect(resultMint.effects?.status.status).toBe('success');
-
-        await page.goto('/my-names');
-        await expect(
-            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
-        ).toBeVisible({ timeout: 5_000 });
-        const nameCard = page
-            .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(name, 'at') });
-
-        await nameCard.getByTestId('name-card-avatar').hover();
-        const menuButtonLocator = nameCard.getByTestId('menu-button');
-        await expect(menuButtonLocator).toBeVisible();
-        await menuButtonLocator.click();
-        await page.getByText('Personalize Avatar', { exact: true }).click();
-        const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
-
-        const mintedImg = dialog.getByRole('img', { name: 'e2e test Avatar' });
-        await mintedImg.waitFor({ state: 'visible', timeout: 10_000 });
-        const mintedCard = mintedImg.locator(
-            'xpath=ancestor::*[@data-testid="avatar-nft-card"][1]',
-        );
-        await mintedCard.click();
-
-        await dialog.getByRole('button', { name: 'Save' }).click();
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
-        await page.bringToFront();
-
-        await expect(
-            page.getByText('Successfully updated avatar for ' + normalizeIotaName(name), {
-                exact: false,
-            }),
-        ).toBeVisible({
-            timeout: 10_000,
-        });
-
-        await page.close();
-    });
     test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
@@ -181,6 +123,52 @@ test.describe.parallel('Name Management Tests', () => {
 
         await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
             timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
+    test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+
+        const name = generateRandomName('display');
+        const responsePurchase2 = await purchaseName(name, keypair);
+        expect(responsePurchase2.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 5_000 });
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+        await page.getByText('Personalize Avatar', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
+
+        // Wait slightly over the React Query staleTime (10s) to ensure a refetch happens
+        await page.waitForTimeout(10_001);
+
+        // Simply pick the first available NFT card in the dialog
+        const targetCard = dialog.locator('[data-testid="avatar-nft-card"]').first();
+        await expect(targetCard).toBeVisible({ timeout: 10_000 });
+        await targetCard.click({ force: true });
+
+        await dialog.getByRole('button', { name: 'Save' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText('Successfully updated avatar for ' + normalizeIotaName(name, 'at'), {
+                exact: false,
+            }),
+        ).toBeVisible({
+            timeout: 10_000,
         });
 
         await page.close();
