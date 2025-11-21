@@ -8,6 +8,7 @@ import { formatAddress } from '@iota/iota-sdk/utils';
 import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { expect, test } from '../helpers/fixtures';
+import { iotaNamesClient } from '../setup/utils';
 import {
     connectWallet,
     createWallet,
@@ -15,7 +16,6 @@ import {
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
-import { iotaNamesClient } from '../setup/utils';
 
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -38,7 +38,7 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
-        const response = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
