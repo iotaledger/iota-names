@@ -108,7 +108,8 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(name: string, address: string, signer: Signer) {
+export async function purchaseName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
@@ -131,14 +132,14 @@ export async function purchaseName(name: string, address: string, signer: Signer
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
     console.log(`Purchased name: ${name} with address: ${address}`);
-    const response = await iotaClient.signAndExecuteTransaction({
+    const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return response;
+    return responsePurchase;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {

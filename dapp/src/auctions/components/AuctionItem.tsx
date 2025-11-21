@@ -9,6 +9,7 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 
 import { getNameDisplaySrc } from '../../lib/utils/displayImage';
+import { useAuctionRefresh } from '../hooks/useAuctionRefresh';
 import { AuctionDetails } from '../hooks/useAuctions';
 import { UserAuctionStatus } from '../lib/utils';
 import { AuctionActionButton } from './AuctionActionButton';
@@ -21,6 +22,8 @@ interface AuctionItemProps {
 }
 
 export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemProps) {
+    useAuctionRefresh(auction.metadata);
+
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
         : null;
