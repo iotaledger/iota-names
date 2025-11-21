@@ -17,6 +17,7 @@ import {
     requestFaucetTokens,
 } from '../utils';
 
+test.setTimeout(60_000);
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
