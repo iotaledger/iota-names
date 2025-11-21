@@ -28,7 +28,7 @@ export const fetchOwnedNames = async () => {
             filter: {
                 MatchAll: [
                     {
-                        StructType: `${packageInfo.packageId}::name_registration::NameRegistration`,
+                        StructType: `${packageInfo.packageId.v1}::name_registration::NameRegistration`,
                     },
                 ],
             },
