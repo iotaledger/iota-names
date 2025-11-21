@@ -105,30 +105,34 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
-                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_else(|_| {
-                    // If environment variables are not set, determine config from the connected network
-                    let chain = tokio::task::block_in_place(|| {
-                        tokio::runtime::Handle::current()
-                            .block_on(async {
-                                IotaClientBuilder::default()
-                                    .build(&node_url)
-                                    .await
-                                    .ok()
-                                    .and_then(|client| {
-                                        tokio::runtime::Handle::current()
-                                            .block_on(client.read_api().get_chain_identifier())
-                                            .ok()
-                                    })
-                                    .and_then(|chain_id| ChainIdentifier::from_chain_short_id(&chain_id))
-                                    .map(|chain_id| chain_id.chain())
-                                    .unwrap_or_else(|| {
-                                        warn!("Failed to get chain identifier from node, defaulting to Unknown");
-                                        Chain::Unknown
-                                    })
-                            })
-                    });
-                    IotaNamesExtendedConfig::from_chain(&chain)
-                });
+                let iota_names_config = match IotaNamesExtendedConfig::from_env() {
+                    Ok(config) => config,
+                    Err(_) => {
+                        // If environment variables are not set, determine config from the connected network
+                        let chain = async {
+                            IotaClientBuilder::default()
+                                .build(&node_url)
+                                .await
+                                .ok()?
+                                .read_api()
+                                .get_chain_identifier()
+                                .await
+                                .ok()
+                                .and_then(|chain_id| {
+                                    ChainIdentifier::from_chain_short_id(&chain_id)
+                                })
+                                .map(|chain_id| chain_id.chain())
+                        }
+                        .await
+                        .unwrap_or_else(|| {
+                            warn!(
+                                "Failed to get chain identifier from node, defaulting to Testnet"
+                            );
+                            Chain::Testnet
+                        });
+                        IotaNamesExtendedConfig::from_chain(&chain)
+                    }
+                };
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
