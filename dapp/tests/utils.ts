@@ -130,14 +130,14 @@ export async function purchaseName(name: string, address: string, signer: Signer
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
     console.log(`Purchased name: ${name} with address: ${address}`);
-    const response = await iotaClient.signAndExecuteTransaction({
+    const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return { nft, name, response };
+    return responsePurchase;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
