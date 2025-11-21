@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
@@ -15,6 +15,7 @@ import {
     generateRandomName,
     purchaseName,
     requestFaucetTokens,
+    setAvatar,
 } from '../utils';
 
 test.setTimeout(60_000);
@@ -40,8 +41,8 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
-        const response = await purchaseName(name, keypair);
-        expect(response.effects?.status.status).toBe('success');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
         await expect(
@@ -128,12 +129,23 @@ test.describe.parallel('Name Management Tests', () => {
         await page.close();
     });
 
-    test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
+    test('Unset name avatar', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
 
         const name = generateRandomName('display');
-        const responsePurchase2 = await purchaseName(name, keypair);
-        expect(responsePurchase2.effects?.status.status).toBe('success');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responseSetAvatar = await setAvatar(
+            record.nftId,
+            record.avatar ?? '0x0',
+            isSubname(name),
+            keypair,
+        );
+        expect(responseSetAvatar.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
         await expect(
@@ -151,14 +163,7 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
 
-        // Wait slightly over the React Query staleTime (10s) to ensure a refetch happens
-        await page.waitForTimeout(10_001);
-
-        // Simply pick the first available NFT card in the dialog
-        const targetCard = dialog.locator('[data-testid="avatar-nft-card"]').first();
-        await expect(targetCard).toBeVisible({ timeout: 10_000 });
-        await targetCard.click({ force: true });
-
+        await dialog.getByRole('button', { name: 'Unset' }).click();
         await dialog.getByRole('button', { name: 'Save' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
