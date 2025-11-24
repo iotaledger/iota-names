@@ -223,7 +223,7 @@ test.describe.parallel('Name Management Tests', () => {
 
     test('Set permissions to a subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('perms');
         const subname = generateRandomSubname('subname', name);
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
@@ -284,7 +284,7 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState,
     }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('nosubname');
         const subname = generateRandomSubname('subname', name);
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
