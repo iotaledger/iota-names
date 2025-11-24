@@ -64,6 +64,10 @@ export type RegistrationParams = BaseParams & {
     name: string;
 };
 
+export type RegistrationWithYearsParams = RegistrationParams & {
+    years: number;
+};
+
 export type RenewalParams = BaseParams & {
     name: string;
     nft: TransactionObjectInput;
