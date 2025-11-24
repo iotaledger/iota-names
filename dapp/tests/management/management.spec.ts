@@ -40,7 +40,7 @@ test.describe.parallel('Name Management Tests', () => {
 
     test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('subname');
         const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
@@ -62,7 +62,7 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        const subname = 'sub-' + Math.floor(Math.random() * 1000);
+        const subname = generateRandomSubname('sub', name);
         await dialog.getByPlaceholder('Enter subname').fill(subname);
 
         await dialog.getByRole('button', { name: 'Create' }).click();
