@@ -27,7 +27,6 @@ import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
-import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 import { SearchStylized } from '../search-component/SearchStylized';
 
@@ -46,7 +45,6 @@ const DEBOUNCE_DELAY = 500;
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { data: blockedList = [] } = useBlockedList();
     const { data: reservedList = [] } = useReservedList();
-    const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
@@ -159,13 +157,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     }
 
     function handlePurchase() {
-        setIsRenewDialogOpen(true);
         refetchNameRecord();
-    }
-
-    function handleRenew() {
-        setIsRenewDialogOpen(false);
-        handleCompletedBidOrPurchase();
     }
 
     function handleCompletedBidOrPurchase() {
@@ -271,14 +263,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                 />
                             </>
                         )
-                    )}
-
-                    {isRenewDialogOpen && (
-                        <RenewNameDialog
-                            setOpen={setIsRenewDialogOpen}
-                            name={name}
-                            onRenew={handleRenew}
-                        />
                     )}
                 </div>
             </div>
