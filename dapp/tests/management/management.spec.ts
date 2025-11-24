@@ -166,8 +166,7 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        const subname = generateRandomSubname('sub', name);
-        await dialog.getByPlaceholder('Enter subname').fill(subname);
+        await dialog.getByPlaceholder('Enter subname').fill('subname');
 
         await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
