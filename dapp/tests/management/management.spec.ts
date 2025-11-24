@@ -15,10 +15,12 @@ import {
     createWallet,
     generateRandomName,
     generateRandomSubname,
+    getAddressByIndexPath,
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
 
+test.setTimeout(60_000);
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
@@ -36,6 +38,56 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
+    test('Add subname to a subname', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('addsubname');
+        const subname = generateRandomSubname('subname', name);
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responsePurchaseSubname = await addSubnameName(
+            subname,
+            record.nftId,
+            record.expirationDate,
+            keypair,
+        );
+        expect(responsePurchaseSubname.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(subname, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(subname, 'at') });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Create Subname', { exact: true }).click();
+
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('New Subname')).toBeVisible();
+
+        await dialog.getByPlaceholder('Enter subname').fill('subname');
+
+        await dialog.getByRole('button', { name: 'Create' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
     test('View name info', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
@@ -93,7 +145,7 @@ test.describe.parallel('Name Management Tests', () => {
 
     test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('subname');
         const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
@@ -115,14 +167,52 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        const subname = 'sub-' + Math.floor(Math.random() * 1000);
-        await dialog.getByPlaceholder('Enter subname').fill(subname);
+        await dialog.getByPlaceholder('Enter subname').fill('subname');
 
         await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
         await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
+    test('Connect address', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('connect');
+
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+
+        const mnemonic = sharedState.wallet.mnemonic as string;
+        const externalAddress = getAddressByIndexPath(mnemonic, 1);
+
+        await dialog.getByPlaceholder('Enter Address').fill(externalAddress);
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText('Successfully connected', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
 
