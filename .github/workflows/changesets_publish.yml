@@ -49,25 +49,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check for pending changesets
-        id: check-changes
-        run: |
-          if [ -n "$(ls -A .changeset/*.md 2>/dev/null | grep -v README.md)" ]; then
-            echo "has-changes=true" >> $GITHUB_OUTPUT
-            echo "Found pending changesets:"
-            ls -1 .changeset/*.md 2>/dev/null | grep -v README.md | head -5
-          else
-            echo "has-changes=false" >> $GITHUB_OUTPUT
-            echo "No pending changesets found"
-          fi
-
       - name: Build packages
-        if: steps.check-changes.outputs.has-changes == 'true'
         run: |
           pnpm turbo run build --filter=./sdk
 
-      - name: Create snapshot versions
-        if: steps.check-changes.outputs.has-changes == 'true'
+      - name: Create versions
         run: |
           if [ "${{ github.event.inputs.create_snapshot }}" = "true" ]; then
             pnpm changeset version --snapshot ${{ github.event.inputs.tag }}
@@ -76,7 +62,6 @@ jobs:
           fi
 
       - name: Publish packages
-        if: steps.check-changes.outputs.has-changes == 'true'
         run: |
           if [ "${{ github.event.inputs.create_snapshot }}" = "true" ]; then
             pnpm changeset publish --snapshot --tag ${{ github.event.inputs.tag }}
@@ -85,7 +70,6 @@ jobs:
           fi
 
       - name: Create summary
-        if: steps.check-changes.outputs.has-changes == 'true'
         run: |
           echo "## Snapshot Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** \`${{ github.event.inputs.tag }}\`" >> $GITHUB_STEP_SUMMARY
@@ -106,11 +90,3 @@ jobs:
           else
             echo "Published packages are official releases; install via the published versions." >> $GITHUB_STEP_SUMMARY
           fi
-
-      - name: No changes detected
-        if: steps.check-changes.outputs.has-changes == 'false'
-        run: |
-          echo "## No Pending Changesets" >> $GITHUB_STEP_SUMMARY
-          echo "No pending changesets found. Snapshot release skipped." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "To create a changeset, run \`pnpm changeset\` and select the packages you want to release."
