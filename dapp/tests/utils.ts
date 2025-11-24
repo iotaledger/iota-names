@@ -107,7 +107,8 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(name: string, address: string, signer: Signer) {
+export async function purchaseName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
@@ -138,6 +139,46 @@ export async function purchaseName(name: string, address: string, signer: Signer
         },
     });
     return responsePurchase;
+}
+
+export async function addSubnameName(
+    subname: string,
+    parentNftId: string,
+    expirationDate: Date,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const subnameNft = await iotaNamesTx.createSubname({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        expirationTimestampMs: expirationDate.getTime(),
+        allowChildCreation: true,
+        allowTimeExtension: true,
+    });
+    iotaNamesTx.transaction.transferObjects([subnameNft], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Purchased subname: ${subname} with address: ${address}`);
+    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return responsePurchaseSubname;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
@@ -246,4 +287,9 @@ export async function bidOnExistingAuction({
 export function generateRandomName(name: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${name}${random}.iota`;
+}
+
+export function generateRandomSubname(subname: string, parentName: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${subname}${random}.${parentName}`;
 }
