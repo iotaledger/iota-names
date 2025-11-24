@@ -4,6 +4,7 @@
 use std::str::FromStr;
 
 use iota_names::config::IotaNamesConfig;
+use iota_protocol_config::Chain;
 use iota_types::base_types::{IotaAddress, ObjectID};
 use serde::{Deserialize, Serialize};
 
@@ -62,6 +63,15 @@ impl IotaNamesExtendedConfig {
         ))
     }
 
+    pub fn from_chain(chain: &Chain) -> Self {
+        match chain {
+            // TODO switch to mainnet https://github.com/iotaledger/iota/issues/6532
+            Chain::Mainnet => Self::testnet(),
+            Chain::Testnet => Self::testnet(),
+            Chain::Unknown => Self::devnet(),
+        }
+    }
+
     // TODO add mainnet https://github.com/iotaledger/iota/issues/6532
 
     // Create a config based on the package and object ids published on testnet.
@@ -95,7 +105,6 @@ impl IotaNamesExtendedConfig {
     }
 
     // Create a config based on the package and object ids published on devnet.
-    #[expect(unused)]
     pub fn devnet() -> Self {
         const AUCTION_PACKAGE_ADDRESS: &str =
             "0x79c8714ea294a92da04875c77ccabf8d1a06107e80d41c23d6777d5b1e6724a5";
