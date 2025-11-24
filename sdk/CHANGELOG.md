@@ -1,5 +1,11 @@
 # @iota/iota-names-sdk
 
+## 0.4.0
+
+### Minor Changes
+
+- 2af724d: Proper multi version and network support.
+
 ## 0.3.0
 
 ### Minor Changes
