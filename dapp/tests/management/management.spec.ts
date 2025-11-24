@@ -233,7 +233,6 @@ test.describe.parallel('Name Management Tests', () => {
             subname,
             record.nftId,
             record.expirationDate,
-            sharedState.wallet.address ?? '',
             keypair,
         );
         expect(responsePurchaseSubname.effects?.status.status).toBe('success');
