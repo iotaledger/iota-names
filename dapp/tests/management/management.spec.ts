@@ -23,7 +23,6 @@ import {
 
 test.setTimeout(60_000);
 test.describe.parallel('Name Management Tests', () => {
-    test.setTimeout(60_000);
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
