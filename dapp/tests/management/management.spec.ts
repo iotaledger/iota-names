@@ -37,21 +37,33 @@ test.describe.parallel('Name Management Tests', () => {
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
     });
-
-    test('Create subname', async ({ appPage: page, context, sharedState }) => {
+    test('Add subname to a subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('subname');
-        const response = await purchaseName(name, keypair);
-        expect(response.effects?.status.status).toBe('success');
+        const name = generateRandomName('addsubname');
+        const subname = generateRandomSubname('subname', name);
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responsePurchaseSubname = await addSubnameName(
+            subname,
+            record.nftId,
+            record.expirationDate,
+            keypair,
+        );
+        expect(responsePurchaseSubname.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
         await expect(
-            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(subname, 'at') }),
         ).toBeVisible({ timeout: 10_000 });
 
         const nameCard = page
             .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(name, 'at') });
+            .filter({ hasText: normalizeIotaName(subname, 'at') });
+
         await nameCard.getByTestId('name-card-avatar').hover();
         const menuButtonLocator = nameCard.getByTestId('menu-button');
         await expect(menuButtonLocator).toBeVisible();
@@ -62,8 +74,7 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        const subname = generateRandomSubname('sub', name);
-        await dialog.getByPlaceholder('Enter subname').fill(subname);
+        await dialog.getByPlaceholder('Enter subname').fill('subname');
 
         await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
@@ -75,6 +86,7 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
+
     test('View name info', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
@@ -129,33 +141,20 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
-    test('Add subname to a subname', async ({ appPage: page, context, sharedState }) => {
+    test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('addsubname');
-        const subname = generateRandomSubname('subname', name);
-        const responsePurchase = await purchaseName(name, keypair);
-        expect(responsePurchase.effects?.status.status).toBe('success');
-
-        const record = await iotaNamesClient.getNameRecord(name);
-        if (!record) throw new Error('Name record not found');
-
-        const responsePurchaseSubname = await addSubnameName(
-            subname,
-            record.nftId,
-            record.expirationDate,
-            keypair,
-        );
-        expect(responsePurchaseSubname.effects?.status.status).toBe('success');
+        const name = generateRandomName('subname');
+        const response = await purchaseName(name, keypair);
+        expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
         await expect(
-            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(subname, 'at') }),
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
         ).toBeVisible({ timeout: 10_000 });
 
         const nameCard = page
             .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(subname, 'at') });
-
+            .filter({ hasText: normalizeIotaName(name, 'at') });
         await nameCard.getByTestId('name-card-avatar').hover();
         const menuButtonLocator = nameCard.getByTestId('menu-button');
         await expect(menuButtonLocator).toBeVisible();
@@ -166,7 +165,8 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('New Subname')).toBeVisible();
 
-        await dialog.getByPlaceholder('Enter subname').fill('subname');
+        const subname = generateRandomSubname('sub', name);
+        await dialog.getByPlaceholder('Enter subname').fill(subname);
 
         await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
