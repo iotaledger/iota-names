@@ -14,4 +14,5 @@ export interface AuctionMetadata {
     minBidNanos: bigint;
     nftId: string;
     nftExpiration: Date;
+    isActive: boolean;
 }
