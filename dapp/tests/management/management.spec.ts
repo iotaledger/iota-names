@@ -221,6 +221,39 @@ test.describe.parallel('Name Management Tests', () => {
         await page.close();
     });
 
+    test('Renew name', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('renew');
+
+        const response = await purchaseName(name, keypair);
+        expect(response.effects?.status.status).toBe('success');
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+        await page.getByText('Renew Name', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Renew Name', { exact: true })).toBeVisible();
+
+        await dialog.getByRole('button', { name: 'Renew' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText('Name renewed successfully', { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
     test('Set permissions to a subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('perms');
