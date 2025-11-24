@@ -51,4 +51,13 @@ export const queryKey = {
     // Deny List
     reservedList: () => [...queryKey.all, 'reserved-list'],
     blockedList: () => [...queryKey.all, 'blocked-list'],
+
+    // Features
+    methodSupported: (packageId: string, module: string, method: string) => [
+        ...queryKey.all,
+        'method-supported',
+        packageId,
+        module,
+        method,
+    ],
 };
