@@ -13,6 +13,7 @@ import {
     connectWallet,
     createWallet,
     generateRandomName,
+    getAddressByIndexPath,
     purchaseName,
     requestFaucetTokens,
 } from '../utils';
@@ -38,7 +39,7 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('display');
 
-        const response = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
@@ -90,8 +91,8 @@ test.describe.parallel('Name Management Tests', () => {
     });
     test('Create subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
-        const response = await purchaseName(name, sharedState.wallet.address ?? '', keypair);
+        const name = generateRandomName('addsubname');
+        const response = await purchaseName(name, keypair);
         expect(response.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
@@ -120,6 +121,44 @@ test.describe.parallel('Name Management Tests', () => {
         await page.bringToFront();
 
         await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+    test('Connect address', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('connect');
+
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+
+        const mnemonic = sharedState.wallet.mnemonic as string;
+        const externalAddress = getAddressByIndexPath(mnemonic, 1);
+
+        await dialog.getByPlaceholder('Enter Address').fill(externalAddress);
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText('Successfully connected', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
 
