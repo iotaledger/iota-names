@@ -83,7 +83,13 @@ export function ExtendedNameCard({
 
     return (
         <>
-            <NameCard name={nft.name} badge={badge} menuOptions={menuOptions} isSelected={isActive}>
+            <NameCard
+                name={nft.name}
+                badge={badge}
+                menuOptions={menuOptions}
+                isSelected={isActive}
+                testId="name-card"
+            >
                 <NameCardBody name={label}>
                     <SubnameCountIndicator
                         onSubnameListClick={onSubnameListClick}

@@ -5,7 +5,7 @@
 import { getNetwork, IotaClient, Network } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { NANOS_PER_IOTA, normalizeIotaAddress } from '@iota/iota-sdk/utils';
+import { IOTA_TYPE_ARG, NANOS_PER_IOTA, normalizeIotaAddress } from '@iota/iota-sdk/utils';
 import { expect } from 'vitest';
 
 import { ALLOWED_METADATA, IotaNamesClient, IotaNamesTransaction } from '../src/index.js';
@@ -89,7 +89,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // register random name like mclsl9pbdg8324x154cmclsl9pbdg8324x154c.iota for 2 years.
     const nft = await iotaNamesTx.register({
         name: uniqueName,
-        coinConfig: iotaNamesClient.config.coins.IOTA,
+        coinConfig: { type: IOTA_TYPE_ARG },
         coin: coinInput,
     });
     // Sets the target address of the NFT.
