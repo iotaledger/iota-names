@@ -169,7 +169,7 @@ test.describe.parallel('Name Management Tests', () => {
 
         await expect(page.getByText('Create Subname', { exact: true })).toHaveCount(0);
 
-        //second way
+        // Method 2: Adding via subname counter
         await page.reload();
 
         const reloadedNameCard = page
@@ -184,7 +184,7 @@ test.describe.parallel('Name Management Tests', () => {
         const newSubnameButton = page.getByRole('button', { name: 'New Subname' });
         await expect(newSubnameButton).toBeDisabled();
 
-        // third way
+        // Method 3: Adding via parent subname counter
         await page.reload();
 
         const parentNameCard = page
