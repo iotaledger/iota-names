@@ -191,45 +191,6 @@ export function getAddressByIndexPath(mnemonic: string, index: number) {
     return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
 }
 
-export async function addSubnameName(
-    subname: string,
-    parentNftId: string,
-    expirationDate: Date,
-    address: string,
-    signer: Signer,
-) {
-    const tx = new Transaction();
-    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-    const subnameNft = await iotaNamesTx.createSubname({
-        parentNft: tx.object(parentNftId),
-        name: subname,
-        expirationTimestampMs: expirationDate.getTime(),
-        allowChildCreation: true,
-        allowTimeExtension: true,
-    });
-    iotaNamesTx.transaction.transferObjects([subnameNft], address);
-    iotaNamesTx.transaction.setSender(address);
-    const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
-    });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Purchased subname: ${subname} with address: ${address}`);
-    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
-        transaction: txBytes,
-        signer,
-        options: {
-            showEffects: true,
-        },
-    });
-    return responsePurchaseSubname;
-}
 interface CreateAndSendAuctionTransaction {
     name: string;
     signer: Signer;
