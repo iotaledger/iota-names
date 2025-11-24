@@ -23,15 +23,15 @@ if (!fs.existsSync(filePath)) {
 const json = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 
 const envVars = {
-    IOTA_NAMES_PACKAGE_ADDRESS: json.packageId,
+    IOTA_NAMES_PACKAGE_ADDRESS: json.packageId.v1,
     IOTA_NAMES_OBJECT_ID: json.iotaNamesObjectId,
-    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: json.paymentsPackageId,
+    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: json.paymentsPackageId.v1,
     IOTA_NAMES_REGISTRY_ID: json.registryTableId,
     IOTA_NAMES_REVERSE_REGISTRY_ID: json.reverseRegistryTableId,
-    IOTA_NAMES_AUCTION_PACKAGE_ADDRESS: json.auctionPackageId,
-    IOTA_NAMES_COUPONS_PACKAGE_ADDRESS: json.couponsPackageId,
-    IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS: json.subnamesPackageId,
-    IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS: json.tempSubnameProxyPackageId,
+    IOTA_NAMES_AUCTION_PACKAGE_ADDRESS: json.auctionPackageId.v1,
+    IOTA_NAMES_COUPONS_PACKAGE_ADDRESS: json.couponsPackageId.v1,
+    IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS: json.subnamesPackageId.v1,
+    IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS: json.tempSubnameProxyPackageId.v1,
     IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID: json.auctionHouseObjectId,
 };
 
