@@ -108,8 +108,9 @@ impl Command {
                 let iota_names_config = match IotaNamesExtendedConfig::from_env() {
                     Ok(config) => config,
                     Err(_) => {
-                        // If environment variables are not set, determine config from the connected network
-                        let chain = 
+                        // If environment variables are not set, determine config from the connected
+                        // network
+                        let chain =
                             IotaClientBuilder::default()
                                 .build(&node_url)
                                 .await?
