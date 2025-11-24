@@ -141,6 +141,7 @@ test.describe.parallel('Name Management Tests', () => {
         if (await closeIcon.isVisible().catch(() => false)) {
             await closeIcon.click();
         }
+
         await page.close();
     });
 
