@@ -39,6 +39,7 @@ export function NamePurchaseCard({
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
     return (
         <div
+            data-testid={testId}
             className={clsx(
                 'group relative w-full flex flex-col justify-between rounded-2xl p-[1px] gap-y-sm',
                 isAvailable && 'hover:bg-names-gradient-primary',

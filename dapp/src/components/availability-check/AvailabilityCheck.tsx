@@ -11,7 +11,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { isAuctionActive } from '@/auctions/lib/utils';
 import {
     NameRecordData,
     useBlockedList,
@@ -28,7 +27,6 @@ import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 
 import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
-import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 import { SearchStylized } from '../search-component/SearchStylized';
 
@@ -47,7 +45,6 @@ const DEBOUNCE_DELAY = 500;
 export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
     const { data: blockedList = [] } = useBlockedList();
     const { data: reservedList = [] } = useReservedList();
-    const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
@@ -91,7 +88,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 
     const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
 
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -160,13 +157,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     }
 
     function handlePurchase() {
-        setIsRenewDialogOpen(true);
         refetchNameRecord();
-    }
-
-    function handleRenew() {
-        setIsRenewDialogOpen(false);
-        handleCompletedBidOrPurchase();
     }
 
     function handleCompletedBidOrPurchase() {
@@ -190,7 +181,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             errorMessage={errorMessage}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             leadingIcon={
-                                <p className="text-names-neutral-50 text-headline-sm sm:text-headline-md">
+                                <p className="text-names-neutral-50 text-title-lg xs:text-headline-sm sm:text-headline-md">
                                     @
                                 </p>
                             }
@@ -273,14 +264,6 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                             </>
                         )
                     )}
-
-                    {isRenewDialogOpen && (
-                        <RenewNameDialog
-                            setOpen={setIsRenewDialogOpen}
-                            name={name}
-                            onRenew={handleRenew}
-                        />
-                    )}
                 </div>
             </div>
         </div>
@@ -300,7 +283,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isAllowedToBid =
         (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
 
@@ -328,6 +311,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                 price={formattedBidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
+                testId="auction-card"
             >
                 {isConnected ? (
                     <Button
@@ -366,7 +350,6 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
     }
 
     const isAvailable = nameRecordData?.type === 'available';
-    const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
         onPurchase();
@@ -382,25 +365,25 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
 
     return (
         <>
-            <NamePurchaseCard
-                name={name}
-                isAvailable={isAvailable}
-                price={formattedPurchasePrice}
-                priceSupportingText={isAvailable ? 'Price' : undefined}
-                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
-                testId="purchase-name-card"
-            >
-                {isUnavailable ? null : isConnected ? (
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Buy"
-                        onClick={() => setPurchaseDialogOpen(true)}
-                    />
-                ) : (
-                    <ConnectButton />
-                )}
-            </NamePurchaseCard>
-
+            {isAvailable && (
+                <NamePurchaseCard
+                    name={name}
+                    isAvailable={true}
+                    price={formattedPurchasePrice}
+                    priceSupportingText="Price"
+                    testId="purchase-name-card"
+                >
+                    {isConnected ? (
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setPurchaseDialogOpen(true)}
+                        />
+                    ) : (
+                        <ConnectButton />
+                    )}
+                </NamePurchaseCard>
+            )}
             {isPurchaseDialogOpen && (
                 <PurchaseNameDialog
                     name={name}
