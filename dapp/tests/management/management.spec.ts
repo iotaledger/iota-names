@@ -149,11 +149,6 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Renew Name', { exact: true })).toBeVisible();
 
-        const yearSelect = dialog.getByRole('combobox');
-        if (await yearSelect.isVisible().catch(() => false)) {
-            await expect(yearSelect).toBeVisible();
-        }
-
         await dialog.getByRole('button', { name: 'Renew' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
