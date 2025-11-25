@@ -14,7 +14,7 @@ import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 export const configuration: SKCMConfiguration = {
     disclaimer: {
         title: undefined,
-        body: 'By using the IOTA site, you agree with our use of cookies. ',
+        body: 'By using this website, you agree with our use of cookies. See details in the ',
         policyText: 'Privacy Policy',
         acceptButtonText: 'Close',
         onPolicyClick: () => {
