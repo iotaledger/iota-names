@@ -487,9 +487,10 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
+
     test('Can not renew a subname due permissions', async ({ appPage: page, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('norenew');
         const subname = generateRandomSubname('subname', name);
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
