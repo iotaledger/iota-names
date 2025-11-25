@@ -226,6 +226,33 @@ export async function connectName(name: string, nft: string, signer: Signer) {
     return responseConnect;
 }
 
+export async function renewName(name: string, parentNftId: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    await iotaNamesTx.renew({
+        nft: parentNftId,
+        name: name,
+        years: 1,
+        coin: tx.gas,
+        address: address,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseRenew = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Renewed name: ${name} with address: ${address}`);
+    return responseRenew;
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
