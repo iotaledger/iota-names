@@ -263,7 +263,6 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
         client: iotaClient,
     });
 
-    console.log(`Renewed name: ${name} with address: ${address}`);
     const responseRenew = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -271,6 +270,7 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
             showEffects: true,
         },
     });
+    console.log(`Renewed name: ${name} with address: ${address}`);
     return responseRenew;
 }
 
