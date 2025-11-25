@@ -7,6 +7,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
+import { execFileSync } from 'child_process';
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
@@ -132,6 +133,125 @@ export async function purchaseName(name: string, signer: Signer) {
 
     console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
+}
+
+export async function addSubnameName(
+    subname: string,
+    parentNftId: string,
+    expirationDate: Date,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const subnameNft = await iotaNamesTx.createSubname({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        expirationTimestampMs: expirationDate.getTime(),
+        allowChildCreation: true,
+        allowTimeExtension: true,
+    });
+    iotaNamesTx.transaction.transferObjects([subnameNft], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(`Purchased subname: ${subname} with address: ${address}`);
+    return responsePurchaseSubname;
+}
+
+export async function editSetup(
+    subname: string,
+    parentNftId: string,
+    allowChildCreation: boolean,
+    allowTimeExtension: boolean,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.editSetup({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        allowChildCreation,
+        allowTimeExtension,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responseEditSetup = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(
+        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
+    );
+    return responseEditSetup;
+}
+
+export async function connectName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responseConnect = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(`Connected name: ${name} to address: ${address}`);
+    return responseConnect;
+}
+
+export async function renewName(name: string, parentNftId: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    await iotaNamesTx.renew({
+        nft: parentNftId,
+        name: name,
+        years: 1,
+        coin: tx.gas,
+        address: address,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseRenew = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Renewed name: ${name} with address: ${address}`);
+    return responseRenew;
 }
 
 export async function publishMovePackage(packagePath: string) {
