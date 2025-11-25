@@ -44,6 +44,18 @@ const nextConfig = withMDX({
                 destination: '/tos',
                 permanent: true,
             },
+            {
+                source: '/((?!privacy$).*)', // Dont redirect if the path is already /privacy
+                has: [
+                    {
+                        type: 'query',
+                        key: 'modal',
+                        value: 'privacy_policy',
+                    },
+                ],
+                destination: '/privacy',
+                permanent: true,
+            },
         ];
     },
 });
