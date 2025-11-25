@@ -122,15 +122,6 @@ export async function purchaseName(name: string, signer: Signer) {
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Purchased name: ${name} with address: ${address}`);
     const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -138,6 +129,8 @@ export async function purchaseName(name: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
 }
 
@@ -162,15 +155,6 @@ export async function addSubnameName(
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Purchased subname: ${subname} with address: ${address}`);
     const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -178,6 +162,8 @@ export async function addSubnameName(
             showEffects: true,
         },
     });
+
+    console.log(`Purchased subname: ${subname} with address: ${address}`);
     return responsePurchaseSubname;
 }
 
@@ -201,17 +187,6 @@ export async function editSetup(
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(
-        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
-    );
     const responseEditSetup = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -219,6 +194,10 @@ export async function editSetup(
             showEffects: true,
         },
     });
+
+    console.log(
+        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
+    );
     return responseEditSetup;
 }
 
@@ -235,8 +214,6 @@ export async function connectName(name: string, nft: string, signer: Signer) {
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    console.log(`Connected name: ${name} to address: ${address}`);
     const responseConnect = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -244,6 +221,8 @@ export async function connectName(name: string, nft: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    console.log(`Connected name: ${name} to address: ${address}`);
     return responseConnect;
 }
 
@@ -278,14 +257,6 @@ export async function createAndSendAuctionTransaction({
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
@@ -324,14 +295,6 @@ export async function bidOnExistingAuction({
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
