@@ -21,17 +21,6 @@ import { iotaClient, iotaNamesClient } from './setup/utils';
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
 
-    const termsLabel = page.getByText(
-        'I have read, understand, and agree to the Terms of Service',
-        { exact: true },
-    );
-    const acceptButton = page.getByRole('button', { name: /^Accept$/i });
-
-    await termsLabel.scrollIntoViewIfNeeded();
-    await termsLabel.click();
-    await expect(acceptButton).toBeEnabled({ timeout: 5_000 });
-    await acceptButton.click();
-
     const pagePromise = context.waitForEvent('page', { timeout: 20_000 });
     const walletButton = page.getByText(new RegExp(extensionName, 'i'));
 
