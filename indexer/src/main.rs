@@ -59,8 +59,8 @@ enum Command {
         api_port: u16,
         /// The URL of Prometheus to restore metrics from on startup.
         #[arg(long, default_value = "http://localhost:9090")]
-        /// Resets metrics in case of a Prometheus error.
         prometheus_url: String,
+        /// Resets metrics in case of a Prometheus error.
         #[arg(long, default_value_t = false)]
         reset_metrics_on_error: bool,
     },
