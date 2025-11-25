@@ -65,8 +65,12 @@ function setNetworkGroup(network: string): void {
  * This will enable future event tracking.
  */
 export async function onAmplitudeConsentAccepted() {
+    setCookies();
+    return initAmplitude();
+}
+
+export function setCookies() {
     document.cookie = `${AMP_COOKIES_KEY}=true; max-age=31536000; path=/; SameSite=Strict`;
-    await initAmplitude();
 }
 
 /**

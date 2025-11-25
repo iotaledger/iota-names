@@ -31,8 +31,9 @@ export function AppProviders({ children }: React.PropsWithChildren) {
 
     useEffect(() => {
         const amplitudeConsentStatus = getAmplitudeConsentStatus();
-        if (amplitudeConsentStatus !== 'accepted') return;
-        initAmplitude();
+        if (amplitudeConsentStatus !== 'declined') {
+            initAmplitude();
+        }
     }, []);
 
     function handleNetworkChange() {

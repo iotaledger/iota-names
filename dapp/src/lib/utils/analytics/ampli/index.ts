@@ -249,9 +249,10 @@ export class Ampli {
 
   private isInitializedAndEnabled(): boolean {
     
+    console.log('getAmplitudeConsentStatus()', getAmplitudeConsentStatus());
     // NOTE don't show error if consent is not given yet.
     // Don't remove this check after `ampli pull web`
-    if (getAmplitudeConsentStatus() !== 'accepted') return;
+    if (getAmplitudeConsentStatus() === 'declined') return;
 
     if (!this.amplitude) {
       console.error('ERROR: Ampli is not yet initialized. Have you called ampli.load() on app start?');

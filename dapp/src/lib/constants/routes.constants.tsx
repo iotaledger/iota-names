@@ -50,6 +50,6 @@ export const FOOTER_LEGAL_LINKS: Route[] = [
     },
     {
         title: 'Privacy Policy',
-        path: '?modal=privacy_policy',
+        path: '/privacy-policy',
     },
 ];

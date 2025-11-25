@@ -11,45 +11,40 @@ import {
 } from '@/lib/utils/analytics/amplitude';
 import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
-import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
+export const configuration: SKCMConfiguration = {
+    disclaimer: {
+        title: undefined,
+        body: 'By using the IOTA site, you agree with our use of cookies. ',
+        policyText: 'Privacy Policy',
+        acceptButtonText: 'Close',
+        onPolicyClick: () => {
+            window.location.href = '/privacy-policy';
+        },
+    },
+    services: {
+        customNecessaryCookies: [
+            {
+                name: AMP_COOKIES_KEY,
+                purpose:
+                    'Flag indicating that Amplitude analytics cookies may be created after consent',
+                expiry: '1 year',
+                type: 'http',
+                showDisclaimerIfMissing: true,
+            },
+        ],
+    },
+    onAcceptCookies: () => {
+        onAmplitudeConsentAccepted();
+    },
+    onDeclineCookies: () => {
+        onAmplitudeConsentDeclined();
+    },
+};
 
 export function CookieDisclaimer() {
-    const configuration: SKCMConfiguration = {
-        disclaimer: {
-            title: undefined,
-            body: 'We use cookies and analytics tools to help us improve your experience. Please accept analytics cookies to allow us to collect anonymous usage statistics. You can learn more in our ',
-            policyText: 'Privacy Policy',
-            onPolicyClick: () => {
-                const current = new URL(window.location.href);
-                current.searchParams.set('modal', 'privacy_policy');
-                window.history.replaceState({}, '', current.toString());
-                window.dispatchEvent(new PopStateEvent('popstate'));
-            },
-        },
-        services: {
-            customNecessaryCookies: [
-                {
-                    name: AMP_COOKIES_KEY,
-                    purpose:
-                        'Flag indicating that Amplitude analytics cookies may be created after consent',
-                    expiry: '1 year',
-                    type: 'http',
-                    showDisclaimerIfMissing: true,
-                },
-            ],
-        },
-        onAcceptCookies: () => {
-            onAmplitudeConsentAccepted();
-        },
-        onDeclineCookies: () => {
-            onAmplitudeConsentDeclined();
-        },
-    };
-
     return (
         <>
             <CookieManager configuration={configuration} />
-            <PrivacyPolicyDialog configuration={configuration} />
         </>
     );
 }

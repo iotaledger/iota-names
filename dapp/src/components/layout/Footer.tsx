@@ -14,7 +14,7 @@ export function Footer() {
     const handleLegalClick = (e: React.MouseEvent, path: string) => {
         const url = new URL(path, window.location.href);
         const modal = url.searchParams.get('modal');
-        if (modal === 'terms_conditions' || modal === 'privacy_policy') {
+        if (modal === 'terms_conditions') {
             e.preventDefault();
             router.replace(path, { scroll: false });
         }
@@ -37,7 +37,11 @@ export function Footer() {
                             <Link
                                 key={title}
                                 href={path}
-                                onClick={(e) => handleLegalClick(e, path)}
+                                onClick={(e) => {
+                                    if (path.startsWith('?modal')) {
+                                        handleLegalClick(e, path);
+                                    }
+                                }}
                                 className="hover:text-names-primary-80 transition-colors duration-200"
                             >
                                 {title}
