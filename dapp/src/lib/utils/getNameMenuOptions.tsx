@@ -60,7 +60,12 @@ export function getNameMenuOptions(
         },
         {
             onClick: () => onOpen(NameDialogId.RenewName),
-            children: <DropdownMenuOption icon={<Calendar />} label="Renew Name" />,
+            children: (
+                <DropdownMenuOption
+                    icon={<Calendar />}
+                    label={isNameSubname ? 'Renew Subname' : 'Renew Name'}
+                />
+            ),
             isHidden:
                 !isPaymentAuthorized ||
                 !namePermissions.allowTimeExtension ||

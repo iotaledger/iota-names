@@ -141,13 +141,61 @@ export async function purchaseName(name: string, signer: Signer) {
     return responsePurchase;
 }
 
-export async function connectName(name: string, address: string, nft: string, signer: Signer) {
+export async function addSubnameName(
+    subname: string,
+    parentNftId: string,
+    expirationDate: Date,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-    iotaNamesTx.setTargetAddress({
-        nft,
-        address,
-        isSubname: false,
+    const subnameNft = await iotaNamesTx.createSubname({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        expirationTimestampMs: expirationDate.getTime(),
+        allowChildCreation: true,
+        allowTimeExtension: true,
+    });
+    iotaNamesTx.transaction.transferObjects([subnameNft], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Purchased subname: ${subname} with address: ${address}`);
+    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return responsePurchaseSubname;
+}
+
+export async function editSetup(
+    subname: string,
+    parentNftId: string,
+    allowChildCreation: boolean,
+    allowTimeExtension: boolean,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.editSetup({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        allowChildCreation,
+        allowTimeExtension,
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
@@ -161,15 +209,17 @@ export async function connectName(name: string, address: string, nft: string, si
     if (txDryRun.effects.status.status !== 'success') {
         throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
     }
-    console.log(`Purchased name: ${name} with address: ${address}`);
-    const responseConnect = await iotaClient.signAndExecuteTransaction({
+    console.log(
+        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
+    );
+    const responseEditSetup = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return responseConnect;
+    return responseEditSetup;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
@@ -278,4 +328,9 @@ export async function bidOnExistingAuction({
 export function generateRandomName(name: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${name}${random}.iota`;
+}
+
+export function generateRandomSubname(subname: string, parentName: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${subname}${random}.${parentName}`;
 }
