@@ -11,6 +11,8 @@ import {
 } from '@/lib/utils/analytics/amplitude';
 import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
+import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
+
 export const configuration: SKCMConfiguration = {
     disclaimer: {
         title: undefined,
@@ -18,7 +20,10 @@ export const configuration: SKCMConfiguration = {
         policyText: 'Privacy Policy',
         acceptButtonText: 'Close',
         onPolicyClick: () => {
-            window.location.href = '/privacy-policy';
+            const current = new URL(window.location.href);
+            current.searchParams.set('modal', 'privacy_policy');
+            window.history.replaceState({}, '', current.toString());
+            window.dispatchEvent(new PopStateEvent('popstate'));
         },
     },
     services: {
@@ -45,6 +50,7 @@ export function CookieDisclaimer() {
     return (
         <>
             <CookieManager configuration={configuration} />
+            <PrivacyPolicyDialog configuration={configuration} />
         </>
     );
 }
