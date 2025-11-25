@@ -437,6 +437,7 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
+
     test('Renew subname', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('renewsub');
@@ -472,9 +473,9 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
 
-        await page.getByText('Renew Name', { exact: true }).click();
+        await page.getByText('Renew Subname', { exact: true }).click();
         const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('Renew Name', { exact: true })).toBeVisible();
+        await expect(dialog.getByText('Renew Subname', { exact: true })).toBeVisible();
 
         await dialog.getByRole('button', { name: 'Renew' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
