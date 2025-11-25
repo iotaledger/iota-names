@@ -22,6 +22,7 @@ import {
     renewName,
     requestFaucetTokens,
 } from '../utils';
+
 test.setTimeout(60_000);
 test.describe.parallel('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -547,5 +548,4 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
         await page.close();
     });
-
 });
