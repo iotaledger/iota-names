@@ -30,6 +30,22 @@ const nextConfig = withMDX({
             resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
         },
     },
+    async redirects() {
+        return [
+            {
+                source: '/((?!tos$).*)', // Dont redirect if the path is already /tos
+                has: [
+                    {
+                        type: 'query',
+                        key: 'modal',
+                        value: 'terms_conditions',
+                    },
+                ],
+                destination: '/tos',
+                permanent: true,
+            },
+        ];
+    },
 });
 
 export default nextConfig;
