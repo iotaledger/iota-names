@@ -24,7 +24,7 @@ import {
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -32,8 +32,7 @@ import { useIotaNamesClient } from '@/contexts';
 import {
     NameRecordData,
     queryKey,
-    useCalculatePriceInFiat,
-    useCalculateRenewalPrice,
+    //useCalculatePriceInFiat,
     useNameRecord,
 } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
@@ -101,9 +100,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
 
-    const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
-    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
-    const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
+    // const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
     const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
@@ -193,10 +190,40 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             : 0;
 
     const isRenewable = (renewableYears ?? 0) > 0;
-    const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
-        id: String(i + 1),
-        label: `${i + 1} Year${i ? 's' : ''}`,
-    }));
+    const renewYearsArray = Array.from({ length: renewableYears }, (_, i) => i + 1);
+
+    const renewalPricesQueries = useQueries({
+        queries: renewYearsArray.map((year) => ({
+            queryKey: [...queryKey.renewalPrice(name, year)],
+            queryFn: async () => {
+                return await iotaNamesClient.calculatePrice({
+                    name,
+                    years: year,
+                    isRegistration: false,
+                });
+            },
+            enabled: !!iotaNamesClient && !!name && renewableYears > 0,
+        })),
+    });
+
+    const renewOptions: SelectOption[] = renewYearsArray.map((year, idx) => {
+        const labelYears = `${year} Year${year > 1 ? 's' : ''}`;
+        const priceNanos = renewalPricesQueries[idx]?.data;
+        const priceIota = priceNanos ? formatNanosToIota(priceNanos) : null;
+        return {
+            id: String(year),
+            renderLabel: () => (
+                <div className="flex w-full items-center justify-between">
+                    <span className="text-body-lg">{labelYears}</span>
+                    {priceIota && (
+                        <span className="rounded-md bg-names-neutral-20 px-sm py-xs text-label-md text-names-neutral-100">
+                            {priceIota}
+                        </span>
+                    )}
+                </div>
+            ),
+        };
+    });
 
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
@@ -263,23 +290,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     <Select
                                         options={renewOptions}
                                         value={renewYears?.toString()}
-                                        supportingText=""
                                         onValueChange={handleYearsChange}
                                         disabled={disableEdit}
                                     />
-                                    {renewalPriceIota ? (
-                                        <span
-                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
-                                            aria-hidden
-                                        >
-                                            <span>{renewalPriceIota}</span>
-                                            {fiatPriceResult ? (
-                                                <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                    (${fiatPriceResult} USD)
-                                                </span>
-                                            ) : null}
-                                        </span>
-                                    ) : null}
                                 </div>
                             )}
                             {renewOptions.length === 0 && !isLoadingData && (
