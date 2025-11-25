@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { resolve } from 'path';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
@@ -24,7 +25,6 @@ import {
     renewName,
     requestFaucetTokens,
 } from '../utils';
-import { resolve } from 'dns';
 
 test.setTimeout(60_000);
 test.describe.parallel('Name Management Tests', () => {
@@ -552,6 +552,7 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
         await page.close();
     });
+
     test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
 

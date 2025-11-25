@@ -122,15 +122,6 @@ export async function purchaseName(name: string, signer: Signer) {
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Purchased name: ${name} with address: ${address}`);
     const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -138,6 +129,8 @@ export async function purchaseName(name: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
 }
 
@@ -227,14 +220,6 @@ export async function createAndSendAuctionTransaction({
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
@@ -273,14 +258,6 @@ export async function bidOnExistingAuction({
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
@@ -302,4 +279,9 @@ export async function bidOnExistingAuction({
 export function generateRandomName(name: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${name}${random}.iota`;
+}
+
+export function generateRandomSubname(subname: string, parentName: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${subname}${random}.${parentName}`;
 }

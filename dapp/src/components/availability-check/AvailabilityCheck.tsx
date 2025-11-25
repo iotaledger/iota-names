@@ -82,11 +82,13 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     );
 
     const errorMessageRaw = auctionError?.message || nameError?.message || priceError?.message;
-    const errorMessage = errorMessageRaw
-        ? getUserFriendlyErrorMessage(errorMessageRaw)
-        : validationError || '';
+    const errorMessage =
+        validationError || (errorMessageRaw ? getUserFriendlyErrorMessage(errorMessageRaw) : '');
 
-    const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
+    const isLoading =
+        !validationError &&
+        debouncedSearchValue &&
+        (isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst);
 
     const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
