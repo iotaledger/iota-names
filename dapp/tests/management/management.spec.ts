@@ -11,6 +11,7 @@ import { expect, test } from '../helpers/fixtures';
 import { iotaNamesClient } from '../setup/utils';
 import {
     addSubnameName,
+    connectName,
     connectWallet,
     createWallet,
     editSetup,
@@ -194,6 +195,7 @@ test.describe.parallel('Name Management Tests', () => {
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
         ).toBeVisible({ timeout: 10_000 });
 
+        await page.goto('/my-names');
         const nameCard = page
             .getByTestId('name-card')
             .filter({ hasText: normalizeIotaName(name, 'at') });
@@ -389,6 +391,48 @@ test.describe.parallel('Name Management Tests', () => {
         await subnameMenuButton.click();
 
         await expect(page.getByText('Create Subname', { exact: true })).toHaveCount(0);
+
+        await page.close();
+    });
+
+    test('Disconnect address', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('disconnect');
+
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const response = await connectName(name, record.nftId, keypair);
+        expect(response.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+
+        await dialog.getByPlaceholder('Enter Address').fill('');
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(page.getByText(`Successfully disconnected`, { exact: false })).toBeVisible({
+            timeout: 30_000,
+        });
 
         await page.close();
     });
