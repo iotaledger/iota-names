@@ -222,6 +222,38 @@ export async function editSetup(
     return responseEditSetup;
 }
 
+export async function connectName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const txDryRun = await iotaClient.dryRunTransactionBlock({
+        transactionBlock: txBytes,
+    });
+
+    if (txDryRun.effects.status.status !== 'success') {
+        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
+    }
+    console.log(`Connected name: ${name} to address: ${address}`);
+    const responseConnect = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    return responseConnect;
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
