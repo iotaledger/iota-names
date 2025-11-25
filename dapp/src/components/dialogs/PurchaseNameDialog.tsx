@@ -268,10 +268,10 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
     const expirationDate = getTargetExpirationDate(purchaseYears);
 
     const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
-    const renewYearsArray = Array.from({ length: purchaseableYears }, (_, i) => i + 1);
+    const purchaseYearsArray = Array.from({ length: purchaseableYears }, (_, i) => i + 1);
 
-    const renewalPricesQueries = useQueries({
-        queries: renewYearsArray.map((year) => ({
+    const purchasePricesQueries = useQueries({
+        queries: purchaseYearsArray.map((year) => ({
             queryKey: [...queryKey.renewalPrice(name, year)],
             queryFn: async () => {
                 return await iotaNamesClient.calculatePrice({
@@ -284,9 +284,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
         })),
     });
 
-    const purchaseOptions: SelectOption[] = renewYearsArray.map((year, idx) => {
+    const purchaseOptions: SelectOption[] = purchaseYearsArray.map((year, idx) => {
         const labelYears = `${year} Year${year > 1 ? 's' : ''}`;
-        const priceNanos = renewalPricesQueries[idx]?.data;
+        const priceNanos = purchasePricesQueries[idx]?.data;
         const priceIota = priceNanos ? formatNanosToIota(priceNanos) : null;
         return {
             id: String(year),
