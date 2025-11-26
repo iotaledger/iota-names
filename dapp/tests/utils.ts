@@ -283,10 +283,6 @@ export async function mintNft(
         arguments: [tx.pure.string(name), tx.pure.string(description), tx.pure.string(imageUrl)],
     });
     const built = await tx.build({ client: iotaClient });
-    const dryRun = await iotaClient.dryRunTransactionBlock({ transactionBlock: built });
-    if (dryRun.effects.status.status !== 'success') {
-        throw new Error(dryRun.effects.status.error || 'Mint dry run failed');
-    }
     const resultMint = await iotaClient.signAndExecuteTransaction({
         transaction: built,
         signer,

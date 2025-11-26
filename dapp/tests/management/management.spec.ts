@@ -584,6 +584,8 @@ test.describe.parallel('Name Management Tests', () => {
         const menuButtonLocator = nameCard.getByTestId('menu-button');
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
+
+        // Wait slightly over the query staleTime (10s) to ensure a refetch happens
         await page.waitForTimeout(11_000);
         await page.getByText('Personalize Avatar', { exact: true }).click();
         const dialog = page.getByRole('dialog');
