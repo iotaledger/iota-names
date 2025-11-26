@@ -1,16 +1,17 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+import { getNetwork } from '@iota/iota-sdk/client';
+import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
+import { execFileSync } from 'child_process';
 import { IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { getNetwork } from '@iota/iota-sdk/client';
 import type { Signer } from '@iota/iota-sdk/cryptography';
-import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
-import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
-import type { BrowserContext, Page } from '@playwright/test';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -240,6 +241,57 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
     });
     console.log(`Renewed name: ${name} with address: ${address}`);
     return responseRenew;
+}
+
+export async function publishMovePackage(packagePath: string) {
+    const cliOutput = execFileSync('iota', ['client', 'publish', packagePath], {
+        encoding: 'utf-8',
+    });
+    const pkgMatch = cliOutput.match(/PackageID:\s*(0x[0-9a-fA-F]+)/);
+    const digestMatch = cliOutput.match(/Transaction Digest:\s*([A-Za-z0-9]+)/);
+    if (!pkgMatch) throw new Error('Failed to parse packageId from CLI output');
+    const packageId = pkgMatch[1];
+    const digest = digestMatch ? digestMatch[1] : 'UNKNOWN';
+    console.log('[publishMovePackage] CLI publish packageId:', packageId);
+
+    if (/DisplayCreated<.*::mint_nft::Nft>/.test(cliOutput)) {
+        console.log('[publishMovePackage] Display object detected (CLI)');
+    } else {
+        console.log('[publishMovePackage] No Display object detected in CLI output');
+    }
+    return { packageId, digest, result: { cliOutput } as unknown };
+}
+
+export async function mintNft(
+    packageId: string,
+    signer: Signer,
+    {
+        name = 'Test NFT',
+        description = 'E2E Minted NFT',
+        imageUrl = 'https://example.com/image.png',
+    }: {
+        name?: string;
+        description?: string;
+        imageUrl?: string;
+    } = {},
+) {
+    const tx = new Transaction();
+    const sender = signer.toIotaAddress();
+    tx.setSender(sender);
+    tx.moveCall({
+        target: `${packageId}::mint_nft::mint`,
+        arguments: [tx.pure.string(name), tx.pure.string(description), tx.pure.string(imageUrl)],
+    });
+    const built = await tx.build({ client: iotaClient });
+    const resultMint = await iotaClient.signAndExecuteTransaction({
+        transaction: built,
+        signer,
+        options: { showEffects: true, showObjectChanges: true },
+    });
+    if (resultMint.effects?.status.status !== 'success') {
+        throw new Error(resultMint.effects?.status.error || 'Mint execution failed');
+    }
+    return resultMint;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
