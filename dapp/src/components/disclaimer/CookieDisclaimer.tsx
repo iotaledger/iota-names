@@ -6,7 +6,6 @@
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
 import { Close } from '@iota/apps-ui-icons';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 import { FOOTER_LEGAL_LINKS } from '@/lib/constants';
@@ -23,7 +22,6 @@ export function CookieDisclaimer() {
     const [amplitudeConsentStatus, setAmplitudeConsentStatus] = useState<
         'pending' | 'accepted' | 'declined' | null
     >(null);
-    const router = useRouter();
 
     useEffect(() => {
         setAmplitudeConsentStatus(getAmplitudeConsentStatus());
@@ -57,14 +55,6 @@ export function CookieDisclaimer() {
         },
     };
 
-    const handleLegalClick = (e: React.MouseEvent, path: string) => {
-        const url = new URL(path, window.location.href);
-        const modal = url.searchParams.get('modal');
-        if (modal === 'terms_conditions' || modal === 'privacy_policy') {
-            e.preventDefault();
-            router.replace(path, { scroll: false });
-        }
-    };
     return (
         <>
             <div className="hidden">
@@ -79,11 +69,6 @@ export function CookieDisclaimer() {
                                 <React.Fragment key={title}>
                                     <Link
                                         href={path}
-                                        onClick={(e) => {
-                                            if (path.startsWith('?modal')) {
-                                                handleLegalClick(e, path);
-                                            }
-                                        }}
                                         className="hover:text-names-primary-80 transition-colors duration-200"
                                     >
                                         {title}
