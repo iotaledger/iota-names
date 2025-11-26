@@ -82,6 +82,8 @@ export interface ConnectedAddressProperties {
 }
 
 export interface CreatedSubnameProperties {
+    allowToCreateAdditionalSubnames: boolean;
+    allowToRenewExpiration: boolean;
     name: string;
     /**
      * | Rule | Value |
@@ -377,7 +379,7 @@ export class Ampli {
    *
    * Event has no description in tracking plan.
    *
-   * @param properties The event's properties (e.g. name)
+   * @param properties The event's properties (e.g. allowToCreateAdditionalSubnames)
    * @param options Amplitude event options.
    */
   createdSubname(
