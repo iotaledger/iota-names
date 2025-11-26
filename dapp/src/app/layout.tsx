@@ -4,6 +4,8 @@
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
+import * as Sentry from '@sentry/nextjs';
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ConnectionGuard } from '@/components';
@@ -14,7 +16,14 @@ import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
 
-export const metadata = DEFAULT_METADATA;
+export function generateMetadata(): Metadata {
+    return {
+        ...DEFAULT_METADATA,
+        other: {
+            ...Sentry.getTraceData(),
+        },
+    };
+}
 
 export default function RootLayout({
     children,
