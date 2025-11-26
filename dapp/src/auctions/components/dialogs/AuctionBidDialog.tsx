@@ -253,6 +253,26 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             />
                         </div>
                         <div className="flex w-full flex-col gap-y-md">
+                            <hr className="w-full border-0 border-t border-names-neutral-60 opacity-30" />
+                            <InfoBox
+                                type={InfoBoxType.Default}
+                                style={InfoBoxStyle.Default}
+                                supportingText={
+                                    <div className="flex flex-col gap-y-xs text-body-lg text-names-neutral-60">
+                                        <p>
+                                            <strong>If outbid</strong>, your IOTA is refunded.
+                                        </p>
+                                        <p>
+                                            <strong>Auctions last</strong> ≥48 hours and end when no
+                                            bids arrive in the last 10 minutes.
+                                        </p>
+                                        <p>
+                                            <strong>If you win</strong>, manually claim your name;
+                                            the 1-year subscription starts at auction end.
+                                        </p>
+                                    </div>
+                                }
+                            />
                             {auctionMetadata && (
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                             )}
