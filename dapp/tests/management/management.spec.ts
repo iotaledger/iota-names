@@ -584,11 +584,11 @@ test.describe.parallel('Name Management Tests', () => {
         const menuButtonLocator = nameCard.getByTestId('menu-button');
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
+        await page.waitForTimeout(11_000);
         await page.getByText('Personalize Avatar', { exact: true }).click();
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
 
-        await page.waitForTimeout(11_000);
         const mintedImg = dialog.getByRole('img', { name: 'e2e test Avatar' });
         await mintedImg.waitFor({ state: 'visible', timeout: 30_000 });
         const mintedCard = mintedImg.locator(
