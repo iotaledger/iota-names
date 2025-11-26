@@ -80,6 +80,7 @@ export function setCookies() {
 export function onAmplitudeConsentDeclined() {
     cleanAmplitudeCookies();
     document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
+    ampli.client.setOptOut(true);
 }
 
 export function cleanAmplitudeCookies() {

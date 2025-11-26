@@ -251,7 +251,6 @@ export class Ampli {
 
   private isInitializedAndEnabled(): boolean {
     
-    console.log('getAmplitudeConsentStatus()', getAmplitudeConsentStatus());
     // NOTE don't show error if consent is not given yet.
     // Don't remove this check after `ampli pull web`
     if (getAmplitudeConsentStatus() === 'declined') return;
