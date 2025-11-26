@@ -33,6 +33,34 @@ const nextConfig = withMDX({
             resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
         },
     },
+    async redirects() {
+        return [
+            {
+                source: '/((?!terms-of-service$).*)', // Dont redirect if the path is already /terms-of-service
+                has: [
+                    {
+                        type: 'query',
+                        key: 'modal',
+                        value: 'terms_conditions',
+                    },
+                ],
+                destination: '/terms-of-service',
+                permanent: true,
+            },
+            {
+                source: '/((?!privacy-policy$).*)', // Dont redirect if the path is already /privacy-policy
+                has: [
+                    {
+                        type: 'query',
+                        key: 'modal',
+                        value: 'privacy_policy',
+                    },
+                ],
+                destination: '/privacy-policy',
+                permanent: true,
+            },
+        ];
+    },
 });
 
 export default withSentryConfig(nextConfig, {
