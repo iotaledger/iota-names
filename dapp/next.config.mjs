@@ -33,7 +33,7 @@ const nextConfig = withMDX({
     async redirects() {
         return [
             {
-                source: '/((?!tos$).*)', // Dont redirect if the path is already /terms-of-service
+                source: '/((?!terms-of-service$).*)', // Dont redirect if the path is already /terms-of-service
                 has: [
                     {
                         type: 'query',
@@ -45,7 +45,7 @@ const nextConfig = withMDX({
                 permanent: true,
             },
             {
-                source: '/((?!privacy$).*)', // Dont redirect if the path is already /privacy-policy
+                source: '/((?!privacy-policy$).*)', // Dont redirect if the path is already /privacy-policy
                 has: [
                     {
                         type: 'query',
