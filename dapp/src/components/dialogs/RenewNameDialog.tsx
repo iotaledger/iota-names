@@ -20,7 +20,6 @@ import {
     Panel,
     Select,
     SelectOption,
-    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -99,7 +98,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
     const [renewYears, setRenewYears] = useState<number | undefined>();
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-    const [applyCoupons, setApplyCoupons] = useState(false);
 
     const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
     const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
@@ -109,7 +107,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         renewYears,
-        applyCoupons,
+        applyCoupons: coupons.length > 0 ? true : false,
         coupons: couponCodes,
         address: account?.address,
     });
@@ -292,19 +290,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                 />
                             )}
                             <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
-                                </div>
-                                {applyCoupons && (
-                                    <CouponInputSelection
-                                        coupons={coupons}
-                                        onAddCoupon={handleAddCoupon}
-                                    />
-                                )}
+                                <CouponInputSelection
+                                    coupons={coupons}
+                                    onAddCoupon={handleAddCoupon}
+                                />
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
