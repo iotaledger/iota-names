@@ -42,14 +42,13 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
 
             <div className="flex flex-col items-start gap-y-sm">
                 <Input
-                    placeholder={
-                        coupons.length === 0 ? 'Enter a coupon code' : 'Add an extra coupon'
-                    }
+                    placeholder={'Have a discount code?'}
                     type={InputType.Text}
                     value={coupon}
                     onChange={(e) => setCoupon(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
                     onClearInput={() => setCoupon('')}
+                    disabled={coupons.length > 0}
                 />
                 <ButtonUnstyled
                     className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
