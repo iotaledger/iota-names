@@ -100,7 +100,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
 
-    // const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
     const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
@@ -216,7 +215,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                 <div className="flex w-full items-center justify-between">
                     <span className="text-body-lg">{labelYears}</span>
                     {priceIota && (
-                        <span className="rounded-md bg-names-neutral-20 px-sm py-xs text-label-md text-names-neutral-100">
+                        <span className="rounded-full bg-names-neutral-10 px-sm py-xs text-label-md text-names-neutral-100">
                             {priceIota}
                         </span>
                     )}

@@ -294,7 +294,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
                 <div className="flex w-full items-center justify-between">
                     <span className="text-body-lg">{labelYears}</span>
                     {priceIota && (
-                        <span className="rounded-md bg-names-neutral-20 px-sm py-xs text-label-md text-names-neutral-100">
+                        <span className="rounded-full bg-names-neutral-10 px-sm py-xs text-label-md text-names-neutral-100">
                             {priceIota}
                         </span>
                     )}
