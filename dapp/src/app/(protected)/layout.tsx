@@ -3,19 +3,9 @@
 
 'use client';
 
-import { redirect } from 'next/navigation';
-import { useEffect, type PropsWithChildren } from 'react';
-
-import { TermsAndConds } from '@/lib/utils/termsAndConditions';
+import type { PropsWithChildren } from 'react';
 
 export default function ProtectedLayout({ children }: PropsWithChildren) {
-    useEffect(() => {
-        const areAccepted = TermsAndConds.areAccepted();
-        if (!areAccepted) {
-            redirect('/?modal=terms_conditions');
-        }
-    }, []);
-
     return (
         <main className="flex flex-col min-h-screen">
             <div className="container w-full h-full pt-20 flex flex-col flex-1">

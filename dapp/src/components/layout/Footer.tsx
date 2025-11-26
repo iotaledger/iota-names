@@ -3,23 +3,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { NamesLogoBranded } from '@/components/svgs';
 import { FOOTER_LEGAL_LINKS, FOOTER_SOCIAL_LINKS } from '@/lib/constants';
 
 export function Footer() {
-    const router = useRouter();
-
-    const handleLegalClick = (e: React.MouseEvent, path: string) => {
-        const url = new URL(path, window.location.href);
-        const modal = url.searchParams.get('modal');
-        if (modal === 'terms_conditions' || modal === 'privacy_policy') {
-            e.preventDefault();
-            router.replace(path, { scroll: false });
-        }
-    };
-
     const COPYRIGHT_YEAR = new Date().getFullYear();
 
     return (
@@ -37,11 +25,6 @@ export function Footer() {
                             <Link
                                 key={title}
                                 href={path}
-                                onClick={(e) => {
-                                    if (path.startsWith('?modal')) {
-                                        handleLegalClick(e, path);
-                                    }
-                                }}
                                 className="hover:text-names-primary-80 transition-colors duration-200"
                             >
                                 {title}

@@ -17,8 +17,6 @@ import {
 } from '@/lib/utils/analytics/amplitude';
 import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
-import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
-
 const TEXT = 'By using this website, you agree with our ';
 
 export function CookieDisclaimer() {
@@ -37,9 +35,7 @@ export function CookieDisclaimer() {
             body: TEXT,
             policyText: 'Privacy Policy',
             acceptButtonText: 'Close',
-            onPolicyClick: () => {
-                window.location.href = '/cookie-policy';
-            },
+            policyUrl: '/privacy-policy',
         },
         services: {
             customNecessaryCookies: [
@@ -108,7 +104,6 @@ export function CookieDisclaimer() {
                     </div>
                 </div>
             )}
-            <PrivacyPolicyDialog configuration={configuration} />
         </>
     );
 }
