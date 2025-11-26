@@ -49,13 +49,13 @@ function createRenewUpdates({
     nameRecord,
     renewYears,
     applyCoupons = false,
-    coupons = [],
+    coupon = '',
     address,
 }: {
     nameRecord?: NameRecord;
     renewYears?: number;
     applyCoupons?: boolean;
-    coupons?: string[];
+    coupon?: string;
     address?: string;
 }) {
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -71,7 +71,7 @@ function createRenewUpdates({
             nftId: nameRecord.nftId,
             years: renewYears,
             address,
-            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
+            ...(applyCoupons ? { couponCodes: coupon } : {}),
         });
     }
     return updates;
@@ -102,13 +102,12 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
     const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
     const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
-    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         renewYears,
         applyCoupons: coupons.length > 0 ? true : false,
-        coupons: couponCodes,
+        coupon: coupons.length > 0 ? coupons[0]?.code : '',
         address: account?.address,
     });
 
@@ -158,7 +157,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     });
 
     async function handleAddCoupon(couponCode: string) {
-        if (couponCodes.includes(couponCode)) {
+        if (coupons.some((c) => c.code === couponCode)) {
             setCoupons((currentCoupons) =>
                 currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
             );
