@@ -34,6 +34,7 @@ import {
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject } from '@/lib/utils/names';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
@@ -133,6 +134,19 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onSuccess() {
+            if (action.type === 'set') {
+                ampli.setAvatar({
+                    name,
+                    setAvatar: true,
+                });
+            }
+
+            if (action.type === 'unset') {
+                ampli.setAvatar({
+                    name,
+                    setAvatar: false,
+                });
+            }
             setOpen(false);
             toast.success(
                 `Successfully updated avatar for ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
