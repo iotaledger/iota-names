@@ -24,6 +24,7 @@ import {
     purchaseName,
     renewName,
     requestFaucetTokens,
+    setAvatar,
 } from '../utils';
 
 test.setTimeout(60_000);
