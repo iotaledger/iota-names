@@ -150,7 +150,7 @@ export function AuctionCarousel() {
 
 function AuctionCarouselHeader() {
     const router = useRouter();
-    const { open, close } = useAvailabilityCheckDialog();
+    const { open } = useAvailabilityCheckDialog();
 
     const handleViewAll = useCallback(() => {
         router.push('/auctions');
@@ -167,7 +167,7 @@ function AuctionCarouselHeader() {
                         text="Start Auction"
                         type={ButtonType.Outlined}
                         size={ButtonSize.Medium}
-                        onClick={() => open({ autoFocusInput: true, onCompleted: close })}
+                        onClick={() => open({ autoFocusInput: true })}
                     />
                     <Button
                         text="View All"
