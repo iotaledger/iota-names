@@ -617,7 +617,9 @@ test.describe.parallel('Name Management Tests', () => {
     test('Unset name avatar', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
 
-        const name = generateRandomName('display');
+        const name = generateRandomName('unset');
+        const displayName = normalizeIotaName(name, 'at');
+
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
 
@@ -628,12 +630,10 @@ test.describe.parallel('Name Management Tests', () => {
         expect(responseSetAvatar.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
-        await expect(
-            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
-        ).toBeVisible({ timeout: 5_000 });
-        const nameCard = page
-            .getByTestId('name-card')
-            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await expect(page.getByTestId('name-card').filter({ hasText: displayName })).toBeVisible({
+            timeout: 5_000,
+        });
+        const nameCard = page.getByTestId('name-card').filter({ hasText: displayName });
 
         await nameCard.getByTestId('name-card-avatar').hover();
         const menuButtonLocator = nameCard.getByTestId('menu-button');
@@ -649,7 +649,7 @@ test.describe.parallel('Name Management Tests', () => {
         await page.bringToFront();
 
         await expect(
-            page.getByText('Successfully updated avatar for ' + normalizeIotaName(name, 'at'), {
+            page.getByText('Successfully updated avatar for ' + displayName, {
                 exact: false,
             }),
         ).toBeVisible({
