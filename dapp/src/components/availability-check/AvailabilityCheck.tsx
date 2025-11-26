@@ -69,7 +69,6 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         data: nameRecordData,
         error: nameError,
         isLoading: isLoadingNameRecord,
-        refetch: refetchNameRecord,
     } = useNameRecord(name);
     const { data: priceList, error: priceError, isLoading: isLoadingPriceList } = usePriceList();
 
@@ -170,10 +169,8 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     async function handleCompletedPurchaseOrBid() {
         if (pathname !== MY_NAMES_ROUTE.path) {
             router.push(MY_NAMES_ROUTE.path);
-            close();
-        } else {
-            await refetchNameRecord();
         }
+        close();
     }
 
     return (
