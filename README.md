@@ -1,5 +1,5 @@
 > [!NOTE]\
-> By using this service, you agree to the [Terms & Conditions](https://testnet.iotanames.com/tos).
+> By using this service, you agree to the [Terms & Conditions](https://testnet.iotanames.com/terms-of-service).
 
 # IOTA-Names
 

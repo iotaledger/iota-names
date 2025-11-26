@@ -4,7 +4,6 @@
 'use client';
 
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { CONFIG } from '@/config';
@@ -17,8 +16,6 @@ import {
 const defaultNetwork = CONFIG.network;
 
 export function CookieDisclaimer() {
-    const router = useRouter();
-
     useEffect(() => {
         initAnalytics(defaultNetwork);
     }, []);
@@ -28,9 +25,7 @@ export function CookieDisclaimer() {
             title: undefined,
             body: 'We use cookies and analytics tools to help us improve your experience. Please accept analytics cookies to allow us to collect anonymous usage statistics. You can learn more in our ',
             policyText: 'Privacy Policy',
-            onPolicyClick: () => {
-                router.replace('/privacy');
-            },
+            policyUrl: '/privacy-policy',
         },
         services: {
             customNecessaryCookies: [

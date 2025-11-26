@@ -33,7 +33,7 @@ const nextConfig = withMDX({
     async redirects() {
         return [
             {
-                source: '/((?!tos$).*)', // Dont redirect if the path is already /tos
+                source: '/((?!tos$).*)', // Dont redirect if the path is already /terms-of-service
                 has: [
                     {
                         type: 'query',
@@ -41,11 +41,11 @@ const nextConfig = withMDX({
                         value: 'terms_conditions',
                     },
                 ],
-                destination: '/tos',
+                destination: '/terms-of-service',
                 permanent: true,
             },
             {
-                source: '/((?!privacy$).*)', // Dont redirect if the path is already /privacy
+                source: '/((?!privacy$).*)', // Dont redirect if the path is already /privacy-policy
                 has: [
                     {
                         type: 'query',
@@ -53,7 +53,7 @@ const nextConfig = withMDX({
                         value: 'privacy_policy',
                     },
                 ],
-                destination: '/privacy',
+                destination: '/privacy-policy',
                 permanent: true,
             },
         ];

@@ -46,10 +46,10 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
 export const FOOTER_LEGAL_LINKS: Route[] = [
     {
         title: 'Terms & Conditions',
-        path: '/tos',
+        path: '/terms-of-service',
     },
     {
         title: 'Privacy Policy',
-        path: '/privacy',
+        path: '/privacy-policy',
     },
 ];
