@@ -1,6 +1,6 @@
 'use client';
 
-import CookiePolicy from '@legal/cookiePolicy.mdx';
+import PrivacyPolicy from '@legal/privacyPolicy.mdx';
 
 export default function Page(): React.JSX.Element {
     return (
@@ -11,7 +11,7 @@ export default function Page(): React.JSX.Element {
                         Last updated: 9th October 2025
                     </span>
                     <div className="text-body-md text-names-neutral-92">
-                        <CookiePolicy />
+                        <PrivacyPolicy />
                     </div>
                 </div>
             </div>
