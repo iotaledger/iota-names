@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { resolve } from 'path';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
@@ -18,9 +19,12 @@ import {
     generateRandomName,
     generateRandomSubname,
     getAddressByIndexPath,
+    mintNft,
+    publishMovePackage,
     purchaseName,
     renewName,
     requestFaucetTokens,
+    setAvatar,
 } from '../utils';
 
 test.setTimeout(60_000);
@@ -547,6 +551,111 @@ test.describe.parallel('Name Management Tests', () => {
         await subnameMenuButton.click();
 
         await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
+        await page.close();
+    });
+
+    test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+
+        const name = generateRandomName('avatar');
+        const response = await purchaseName(name, keypair);
+        expect(response.effects?.status.status).toBe('success');
+
+        const packagePath = resolve(__dirname, 'mint_nft');
+        const { packageId } = await publishMovePackage(packagePath);
+        console.log('[mint_nft publish] packageId (address):', packageId);
+        expect(packageId.startsWith('0x')).toBeTruthy();
+
+        const resultMint = await mintNft(packageId, keypair, {
+            name: 'e2e test Avatar',
+            description: 'E2E NFT',
+            imageUrl: 'https://example.com/e2e.png',
+        });
+        expect(resultMint.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 5_000 });
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        // Wait slightly over the query staleTime (10s) to ensure a refetch happens
+        await page.waitForTimeout(11_000);
+        await page.getByText('Personalize Avatar', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
+
+        const mintedImg = dialog.getByRole('img', { name: 'e2e test Avatar' });
+        await mintedImg.waitFor({ state: 'visible', timeout: 30_000 });
+        const mintedCard = mintedImg.locator(
+            'xpath=ancestor::*[@data-testid="avatar-nft-card"][1]',
+        );
+        await mintedCard.click();
+
+        await dialog.getByRole('button', { name: 'Save' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText('Successfully updated avatar for ' + normalizeIotaName(name), {
+                exact: false,
+            }),
+        ).toBeVisible({
+            timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
+    test('Unset name avatar', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+
+        const name = generateRandomName('unset');
+        const displayName = normalizeIotaName(name, 'at');
+
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responseSetAvatar = await setAvatar(record, keypair);
+        expect(responseSetAvatar.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(page.getByTestId('name-card').filter({ hasText: displayName })).toBeVisible({
+            timeout: 5_000,
+        });
+        const nameCard = page.getByTestId('name-card').filter({ hasText: displayName });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+        await page.getByText('Personalize Avatar', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
+
+        await dialog.getByRole('button', { name: 'Unset' }).click();
+        await dialog.getByRole('button', { name: 'Save' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText('Successfully updated avatar for ' + displayName, {
+                exact: false,
+            }),
+        ).toBeVisible({
+            timeout: 10_000,
+        });
+
         await page.close();
     });
 });
