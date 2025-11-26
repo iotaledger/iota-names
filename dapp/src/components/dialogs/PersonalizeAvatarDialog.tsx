@@ -207,6 +207,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                     return (
                                         <div
                                             key={asset.objectId}
+                                            data-testid="avatar-nft-card"
+                                            data-object-id={asset.objectId}
+                                            data-selected={isSelected ? 'true' : 'false'}
                                             className={`rounded-xl p-[1px] transition-all ${
                                                 isSelected
                                                     ? 'bg-names-gradient-primary'
