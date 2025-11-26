@@ -487,4 +487,66 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
+
+    test('Can not renew a subname due permissions', async ({ appPage: page, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('norenew');
+        const subname = generateRandomSubname('subname', name);
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responsePurchaseSubname = await addSubnameName(
+            subname,
+            record.nftId,
+            record.expirationDate,
+            keypair,
+        );
+        expect(responsePurchaseSubname.effects?.status.status).toBe('success');
+
+        const responseEditSetup = await editSetup(subname, record.nftId, false, false, keypair);
+        expect(responseEditSetup.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(subname, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(subname, 'at') });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
+
+        // Method 2: Adding via parent subname counter
+        await page.reload();
+
+        const parentNameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') })
+            .filter({ has: page.getByText('1 Subname', { exact: true }) });
+
+        await expect(parentNameCard).toBeVisible({ timeout: 5_000 });
+
+        const parentCountLocator = parentNameCard.getByText('1 Subname', { exact: true });
+        await expect(parentCountLocator).toBeVisible({ timeout: 5_000 });
+        await parentCountLocator.click();
+
+        const subnamesDialog = page.getByRole('dialog');
+        await expect(subnamesDialog).toBeVisible();
+
+        const subnameMenuButton = subnamesDialog.getByTestId('menu-button');
+        await expect(subnameMenuButton).toBeVisible({ timeout: 5_000 });
+        await subnameMenuButton.click();
+
+        await expect(page.getByText('Renew Subname', { exact: true })).toHaveCount(0);
+        await page.close();
+    });
 });
