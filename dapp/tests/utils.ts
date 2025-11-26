@@ -8,7 +8,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import 'dotenv/config';
 
 import { execFileSync } from 'child_process';
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
@@ -293,29 +293,22 @@ export async function mintNft(
     return resultMint;
 }
 
-export async function setAvatar(nftId: string, avatar: string, isSubname: boolean, signer: Signer) {
+export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     const address = signer.toIotaAddress();
+    const isNameSubname = nameRecord.name ? isSubname(nameRecord.name) : false;
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     iotaNamesTx.setUserData({
-        nft: nftId,
+        nft: nameRecord.nftId,
         key: 'avatar',
-        value: avatar,
-        isSubname,
+        value: nameRecord.avatar ?? '0x0',
+        isSubname: isNameSubname,
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
 
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Avatar set to address: ${address}`);
     const responseSetAvatar = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
@@ -323,6 +316,7 @@ export async function setAvatar(nftId: string, avatar: string, isSubname: boolea
             showEffects: true,
         },
     });
+    console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { resolve } from 'path';
-import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
@@ -624,12 +624,7 @@ test.describe.parallel('Name Management Tests', () => {
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
 
-        const responseSetAvatar = await setAvatar(
-            record.nftId,
-            record.avatar ?? '0x0',
-            isSubname(name),
-            keypair,
-        );
+        const responseSetAvatar = await setAvatar(record, keypair);
         expect(responseSetAvatar.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
