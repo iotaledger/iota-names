@@ -117,6 +117,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             queryClient.invalidateQueries({
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionList() });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
 
             if (!auctionMetadata) {

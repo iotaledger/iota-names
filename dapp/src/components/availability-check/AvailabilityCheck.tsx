@@ -7,11 +7,11 @@ import { Close } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
-import { isAuctionActive } from '@/auctions/lib/utils';
 import {
     NameRecordData,
     useBlockedList,
@@ -21,20 +21,20 @@ import {
 } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
+import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
 import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
+import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
-import { RenewNameDialog } from '../dialogs/RenewNameDialog';
 import { NamePurchaseCard } from '../NamePurchaseCard';
 import { SearchStylized } from '../search-component/SearchStylized';
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
-    onCompleted?: () => void;
 }
 interface RecentSearch {
     searchedName: string;
@@ -44,10 +44,12 @@ interface RecentSearch {
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
 const DEBOUNCE_DELAY = 500;
 
-export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityCheckProps) {
+export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
+    const pathname = usePathname();
+    const router = useRouter();
+    const { close } = useAvailabilityCheckDialog();
     const { data: blockedList = [] } = useBlockedList();
     const { data: reservedList = [] } = useReservedList();
-    const [isRenewDialogOpen, setIsRenewDialogOpen] = useState(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
@@ -61,15 +63,14 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     const {
         data: auctionMetadata,
         error: auctionError,
-        isLoading: isLoadingAuctionMetadat,
+        isLoading: isLoadingAuctionMetadata,
     } = useGetAuctionMetadata(name);
     const {
         data: nameRecordData,
         error: nameError,
         isLoading: isLoadingNameRecord,
-        refetch: refetchNameRecord,
     } = useNameRecord(name);
-    const { data: priceList, error: priceError, isLoading: isLoadingPriceLst } = usePriceList();
+    const { data: priceList, error: priceError, isLoading: isLoadingPriceList } = usePriceList();
 
     const validationError = useMemo(
         () =>
@@ -85,13 +86,15 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
     );
 
     const errorMessageRaw = auctionError?.message || nameError?.message || priceError?.message;
-    const errorMessage = errorMessageRaw
-        ? getUserFriendlyErrorMessage(errorMessageRaw)
-        : validationError || '';
+    const errorMessage =
+        validationError || (errorMessageRaw ? getUserFriendlyErrorMessage(errorMessageRaw) : '');
 
-    const isLoading = isLoadingAuctionMetadat || isLoadingNameRecord || isLoadingPriceLst;
+    const isLoading =
+        !validationError &&
+        debouncedSearchValue &&
+        (isLoadingAuctionMetadata || isLoadingNameRecord || isLoadingPriceList);
 
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
     const isNameTaken = isUnavailable && !isAuctionInProgress;
 
@@ -159,23 +162,15 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
         setSearchValue(denormalizeName(inputValue));
     }
 
-    function handlePurchase() {
-        setIsRenewDialogOpen(true);
-        refetchNameRecord();
-    }
-
-    function handleRenew() {
-        setIsRenewDialogOpen(false);
-        handleCompletedBidOrPurchase();
-    }
-
-    function handleCompletedBidOrPurchase() {
-        setSearchValue('');
-        onCompleted?.();
-    }
-
     function isForbiddenName(name: string, forbiddenNames: string[]) {
         return forbiddenNames.some((w) => name === `${w}.iota`);
+    }
+
+    async function handleCompletedPurchaseOrBid() {
+        if (pathname !== MY_NAMES_ROUTE.path) {
+            router.push(MY_NAMES_ROUTE.path);
+        }
+        close();
     }
 
     return (
@@ -262,24 +257,16 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
                                 <PurchaseName
                                     name={name}
                                     nameRecordData={nameRecordData}
-                                    onPurchase={handlePurchase}
+                                    onCompleted={handleCompletedPurchaseOrBid}
                                 />
 
                                 <BidName
                                     name={name}
                                     nameRecordData={nameRecordData}
-                                    onCompleted={handleCompletedBidOrPurchase}
+                                    onCompleted={handleCompletedPurchaseOrBid}
                                 />
                             </>
                         )
-                    )}
-
-                    {isRenewDialogOpen && (
-                        <RenewNameDialog
-                            setOpen={setIsRenewDialogOpen}
-                            name={name}
-                            onRenew={handleRenew}
-                        />
                     )}
                 </div>
             </div>
@@ -290,7 +277,7 @@ export function AvailabilityCheck({ autoFocusInput, onCompleted }: AvailabilityC
 interface BidNameProps {
     name: string;
     nameRecordData: NameRecordData;
-    onCompleted: () => void;
+    onCompleted?: () => void;
 }
 function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
     const { data: { isAuctionAuthorized } = {} } = useNamesPurchaseMode();
@@ -300,7 +287,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 
     const isAvailable = nameRecordData?.type === 'available';
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isAuctionInProgress = auctionMetadata ? isAuctionActive(auctionMetadata) : false;
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isAllowedToBid =
         (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
 
@@ -310,7 +297,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 
     function handleBid() {
         setAuctionDialogOpen(false);
-        onCompleted();
+        onCompleted?.();
     }
 
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
@@ -355,9 +342,9 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
 interface PurchaseNameProps {
     name: string;
     nameRecordData: NameRecordData;
-    onPurchase: () => void;
+    onCompleted?: () => void;
 }
-function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
+function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) {
     const { data: { isPaymentAuthorized } = {} } = useNamesPurchaseMode();
     const { isConnected } = useCurrentWallet();
     const [isPurchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
@@ -367,10 +354,9 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
     }
 
     const isAvailable = nameRecordData?.type === 'available';
-    const isUnavailable = nameRecordData?.type === 'unavailable';
 
     function handlePurchase() {
-        onPurchase();
+        onCompleted?.();
         setPurchaseDialogOpen(false);
     }
 
@@ -383,31 +369,31 @@ function PurchaseName({ name, nameRecordData, onPurchase }: PurchaseNameProps) {
 
     return (
         <>
-            <NamePurchaseCard
-                name={name}
-                isAvailable={isAvailable}
-                price={formattedPurchasePrice}
-                priceSupportingText={isAvailable ? 'Price' : undefined}
-                statusMessage={isAvailable ? undefined : 'Name cannot be purchased.'}
-                testId="purchase-name-card"
-            >
-                {isUnavailable ? null : isConnected ? (
-                    <Button
-                        type={ButtonType.Secondary}
-                        text="Buy"
-                        onClick={() => setPurchaseDialogOpen(true)}
-                    />
-                ) : (
-                    <ConnectButton />
-                )}
-            </NamePurchaseCard>
-
+            {isAvailable && (
+                <NamePurchaseCard
+                    name={name}
+                    isAvailable={true}
+                    price={formattedPurchasePrice}
+                    priceSupportingText="Price"
+                    testId="purchase-name-card"
+                >
+                    {isConnected ? (
+                        <Button
+                            type={ButtonType.Secondary}
+                            text="Buy"
+                            onClick={() => setPurchaseDialogOpen(true)}
+                        />
+                    ) : (
+                        <ConnectButton />
+                    )}
+                </NamePurchaseCard>
+            )}
             {isPurchaseDialogOpen && (
                 <PurchaseNameDialog
                     name={name}
                     open={isPurchaseDialogOpen}
                     setOpen={setPurchaseDialogOpen}
-                    onPurchase={handlePurchase}
+                    onCompleted={handlePurchase}
                 />
             )}
         </>
