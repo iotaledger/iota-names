@@ -1,87 +1,95 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import * as amplitude from '@amplitude/analytics-browser';
-import { type UserSession } from '@amplitude/analytics-types';
+import { LogLevel } from '@amplitude/analytics-core';
 
-import { PersistableStorage } from '../persistableStorage';
+import { CONFIG } from '@/config';
+
 import { ampli } from './ampli';
+import { AMP_COOKIES_KEY } from './constants';
 
-const IS_PROD_ENV = process.env.NODE_ENV === 'production';
+const IS_ENABLED =
+    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
+    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
-export const persistableStorage = new PersistableStorage<UserSession>();
+/**
+ * Check if user has previously given consent for cookies/tracking.
+ */
+export function getAmplitudeConsentStatus() {
+    if (typeof document === 'undefined') return 'pending';
+    if (document.cookie.includes(`${AMP_COOKIES_KEY}=true`)) return 'accepted';
+    if (document.cookie.includes(`${AMP_COOKIES_KEY}=false`)) return 'declined';
+    return 'pending';
+}
 
-export async function initAmplitude(defaultNetwork: string) {
-    await ampli.load({
-        environment: 'iotanames',
-        disabled: !IS_PROD_ENV,
-        client: {
-            configuration: {
-                optOut: true, // Start with tracking disabled for GDPR compliance
-                autocapture: true,
+/**
+ * Initialize Amplitude.
+ * This should be called once when the app starts.
+ * Multiple calls to this function are safe - subsequent calls will be ignored.
+ */
+export async function initAmplitude() {
+    if (ampli.isLoaded) {
+        return;
+    }
+
+    const defaultNetwork = CONFIG.network;
+
+    try {
+        await ampli.load({
+            environment: 'iotanames',
+            disabled: !IS_ENABLED,
+            client: {
+                configuration: {
+                    autocapture: {
+                        pageViews: IS_ENABLED,
+                        sessions: IS_ENABLED,
+                    },
+                    logLevel: LogLevel.None,
+                },
             },
-        },
-    });
+        }).promise;
 
-    if (ampli.client) {
-        ampli.identify(undefined, {
-            groups: {
-                activeNetwork: defaultNetwork,
-            },
-        });
+        setNetworkGroup(defaultNetwork);
+    } catch (error) {
+        console.error('[Amplitude] Initialization failed:', error);
+        throw error;
     }
+}
 
-    window.addEventListener('pagehide', () => {
-        amplitude.setTransport('beacon');
-        amplitude.flush();
-    });
+function setNetworkGroup(network: string): void {
+    ampli.client.setGroup('activeNetwork', network); // keep `activeNetwork` key for backward compatibility
 }
 
 /**
- * Call this function when user gives consent for cookies/tracking
- * This enables tracking and persists the analytics data from memory to cookies
+ * Call this function when user gives consent for cookies/tracking.
+ * This will enable future event tracking.
  */
-export function consentToAnalytics() {
-    if (ampli.client) {
-        ampli.client.setOptOut(false);
-    }
+export async function onAmplitudeConsentAccepted() {
+    setCookies();
+    return initAmplitude();
+}
 
-    persistableStorage.persist();
+export function setCookies() {
+    document.cookie = `${AMP_COOKIES_KEY}=true; max-age=31536000; path=/; SameSite=Strict`;
 }
 
 /**
- * Call this function when user declines cookies/tracking
- * This disables tracking and clears any stored data
+ * Call this function when user declines cookies/tracking.
+ * This will disable event tracking.
  */
-export function declineAnalytics() {
-    if (ampli.client) {
-        ampli.client.setOptOut(true);
-    }
-
-    persistableStorage.reset();
+export function onAmplitudeConsentDeclined() {
+    cleanAmplitudeCookies();
+    document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
+    ampli.client.setOptOut(true);
 }
 
-/**
- * Check if user has already given consent for analytics
- * This checks if there are existing Amplitude cookies
- */
-export function hasAnalyticsConsent(): boolean {
-    return persistableStorage.persist !== undefined && document.cookie.includes('AMP_');
-}
-
-/**
- * Initialize analytics with CMP integration
- * Call this after user interaction or when checking existing consent
- */
-export async function initAnalytics(defaultNetwork: string) {
-    const hasConsent = hasAnalyticsConsent();
-
-    if (hasConsent) {
-        await initAmplitude(defaultNetwork);
-        if (ampli.client) {
-            ampli.client.setOptOut(false);
+export function cleanAmplitudeCookies() {
+    const cookies = document.cookie.split(';');
+    cookies.forEach((cookie) => {
+        const cookieNameOrigin = cookie.split('=')[0].trim();
+        const cookieNameLower = cookieNameOrigin.toLowerCase();
+        if (cookieNameLower.startsWith('amp_')) {
+            document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict`;
         }
-    } else {
-        await initAmplitude(defaultNetwork);
-    }
+    });
 }
