@@ -24,6 +24,7 @@ import {
     purchaseName,
     renewName,
     requestFaucetTokens,
+    setAvatar,
 } from '../utils';
 
 test.setTimeout(60_000);
@@ -608,6 +609,51 @@ test.describe.parallel('Name Management Tests', () => {
             }),
         ).toBeVisible({
             timeout: 30_000,
+        });
+
+        await page.close();
+    });
+
+    test('Unset name avatar', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+
+        const name = generateRandomName('unset');
+        const displayName = normalizeIotaName(name, 'at');
+
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responseSetAvatar = await setAvatar(record, keypair);
+        expect(responseSetAvatar.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(page.getByTestId('name-card').filter({ hasText: displayName })).toBeVisible({
+            timeout: 5_000,
+        });
+        const nameCard = page.getByTestId('name-card').filter({ hasText: displayName });
+
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+        await page.getByText('Personalize Avatar', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
+
+        await dialog.getByRole('button', { name: 'Unset' }).click();
+        await dialog.getByRole('button', { name: 'Save' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText('Successfully updated avatar for ' + displayName, {
+                exact: false,
+            }),
+        ).toBeVisible({
+            timeout: 10_000,
         });
 
         await page.close();
