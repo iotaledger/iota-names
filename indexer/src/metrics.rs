@@ -165,20 +165,16 @@ impl IotaNamesMetrics {
         // Macro to restore simple metrics
         macro_rules! restore_metric {
             ($metric_name:literal, $field:ident, counter) => {
-                if let Ok(value) = self
+                let value = self
                     .query_metric_value(&client, prometheus_url, $metric_name)
-                    .await
-                {
-                    self.$field.inc_by(value as u64);
-                }
+                    .await?;
+                self.$field.inc_by(value as u64);
             };
             ($metric_name:literal, $field:ident, gauge) => {
-                if let Ok(value) = self
+                let value = self
                     .query_metric_value(&client, prometheus_url, $metric_name)
-                    .await
-                {
-                    self.$field.set(value);
-                }
+                    .await?;
+                self.$field.set(value);
             };
         }
 
