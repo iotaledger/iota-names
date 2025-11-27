@@ -4,8 +4,9 @@
 'use client';
 
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, Tooltip, truncate } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, Tooltip } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { formatAddress } from '@iota/iota-sdk/utils';
 import clsx from 'clsx';
 import { Fragment } from 'react';
 
@@ -91,7 +92,7 @@ export function NamePanelTile({
                     ) : null
                 }
                 name={registration.name}
-                subtitle={linkedAddress ? truncate(linkedAddress, 4, 4) : undefined}
+                subtitle={linkedAddress ? formatAddress(linkedAddress) : undefined}
                 onClick={onClick}
                 menuButton={<MenuButton variant="ghost" onClick={toggleMenu} ref={triggerRef} />}
                 footer={
