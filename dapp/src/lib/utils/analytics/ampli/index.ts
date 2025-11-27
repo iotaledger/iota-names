@@ -104,12 +104,6 @@ export interface DomainClaimedProperties {
     name: string;
 }
 
-export interface OpenedIotaNamesProperties {
-    activeOrigin: string;
-    pagePath?: string;
-    pagePathFragment?: string;
-}
-
 export interface PerformedSearchProperties {
     query: string;
 }
