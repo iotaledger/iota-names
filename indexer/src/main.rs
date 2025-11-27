@@ -62,7 +62,7 @@ enum Command {
         prometheus_url: String,
         /// Resets metrics in case of a Prometheus error.
         #[arg(long, default_value_t = false)]
-        reset_metrics_on_error: bool,
+        reset_metrics: bool,
     },
 }
 
@@ -76,7 +76,7 @@ impl Command {
                 num_workers,
                 api_port,
                 prometheus_url,
-                reset_metrics_on_error,
+                reset_metrics,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -86,7 +86,7 @@ impl Command {
 
                 // Try to restore metrics from Prometheus
                 if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
-                    if reset_metrics_on_error {
+                    if reset_metrics {
                         warn!(
                             "Could not restore metrics from Prometheus ({e}); proceeding with new metrics due to --reset-metrics-on-error flag"
                         );

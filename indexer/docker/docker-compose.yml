@@ -48,7 +48,7 @@ services:
       # Devnet values:
       - "--node-url=https://api.devnet.iota.cafe"
       - "--checkpoint-url=https://checkpoints.devnet.iota.cafe"
-      # - "--reset-metrics-on-error"
+      # - "--reset-metrics"
 
   prometheus:
     image: prom/prometheus:latest

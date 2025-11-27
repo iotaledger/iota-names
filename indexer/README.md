@@ -27,7 +27,7 @@ Rust dependencies are cached by the Cargo.toml/Cargo.lock files, use `--no-cache
 
 Update the `docker-compose.yml` file to use the commented `# Localnet values:`" instead of devnet for the start command of the iota-names-indexer.
 
-To start collecting metrics from scratch in case restoring them from Prometheus fails, uncomment `--reset-metrics-on-error`.
+To start collecting metrics from scratch in case restoring them from Prometheus fails, uncomment `--reset-metrics`.
 
 ### Start the indexer
 
