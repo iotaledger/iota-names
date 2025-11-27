@@ -52,4 +52,8 @@ export const FOOTER_LEGAL_LINKS: Route[] = [
         title: 'Privacy Policy',
         path: '/privacy-policy',
     },
+    {
+        title: 'Cookie Policy',
+        path: '/cookie-policy',
+    },
 ];
