@@ -88,11 +88,11 @@ impl Command {
                 if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
                     if reset_metrics {
                         warn!(
-                            "Could not restore metrics from Prometheus ({e}); proceeding with new metrics due to --reset-metrics-on-error flag"
+                            "Could not restore metrics from Prometheus ({e}); proceeding with new metrics due to --reset-metrics flag"
                         );
                     } else {
                         return Err(anyhow::anyhow!(
-                            "Could not restore metrics from Prometheus ({e}); provide --reset-metrics-on-error flag to reset metrics"
+                            "Could not restore metrics from Prometheus ({e}); provide --reset-metrics flag to reset metrics"
                         ));
                     }
                 } else {
