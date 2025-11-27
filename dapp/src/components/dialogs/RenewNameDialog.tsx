@@ -29,12 +29,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import {
-    NameRecordData,
-    queryKey,
-    //useCalculatePriceInFiat,
-    useNameRecord,
-} from '@/hooks';
+import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
