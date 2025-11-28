@@ -3,9 +3,9 @@
 
 'use client';
 
-import type { PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 
-export default function ProtectedLayout({ children }: PropsWithChildren) {
+export default function CookiePolicyLayout({ children }: PropsWithChildren): JSX.Element {
     return (
         <main className="flex flex-col min-h-screen">
             <div className="container w-full h-full pt-20 flex flex-col flex-1">
