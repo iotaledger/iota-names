@@ -260,15 +260,18 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                 supportingText={
                                     <div className="flex flex-col gap-y-xs text-body-lg text-names-neutral-60">
                                         <p>
-                                            <strong>If outbid</strong>, your IOTA is refunded.
+                                            If someone <strong>outbids</strong> you, the amount you
+                                            placed is fully refunded.
                                         </p>
                                         <p>
-                                            <strong>Auctions last</strong> ≥48 hours and end when no
-                                            bids arrive in the last 10 minutes.
+                                            <strong>Auctions run</strong> for at{' '}
+                                            <strong>least 48 hours</strong> and extend if a bid is
+                                            placed in the final 10 minutes.
                                         </p>
                                         <p>
-                                            <strong>If you win</strong>, manually claim your name;
-                                            the 1-year subscription starts at auction start.
+                                            <strong>Win the auction?</strong> Don't forget to claim
+                                            your name. The 1-year subscription starts at the
+                                            auction's start time.
                                         </p>
                                     </div>
                                 }
