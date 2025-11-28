@@ -25,6 +25,7 @@ import {
     renewName,
     requestFaucetTokens,
     setAvatar,
+    setDisplayName,
 } from '../utils';
 
 test.setTimeout(60_000);
@@ -656,6 +657,43 @@ test.describe.parallel('Name Management Tests', () => {
             timeout: 10_000,
         });
 
+        await page.close();
+    });
+
+    test('Unset Display', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('display');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+        const responseConnect = await connectName(name, record.nftId, keypair);
+        expect(responseConnect.effects?.status.status).toBe('success');
+        const responseSetDisplay = await setDisplayName(name, keypair);
+        expect(responseSetDisplay.effects?.status.status).toBe('success');
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+        const displayLabel = dialog.getByText('Set as Display name', { exact: true });
+        await expect(displayLabel).toBeVisible();
+        const displayCheckbox = dialog.getByRole('checkbox');
+        await expect(displayCheckbox).toBeChecked({ timeout: 10_000 });
+        await displayCheckbox.click();
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+        await dialog.getByRole('button', { name: 'Finish' }).click();
         await page.close();
     });
 });

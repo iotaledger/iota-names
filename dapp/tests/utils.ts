@@ -319,6 +319,28 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
+
+export async function setDisplayName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setDefault(name);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseSetDisplay = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Set name: ${name} as display name for address: ${address}`);
+    return responseSetDisplay;
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
