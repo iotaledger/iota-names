@@ -57,10 +57,10 @@ type PurchaseNameProps = {
     name: string;
     open: boolean;
     setOpen: (bool: boolean) => void;
-    onPurchase?: () => void;
+    onCompleted?: () => void;
 };
 
-export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: PurchaseNameProps) {
+export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: PurchaseNameProps) {
     const queryClient = useQueryClient();
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
@@ -177,7 +177,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onPurchase }: Purchase
             );
             setOpen(false);
 
-            if (onPurchase) onPurchase();
+            onCompleted?.();
         },
         onError(error) {
             toast.error(getUserFriendlyErrorMessage(error));
