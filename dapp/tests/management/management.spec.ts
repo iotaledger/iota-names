@@ -697,6 +697,16 @@ test.describe.parallel('Name Management Tests', () => {
         });
         await dialog.getByRole('button', { name: 'Finish' }).click();
 
+        // Search 'Displayed' pill
+        await page.reload();
+        const reloadedNameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await expect(reloadedNameCard).toBeVisible({ timeout: 10_000 });
+
+        const displayedPill = reloadedNameCard.getByText('Displayed', { exact: true });
+        await expect(displayedPill).toBeVisible();
+
         await page.close();
     });
 });
