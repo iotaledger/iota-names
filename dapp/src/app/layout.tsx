@@ -4,17 +4,25 @@
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
 
+import * as Sentry from '@sentry/nextjs';
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
 import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
-import { TermsAndConditionsDialog } from '@/components/dialogs/TermsAndConditionsDialog';
 import { Footer, Navbar } from '@/components/layout';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
 
-export const metadata = DEFAULT_METADATA;
+export function generateMetadata(): Metadata {
+    return {
+        ...DEFAULT_METADATA,
+        other: {
+            ...Sentry.getTraceData(),
+        },
+    };
+}
 
 export default function RootLayout({
     children,
@@ -31,7 +39,6 @@ export default function RootLayout({
                             {children}
                             <AvailabilityCheckDialog />
                             <Footer />
-                            <TermsAndConditionsDialog />
                         </ConnectionGuard>
                     </Suspense>
                 </AppProviders>

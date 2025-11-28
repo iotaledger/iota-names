@@ -89,8 +89,9 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     ]);
 
     // Register a name for 2 years
-    const nft = await iotaNamesTx.register({
+    const nft = await iotaNamesTx.registerWithYears({
         name: uniqueName,
+        years: 2,
         coinConfig: { type: IOTA_TYPE_ARG },
         coin: coinInput,
     });
@@ -629,8 +630,9 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 500n * NANOS_PER_IOTA,
             ]);
 
-            const nft = await iotaNamesTx.register({
+            const nft = await iotaNamesTx.registerWithYears({
                 name: uniqueName,
+                years: 5,
                 coinConfig: { type: IOTA_TYPE_ARG },
                 coin: coinInput,
             });
