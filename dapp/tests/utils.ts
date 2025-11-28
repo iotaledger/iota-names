@@ -8,7 +8,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import 'dotenv/config';
 
 import { execFileSync } from 'child_process';
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
+import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
@@ -123,7 +123,6 @@ export async function purchaseName(name: string, signer: Signer) {
     console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
 }
-
 export async function addSubnameName(
     subname: string,
     parentNftId: string,
@@ -294,6 +293,32 @@ export async function mintNft(
     return resultMint;
 }
 
+export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const isNameSubname = nameRecord.name ? isSubname(nameRecord.name) : false;
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setUserData({
+        nft: nameRecord.nftId,
+        key: 'avatar',
+        value: nameRecord.avatar ?? '0x0',
+        isSubname: isNameSubname,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseSetAvatar = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Avatar set to address: ${address}`);
+    return responseSetAvatar;
+}
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();

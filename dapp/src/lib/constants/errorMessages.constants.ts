@@ -36,4 +36,12 @@ export const ERROR_PATTERNS = {
     [GAS_BALANCE_TOO_LOW_ID]: 'Not enough balance to cover transaction fees.',
     [NOT_ENOUGH_BALANCE_ID]: 'Not enough balance to create the transaction.',
     [INSUFFICIENT_COIN_BALANCE_ID]: 'Insufficient coin balance to complete this action.',
+    'not valid for the given number of years': 'Coupon is not valid for the given number of years.',
+    'not valid for the given name length': 'Coupon is not valid for the given name length.',
+    'claimed the maximum number of times': 'Coupon has been claimed the maximum number of times.',
+    'invalid percentage amount': 'Invalid percentage amount for coupon.',
+    'address does not match': 'Coupon address does not match.',
+    'coupon has expired': 'Coupon has expired.',
+    'number of claims cannot be zero': 'Number of claims cannot be zero.',
+    'cannot be used with other coupons': 'Coupon cannot be used with other coupons.',
 };
