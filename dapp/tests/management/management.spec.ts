@@ -699,5 +699,4 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
-
 });
