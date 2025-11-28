@@ -268,7 +268,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                                         </p>
                                         <p>
                                             <strong>If you win</strong>, manually claim your name;
-                                            the 1-year subscription starts at auction end.
+                                            the 1-year subscription starts at auction start.
                                         </p>
                                     </div>
                                 }
