@@ -1,8 +1,8 @@
-#skcm-cookie-disclaimer#skcm-cookie-disclaimer {
+#skcm-cookie-disclaimer {
     @apply bg-names-neutral-6;
     @apply max-w-none w-full;
     @apply flex flex-col;
-    @apply py-6 px-8;
+    @apply !py-6 !px-8;
     @apply max-md:space-y-4;
     @apply bottom-0 right-0;
     @apply rounded-none;
@@ -14,18 +14,19 @@
         var(--names-gradient-primary) border-box;
     border: 1px solid transparent;
 
+    #skcm-cookie-disclaimer__buttons--reject {
+        @apply hidden;
+    }
+
     #skcm-cookie-disclaimer__body {
-        @apply max-md:container;
-        @apply flex flex-col;
-        @apply items-center justify-center md:items-start;
+        @apply max-md:container items-center justify-center md:items-start m-0 text-body-md !pl-0;
 
         #skcm-body {
-            @apply m-0;
             @apply text-names-neutral-92;
+        }
 
-            a {
-                @apply text-names-primary-80;
-            }
+        a {
+            @apply text-names-primary-80 inline-flex;
         }
     }
 
