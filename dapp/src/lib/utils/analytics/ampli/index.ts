@@ -96,6 +96,16 @@ export interface CreatedSubnameProperties {
     subnamePermissions?: ('allow_to_create_additional_subnames' | 'allow_to_renew_expiration')[];
 }
 
+export interface DomainClaimedProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    auctionWonDate: number;
+    name: string;
+}
+
 export interface PerformedSearchProperties {
     query: string;
 }
@@ -184,6 +194,14 @@ export class CreatedSubname implements BaseEvent {
     event_type = 'created subname';
 
     constructor(public event_properties: CreatedSubnameProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class DomainClaimed implements BaseEvent {
+    event_type = 'domain claimed';
+
+    constructor(public event_properties: DomainClaimedProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -407,6 +425,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new CreatedSubname(properties), options);
+  }
+
+  /**
+   * domain claimed
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/domain%20claimed)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. auctionWonDate)
+   * @param options Amplitude event options.
+   */
+  domainClaimed(
+    properties: DomainClaimedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DomainClaimed(properties), options);
   }
 
   /**
