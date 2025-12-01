@@ -22,6 +22,8 @@
 
 import * as amplitude from '@amplitude/analytics-browser';
 
+import { getAmplitudeConsentStatus } from '../amplitude';
+
 export type Environment = 'iotanames';
 
 export const ApiKey: Record<Environment, string> = {
@@ -153,6 +155,11 @@ export interface RenewedSubnameProperties {
     name: string;
 }
 
+export interface SetAvatarProperties {
+    name: string;
+    setAvatar: boolean;
+}
+
 export interface SetNameAsDisplayedProperties {
     name: string;
 }
@@ -221,6 +228,14 @@ export class RenewedSubname implements BaseEvent {
     }
 }
 
+export class SetAvatar implements BaseEvent {
+    event_type = 'set avatar';
+
+    constructor(public event_properties: SetAvatarProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
 export class SetNameAsDisplayed implements BaseEvent {
     event_type = 'set name as displayed';
 
@@ -248,6 +263,11 @@ export class Ampli {
   }
 
   private isInitializedAndEnabled(): boolean {
+    
+    // NOTE don't show error if consent is not given yet.
+    // Don't remove this check after `ampli pull web`
+    if (getAmplitudeConsentStatus() === 'declined') return;
+
     if (!this.amplitude) {
       console.error('ERROR: Ampli is not yet initialized. Have you called ampli.load() on app start?');
       return false;
@@ -472,6 +492,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new RenewedSubname(properties), options);
+  }
+
+  /**
+   * set avatar
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/set%20avatar)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. name)
+   * @param options Amplitude event options.
+   */
+  setAvatar(
+    properties: SetAvatarProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new SetAvatar(properties), options);
   }
 
   /**

@@ -13,7 +13,7 @@ const TITLE = 'Your On-Chain Name';
 const DESCRIPTION = 'Own a unique, human-readable name on IOTA.';
 
 export function LandingHero() {
-    const { open, close } = useAvailabilityCheckDialog();
+    const { open } = useAvailabilityCheckDialog();
 
     return (
         <div className="relative min-h-[700px] md:min-h-[560px] overflow-hidden">
@@ -34,7 +34,7 @@ export function LandingHero() {
                 <div className="w-full max-w-2xl flex flex-col">
                     <SearchStylized
                         placeholder="Search for your IOTA name"
-                        onFocus={() => open({ autoFocusInput: true, onCompleted: close })}
+                        onFocus={() => open({ autoFocusInput: true })}
                         trailingElement={
                             <ButtonUnstyled className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100">
                                 <Search className="text-names-primary-0" />
