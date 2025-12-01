@@ -658,6 +658,7 @@ test.describe.parallel('Name Management Tests', () => {
 
         await page.close();
     });
+
     test('Connect Address and Set Display', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('default');
