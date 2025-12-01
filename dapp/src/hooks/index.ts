@@ -14,6 +14,7 @@ export * from './useTokenPrice';
 export * from './useCoinMetadata';
 export * from './useFeatureEnabledByNetwork';
 export * from './useAppsBackend';
+export * from './useCalculateRenewalPrice';
 export * from './useCalculatePriceInFiat';
 export * from './useRefreshAuctions';
 export * from './useDenyList';
