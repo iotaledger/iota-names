@@ -21,12 +21,11 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    SelectOption,
     Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BigNumber from 'bignumber.js';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -36,6 +35,7 @@ import {
     NameUpdate,
     queryKey,
     useBalance,
+    useCalculatePrice,
     useCalculatePriceInFiat,
     useUpdateNameTransaction,
 } from '@/hooks';
@@ -65,7 +65,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: config, isLoading: isLoadingConfig } = useNamesConfig();
-
+    const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
+    const purchaseOptions = useCalculatePrice(name, purchaseableYears, true);
     const account = useCurrentAccount();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
@@ -267,41 +268,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
     const expirationDate = getTargetExpirationDate(purchaseYears);
 
-    const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
-    const purchaseYearsArray = Array.from({ length: purchaseableYears }, (_, i) => i + 1);
-
-    const purchasePricesQueries = useQueries({
-        queries: purchaseYearsArray.map((year) => ({
-            queryKey: [...queryKey.renewalPrice(name, year)],
-            queryFn: async () => {
-                return await iotaNamesClient.calculatePrice({
-                    name,
-                    years: year,
-                    isRegistration: false,
-                });
-            },
-            enabled: !!iotaNamesClient && !!name && purchaseableYears > 0,
-        })),
-    });
-
-    const purchaseOptions: SelectOption[] = purchaseYearsArray.map((year, idx) => {
-        const labelYears = `${year} Year${year > 1 ? 's' : ''}`;
-        const priceNanos = purchasePricesQueries[idx]?.data;
-        const priceIota = priceNanos ? formatNanosToIota(priceNanos) : null;
-        return {
-            id: String(year),
-            renderLabel: () => (
-                <div className="flex w-full items-center justify-between">
-                    <span className="text-body-lg">{labelYears}</span>
-                    {priceIota && (
-                        <span className="rounded-full bg-names-neutral-10 px-sm py-xs text-label-md text-names-neutral-100">
-                            {priceIota}
-                        </span>
-                    )}
-                </div>
-            ),
-        };
-    });
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>

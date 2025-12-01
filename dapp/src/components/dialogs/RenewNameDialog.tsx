@@ -19,20 +19,19 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    SelectOption,
     Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
-import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import { NameRecordData, queryKey, useNameRecord } from '@/hooks';
+import { NameRecordData, queryKey, useCalculatePrice, useNameRecord } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
@@ -91,6 +90,14 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const renewableYears =
+        config && config.coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  config.coreConfig.max_years,
+                  nameRecord.nameRecord.expirationDate,
+              )
+            : 0;
+    const renewOptions = useCalculatePrice(name, renewableYears, false);
     const [renewYears, setRenewYears] = useState<number | undefined>();
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
@@ -175,49 +182,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         setRenewYears(Number(years));
     }
 
-    const renewableYears =
-        config && config.coreConfig && nameRecord
-            ? getNameRenewableYears(
-                  config.coreConfig.max_years,
-                  nameRecord.nameRecord.expirationDate,
-              )
-            : 0;
-
     const isRenewable = (renewableYears ?? 0) > 0;
-    const renewYearsArray = Array.from({ length: renewableYears }, (_, i) => i + 1);
-
-    const renewalPricesQueries = useQueries({
-        queries: renewYearsArray.map((year) => ({
-            queryKey: [...queryKey.renewalPrice(name, year)],
-            queryFn: async () => {
-                return await iotaNamesClient.calculatePrice({
-                    name,
-                    years: year,
-                    isRegistration: false,
-                });
-            },
-            enabled: !!iotaNamesClient && !!name && renewableYears > 0,
-        })),
-    });
-
-    const renewOptions: SelectOption[] = renewYearsArray.map((year, idx) => {
-        const labelYears = `${year} Year${year > 1 ? 's' : ''}`;
-        const priceNanos = renewalPricesQueries[idx]?.data;
-        const priceIota = priceNanos ? formatNanosToIota(priceNanos) : null;
-        return {
-            id: String(year),
-            renderLabel: () => (
-                <div className="flex w-full items-center justify-between">
-                    <span className="text-body-lg">{labelYears}</span>
-                    {priceIota && (
-                        <span className="rounded-full bg-names-neutral-10 px-sm py-xs text-label-md text-names-neutral-100">
-                            {priceIota}
-                        </span>
-                    )}
-                </div>
-            ),
-        };
-    });
 
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
