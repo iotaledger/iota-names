@@ -170,22 +170,20 @@ test.describe.parallel('Name Management Tests', () => {
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
 
-        await page.getByText('Connect to Address', { exact: true }).click();
+        await page.getByText('Create Subname', { exact: true }).click();
+
         const dialog = page.getByRole('dialog');
-        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+        await expect(dialog.getByText('New Subname')).toBeVisible();
 
         await dialog.getByPlaceholder('Enter subname').fill('subname');
 
-        await dialog.getByText('Set as Display name').click();
-
-        await dialog.getByRole('button', { name: 'Apply' }).click();
+        await dialog.getByRole('button', { name: 'Create' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
+        await expect(page.getByText('Successfully created subname', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
-        await dialog.getByRole('button', { name: 'Finish' }).click();
 
         await page.close();
     });
