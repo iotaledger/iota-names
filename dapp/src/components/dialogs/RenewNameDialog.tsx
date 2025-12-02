@@ -19,7 +19,6 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    SelectOption,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -28,16 +27,10 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import {
-    NameRecordData,
-    queryKey,
-    useCalculatePriceInFiat,
-    useCalculateRenewalPrice,
-    useNameRecord,
-} from '@/hooks';
+import { NameRecordData, queryKey, useCalculatePrice, useNameRecord } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
@@ -96,12 +89,16 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const renewableYears =
+        config && config.coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  config.coreConfig.max_years,
+                  nameRecord.nameRecord.expirationDate,
+              )
+            : 0;
+    const renewOptions = useCalculatePrice(name, renewableYears, false);
     const [renewYears, setRenewYears] = useState<number | undefined>();
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-
-    const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
-    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
-    const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
@@ -181,19 +178,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         setRenewYears(Number(years));
     }
 
-    const renewableYears =
-        config && config.coreConfig && nameRecord
-            ? getNameRenewableYears(
-                  config.coreConfig.max_years,
-                  nameRecord.nameRecord.expirationDate,
-              )
-            : 0;
-
     const isRenewable = (renewableYears ?? 0) > 0;
-    const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
-        id: String(i + 1),
-        label: `${i + 1} Year${i ? 's' : ''}`,
-    }));
 
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
@@ -260,23 +245,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     <Select
                                         options={renewOptions}
                                         value={renewYears?.toString()}
-                                        supportingText=""
                                         onValueChange={handleYearsChange}
                                         disabled={disableEdit}
                                     />
-                                    {renewalPriceIota ? (
-                                        <span
-                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
-                                            aria-hidden
-                                        >
-                                            <span>{renewalPriceIota}</span>
-                                            {fiatPriceResult ? (
-                                                <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                    (${fiatPriceResult} USD)
-                                                </span>
-                                            ) : null}
-                                        </span>
-                                    ) : null}
                                 </div>
                             )}
                             {renewOptions.length === 0 && !isLoadingData && (
