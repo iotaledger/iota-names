@@ -26,7 +26,7 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
     }
 
     return (
-        <div className={clsx('flex flex-col mt-sm', coupons.length && 'gap-y-sm')}>
+        <div className={clsx('flex flex-col', coupons.length && 'gap-y-sm')}>
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
                 {coupons.map(({ code: coupon, isInvalid: isError }) => (
                     <Chip
