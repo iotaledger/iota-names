@@ -141,21 +141,19 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 queryKey: queryKey.defaultName(account?.address || ''),
             });
 
-            const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
-            if (hasAddressUpdate) {
-                const addressType = isTargetingCurrentAddress ? 'current' : 'external';
-                ampli.connectedAddress({
-                    name: cleanName,
-                    addressType: addressType,
-                });
-            }
-
             const hasSetDefaultUpdate = updates.some((update) => update.type === 'set-default');
-            if (hasSetDefaultUpdate) {
-                ampli.setNameAsDisplayed({
-                    name: cleanName,
-                });
-            }
+
+            const addressType = isTargetingCurrentAddress
+                ? 'current'
+                : editTargetAddress
+                  ? 'external'
+                  : 'empty';
+
+            ampli.connectedAddress({
+                name: cleanName,
+                addressType: addressType,
+                setNameAsDisplayed: hasSetDefaultUpdate,
+            });
 
             if (editTargetAddress.length === 0) {
                 toast.success(`Successfully disconnected ${cleanName}`);

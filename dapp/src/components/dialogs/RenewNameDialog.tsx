@@ -150,7 +150,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             });
             ampli.renewedName({
                 name,
-                expiration: renewYears || 0,
+                expiration: renewYears || 0, // tbd replace with more meaningful name renewYears
+                renewYears: renewYears || 0,
             });
             toast.success('Name renewed successfully');
         },
