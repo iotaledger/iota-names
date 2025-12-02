@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { queryKey } from '@/hooks/queryKey';
+import { ampli } from '@/lib/utils/analytics/ampli';
 
 import { AuctionDetails } from '../hooks/useAuctions';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
@@ -30,6 +31,12 @@ export function AuctionActionButton({
         useClaimAuctionTransaction(account?.address || '', auction.name, {
             onSuccess() {
                 setIsClaimCompleted(true);
+
+                ampli.domainClaimed({
+                    name: auction.name,
+                    auctionWonDate: auction.metadata?.endTimestamp?.getTime() || 0,
+                });
+
                 queryClient.invalidateQueries({
                     queryKey: queryKey.userAuctionHistory(account?.address),
                 });
