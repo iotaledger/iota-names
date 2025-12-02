@@ -136,7 +136,7 @@ jobs:
 
   dapp_e2e_test:
     name: Run dapp E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
@@ -174,6 +174,9 @@ jobs:
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: 20
+
+      - name: System dependencies
+        run: apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev
 
       - name: Install Homebrew
         run: |
