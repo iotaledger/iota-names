@@ -292,12 +292,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                     />
                                 </div>
                             ) : null}
-                            <div className="flex flex-col">
-                                <CouponInputSelection
-                                    coupons={coupons}
-                                    onAddCoupon={handleAddCoupon}
-                                />
-                            </div>
+                            {!isLoading ? (
+                                <div className="flex flex-col">
+                                    <CouponInputSelection
+                                        coupons={coupons}
+                                        onAddCoupon={handleAddCoupon}
+                                    />
+                                </div>
+                            ) : null}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             {updateNameError ? (
