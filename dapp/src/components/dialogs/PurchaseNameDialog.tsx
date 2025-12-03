@@ -70,7 +70,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const account = useCurrentAccount();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
-    const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+    const [isPublicName, setIsPublicName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [applyCoupons, setApplyCoupons] = useState(false);
     const [purchaseYears, setPurchaseYears] = useState<number>(1);
@@ -105,7 +105,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
             name: name,
             years: isRegisterWithYearsSupported ? purchaseYears : undefined,
             price: price,
-            setDefault: isDisplayName,
+            setPublic: isPublicName,
             address: account?.address,
             ...(applyCoupons && coupons.length ? { couponCodes } : {}),
         });
@@ -158,7 +158,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                 queryKey: queryKey.nameRecord(name),
             });
             queryClient.invalidateQueries({
-                queryKey: queryKey.defaultName(account?.address || ''),
+                queryKey: queryKey.publicName(account?.address || ''),
             });
 
             ampli.purchasedName({
@@ -169,7 +169,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
             });
 
-            if (isDisplayName) {
+            if (isPublicName) {
                 ampli.setNameAsDisplayed({ name });
             }
 
@@ -324,8 +324,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
                                         name="set_display_name"
-                                        isChecked={isDisplayName}
-                                        onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                        isChecked={isPublicName}
+                                        onCheckedChange={(e) => setIsPublicName(e.target.checked)}
                                         label="Set name as Display Name"
                                     />
                                 </div>

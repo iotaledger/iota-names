@@ -8,7 +8,6 @@ import {
     Button,
     ButtonSize,
     ButtonType,
-    Checkbox,
     Chip,
     ChipType,
     Dialog,
@@ -23,24 +22,24 @@ import {
     InputType,
     LoadingIndicator,
     Panel,
-    TooltipPosition,
+    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress, isValidIotaAddress } from '@iota/iota-sdk/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import clsx from 'clsx';
+import Image from 'next/image';
 import { ChangeEvent, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
-import { useGetDefaultName } from '@/hooks/useGetDefaultName';
+import { useGetPublicName } from '@/hooks/useGetPublicName';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
-
-import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface ConnectToAddressDialogProps {
     name: string;
@@ -53,11 +52,11 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const account = useCurrentAccount();
 
     const [editTargetAddress, setEditTargetAddress] = useState<string>('');
-    const [editIsDefaultName, setEditIsDefaultName] = useState<boolean>(false);
+    const [editIsPublicName, setEditIsPublicName] = useState<boolean>(false);
 
     const { data: nameRecordData, isLoading: isNameRecordLoading } = useNameRecord(name);
     const { data: ownedSubnames } = useRegistrationNfts('subname');
-    const { data: addressName } = useGetDefaultName(account?.address ?? '');
+    const { data: addressName } = useGetPublicName(account?.address ?? '');
 
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
@@ -72,15 +71,15 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         setEditTargetAddress(currentTargetAddress);
     }, [currentTargetAddress]);
 
-    // Sync address current default name
+    // Sync address current public name
     useEffect(() => {
-        setEditIsDefaultName(addressName === name);
+        setEditIsPublicName(addressName === name);
     }, [addressName]);
 
     const hasAddressChange = editTargetAddress !== currentTargetAddress;
-    const hasDefaultChange = (addressName === name) !== editIsDefaultName;
+    const hasPublicChanged = (addressName === name) !== editIsPublicName;
     const isValidAddressOrEmpty = editTargetAddress === '' || isValidIotaAddress(editTargetAddress);
-    const hasChanges = (hasAddressChange && isValidAddressOrEmpty) || hasDefaultChange;
+    const hasChanges = (hasAddressChange && isValidAddressOrEmpty) || hasPublicChanged;
     const isTargetingCurrentAddress = editTargetAddress === account?.address;
 
     const updates: NameUpdate[] = [];
@@ -88,8 +87,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         ? getNameObject(ownedSubnames ?? [], nameRecord?.nameRecord.name ?? '')
         : nameRecord?.nameRecord.nftId;
 
-    if (hasDefaultChange && !editIsDefaultName) {
-        updates.push({ type: 'unset-default' });
+    if (hasPublicChanged && !editIsPublicName) {
+        updates.push({ type: 'unset-public' });
     }
 
     if (hasAddressChange && nftId) {
@@ -101,13 +100,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         });
     }
 
-    if (hasDefaultChange && editIsDefaultName) {
+    if (hasPublicChanged && editIsPublicName) {
         if (isTargetingCurrentAddress) {
-            updates.push({ type: 'set-default', name });
+            updates.push({ type: 'set-public', name });
         } else {
-            // Dont allow setting a name as default if the
+            // Dont allow setting a name as public if the
             // edit address does not match the current address
-            setEditIsDefaultName(false);
+            setEditIsPublicName(false);
         }
     }
 
@@ -138,7 +137,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             setAppliedUpdates(updates);
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
             queryClient.invalidateQueries({
-                queryKey: queryKey.defaultName(account?.address || ''),
+                queryKey: queryKey.publicName(account?.address || ''),
             });
 
             const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
@@ -150,8 +149,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                 });
             }
 
-            const hasSetDefaultUpdate = updates.some((update) => update.type === 'set-default');
-            if (hasSetDefaultUpdate) {
+            const hasSetPublicUpdate = updates.some((update) => update.type === 'set-public');
+            if (hasSetPublicUpdate) {
                 ampli.setNameAsDisplayed({
                     name: cleanName,
                 });
@@ -184,19 +183,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
         if (account?.address) setEditTargetAddress(account.address);
     }
 
-    function copyAddressToClipboard() {
-        if (account?.address) {
-            copyToClipboard(account.address);
-        }
-    }
-
     const isLoading = isApplying || isSigning || isLoadingTx;
     const disableEdit = isNameRecordLoading || isExpired || isSigning;
     const disableApply =
         !hasChanges || !isValidAddressOrEmpty || isExpired || isLoading || !updateNameTransaction;
     const cleanName = normalizeIotaName(name, 'at', { truncateLongParts: true });
 
-    const showAddressWarning = !!addressName && addressName !== name && editIsDefaultName;
+    const showAddressWarning = !!addressName && addressName !== name && editIsPublicName;
     const errorMessage =
         editTargetAddress && !isValidAddressOrEmpty ? 'Not a valid IOTA address' : undefined;
     return (
@@ -218,10 +211,15 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         <span className="text-title-md text-names-neutral-100">
                                             Link to Address
                                         </span>
-                                        <div className="[&>div>label]:break-words">
+                                        <div
+                                            className={clsx(
+                                                '[&>div>label]:break-words',
+                                                isTargetingCurrentAddress && 'pb-6',
+                                            )}
+                                        >
                                             <Input
                                                 type={InputType.Text}
-                                                label={`Select a target address to connect to ${cleanName}`}
+                                                label={`Enter a target address to connect to ${cleanName}`}
                                                 placeholder="Enter Address"
                                                 value={editTargetAddress}
                                                 onChange={handleAddressChange}
@@ -244,7 +242,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         )}
                                         {nameRecord?.nameRecord.targetAddress &&
                                             !hasAddressChange &&
-                                            editIsDefaultName && (
+                                            editIsPublicName && (
                                                 <div className="flex w-full break-all">
                                                     <InfoBox
                                                         type={InfoBoxType.Success}
@@ -260,71 +258,50 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                     </div>
                                     {isTargetingCurrentAddress && (
                                         <Panel bgColor="bg-names-neutral-10 state-layer relative">
-                                            <div className="flex flex-col rounded-lg p-md gap-y-md">
-                                                <div
-                                                    className={`flex flex-row items-start gap-x-md ${
-                                                        !disableEdit && isTargetingCurrentAddress
-                                                            ? 'cursor-pointer'
-                                                            : 'cursor-not-allowed'
-                                                    }`}
-                                                    onClick={() => {
-                                                        if (
-                                                            !disableEdit &&
-                                                            isTargetingCurrentAddress
-                                                        ) {
-                                                            setEditIsDefaultName(
-                                                                !editIsDefaultName,
-                                                            );
-                                                        }
-                                                    }}
-                                                >
-                                                    <div className=" flex flex-col gap-y-xxs">
+                                            <div
+                                                className={clsx(
+                                                    'flex flex-col rounded-lg gap-y-xxxs',
+                                                    !disableEdit && isTargetingCurrentAddress
+                                                        ? 'cursor-pointer'
+                                                        : 'cursor-not-allowed',
+                                                )}
+                                                onClick={() => {
+                                                    if (!disableEdit && isTargetingCurrentAddress) {
+                                                        setEditIsPublicName(!editIsPublicName);
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex flex-row items-start gap-x-md p-md">
+                                                    <div className="flex flex-col gap-y-xxs">
                                                         <span className="text-title-md text-names-neutral-100">
-                                                            Set as Display name
+                                                            Use as your public name
                                                         </span>
-                                                        <span className="text-body-md text-names-neutral-90">
-                                                            Use Name publicly across the web instead
-                                                            of current address.
+                                                        <span className="text-body-sm text-names-neutral-70">
+                                                            Your IOTA name will be publicly visible
+                                                            and searchable (e.g., in blockchain
+                                                            explorers), allowing others to find you
+                                                            using {cleanName} instead of your
+                                                            address.
                                                         </span>
                                                     </div>
-                                                    <Checkbox
-                                                        isChecked={editIsDefaultName}
+                                                    <Toggle
+                                                        isToggled={editIsPublicName}
                                                         isDisabled={
                                                             disableEdit ||
                                                             !isTargetingCurrentAddress
                                                         }
-                                                        onCheckedChange={(checked) => {
-                                                            const value = !!checked.target.checked;
-                                                            console.log(
-                                                                'Checkbox Set as Display Name →',
-                                                                value,
-                                                            );
-                                                            setEditIsDefaultName(value);
+                                                        onChange={(checked) => {
+                                                            setEditIsPublicName(checked);
                                                         }}
                                                     />
                                                 </div>
-                                                <Panel hasBorder bgColor="bg-names-neutral-10">
-                                                    <div className="flex flex-col items-center gap-y-xxs py-md px-xs">
-                                                        <span className="text-title-lg text-names-neutral-100 w-full text-center">
-                                                            <TruncatedNameWithTooltip
-                                                                name={name}
-                                                                tooltipPosition={
-                                                                    TooltipPosition.Top
-                                                                }
-                                                            />
-                                                        </span>
-                                                        <Chip
-                                                            label={formatAddress(
-                                                                account?.address || '',
-                                                            )}
-                                                            trailingElement={
-                                                                <Copy className="w-4 h-4" />
-                                                            }
-                                                            onClick={copyAddressToClipboard}
-                                                            type={ChipType.Elevated}
-                                                        />
-                                                    </div>
-                                                </Panel>
+                                                <Image
+                                                    src="/public-name-showcase.gif"
+                                                    width={352}
+                                                    height={117}
+                                                    alt={cleanName}
+                                                    className="w-full h-[117px] object-cover rounded-b-xl"
+                                                />
 
                                                 {showAddressWarning && (
                                                     <InfoBox
@@ -397,7 +374,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
         truncateLongParts: true,
     });
 
-    const isNameDefault = updates.some((update) => update.type === 'set-default');
+    const isNamePublic = updates.some((update) => update.type === 'set-public');
 
     return (
         <div className="text-center flex flex-col gap-y-md">
@@ -407,18 +384,18 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                     label={formatAddress(account?.address || '')}
                     trailingElement={<Copy className="w-4 h-4" />}
                     onClick={copyAddressToClipboard}
-                    type={isNameDefault ? ChipType.Success : ChipType.Elevated}
+                    type={isNamePublic ? ChipType.Success : ChipType.Elevated}
                 />
             </div>
             <div className="flex flex-col">
                 {updates.map((update) => {
                     switch (update.type) {
-                        case 'set-default': {
+                        case 'set-public': {
                             return (
                                 <span
                                     key={update.type}
                                     className="text-body-md text-names-neutral-70"
-                                >{`${cleanName} is now set as displayed`}</span>
+                                >{`${cleanName} is now visible publicly.`}</span>
                             );
                         }
 
