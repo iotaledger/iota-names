@@ -130,20 +130,20 @@ importers:
         specifier: ^0.7.2
         version: 0.7.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: ^0.7.0
+        version: 0.7.0(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(typescript@5.8.3)
+        specifier: ^0.11.0
+        version: 0.11.0(typescript@5.8.3)
       '@iota/iota-names-sdk':
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(typescript@5.8.3)
+        specifier: ^1.8.0
+        version: 1.8.0(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(typescript@5.8.3)
+        specifier: ^0.5.1
+        version: 0.5.1(typescript@5.8.3)
       '@next/mdx':
         specifier: ^15.5.0
         version: 15.5.0(@mdx-js/react@2.3.0(react@18.3.1))
@@ -370,8 +370,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(typescript@5.8.3)
+        specifier: ^1.8.0
+        version: 1.8.0(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
@@ -380,8 +380,8 @@ importers:
         specifier: workspace:^
         version: link:../build-scripts
       '@iota/graphql-transport':
-        specifier: 0.0.0-experimental-20251127115223
-        version: 0.0.0-experimental-20251127115223(typescript@5.8.3)
+        specifier: ^0.11.0
+        version: 0.11.0(typescript@5.8.3)
       '@types/tmp':
         specifier: ^0.2.6
         version: 0.2.6
@@ -1847,20 +1847,20 @@ packages:
       react: ^18 || ^19
       react-dom: ^18 || ^19
 
-  '@iota/bcs@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-JmOZj6woq5sSpNuR+SaydpZ5KFYl3BYXznlbMMH0X8wUqIU1lr3xjwCBwFFl2ez4oxYJ/FjtmNCJ/35h2hzHUA==}
-
   '@iota/bcs@1.2.0':
     resolution: {integrity: sha512-QdRSR0KpJ87tdjVNmM/j0+0DvE0aTxHIa02337iluaOsMqtJ8OdgUCfSyLduC/3qS+8tJE+UB1KOw55tF+sN2w==}
 
-  '@iota/dapp-kit@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-62IS8+iEwwGuzfUDipe3W8IFhSpTQ0vdvqKY+vSJsdQeZAGehktegkv+10YDcyshEJDNxxxKLdDv/DBTrl54Wg==}
+  '@iota/bcs@1.3.0':
+    resolution: {integrity: sha512-R99rbggmRuRIhfPpmmceo87gRrVrfM1oZRhGhK5dmbOk5wooo3rMYzN/a0KzQ9Ieig/FisuV5uDEkFheQXr7WA==}
+
+  '@iota/dapp-kit@0.7.0':
+    resolution: {integrity: sha512-e6go/863JcsncOrkvJqtFYdLYSZ21/nDj0UmbF9exefsX9aMzLxoHSiB9zL+qBPY1z9G1WfAgqyFYRQBKzEzgg==}
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
 
-  '@iota/graphql-transport@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-fk6daNVSKqBexXEpT/sMDviI3a97b4iZztI35gTnJOo2w5w3EClGXTbdewXoHBr+QDyc+saRzW+eXVVVqZzZlg==}
+  '@iota/graphql-transport@0.11.0':
+    resolution: {integrity: sha512-HsMStdLnG3l7rVSgjW/MRSZd0pMfgRXXJTaRI+12XRNAGMb7LKdY78q+dqmetuFCtO6EsZL7otzbu7Uc5rh/8w==}
 
   '@iota/iota-names-sdk@0.3.0':
     resolution: {integrity: sha512-UU0ZRcwkOEexrsa3RGtoJ/tD0G1moM62CmGjfifOjisA3gSDn6f13mIxWreM6nalhp69t2WKpF69wQ1Rcd8MHQ==}
@@ -1868,24 +1868,28 @@ packages:
     peerDependencies:
       '@iota/iota-sdk': ^1.5.0
 
-  '@iota/iota-sdk@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-0ocPn+lgCbd+1H0IuE4TrJ0bvnQWRjaITp0pl2zNCa6gpR39nSS4JYr7KxNhIsyR0nqXSIJeOosg9hKc5C/k1Q==}
-    engines: {node: '>=20'}
-
   '@iota/iota-sdk@1.5.0':
     resolution: {integrity: sha512-R5Tx78Z3ZMh+P7uAqN3U+JylfY+rbnnzjqEehef+bYatyddkh8uEr7S2l/0++Vrp56bpZnSdLTld1PvKKWyXaQ==}
     engines: {node: '>=20'}
 
-  '@iota/kiosk@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-vaRslq3HPzbddU/FPUGx8by1z4w5Q9XwmQ8mKjab3LrTvbweypukb1V4xBHaOIpiTXd52tIzAofTOo24xkAGPg==}
+  '@iota/iota-sdk@1.7.1':
+    resolution: {integrity: sha512-ZUGPGldQPI2j9twUkylRuE/JkP9U4T7eOFdid4G8UufCs5VdepTISv76IoTSgn/K27xQhVjULsqx4rhlUWSXeA==}
+    engines: {node: '>=20'}
+
+  '@iota/iota-sdk@1.8.0':
+    resolution: {integrity: sha512-tXh4y+ccy5DKURtcdcB4O+QnV3arnUH0iIKg+G77/QzOJS6ylZ6fzQzmW7AhpTj/yWS649n+HzVo4xo7F/2AcA==}
     engines: {node: '>=20'}
 
   '@iota/kiosk@0.4.6':
     resolution: {integrity: sha512-+caukjLX6Zzuh7c/LjhtTACiU8vEqKwAK7JCkv7ZlGOxzEpn1I7XPv5wby8zWam7xRHjeMVOtYwfVq36zmxIZA==}
     engines: {node: '>=20'}
 
-  '@iota/wallet-standard@0.0.0-experimental-20251127115223':
-    resolution: {integrity: sha512-UDvc3OO/dR59hhSG4bPv+aInS3PjTHGdAeVZLKRG2TWVS6owAYe6dM47pZwUoqcKeLd6VOEGd6hvFxxki7ofrg==}
+  '@iota/kiosk@0.5.1':
+    resolution: {integrity: sha512-u9yYRasiBu/dvRuPGcjeGXjCo7/TGqJMrj2Os04QMmBAONWsu+b3tAML262tt+JSwjKyUKw2QS+EYMXueWG/LQ==}
+    engines: {node: '>=20'}
+
+  '@iota/wallet-standard@0.2.17':
+    resolution: {integrity: sha512-Xu8tg88CqxxustDZXEN2x/mYAeUlEOFZW6deBKINe7C/1SNHLWOwbTKfyouXDrAyOqVxJF7T0tkln6klKVH36Q==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -3746,9 +3750,6 @@ packages:
 
   '@vanilla-extract/integration@8.0.1':
     resolution: {integrity: sha512-ag64t+AM96XGOiloc5ryZHP5rbfleFyfoPKa42QqOuyAlLx/UpW5epSY+RUldizP4P/uLy5WFRiYlNddK1eQUQ==}
-
-  '@vanilla-extract/private@1.0.6':
-    resolution: {integrity: sha512-ytsG/JLweEjw7DBuZ/0JCN4WAQgM9erfSTdS1NQY778hFQSZ6cfCDEZZ0sgVm4k54uNz6ImKB33AYvSR//fjxw==}
 
   '@vanilla-extract/private@1.0.7':
     resolution: {integrity: sha512-v9Yb0bZ5H5Kr8ciwPXyEToOFD7J/fKKH93BYP7NCSZg02VYsA/pNFrLeVDJM2OO/vsygduPKuiEI6ORGQ4IcBw==}
@@ -10319,19 +10320,19 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@iota/bcs@0.0.0-experimental-20251127115223':
-    dependencies:
-      bs58: 6.0.0
-
   '@iota/bcs@1.2.0':
     dependencies:
       bs58: 6.0.0
 
-  '@iota/dapp-kit@0.0.0-experimental-20251127115223(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@iota/bcs@1.3.0':
     dependencies:
-      '@iota/iota-names-sdk': 0.3.0(@iota/iota-sdk@0.0.0-experimental-20251127115223(typescript@5.8.3))
-      '@iota/iota-sdk': 0.0.0-experimental-20251127115223(typescript@5.8.3)
-      '@iota/wallet-standard': 0.0.0-experimental-20251127115223(typescript@5.8.3)
+      bs58: 6.0.0
+
+  '@iota/dapp-kit@0.7.0(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+    dependencies:
+      '@iota/iota-names-sdk': 0.3.0(@iota/iota-sdk@1.7.1(typescript@5.8.3))
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
+      '@iota/wallet-standard': 0.2.17(typescript@5.8.3)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.15(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.3(@types/react@18.3.21)(react@18.3.1)
@@ -10352,41 +10353,21 @@ snapshots:
       - react-dom
       - typescript
 
-  '@iota/graphql-transport@0.0.0-experimental-20251127115223(typescript@5.8.3)':
+  '@iota/graphql-transport@0.11.0(typescript@5.8.3)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 0.0.0-experimental-20251127115223
-      '@iota/iota-sdk': 0.0.0-experimental-20251127115223(typescript@5.8.3)
+      '@iota/bcs': 1.3.0
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
       graphql: 16.11.0
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/iota-names-sdk@0.3.0(@iota/iota-sdk@0.0.0-experimental-20251127115223(typescript@5.8.3))':
+  '@iota/iota-names-sdk@0.3.0(@iota/iota-sdk@1.7.1(typescript@5.8.3))':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20251127115223(typescript@5.8.3)
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
       '@noble/hashes': 1.8.0
-
-  '@iota/iota-sdk@0.0.0-experimental-20251127115223(typescript@5.8.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
-      '@iota/bcs': 0.0.0-experimental-20251127115223
-      '@noble/curves': 1.9.1
-      '@noble/hashes': 1.8.0
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      '@suchipi/femver': 1.0.0
-      bech32: 2.0.0
-      bignumber.js: 9.3.0
-      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
-      graphql: 16.11.0
-      tweetnacl: 1.0.3
-      valibot: 0.36.0
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
   '@iota/iota-sdk@1.5.0(typescript@5.8.3)':
     dependencies:
@@ -10408,10 +10389,41 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/kiosk@0.0.0-experimental-20251127115223(typescript@5.8.3)':
+  '@iota/iota-sdk@1.7.1(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20251127115223(typescript@5.8.3)
-      dotenv: 16.4.7
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      '@iota/bcs': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      '@suchipi/femver': 1.0.0
+      bech32: 2.0.0
+      bignumber.js: 9.3.0
+      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
+      graphql: 16.11.0
+      tweetnacl: 1.0.3
+      valibot: 0.36.0
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
+  '@iota/iota-sdk@1.8.0(typescript@5.8.3)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      '@iota/bcs': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      '@suchipi/femver': 1.0.0
+      bech32: 2.0.0
+      bignumber.js: 9.3.0
+      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
+      graphql: 16.11.0
+      tweetnacl: 1.0.3
+      valibot: 0.36.0
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
@@ -10426,9 +10438,18 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/wallet-standard@0.0.0-experimental-20251127115223(typescript@5.8.3)':
+  '@iota/kiosk@0.5.1(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 0.0.0-experimental-20251127115223(typescript@5.8.3)
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
+      dotenv: 16.4.7
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
+  '@iota/wallet-standard@0.2.17(typescript@5.8.3)':
+    dependencies:
+      '@iota/iota-sdk': 1.7.1(typescript@5.8.3)
       '@wallet-standard/core': 1.0.3
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
@@ -12464,7 +12485,7 @@ snapshots:
   '@vanilla-extract/css@1.17.1(babel-plugin-macros@3.1.0)':
     dependencies:
       '@emotion/hash': 0.9.2
-      '@vanilla-extract/private': 1.0.6
+      '@vanilla-extract/private': 1.0.7
       css-what: 6.1.0
       cssesc: 3.0.0
       csstype: 3.1.3
@@ -12506,8 +12527,6 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
-
-  '@vanilla-extract/private@1.0.6': {}
 
   '@vanilla-extract/private@1.0.7': {}
 
