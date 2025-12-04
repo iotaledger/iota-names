@@ -271,7 +271,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                     }
                                                 }}
                                             >
-                                                <div className="flex flex-row items-start gap-x-md p-md">
+                                                <div className="flex flex-row items-center gap-x-md p-md">
                                                     <div className="flex flex-col gap-y-xxs">
                                                         <span className="text-title-md text-names-neutral-100">
                                                             Use as your public name
