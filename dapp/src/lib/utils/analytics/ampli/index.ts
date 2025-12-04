@@ -106,6 +106,12 @@ export interface DomainClaimedProperties {
     name: string;
 }
 
+export interface OpenedIotaNamesProperties {
+    activeOrigin: string;
+    pagePath?: string;
+    pagePathFragment?: string;
+}
+
 export interface PerformedSearchProperties {
     query: string;
 }
@@ -202,6 +208,14 @@ export class DomainClaimed implements BaseEvent {
     event_type = 'domain claimed';
 
     constructor(public event_properties: DomainClaimedProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class OpenedIotaNames implements BaseEvent {
+    event_type = 'opened iota names';
+
+    constructor(public event_properties: OpenedIotaNamesProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -442,6 +456,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new DomainClaimed(properties), options);
+  }
+
+  /**
+   * opened iota names
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/opened%20iota%20names)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. activeOrigin)
+   * @param options Amplitude event options.
+   */
+  openedIotaNames(
+    properties: OpenedIotaNamesProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OpenedIotaNames(properties), options);
   }
 
   /**
