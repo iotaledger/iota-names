@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Copy, Link, Warning } from '@iota/apps-ui-icons';
+import { Add, CheckmarkFilled, Copy, Link, Warning } from '@iota/apps-ui-icons';
 import {
     Button,
     ButtonSize,
@@ -377,46 +377,57 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
     const isNamePublic = updates.some((update) => update.type === 'set-public');
 
     return (
-        <div className="text-center flex flex-col gap-y-md">
-            <div className="flex flex-col items-center gap-y-sm">
-                <Chip
-                    leadingElement={<Link className="w-4 h-4" />}
-                    label={formatAddress(account?.address || '')}
-                    trailingElement={<Copy className="w-4 h-4" />}
-                    onClick={copyAddressToClipboard}
-                    type={isNamePublic ? ChipType.Success : ChipType.Elevated}
-                />
+        <div className="flex flex-col gap-y-md">
+            <div className="flex flex-col gap-y-sm">
+                <div className="text-headline-sm text-iota-neutral-100">{cleanName}</div>
+                <div>
+                    <Chip
+                        leadingElement={<Link className="w-4 h-4" />}
+                        label={formatAddress(account?.address || '')}
+                        trailingElement={<Copy className="w-4 h-4" />}
+                        onClick={copyAddressToClipboard}
+                        type={isNamePublic ? ChipType.Success : ChipType.Elevated}
+                    />
+                </div>
             </div>
-            <div className="flex flex-col">
-                {updates.map((update) => {
-                    switch (update.type) {
-                        case 'set-public': {
-                            return (
-                                <span
-                                    key={update.type}
-                                    className="text-body-md text-names-neutral-70"
-                                >{`${cleanName} is now visible publicly.`}</span>
-                            );
-                        }
+            <Panel bgColor="bg-names-neutral-10">
+                <div className="flex flex-col gap-y-2 p-md text-start">
+                    {updates.map((update) => {
+                        switch (update.type) {
+                            case 'set-public': {
+                                return (
+                                    <div
+                                        className="flex flex-row items-center gap-xs"
+                                        key={update.type}
+                                    >
+                                        <CheckmarkFilled className="size-5 text-names-neutral-50" />
+                                        <span className="text-body-md text-names-neutral-92">{`${cleanName} is now publicly visible.`}</span>
+                                    </div>
+                                );
+                            }
 
-                        case 'set-target-address': {
-                            return (
-                                <span
-                                    key={update.type}
-                                    className="text-body-md text-names-neutral-70"
-                                >
-                                    {update.address
-                                        ? 'Address linked successfully'
-                                        : `${cleanName} is no longer linked to an address`}
-                                </span>
-                            );
-                        }
+                            case 'set-target-address': {
+                                return (
+                                    <div
+                                        className="flex flex-row items-center gap-xs"
+                                        key={update.type}
+                                    >
+                                        <CheckmarkFilled className="size-5 text-names-neutral-50" />
+                                        <span className="text-body-md text-names-neutral-92">
+                                            {update.address
+                                                ? 'Address linked successfully'
+                                                : `${cleanName} is no longer linked to an address`}
+                                        </span>
+                                    </div>
+                                );
+                            }
 
-                        default:
-                            return null;
-                    }
-                })}
-            </div>
+                            default:
+                                return null;
+                        }
+                    })}
+                </div>
+            </Panel>
         </div>
     );
 }
