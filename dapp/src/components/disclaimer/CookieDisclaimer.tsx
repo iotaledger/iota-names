@@ -9,7 +9,6 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
 import { FOOTER_LEGAL_LINKS } from '@/lib/constants';
-import { ampli } from '@/lib/utils/analytics/ampli';
 import {
     getAmplitudeConsentStatus,
     onAmplitudeConsentAccepted,
@@ -48,13 +47,8 @@ export function CookieDisclaimer() {
                 },
             ],
         },
-        onAcceptCookies: async () => {
-            await onAmplitudeConsentAccepted();
-            await ampli.openedIotaNames({
-                activeOrigin: window.location.origin,
-                pagePath: window.location.pathname,
-                pagePathFragment: `${location.pathname}${location.search}${location.hash}`,
-            }).promise;
+        onAcceptCookies: () => {
+            onAmplitudeConsentAccepted();
         },
         onDeclineCookies: () => {
             onAmplitudeConsentDeclined();
