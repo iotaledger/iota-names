@@ -21,8 +21,6 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    SelectOption,
-    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
@@ -36,6 +34,7 @@ import {
     NameUpdate,
     queryKey,
     useBalance,
+    useCalculatePrice,
     useCalculatePriceInFiat,
     useCoinMetadata,
     useUpdateNameTransaction,
@@ -66,14 +65,14 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const client = useIotaClient();
     const { iotaNamesClient } = useIotaNamesClient();
     const { data: config, isLoading: isLoadingConfig } = useNamesConfig();
-
+    const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
+    const purchaseOptions = useCalculatePrice(name, purchaseableYears, true);
     const account = useCurrentAccount();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
     const { data: coinMetadata } = useCoinMetadata(coinBalance?.coinType);
     const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-    const [applyCoupons, setApplyCoupons] = useState(false);
     const [purchaseYears, setPurchaseYears] = useState<number>(1);
     const { data: isRegisterWithYearsSupported, isLoading: isLoadingRegisterWithYears } =
         useIsMethodSupported({
@@ -108,7 +107,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
             price: price,
             setDefault: isDisplayName,
             address: account?.address,
-            ...(applyCoupons && coupons.length ? { couponCodes } : {}),
+            ...(coupons.length ? { couponCodes } : {}),
         });
     }
 
@@ -121,7 +120,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
         updates: updates,
     });
 
-    const applyDiscount = applyCoupons && couponCodes.length >= 0;
+    const applyDiscount = couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
         queryKey: [couponCodes, name, account?.address, purchaseYears],
@@ -271,12 +270,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const canRegister = canPay && !hasErrors && !isLoading && !isSendingTransaction;
     const expirationDate = getTargetExpirationDate(purchaseYears);
 
-    const purchaseableYears = config && config.coreConfig ? config.coreConfig.max_years : 0;
-    const purchaseOptions: SelectOption[] = Array.from({ length: purchaseableYears }, (_, i) => ({
-        id: String(i + 1),
-        label: `${i + 1} Year${i ? 's' : ''}`,
-    }));
-
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -299,38 +292,16 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                     <Select
                                         options={purchaseOptions}
                                         value={purchaseYears?.toString()}
-                                        supportingText=""
                                         onValueChange={handleYearsChange}
                                     />
-                                    {finalPriceIota ? (
-                                        <span
-                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
-                                            aria-hidden
-                                        >
-                                            <span>{finalPriceIota}</span>
-                                            {fiatPriceResult ? (
-                                                <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                    (${fiatPriceResult} USD)
-                                                </span>
-                                            ) : null}
-                                        </span>
-                                    ) : null}
                                 </div>
                             ) : null}
                             <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
-                                </div>
-                                {applyCoupons && (
-                                    <CouponInputSelection
-                                        coupons={coupons}
-                                        onAddCoupon={handleAddCoupon}
-                                    />
-                                )}
+                                <CouponInputSelection
+                                    coupons={coupons}
+                                    disabled={isLoading}
+                                    onAddCoupon={handleAddCoupon}
+                                />
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">

@@ -84,6 +84,10 @@ export interface ConnectedAddressProperties {
     setNameAsDisplayed?: boolean;
 }
 
+export interface ConnectedWalletProperties {
+    wallet: string;
+}
+
 export interface CreatedSubnameProperties {
     allowToCreateAdditionalSubnames?: boolean;
     allowToRenewExpiration?: boolean;
@@ -107,6 +111,12 @@ export interface DomainClaimedProperties {
      */
     auctionWonDate: number;
     name: string;
+}
+
+export interface OpenedIotaNamesProperties {
+    activeOrigin: string;
+    pagePath?: string;
+    pagePathFragment?: string;
 }
 
 export interface PerformedSearchProperties {
@@ -211,6 +221,14 @@ export class ConnectedAddress implements BaseEvent {
     }
 }
 
+export class ConnectedWallet implements BaseEvent {
+    event_type = 'connected wallet';
+
+    constructor(public event_properties: ConnectedWalletProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
 export class CreatedSubname implements BaseEvent {
     event_type = 'created subname';
 
@@ -223,6 +241,14 @@ export class DomainClaimed implements BaseEvent {
     event_type = 'domain claimed';
 
     constructor(public event_properties: DomainClaimedProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class OpenedIotaNames implements BaseEvent {
+    event_type = 'opened iota names';
+
+    constructor(public event_properties: OpenedIotaNamesProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -432,6 +458,23 @@ export class Ampli {
   }
 
   /**
+   * connected wallet
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/connected%20wallet)
+   *
+   * Triggered at the end of a connection event, when the user successfully connected any wallet
+   *
+   * @param properties The event's properties (e.g. wallet)
+   * @param options Amplitude event options.
+   */
+  connectedWallet(
+    properties: ConnectedWalletProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ConnectedWallet(properties), options);
+  }
+
+  /**
    * created subname
    *
    * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/created%20subname)
@@ -463,6 +506,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new DomainClaimed(properties), options);
+  }
+
+  /**
+   * opened iota names
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/opened%20iota%20names)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. activeOrigin)
+   * @param options Amplitude event options.
+   */
+  openedIotaNames(
+    properties: OpenedIotaNamesProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OpenedIotaNames(properties), options);
   }
 
   /**
