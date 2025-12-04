@@ -100,6 +100,22 @@ export interface CreatedSubnameProperties {
     subnamePermissions?: ('allow_to_create_additional_subnames' | 'allow_to_renew_expiration')[];
 }
 
+export interface DomainClaimedProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    auctionWonDate: number;
+    name: string;
+}
+
+export interface OpenedIotaNamesProperties {
+    activeOrigin: string;
+    pagePath?: string;
+    pagePathFragment?: string;
+}
+
 export interface PerformedSearchProperties {
     query: string;
 }
@@ -159,6 +175,11 @@ export interface RenewedSubnameProperties {
     name: string;
 }
 
+export interface SetAvatarProperties {
+    name: string;
+    setAvatar: boolean;
+}
+
 export interface SetNameAsDisplayedProperties {
     name: string;
 }
@@ -191,6 +212,22 @@ export class CreatedSubname implements BaseEvent {
     event_type = 'created subname';
 
     constructor(public event_properties: CreatedSubnameProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class DomainClaimed implements BaseEvent {
+    event_type = 'domain claimed';
+
+    constructor(public event_properties: DomainClaimedProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class OpenedIotaNames implements BaseEvent {
+    event_type = 'opened iota names';
+
+    constructor(public event_properties: OpenedIotaNamesProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -231,6 +268,14 @@ export class RenewedSubname implements BaseEvent {
     event_type = 'renewed subname';
 
     constructor(public event_properties: RenewedSubnameProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class SetAvatar implements BaseEvent {
+    event_type = 'set avatar';
+
+    constructor(public event_properties: SetAvatarProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -426,6 +471,40 @@ export class Ampli {
   }
 
   /**
+   * domain claimed
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/domain%20claimed)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. auctionWonDate)
+   * @param options Amplitude event options.
+   */
+  domainClaimed(
+    properties: DomainClaimedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DomainClaimed(properties), options);
+  }
+
+  /**
+   * opened iota names
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/opened%20iota%20names)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. activeOrigin)
+   * @param options Amplitude event options.
+   */
+  openedIotaNames(
+    properties: OpenedIotaNamesProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OpenedIotaNames(properties), options);
+  }
+
+  /**
    * performed search
    *
    * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/performed%20search)
@@ -508,6 +587,23 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new RenewedSubname(properties), options);
+  }
+
+  /**
+   * set avatar
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/set%20avatar)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. name)
+   * @param options Amplitude event options.
+   */
+  setAvatar(
+    properties: SetAvatarProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new SetAvatar(properties), options);
   }
 
   /**
