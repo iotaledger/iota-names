@@ -8,7 +8,7 @@ export * from './useRegistrationNfts';
 export * from './useTheme';
 export * from './usePriceList';
 export * from './queryKey';
-export * from './useGetDefaultName';
+export * from './useGetPublicName';
 export * from './useUpdateNameTransaction';
 export * from './useTokenPrice';
 export * from './useCoinMetadata';
