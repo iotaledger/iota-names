@@ -205,7 +205,7 @@ jobs:
       - name: Prepare local network & Run Dapp e2e tests
         working-directory: ./
         run: |
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
+          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
           sleep 10
 
           iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
