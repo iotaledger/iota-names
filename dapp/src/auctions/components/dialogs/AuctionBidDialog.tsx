@@ -126,23 +126,23 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                     wasUserTopBidder: false,
                     isUserFirstBidOnAuction: true,
                     auctionCurrentBidAmount: 0,
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             } else if (auctionStatus === 'top_bidder') {
                 ampli.placedAuctionBid({
                     name: name,
                     wasUserTopBidder: true,
                     isUserFirstBidOnAuction: false,
-                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    auctionCurrentBidAmount: parseNanosToIota(auctionMetadata.currentBidNanos),
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             } else {
                 ampli.placedAuctionBid({
                     name: name,
                     wasUserTopBidder: false,
                     isUserFirstBidOnAuction: false,
-                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    auctionCurrentBidAmount: parseNanosToIota(auctionMetadata.currentBidNanos),
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             }
 

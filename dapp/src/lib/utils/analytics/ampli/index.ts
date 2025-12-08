@@ -77,10 +77,11 @@ export interface ConnectedAddressProperties {
     /**
      * | Rule | Value |
      * |---|---|
-     * | Enum Values | current, external |
+     * | Enum Values | current, external, empty |
      */
-    addressType: 'current' | 'external';
+    addressType: 'current' | 'external' | 'empty';
     name: string;
+    setNameAsDisplayed?: boolean;
 }
 
 export interface ConnectedWalletProperties {
@@ -88,9 +89,11 @@ export interface ConnectedWalletProperties {
 }
 
 export interface CreatedSubnameProperties {
-    allowToCreateAdditionalSubnames: boolean;
-    allowToRenewExpiration: boolean;
+    allowToCreateAdditionalSubnames?: boolean;
+    allowToRenewExpiration?: boolean;
     name: string;
+    parentName?: string;
+    subname?: string;
     /**
      * | Rule | Value |
      * |---|---|
@@ -127,6 +130,7 @@ export interface PlacedAuctionBidProperties {
      * | Type | number |
      */
     auctionCurrentBidAmount: number;
+    coinType?: string;
     isUserFirstBidOnAuction: boolean;
     name: string;
     /**
@@ -145,6 +149,7 @@ export interface PurchasedNameProperties {
      * | Type | number |
      */
     amount: number;
+    coinType?: string;
     discountName?: string;
     /**
      * | Rule | Value |
@@ -159,6 +164,14 @@ export interface PurchasedNameProperties {
      */
     expiration: number;
     name: string;
+    /**
+     * Property created as alternative of `expiration` with more readable name.
+     *
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    purchaseYears?: number;
 }
 
 export interface RenewedNameProperties {
@@ -169,9 +182,17 @@ export interface RenewedNameProperties {
      */
     expiration: number;
     name: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    renewYears: number;
 }
 
 export interface RenewedSubnameProperties {
+    expirationTime: string;
+    expirationType: string;
     name: string;
 }
 
@@ -579,7 +600,7 @@ export class Ampli {
    *
    * Event has no description in tracking plan.
    *
-   * @param properties The event's properties (e.g. name)
+   * @param properties The event's properties (e.g. expirationTime)
    * @param options Amplitude event options.
    */
   renewedSubname(

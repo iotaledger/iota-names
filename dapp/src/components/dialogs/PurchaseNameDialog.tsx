@@ -36,12 +36,13 @@ import {
     useBalance,
     useCalculatePrice,
     useCalculatePriceInFiat,
+    useCoinMetadata,
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useIsMethodSupported } from '@/hooks/useIsMethodSupported';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
@@ -69,6 +70,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const account = useCurrentAccount();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
+    const { data: coinMetadata } = useCoinMetadata(coinBalance?.coinType);
     const [isPublicName, setIsPublicName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
     const [purchaseYears, setPurchaseYears] = useState<number>(1);
@@ -161,10 +163,12 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
 
             ampli.purchasedName({
                 name,
-                amount: price ?? 0,
-                expiration: purchaseYears,
+                amount: parseNanosToIota(price ?? 0),
+                expiration: purchaseYears, // tbd replace expiration with more meaningful name purchaseYears
+                purchaseYears: purchaseYears,
                 discountName: couponCodes.join(','),
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
+                coinType: coinMetadata?.symbol,
             });
 
             if (isPublicName) {

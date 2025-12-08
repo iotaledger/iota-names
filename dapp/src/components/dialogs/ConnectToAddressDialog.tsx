@@ -141,18 +141,19 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             });
 
             const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
-            if (hasAddressUpdate) {
-                const addressType = isTargetingCurrentAddress ? 'current' : 'external';
+            const hasSetPublicUpdate = updates.some((update) => update.type === 'set-public');
+
+            if (hasAddressUpdate || hasSetPublicUpdate) {
+                const addressType = isTargetingCurrentAddress
+                    ? 'current'
+                    : editTargetAddress
+                      ? 'external'
+                      : 'empty';
+
                 ampli.connectedAddress({
                     name: cleanName,
                     addressType: addressType,
-                });
-            }
-
-            const hasSetPublicUpdate = updates.some((update) => update.type === 'set-public');
-            if (hasSetPublicUpdate) {
-                ampli.setNameAsDisplayed({
-                    name: cleanName,
+                    setNameAsDisplayed: hasSetPublicUpdate,
                 });
             }
 
