@@ -34,6 +34,7 @@ import {
 } from '@/hooks';
 import { useGetVisualAssets } from '@/hooks/useGetVisualAssets';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject } from '@/lib/utils/names';
 
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
@@ -133,6 +134,19 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
             queryClient.invalidateQueries({ queryKey: queryKey.nameRecord(name) });
         },
         onSuccess() {
+            if (action.type === 'set') {
+                ampli.setAvatar({
+                    name,
+                    setAvatar: true,
+                });
+            }
+
+            if (action.type === 'unset') {
+                ampli.setAvatar({
+                    name,
+                    setAvatar: false,
+                });
+            }
             setOpen(false);
             toast.success(
                 `Successfully updated avatar for ${normalizeIotaName(name, 'at', { truncateLongParts: true })}`,
@@ -207,6 +221,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                     return (
                                         <div
                                             key={asset.objectId}
+                                            data-testid="avatar-nft-card"
+                                            data-object-id={asset.objectId}
+                                            data-selected={isSelected ? 'true' : 'false'}
                                             className={`rounded-xl p-[1px] transition-all ${
                                                 isSelected
                                                     ? 'bg-names-gradient-primary'

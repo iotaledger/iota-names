@@ -73,7 +73,7 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     expect(finalState.isPaymentAuthorized).toBe(targetState.isPaymentAuthorized);
 }
 
-async function execTryCatch(...args: Parameters<typeof runCommand>): Promise<void> {
+export async function execTryCatch(...args: Parameters<typeof runCommand>): Promise<void> {
     try {
         const output = await runCommand(...args);
         console.log('Command output:', output);

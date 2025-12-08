@@ -19,14 +19,13 @@ import { NavbarMobile } from './NavbarMobile';
 export function Navbar() {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
-    const { open, close } = useAvailabilityCheckDialog();
+    const { open } = useAvailabilityCheckDialog();
 
     const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
     function toggleSearchDialog() {
         open({
             autoFocusInput: true,
-            onCompleted: close,
         });
     }
 

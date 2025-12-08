@@ -12,6 +12,9 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use clap::Parser;
+use iota_protocol_config::Chain;
+use iota_sdk::IotaClientBuilder;
+use iota_types::digests::ChainIdentifier;
 use tokio::task::JoinSet;
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info, warn};
@@ -57,6 +60,9 @@ enum Command {
         /// The URL of Prometheus to restore metrics from on startup.
         #[arg(long, default_value = "http://localhost:9090")]
         prometheus_url: String,
+        /// Resets metrics in case of a Prometheus error.
+        #[arg(long, default_value_t = false)]
+        reset_metrics: bool,
     },
 }
 
@@ -70,6 +76,7 @@ impl Command {
                 num_workers,
                 api_port,
                 prometheus_url,
+                reset_metrics,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -79,7 +86,15 @@ impl Command {
 
                 // Try to restore metrics from Prometheus
                 if let Err(e) = metrics.restore_from_prometheus(&prometheus_url).await {
-                    warn!("Could not restore all metrics from Prometheus ({e})");
+                    if reset_metrics {
+                        warn!(
+                            "Could not restore metrics from Prometheus ({e}); proceeding with new metrics due to --reset-metrics flag"
+                        );
+                    } else {
+                        return Err(anyhow::anyhow!(
+                            "Could not restore metrics from Prometheus ({e}); provide --reset-metrics flag to reset metrics"
+                        ));
+                    }
                 } else {
                     info!("Successfully restored metrics from Prometheus");
                 }
@@ -102,7 +117,32 @@ impl Command {
 
                 // Spawn the metrics worker
                 let handle = cancel_token.clone();
-                let iota_names_config = IotaNamesExtendedConfig::from_env().unwrap_or_default();
+                let iota_names_config = match IotaNamesExtendedConfig::from_env() {
+                    Ok(config) => config,
+                    Err(_) => {
+                        // If environment variables are not set, determine config from the connected
+                        // network
+                        let chain =
+                            IotaClientBuilder::default()
+                                .build(&node_url)
+                                .await?
+                                .read_api()
+                                .get_chain_identifier()
+                                .await
+                                .ok()
+                                .and_then(|chain_id| {
+                                    ChainIdentifier::from_chain_short_id(&chain_id)
+                                })
+                                .map(|chain_id| chain_id.chain())
+                        .unwrap_or_else(|| {
+                            warn!(
+                                "Failed to get chain identifier from node, defaulting to Unknown"
+                            );
+                            Chain::Unknown
+                        });
+                        IotaNamesExtendedConfig::from_chain(&chain)
+                    }
+                };
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(

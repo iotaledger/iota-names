@@ -4,40 +4,41 @@
 'use client';
 
 import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
-import { useEffect } from 'react';
+import { Close } from '@iota/apps-ui-icons';
+import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 
-import { CONFIG } from '@/config';
+import { FOOTER_LEGAL_LINKS } from '@/lib/constants';
 import {
-    consentToAnalytics,
-    declineAnalytics,
-    initAnalytics,
+    getAmplitudeConsentStatus,
+    onAmplitudeConsentAccepted,
+    onAmplitudeConsentDeclined,
 } from '@/lib/utils/analytics/amplitude';
+import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
-import { PrivacyPolicyDialog } from '../dialogs/PrivacyPolicyDialog';
-
-const defaultNetwork = CONFIG.network;
+const TEXT = 'By using this website, you agree with our ';
 
 export function CookieDisclaimer() {
+    const [amplitudeConsentStatus, setAmplitudeConsentStatus] = useState<
+        'pending' | 'accepted' | 'declined' | null
+    >(null);
+
     useEffect(() => {
-        initAnalytics(defaultNetwork);
+        setAmplitudeConsentStatus(getAmplitudeConsentStatus());
     }, []);
 
     const configuration: SKCMConfiguration = {
         disclaimer: {
             title: undefined,
-            body: 'We use cookies and analytics tools to help us improve your experience. Please accept analytics cookies to allow us to collect anonymous usage statistics. You can learn more in our ',
+            body: TEXT,
             policyText: 'Privacy Policy',
-            onPolicyClick: () => {
-                const current = new URL(window.location.href);
-                current.searchParams.set('modal', 'privacy_policy');
-                window.history.replaceState({}, '', current.toString());
-                window.dispatchEvent(new PopStateEvent('popstate'));
-            },
+            acceptButtonText: 'Close',
+            policyUrl: '/privacy-policy',
         },
         services: {
             customNecessaryCookies: [
                 {
-                    name: 'AMP_COOKIES_ACCEPTED',
+                    name: AMP_COOKIES_KEY,
                     purpose:
                         'Flag indicating that Amplitude analytics cookies may be created after consent',
                     expiry: '1 year',
@@ -47,19 +48,47 @@ export function CookieDisclaimer() {
             ],
         },
         onAcceptCookies: () => {
-            consentToAnalytics();
-            document.cookie = 'AMP_COOKIES_ACCEPTED=true; max-age=31536000';
+            onAmplitudeConsentAccepted();
         },
         onDeclineCookies: () => {
-            declineAnalytics();
-            document.cookie = 'AMP_COOKIES_ACCEPTED=false; max-age=31536000 ';
+            onAmplitudeConsentDeclined();
         },
     };
 
     return (
         <>
-            <CookieManager configuration={configuration} />
-            <PrivacyPolicyDialog configuration={configuration} />
+            <div className="hidden">
+                <CookieManager configuration={configuration} />
+            </div>
+            {amplitudeConsentStatus === 'pending' && (
+                <div id="skcm-cookie-disclaimer">
+                    <div id="skcm-cookie-disclaimer__body">
+                        {TEXT}
+                        {FOOTER_LEGAL_LINKS.map(({ title, path }, index) => {
+                            return (
+                                <React.Fragment key={title}>
+                                    <Link
+                                        href={path}
+                                        className="hover:text-names-primary-80 transition-colors duration-200"
+                                    >
+                                        {title}
+                                    </Link>
+                                    {index < FOOTER_LEGAL_LINKS.length - 1 ? ', ' : '.'}
+                                </React.Fragment>
+                            );
+                        })}
+                    </div>
+                    <div
+                        onClick={() => {
+                            onAmplitudeConsentAccepted();
+                            setAmplitudeConsentStatus('accepted');
+                        }}
+                        className="absolute right-2 top-2 inline-flex cursor-pointer items-center justify-center rounded-full p-xs !mt-0 text-iota-neutral-100 outline-none hover:text-iota-neutral-92"
+                    >
+                        <Close className="h-5 w-5" aria-label="Close" />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

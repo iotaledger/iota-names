@@ -4017,6 +4017,7 @@ dependencies = [
  "iota-json-rpc-types",
  "iota-metrics",
  "iota-names",
+ "iota-protocol-config",
  "iota-sdk 1.12.0-alpha",
  "iota-types",
  "move-core-types",

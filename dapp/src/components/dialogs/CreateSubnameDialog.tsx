@@ -162,19 +162,12 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                 queryKey: queryKey.ownedObjects(account?.address || ''),
             });
             if (fullSubnameName) {
-                const subnamePermissions: (
-                    | 'allow_to_create_additional_subnames'
-                    | 'allow_to_renew_expiration'
-                )[] = [];
-                if (editIsAllowingRenew) {
-                    subnamePermissions.push('allow_to_renew_expiration');
-                }
-                if (editIsAllowSubnames) {
-                    subnamePermissions.push('allow_to_create_additional_subnames');
-                }
                 ampli.createdSubname({
                     name: fullSubnameName,
-                    subnamePermissions: subnamePermissions,
+                    subname: editSubname,
+                    parentName: name,
+                    allowToRenewExpiration: editIsAllowingRenew,
+                    allowToCreateAdditionalSubnames: editIsAllowSubnames,
                 });
                 toast.success(
                     `Successfully created subname ${normalizeIotaName(fullSubnameName, 'at', { truncateLongParts: true })}`,
