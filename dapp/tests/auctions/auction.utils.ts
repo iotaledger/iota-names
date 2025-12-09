@@ -20,7 +20,7 @@ export async function checkAuctionPills(
     await page.getByText('Refreshed successfully!').waitFor({ state: 'visible', timeout: 10_000 });
 
     const auctionNameCard = page
-        .getByTestId('auction-name-card')
+        .getByTestId('name-card')
         .filter({ hasText: normalizeIotaName(nameToAuction, 'at') });
 
     await expect(auctionNameCard.getByTestId('auction-status-badge')).toHaveText(status, {
@@ -29,7 +29,7 @@ export async function checkAuctionPills(
 
     await page.getByRole('link', { name: 'Auctions' }).click();
     await page.getByPlaceholder('Search auction').fill(nameToAuction);
-    const auctionCard = page.getByTestId('auction-name-card').filter({
+    const auctionCard = page.getByTestId('name-card').filter({
         hasText: normalizeIotaName(nameToAuction, 'at'),
     });
 
@@ -43,7 +43,7 @@ export async function checkAuctionPills(
 
     const carousel = page.getByTestId('auction-carousel');
     const auctionInCarousel = carousel
-        .getByTestId('auction-name-card')
+        .getByTestId('name-card')
         .filter({
             hasText: normalizeIotaName(nameToAuction, 'at'),
         })

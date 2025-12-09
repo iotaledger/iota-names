@@ -7,8 +7,9 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
-import { IotaNamesTransaction } from '@iota/iota-names-sdk';
-import { Signer } from '@iota/iota-sdk/cryptography';
+import { execFileSync } from 'child_process';
+import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
+import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
@@ -20,17 +21,6 @@ import { iotaClient, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
-
-    const termsLabel = page.getByText(
-        'I have read, understand, and agree to the Terms of Service',
-        { exact: true },
-    );
-    const acceptButton = page.getByRole('button', { name: /^Accept$/i });
-
-    await termsLabel.scrollIntoViewIfNeeded();
-    await termsLabel.click();
-    await expect(acceptButton).toBeEnabled({ timeout: 5_000 });
-    await acceptButton.click();
 
     const pagePromise = context.waitForEvent('page', { timeout: 20_000 });
     const walletButton = page.getByText(new RegExp(extensionName, 'i'));
@@ -96,6 +86,7 @@ export async function requestFaucetTokens(recipient: string) {
         throw new Error(`Faucet URL not defined for network: ${currentNetwork}`);
     }
 
+    console.log(`Requesting faucet tokens from ${faucetUrl} to address: ${recipient}`);
     const res = await requestIotaFromFaucetV0({
         host: faucetUrl,
         recipient,
@@ -106,7 +97,8 @@ export async function requestFaucetTokens(recipient: string) {
     }
 }
 
-export async function purchaseName(name: string, address: string, signer: Signer) {
+export async function purchaseName(name: string, signer: Signer) {
+    const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
     const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [50_000_000_000]);
@@ -120,25 +112,213 @@ export async function purchaseName(name: string, address: string, signer: Signer
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
     });
-
-    const txDryRun = await iotaClient.dryRunTransactionBlock({
-        transactionBlock: txBytes,
-    });
-
-    if (txDryRun.effects.status.status !== 'success') {
-        throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-    }
-    console.log(`Purchased name: ${name} with address: ${address}`);
-    const response = await iotaClient.signAndExecuteTransaction({
+    const responsePurchase = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    return { nft, name, response };
+
+    console.log(`Purchased name: ${name} with address: ${address}`);
+    return responsePurchase;
+}
+export async function addSubnameName(
+    subname: string,
+    parentNftId: string,
+    expirationDate: Date,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    const subnameNft = await iotaNamesTx.createSubname({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        expirationTimestampMs: expirationDate.getTime(),
+        allowChildCreation: true,
+        allowTimeExtension: true,
+    });
+    iotaNamesTx.transaction.transferObjects([subnameNft], address);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(`Purchased subname: ${subname} with address: ${address}`);
+    return responsePurchaseSubname;
 }
 
+export async function editSetup(
+    subname: string,
+    parentNftId: string,
+    allowChildCreation: boolean,
+    allowTimeExtension: boolean,
+    signer: Signer,
+) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.editSetup({
+        parentNft: tx.object(parentNftId),
+        name: subname,
+        allowChildCreation,
+        allowTimeExtension,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responseEditSetup = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(
+        `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
+    );
+    return responseEditSetup;
+}
+
+export async function connectName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+    const responseConnect = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    console.log(`Connected name: ${name} to address: ${address}`);
+    return responseConnect;
+}
+
+export async function renewName(name: string, parentNftId: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    await iotaNamesTx.renew({
+        nft: parentNftId,
+        name: name,
+        years: 1,
+        coin: tx.gas,
+        address: address,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseRenew = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Renewed name: ${name} with address: ${address}`);
+    return responseRenew;
+}
+
+export async function publishMovePackage(packagePath: string) {
+    const cliOutput = execFileSync('iota', ['client', 'publish', packagePath], {
+        encoding: 'utf-8',
+    });
+    const pkgMatch = cliOutput.match(/PackageID:\s*(0x[0-9a-fA-F]+)/);
+    const digestMatch = cliOutput.match(/Transaction Digest:\s*([A-Za-z0-9]+)/);
+    if (!pkgMatch) throw new Error('Failed to parse packageId from CLI output');
+    const packageId = pkgMatch[1];
+    const digest = digestMatch ? digestMatch[1] : 'UNKNOWN';
+    console.log('[publishMovePackage] CLI publish packageId:', packageId);
+
+    if (/DisplayCreated<.*::mint_nft::Nft>/.test(cliOutput)) {
+        console.log('[publishMovePackage] Display object detected (CLI)');
+    } else {
+        console.log('[publishMovePackage] No Display object detected in CLI output');
+    }
+    return { packageId, digest, result: { cliOutput } as unknown };
+}
+
+export async function mintNft(
+    packageId: string,
+    signer: Signer,
+    {
+        name = 'Test NFT',
+        description = 'E2E Minted NFT',
+        imageUrl = 'https://example.com/image.png',
+    }: {
+        name?: string;
+        description?: string;
+        imageUrl?: string;
+    } = {},
+) {
+    const tx = new Transaction();
+    const sender = signer.toIotaAddress();
+    tx.setSender(sender);
+    tx.moveCall({
+        target: `${packageId}::mint_nft::mint`,
+        arguments: [tx.pure.string(name), tx.pure.string(description), tx.pure.string(imageUrl)],
+    });
+    const built = await tx.build({ client: iotaClient });
+    const resultMint = await iotaClient.signAndExecuteTransaction({
+        transaction: built,
+        signer,
+        options: { showEffects: true, showObjectChanges: true },
+    });
+    if (resultMint.effects?.status.status !== 'success') {
+        throw new Error(resultMint.effects?.status.error || 'Mint execution failed');
+    }
+    return resultMint;
+}
+
+export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const isNameSubname = nameRecord.name ? isSubname(nameRecord.name) : false;
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setUserData({
+        nft: nameRecord.nftId,
+        key: 'avatar',
+        value: nameRecord.avatar ?? '0x0',
+        isSubname: isNameSubname,
+    });
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClient,
+    });
+
+    const responseSetAvatar = await iotaClient.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    console.log(`Avatar set to address: ${address}`);
+    return responseSetAvatar;
+}
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -161,23 +341,15 @@ export async function createAndSendAuctionTransaction({
 }: CreateAndSendAuctionTransaction) {
     try {
         const tx = buildCreateAuctionTransaction(
-            iotaNamesClient.config.auctionPackageId,
-            iotaNamesClient.config.iotaNamesObjectId,
-            iotaNamesClient.config.auctionHouseObjectId,
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('iotaNamesObjectId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
             signer.toIotaAddress(),
             bidAmountIota * NANOS_PER_IOTA,
             name,
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
@@ -208,22 +380,14 @@ export async function bidOnExistingAuction({
 }: BidOnExistingAuction) {
     try {
         const tx = buildPlaceBidTransaction(
-            iotaNamesClient.config.auctionPackageId,
-            iotaNamesClient.config.auctionHouseObjectId,
+            iotaNamesClient.getPackage('auctionPackageId'),
+            iotaNamesClient.getPackage('auctionHouseObjectId'),
             signer.toIotaAddress(),
             bidAmountIota * NANOS_PER_IOTA,
             name,
         );
 
         const txBytes = await tx.build({ client: iotaClient });
-        const txDryRun = await iotaClient.dryRunTransactionBlock({
-            transactionBlock: txBytes,
-        });
-
-        if (txDryRun.effects.status.status !== 'success') {
-            throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-        }
-
         const response = await iotaClient.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
@@ -245,4 +409,9 @@ export async function bidOnExistingAuction({
 export function generateRandomName(name: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${name}${random}.iota`;
+}
+
+export function generateRandomSubname(subname: string, parentName: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${subname}${random}.${parentName}`;
 }

@@ -134,6 +134,9 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             });
             ampli.renewedSubname({
                 name,
+                // TODO expirationType `custom` will be added after implement https://github.com/iotaledger/iota-names/issues/915
+                expirationType: 'parent',
+                expirationTime: expirationDate?.getTime().toString() || '',
             });
             toast.success('Subname renewed successfully');
         },
@@ -186,7 +189,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
-                <Header title="Renew Name" onClose={() => setOpen(false)} />
+                <Header title="Renew Subname" onClose={() => setOpen(false)} />
                 <DialogBody>
                     <div className="flex flex-col justify-between h-full items-center">
                         <div className="flex flex-col w-full gap-y-md">

@@ -37,11 +37,11 @@ export type NameUpdate =
           nftId: string;
       }
     | {
-          type: 'set-default';
+          type: 'set-public';
           name: string;
       }
     | {
-          type: 'unset-default';
+          type: 'unset-public';
       }
     | {
           type: 'edit-setup';
@@ -69,7 +69,7 @@ export type NameUpdate =
           nftId: string;
           years: number;
           address?: string;
-          couponCodes?: string[];
+          couponCode?: string;
       }
     | {
           type: 'renew-subname';
@@ -79,10 +79,11 @@ export type NameUpdate =
     | {
           type: 'register-name';
           name: string;
+          years?: number;
           price: number;
-          setDefault: boolean;
+          setPublic: boolean;
           address?: string;
-          couponCodes?: string[];
+          couponCode?: string;
       };
 
 export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTransactionOptions) {
@@ -119,11 +120,11 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             isSubname: update.isSubname,
                         });
                         break;
-                    case 'set-default':
-                        iotaNamesTx.setDefault(update.name);
+                    case 'set-public':
+                        iotaNamesTx.setPublic(update.name);
                         break;
-                    case 'unset-default':
-                        iotaNamesTx.unsetDefault();
+                    case 'unset-public':
+                        iotaNamesTx.unsetPublic();
                         break;
                     case 'edit-setup':
                         iotaNamesTx.editSetup({
@@ -156,7 +157,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                             years: update.years,
                             coin: tx.gas,
                             address: update.address,
-                            couponCodes: update.couponCodes,
+                            couponCodes: update.couponCode ? [update.couponCode] : [],
                         });
                         break;
                     case 'renew-subname':
@@ -167,19 +168,30 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         break;
                     case 'register-name':
                         const [coin] = iotaNamesTx.transaction.splitCoins(tx.gas, [update.price]);
-                        const nft = await iotaNamesTx.register({
-                            name: update.name,
-                            coin,
-                            address: update.address,
-                            couponCodes: update.couponCodes,
-                        });
-                        if (update.setDefault) {
+                        let nft;
+                        if (update.years) {
+                            nft = await iotaNamesTx.registerWithYears({
+                                name: update.name,
+                                years: update.years,
+                                coin,
+                                address: update.address,
+                                couponCodes: update.couponCode ? [update.couponCode] : [],
+                            });
+                        } else {
+                            nft = await iotaNamesTx.register({
+                                name: update.name,
+                                coin,
+                                address: update.address,
+                                couponCodes: update.couponCode ? [update.couponCode] : [],
+                            });
+                        }
+                        if (update.setPublic) {
                             iotaNamesTx.setTargetAddress({
                                 nft: nft,
                                 address: address,
                                 isSubname: false,
                             });
-                            iotaNamesTx.setDefault(update.name);
+                            iotaNamesTx.setPublic(update.name);
                         }
                         iotaNamesTx.transaction.transferObjects([nft, coin], address);
                         break;

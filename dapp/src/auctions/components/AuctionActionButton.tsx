@@ -7,10 +7,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import { queryKey } from '@/hooks/queryKey';
+import { ampli } from '@/lib/utils/analytics/ampli';
 
 import { AuctionDetails } from '../hooks/useAuctions';
 import { useClaimAuctionTransaction } from '../hooks/useClaimAuctionTransaction';
-import { getTimeRemaining, isAuctionActive, UserAuctionStatus } from '../lib/utils';
+import { getTimeRemaining, UserAuctionStatus } from '../lib/utils';
 
 export function AuctionActionButton({
     auction,
@@ -30,6 +31,12 @@ export function AuctionActionButton({
         useClaimAuctionTransaction(account?.address || '', auction.name, {
             onSuccess() {
                 setIsClaimCompleted(true);
+
+                ampli.domainClaimed({
+                    name: auction.name,
+                    auctionWonDate: auction.metadata?.endTimestamp?.getTime() || 0,
+                });
+
                 queryClient.invalidateQueries({
                     queryKey: queryKey.userAuctionHistory(account?.address),
                 });
@@ -40,11 +47,12 @@ export function AuctionActionButton({
             },
         });
 
-    if (!account?.address && isAuctionActive(auction.metadata)) {
+    if (!account?.address && auction.metadata?.isActive) {
         return (
             <ConnectModal trigger={<Button text="Bid" type={ButtonType.Outlined} fullWidth />} />
         );
     }
+
     if (auctionStatus === 'claimable' && auction.metadata?.winner === account?.address) {
         if (isClaimCompleted) {
             return <Button text="Claimed" type={ButtonType.Outlined} disabled fullWidth />;

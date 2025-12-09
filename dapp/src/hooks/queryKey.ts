@@ -17,7 +17,7 @@ export const queryKey = {
     updateName: (address?: string) => [...queryKey.all, 'update-name', address],
 
     // Address
-    defaultName: (address: string) => [...queryKey.all, 'default-name', address],
+    publicName: (address: string) => [...queryKey.all, 'public-name', address],
 
     // Generic
     ownedObjects: (address: string) => [...queryKey.all, 'owned-objects', address],
@@ -51,4 +51,13 @@ export const queryKey = {
     // Deny List
     reservedList: () => [...queryKey.all, 'reserved-list'],
     blockedList: () => [...queryKey.all, 'blocked-list'],
+
+    // Features
+    methodSupported: (packageId: string, module: string, method: string) => [
+        ...queryKey.all,
+        'method-supported',
+        packageId,
+        module,
+        method,
+    ],
 };

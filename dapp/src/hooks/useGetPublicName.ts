@@ -7,15 +7,15 @@ import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
 
-export function useGetDefaultName(address: string) {
+export function useGetPublicName(address: string) {
     const { iotaNamesClient } = useIotaNamesClient();
 
     return useQuery({
-        queryKey: [...queryKey.defaultName(address)],
+        queryKey: [...queryKey.publicName(address)],
         async queryFn() {
-            const defaultName = await iotaNamesClient.getDefaultName(address);
+            const publicName = await iotaNamesClient.getPublicName(address);
 
-            return defaultName;
+            return publicName;
         },
         enabled: !!iotaNamesClient && address.length > 0,
     });

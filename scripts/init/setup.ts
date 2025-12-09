@@ -21,7 +21,7 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
     const networkPackageInfo: NetworkPackageInfo = {
         adminAddress: getActiveAddress(),
         adminCap: packageInfo.IotaNames.adminCap,
-        auctionPackageId: packageInfo.Auction.packageId,
+        auctionPackageId: { v1: packageInfo.Auction.packageId },
         auctionHouseObjectId: packageInfo.Auction.objectId,
         coins: {
             IOTA: {
@@ -30,14 +30,14 @@ export const setup = async (packageInfo: PackageInfo, network: string) => {
             },
         },
         iotaNamesObjectId: packageInfo.IotaNames.objectId,
-        packageId: packageInfo.IotaNames.packageId,
-        paymentsPackageId: packageInfo.Payments.packageId,
+        packageId: { v1: packageInfo.IotaNames.packageId },
+        paymentsPackageId: { v1: packageInfo.Payments.packageId },
         publisherId: packageInfo.IotaNames.publisher,
         registryTableId: '',
         reverseRegistryTableId: '',
-        couponsPackageId: packageInfo.Coupons.packageId,
-        subnamesPackageId: packageInfo.Subnames.packageId,
-        tempSubnameProxyPackageId: packageInfo.TempSubnameProxy.packageId,
+        couponsPackageId: { v1: packageInfo.Coupons.packageId },
+        subnamesPackageId: { v1: packageInfo.Subnames.packageId },
+        tempSubnameProxyPackageId: { v1: packageInfo.TempSubnameProxy.packageId },
         upgradeCap: packageInfo.IotaNames.upgradeCap,
     };
     writePackageInfo(network, networkPackageInfo);

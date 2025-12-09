@@ -18,10 +18,10 @@ fi
 echo "Updating auction durations in: $FILE"
 
 TMP_FILE="$(mktemp)"
-sed -E '
-s/^(const\s+AUCTION_BIDDING_PERIOD_MS:\s*u64\s*=\s*)[^;]+;/\1 20 * 1000;/;
-s/^(const\s+AUCTION_MIN_QUIET_PERIOD_MS:\s*u64\s*=\s*)[^;]+;/\1 10 * 1000;/;
-' "$FILE" > "$TMP_FILE"
+sed -E \
+  -e 's/^(const[[:space:]]+AUCTION_BIDDING_PERIOD_MS:[[:space:]]*u64[[:space:]]*=[[:space:]]*)[^;]+;/\1 20 * 1000;/' \
+  -e 's/^(const[[:space:]]+AUCTION_MIN_QUIET_PERIOD_MS:[[:space:]]*u64[[:space:]]*=[[:space:]]*)[^;]+;/\1 10 * 1000;/' \
+  "$FILE" > "$TMP_FILE"
 
 if cmp -s "$FILE" "$TMP_FILE"; then
   rm -f "$TMP_FILE"

@@ -6,12 +6,12 @@ import { expect } from '@playwright/test';
 import { getAuthorizedSmartContractTypes, iotaNamesClient, runCommand } from './utils';
 
 const envs = {
-    IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.config.packageId,
-    IOTA_NAMES_OBJECT_ID: iotaNamesClient.config.iotaNamesObjectId,
-    ADMIN_CAP: iotaNamesClient.config.adminCap,
-    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: iotaNamesClient.config.paymentsPackageId,
-    ADMIN_ADDRESS: iotaNamesClient.config.adminAddress,
-    IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.config.auctionPackageId,
+    IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.getPackage('packageId'),
+    IOTA_NAMES_OBJECT_ID: iotaNamesClient.getPackage('iotaNamesObjectId'),
+    ADMIN_CAP: iotaNamesClient.getPackage('adminCap'),
+    IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS: iotaNamesClient.getPackage('paymentsPackageId'),
+    ADMIN_ADDRESS: iotaNamesClient.getPackage('adminAddress'),
+    IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.getPackage('auctionPackageId'),
 };
 
 function getUpdateAuthCommand(mode: 'enable' | 'disable', type: 'payment' | 'auction') {
@@ -73,7 +73,7 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     expect(finalState.isPaymentAuthorized).toBe(targetState.isPaymentAuthorized);
 }
 
-async function execTryCatch(...args: Parameters<typeof runCommand>): Promise<void> {
+export async function execTryCatch(...args: Parameters<typeof runCommand>): Promise<void> {
     try {
         const output = await runCommand(...args);
         console.log('Command output:', output);

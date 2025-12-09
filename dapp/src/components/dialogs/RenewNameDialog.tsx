@@ -19,8 +19,6 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    SelectOption,
-    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -29,16 +27,10 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { useIotaNamesClient } from '@/contexts';
-import {
-    NameRecordData,
-    queryKey,
-    useCalculatePriceInFiat,
-    useCalculateRenewalPrice,
-    useNameRecord,
-} from '@/hooks';
+import { NameRecordData, queryKey, useCalculatePrice, useNameRecord } from '@/hooks';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTransaction';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNamePermissions, getNameRenewableYears, isGracePeriodExpired } from '@/lib/utils/names';
@@ -50,13 +42,13 @@ function createRenewUpdates({
     nameRecord,
     renewYears,
     applyCoupons = false,
-    coupons = [],
+    coupon = '',
     address,
 }: {
     nameRecord?: NameRecord;
     renewYears?: number;
     applyCoupons?: boolean;
-    coupons?: string[];
+    coupon?: string;
     address?: string;
 }) {
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -72,7 +64,7 @@ function createRenewUpdates({
             nftId: nameRecord.nftId,
             years: renewYears,
             address,
-            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
+            ...(applyCoupons ? { couponCodes: coupon } : {}),
         });
     }
     return updates;
@@ -97,20 +89,22 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
 
+    const renewableYears =
+        config && config.coreConfig && nameRecord
+            ? getNameRenewableYears(
+                  config.coreConfig.max_years,
+                  nameRecord.nameRecord.expirationDate,
+              )
+            : 0;
+    const renewOptions = useCalculatePrice(name, renewableYears, false);
     const [renewYears, setRenewYears] = useState<number | undefined>();
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-    const [applyCoupons, setApplyCoupons] = useState(false);
-
-    const { data: renewalPriceInNanos } = useCalculateRenewalPrice(name, renewYears ?? 1);
-    const renewalPriceIota = renewalPriceInNanos ? formatNanosToIota(renewalPriceInNanos) : '0';
-    const fiatPriceResult = useCalculatePriceInFiat(renewalPriceInNanos || '0');
-    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         renewYears,
-        applyCoupons,
-        coupons: couponCodes,
+        applyCoupons: coupons.length > 0 ? true : false,
+        coupon: coupons.length > 0 ? coupons[0]?.code : '',
         address: account?.address,
     });
 
@@ -150,7 +144,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             });
             ampli.renewedName({
                 name,
-                expiration: renewYears || 0,
+                expiration: renewYears || 0, // tbd replace with more meaningful name renewYears
+                renewYears: renewYears || 0,
             });
             toast.success('Name renewed successfully');
         },
@@ -160,7 +155,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     });
 
     async function handleAddCoupon(couponCode: string) {
-        if (couponCodes.includes(couponCode)) {
+        if (coupons.some((c) => c.code === couponCode)) {
             setCoupons((currentCoupons) =>
                 currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
             );
@@ -184,19 +179,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
         setRenewYears(Number(years));
     }
 
-    const renewableYears =
-        config && config.coreConfig && nameRecord
-            ? getNameRenewableYears(
-                  config.coreConfig.max_years,
-                  nameRecord.nameRecord.expirationDate,
-              )
-            : 0;
-
     const isRenewable = (renewableYears ?? 0) > 0;
-    const renewOptions: SelectOption[] = Array.from({ length: renewableYears }, (_, i) => ({
-        id: String(i + 1),
-        label: `${i + 1} Year${i ? 's' : ''}`,
-    }));
 
     useEffect(() => {
         if (!renewYears && renewOptions.length && renewableYears >= 1) {
@@ -263,23 +246,9 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     <Select
                                         options={renewOptions}
                                         value={renewYears?.toString()}
-                                        supportingText=""
                                         onValueChange={handleYearsChange}
                                         disabled={disableEdit}
                                     />
-                                    {renewalPriceIota ? (
-                                        <span
-                                            className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-names-neutral-100"
-                                            aria-hidden
-                                        >
-                                            <span>{renewalPriceIota}</span>
-                                            {fiatPriceResult ? (
-                                                <span className="ml-1 text-label-sm text-names-neutral-80">
-                                                    (${fiatPriceResult} USD)
-                                                </span>
-                                            ) : null}
-                                        </span>
-                                    ) : null}
                                 </div>
                             )}
                             {renewOptions.length === 0 && !isLoadingData && (
@@ -291,21 +260,15 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
-                                </div>
-                                {applyCoupons && (
+                            {isRenewable && (
+                                <div className="flex flex-col">
                                     <CouponInputSelection
                                         coupons={coupons}
+                                        disabled={isLoading}
                                         onAddCoupon={handleAddCoupon}
                                     />
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             {updateNameError ? (

@@ -9,6 +9,7 @@ import { NameCardBody } from '@/components/name-card/NameCardBody';
 import { ExpiryDateIndicator } from '@/components/name-card/NameCardIndicators';
 
 import { getNameDisplaySrc } from '../../lib/utils/displayImage';
+import { useAuctionRefresh } from '../hooks/useAuctionRefresh';
 import { AuctionDetails } from '../hooks/useAuctions';
 import { UserAuctionStatus } from '../lib/utils';
 import { AuctionActionButton } from './AuctionActionButton';
@@ -21,6 +22,8 @@ interface AuctionItemProps {
 }
 
 export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemProps) {
+    useAuctionRefresh(auction.metadata);
+
     const auctionDisplayImage = auction.metadata?.nftExpiration
         ? getNameDisplaySrc(auction.name, auction.metadata.nftExpiration.getTime())
         : null;
@@ -49,7 +52,7 @@ export function AuctionItem({ auction, auctionStatus, onBidClick }: AuctionItemP
     }
 
     return (
-        <NameCard name={auction.name} displaySrc={auctionDisplayImage} testId="auction-name-card">
+        <NameCard name={auction.name} displaySrc={auctionDisplayImage} testId="name-card">
             <NameCardBody name={normalizeIotaName(auction.name)}>
                 <div className="flex flex-row items-center justify-between gap-x-xs">
                     <ExpiryDateIndicator auction={auction} />

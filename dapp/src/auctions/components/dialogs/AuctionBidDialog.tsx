@@ -117,6 +117,7 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
             queryClient.invalidateQueries({
                 queryKey: queryKey.userAuctionHistory(account?.address),
             });
+            queryClient.invalidateQueries({ queryKey: queryKey.auctionList() });
             queryClient.invalidateQueries({ queryKey: queryKey.auctionMetadata(name) });
 
             if (!auctionMetadata) {
@@ -125,23 +126,23 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                     wasUserTopBidder: false,
                     isUserFirstBidOnAuction: true,
                     auctionCurrentBidAmount: 0,
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             } else if (auctionStatus === 'top_bidder') {
                 ampli.placedAuctionBid({
                     name: name,
                     wasUserTopBidder: true,
                     isUserFirstBidOnAuction: false,
-                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    auctionCurrentBidAmount: parseNanosToIota(auctionMetadata.currentBidNanos),
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             } else {
                 ampli.placedAuctionBid({
                     name: name,
                     wasUserTopBidder: false,
                     isUserFirstBidOnAuction: false,
-                    auctionCurrentBidAmount: Number(auctionMetadata.currentBidNanos),
-                    userBidAmount: bidNanos ? Number(bidNanos) : 0,
+                    auctionCurrentBidAmount: parseNanosToIota(auctionMetadata.currentBidNanos),
+                    userBidAmount: parseNanosToIota(bidNanos ?? 0),
                 });
             }
 
@@ -252,6 +253,23 @@ export function AuctionBidDialog({ name, closeDialog, onCompleted }: AuctionBidD
                             />
                         </div>
                         <div className="flex w-full flex-col gap-y-md">
+                            <hr className="w-full border-0 border-t border-names-neutral-20" />
+                            <div className="flex flex-col gap-y-xs text-body-md text-names-neutral-50 px-4 pb-4">
+                                <p>
+                                    If someone <strong>outbids</strong> you, the amount you placed
+                                    is fully refunded.
+                                </p>
+                                <p>
+                                    <strong>Auctions run</strong> for at{' '}
+                                    <strong>least 48 hours</strong> and extend if a bid is placed in
+                                    the final 10 minutes.
+                                </p>
+                                <p>
+                                    <strong>Win the auction?</strong> Don't forget to claim your
+                                    name. The 1-year subscription starts at the auction's start
+                                    time.
+                                </p>
+                            </div>
                             {auctionMetadata && (
                                 <DisplayStats label="Registration Expires" value={expirationDate} />
                             )}
