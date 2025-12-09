@@ -230,6 +230,7 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                             name={name}
                             isAvailable={false}
                             statusMessage="Name is already taken."
+                            testId="unavailable-purchase-card"
                         />
                     ) : isForbiddenName(name, blockedList) ? (
                         <NamePurchaseCard

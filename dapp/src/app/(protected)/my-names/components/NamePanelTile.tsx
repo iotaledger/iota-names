@@ -4,8 +4,9 @@
 'use client';
 
 import { Info, StarHex, Warning } from '@iota/apps-ui-icons';
-import { ButtonUnstyled, Tooltip, truncate } from '@iota/apps-ui-kit';
+import { ButtonUnstyled, Tooltip } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
+import { formatAddress } from '@iota/iota-sdk/utils';
 import clsx from 'clsx';
 import { Fragment } from 'react';
 
@@ -13,7 +14,7 @@ import { MenuButton } from '@/components/buttons/MenuButton';
 import { ContextMenuDropdown } from '@/components/ContextMenu';
 import { NameDialogsController } from '@/components/dialogs/NameDialogsController';
 import { useNameRecord } from '@/hooks';
-import { useGetDefaultName } from '@/hooks/useGetDefaultName';
+import { useGetPublicName } from '@/hooks/useGetPublicName';
 import { useNameContextMenu } from '@/hooks/useNameContextMenu';
 import { useNameManageDialog } from '@/hooks/useNameMenuOptions';
 import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
@@ -46,7 +47,7 @@ export function NamePanelTile({
     const { openDialogId, openDialog, closeDialog } = useNameManageDialog();
 
     const account = useCurrentAccount();
-    const { data: defaultName } = useGetDefaultName(account?.address ?? '');
+    const { data: publicName } = useGetPublicName(account?.address ?? '');
     const { data: nameRecordData } = useNameRecord(registration.name);
 
     const nameRecord =
@@ -54,7 +55,7 @@ export function NamePanelTile({
 
     const linkedAddress = nameRecord?.targetAddress || undefined;
 
-    const isDefaultName = defaultName === registration.name;
+    const isPublicName = publicName === registration.name;
     const isCloseToExpiration = isNameRecordCloseToExpiration(registration);
     const isExpired = isNameRecordExpired(registration);
     const allowTimeExtension = nameRecord
@@ -84,14 +85,14 @@ export function NamePanelTile({
             <PanelTile
                 type={panelType}
                 icon={
-                    isDefaultName ? (
-                        <Tooltip text="Default name">
+                    isPublicName ? (
+                        <Tooltip text="Public name">
                             <StarHex className="w-4 h-4 text-names-primary-80" />
                         </Tooltip>
                     ) : null
                 }
                 name={registration.name}
-                subtitle={linkedAddress ? truncate(linkedAddress, 4, 4) : undefined}
+                subtitle={linkedAddress ? formatAddress(linkedAddress) : undefined}
                 onClick={onClick}
                 menuButton={<MenuButton variant="ghost" onClick={toggleMenu} ref={triggerRef} />}
                 footer={
