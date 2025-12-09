@@ -77,16 +77,23 @@ export interface ConnectedAddressProperties {
     /**
      * | Rule | Value |
      * |---|---|
-     * | Enum Values | current, external |
+     * | Enum Values | current, external, empty |
      */
-    addressType: 'current' | 'external';
+    addressType: 'current' | 'external' | 'empty';
     name: string;
+    setNameAsDisplayed?: boolean;
+}
+
+export interface ConnectedWalletProperties {
+    wallet: string;
 }
 
 export interface CreatedSubnameProperties {
-    allowToCreateAdditionalSubnames: boolean;
-    allowToRenewExpiration: boolean;
+    allowToCreateAdditionalSubnames?: boolean;
+    allowToRenewExpiration?: boolean;
     name: string;
+    parentName?: string;
+    subname?: string;
     /**
      * | Rule | Value |
      * |---|---|
@@ -94,6 +101,22 @@ export interface CreatedSubnameProperties {
      * | Item Type | string |
      */
     subnamePermissions?: ('allow_to_create_additional_subnames' | 'allow_to_renew_expiration')[];
+}
+
+export interface DomainClaimedProperties {
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    auctionWonDate: number;
+    name: string;
+}
+
+export interface OpenedIotaNamesProperties {
+    activeOrigin: string;
+    pagePath?: string;
+    pagePathFragment?: string;
 }
 
 export interface PerformedSearchProperties {
@@ -107,6 +130,7 @@ export interface PlacedAuctionBidProperties {
      * | Type | number |
      */
     auctionCurrentBidAmount: number;
+    coinType?: string;
     isUserFirstBidOnAuction: boolean;
     name: string;
     /**
@@ -125,6 +149,7 @@ export interface PurchasedNameProperties {
      * | Type | number |
      */
     amount: number;
+    coinType?: string;
     discountName?: string;
     /**
      * | Rule | Value |
@@ -139,6 +164,14 @@ export interface PurchasedNameProperties {
      */
     expiration: number;
     name: string;
+    /**
+     * Property created as alternative of `expiration` with more readable name.
+     *
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    purchaseYears?: number;
 }
 
 export interface RenewedNameProperties {
@@ -149,9 +182,17 @@ export interface RenewedNameProperties {
      */
     expiration: number;
     name: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    renewYears: number;
 }
 
 export interface RenewedSubnameProperties {
+    expirationTime: string;
+    expirationType: string;
     name: string;
 }
 
@@ -180,10 +221,34 @@ export class ConnectedAddress implements BaseEvent {
     }
 }
 
+export class ConnectedWallet implements BaseEvent {
+    event_type = 'connected wallet';
+
+    constructor(public event_properties: ConnectedWalletProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
 export class CreatedSubname implements BaseEvent {
     event_type = 'created subname';
 
     constructor(public event_properties: CreatedSubnameProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class DomainClaimed implements BaseEvent {
+    event_type = 'domain claimed';
+
+    constructor(public event_properties: DomainClaimedProperties) {
+        this.event_properties = event_properties;
+    }
+}
+
+export class OpenedIotaNames implements BaseEvent {
+    event_type = 'opened iota names';
+
+    constructor(public event_properties: OpenedIotaNamesProperties) {
         this.event_properties = event_properties;
     }
 }
@@ -393,6 +458,23 @@ export class Ampli {
   }
 
   /**
+   * connected wallet
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/connected%20wallet)
+   *
+   * Triggered at the end of a connection event, when the user successfully connected any wallet
+   *
+   * @param properties The event's properties (e.g. wallet)
+   * @param options Amplitude event options.
+   */
+  connectedWallet(
+    properties: ConnectedWalletProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new ConnectedWallet(properties), options);
+  }
+
+  /**
    * created subname
    *
    * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/created%20subname)
@@ -407,6 +489,40 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new CreatedSubname(properties), options);
+  }
+
+  /**
+   * domain claimed
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/domain%20claimed)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. auctionWonDate)
+   * @param options Amplitude event options.
+   */
+  domainClaimed(
+    properties: DomainClaimedProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new DomainClaimed(properties), options);
+  }
+
+  /**
+   * opened iota names
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/opened%20iota%20names)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param properties The event's properties (e.g. activeOrigin)
+   * @param options Amplitude event options.
+   */
+  openedIotaNames(
+    properties: OpenedIotaNamesProperties,
+    options?: EventOptions,
+  ) {
+    return this.track(new OpenedIotaNames(properties), options);
   }
 
   /**
@@ -484,7 +600,7 @@ export class Ampli {
    *
    * Event has no description in tracking plan.
    *
-   * @param properties The event's properties (e.g. name)
+   * @param properties The event's properties (e.g. expirationTime)
    * @param options Amplitude event options.
    */
   renewedSubname(

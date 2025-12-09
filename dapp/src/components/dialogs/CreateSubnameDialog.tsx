@@ -164,6 +164,8 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
             if (fullSubnameName) {
                 ampli.createdSubname({
                     name: fullSubnameName,
+                    subname: editSubname,
+                    parentName: name,
                     allowToRenewExpiration: editIsAllowingRenew,
                     allowToCreateAdditionalSubnames: editIsAllowSubnames,
                 });

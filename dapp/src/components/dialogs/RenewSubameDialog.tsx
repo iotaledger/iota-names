@@ -134,6 +134,9 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             });
             ampli.renewedSubname({
                 name,
+                // TODO expirationType `custom` will be added after implement https://github.com/iotaledger/iota-names/issues/915
+                expirationType: 'parent',
+                expirationTime: expirationDate?.getTime().toString() || '',
             });
             toast.success('Subname renewed successfully');
         },
