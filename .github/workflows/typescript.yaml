@@ -176,7 +176,7 @@ jobs:
           node-version: 20
 
       - name: System dependencies
-        run: sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev
+        run: sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev
 
       - name: Install Homebrew
         run: |
