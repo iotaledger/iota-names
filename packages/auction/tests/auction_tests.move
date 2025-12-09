@@ -355,14 +355,14 @@ fun test_current_bidder_can_place_bid() {
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_NAME),
-        1201 * NANOS_PER_IOTA,
+        1210 * NANOS_PER_IOTA,
         0,
     );
     place_bid_util(
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_NAME),
-        1202 * NANOS_PER_IOTA,
+        1220 * NANOS_PER_IOTA,
         0,
     );
 
@@ -957,7 +957,7 @@ fun test_admin_collect_fund_even_if_auction_is_deauthorized() {
 }
 
 #[test, expected_failure(abort_code = auction::EBidTooLow)]
-fun test_overbid_less_than_1_IOTA() {
+fun test_overbid_less_than_10_IOTA() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -979,7 +979,7 @@ fun test_overbid_less_than_1_IOTA() {
 }
 
 #[test]
-fun test_overbid_of_1_IOTA() {
+fun test_overbid_of_10_IOTA() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -993,7 +993,7 @@ fun test_overbid_of_1_IOTA() {
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_NAME),
-        101 * NANOS_PER_IOTA,
+        110 * NANOS_PER_IOTA,
         0,
     );
 
@@ -1001,7 +1001,7 @@ fun test_overbid_of_1_IOTA() {
 }
 
 #[test]
-fun test_overbid_of_1_IOTA_and_1_NANO() {
+fun test_overbid_of_10_IOTA_and_1_NANO() {
     let mut scenario_val = test_init();
     let scenario = &mut scenario_val;
 
@@ -1015,7 +1015,7 @@ fun test_overbid_of_1_IOTA_and_1_NANO() {
         scenario,
         SECOND_ADDRESS,
         utf8(FIRST_NAME),
-        101 * NANOS_PER_IOTA + 1,
+        110 * NANOS_PER_IOTA + 1,
         0,
     );
 

@@ -26,8 +26,8 @@ const DEFAULT_DURATION: u8 = 1;
 const AUCTION_BIDDING_PERIOD_MS: u64 = 2 * 24 * 60 * 60 * 1000;
 /// The auction quiet period is 10 minutes.
 const AUCTION_MIN_QUIET_PERIOD_MS: u64 = 10 * 60 * 1000;
-/// The overbid must be at least of 1 IOTA, which is 10^9 NANOs
-const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 1_000_000_000;
+/// The overbid must be at least of 10 IOTA, which is 10*10^9 NANOs
+const AUCTION_MIN_OVERBID_VALUE_IOTA: u64 = 10_000_000_000;
 
 // === Abort codes ===
 
