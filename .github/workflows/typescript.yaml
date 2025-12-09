@@ -176,8 +176,8 @@ jobs:
           node-version: 20
 
       - name: System dependencies
-        run: sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev
-
+        run: sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev libudev libudev-devel
+ 
       - name: Install Homebrew
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
