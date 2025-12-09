@@ -25,7 +25,7 @@ import {
     renewName,
     requestFaucetTokens,
     setAvatar,
-    setDisplayName,
+    setPublicName,
 } from '../utils';
 
 test.setTimeout(60_000);
@@ -669,7 +669,7 @@ test.describe.parallel('Name Management Tests', () => {
         if (!record) throw new Error('Name record not found');
         const responseConnect = await connectName(name, record.nftId, keypair);
         expect(responseConnect.effects?.status.status).toBe('success');
-        const responseSetDisplay = await setDisplayName(name, keypair);
+        const responseSetDisplay = await setPublicName(name, keypair);
         expect(responseSetDisplay.effects?.status.status).toBe('success');
         await page.goto('/my-names');
         await expect(

@@ -320,11 +320,11 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     return responseSetAvatar;
 }
 
-export async function setDisplayName(name: string, signer: Signer) {
+export async function setPublicName(name: string, signer: Signer) {
     const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
-    iotaNamesTx.setDefault(name);
+    iotaNamesTx.setPublic(name);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
         client: iotaClient,
