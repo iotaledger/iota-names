@@ -330,15 +330,15 @@ export async function setPublicName(name: string, signer: Signer) {
         client: iotaClient,
     });
 
-    const responseSetDisplay = await iotaClient.signAndExecuteTransaction({
+    const responseSetPublic = await iotaClient.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
-    console.log(`Set name: ${name} as display name for address: ${address}`);
-    return responseSetDisplay;
+    console.log(`Set name: ${name} as public name for address: ${address}`);
+    return responseSetPublic;
 }
 
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {

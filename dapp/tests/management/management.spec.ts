@@ -660,17 +660,17 @@ test.describe.parallel('Name Management Tests', () => {
         await page.close();
     });
 
-    test('Unset Display', async ({ appPage: page, context, sharedState }) => {
+    test('Unset Public Name', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
-        const name = generateRandomName('display');
+        const name = generateRandomName('unset');
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
         const responseConnect = await connectName(name, record.nftId, keypair);
         expect(responseConnect.effects?.status.status).toBe('success');
-        const responseSetDisplay = await setPublicName(name, keypair);
-        expect(responseSetDisplay.effects?.status.status).toBe('success');
+        const responseSetPublic = await setPublicName(name, keypair);
+        expect(responseSetPublic.effects?.status.status).toBe('success');
         await page.goto('/my-names');
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
@@ -685,11 +685,11 @@ test.describe.parallel('Name Management Tests', () => {
         await page.getByText('Connect to Address', { exact: true }).click();
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
-        const displayLabel = dialog.getByText('Set as Display name', { exact: true });
-        await expect(displayLabel).toBeVisible();
-        const displayCheckbox = dialog.getByRole('checkbox');
-        await expect(displayCheckbox).toBeChecked({ timeout: 10_000 });
-        await displayCheckbox.click();
+        const publicLabel = dialog.getByText('Use as your public name', { exact: true });
+        await expect(publicLabel).toBeVisible();
+        const publicNameCheckbox = dialog.getByRole('checkbox');
+        await expect(publicNameCheckbox).toBeChecked({ timeout: 10_000 });
+        await publicNameCheckbox.click();
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
