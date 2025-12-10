@@ -21,7 +21,7 @@ jobs:
       - name: Install prettier plugin
         run: npm i -g prettier @mysten/prettier-plugin-move
 
-      - name: Run format check
+      - name: Check format
         run: prettier-move -c packages/**
 
   test:
@@ -31,8 +31,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 1
 
       - name: Install Homebrew
         run: |
@@ -42,7 +40,7 @@ jobs:
       - name: Install IOTA using Homebrew
         run: brew install iotaledger/tap/iota
 
-      - name: Run move tests in all package subdirectories, with exclusions
+      - name: Run move tests in all package subdirectories
         run: |
           for dir in packages/*; do
             dir_name=$(basename "$dir")
