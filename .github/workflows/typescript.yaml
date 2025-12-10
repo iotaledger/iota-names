@@ -61,7 +61,7 @@ jobs:
 
   sdk_test:
     name: SDK Tests
-    runs-on: ubuntu-latest
+    runs-on: self-hosted-x64
     services:
       postgres:
         image: postgres:15
@@ -82,6 +82,15 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: System dependencies
+        run: |
+          sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev locales
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
+
       - name: Install Homebrew
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -93,10 +102,6 @@ jobs:
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version: 20
-
-      - name: Do a global PNPM install
-        run: |
-          npm install -g pnpm
 
       - name: Install Dependencies
         run: |
