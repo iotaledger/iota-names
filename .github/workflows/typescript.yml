@@ -21,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_and_lint:
+  build-and-lint:
     name: TS Build / Lint
     runs-on: ubuntu-latest
     steps:
@@ -59,7 +59,7 @@ jobs:
         run: |
           pnpm lint
 
-  sdk_test:
+  sdk-test:
     name: SDK Tests
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
@@ -135,7 +135,7 @@ jobs:
           cd ../sdk
           VITE_IOTA_BIN="iota" pnpm test:e2e
 
-  dapp_e2e_test:
+  dapp-e2e-test:
     name: Run dapp E2E Tests
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
@@ -257,7 +257,7 @@ jobs:
           path: dapp/playwright-report/
           retention-days: 7
 
-  names_display_test:
+  names-display-test:
     name: Names Display Tests
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: self-hosted-x64

@@ -33,7 +33,7 @@ on:
         default: "0x1ca3c38e888493f869ac35346a2041d6cf87b0b935ebba14b35a08811d8a76e4"
 
 jobs:
-  iota_names:
+  iota-names:
     name: IOTA-Names create tx
     runs-on: ubuntu-latest
 

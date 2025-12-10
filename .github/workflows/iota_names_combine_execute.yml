@@ -45,7 +45,7 @@ on:
         type: boolean
 
 jobs:
-  iota_names_combine_and_execute:
+  iota-names-combine-and-execute:
     name: IOTA-Names Combine and Execute tx
     runs-on: ubuntu-latest
 
