@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import { Network } from '@iota/iota-sdk/client';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
