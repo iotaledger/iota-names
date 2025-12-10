@@ -23,7 +23,7 @@ jobs:
 
       - name: Run format check
         run: prettier-move -c packages/**
-  
+
   test:
     runs-on: ubuntu-latest
     needs: format
