@@ -2,8 +2,7 @@ name: dprint format
 
 on:
   push:
-    branches:
-      - "develop"
+    branches: [develop]
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 

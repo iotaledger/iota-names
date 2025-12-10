@@ -4,8 +4,7 @@ on:
   ## Allow triggering this workflow manually via GitHub CLI/web
   workflow_dispatch:
   push:
-    branches:
-      - develop
+    branches: [develop]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
