@@ -61,6 +61,7 @@ jobs:
 
   sdk_test:
     name: SDK Tests
+    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -136,6 +137,7 @@ jobs:
 
   dapp_e2e_test:
     name: Run dapp E2E Tests
+    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet

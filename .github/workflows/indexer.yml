@@ -25,9 +25,11 @@ jobs:
         run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
 
       - name: Check udeps
+        if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
         run: cargo +nightly-2025-04-01 udeps --manifest-path indexer/Cargo.toml
 
       - name: Run clippy
+        if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
         run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
 
   bans-licenses-sources:
@@ -46,6 +48,7 @@ jobs:
 
   check:
     name: Check indexer crate
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1

@@ -10,6 +10,7 @@ on:
 
 jobs:
   deploy-preview:
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     uses: ./.github/workflows/vercel_app_deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
