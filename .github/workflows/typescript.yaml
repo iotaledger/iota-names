@@ -136,7 +136,7 @@ jobs:
 
   dapp_e2e_test:
     name: Run dapp E2E Tests
-    runs-on: self-hosted
+    runs-on: self-hosted-x64
     env:
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
