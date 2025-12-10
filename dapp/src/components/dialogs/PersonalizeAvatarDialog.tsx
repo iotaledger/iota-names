@@ -23,7 +23,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { BrandedAssets } from '@/components/svgs';
 import {
     NameRecordData,
     NameUpdate,
@@ -37,6 +36,7 @@ import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject } from '@/lib/utils/names';
 
+import { NameAvatarDisplay } from '../name-record/AvatarDisplay';
 import { TruncatedNameWithTooltip } from '../TruncatedNameWithTooltip';
 
 interface PersonalizeAvatarDialogProps {
@@ -119,6 +119,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         updates,
     });
 
+    const defaultAsset =
+        visualAssets?.find((a) => a.objectId === nameRecord?.nameRecord.nftId) || null;
+
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
 
@@ -167,6 +170,14 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         if (!updateNameTransaction) return;
         saveAvatar();
     }
+    const selectedAsset =
+        action.type === 'set'
+            ? visualAssets?.find((a) => a.objectId === action.avatar)
+            : action.type === 'unset'
+              ? defaultAsset
+              : currentAvatar
+                ? visualAssets?.find((a) => a.objectId === currentAvatar)
+                : defaultAsset;
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
@@ -183,15 +194,41 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
                 <DialogBody>
                     <div className="flex flex-col gap-md items-center">
-                        <div className="flex flex-col gap-md items-center w-full">
-                            <BrandedAssets className="w-12 h-12" />
-                            <div className="flex flex-col gap-xs text-center w-full">
-                                <span className="text-title-md text-names-neutral-92 w-full text-center">
+                        <div className="flex flex-col gap-md items-start w-full">
+                            <div className="flex flex-row gap-lg p-[2px] rounded-xl bg-names-neutral-10 items-center w-full">
+                                <div className="w-28 h-28">
+                                    {selectedAsset ? (
+                                        <VisualAssetCard
+                                            src={selectedAsset.display?.data?.image_url || ''}
+                                            altText={selectedAsset.display?.data?.name || 'NFT'}
+                                            isHoverable={false}
+                                        />
+                                    ) : (
+                                        <NameAvatarDisplay name={name} />
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col gap-xxs">
+                                    <p className="text-names-neutral-92 text-title-md">
+                                        <TruncatedNameWithTooltip
+                                            name={name}
+                                            tooltipPosition={TooltipPosition.Top}
+                                        />
+                                    </p>
+
+                                    <p className="text-names-neutral-70 text-body-md">NFT Name</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-xxs text-start w-full">
+                                <div className="flex flex-row gap-xxs text-title-md text-names-neutral-92 w-full text-start">
+                                    <p>Personalize</p>
                                     <TruncatedNameWithTooltip
                                         name={name}
                                         tooltipPosition={TooltipPosition.Top}
                                     />
-                                </span>
+                                </div>
+
                                 <span className="text-body-md text-names-neutral-70">
                                     Use an NFT to personalize your avatar
                                 </span>
