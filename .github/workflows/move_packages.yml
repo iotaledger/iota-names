@@ -3,7 +3,7 @@ name: Lint and Test Move Packages
 on:
   pull_request:
     paths:
-      - ".github/workflows/move_packages.yaml"
+      - ".github/workflows/move_packages.yml"
       - "packages/**"
   push:
     branches:

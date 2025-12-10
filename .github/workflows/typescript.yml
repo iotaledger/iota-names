@@ -3,7 +3,7 @@ name: Typescript
 on:
   pull_request:
     paths:
-      - ".github/workflows/typescript.yaml"
+      - ".github/workflows/typescript.yml"
       - "packages/**"
       - "scripts/**"
       - "build-scripts/**"

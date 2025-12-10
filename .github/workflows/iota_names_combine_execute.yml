@@ -92,7 +92,7 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
         with:
-          workflow: iota-names-build-tx.yaml
+          workflow: iota_names_build_tx.yml
           workflow_conclusion: success
           name: transaction-data
           path: scripts/tx
