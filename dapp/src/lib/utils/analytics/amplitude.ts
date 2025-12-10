@@ -7,10 +7,9 @@ import { CONFIG } from '@/config';
 
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
+import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
-const IS_ENABLED =
-    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
-    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
+const IS_ENABLED = true;
 
 /**
  * Check if user has previously given consent for cookies/tracking.
@@ -43,11 +42,29 @@ export async function initAmplitude() {
                     autocapture: {
                         pageViews: IS_ENABLED,
                         sessions: IS_ENABLED,
+                        elementInteractions: IS_ENABLED
+                            ? {
+                                  // Track buttons, links, and elements with data-testid
+                                  cssSelectorAllowlist: [
+                                      'button',
+                                      'a',
+                                      '[data-testid]',
+                                      '[data-amp-track-action]',
+                                  ],
+                                  // Capture all data-* attributes (including data-testid and data-amp-track-*)
+                                  dataAttributePrefix: 'data-',
+                              }
+                            : false,
                     },
                     logLevel: LogLevel.None,
                 },
             },
         }).promise;
+
+        // Add context enrichment plugin to add page context to all events
+        if (IS_ENABLED) {
+            ampli.client.add(contextEnrichmentPlugin());
+        }
 
         setNetworkGroup(defaultNetwork);
     } catch (error) {
