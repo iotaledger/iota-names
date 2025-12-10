@@ -192,10 +192,6 @@ jobs:
       - name: Install IOTA using Homebrew
         run: brew install iotaledger/tap/iota
 
-      - name: Do a global PNPM install
-        run: |
-          npm install -g pnpm
-
       - name: Install Dependencies
         run: |
           pnpm install
