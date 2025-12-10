@@ -241,6 +241,7 @@ jobs:
             start \
             --node-url=http://host.docker.internal:9000 \
             --checkpoint-url=http://host.docker.internal:9000
+            --reset-metrics
 
           pnpm dapp build
           cd dapp
