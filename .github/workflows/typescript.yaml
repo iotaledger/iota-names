@@ -183,7 +183,7 @@ jobs:
 
           export LANG=en_US.UTF-8
           export LC_ALL=en_US.UTF-8
- 
+
       - name: Install Homebrew
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
