@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# This script updates the auction durations in packages/auction/sources/auction.move
+# This script updates the auction constants in packages/auction/sources/auction.move
 # - AUCTION_BIDDING_PERIOD_MS -> 20 seconds (20 * 1000)
 # - AUCTION_MIN_QUIET_PERIOD_MS -> 10 seconds (10 * 1000)
+# - AUCTION_MIN_OVERBID_VALUE_IOTA -> 1 IOTA
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
 # Go two levels up from dapp/scripts to reach the repo root
@@ -15,12 +16,13 @@ if [[ ! -f "$FILE" ]]; then
   exit 1
 fi
 
-echo "Updating auction durations in: $FILE"
+echo "Updating auction constants in: $FILE"
 
 TMP_FILE="$(mktemp)"
 sed -E \
   -e 's/^(const[[:space:]]+AUCTION_BIDDING_PERIOD_MS:[[:space:]]*u64[[:space:]]*=[[:space:]]*)[^;]+;/\1 20 * 1000;/' \
   -e 's/^(const[[:space:]]+AUCTION_MIN_QUIET_PERIOD_MS:[[:space:]]*u64[[:space:]]*=[[:space:]]*)[^;]+;/\1 10 * 1000;/' \
+  -e 's/^(const[[:space:]]+AUCTION_MIN_OVERBID_VALUE_IOTA:[[:space:]]*u64[[:space:]]*=[[:space:]]*)[^;]+;/\1 1_000_000_000;/' \
   "$FILE" > "$TMP_FILE"
 
 if cmp -s "$FILE" "$TMP_FILE"; then
@@ -33,4 +35,4 @@ mv "$TMP_FILE" "$FILE"
 
 echo "Done."
 echo "New values:"
-grep -nE "AUCTION_(BIDDING_PERIOD_MS|MIN_QUIET_PERIOD_MS)" "$FILE" || true
+grep -nE "AUCTION_(BIDDING_PERIOD_MS|MIN_QUIET_PERIOD_MS|MIN_OVERBID_VALUE_IOTA)" "$FILE" || true
