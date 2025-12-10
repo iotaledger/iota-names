@@ -176,7 +176,13 @@ jobs:
           node-version: 20
 
       - name: System dependencies
-        run: sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev
+        run: |
+          sudo apt update && sudo apt install -y libpq5 libpq-dev ca-certificates libsqlite3-dev libudev-dev locales
+          sudo locale-gen en_US.UTF-8
+          sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+          export LANG=en_US.UTF-8
+          export LC_ALL=en_US.UTF-8
  
       - name: Install Homebrew
         run: |
