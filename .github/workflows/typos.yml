@@ -12,13 +12,13 @@ concurrency:
 
 jobs:
   run:
-    name: Spell Check with Typos
+    name: Check typos
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Actions Repository
+      - name: Checkout repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Check spelling
-        uses: crate-ci/typos@b1a1ef3893ff35ade0cfa71523852a49bfd05d19 # v1.31.1
+      - name: Check typos
+        uses: crate-ci/typos@2d0ce569feab1f8752f1dde43cc2f2aa53236e06 # v1.40.0
         with:
           config: ./.typos.toml
