@@ -327,13 +327,12 @@ export class IotaNamesClient {
 
         return priceMap;
     }
-
-    async getDefaultName(address: string): Promise<string | null> {
+    async getPublicName(address: string): Promise<string | null> {
         const response: any = await this.graphQlClient.query({
             query: graphql(`
                 query resolveNameServiceName($address: IotaAddress!, $nameFormat: NameFormat) {
                     address(address: $address) {
-                        iotaNamesDefaultName(format: $nameFormat)
+                        publicName: iotaNamesDefaultName(format: $nameFormat)
                     }
                 }
             `),
@@ -342,9 +341,9 @@ export class IotaNamesClient {
             },
         });
 
-        const defaultName = response?.data?.address?.iotaNamesDefaultName ?? null;
+        const publicName = response?.data?.address?.publicName ?? null;
 
-        return defaultName;
+        return publicName;
     }
 
     async getDenyListTableIds(): Promise<{

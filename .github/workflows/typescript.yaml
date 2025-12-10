@@ -218,7 +218,7 @@ jobs:
           iota client faucet
           sleep 5
 
-          bash dapp/scripts/update_auctions_duration.sh
+          bash dapp/scripts/update_auctions_constants.sh
           cd scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
@@ -245,7 +245,8 @@ jobs:
             ghcr.io/iotaledger/iota-names/iota-names-indexer:latest \
             start \
             --node-url=http://host.docker.internal:9000 \
-            --checkpoint-url=http://host.docker.internal:9000
+            --checkpoint-url=http://host.docker.internal:9000 \
+            --reset-metrics
 
           pnpm dapp build
           cd dapp

@@ -17,7 +17,7 @@ export const queryKey = {
     updateName: (address?: string) => [...queryKey.all, 'update-name', address],
 
     // Address
-    defaultName: (address: string) => [...queryKey.all, 'default-name', address],
+    publicName: (address: string) => [...queryKey.all, 'public-name', address],
 
     // Generic
     ownedObjects: (address: string) => [...queryKey.all, 'owned-objects', address],

@@ -17,6 +17,7 @@ import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/conte
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { captureException } from '@/instrumentation';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
+import { ampli } from '@/lib/utils/analytics/ampli';
 import { getAmplitudeConsentStatus, initAmplitude } from '@/lib/utils/analytics/amplitude';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
 import { growthbook } from '@/lib/utils/growthbook';
@@ -45,10 +46,17 @@ export function AppProviders({ children }: React.PropsWithChildren) {
     const defaultNetwork = CONFIG.network;
 
     useEffect(() => {
-        const amplitudeConsentStatus = getAmplitudeConsentStatus();
-        if (amplitudeConsentStatus !== 'declined') {
-            initAmplitude();
-        }
+        (async () => {
+            const amplitudeConsentStatus = getAmplitudeConsentStatus();
+            if (amplitudeConsentStatus !== 'declined') {
+                await initAmplitude();
+                await ampli.openedIotaNames({
+                    activeOrigin: window.location.origin,
+                    pagePath: window.location.pathname,
+                    pagePathFragment: `${location.pathname}${location.search}${location.hash}`,
+                }).promise;
+            }
+        })();
     }, []);
 
     function handleNetworkChange() {

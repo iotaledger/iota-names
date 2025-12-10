@@ -399,9 +399,9 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Sets a default name for the user.
+     * Sets a public name for the user.
      */
-    setDefault(name: string) {
+    setPublic(name: string) {
         if (!isValidIotaName(name)) throw new Error('Invalid IOTA names');
         const packageId = this.iotaNamesClient.getPackage('packageId');
         const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId');
@@ -416,9 +416,9 @@ export class IotaNamesTransaction {
     }
 
     /**
-     * Unsets a default name for the user.
+     * Unsets a Public name for the user.
      */
-    unsetDefault() {
+    unsetPublic() {
         const iotaNamesObjectId = this.iotaNamesClient.getPackage('iotaNamesObjectId');
         const packageId = this.iotaNamesClient.getPackage('packageId');
 

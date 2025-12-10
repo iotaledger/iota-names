@@ -99,7 +99,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
         isSubname: false,
     });
 
-    iotaNamesTx.setDefault(uniqueName);
+    iotaNamesTx.setPublic(uniqueName);
 
     // Sets the avatar of the NFT.
     iotaNamesTx.setUserData({
