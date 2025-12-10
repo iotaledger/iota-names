@@ -7,12 +7,12 @@ on:
       - develop
     paths:
       - "dapp/**"
-      - ".github/workflows/iota-names.staging-deploy.yml"
-      - ".github/workflows/vercel-app-deploy.yml"
+      - ".github/workflows/iota_names.staging_deploy.yml"
+      - ".github/workflows/vercel_app_deploy.yml"
 
 jobs:
   deploy-staging:
-    uses: ./.github/workflows/vercel-app-deploy.yml
+    uses: ./.github/workflows/vercel_app_deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
       NAMES_DAPP_DEFAULT_NETWORK: devnet

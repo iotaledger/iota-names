@@ -1,14 +1,19 @@
-name: Production Testnet Deploy for IOTA Names
+name: Preview Deploy for IOTA Names
 
 on:
-  workflow_dispatch:
+  pull_request:
+    paths:
+      - "sdk/**"
+      - "dapp/**"
+      - ".github/workflows/iota_names.preview_deploy.yml"
+      - ".github/workflows/vercel_app_deploy.yml"
 
 jobs:
-  deploy-testnet-production:
-    uses: ./.github/workflows/vercel-app-deploy.yml
+  deploy-preview:
+    uses: ./.github/workflows/vercel_app_deploy.yml
     with:
-      VERCEL_ENVIRONMENT: production-testnet
-      NAMES_DAPP_DEFAULT_NETWORK: testnet
+      VERCEL_ENVIRONMENT: preview
+      NAMES_DAPP_DEFAULT_NETWORK: devnet
     secrets:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
