@@ -1,4 +1,4 @@
-name: Indexer CI
+name: Indexer
 
 on:
   push:
@@ -14,41 +14,43 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
 
 jobs:
-  lint:
-    name: Lint indexer crate
+  format:
+    name: Check format
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
 
-      - name: Check format
-        run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
+  udeps:
+    name: Check unused dependencies
+    needs: format
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - run: cargo +nightly-2025-04-01 udeps --manifest-path indexer/Cargo.toml
 
-      - name: Check udeps
-        if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
-        run: cargo +nightly-2025-04-01 udeps --manifest-path indexer/Cargo.toml
-
-      - name: Run clippy
-        if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
-        run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
-
-  bans-licenses-sources:
+  deny-bans-licenses-sources:
     name: Cargo deny (bans, licenses, sources)
+    needs: format
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - run: cargo deny --manifest-path indexer/Cargo.toml check bans licenses sources --hide-inclusion-graph
 
-  advisories:
+  deny-advisories:
     name: Cargo deny (advisories)
+    needs: format
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - run: cargo deny --manifest-path indexer/Cargo.toml check advisories --hide-inclusion-graph
 
-  check:
-    name: Check indexer crate
+  clippy:
+    name: Clippy
+    needs: format
     if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - run: cargo check --all-targets --all-features --manifest-path indexer/Cargo.toml
+      - run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
