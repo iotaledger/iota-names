@@ -4,7 +4,7 @@
 import { resolve } from 'path';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import { formatAddress } from '@iota/iota-sdk/utils';
+import { formatAddress, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
 import { formatDate } from '@/lib/utils/format/formatDate';
 
@@ -14,6 +14,7 @@ import {
     addSubnameName,
     connectName,
     connectWallet,
+    createCoupon,
     createWallet,
     editSetup,
     generateRandomName,
@@ -663,8 +664,16 @@ test.describe.parallel('Name Management Tests', () => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('renewcoupon');
 
-        const response = await purchaseName(name, keypair);
-        expect(response.effects?.status.status).toBe('success');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const couponCode = 'FIXED_1000';
+        await createCoupon({
+            code: couponCode,
+            type: 'fixed',
+            value: BigInt(1000) * NANOS_PER_IOTA,
+        });
+
         await page.goto('/my-names');
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
@@ -681,9 +690,9 @@ test.describe.parallel('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Renew Name', { exact: true })).toBeVisible();
 
-        await dialog.getByPlaceholder('Have a discount code?').fill('FIXED_1000');
+        await dialog.getByPlaceholder('Have a discount code?').fill(couponCode);
         await dialog.getByText('+ Apply Coupon').click();
-        await expect(dialog.getByText('FIXED_1000', { exact: true })).toBeVisible();
+        await expect(dialog.getByText(couponCode, { exact: true })).toBeVisible();
 
         await dialog.getByRole('button', { name: 'Renew' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
