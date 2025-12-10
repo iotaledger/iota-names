@@ -1,9 +1,9 @@
-name: Move Test CI
+name: Lint and Test Move Packages
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/move_test.yaml"
+      - ".github/workflows/move_packages.yaml"
       - "packages/**"
   push:
     branches:
@@ -14,8 +14,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install prettier plugin
+        run: npm i -g prettier @mysten/prettier-plugin-move
+
+      - name: Run format check
+        run: prettier-move -c packages/**
+  
   test:
     runs-on: ubuntu-latest
+    needs: format
 
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
