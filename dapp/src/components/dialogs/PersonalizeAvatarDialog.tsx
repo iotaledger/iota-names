@@ -1,10 +1,13 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Info, Loader, Warning } from '@iota/apps-ui-icons';
+import { Info, Loader, Refresh, Warning } from '@iota/apps-ui-icons';
 import {
+    Badge,
+    BadgeType,
     Button,
     ButtonType,
+    ButtonUnstyled,
     Dialog,
     DialogBody,
     DialogContent,
@@ -20,7 +23,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { ALLOWED_METADATA, isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -66,8 +69,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     const { data: subnamesOwned } = useRegistrationNfts('subname');
     const { data: visualAssets, isLoading: isLoadingGetVisualAssets } = useGetVisualAssets(address);
 
-    const [action, setAction] = useState<SetAction>({ type: 'none' });
-
     const nameRecord = nameRecordData as
         | Extract<NameRecordData, { type: 'unavailable' }>
         | undefined;
@@ -75,15 +76,9 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
     const updates: NameUpdate[] = [];
     const currentAvatar = nameRecord?.nameRecord.avatar;
 
-    // Sync current avatar with selection
-    useEffect(() => {
-        if (action.type == 'none' && currentAvatar) {
-            setAction({
-                type: 'set',
-                avatar: currentAvatar,
-            });
-        }
-    }, [currentAvatar]);
+    const [action, setAction] = useState<SetAction>(() =>
+        currentAvatar ? { type: 'set', avatar: currentAvatar } : { type: 'none' },
+    );
 
     // if (nameRecord) {
     if (nameRecord && isNameSubname !== null) {
@@ -118,9 +113,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         address: account?.address || '',
         updates,
     });
-
-    const defaultAsset =
-        visualAssets?.find((a) => a.objectId === nameRecord?.nameRecord.nftId) || null;
 
     const { mutateAsync: signAndExecuteTransaction, isPending: isSigning } =
         useSignAndExecuteTransaction();
@@ -170,19 +162,32 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         if (!updateNameTransaction) return;
         saveAvatar();
     }
-    const selectedAsset =
-        action.type === 'set'
-            ? visualAssets?.find((a) => a.objectId === action.avatar)
-            : action.type === 'unset'
-              ? defaultAsset
-              : currentAvatar
-                ? visualAssets?.find((a) => a.objectId === currentAvatar)
-                : defaultAsset;
+    const selectedAsset = (() => {
+        if (action.type === 'unset') {
+            return null;
+        }
+
+        if (action.type === 'set') {
+            return visualAssets?.find((a) => a.objectId === action.avatar) || null;
+        }
+
+        if (action.type === 'none' && currentAvatar) {
+            return visualAssets?.find((a) => a.objectId === currentAvatar) || null;
+        }
+
+        return null;
+    })();
 
     const isLoadingData = isLoadingGetVisualAssets;
     const isLoading = isUpdating || isLoadingData || isSaving || isSigning;
     const disableUnset = !currentAvatar || isLoading || updates.length > 0;
     const disableSave = isLoading || updates.length === 0 || !updateNameTransaction;
+    const isInUse = (() => {
+        if (!currentAvatar) {
+            return action.type === 'unset' || !selectedAsset;
+        }
+        return selectedAsset?.objectId === currentAvatar;
+    })();
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -195,29 +200,49 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                 <DialogBody>
                     <div className="flex flex-col gap-md items-center">
                         <div className="flex flex-col gap-md items-start w-full">
-                            <div className="flex flex-row gap-lg p-[2px] rounded-xl bg-names-neutral-10 items-center w-full">
-                                <div className="w-28 h-28">
-                                    {selectedAsset ? (
-                                        <VisualAssetCard
-                                            src={selectedAsset.display?.data?.image_url || ''}
-                                            altText={selectedAsset.display?.data?.name || 'NFT'}
-                                            isHoverable={false}
-                                        />
-                                    ) : (
-                                        <NameAvatarDisplay name={name} />
-                                    )}
-                                </div>
+                            <div className="flex flex-col gap-xs w-full items-end">
+                                <div className="flex flex-row gap-lg p-[2px] rounded-xl bg-names-neutral-10 w-full">
+                                    <div className="w-28 h-28 flex-shrink-0">
+                                        {action.type === 'unset' || !selectedAsset ? (
+                                            <NameAvatarDisplay name={name} isOnlyDefaultAvatar />
+                                        ) : (
+                                            <VisualAssetCard
+                                                src={selectedAsset.display?.data?.image_url || ''}
+                                                altText={selectedAsset.display?.data?.name || 'NFT'}
+                                                isHoverable={false}
+                                            />
+                                        )}
+                                    </div>
 
-                                <div className="flex flex-col gap-xxs">
-                                    <p className="text-names-neutral-92 text-title-md">
-                                        <TruncatedNameWithTooltip
-                                            name={name}
-                                            tooltipPosition={TooltipPosition.Top}
-                                        />
-                                    </p>
+                                    <div className="flex flex-col gap-xxs w-full relative justify-center">
+                                        {isInUse && (
+                                            <div className="absolute top-0 right-0">
+                                                <Badge label="In Use" type={BadgeType.Neutral} />
+                                            </div>
+                                        )}
 
-                                    <p className="text-names-neutral-70 text-body-md">NFT Name</p>
+                                        <p className="text-names-neutral-92 text-title-md">
+                                            <TruncatedNameWithTooltip
+                                                name={name}
+                                                tooltipPosition={TooltipPosition.Top}
+                                            />
+                                        </p>
+
+                                        <p className="text-names-neutral-70 text-body-md">
+                                            NFT Name
+                                        </p>
+                                    </div>
                                 </div>
+                                <ButtonUnstyled
+                                    onClick={handleUnset}
+                                    disabled={disableUnset}
+                                    className="text-names-neutral-70 disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Refresh className="h-4 w-4" />
+                                        Restore Default
+                                    </span>
+                                </ButtonUnstyled>
                             </div>
 
                             <div className="flex flex-col gap-xxs text-start w-full">
@@ -303,21 +328,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                             text="Cancel"
                             onClick={() => setOpen(false)}
                             fullWidth
-                        />
-                        <Button
-                            type={ButtonType.Primary}
-                            text="Unset avatar"
-                            onClick={handleUnset}
-                            disabled={disableUnset}
-                            fullWidth
-                            icon={
-                                isLoading ? (
-                                    <Loader
-                                        className="animate-spin"
-                                        data-testid="loading-indicator"
-                                    />
-                                ) : null
-                            }
                         />
                         <Button
                             type={ButtonType.Primary}
