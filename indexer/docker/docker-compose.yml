@@ -26,7 +26,7 @@ services:
     volumes:
       - indexer_progress:/data
     environment:
-      - RUST_LOG=info,iota_names_indexer=debug,iota_data_ingestion_core=warn
+      - RUST_LOG=info,iota_names_indexer=debug,iota_data_ingestion_core=info
       - IOTA_NAMES_PACKAGE_ADDRESS=${IOTA_NAMES_PACKAGE_ADDRESS}
       - IOTA_NAMES_OBJECT_ID=${IOTA_NAMES_OBJECT_ID}
       - IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS=${IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS}
