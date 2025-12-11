@@ -22,7 +22,8 @@ PID_GRAPHQL=""
 wait_for_url() {
     local url=$1
     local name=$2
-    local max_attempts=${3:-60}
+    local log_file=${3:-}
+    local max_attempts=${4:-60}
 
     echo "Waiting for $name at $url..."
     for i in $(seq 1 "$max_attempts"); do
@@ -33,6 +34,11 @@ wait_for_url() {
         sleep 1
     done
     echo "ERROR: $name failed to become ready at $url"
+    if [[ -n "$log_file" && -f "$log_file" ]]; then
+        echo "=== Last 50 lines of $log_file ==="
+        tail -50 "$log_file"
+        echo "=== End of log ==="
+    fi
     return 1
 }
 
@@ -65,8 +71,8 @@ start_initial_network() {
     PID_IOTA=$!
     PIDS+=("$PID_IOTA")
 
-    wait_for_url "http://127.0.0.1:9000" "iota-node"
-    wait_for_url "http://127.0.0.1:9123/gas" "faucet"
+    wait_for_url "http://127.0.0.1:9000/health" "iota-node" "iota-node.log"
+    wait_for_url "http://127.0.0.1:9123/gas" "faucet" "iota-node.log"
 
     # Start indexer-writer
     ./iota-indexer \
@@ -89,7 +95,7 @@ start_initial_network() {
     PID_INDEXER_READER=$!
     PIDS+=("$PID_INDEXER_READER")
 
-    wait_for_url "http://127.0.0.1:9124" "indexer-reader"
+    wait_for_url "http://127.0.0.1:9124" "indexer-reader" "indexer-reader.log"
 
     # Start graphql (no config yet)
     ./iota-graphql-rpc start-server \
@@ -98,7 +104,7 @@ start_initial_network() {
     PID_GRAPHQL=$!
     PIDS+=("$PID_GRAPHQL")
 
-    wait_for_url "http://127.0.0.1:9125" "graphql"
+    wait_for_url "http://127.0.0.1:9125" "graphql" "graphql.log"
 
     echo "=== Phase 1 complete ==="
 }
@@ -220,7 +226,7 @@ restart_with_configs() {
     PID_IOTA=$!
     PIDS+=("$PID_IOTA")
 
-    wait_for_url "http://127.0.0.1:9000" "iota-node"
+    wait_for_url "http://127.0.0.1:9000/health" "iota-node" "iota-node.log"
 
     # Restart indexer-reader with iota-names params
     ./iota-indexer \
@@ -236,7 +242,7 @@ restart_with_configs() {
     PID_INDEXER_READER=$!
     PIDS+=("$PID_INDEXER_READER")
 
-    wait_for_url "http://127.0.0.1:9124" "indexer-reader"
+    wait_for_url "http://127.0.0.1:9124" "indexer-reader" "indexer-reader.log"
 
     # Restart graphql with config file
     ./iota-graphql-rpc start-server \
@@ -246,7 +252,7 @@ restart_with_configs() {
     PID_GRAPHQL=$!
     PIDS+=("$PID_GRAPHQL")
 
-    wait_for_url "http://127.0.0.1:9125" "graphql"
+    wait_for_url "http://127.0.0.1:9125" "graphql" "graphql.log"
 
     echo "=== Phase 4 complete ==="
 }
