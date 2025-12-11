@@ -8,7 +8,7 @@
     ],
     "excludes": [
         "pnpm-lock.yaml",
-        "./changeset/*"
+        ".changeset/*"
     ],
     "toml": {
         "lineWidth": 80
