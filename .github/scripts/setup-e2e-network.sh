@@ -27,8 +27,10 @@ wait_for_url() {
 
     echo "Waiting for $name at $url..."
     for i in $(seq 1 "$max_attempts"); do
-        if curl -sf "$url" > /dev/null 2>&1; then
-            echo "$name is ready"
+        local http_code
+        http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+        if [[ "$http_code" != "000" ]]; then
+            echo "$name is ready (HTTP $http_code)"
             return 0
         fi
         sleep 1
@@ -72,7 +74,7 @@ start_initial_network() {
     PIDS+=("$PID_IOTA")
 
     wait_for_url "http://127.0.0.1:9000/health" "iota-node" "iota-node.log"
-    wait_for_url "http://127.0.0.1:9123/gas" "faucet" "iota-node.log"
+    wait_for_url "http://127.0.0.1:9123" "faucet" "iota-node.log"
 
     # Start indexer-writer
     ./iota-indexer \
