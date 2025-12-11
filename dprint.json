@@ -7,7 +7,8 @@
         "**/*.{yml,yaml}"
     ],
     "excludes": [
-        "pnpm-lock.yaml"
+        "pnpm-lock.yaml",
+        "./changeset/*"
     ],
     "toml": {
         "lineWidth": 80
