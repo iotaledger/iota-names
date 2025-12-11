@@ -116,7 +116,6 @@ jobs:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
-          ADMIN_MNEMONIC=$(iota keytool generate ed25519 --json | jq -r '.mnemonic')
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
           sleep 10
 
@@ -134,7 +133,7 @@ jobs:
           cat ./package-info/localnet.json
 
           cd ../sdk
-          ADMIN_MNEMONIC=$ADMIN_MNEMONIC VITE_IOTA_BIN="iota" pnpm test:e2e
+          VITE_IOTA_BIN="iota" pnpm test:e2e
 
   dapp-e2e-test:
     name: Run dapp E2E Tests
@@ -208,6 +207,7 @@ jobs:
       - name: Prepare local network & Run Dapp e2e tests
         working-directory: ./
         run: |
+          ADMIN_MNEMONIC=$(iota keytool generate ed25519 --json | jq -r '.mnemonic')
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
           sleep 10
 
@@ -248,7 +248,7 @@ jobs:
 
           pnpm dapp build
           cd dapp
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- env ADMIN_MNEMONIC=$ADMIN_MNEMONIC pnpm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
