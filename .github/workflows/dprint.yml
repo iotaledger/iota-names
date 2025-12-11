@@ -1,0 +1,20 @@
+name: Dprint
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
+
+jobs:
+  run:
+    name: Check dprint format
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: dprint check
