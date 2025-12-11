@@ -177,14 +177,6 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
-      - name: Install IOTA using Homebrew
-        run: brew install iotaledger/tap/iota
-
       - name: Do a global PNPM install
         run: |
           npm install -g pnpm
@@ -204,27 +196,18 @@ jobs:
         run: |
           pnpm run playwright:install
 
-      - name: Prepare local network & Run Dapp e2e tests
+      - name: Setup E2E Network
+        working-directory: ./
+        env:
+          IOTA_BINARY_VERSION: "v1.10.0-alpha"
+          DB_URL: "postgres://postgres:postgrespw@localhost:5432/iota_indexer"
+        run: |
+          .github/scripts/setup-e2e-network.sh
+
+      - name: Inject localnet config and start indexer
         working-directory: ./
         run: |
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
-          sleep 10
-
-          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
-          iota client switch --env localnet
-          iota client faucet
-          sleep 5
-
-          bash dapp/scripts/update_auctions_constants.sh
-          cd scripts
-          export NETWORK=localnet
-          pnpm ts-node init/init.ts localnet
-          pnpm ts-node tests/register-name.ts
-          sleep 5
-
-          cat ./package-info/localnet.json
-
-          cd ../dapp
+          cd dapp
           pnpm inject-localnet
 
           cd ..
@@ -245,6 +228,9 @@ jobs:
             --checkpoint-url=http://host.docker.internal:9000 \
             --reset-metrics
 
+      - name: Build and run E2E tests
+        working-directory: ./
+        run: |
           pnpm dapp build
           cd dapp
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
