@@ -207,7 +207,8 @@ jobs:
       - name: Prepare local network & Run Dapp e2e tests
         working-directory: ./
         run: |
-          ADMIN_MNEMONIC=$(iota client new-address --key-scheme ed25519 --json | jq -r '.recoveryPhrase')
+          ADMIN_MNEMONIC="say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
+          iota keytool import "$ADMIN_MNEMONIC" ed25519
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
           sleep 10
 
