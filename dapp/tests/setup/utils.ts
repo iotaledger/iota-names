@@ -3,11 +3,17 @@
 
 import 'dotenv/config';
 
-import { exec } from 'child_process';
 import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
 import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+
+if (!process.env.ADMIN_MNEMONIC) {
+    throw new Error('env ADMIN_MNEMONIC not set. Cannot setup tests.');
+}
+
+const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ADMIN_MNEMONIC);
 
 const DEFAULT_NETWORK = process.env.NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK as string;
 
@@ -62,23 +68,8 @@ async function getAuthorizedSmartContractTypes() {
     };
 }
 
-function runCommand(cmd: string, envs: Record<string, string> = {}) {
-    return new Promise<string>((resolve, reject) => {
-        exec(cmd, { env: { ...process.env, ...envs } }, (error, stdout, stderr) => {
-            if (error) {
-                const message = [
-                    `❌ Command failed: ${cmd}`,
-                    stderr.trim() && `stderr:\n${stderr.trim()}`,
-                    stdout.trim() && `stdout:\n${stdout.trim()}`,
-                ]
-                    .filter(Boolean)
-                    .join('\n\n');
-                return reject(new Error(message));
-            }
-
-            resolve(stdout.trim());
-        });
-    });
+async function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export {
@@ -89,5 +80,6 @@ export {
     PAYMENT_TYPE,
     AUCTION_TYPE,
     getAuthorizedSmartContractTypes,
-    runCommand,
+    adminKeypair,
+    sleep,
 };

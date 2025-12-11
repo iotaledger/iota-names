@@ -1,41 +1,44 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { execTryCatch } from '../setup/toggleSmartContract';
-import { iotaNamesClient } from '../setup/utils';
+import { Transaction } from '@iota/iota-sdk/transactions';
 
-export async function addBlockedLabels(labels: string[]) {
+import { adminKeypair, iotaClient, iotaNamesClient } from '../setup/utils';
+
+export async function addToDenyList(
+    labels: string[],
+    labelType: 'blocked' | 'reserved',
+): Promise<void> {
     const packageId = iotaNamesClient.getPackage('packageId');
     const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
     const adminCap = iotaNamesClient.getPackage('adminCap');
 
-    const formattedLabels = `['${labels.join("', '")}']`;
+    const target = `${packageId}::deny_list::add_${labelType}_labels`;
 
-    const command = `iota client ptb \
-        --make-move-vec "<0x1::string::String>" "${formattedLabels}" \
-        --assign labels \
-        --move-call ${packageId}::deny_list::add_blocked_labels \
-            @${iotaNamesObjectId} \
-            @${adminCap} \
-            labels`;
+    const tx = new Transaction();
 
-    return await execTryCatch(command.replace(/\n/g, ' '));
-}
+    tx.moveCall({
+        target,
+        arguments: [
+            tx.object(iotaNamesObjectId),
+            tx.object(adminCap),
+            tx.pure.vector('string', labels),
+        ],
+    });
 
-export async function addReservedLabels(labels: string[]) {
-    const packageId = iotaNamesClient.getPackage('packageId');
-    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
-    const adminCap = iotaNamesClient.getPackage('adminCap');
+    tx.setSender(adminKeypair.toIotaAddress());
 
-    const formattedLabels = `['${labels.join("', '")}']`;
+    const resp = await iotaClient.signAndExecuteTransaction({
+        transaction: await tx.build({
+            client: iotaClient,
+        }),
+        signer: adminKeypair,
+        options: {
+            showEffects: true,
+        },
+    });
 
-    const command = `iota client ptb \
-        --make-move-vec "<0x1::string::String>" "${formattedLabels}" \
-        --assign labels \
-        --move-call ${packageId}::deny_list::add_reserved_labels \
-            @${iotaNamesObjectId} \
-            @${adminCap} \
-            labels`;
-
-    return await execTryCatch(command.replace(/\n/g, ' '));
+    if (resp.effects?.status.status !== 'success') {
+        throw new Error(`Failed to add ${labelType} labels`);
+    }
 }

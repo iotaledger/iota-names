@@ -116,6 +116,7 @@ jobs:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
+          ADMIN_MNEMONIC=$(iota keytool generate ed25519 --json | jq -r '.mnemonic')
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
           sleep 10
 
@@ -133,7 +134,7 @@ jobs:
           cat ./package-info/localnet.json
 
           cd ../sdk
-          VITE_IOTA_BIN="iota" pnpm test:e2e
+          ADMIN_MNEMONIC=$ADMIN_MNEMONIC VITE_IOTA_BIN="iota" pnpm test:e2e
 
   dapp-e2e-test:
     name: Run dapp E2E Tests
