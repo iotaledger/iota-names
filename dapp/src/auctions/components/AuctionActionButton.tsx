@@ -3,8 +3,10 @@
 
 import { Button, ButtonType } from '@iota/apps-ui-kit';
 import { ConnectModal, useCurrentAccount } from '@iota/dapp-kit';
+import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { queryKey } from '@/hooks/queryKey';
 import { ampli } from '@/lib/utils/analytics/ampli';
@@ -44,6 +46,11 @@ export function AuctionActionButton({
                 queryClient.invalidateQueries({
                     queryKey: queryKey.ownedObjects(account?.address || ''),
                 });
+                toast.success(
+                    `${normalizeIotaName(auction.name, 'at', {
+                        truncateLongParts: true,
+                    })} claimed successfully!`,
+                );
             },
         });
 
