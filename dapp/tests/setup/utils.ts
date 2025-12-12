@@ -95,4 +95,5 @@ export {
     getAuthorizedSmartContractTypes,
     adminKeypair,
     sleep,
+    iotaClientGraphQl,
 };

@@ -17,7 +17,7 @@ import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/aucti
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
-import { client, iotaNamesClient } from './setup/utils';
+import { iotaClientGraphQl, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
@@ -110,9 +110,9 @@ export async function purchaseName(name: string, signer: Signer) {
     iotaNamesTx.transaction.transferObjects([nft, coin], address);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
-    const responsePurchase = await client.signAndExecuteTransaction({
+    const responsePurchase = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -142,9 +142,9 @@ export async function addSubnameName(
     iotaNamesTx.transaction.transferObjects([subnameNft], address);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
-    const responsePurchaseSubname = await client.signAndExecuteTransaction({
+    const responsePurchaseSubname = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -174,9 +174,9 @@ export async function editSetup(
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
-    const responseEditSetup = await client.signAndExecuteTransaction({
+    const responseEditSetup = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -201,9 +201,9 @@ export async function connectName(name: string, nft: string, signer: Signer) {
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
-    const responseConnect = await client.signAndExecuteTransaction({
+    const responseConnect = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -228,10 +228,10 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
 
-    const responseRenew = await client.signAndExecuteTransaction({
+    const responseRenew = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -281,8 +281,8 @@ export async function mintNft(
         target: `${packageId}::mint_nft::mint`,
         arguments: [tx.pure.string(name), tx.pure.string(description), tx.pure.string(imageUrl)],
     });
-    const built = await tx.build({ client });
-    const resultMint = await client.signAndExecuteTransaction({
+    const built = await tx.build({ client: iotaClientGraphQl });
+    const resultMint = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: built,
         signer,
         options: { showEffects: true, showObjectChanges: true },
@@ -306,10 +306,10 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client,
+        client: iotaClientGraphQl,
     });
 
-    const responseSetAvatar = await client.signAndExecuteTransaction({
+    const responseSetAvatar = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
@@ -349,8 +349,8 @@ export async function createAndSendAuctionTransaction({
             name,
         );
 
-        const txBytes = await tx.build({ client });
-        const response = await client.signAndExecuteTransaction({
+        const txBytes = await tx.build({ client: iotaClientGraphQl });
+        const response = await iotaClientGraphQl.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
             options: {
@@ -387,8 +387,8 @@ export async function bidOnExistingAuction({
             name,
         );
 
-        const txBytes = await tx.build({ client });
-        const response = await client.signAndExecuteTransaction({
+        const txBytes = await tx.build({ client: iotaClientGraphQl });
+        const response = await iotaClientGraphQl.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
             options: {
