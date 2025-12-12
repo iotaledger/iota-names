@@ -5,12 +5,13 @@ on:
     paths:
       - "sdk/**"
       - "dapp/**"
-      - ".github/workflows/iota-names.preview-deploy.yml"
-      - ".github/workflows/vercel-app-deploy.yml"
+      - ".github/workflows/iota_names.preview_deploy.yml"
+      - ".github/workflows/vercel_app_deploy.yml"
 
 jobs:
   deploy-preview:
-    uses: ./.github/workflows/vercel-app-deploy.yml
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    uses: ./.github/workflows/vercel_app_deploy.yml
     with:
       VERCEL_ENVIRONMENT: preview
       NAMES_DAPP_DEFAULT_NETWORK: devnet
