@@ -88,7 +88,6 @@ async function sleep(ms: number): Promise<void> {
 export {
     DEFAULT_NETWORK,
     NETWORK_CONFIG,
-    iotaClientGraphQl,
     client,
     iotaNamesClient,
     PAYMENT_TYPE,
