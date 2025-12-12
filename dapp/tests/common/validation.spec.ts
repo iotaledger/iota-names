@@ -6,6 +6,7 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { denormalizeName } from '@/lib/utils';
 
 import { expect, test } from '../helpers/fixtures';
+import { sleep } from '../setup/utils';
 import { generateRandomName } from '../utils';
 import { addToDenyList } from './validation.utils';
 
@@ -51,6 +52,7 @@ test.describe('Name Validation tests', () => {
         const normalizedName = normalizeIotaName(BLOCKED_NAME, 'at');
 
         await addToDenyList([denormalizeName(BLOCKED_NAME)], 'blocked');
+        await sleep(2000);
 
         await page.goto('/');
         await page.getByPlaceholder('Search for your IOTA name').click();
@@ -75,6 +77,7 @@ test.describe('Name Validation tests', () => {
     test("Restricted names can't be registered", async ({ appPage: page }) => {
         const RESERVED_NAME = generateRandomName('tooling');
         await addToDenyList([denormalizeName(RESERVED_NAME)], 'reserved');
+        await sleep(2000);
 
         await page.goto('/');
         await page.getByPlaceholder('Search for your IOTA name').click();
