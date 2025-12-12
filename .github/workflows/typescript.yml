@@ -165,6 +165,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+        command: postgres -c max_connections=1000
     defaults:
       run:
         working-directory: ./dapp
