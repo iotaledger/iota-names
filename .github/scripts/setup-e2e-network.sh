@@ -27,15 +27,13 @@ wait_for_url() {
 
     echo "Waiting for $name at $url..."
     for i in $(seq 1 "$max_attempts"); do
-        local http_code
-        http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
-        if [[ "$http_code" != "000" ]]; then
-            echo "$name is ready (HTTP $http_code)"
+        if curl -s -o /dev/null --connect-timeout 2 "$url" 2>/dev/null; then
+            echo "$name is ready"
             return 0
         fi
         sleep 1
     done
-    echo "ERROR: $name failed to become ready at $url"
+    echo "ERROR: $name failed to become ready at $url after $max_attempts attempts"
     if [[ -n "$log_file" && -f "$log_file" ]]; then
         echo "=== Last 50 lines of $log_file ==="
         tail -50 "$log_file"
@@ -47,15 +45,23 @@ wait_for_url() {
 download_binaries() {
     echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
 
-    local asset_name="iota-$IOTA_BINARY_VERSION-linux-x86_64.tgz"
+    local os_name arch_name
+    os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
+    arch_name=$(uname -m)
+
+    [[ "$os_name" == "darwin" ]] && os_name="macos"
+    [[ "$arch_name" == "aarch64" ]] && arch_name="arm64"
+
+    local asset_name="iota-$IOTA_BINARY_VERSION-${os_name}-${arch_name}.tgz"
     local download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_VERSION/$asset_name"
 
-    wget -q "$download_url" -O iota.tgz
+    echo "Downloading from: $download_url"
+    curl -sL "$download_url" -o iota.tgz
     tar -zxvf iota.tgz
     chmod +x ./iota ./iota-indexer ./iota-graphql-rpc
 
     export PATH="$(pwd):$PATH"
-    echo "$(pwd)" >> "$GITHUB_PATH"
+    [[ -n "${GITHUB_PATH:-}" ]] && echo "$(pwd)" >> "$GITHUB_PATH"
 
     echo "Binaries downloaded and added to PATH"
 }
@@ -91,6 +97,7 @@ start_initial_network() {
     # Start indexer-reader
     ./iota-indexer \
         --db-url "$DB_URL" \
+        --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
         --rpc-client-url "http://127.0.0.1:9000" \
         --rpc-address "0.0.0.0:9124" > indexer-reader.log 2>&1 &
@@ -102,6 +109,7 @@ start_initial_network() {
     # Start graphql (no config yet)
     ./iota-graphql-rpc start-server \
         --node-rpc-url "http://127.0.0.1:9124" \
+        --prom-port 9186 \
         --port 9125 > graphql.log 2>&1 &
     PID_GRAPHQL=$!
     PIDS+=("$PID_GRAPHQL")
@@ -233,6 +241,7 @@ restart_with_configs() {
     # Restart indexer-reader with iota-names params
     ./iota-indexer \
         --db-url "$DB_URL" \
+        --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
         --rpc-client-url "http://127.0.0.1:9000" \
         --rpc-address "0.0.0.0:9124" \
@@ -250,6 +259,7 @@ restart_with_configs() {
     ./iota-graphql-rpc start-server \
         --node-rpc-url "http://127.0.0.1:9124" \
         --port 9125 \
+        --prom-port 9186 \
         --config "$GRAPHQL_CONFIG" > graphql.log 2>&1 &
     PID_GRAPHQL=$!
     PIDS+=("$PID_GRAPHQL")
