@@ -3,7 +3,7 @@
 
 import { Transaction } from '@iota/iota-sdk/transactions';
 
-import { adminKeypair, iotaClient, iotaNamesClient } from '../setup/utils';
+import { adminKeypair, client, iotaNamesClient } from '../setup/utils';
 
 export async function addToDenyList(
     labels: string[],
@@ -28,9 +28,9 @@ export async function addToDenyList(
 
     tx.setSender(adminKeypair.toIotaAddress());
 
-    const resp = await iotaClient.signAndExecuteTransaction({
+    const resp = await client.signAndExecuteTransaction({
         transaction: await tx.build({
-            client: iotaClient,
+            client: client,
         }),
         signer: adminKeypair,
         options: {

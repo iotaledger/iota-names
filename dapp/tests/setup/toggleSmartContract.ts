@@ -7,7 +7,7 @@ import { expect } from '@playwright/test';
 import {
     adminKeypair,
     getAuthorizedSmartContractTypes,
-    iotaClient,
+    iotaClientGraphQl,
     iotaNamesClient,
     sleep,
 } from './utils';
@@ -39,9 +39,9 @@ async function sendAuthTransaction(authorize: boolean, mode: 'payment' | 'auctio
 
     tx.setSender(adminKeypair.toIotaAddress());
 
-    const resp = await iotaClient.signAndExecuteTransaction({
+    const resp = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: await tx.build({
-            client: iotaClient,
+            client: iotaClientGraphQl,
         }),
         signer: adminKeypair,
         options: {

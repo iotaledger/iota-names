@@ -25,10 +25,23 @@ if (!DEFAULT_NETWORK) {
 
 const NETWORK_CONFIG = getNetwork(DEFAULT_NETWORK);
 
-const iotaClient = new IotaClient({
+const iotaClientGraphQl = new IotaClient({
     transport: new IotaClientGraphQLTransport({
         url: NETWORK_CONFIG.graphql!,
+        fallbackTransportUrl: NETWORK_CONFIG.url,
+        unsupportedMethods: [
+            'multiGetObjects',
+            'getReferenceGasPrice',
+            'getNormalizedMoveFunction',
+            'getOwnedObjects',
+            'dryRunTransactionBlock',
+            'executeTransactionBlock',
+        ],
     }),
+});
+
+const client = new IotaClient({
+    url: NETWORK_CONFIG.url,
 });
 
 const iotaNamesClient = new IotaNamesClient({
@@ -53,7 +66,7 @@ const PAYMENT_TYPE = `${authKeyType}<${paymentsPackageId}::payments::PaymentsAut
 const AUCTION_TYPE = `${authKeyType}<${auctionPackageId}::auction::AuctionAuth>`;
 
 async function getAuthorizedSmartContractTypes() {
-    const { data: dynamicFields } = await iotaClient.getDynamicFields({
+    const { data: dynamicFields } = await iotaClientGraphQl.getDynamicFields({
         parentId: iotaNamesObjectId,
     });
 
@@ -75,7 +88,8 @@ async function sleep(ms: number): Promise<void> {
 export {
     DEFAULT_NETWORK,
     NETWORK_CONFIG,
-    iotaClient,
+    iotaClientGraphQl,
+    client,
     iotaNamesClient,
     PAYMENT_TYPE,
     AUCTION_TYPE,
