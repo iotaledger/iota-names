@@ -1,0 +1,61 @@
+name: Indexer
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".github/workflows/indexer.yml"
+      - "indexer/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
+
+jobs:
+  format:
+    name: Check format
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
+
+  udeps:
+    name: Check unused dependencies
+    needs: format
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: cargo +nightly-2025-04-01 udeps --manifest-path indexer/Cargo.toml
+
+  deny-bans-licenses-sources:
+    name: Cargo deny (bans, licenses, sources)
+    needs: format
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: cargo deny --manifest-path indexer/Cargo.toml check bans licenses sources --hide-inclusion-graph
+
+  deny-advisories:
+    name: Cargo deny (advisories)
+    needs: format
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: cargo deny --manifest-path indexer/Cargo.toml check advisories --hide-inclusion-graph
+
+  clippy:
+    name: Clippy
+    needs: format
+    if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - run: cargo clippy --all-targets --all-features --manifest-path indexer/Cargo.toml -- -D warnings
