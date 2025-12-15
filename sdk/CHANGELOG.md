@@ -1,5 +1,11 @@
 # @iota/iota-names-sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- 7dfa16f: Rename functions related to "default" name to "public" name
+
 ## 0.4.0
 
 ### Minor Changes

@@ -146,7 +146,7 @@ curl "http://localhost:3000/myname/$(date +%s)" > myname.svg
 2. **Port Conflicts:** If port 3000 is already in use, modify the port mapping in `docker-compose.yml`:
    ```yaml
    ports:
-     - "3001:3000"  # Maps host port 3001 to container port 3000
+     - "3001:3000" # Maps host port 3001 to container port 3000
    ```
 
 3. **Health Check Failures:** The service includes a health check that tests the API endpoint. If it fails, check the logs with `docker-compose logs names-display`.

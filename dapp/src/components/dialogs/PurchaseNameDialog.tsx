@@ -21,7 +21,6 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
@@ -37,12 +36,13 @@ import {
     useBalance,
     useCalculatePrice,
     useCalculatePriceInFiat,
+    useCoinMetadata,
     useUpdateNameTransaction,
 } from '@/hooks';
 import { useIsMethodSupported } from '@/hooks/useIsMethodSupported';
 import { useNameRecord } from '@/hooks/useNameRecord';
 import { useNamesConfig } from '@/hooks/useNamesConfig';
-import { formatNanosToIota, getUserFriendlyErrorMessage } from '@/lib/utils';
+import { formatNanosToIota, getUserFriendlyErrorMessage, parseNanosToIota } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getTargetExpirationDate } from '@/lib/utils/names';
 
@@ -70,9 +70,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const account = useCurrentAccount();
 
     const { data: coinBalance, error: coinBalanceError } = useBalance(account?.address ?? '');
-    const [isDisplayName, setIsDisplayName] = useState<boolean>(false);
+    const { data: coinMetadata } = useCoinMetadata(coinBalance?.coinType);
+    const [isPublicName, setIsPublicName] = useState<boolean>(false);
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-    const [applyCoupons, setApplyCoupons] = useState(false);
     const [purchaseYears, setPurchaseYears] = useState<number>(1);
     const { data: isRegisterWithYearsSupported, isLoading: isLoadingRegisterWithYears } =
         useIsMethodSupported({
@@ -105,9 +105,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
             name: name,
             years: isRegisterWithYearsSupported ? purchaseYears : undefined,
             price: price,
-            setDefault: isDisplayName,
+            setPublic: isPublicName,
             address: account?.address,
-            ...(applyCoupons && coupons.length ? { couponCodes } : {}),
+            ...(coupons.length ? { couponCodes } : {}),
         });
     }
 
@@ -120,7 +120,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
         updates: updates,
     });
 
-    const applyDiscount = applyCoupons && couponCodes.length >= 0;
+    const applyDiscount = couponCodes.length >= 0;
 
     const { data: discountedPrice, isLoading: isDiscountedPriceLoading } = useQuery({
         queryKey: [couponCodes, name, account?.address, purchaseYears],
@@ -158,18 +158,20 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                 queryKey: queryKey.nameRecord(name),
             });
             queryClient.invalidateQueries({
-                queryKey: queryKey.defaultName(account?.address || ''),
+                queryKey: queryKey.publicName(account?.address || ''),
             });
 
             ampli.purchasedName({
                 name,
-                amount: price ?? 0,
-                expiration: purchaseYears,
+                amount: parseNanosToIota(price ?? 0),
+                expiration: purchaseYears, // tbd replace expiration with more meaningful name purchaseYears
+                purchaseYears: purchaseYears,
                 discountName: couponCodes.join(','),
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,
+                coinType: coinMetadata?.symbol,
             });
 
-            if (isDisplayName) {
+            if (isPublicName) {
                 ampli.setNameAsDisplayed({ name });
             }
 
@@ -295,19 +297,11 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                 </div>
                             ) : null}
                             <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
-                                </div>
-                                {applyCoupons && (
-                                    <CouponInputSelection
-                                        coupons={coupons}
-                                        onAddCoupon={handleAddCoupon}
-                                    />
-                                )}
+                                <CouponInputSelection
+                                    coupons={coupons}
+                                    disabled={isLoading}
+                                    onAddCoupon={handleAddCoupon}
+                                />
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
@@ -324,8 +318,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                 <div className="flex flex-row gap-x-sm w-full p-md">
                                     <Checkbox
                                         name="set_display_name"
-                                        isChecked={isDisplayName}
-                                        onCheckedChange={(e) => setIsDisplayName(e.target.checked)}
+                                        isChecked={isPublicName}
+                                        onCheckedChange={(e) => setIsPublicName(e.target.checked)}
                                         label="Set name as Display Name"
                                     />
                                 </div>

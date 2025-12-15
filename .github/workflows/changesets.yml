@@ -1,11 +1,9 @@
 name: Changesets
 
 on:
-  ## Allow triggering this workflow manually via GitHub CLI/web
   workflow_dispatch:
   push:
-    branches:
-      - develop
+    branches: [develop]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -14,19 +12,23 @@ jobs:
     runs-on: self-hosted-x64
     steps:
       - name: checkout code repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
       - name: Install Nodejs
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: "20"
           cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Create Release Pull Request
-        uses: changesets/action@f13b1baaa620fde937751f5d2c3572b9da32af23 # v1.4.5
+        uses: changesets/action@e0145edc7d9d8679003495b11f87bd8ef63c0cba # v1.5.3
         with:
           # Generates src/version.ts file using genVersion
           # https://github.com/changesets/action#with-version-script

@@ -103,8 +103,8 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
         isSubname: false,
     });
 
-    // Set this as the default name
-    iotaNamesTx.setDefault(uniqueName);
+    // Set this as the public name
+    iotaNamesTx.setPublic(uniqueName);
 
     // Set metadata
     iotaNamesTx.setUserData({
@@ -312,7 +312,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
             expect(result.effects.status.status).toBe('success');
         }, 60000);
 
-        it('should register with metadata and set as default', async () => {
+        it('should register with metadata and set as public', async () => {
             const tx = new Transaction();
             const iotaNamesTx = new IotaNamesTransaction(client, tx);
 
@@ -334,7 +334,7 @@ describe('IOTA Names Localnet Integration Tests', () => {
                 isSubname: false,
             });
 
-            iotaNamesTx.setDefault(uniqueName);
+            iotaNamesTx.setPublic(uniqueName);
 
             iotaNamesTx.setUserData({
                 nft,

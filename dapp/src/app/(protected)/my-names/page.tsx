@@ -28,7 +28,7 @@ import { RenewSubnameDialog } from '@/components/dialogs/RenewSubameDialog';
 import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
-import { useGetDefaultName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
+import { useGetPublicName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -72,7 +72,7 @@ export default function MyNamesPage(): JSX.Element {
     const { isRefreshing, handleRefresh } = useRefreshAuctions(auctionDetails);
 
     const address = useCurrentAccount()?.address ?? '';
-    const { data: defaultName } = useGetDefaultName(address);
+    const { data: publicName } = useGetPublicName(address);
 
     const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
 
@@ -113,8 +113,8 @@ export default function MyNamesPage(): JSX.Element {
         closePanel();
     }
 
-    function isDefaultName(name: RegistrationNft): boolean {
-        return defaultName ? defaultName === name.name : false;
+    function isPublicName(name: RegistrationNft): boolean {
+        return publicName ? publicName === name.name : false;
     }
 
     function handleNameRenewed(name: RegistrationNft): void {
@@ -242,10 +242,10 @@ export default function MyNamesPage(): JSX.Element {
                                     }}
                                     isActive={rightPanelSelectedName?.name === nft.name}
                                     badge={
-                                        isDefaultName(nft) ? (
+                                        isPublicName(nft) ? (
                                             <Badge
                                                 type={BadgeType.PrimarySolid}
-                                                label="Displayed"
+                                                label="Public Name"
                                             />
                                         ) : null
                                     }

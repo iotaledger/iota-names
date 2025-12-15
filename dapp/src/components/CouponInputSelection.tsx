@@ -12,10 +12,15 @@ import type { UserSetCoupon } from './dialogs';
 
 interface CouponInputSelectionProps {
     coupons: UserSetCoupon[];
+    disabled: boolean;
     onAddCoupon: (code: string) => Promise<void>;
 }
 
-export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelectionProps) {
+export function CouponInputSelection({
+    coupons,
+    disabled,
+    onAddCoupon,
+}: CouponInputSelectionProps) {
     const [coupon, setCoupon] = useState<string>('');
 
     async function addCoupon() {
@@ -26,7 +31,7 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
     }
 
     return (
-        <div className={clsx('flex flex-col mt-sm', coupons.length && 'gap-y-sm')}>
+        <div className={clsx('flex flex-col', coupons.length && 'gap-y-sm')}>
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
                 {coupons.map(({ code: coupon, isInvalid: isError }) => (
                     <Chip
@@ -41,23 +46,26 @@ export function CouponInputSelection({ coupons, onAddCoupon }: CouponInputSelect
             </div>
 
             <div className="flex flex-col items-start gap-y-sm">
-                <Input
-                    placeholder={
-                        coupons.length === 0 ? 'Enter a coupon code' : 'Add an extra coupon'
-                    }
-                    type={InputType.Text}
-                    value={coupon}
-                    onChange={(e) => setCoupon(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
-                    onClearInput={() => setCoupon('')}
-                />
-                <ButtonUnstyled
-                    className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    onClick={addCoupon}
-                    disabled={!coupon.trim()}
-                >
-                    + Apply Coupon
-                </ButtonUnstyled>
+                {coupons.length === 0 && (
+                    <>
+                        <Input
+                            placeholder={'Have a discount code?'}
+                            type={InputType.Text}
+                            value={coupon}
+                            onChange={(e) => setCoupon(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
+                            onClearInput={() => setCoupon('')}
+                            disabled={disabled}
+                        />
+                        <ButtonUnstyled
+                            className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                            onClick={addCoupon}
+                            disabled={disabled}
+                        >
+                            + Apply Coupon
+                        </ButtonUnstyled>
+                    </>
+                )}
             </div>
         </div>
     );

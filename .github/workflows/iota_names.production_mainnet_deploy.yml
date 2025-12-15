@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy-mainnet-production:
-    uses: ./.github/workflows/vercel-app-deploy.yml
+    uses: ./.github/workflows/vercel_app_deploy.yml
     with:
       VERCEL_ENVIRONMENT: production
       NAMES_DAPP_DEFAULT_NETWORK: mainnet

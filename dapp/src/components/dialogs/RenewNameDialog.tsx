@@ -19,7 +19,6 @@ import {
     LoadingIndicator,
     Panel,
     Select,
-    Toggle,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -43,13 +42,13 @@ function createRenewUpdates({
     nameRecord,
     renewYears,
     applyCoupons = false,
-    coupons = [],
+    coupon = '',
     address,
 }: {
     nameRecord?: NameRecord;
     renewYears?: number;
     applyCoupons?: boolean;
-    coupons?: string[];
+    coupon?: string;
     address?: string;
 }) {
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -65,7 +64,7 @@ function createRenewUpdates({
             nftId: nameRecord.nftId,
             years: renewYears,
             address,
-            ...(applyCoupons && coupons.length ? { couponCodes: coupons } : {}),
+            ...(applyCoupons ? { couponCodes: coupon } : {}),
         });
     }
     return updates;
@@ -100,15 +99,12 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const renewOptions = useCalculatePrice(name, renewableYears, false);
     const [renewYears, setRenewYears] = useState<number | undefined>();
     const [coupons, setCoupons] = useState<UserSetCoupon[]>([]);
-    const [applyCoupons, setApplyCoupons] = useState(false);
-
-    const couponCodes = coupons.map((c) => c.code);
 
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         renewYears,
-        applyCoupons,
-        coupons: couponCodes,
+        applyCoupons: coupons.length > 0 ? true : false,
+        coupon: coupons.length > 0 ? coupons[0]?.code : '',
         address: account?.address,
     });
 
@@ -148,7 +144,8 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             });
             ampli.renewedName({
                 name,
-                expiration: renewYears || 0,
+                expiration: renewYears || 0, // tbd replace with more meaningful name renewYears
+                renewYears: renewYears || 0,
             });
             toast.success('Name renewed successfully');
         },
@@ -158,7 +155,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     });
 
     async function handleAddCoupon(couponCode: string) {
-        if (couponCodes.includes(couponCode)) {
+        if (coupons.some((c) => c.code === couponCode)) {
             setCoupons((currentCoupons) =>
                 currentCoupons.filter((existingCoupon) => existingCoupon.code !== couponCode),
             );
@@ -263,21 +260,15 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                                     supportingText={`This name has already been extended to the maximum allowed period of ${config?.coreConfig?.max_years} years. You'll be able to renew it again once it gets closer to its expiration date`}
                                 />
                             )}
-                            <div className="flex flex-col">
-                                <div className="self-end">
-                                    <Toggle
-                                        isToggled={applyCoupons}
-                                        onChange={setApplyCoupons}
-                                        label="Add Coupons"
-                                    />
-                                </div>
-                                {applyCoupons && (
+                            {isRenewable && (
+                                <div className="flex flex-col">
                                     <CouponInputSelection
                                         coupons={coupons}
+                                        disabled={isLoading}
                                         onAddCoupon={handleAddCoupon}
                                     />
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
                             {updateNameError ? (

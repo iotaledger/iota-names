@@ -1,7 +1,7 @@
 ---
 name: IOTA-Names doc content issue or request
 about: Creates an issue for IOTA-Names documentation
-title: 'IOTA-Names doc content issue or request'
+title: "IOTA-Names doc content issue or request"
 labels: doc-issue
 ---
 
