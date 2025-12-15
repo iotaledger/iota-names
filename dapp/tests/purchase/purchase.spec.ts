@@ -5,6 +5,8 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 import { expect } from '@playwright/test';
 
+import { denormalizeName } from '@/lib/utils';
+
 import { test } from '../helpers/fixtures';
 import { connectWallet, createWallet, requestFaucetTokens } from '../utils';
 
@@ -51,5 +53,18 @@ test.describe.parallel('Purchase Name Tests', () => {
         });
 
         await page.bringToFront();
+    });
+    test('Unavailable shows up for already purchased name', async ({ appPage: page }) => {
+        // Name registered when initializing localnet with scripts/tests/register-name.ts
+        const targetName = 'test.iota';
+        const denormalizedName = denormalizeName(targetName);
+
+        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Check name availability').fill(denormalizedName);
+
+        const namePurchaseCard = page.getByTestId('unavailable-purchase-card');
+        await expect(namePurchaseCard).toContainText('@' + denormalizedName);
+        await expect(namePurchaseCard).toContainText('Unavailable');
+        await expect(namePurchaseCard).toContainText('Name is already taken.');
     });
 });
