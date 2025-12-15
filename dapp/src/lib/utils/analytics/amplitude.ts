@@ -65,11 +65,11 @@ function setNetworkGroup(network: string): void {
  * This will enable future event tracking.
  */
 export async function onAmplitudeConsentAccepted() {
-    setCookies();
+    setAmpliConcentAccepted();
     return initAmplitude();
 }
 
-export function setCookies() {
+export function setAmpliConcentAccepted() {
     document.cookie = `${AMP_COOKIES_KEY}=true; max-age=31536000; path=/; SameSite=Strict`;
 }
 
@@ -78,9 +78,12 @@ export function setCookies() {
  * This will disable event tracking.
  */
 export function onAmplitudeConsentDeclined() {
-    cleanAmplitudeCookies();
-    document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
+    // First, opt out to prevent Amplitude from creating new cookies
     ampli.client.setOptOut(true);
+    // Then clean existing cookies
+    cleanAmplitudeCookies();
+    // Finally, set the consent flag
+    document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
 }
 
 export function cleanAmplitudeCookies() {
@@ -88,8 +91,23 @@ export function cleanAmplitudeCookies() {
     cookies.forEach((cookie) => {
         const cookieNameOrigin = cookie.split('=')[0].trim();
         const cookieNameLower = cookieNameOrigin.toLowerCase();
-        if (cookieNameLower.startsWith('amp_')) {
-            document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict`;
+        // Check if cookie starts with 'amp_' (case-insensitive) but is NOT our consent flag
+        // This catches cookies like: AMP_<hash>, amp_device_id, amp_session_id, etc.
+        if (
+            cookieNameLower.startsWith('amp_') &&
+            cookieNameLower !== AMP_COOKIES_KEY.toLowerCase()
+        ) {
+            // Delete cookie with various path and domain combinations to ensure removal
+            // Delete with path=/
+            document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+            // Delete with path=/ and current domain
+            document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}`;
+            // Delete with root path and parent domain (for subdomain cookies)
+            const domainParts = window.location.hostname.split('.');
+            if (domainParts.length > 2) {
+                const parentDomain = domainParts.slice(-2).join('.');
+                document.cookie = `${cookieNameOrigin}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.${parentDomain}`;
+            }
         }
     });
 }

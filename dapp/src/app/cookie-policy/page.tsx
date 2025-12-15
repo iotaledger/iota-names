@@ -3,40 +3,45 @@
 
 'use client';
 
-import { CookieLibrary, useSubmitNecessaryCookies } from '@boxfish-studio/react-cookie-manager';
 import { toast } from 'react-hot-toast';
 
+import { CookiePolicyContent } from '@/components/cookie-policy/CookiePolicyContent';
 import {
     onAmplitudeConsentAccepted,
     onAmplitudeConsentDeclined,
 } from '@/lib/utils/analytics/amplitude';
+import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
 export default function CookiePolicy() {
-    const submitNecessaryCookies = useSubmitNecessaryCookies();
-    async function handleAccept() {
-        try {
-            onAmplitudeConsentAccepted();
-            submitNecessaryCookies('true');
-        } finally {
-            toast.success('Your cookie preferences have been saved.');
-        }
+    async function handleConsentAccepted() {
+        await onAmplitudeConsentAccepted();
+        toast.success('Your cookie preferences have been saved.');
     }
 
-    async function handleDecline() {
-        try {
-            onAmplitudeConsentDeclined();
-            submitNecessaryCookies('false');
-        } finally {
-            toast.success('Your cookie preferences have been saved.');
-        }
+    async function handleConsentDeclined() {
+        onAmplitudeConsentDeclined();
+        toast.success('Your cookie preferences have been saved.');
     }
     return (
         <section className="cookie-policy-page">
-            <CookieLibrary
-                configuration={{
-                    onAcceptCookies: handleAccept,
-                    onDeclineCookies: handleDecline,
-                }}
+            <CookiePolicyContent
+                consentKey={AMP_COOKIES_KEY}
+                necessaryCookies={[
+                    {
+                        name: AMP_COOKIES_KEY,
+                        purpose: 'Session management cookie for IOTA applications',
+                        provider: 'IOTA',
+                        category: 'Necessary',
+                    },
+                    {
+                        name: 'AMP_*',
+                        purpose: 'Amplitude analytics cookies',
+                        provider: 'Amplitude',
+                        category: 'Analytics',
+                    },
+                ]}
+                onAccept={handleConsentAccepted}
+                onReject={handleConsentDeclined}
             />
         </section>
     );
