@@ -8,6 +8,7 @@ import { adminKeypair, client, iotaNamesClient } from '../setup/utils';
 export async function addToDenyList(
     labels: string[],
     labelType: 'blocked' | 'reserved',
+    waitForTransaction: boolean,
 ): Promise<void> {
     const packageId = iotaNamesClient.getPackage('packageId');
     const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
@@ -40,5 +41,11 @@ export async function addToDenyList(
 
     if (resp.effects?.status.status !== 'success') {
         throw new Error(`Failed to add ${labelType} labels`);
+    }
+
+    if (waitForTransaction) {
+        await client.waitForTransaction({
+            digest: resp.digest,
+        });
     }
 }

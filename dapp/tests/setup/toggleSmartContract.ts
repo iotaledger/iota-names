@@ -4,13 +4,7 @@
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { expect } from '@playwright/test';
 
-import {
-    adminKeypair,
-    client,
-    getAuthorizedSmartContractTypes,
-    iotaNamesClient,
-    sleep,
-} from './utils';
+import { adminKeypair, client, getAuthorizedSmartContractTypes, iotaNamesClient } from './utils';
 
 const envs = {
     IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.getPackage('packageId'),
@@ -21,7 +15,11 @@ const envs = {
     IOTA_NAMES_AUCTIONS_PACKAGE_ADDRESS: iotaNamesClient.getPackage('auctionPackageId'),
 };
 
-async function sendAuthTransaction(authorize: boolean, mode: 'payment' | 'auction'): Promise<void> {
+async function sendAuthTransaction(
+    authorize: boolean,
+    mode: 'payment' | 'auction',
+    waitForTransaction: boolean,
+): Promise<void> {
     const target = `${envs.IOTA_NAMES_PACKAGE_ADDRESS}::iota_names::${authorize ? 'authorize' : 'deauthorize'}`;
 
     const typeArg =
@@ -56,6 +54,12 @@ async function sendAuthTransaction(authorize: boolean, mode: 'payment' | 'auctio
             )}`,
         );
     }
+
+    if (waitForTransaction) {
+        await client.waitForTransaction({
+            digest: resp.digest,
+        });
+    }
 }
 
 export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): Promise<void> {
@@ -71,13 +75,11 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
     const currentState = await getAuthorizedSmartContractTypes();
 
     if (currentState.isAuctionAuthorized !== targetState.isAuctionAuthorized) {
-        await sleep(1000);
-        await sendAuthTransaction(targetState.isAuctionAuthorized, 'auction');
+        await sendAuthTransaction(targetState.isAuctionAuthorized, 'auction', true);
     }
 
     if (currentState.isPaymentAuthorized !== targetState.isPaymentAuthorized) {
-        await sleep(1000);
-        await sendAuthTransaction(targetState.isPaymentAuthorized, 'payment');
+        await sendAuthTransaction(targetState.isPaymentAuthorized, 'payment', true);
     }
 
     if (
@@ -87,9 +89,6 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
         console.log('Smart contract modes are already in the target state. No changes made.');
         return;
     }
-
-    // Wait for the transaction to settle
-    await sleep(2000);
 
     const finalState = await getAuthorizedSmartContractTypes();
 

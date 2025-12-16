@@ -72,10 +72,6 @@ async function getAuthorizedSmartContractTypes() {
     };
 }
 
-async function sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export {
     DEFAULT_NETWORK,
     NETWORK_CONFIG,
@@ -85,6 +81,5 @@ export {
     AUCTION_TYPE,
     getAuthorizedSmartContractTypes,
     adminKeypair,
-    sleep,
     iotaClientGraphQl,
 };
