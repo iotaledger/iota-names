@@ -1,13 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type {
-    BrowserConfig,
-    EnrichmentPlugin,
-    Event,
-    // PluginType,
-} from '@amplitude/analytics-types';
-import { PluginType } from '@amplitude/analytics-types';
+import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
 const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
     '/': 'Landing Page Viewed',
@@ -451,6 +445,45 @@ function getPageViewEventName(path: string): string | null {
     return null;
 }
 
+/**
+ * Map clicked element paths to custom event names
+ */
+function defineClickedElementEventName(event: Event): string | null {
+    // Example mapping - can be extended as needed
+    const CLICKED_ELEMENT_EVENTS: {
+        eventProperties: Record<string, string>;
+        outputName: string;
+    }[] = [
+        {
+            eventProperties: {
+                '[Amplitude] Element Tag': 'a',
+                '[Amplitude] Element Text': 'Documentation',
+            },
+            outputName: 'Documentation Page Viewed',
+        },
+        {
+            eventProperties: {
+                '[Amplitude] Element Tag': 'a',
+                '[Amplitude] Element Text': 'Terms & Conditions',
+            },
+            outputName: 'Terms & Conditions Link Clicked',
+        },
+    ];
+
+    for (const mapping of CLICKED_ELEMENT_EVENTS) {
+        const match = Object.entries(mapping.eventProperties).every(
+            ([key, value]) =>
+                (event.event_properties as { [key: string]: string })?.[key] === value,
+        );
+
+        if (match) {
+            return mapping.outputName;
+        }
+    }
+
+    return null;
+}
+
 export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}): EnrichmentPlugin {
     const config: Required<ContextEnrichmentOptions> = {
         ...DEFAULT_OPTIONS,
@@ -475,13 +508,20 @@ export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}):
 
             // Create a copy of event properties to avoid mutations
             const enrichedProperties = { ...event.event_properties };
-
+            console.log('event.event_type', event);
             // Handling for autocapture page view events
             if (event.event_type === '[Amplitude] Page Viewed') {
                 const path = window.location.pathname;
                 const pageEventName = getPageViewEventName(path);
                 if (pageEventName) {
                     event.event_type = pageEventName;
+                }
+            }
+
+            if (event.event_type === '[Amplitude] Element Clicked') {
+                const customEventName = defineClickedElementEventName(event);
+                if (customEventName) {
+                    event.event_type = customEventName;
                 }
             }
 
