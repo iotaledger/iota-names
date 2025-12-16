@@ -5,8 +5,16 @@ import type {
     BrowserConfig,
     EnrichmentPlugin,
     Event,
-    PluginType,
+    // PluginType,
 } from '@amplitude/analytics-types';
+import { PluginType } from '@amplitude/analytics-types';
+
+const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
+    '/': 'Landing Page Viewed',
+    '/my-names': 'My Names Page Viewed',
+    '/auctions': 'Auctions Page Viewed',
+    '/search': 'Search Page Viewed',
+};
 
 /**
  * Custom Amplitude plugin that enriches autocapture events with additional context.
@@ -430,6 +438,19 @@ function defaultPageNameResolver(path: string): string {
     return path;
 }
 
+/**
+ * Maps page paths to custom page view event names
+ */
+function getPageViewEventName(path: string): string | null {
+    // Check for exact match
+    if (PAGE_VIEW_EVENTS_MAP[path]) {
+        return PAGE_VIEW_EVENTS_MAP[path];
+    }
+
+    // Return null for unknown routes (keep default event name)
+    return null;
+}
+
 export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}): EnrichmentPlugin {
     const config: Required<ContextEnrichmentOptions> = {
         ...DEFAULT_OPTIONS,
@@ -439,7 +460,7 @@ export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}):
 
     return {
         name: 'context-enrichment',
-        type: 'enrichment' as PluginType.ENRICHMENT,
+        type: 'enrichment',
 
         setup: async (_config: BrowserConfig) => {
             // Plugin setup - can be used for initialization if needed
@@ -454,6 +475,15 @@ export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}):
 
             // Create a copy of event properties to avoid mutations
             const enrichedProperties = { ...event.event_properties };
+
+            // Handling for autocapture page view events
+            if (event.event_type === '[Amplitude] Page Viewed') {
+                const path = window.location.pathname;
+                const pageEventName = getPageViewEventName(path);
+                if (pageEventName) {
+                    event.event_type = pageEventName;
+                }
+            }
 
             // Add page context for all events
             if (config.includePageContext) {
@@ -509,18 +539,6 @@ export function contextEnrichmentPlugin(options: ContextEnrichmentOptions = {}):
                         }
                     }
                 }
-            }
-
-            // Special handling for autocapture page view events
-            if (event.event_type === '[Amplitude] Page Viewed') {
-                // Add previous page (useful for tracking navigation flow)
-                const previousPath = sessionStorage.getItem('amp_previous_page');
-                if (previousPath) {
-                    enrichedProperties.previous_page = previousPath;
-                }
-
-                // Store current page for next navigation
-                sessionStorage.setItem('amp_previous_page', window.location.pathname);
             }
 
             // Return enriched event
