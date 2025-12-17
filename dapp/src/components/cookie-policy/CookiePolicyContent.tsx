@@ -63,19 +63,19 @@ export function CookiePolicyContent({
                     </>
                 </CookiePolicyContentDescription>
             </CookiePolicyContentSection>
-            <CookiePolicyContentSection>
-                <CookiePolicyContentTitle>Necessary Cookies</CookiePolicyContentTitle>
-                <CookiePolicyContentDescription>
-                    <p>
-                        Necessary cookies help make a website usable by enabling basic functions
-                        like page navigation and access to secure areas of the website. The website
-                        cannot function properly without these cookies.
-                    </p>
-                </CookiePolicyContentDescription>
-                {necessaryCookies && necessaryCookies.length > 0 && (
+            {necessaryCookies && necessaryCookies.length > 0 && (
+                <CookiePolicyContentSection>
+                    <CookiePolicyContentTitle>Necessary Cookies</CookiePolicyContentTitle>
+                    <CookiePolicyContentDescription>
+                        <p>
+                            Necessary cookies help make a website usable by enabling basic functions
+                            like page navigation and access to secure areas of the website. The
+                            website cannot function properly without these cookies.
+                        </p>
+                    </CookiePolicyContentDescription>
                     <CookiesTable cookies={necessaryCookies} />
-                )}
-            </CookiePolicyContentSection>
+                </CookiePolicyContentSection>
+            )}
             {additionalCookies && additionalCookies.length > 0 && (
                 <CookiePolicyContentSection>
                     <CookiePolicyContentTitle>Additional Cookies</CookiePolicyContentTitle>
