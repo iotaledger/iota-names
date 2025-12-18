@@ -3,7 +3,6 @@
 
 'use client';
 
-import { CookieManagerProvider } from '@boxfish-studio/react-cookie-manager';
 import { GrowthBookProvider } from '@growthbook/growthbook-react';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
@@ -86,13 +85,11 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                     ]}
                                 >
                                     <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                        <CookieManagerProvider>
-                                            {children}
-                                            <Toaster />
-                                            <Suspense fallback={null}>
-                                                <CookieDisclaimer />
-                                            </Suspense>
-                                        </CookieManagerProvider>
+                                        {children}
+                                        <Toaster />
+                                        <Suspense fallback={null}>
+                                            <CookieDisclaimer />
+                                        </Suspense>
                                     </ThemeProvider>
                                 </WalletProvider>
                             </IotaNamesIndexerClientProvider>
