@@ -161,10 +161,15 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                 queryKey: queryKey.publicName(account?.address || ''),
             });
 
+            const expirationDate = new Date();
+            expirationDate.setFullYear(expirationDate.getFullYear() + purchaseYears);
+            const expirationTime = expirationDate.getTime();
+
             ampli.purchasedName({
                 name,
                 amount: parseNanosToIota(price ?? 0),
-                expiration: purchaseYears, // tbd replace expiration with more meaningful name purchaseYears
+                expiration: purchaseYears, // TODO remove this field after we release expirationTime. Keep it now for backward compatibility
+                expirationTime,
                 purchaseYears: purchaseYears,
                 discountName: couponCodes.join(','),
                 discountPercentage: applyDiscount ? (price - (discountedPrice ?? 0)) / price : 0,

@@ -163,6 +163,12 @@ export interface PurchasedNameProperties {
      * | Type | number |
      */
     expiration: number;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expirationTime: number;
     name: string;
     /**
      * Property created as alternative of `expiration` with more readable name.
@@ -181,6 +187,12 @@ export interface RenewedNameProperties {
      * | Type | number |
      */
     expiration: number;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expirationTime: number;
     name: string;
     /**
      * | Rule | Value |
@@ -191,7 +203,12 @@ export interface RenewedNameProperties {
 }
 
 export interface RenewedSubnameProperties {
-    expirationTime: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expirationTime: number;
     expirationType: string;
     name: string;
 }
