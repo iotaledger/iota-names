@@ -277,47 +277,47 @@ impl IotaNamesWorker {
     }
 
     async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
-        // debug!(
-        //     "Processing checkpoint: {}",
-        //     checkpoint.checkpoint_summary.sequence_number
-        // );
+        debug!(
+            "Processing checkpoint: {}",
+            checkpoint.checkpoint_summary.sequence_number
+        );
 
-        // let mut iota_names_balance = false;
-        // let mut auction_house_balance = false;
-        // for object in checkpoint.latest_live_output_objects() {
-        //     if object.id() == self.balance_object_id {
-        //         let balance = get_iota_names_balance(object)?;
-        //         self.metrics.balance.set(balance.value() as _);
-        //         iota_names_balance = true;
-        //     } else if object.id() == self.extended_config.auction_house_id {
-        //         let balance = get_auction_house_balance(object)?;
-        //         self.metrics.auction_house_balance.set(balance.value() as _);
-        //         auction_house_balance = true;
-        //     } else {
-        //         continue;
-        //     }
-        //     if iota_names_balance && auction_house_balance {
-        //         break;
-        //     }
-        // }
+        let mut iota_names_balance = false;
+        let mut auction_house_balance = false;
+        for object in checkpoint.latest_live_output_objects() {
+            if object.id() == self.balance_object_id {
+                let balance = get_iota_names_balance(object)?;
+                self.metrics.balance.set(balance.value() as _);
+                iota_names_balance = true;
+            } else if object.id() == self.extended_config.auction_house_id {
+                let balance = get_auction_house_balance(object)?;
+                self.metrics.auction_house_balance.set(balance.value() as _);
+                auction_house_balance = true;
+            } else {
+                continue;
+            }
+            if iota_names_balance && auction_house_balance {
+                break;
+            }
+        }
 
-        // for transaction in &checkpoint.transactions {
-        //     let TransactionEffects::V1(effects) = &transaction.effects;
+        for transaction in &checkpoint.transactions {
+            let TransactionEffects::V1(effects) = &transaction.effects;
 
-        //     if *effects.status() != ExecutionStatus::Success {
-        //         continue;
-        //     }
+            if *effects.status() != ExecutionStatus::Success {
+                continue;
+            }
 
-        //     if let Some(events) = &transaction.events {
-        //         for event in events.data.iter() {
-        //             match IotaNamesEvent::try_from_event(event,
-        // &self.extended_config) {                 Ok(Some(event)) =>
-        // self.process_event(event)?,                 Err(e) => warn!("parsing
-        // event failed: {e}"),                 _ => {}
-        //             }
-        //         }
-        //     }
-        // }
+            if let Some(events) = &transaction.events {
+                for event in events.data.iter() {
+                    match IotaNamesEvent::try_from_event(event, &self.extended_config) {
+                        Ok(Some(event)) => self.process_event(event)?,
+                        Err(e) => warn!("parsing event failed: {e}"),
+                        _ => {}
+                    }
+                }
+            }
+        }
 
         Ok(())
     }
