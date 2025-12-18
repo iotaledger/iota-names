@@ -75,11 +75,13 @@ export function setAmpliConsentAccepted() {
 
 /**
  * Call this function when user declines cookies/tracking.
- * This will disable event tracking.
+ * This will disable event tracking and clear all Amplitude data.
  */
 export function onAmplitudeConsentDeclined() {
     // First, opt out to prevent Amplitude from creating new cookies
     ampli.client.setOptOut(true);
+    // Clear all Amplitude storage (localStorage and cookies)
+    ampli.client.reset();
     cleanAmplitudeCookies();
     document.cookie = `${AMP_COOKIES_KEY}=false; max-age=31536000; path=/; SameSite=Strict`;
 }

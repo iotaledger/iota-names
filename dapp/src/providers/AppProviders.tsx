@@ -83,6 +83,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                                             variables: darkTheme,
                                         },
                                     ]}
+                                    chain={allNetworks[defaultNetwork].chain}
                                 >
                                     <ThemeProvider staticTheme={APP_STATIC_THEME}>
                                         {children}
