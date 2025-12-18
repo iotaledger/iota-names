@@ -7,11 +7,13 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
-import { execFileSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { blake2b } from '@noble/hashes/blake2';
+import { bytesToHex } from '@noble/hashes/utils';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -38,8 +40,9 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
 
 export async function createWallet(page: Page) {
     await page.bringToFront();
-    await page.getByRole('button', { name: /Add Profile/ }).click({ timeout: 30000 });
-    await page.getByText('Create New', { exact: true }).click();
+    await page.getByRole('button', { name: /Get Started/ }).click({ timeout: 30_000 });
+    await page.getByText('Create a new wallet').click();
+    await page.getByText('Mnemonic', { exact: true }).click();
     await page.getByTestId('password.input').fill('iotae2etests');
     await page.getByTestId('password.confirmation').fill('iotae2etests');
     await page.getByText('I read and agree').click();
@@ -319,6 +322,7 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -414,4 +418,45 @@ export function generateRandomName(name: string) {
 export function generateRandomSubname(subname: string, parentName: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${subname}${random}.${parentName}`;
+}
+
+interface CreateCouponOptions {
+    code: string;
+    type: 'fixed' | 'percentage';
+    value: bigint;
+}
+
+export async function createCoupon({ code, type, value }: CreateCouponOptions) {
+    const couponCodeHash = bytesToHex(blake2b(code, { dkLen: 32 }));
+
+    const couponsPackageId = iotaNamesClient.getPackage('couponsPackageId');
+    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
+    const adminCapId = iotaNamesClient.getPackage('adminCap');
+    const adminAddress = iotaNamesClient.getPackage('adminAddress');
+
+    const functionName =
+        type === 'fixed' ? 'admin_add_fixed_coupon' : 'admin_add_percentage_coupon';
+
+    const command = `iota client ptb \
+        --move-call ${couponsPackageId}::rules::new_empty_rules \
+        --assign empty_rules \
+        --move-call ${couponsPackageId}::coupon_house::${functionName} \
+            @${adminCapId} \
+            @${iotaNamesObjectId} \
+            '"${couponCodeHash}"' \
+            ${value.toString()} \
+            empty_rules \
+        --gas-budget 50000000 \
+        --sender @${adminAddress}`;
+
+    console.log(`Creating ${type} coupon "${code}" with hash ${couponCodeHash}...`);
+
+    try {
+        const output = execSync(command, { encoding: 'utf-8' });
+        console.log(`Created ${type} coupon "${code}" successfully`);
+        return output;
+    } catch (error) {
+        console.error(`Failed to create coupon "${code}":`, error);
+        throw error;
+    }
 }
