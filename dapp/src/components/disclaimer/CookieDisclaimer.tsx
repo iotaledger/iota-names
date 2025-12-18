@@ -3,7 +3,6 @@
 
 'use client';
 
-import { CookieManager, type SKCMConfiguration } from '@boxfish-studio/react-cookie-manager';
 import { Close } from '@iota/apps-ui-icons';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
@@ -12,9 +11,7 @@ import { FOOTER_LEGAL_LINKS } from '@/lib/constants';
 import {
     getAmplitudeConsentStatus,
     onAmplitudeConsentAccepted,
-    onAmplitudeConsentDeclined,
 } from '@/lib/utils/analytics/amplitude';
-import { AMP_COOKIES_KEY } from '@/lib/utils/analytics/constants';
 
 const TEXT = 'By using this website, you agree with our ';
 
@@ -27,56 +24,33 @@ export function CookieDisclaimer() {
         setAmplitudeConsentStatus(getAmplitudeConsentStatus());
     }, []);
 
-    const configuration: SKCMConfiguration = {
-        disclaimer: {
-            title: undefined,
-            body: TEXT,
-            policyText: 'Privacy Policy',
-            acceptButtonText: 'Close',
-            policyUrl: '/privacy-policy',
-        },
-        services: {
-            customNecessaryCookies: [
-                {
-                    name: AMP_COOKIES_KEY,
-                    purpose:
-                        'Flag indicating that Amplitude analytics cookies may be created after consent',
-                    expiry: '1 year',
-                    type: 'http',
-                    showDisclaimerIfMissing: true,
-                },
-            ],
-        },
-        onAcceptCookies: () => {
-            onAmplitudeConsentAccepted();
-        },
-        onDeclineCookies: () => {
-            onAmplitudeConsentDeclined();
-        },
-    };
-
     return (
         <>
-            <div className="hidden">
-                <CookieManager configuration={configuration} />
-            </div>
             {amplitudeConsentStatus === 'pending' && (
-                <div id="skcm-cookie-disclaimer">
-                    <div id="skcm-cookie-disclaimer__body">
-                        {TEXT}
-                        {FOOTER_LEGAL_LINKS.map(({ title, path }, index) => {
-                            return (
-                                <React.Fragment key={title}>
-                                    <Link
-                                        href={path}
-                                        className="hover:text-names-primary-80 transition-colors duration-200"
-                                    >
-                                        {title}
-                                    </Link>
-                                    {index < FOOTER_LEGAL_LINKS.length - 1 ? ', ' : '.'}
-                                </React.Fragment>
-                            );
-                        })}
+                <div
+                    className="fixed bg-names-neutral-6 max-w-none w-full flex flex-col !py-6 !px-8 max-md:space-y-4 max-md:px-0 bottom-0 right-0 rounded-none shadow-2xl md:flex-row md:space-x-4 md:py-4 md:px-6 md:bottom-6 md:right-6 md:rounded-md md:max-w-lg border border-transparent"
+                    style={{
+                        background:
+                            'linear-gradient(#0a0d23, #0a0d23) padding-box, var(--names-gradient-primary) border-box',
+                    }}
+                >
+                    <div className="flex max-md:container items-center justify-center md:items-start m-0 text-body-md !pl-0 [&_a]:text-names-primary-80 [&_a]:inline-flex">
+                        <span className="text-names-neutral-92">
+                            {TEXT}
+                            {FOOTER_LEGAL_LINKS.map(({ title, path }, index) => {
+                                return (
+                                    <React.Fragment key={title}>
+                                        <Link
+                                            href={path}
+                                            className="transition-colors duration-200"
+                                        >
+                                            {title}
+                                        </Link>
+                                        {index < FOOTER_LEGAL_LINKS.length - 1 ? ', ' : '.'}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </span>
                     </div>
                     <div
                         onClick={() => {
