@@ -52,7 +52,8 @@ download_binaries() {
     [[ "$os_name" == "darwin" ]] && os_name="macos"
     [[ "$arch_name" == "aarch64" ]] && arch_name="arm64"
 
-    local asset_name="iota-$IOTA_BINARY_VERSION-${os_name}-${arch_name}.tgz"
+    # Remove '-alpha' when https://github.com/iotaledger/iota/pull/9538 is in mainnet release
+    local asset_name="iota-$IOTA_BINARY_VERSION-alpha-${os_name}-${arch_name}.tgz"
     local download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_VERSION/$asset_name"
 
     echo "Downloading from: $download_url"
