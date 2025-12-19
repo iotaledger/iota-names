@@ -2,30 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { normalizeIotaName } from '@iota/iota-names-sdk';
-import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { denormalizeName } from '@/lib/utils';
 
 import { expect, test } from '../helpers/fixtures';
-import { connectWallet, createWallet, generateRandomName } from '../utils';
-import { addBlockedLabels, addReservedLabels } from './validation.utils';
+import { generateRandomName } from '../utils';
+import { addToDenyList } from './validation.utils';
 
 test.describe('Name Validation tests', () => {
-    test.beforeAll(async ({ appPage, extensionPage, context, extensionName, sharedState }) => {
-        const { address, mnemonic } = await createWallet(extensionPage);
-
-        await appPage.bringToFront();
-
-        await connectWallet(appPage, context, extensionName);
-
-        await expect(appPage.getByRole('button', { name: formatAddress(address) })).toBeVisible({
-            timeout: 10_000,
-        });
-
-        sharedState.wallet.address = address;
-        sharedState.wallet.mnemonic = mnemonic;
-    });
-
     test("Dapp doesn't allow invalid names", async ({ appPage: page }) => {
         const NAME_LENGTH_VALIDATION_ERROR = 'Name must be 3-63 characters long';
 
@@ -66,7 +50,7 @@ test.describe('Name Validation tests', () => {
         const BLOCKED_NAME = generateRandomName('javascript');
         const normalizedName = normalizeIotaName(BLOCKED_NAME, 'at');
 
-        await addBlockedLabels([denormalizeName(BLOCKED_NAME)]);
+        await addToDenyList([denormalizeName(BLOCKED_NAME)], 'blocked', true);
 
         await page.goto('/');
         await page.getByPlaceholder('Search for your IOTA name').click();
@@ -90,7 +74,7 @@ test.describe('Name Validation tests', () => {
 
     test("Restricted names can't be registered", async ({ appPage: page }) => {
         const RESERVED_NAME = generateRandomName('tooling');
-        await addReservedLabels([denormalizeName(RESERVED_NAME)]);
+        await addToDenyList([denormalizeName(RESERVED_NAME)], 'reserved', true);
 
         await page.goto('/');
         await page.getByPlaceholder('Search for your IOTA name').click();

@@ -28,7 +28,7 @@ importers:
         version: 10.1.5(eslint@8.57.1)
       eslint-config-react-app:
         specifier: ^7.0.1
-        version: 7.0.1(@babel/plugin-syntax-flow@7.27.1(@babel/core@7.28.0))(@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.0))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)(typescript@5.8.3)
+        version: 7.0.1(@babel/plugin-syntax-flow@7.27.1(@babel/core@7.28.0))(@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.0))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)(typescript@5.8.3)
       eslint-import-resolver-typescript:
         specifier: ^3.10.1
         version: 3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1)
@@ -127,8 +127,8 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@iota/dapp-kit':
-        specifier: ^0.8.0
-        version: 0.8.0(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
+        specifier: ^0.8.1
+        version: 0.8.1(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)
       '@iota/graphql-transport':
         specifier: ^0.12.0
         version: 0.12.0(typescript@5.8.3)
@@ -136,11 +136,11 @@ importers:
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: ^1.9.0
-        version: 1.9.0(typescript@5.8.3)
+        specifier: ^1.10.0
+        version: 1.10.0(typescript@5.8.3)
       '@iota/kiosk':
-        specifier: ^0.6.0
-        version: 0.6.0(typescript@5.8.3)
+        specifier: ^0.6.1
+        version: 0.6.1(typescript@5.8.3)
       '@next/mdx':
         specifier: ^15.5.0
         version: 15.5.0(@mdx-js/react@2.3.0(react@18.3.1))
@@ -342,8 +342,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@iota/iota-sdk':
-        specifier: ^1.5.0
-        version: 1.5.0(typescript@5.8.3)
+        specifier: ^1.10.0
+        version: 1.10.0(typescript@5.8.3)
       '@iota/kiosk':
         specifier: ^0.4.6
         version: 0.4.6(typescript@5.8.3)
@@ -367,8 +367,8 @@ importers:
   sdk:
     dependencies:
       '@iota/iota-sdk':
-        specifier: ^1.9.0
-        version: 1.9.0(typescript@5.8.3)
+        specifier: ^1.10.0
+        version: 1.10.0(typescript@5.8.3)
       '@noble/hashes':
         specifier: ^1.4.0
         version: 1.8.0
@@ -1847,8 +1847,8 @@ packages:
   '@iota/bcs@1.4.0':
     resolution: {integrity: sha512-Bpg8uPB3UTweJyFS3G+aycGcTCxaJQi2a9bEy2QXWMBM8a/tLN1KCg4IzKWkAJ4FyMNrZZrdXiBqAzmNK6xdVQ==}
 
-  '@iota/dapp-kit@0.8.0':
-    resolution: {integrity: sha512-KOOkDrew8wE/JQEKZUOBubvV6SFMKS+jzRE6kQqiC46TrNV5ua4rpC6RERnS5bt/Sw7xgg0tWEpwsPxUp2vhJw==}
+  '@iota/dapp-kit@0.8.1':
+    resolution: {integrity: sha512-PsGiDaE+v77Gl2nGFG0MC2oXnxcwgUT8qDOUMJErlO7CVdLePMAE0iTg05auezXxub9BBFWqOCRvyLgm0KpewA==}
     peerDependencies:
       '@tanstack/react-query': ^5.50.1
       react: '*'
@@ -1862,6 +1862,10 @@ packages:
     peerDependencies:
       '@iota/iota-sdk': ^1.5.0
 
+  '@iota/iota-sdk@1.10.0':
+    resolution: {integrity: sha512-TbLPxFagi7MZFDsnmefEMkmFVhe1/zn4Co6nSTAyL5W2RIZKcVjLy209zKlbHAYwhJvAjoUJ81q2AthBcKLsyA==}
+    engines: {node: '>=20'}
+
   '@iota/iota-sdk@1.5.0':
     resolution: {integrity: sha512-R5Tx78Z3ZMh+P7uAqN3U+JylfY+rbnnzjqEehef+bYatyddkh8uEr7S2l/0++Vrp56bpZnSdLTld1PvKKWyXaQ==}
     engines: {node: '>=20'}
@@ -1874,12 +1878,12 @@ packages:
     resolution: {integrity: sha512-+caukjLX6Zzuh7c/LjhtTACiU8vEqKwAK7JCkv7ZlGOxzEpn1I7XPv5wby8zWam7xRHjeMVOtYwfVq36zmxIZA==}
     engines: {node: '>=20'}
 
-  '@iota/kiosk@0.6.0':
-    resolution: {integrity: sha512-RB9IXutk+VzFuvm8fVR19qWVdS8x/F4iVkjBJuzvLUXONHio3XjgQSKitf8dIxVoUqRddeHVZDYjHoD1RKwF2g==}
+  '@iota/kiosk@0.6.1':
+    resolution: {integrity: sha512-DA7z0KzoX9viQLKkL9lv17guOlUn4Jr6zFi8NFuZvmktPNRB/fGBtwXP6VOZjQUSSDhpYxU2YtpQ891EkmPtLw==}
     engines: {node: '>=20'}
 
-  '@iota/wallet-standard@0.3.0':
-    resolution: {integrity: sha512-nKCJl3kPYkGCidX9aC0L4b7e4aVaNY2x1zlYsybWYoDmbBF8+UPG8PtqVxgB8A0YR2SGKIfsEQpQegq2Hq8LgA==}
+  '@iota/wallet-standard@0.3.1':
+    resolution: {integrity: sha512-zGtInJyrsQWK52LchYXrAmFYd/eMH5w7a3n7e896nchjxmOXZUNe25nX5eEd7/B4u2A9lTdvypXJYnRPPW0lEQ==}
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -8376,6 +8380,14 @@ packages:
   valibot@0.36.0:
     resolution: {integrity: sha512-CjF1XN4sUce8sBK9TixrDqFM7RwNkuXdJu174/AwmQUB62QbCQADg5lLe8ldBalFgtj1uKj+pKwDJiNo4Mn+eQ==}
 
+  valibot@1.2.0:
+    resolution: {integrity: sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   vfile-location@5.0.3:
     resolution: {integrity: sha512-5yXvWDEgqeiYiBe1lbxYF7UMAIm/IcopxMHrMQDq3nvKcjPKIhZklUKL+AE7J7uApI4kwe2snsK+eI6UTj9EHg==}
 
@@ -10312,11 +10324,11 @@ snapshots:
     dependencies:
       bs58: 6.0.0
 
-  '@iota/dapp-kit@0.8.0(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
+  '@iota/dapp-kit@0.8.1(@tanstack/react-query@5.76.1(react@18.3.1))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-names-sdk': 0.3.0(@iota/iota-sdk@1.9.0(typescript@5.8.3))
-      '@iota/iota-sdk': 1.9.0(typescript@5.8.3)
-      '@iota/wallet-standard': 0.3.0(typescript@5.8.3)
+      '@iota/iota-names-sdk': 0.3.0(@iota/iota-sdk@1.10.0(typescript@5.8.3))
+      '@iota/iota-sdk': 1.10.0(typescript@5.8.3)
+      '@iota/wallet-standard': 0.3.1(typescript@5.8.3)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dropdown-menu': 2.1.15(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-slot': 1.2.3(@types/react@18.3.21)(react@18.3.1)
@@ -10348,10 +10360,30 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/iota-names-sdk@0.3.0(@iota/iota-sdk@1.9.0(typescript@5.8.3))':
+  '@iota/iota-names-sdk@0.3.0(@iota/iota-sdk@1.10.0(typescript@5.8.3))':
     dependencies:
-      '@iota/iota-sdk': 1.9.0(typescript@5.8.3)
+      '@iota/iota-sdk': 1.10.0(typescript@5.8.3)
       '@noble/hashes': 1.8.0
+
+  '@iota/iota-sdk@1.10.0(typescript@5.8.3)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.11.0)
+      '@iota/bcs': 1.4.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      '@suchipi/femver': 1.0.0
+      bech32: 2.0.0
+      bignumber.js: 9.3.0
+      gql.tada: 1.8.10(graphql@16.11.0)(typescript@5.8.3)
+      graphql: 16.11.0
+      tweetnacl: 1.0.3
+      valibot: 1.2.0(typescript@5.8.3)
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
 
   '@iota/iota-sdk@1.5.0(typescript@5.8.3)':
     dependencies:
@@ -10402,18 +10434,18 @@ snapshots:
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/kiosk@0.6.0(typescript@5.8.3)':
+  '@iota/kiosk@0.6.1(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 1.9.0(typescript@5.8.3)
+      '@iota/iota-sdk': 1.10.0(typescript@5.8.3)
       dotenv: 16.4.7
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
       - '@gql.tada/vue-support'
       - typescript
 
-  '@iota/wallet-standard@0.3.0(typescript@5.8.3)':
+  '@iota/wallet-standard@0.3.1(typescript@5.8.3)':
     dependencies:
-      '@iota/iota-sdk': 1.9.0(typescript@5.8.3)
+      '@iota/iota-sdk': 1.10.0(typescript@5.8.3)
       '@wallet-standard/core': 1.0.3
     transitivePeerDependencies:
       - '@gql.tada/svelte-support'
@@ -13968,7 +14000,7 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-config-react-app@7.0.1(@babel/plugin-syntax-flow@7.27.1(@babel/core@7.28.0))(@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.0))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)(typescript@5.8.3):
+  eslint-config-react-app@7.0.1(@babel/plugin-syntax-flow@7.27.1(@babel/core@7.28.0))(@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.0))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)(typescript@5.8.3):
     dependencies:
       '@babel/core': 7.28.0
       '@babel/eslint-parser': 7.28.0(@babel/core@7.28.0)(eslint@8.57.1)
@@ -13979,7 +14011,7 @@ snapshots:
       confusing-browser-globals: 1.0.11
       eslint: 8.57.1
       eslint-plugin-flowtype: 8.0.3(@babel/plugin-syntax-flow@7.27.1(@babel/core@7.28.0))(@babel/plugin-transform-react-jsx@7.27.1(@babel/core@7.28.0))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jest: 25.7.0(@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
@@ -14044,7 +14076,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -14055,7 +14087,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -14107,7 +14139,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -14118,7 +14150,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -14147,7 +14179,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@8.35.1(eslint@8.57.1)(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -18234,6 +18266,10 @@ snapshots:
   v8-compile-cache-lib@3.0.1: {}
 
   valibot@0.36.0: {}
+
+  valibot@1.2.0(typescript@5.8.3):
+    optionalDependencies:
+      typescript: 5.8.3
 
   vfile-location@5.0.3:
     dependencies:
