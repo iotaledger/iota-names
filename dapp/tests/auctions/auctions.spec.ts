@@ -148,7 +148,7 @@ test.describe.parallel('Auction Flow', () => {
 
         await page.getByTestId('refresh-button').click();
         await page
-            .getByText('Refreshed successfully!')
+            .getByText('Refreshed successfully')
             .waitFor({ state: 'visible', timeout: 10_000 });
 
         let auctionNameCard = page
@@ -168,7 +168,7 @@ test.describe.parallel('Auction Flow', () => {
 
         await page.getByTestId('refresh-button').click();
         await page
-            .getByText('Refreshed successfully!')
+            .getByText('Refreshed successfully')
             .waitFor({ state: 'visible', timeout: 10_000 });
 
         auctionNameCard = page

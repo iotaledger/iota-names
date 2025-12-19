@@ -49,7 +49,7 @@ export function AuctionActionButton({
                 toast.success(
                     `${normalizeIotaName(auction.name, 'at', {
                         truncateLongParts: true,
-                    })} claimed successfully!`,
+                    })} claimed successfully`,
                 );
             },
         });
