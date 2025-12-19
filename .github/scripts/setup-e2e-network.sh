@@ -14,6 +14,8 @@ CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 GRAPHQL_CONFIG="${GRAPHQL_CONFIG:-$(pwd)/graphql-config.toml}"
 DB_URL="${DB_URL:-postgres://postgres:postgrespw@localhost:5432/iota_indexer}"
 
+ADMIN_MNEMONIC="${ADMIN_MNEMONIC:?ADMIN_MNEMONIC environment variable is required}"
+
 declare -a PIDS=()
 PID_IOTA=""
 PID_INDEXER_WRITER=""
@@ -125,6 +127,7 @@ start_initial_network() {
 # ============================================================================
 publish_iota_names() {
     echo "=== Phase 2: Publishing iota-names ==="
+    ./iota keytool import "$ADMIN_MNEMONIC" ed25519
 
     ./iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000
     ./iota client switch --env localnet

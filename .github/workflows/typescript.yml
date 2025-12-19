@@ -140,6 +140,7 @@ jobs:
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     env:
+      ADMIN_MNEMONIC: "say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
         {
@@ -234,7 +235,7 @@ jobs:
         run: |
           pnpm dapp build
           cd dapp
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- env ADMIN_MNEMONIC="$ADMIN_MNEMONIC" pnpm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
