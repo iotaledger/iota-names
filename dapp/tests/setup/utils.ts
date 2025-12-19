@@ -3,11 +3,17 @@
 
 import 'dotenv/config';
 
-import { exec } from 'child_process';
 import { IotaClientGraphQLTransport } from '@iota/graphql-transport';
 import { IotaNamesClient } from '@iota/iota-names-sdk';
 import { getNetwork, IotaClient } from '@iota/iota-sdk/client';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
+
+if (!process.env.ADMIN_MNEMONIC) {
+    throw new Error('env ADMIN_MNEMONIC not set. Cannot setup tests.');
+}
+
+const adminKeypair = Ed25519Keypair.deriveKeypair(process.env.ADMIN_MNEMONIC);
 
 const DEFAULT_NETWORK = process.env.NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK as string;
 
@@ -19,10 +25,14 @@ if (!DEFAULT_NETWORK) {
 
 const NETWORK_CONFIG = getNetwork(DEFAULT_NETWORK);
 
-const iotaClient = new IotaClient({
+const iotaClientGraphQl = new IotaClient({
     transport: new IotaClientGraphQLTransport({
         url: NETWORK_CONFIG.graphql!,
     }),
+});
+
+const client = new IotaClient({
+    url: NETWORK_CONFIG.url,
 });
 
 const iotaNamesClient = new IotaNamesClient({
@@ -47,7 +57,7 @@ const PAYMENT_TYPE = `${authKeyType}<${paymentsPackageId}::payments::PaymentsAut
 const AUCTION_TYPE = `${authKeyType}<${auctionPackageId}::auction::AuctionAuth>`;
 
 async function getAuthorizedSmartContractTypes() {
-    const { data: dynamicFields } = await iotaClient.getDynamicFields({
+    const { data: dynamicFields } = await iotaClientGraphQl.getDynamicFields({
         parentId: iotaNamesObjectId,
     });
 
@@ -62,32 +72,14 @@ async function getAuthorizedSmartContractTypes() {
     };
 }
 
-function runCommand(cmd: string, envs: Record<string, string> = {}) {
-    return new Promise<string>((resolve, reject) => {
-        exec(cmd, { env: { ...process.env, ...envs } }, (error, stdout, stderr) => {
-            if (error) {
-                const message = [
-                    `❌ Command failed: ${cmd}`,
-                    stderr.trim() && `stderr:\n${stderr.trim()}`,
-                    stdout.trim() && `stdout:\n${stdout.trim()}`,
-                ]
-                    .filter(Boolean)
-                    .join('\n\n');
-                return reject(new Error(message));
-            }
-
-            resolve(stdout.trim());
-        });
-    });
-}
-
 export {
     DEFAULT_NETWORK,
     NETWORK_CONFIG,
-    iotaClient,
+    client,
     iotaNamesClient,
     PAYMENT_TYPE,
     AUCTION_TYPE,
     getAuthorizedSmartContractTypes,
-    runCommand,
+    adminKeypair,
+    iotaClientGraphQl,
 };
