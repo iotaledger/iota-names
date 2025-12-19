@@ -17,7 +17,7 @@ export async function checkAuctionPills(
     await page.locator("h2:has-text('My Names')").waitFor({ state: 'visible', timeout: 10_000 });
 
     await page.getByTestId('refresh-button').click();
-    await page.getByText('Refreshed successfully!').waitFor({ state: 'visible', timeout: 10_000 });
+    await page.getByText('Refreshed successfully').waitFor({ state: 'visible', timeout: 10_000 });
 
     const auctionNameCard = page
         .getByTestId('name-card')

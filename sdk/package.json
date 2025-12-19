@@ -41,7 +41,7 @@
         "node": ">=20"
     },
     "peerDependencies": {
-        "@iota/iota-sdk": "^1.9.0"
+        "@iota/iota-sdk": "^1.10.0"
     },
     "dependencies": {
         "@noble/hashes": "^1.4.0"
