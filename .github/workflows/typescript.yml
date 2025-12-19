@@ -202,6 +202,9 @@ jobs:
         run: |
           .github/scripts/setup-e2e-network.sh
 
+      - name: Wait for indexer to catch up
+        run: |
+          sleep 30
       - name: Inject localnet config and start indexer
         working-directory: ./
         run: |
