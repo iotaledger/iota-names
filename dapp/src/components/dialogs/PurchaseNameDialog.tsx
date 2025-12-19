@@ -168,7 +168,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
             ampli.purchasedName({
                 name,
                 amount: parseNanosToIota(price ?? 0),
-                expiration: purchaseYears, // TODO remove this field after we release expirationTime. Keep it now for backward compatibility
                 expirationTime,
                 purchaseYears: purchaseYears,
                 discountName: couponCodes.join(','),

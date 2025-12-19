@@ -150,7 +150,6 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
 
             ampli.renewedName({
                 name,
-                expiration: renewYears || 0, // TODO remove this field after we release expirationTime. Keep it now for backward compatibility
                 expirationTime,
                 renewYears: renewYears || 0,
             });
