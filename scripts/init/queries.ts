@@ -17,10 +17,16 @@ export const queryRegistryTables = async (
                 dummy_field: false,
             },
         },
+        options: {
+            showContent: true,
+        },
     });
 
-    if (table.data?.content?.dataType !== 'moveObject')
-        throw new Error(`Invalid data ${iotaNamesPackageId}`);
+    if (table.data?.content?.dataType !== 'moveObject') {
+        throw new Error(
+            `Invalid data. Data type was expected to be 'moveObject' but was ${table.data?.content?.dataType} for package: ${iotaNamesPackageId}`,
+        );
+    }
 
     const data = table.data?.content.fields as Record<string, any>;
     let registryTableId = data.value.fields.registry.fields.id.id;
