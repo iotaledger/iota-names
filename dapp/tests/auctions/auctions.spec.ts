@@ -20,7 +20,7 @@ import {
 } from '../utils';
 import { checkAuctionPills } from './auction.utils';
 
-test.describe.parallel('Auction Flow', () => {
+test.describe.serial('Auction Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
