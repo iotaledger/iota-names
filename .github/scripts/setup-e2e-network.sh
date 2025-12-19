@@ -7,7 +7,8 @@ set -euo pipefail
 # then restarts services with injected configs.
 # ============================================================================
 
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.10.0-alpha}"
+# TODO  Remove '-alpha' when https://github.com/iotaledger/iota/pull/9538 is in mainnet release
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.14.0-alpha}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 GRAPHQL_CONFIG="${GRAPHQL_CONFIG:-$(pwd)/graphql-config.toml}"
@@ -52,8 +53,7 @@ download_binaries() {
     [[ "$os_name" == "darwin" ]] && os_name="macos"
     [[ "$arch_name" == "aarch64" ]] && arch_name="arm64"
 
-    # Remove '-alpha' when https://github.com/iotaledger/iota/pull/9538 is in mainnet release
-    local asset_name="iota-$IOTA_BINARY_VERSION-alpha-${os_name}-${arch_name}.tgz"
+    local asset_name="iota-$IOTA_BINARY_VERSION-${os_name}-${arch_name}.tgz"
     local download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_VERSION/$asset_name"
 
     echo "Downloading from: $download_url"
