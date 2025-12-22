@@ -244,6 +244,18 @@ jobs:
           path: dapp/playwright-report/
           retention-days: 7
 
+      - name: Upload Network Logs
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: network-logs
+          path: |
+            iota-node.log
+            indexer-writer.log
+            indexer-reader.log
+            graphql.log
+          retention-days: 7
+
   names-display-test:
     name: Names Display Tests
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
