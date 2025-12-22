@@ -166,7 +166,7 @@ publish_iota_names() {
 stop_and_inject_configs() {
     echo "=== Phase 3: Stopping localnet processes and injecting iota-names configs ==="
 
-    for pid in $PID_IOTA $PID_INDEXER_READER $PID_GRAPHQL; do
+    for pid in $PID_IOTA $PID_INDEXER_WRITER $PID_INDEXER_READER $PID_GRAPHQL; do
         echo "Stopping PID: $pid"
         kill "$pid" 2>/dev/null || true
         wait "$pid" 2>/dev/null || true
@@ -241,6 +241,18 @@ restart_with_configs() {
     PIDS+=("$PID_IOTA")
 
     wait_for_url "http://127.0.0.1:9000/health" "iota-node" "iota-node.log"
+
+    # restart indexer-writer
+    ./iota-indexer \
+        --db-url "$DB_URL" \
+        indexer \
+        --rpc-client-url "http://127.0.0.1:9000" \
+        --remote-store-url "http://127.0.0.1:9000/api/v1" \
+        --reset-db > indexer-writer.log 2>&1 &
+    PID_INDEXER_WRITER=$!
+    PIDS+=("$PID_INDEXER_WRITER")
+
+    sleep 5
 
     # Restart indexer-reader with iota-names params
     ./iota-indexer \
