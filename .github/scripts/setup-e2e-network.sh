@@ -172,6 +172,10 @@ stop_and_inject_configs() {
         wait "$pid" 2>/dev/null || true
     done
 
+    for log in iota-node.log indexer-writer.log indexer-reader.log graphql.log; do
+        echo -e "\n\n========== RESTARTED HERE ==========\n\n" >> "$log"
+    done
+
     # Inject config into fullnode.yaml
     echo "Injecting config into $CONFIG_DIR/fullnode.yaml"
     cat >> "$CONFIG_DIR/fullnode.yaml" <<EOF
@@ -236,7 +240,7 @@ restart_with_configs() {
     # Restart iota
     ./iota start \
         --network.config "$CONFIG_DIR" \
-        --with-faucet > iota-node.log 2>&1 &
+        --with-faucet >> iota-node.log 2>&1 &
     PID_IOTA=$!
     PIDS+=("$PID_IOTA")
 
@@ -248,7 +252,7 @@ restart_with_configs() {
         indexer \
         --rpc-client-url "http://127.0.0.1:9000" \
         --remote-store-url "http://127.0.0.1:9000/api/v1" \
-        --reset-db > indexer-writer.log 2>&1 &
+        --reset-db >> indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
     PIDS+=("$PID_INDEXER_WRITER")
 
@@ -265,7 +269,7 @@ restart_with_configs() {
         --iota-names-object-id "$IOTA_NAMES_OBJECT_ID" \
         --iota-names-payments-package-address "$IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS" \
         --iota-names-registry-id "$IOTA_NAMES_REGISTRY_ID" \
-        --iota-names-reverse-registry-id "$IOTA_NAMES_REVERSE_REGISTRY_ID" > indexer-reader.log 2>&1 &
+        --iota-names-reverse-registry-id "$IOTA_NAMES_REVERSE_REGISTRY_ID" >> indexer-reader.log 2>&1 &
     PID_INDEXER_READER=$!
     PIDS+=("$PID_INDEXER_READER")
 
@@ -276,7 +280,7 @@ restart_with_configs() {
         --node-rpc-url "http://127.0.0.1:9124" \
         --port 9125 \
         --prom-port 9186 \
-        --config "$GRAPHQL_CONFIG" > graphql.log 2>&1 &
+        --config "$GRAPHQL_CONFIG" >> graphql.log 2>&1 &
     PID_GRAPHQL=$!
     PIDS+=("$PID_GRAPHQL")
 
