@@ -216,7 +216,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
 
                                     <div className="flex flex-col gap-xxs w-full relative justify-center">
                                         {isInUse && (
-                                            <div className="absolute top-0 right-0">
+                                            <div className="absolute top-2 right-2">
                                                 <Badge label="In Use" type={BadgeType.Neutral} />
                                             </div>
                                         )}
