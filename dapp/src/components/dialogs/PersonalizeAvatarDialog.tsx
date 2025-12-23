@@ -163,10 +163,6 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         saveAvatar();
     }
     const selectedAsset = (() => {
-        if (action.type === 'unset') {
-            return null;
-        }
-
         if (action.type === 'set') {
             return visualAssets?.find((a) => a.objectId === action.avatar) || null;
         }
