@@ -111,7 +111,7 @@ start_initial_network() {
 
     # Start graphql (no config yet)
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9124" \
+        --node-rpc-url "http://127.0.0.1:9000" \
         --prom-port 9186 \
         --port 9125 > graphql.log 2>&1 &
     PID_GRAPHQL=$!
@@ -277,7 +277,7 @@ restart_with_configs() {
 
     # Restart graphql with config file
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9124" \
+        --node-rpc-url "http://127.0.0.1:9000" \
         --port 9125 \
         --prom-port 9186 \
         --config "$GRAPHQL_CONFIG" >> graphql.log 2>&1 &
