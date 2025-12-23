@@ -51,12 +51,10 @@ export async function initAmplitude() {
                                       '[data-testid]',
                                       '[data-amp-track-action]',
                                   ],
-                                  // Capture all data-* attributes (including data-testid and data-amp-track-*)
-                                  dataAttributePrefix: 'data-',
                               }
                             : false,
                     },
-                    logLevel: LogLevel.None,
+                    logLevel: LogLevel.Debug,
                 },
             },
         }).promise;
