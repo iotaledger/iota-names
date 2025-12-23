@@ -122,7 +122,7 @@ export default function MyNamesPage(): JSX.Element {
         toast.success(
             `${normalizeIotaName(name.name, 'at', {
                 truncateLongParts: true,
-            })} renewed successfully!`,
+            })} renewed successfully`,
         );
     }
 
