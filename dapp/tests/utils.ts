@@ -463,9 +463,17 @@ export async function createCoupon({ code, type, value }: CreateCouponOptions) {
 
 export async function checkAddressBalanceWithRetries(address: string): Promise<void> {
     for (let attempt = 1; attempt <= 5; attempt++) {
-        const balanceResponse = await iotaClientGraphQl.getBalance({ owner: address });
-        if (!balanceResponse.totalBalance.startsWith('0')) {
-            console.log(`Address ${address} has balance: ${balanceResponse.totalBalance} IOTA`);
+        let totalBalance: string | null = null;
+
+        try {
+            const balanceResponse = await iotaClientGraphQl.getBalance({ owner: address });
+            totalBalance = balanceResponse.totalBalance;
+        } catch (error) {
+            console.error(`Error checking balance for address ${address}:`, error);
+        }
+
+        if (totalBalance && !totalBalance.startsWith('0')) {
+            console.log(`Address ${address} has balance: ${totalBalance} IOTA`);
             break;
         }
 
