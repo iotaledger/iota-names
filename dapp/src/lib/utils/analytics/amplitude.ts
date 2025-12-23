@@ -9,7 +9,9 @@ import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
 import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
-const IS_ENABLED = true;
+const IS_ENABLED =
+    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
+    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
 /**
  * Check if user has previously given consent for cookies/tracking.
@@ -44,17 +46,11 @@ export async function initAmplitude() {
                         sessions: IS_ENABLED,
                         elementInteractions: IS_ENABLED
                             ? {
-                                  // Track buttons, links, and elements with data-testid
-                                  cssSelectorAllowlist: [
-                                      'button',
-                                      'a',
-                                      '[data-testid]',
-                                      '[data-amp-track-action]',
-                                  ],
+                                  cssSelectorAllowlist: ['button', 'a'],
                               }
                             : false,
                     },
-                    logLevel: LogLevel.Debug,
+                    logLevel: LogLevel.None,
                 },
             },
         }).promise;
