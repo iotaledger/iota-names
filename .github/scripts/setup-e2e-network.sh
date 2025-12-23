@@ -78,7 +78,8 @@ start_initial_network() {
     # Start iota node with force-regenesis for fresh state
     ./iota start \
         --network.config "$CONFIG_DIR" \
-        --with-faucet > iota-node.log 2>&1 &
+        --with-faucet \
+        --faucet-amount 100000000000000 > iota-node.log 2>&1 &
     PID_IOTA=$!
     PIDS+=("$PID_IOTA")
 
@@ -240,7 +241,8 @@ restart_with_configs() {
     # Restart iota
     ./iota start \
         --network.config "$CONFIG_DIR" \
-        --with-faucet >> iota-node.log 2>&1 &
+        --with-faucet \
+        --faucet-amount 100000000000000 >> iota-node.log 2>&1 &
     PID_IOTA=$!
     PIDS+=("$PID_IOTA")
 
