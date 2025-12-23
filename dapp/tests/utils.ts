@@ -460,3 +460,18 @@ export async function createCoupon({ code, type, value }: CreateCouponOptions) {
         throw error;
     }
 }
+
+export async function checkAddressBalanceWithRetries(address: string): Promise<void> {
+    for (let attempt = 1; attempt <= 5; attempt++) {
+        const balanceResponse = await iotaClientGraphQl.getBalance({ owner: address });
+        if (!balanceResponse.totalBalance.startsWith('0')) {
+            console.log(`Address ${address} has balance: ${balanceResponse.totalBalance} IOTA`);
+            break;
+        }
+
+        console.log(
+            `Attempt ${attempt}: Address ${address} balance is zero. Retrying in 2 seconds...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
+}
