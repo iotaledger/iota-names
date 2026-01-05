@@ -20,7 +20,7 @@ import {
 } from '../utils';
 import { checkAuctionPills } from './auction.utils';
 
-test.describe.parallel('Auction Flow', () => {
+test.describe.serial('Auction Flow', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
 
@@ -100,7 +100,7 @@ test.describe.parallel('Auction Flow', () => {
         await page.goto(`/auctions?page=1&search=${auctionName}`);
         await page.getByTestId('refresh-button').click({ timeout: 10_000 });
 
-        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible({
+        await expect(page.getByText(/Refreshed successfully/i)).toBeVisible({
             timeout: 10_000,
         });
 
@@ -148,7 +148,7 @@ test.describe.parallel('Auction Flow', () => {
 
         await page.getByTestId('refresh-button').click();
         await page
-            .getByText('Refreshed successfully!')
+            .getByText('Refreshed successfully')
             .waitFor({ state: 'visible', timeout: 10_000 });
 
         let auctionNameCard = page
@@ -168,7 +168,7 @@ test.describe.parallel('Auction Flow', () => {
 
         await page.getByTestId('refresh-button').click();
         await page
-            .getByText('Refreshed successfully!')
+            .getByText('Refreshed successfully')
             .waitFor({ state: 'visible', timeout: 10_000 });
 
         auctionNameCard = page
@@ -217,7 +217,7 @@ test.describe.parallel('Auction Flow', () => {
         await page.goto(`/auctions?page=1&search=${auctionName}`);
 
         await page.getByTestId('refresh-button').click({ timeout: 10_000 });
-        await expect(page.getByText(/Refreshed successfully!/i)).toBeVisible();
+        await expect(page.getByText(/Refreshed successfully/i)).toBeVisible();
 
         const displayName = normalizeIotaName(auctionName, 'at');
 

@@ -162,7 +162,7 @@ export interface PurchasedNameProperties {
      * |---|---|
      * | Type | number |
      */
-    expiration: number;
+    expirationTime: number;
     name: string;
     /**
      * Property created as alternative of `expiration` with more readable name.
@@ -180,7 +180,7 @@ export interface RenewedNameProperties {
      * |---|---|
      * | Type | number |
      */
-    expiration: number;
+    expirationTime: number;
     name: string;
     /**
      * | Rule | Value |
@@ -191,7 +191,12 @@ export interface RenewedNameProperties {
 }
 
 export interface RenewedSubnameProperties {
-    expirationTime: string;
+    /**
+     * | Rule | Value |
+     * |---|---|
+     * | Type | number |
+     */
+    expirationTime: number;
     expirationType: string;
     name: string;
 }
@@ -583,7 +588,7 @@ export class Ampli {
    *
    * Event has no description in tracking plan.
    *
-   * @param properties The event's properties (e.g. expiration)
+   * @param properties The event's properties (e.g. expirationTime)
    * @param options Amplitude event options.
    */
   renewedName(

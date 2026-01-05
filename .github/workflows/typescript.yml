@@ -3,7 +3,7 @@ name: Typescript
 on:
   pull_request:
     paths:
-      - ".github/workflows/typescript.yaml"
+      - ".github/workflows/typescript.yml"
       - "packages/**"
       - "scripts/**"
       - "build-scripts/**"
@@ -13,22 +13,22 @@ on:
       - "dapp/**"
       - "names-display/**"
   push:
-    branches:
-      - develop
+    branches: [develop]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/develop' }}
 
 jobs:
-  build_and_lint:
+  build-and-lint:
     name: TS Build / Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 1
-      - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
 
@@ -59,8 +59,9 @@ jobs:
         run: |
           pnpm lint
 
-  sdk_test:
+  sdk-test:
     name: SDK Tests
+    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -78,7 +79,7 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 1
 
@@ -90,7 +91,7 @@ jobs:
       - name: Install IOTA using Homebrew
         run: brew install iotaledger/tap/iota
 
-      - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
 
@@ -134,8 +135,9 @@ jobs:
           cd ../sdk
           VITE_IOTA_BIN="iota" pnpm test:e2e
 
-  dapp_e2e_test:
+  dapp-e2e-test:
     name: Run dapp E2E Tests
+    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
@@ -167,11 +169,11 @@ jobs:
       run:
         working-directory: ./dapp
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 1
 
-      - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
 
@@ -205,6 +207,8 @@ jobs:
       - name: Prepare local network & Run Dapp e2e tests
         working-directory: ./
         run: |
+          ADMIN_MNEMONIC="say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
+          iota keytool import "$ADMIN_MNEMONIC" ed25519
           iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
           sleep 10
 
@@ -213,7 +217,7 @@ jobs:
           iota client faucet
           sleep 5
 
-          bash dapp/scripts/update_auctions_duration.sh
+          bash dapp/scripts/update_auctions_constants.sh
           cd scripts
           export NETWORK=localnet
           pnpm ts-node init/init.ts localnet
@@ -240,21 +244,22 @@ jobs:
             ghcr.io/iotaledger/iota-names/iota-names-indexer:latest \
             start \
             --node-url=http://host.docker.internal:9000 \
-            --checkpoint-url=http://host.docker.internal:9000
+            --checkpoint-url=http://host.docker.internal:9000 \
+            --reset-metrics
 
           pnpm dapp build
           cd dapp
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- pnpm run test:e2e
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- env ADMIN_MNEMONIC="$ADMIN_MNEMONIC" pnpm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: playwright-report
           path: dapp/playwright-report/
           retention-days: 7
 
-  names_display_test:
+  names-display-test:
     name: Names Display Tests
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: self-hosted-x64
@@ -263,23 +268,29 @@ jobs:
         working-directory: ./names-display
     steps:
       - name: checkout code repository
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
-      - uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
       - name: Install Nodejs
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: "20"
           cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: ./
+
       - name: Build sdk
         run: pnpm --filter @iota/iota-names-sdk run build
+
       - name: Build names-display service
         run: pnpm --filter names-display run build
         working-directory: ./
+
       - name: Run names-display tests
         run: pnpm --filter names-display run test
         working-directory: ./

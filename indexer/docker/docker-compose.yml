@@ -21,6 +21,9 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
+    depends_on:
+      prometheus:
+        condition: service_healthy
     networks:
       - indexer-metrics-net
     volumes:
@@ -66,6 +69,12 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - indexer-metrics-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
 
   grafana:
     image: grafana/grafana:latest

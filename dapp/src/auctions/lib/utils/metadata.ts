@@ -4,10 +4,11 @@
 import { getNameType } from '@iota/iota-names-sdk';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { fromB64, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { fromB64 } from '@iota/iota-sdk/utils';
 
 import { queryKey } from '@/hooks';
 
+import { AUCTION_MIN_OVERBID_VALUE_IOTA } from '../constants';
 import { AuctionFieldBcs } from '../types/bcs';
 import { AuctionMetadata, RawAuctionMetadata } from '../types/metadata';
 import { deriveAuctionDynamicFieldId } from './dynamicField';
@@ -83,7 +84,7 @@ function normalizeAuctionData(
     const auction = rawData.value.value;
 
     const currentBidNanos = BigInt(auction.current_bid.balance.value || BigInt(0));
-    const minBidNanos = currentBidNanos + NANOS_PER_IOTA;
+    const minBidNanos = currentBidNanos + AUCTION_MIN_OVERBID_VALUE_IOTA;
 
     return {
         name: auction.nft.name_str,
