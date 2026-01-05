@@ -132,11 +132,13 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
+            const expirationTime = expirationDate ? expirationDate.getTime() : Date.now();
+
             ampli.renewedSubname({
                 name,
                 // TODO expirationType `custom` will be added after implement https://github.com/iotaledger/iota-names/issues/915
                 expirationType: 'parent',
-                expirationTime: expirationDate?.getTime().toString() || '',
+                expirationTime,
             });
             toast.success('Subname renewed successfully');
         },
