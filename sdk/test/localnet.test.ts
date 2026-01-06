@@ -18,7 +18,7 @@ import { PackageInfo } from '../src/types';
 import { getClient, getGraphQLClient, setupIotaClient, TestToolbox } from './toolbox';
 
 const LOCALNET_PRICING = {
-    THREE_LETTER: { registration: 500, renewal: 500 },
+    THREE_LETTER: { registration: 1500, renewal: 1500 },
     FOUR_LETTER: { registration: 250, renewal: 250 },
     FIVE_PLUS_LETTER: { registration: 50, renewal: 50 },
 } as const;
