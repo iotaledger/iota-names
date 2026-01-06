@@ -12,6 +12,7 @@ import { expect, test } from '../helpers/fixtures';
 import { iotaNamesClient } from '../setup/utils';
 import {
     addSubnameName,
+    checkAddressBalanceWithRetries,
     connectName,
     connectWallet,
     createCoupon,
@@ -42,6 +43,7 @@ test.describe.serial('Name Management Tests', () => {
         });
 
         await requestFaucetTokens(address);
+        await checkAddressBalanceWithRetries(address);
 
         sharedState.wallet.address = address;
         sharedState.wallet.mnemonic = mnemonic;
