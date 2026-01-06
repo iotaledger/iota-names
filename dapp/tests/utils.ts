@@ -123,6 +123,8 @@ export async function purchaseName(name: string, signer: Signer) {
         },
     });
 
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchase.digest });
+
     console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
 }
@@ -189,6 +191,8 @@ export async function editSetup(
         },
     });
 
+    await iotaClientGraphQl.waitForTransaction({ digest: responseEditSetup.digest });
+
     console.log(
         `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
     );
@@ -215,6 +219,8 @@ export async function connectName(name: string, nft: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseConnect.digest });
 
     console.log(`Connected name: ${name} to address: ${address}`);
     return responseConnect;
@@ -243,6 +249,9 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseRenew.digest });
+
     console.log(`Renewed name: ${name} with address: ${address}`);
     return responseRenew;
 }
@@ -295,6 +304,9 @@ export async function mintNft(
     if (resultMint.effects?.status.status !== 'success') {
         throw new Error(resultMint.effects?.status.error || 'Mint execution failed');
     }
+
+    await iotaClientGraphQl.waitForTransaction({ digest: resultMint.digest });
+
     return resultMint;
 }
 
@@ -321,6 +333,9 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetAvatar.digest });
+
     console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
@@ -364,6 +379,8 @@ export async function createAndSendAuctionTransaction({
             },
         });
 
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
+
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully created auction for name: ${name}`);
 
@@ -401,6 +418,8 @@ export async function bidOnExistingAuction({
                 showEffects: true,
             },
         });
+
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
 
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully bid on existing auction for name: ${name}`);

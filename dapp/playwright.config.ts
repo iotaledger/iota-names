@@ -9,6 +9,7 @@ export default defineConfig({
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
     workers: 1,
+    maxFailures: process.env.CI ? 10 : undefined,
     reporter: 'html',
     expect: {
         timeout: 10_000,
