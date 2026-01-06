@@ -155,6 +155,8 @@ export async function addSubnameName(
         },
     });
 
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchaseSubname.digest });
+
     console.log(`Purchased subname: ${subname} with address: ${address}`);
     return responsePurchaseSubname;
 }
