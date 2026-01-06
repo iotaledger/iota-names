@@ -260,8 +260,8 @@ test.describe.serial('Auction Flow', () => {
             requestFaucetTokens(newSigner.toIotaAddress()),
         ]);
 
-        checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
-        checkAddressBalanceWithRetries(newSigner.toIotaAddress());
+        await checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
+        await checkAddressBalanceWithRetries(newSigner.toIotaAddress());
 
         const startAuctionResult = await createAndSendAuctionTransaction({
             name,
@@ -285,7 +285,7 @@ test.describe.serial('Auction Flow', () => {
 
         await requestFaucetTokens(walletSigner.toIotaAddress());
 
-        checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
+        await checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
 
         const startAuctionResult = await createAndSendAuctionTransaction({
             name,
