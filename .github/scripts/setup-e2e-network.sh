@@ -11,10 +11,12 @@ set -euo pipefail
 IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.14.0-alpha}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GRAPHQL_CONFIG="${GRAPHQL_CONFIG:-$(pwd)/graphql-config.toml}"
 DB_URL="${DB_URL:-postgres://postgres:postgrespw@localhost:5432/iota_indexer}"
 
 ADMIN_MNEMONIC="${ADMIN_MNEMONIC:?ADMIN_MNEMONIC environment variable is required}"
+
 
 declare -a PIDS=()
 PID_IOTA=""
@@ -188,46 +190,9 @@ iota-names-config:
   reverse-registry-id: "$IOTA_NAMES_REVERSE_REGISTRY_ID"
 EOF
 
-    # Create graphql config TOML
+    # Create graphql config TOML from template
     echo "Creating graphql config at $GRAPHQL_CONFIG"
-    cat > "$GRAPHQL_CONFIG" <<EOF
-[versions]
-versions = []
-
-[limits]
-max-query-depth = 20
-max-query-nodes = 300
-max-output-nodes = 100000
-max-query-payload-size = 5000
-max-db-query-cost = 20000
-default-page-size = 20
-max-page-size = 50
-mutation-timeout-ms = 74000
-request-timeout-ms = 40000
-max-type-argument-depth = 16
-max-type-argument-width = 32
-max-type-nodes = 256
-max-move-value-depth = 128
-max-transaction-ids = 1000
-max-scan-limit = 100000000
-max-tx-payload-size = 174763
-disabled-features = []
-
-[experiments]
-
-[iota-names]
-package-address = "$IOTA_NAMES_PACKAGE_ADDRESS"
-object-id = "$IOTA_NAMES_OBJECT_ID"
-payments-package-address = "$IOTA_NAMES_PAYMENTS_PACKAGE_ADDRESS"
-registry-id = "$IOTA_NAMES_REGISTRY_ID"
-reverse-registry-id = "$IOTA_NAMES_REVERSE_REGISTRY_ID"
-
-[background-tasks]
-watermark-update-ms = 500
-
-[zklogin]
-env = "Prod"
-EOF
+    envsubst < "$SCRIPT_DIR/templates/graphql-config.toml.template" > "$GRAPHQL_CONFIG"
 
     echo "=== Phase 3 complete ==="
 }
