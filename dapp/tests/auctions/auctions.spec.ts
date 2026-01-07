@@ -12,7 +12,6 @@ import { denormalizeName } from '@/lib/utils';
 import { expect, test } from '../helpers/fixtures';
 import {
     bidOnExistingAuction,
-    checkAddressBalanceWithRetries,
     connectWallet,
     createAndSendAuctionTransaction,
     createWallet,
@@ -91,8 +90,6 @@ test.describe.serial('Auction Flow', () => {
         const keypair = new Ed25519Keypair();
         await requestFaucetTokens(keypair.toIotaAddress());
 
-        await checkAddressBalanceWithRetries(keypair.toIotaAddress());
-
         const response = await createAndSendAuctionTransaction({
             signer: keypair,
             name: auctionName,
@@ -137,8 +134,6 @@ test.describe.serial('Auction Flow', () => {
 
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
         await requestFaucetTokens(keypair.toIotaAddress());
-
-        await checkAddressBalanceWithRetries(keypair.toIotaAddress());
 
         const response = await createAndSendAuctionTransaction({
             signer: keypair,
@@ -260,9 +255,6 @@ test.describe.serial('Auction Flow', () => {
             requestFaucetTokens(newSigner.toIotaAddress()),
         ]);
 
-        await checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
-        await checkAddressBalanceWithRetries(newSigner.toIotaAddress());
-
         const startAuctionResult = await createAndSendAuctionTransaction({
             name,
             signer: walletSigner,
@@ -284,8 +276,6 @@ test.describe.serial('Auction Flow', () => {
         const walletSigner = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic!);
 
         await requestFaucetTokens(walletSigner.toIotaAddress());
-
-        await checkAddressBalanceWithRetries(walletSigner.toIotaAddress());
 
         const startAuctionResult = await createAndSendAuctionTransaction({
             name,

@@ -80,7 +80,7 @@ export async function createWallet(page: Page) {
     };
 }
 
-export async function requestFaucetTokens(recipient: string) {
+export async function requestFaucetTokens(recipient: string, blockUntilBalance: boolean = true) {
     const currentNetwork = CONFIG.network;
     const networkConfig = getNetwork(currentNetwork);
 
@@ -97,6 +97,10 @@ export async function requestFaucetTokens(recipient: string) {
 
     if (res.error) {
         throw new Error(`Faucet error: ${res.error}`);
+    }
+
+    if (blockUntilBalance) {
+        await checkAddressBalanceWithRetries(recipient);
     }
 }
 
