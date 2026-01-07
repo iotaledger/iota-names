@@ -665,12 +665,15 @@ test.describe.serial('Name Management Tests', () => {
         const name = generateRandomName('unset');
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
+
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
+
         const responseConnect = await connectName(name, record.nftId, keypair);
         expect(responseConnect.effects?.status.status).toBe('success');
         const responseSetPublic = await setPublicName(name, keypair);
         expect(responseSetPublic.effects?.status.status).toBe('success');
+
         await page.goto('/my-names');
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
@@ -683,6 +686,7 @@ test.describe.serial('Name Management Tests', () => {
         const menuButtonLocator = nameCard.getByTestId('menu-button');
         await expect(menuButtonLocator).toBeVisible();
         await menuButtonLocator.click();
+
         await page.getByText('Connect to Address', { exact: true }).click();
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
@@ -692,11 +696,14 @@ test.describe.serial('Name Management Tests', () => {
         await expect(publicNameCheckbox).toBeChecked({ timeout: 10_000 });
         await publicNameCheckbox.click();
         await dialog.getByRole('button', { name: 'Apply' }).click();
+
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
         await dialog.getByRole('button', { name: 'Finish' }).click();
+
         await page.close();
     });
+
     test('Renew name with coupon', async ({ appPage: page, context, sharedState }) => {
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('renewcoupon');
@@ -710,6 +717,7 @@ test.describe.serial('Name Management Tests', () => {
             type: 'fixed',
             value: BigInt(1000) * NANOS_PER_IOTA,
         });
+
         await page.goto('/my-names');
         await expect(
             page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
@@ -737,6 +745,7 @@ test.describe.serial('Name Management Tests', () => {
         await expect(page.getByText('Name renewed successfully', { exact: false })).toBeVisible({
             timeout: 30_000,
         });
+
         await page.close();
     });
 });
