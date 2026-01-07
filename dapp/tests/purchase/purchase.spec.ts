@@ -54,6 +54,37 @@ test.describe.serial('Purchase Name Tests', () => {
 
         await page.bringToFront();
     });
+
+    test('Availability Dialog opens from all UI elements', async ({ appPage: page }) => {
+        await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+        await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
+
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
+
+        await page.goto('/auctions', { waitUntil: 'domcontentloaded' });
+
+        await page
+            .getByTestId('top-navbar')
+            .getByPlaceholder('Search for your IOTA name')
+            .filter({ visible: true })
+            .click();
+
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
+
+        await page.goto('/my-names', { waitUntil: 'domcontentloaded' });
+
+        await page.getByRole('button', { name: 'Name', exact: true }).click();
+
+        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
+            timeout: 5_000,
+        });
+    });
+
     test('Unavailable shows up for already purchased name', async ({ appPage: page }) => {
         // Name registered when initializing localnet with scripts/tests/register-name.ts
         const targetName = 'test.iota';
