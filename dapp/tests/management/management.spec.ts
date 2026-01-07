@@ -28,7 +28,6 @@ import {
     setAvatar,
 } from '../utils';
 
-test.setTimeout(60_000);
 test.describe.serial('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
@@ -644,7 +643,7 @@ test.describe.serial('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
 
-        await dialog.getByRole('button', { name: 'Unset' }).click();
+        await dialog.getByRole('button', { name: 'Restore Default' }).click();
         await dialog.getByRole('button', { name: 'Save' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
