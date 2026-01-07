@@ -28,21 +28,20 @@ test.describe.serial('Purchase Name Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Can purchase a name', async ({ appPage: page, context }) => {
-        const nameToPurchase = `e2e-test-name`;
+    test('Can purchase a name making it default', async ({ appPage: page, context }) => {
+        const nameToPurchase = `e2edefault`;
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
         await page.getByPlaceholder('Check name availability').fill(nameToPurchase);
         const purchaseCardLocator = page.getByTestId('purchase-name-card');
 
-        await purchaseCardLocator.waitFor();
-        await expect(purchaseCardLocator).toBeVisible();
-
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
 
+        await page.getByText('Set name as Display Name').click();
         await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
 
