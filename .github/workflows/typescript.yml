@@ -140,6 +140,7 @@ jobs:
     if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     env:
+      ADMIN_MNEMONIC: "say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: localnet
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: |
         {
@@ -150,21 +151,6 @@ jobs:
             "baseUrl": "http://localhost:3005"
           }
         }
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgrespw
-          POSTGRES_DB: iota_indexer
-          POSTGRES_HOST_AUTH_METHOD: trust
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
     defaults:
       run:
         working-directory: ./dapp
@@ -177,13 +163,18 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Homebrew
+      - name: Start Postgres
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
-      - name: Install IOTA using Homebrew
-        run: brew install iotaledger/tap/iota
+          docker run -d --name postgres \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgrespw \
+            -e POSTGRES_DB=iota_indexer \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5432:5432 \
+            postgres:15 \
+            postgres -c max_connections=1000
+          until docker exec postgres pg_isready; do sleep 1; done
+        working-directory: ./
 
       - name: Do a global PNPM install
         run: |
@@ -204,29 +195,20 @@ jobs:
         run: |
           pnpm run playwright:install
 
-      - name: Prepare local network & Run Dapp e2e tests
+      - name: Setup E2E Network
+        working-directory: ./
+        env:
+          DB_URL: "postgres://postgres:postgrespw@localhost:5432/iota_indexer"
+        run: |
+          .github/scripts/setup-e2e-network.sh
+
+      - name: Wait for indexer to catch up
+        run: |
+          sleep 45
+      - name: Inject localnet config and start indexer
         working-directory: ./
         run: |
-          ADMIN_MNEMONIC="say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
-          iota keytool import "$ADMIN_MNEMONIC" ed25519
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 900000 > /dev/null 2>&1 &
-          sleep 10
-
-          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
-          iota client switch --env localnet
-          iota client faucet
-          sleep 5
-
-          bash dapp/scripts/update_auctions_constants.sh
-          cd scripts
-          export NETWORK=localnet
-          pnpm ts-node init/init.ts localnet
-          pnpm ts-node tests/register-name.ts
-          sleep 5
-
-          cat ./package-info/localnet.json
-
-          cd ../dapp
+          cd dapp
           pnpm inject-localnet
 
           cd ..
@@ -247,6 +229,9 @@ jobs:
             --checkpoint-url=http://host.docker.internal:9000 \
             --reset-metrics
 
+      - name: Build and run E2E tests
+        working-directory: ./
+        run: |
           pnpm dapp build
           cd dapp
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- env ADMIN_MNEMONIC="$ADMIN_MNEMONIC" pnpm run test:e2e
@@ -257,6 +242,18 @@ jobs:
         with:
           name: playwright-report
           path: dapp/playwright-report/
+          retention-days: 7
+
+      - name: Upload Network Logs
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: network-logs
+          path: |
+            iota-node.log
+            indexer-writer.log
+            indexer-reader.log
+            graphql.log
           retention-days: 7
 
   names-display-test:
