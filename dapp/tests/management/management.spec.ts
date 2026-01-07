@@ -28,7 +28,6 @@ import {
     setAvatar,
 } from '../utils';
 
-test.setTimeout(60_000);
 test.describe.serial('Name Management Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
         const { address, mnemonic } = await createWallet(extensionPage);
