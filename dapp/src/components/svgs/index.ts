@@ -3,4 +3,3 @@
 
 export { default as NamesLogoBranded } from './NamesLogoBranded';
 export { default as NamesLogoWeb } from './NamesLogoWeb';
-export { default as BrandedAssets } from './BrandedAssets';
