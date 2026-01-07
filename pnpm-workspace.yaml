@@ -5,4 +5,4 @@ packages:
   - "documentation/**"
   - "dapp"
   - "names-display"
-minimumReleaseAge: 10080
+minimumReleaseAge: 1440
