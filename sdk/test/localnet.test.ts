@@ -18,7 +18,7 @@ import { PackageInfo } from '../src/types';
 import { getClient, getGraphQLClient, setupIotaClient, TestToolbox } from './toolbox';
 
 const LOCALNET_PRICING = {
-    THREE_LETTER: { registration: 500, renewal: 500 },
+    THREE_LETTER: { registration: 1500, renewal: 1500 },
     FOUR_LETTER: { registration: 250, renewal: 250 },
     FIVE_PLUS_LETTER: { registration: 50, renewal: 50 },
 } as const;
@@ -60,16 +60,16 @@ export const e2eLocalnetDryRunFlow = async (toolbox: TestToolbox) => {
     const renewalPriceList = await iotaNamesClient.getRenewalPriceList();
 
     // Expected lists for localnet - these match the configuration in scripts/init/packages.ts
-    // From packages.ts lines 104-108: [500, 250, 50] * NANOS_PER_IOTA
+    // From packages.ts lines 104-108: [1500, 250, 50] * NANOS_PER_IOTA
     const expectedPriceList = new Map([
-        [[3, 3], 500 * Number(NANOS_PER_IOTA)], // 500000000000 nanos (500 IOTA)
+        [[3, 3], 1500 * Number(NANOS_PER_IOTA)], // 1500000000000 nanos (1500 IOTA)
         [[4, 4], 250 * Number(NANOS_PER_IOTA)], // 250000000000 nanos (250 IOTA)
         [[5, 63], 50 * Number(NANOS_PER_IOTA)], // 50000000000 nanos (50 IOTA)
     ]);
 
-    // From packages.ts lines 126-130: [500, 250, 50] * NANOS_PER_IOTA
+    // From packages.ts lines 126-130: [1500, 250, 50] * NANOS_PER_IOTA
     const expectedRenewalPriceList = new Map([
-        [[3, 3], 500 * Number(NANOS_PER_IOTA)], // 500000000000 nanos (500 IOTA)
+        [[3, 3], 1500 * Number(NANOS_PER_IOTA)], // 1500000000000 nanos (1500 IOTA)
         [[4, 4], 250 * Number(NANOS_PER_IOTA)], // 250000000000 nanos (250 IOTA)
         [[5, 63], 50 * Number(NANOS_PER_IOTA)], // 50000000000 nanos (50 IOTA)
     ]);
