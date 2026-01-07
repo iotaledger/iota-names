@@ -8,7 +8,7 @@ export default defineConfig({
     fullyParallel: false,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 1 : 0,
-    workers: process.env.CI ? 2 : undefined,
+    workers: 1,
     reporter: 'html',
     expect: {
         timeout: 10_000,
@@ -25,7 +25,7 @@ export default defineConfig({
                 ...devices['Desktop Chrome'],
                 userAgent: 'Playwright',
             },
-            fullyParallel: true,
+            fullyParallel: false,
         },
         {
             name: 'Management flow',
@@ -48,7 +48,7 @@ export default defineConfig({
             },
             testDir: './tests/purchase',
             dependencies: ['Purchase setup'],
-            fullyParallel: true,
+            fullyParallel: false,
         },
         {
             name: 'Auctions setup',
