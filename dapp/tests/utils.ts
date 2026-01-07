@@ -445,6 +445,11 @@ export function generateRandomSubname(subname: string, parentName: string) {
     return `${subname}${random}.${parentName}`;
 }
 
+export function generateRandomCoupon(coupon: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${coupon}${random}`.toUpperCase();
+}
+
 interface CreateCouponOptions {
     code: string;
     type: 'fixed' | 'percentage';
