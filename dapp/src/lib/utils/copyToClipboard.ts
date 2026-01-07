@@ -12,7 +12,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
     try {
         await navigator.clipboard.writeText(text);
-        toast.success('Copied to clipboard!');
+        toast.success('Copied to clipboard');
         return true;
     } catch (err) {
         toast.error(getUserFriendlyErrorMessage('FAILED_TO_COPY'));

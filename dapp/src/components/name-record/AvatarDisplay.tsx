@@ -16,16 +16,17 @@ const FALLBACK_URL = '/name-bg.svg';
 interface NameAvatarDisplay {
     name: string;
     blur?: boolean;
+    isOnlyDefaultAvatar?: boolean;
 }
 
-export function NameAvatarDisplay({ name, blur }: NameAvatarDisplay) {
+export function NameAvatarDisplay({ name, blur, isOnlyDefaultAvatar = false }: NameAvatarDisplay) {
     const { data: nameRecordData, isLoading: isNameRecordDataLoading } = useNameRecord(name);
     const { data: subnames, isLoading: isSubnamesLoading } = useRegistrationNfts('subname');
     const isNameSubname = isSubname(name);
 
     const avatarId =
         nameRecordData?.type === 'unavailable'
-            ? nameRecordData?.nameRecord.avatar
+            ? nameRecordData?.nameRecord.avatar && !isOnlyDefaultAvatar
                 ? nameRecordData.nameRecord.avatar
                 : isNameSubname
                   ? subnames?.find((n) => n.name === name)?.id

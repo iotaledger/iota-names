@@ -7,17 +7,19 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
-import { execFileSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { blake2b } from '@noble/hashes/blake2';
+import { bytesToHex } from '@noble/hashes/utils';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
-import { iotaClient, iotaNamesClient } from './setup/utils';
+import { iotaClientGraphQl, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
@@ -38,8 +40,9 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
 
 export async function createWallet(page: Page) {
     await page.bringToFront();
-    await page.getByRole('button', { name: /Add Profile/ }).click({ timeout: 30000 });
-    await page.getByText('Create New', { exact: true }).click();
+    await page.getByRole('button', { name: /Get Started/ }).click({ timeout: 30_000 });
+    await page.getByText('Create a new wallet').click();
+    await page.getByText('Mnemonic', { exact: true }).click();
     await page.getByTestId('password.input').fill('iotae2etests');
     await page.getByTestId('password.confirmation').fill('iotae2etests');
     await page.getByText('I read and agree').click();
@@ -77,7 +80,7 @@ export async function createWallet(page: Page) {
     };
 }
 
-export async function requestFaucetTokens(recipient: string) {
+export async function requestFaucetTokens(recipient: string, blockUntilBalance: boolean = true) {
     const currentNetwork = CONFIG.network;
     const networkConfig = getNetwork(currentNetwork);
 
@@ -95,6 +98,10 @@ export async function requestFaucetTokens(recipient: string) {
     if (res.error) {
         throw new Error(`Faucet error: ${res.error}`);
     }
+
+    if (blockUntilBalance) {
+        await checkAddressBalanceWithRetries(recipient);
+    }
 }
 
 export async function purchaseName(name: string, signer: Signer) {
@@ -110,15 +117,17 @@ export async function purchaseName(name: string, signer: Signer) {
     iotaNamesTx.transaction.transferObjects([nft, coin], address);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
-    const responsePurchase = await iotaClient.signAndExecuteTransaction({
+    const responsePurchase = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchase.digest });
 
     console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
@@ -142,15 +151,17 @@ export async function addSubnameName(
     iotaNamesTx.transaction.transferObjects([subnameNft], address);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
-    const responsePurchaseSubname = await iotaClient.signAndExecuteTransaction({
+    const responsePurchaseSubname = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchaseSubname.digest });
 
     console.log(`Purchased subname: ${subname} with address: ${address}`);
     return responsePurchaseSubname;
@@ -174,15 +185,17 @@ export async function editSetup(
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
-    const responseEditSetup = await iotaClient.signAndExecuteTransaction({
+    const responseEditSetup = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseEditSetup.digest });
 
     console.log(
         `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
@@ -201,15 +214,17 @@ export async function connectName(name: string, nft: string, signer: Signer) {
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
-    const responseConnect = await iotaClient.signAndExecuteTransaction({
+    const responseConnect = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseConnect.digest });
 
     console.log(`Connected name: ${name} to address: ${address}`);
     return responseConnect;
@@ -228,16 +243,19 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
 
-    const responseRenew = await iotaClient.signAndExecuteTransaction({
+    const responseRenew = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseRenew.digest });
+
     console.log(`Renewed name: ${name} with address: ${address}`);
     return responseRenew;
 }
@@ -281,8 +299,8 @@ export async function mintNft(
         target: `${packageId}::mint_nft::mint`,
         arguments: [tx.pure.string(name), tx.pure.string(description), tx.pure.string(imageUrl)],
     });
-    const built = await tx.build({ client: iotaClient });
-    const resultMint = await iotaClient.signAndExecuteTransaction({
+    const built = await tx.build({ client: iotaClientGraphQl });
+    const resultMint = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: built,
         signer,
         options: { showEffects: true, showObjectChanges: true },
@@ -290,6 +308,9 @@ export async function mintNft(
     if (resultMint.effects?.status.status !== 'success') {
         throw new Error(resultMint.effects?.status.error || 'Mint execution failed');
     }
+
+    await iotaClientGraphQl.waitForTransaction({ digest: resultMint.digest });
+
     return resultMint;
 }
 
@@ -306,19 +327,23 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     });
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({
-        client: iotaClient,
+        client: iotaClientGraphQl,
     });
 
-    const responseSetAvatar = await iotaClient.signAndExecuteTransaction({
+    const responseSetAvatar = await iotaClientGraphQl.signAndExecuteTransaction({
         transaction: txBytes,
         signer,
         options: {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetAvatar.digest });
+
     console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -349,14 +374,16 @@ export async function createAndSendAuctionTransaction({
             name,
         );
 
-        const txBytes = await tx.build({ client: iotaClient });
-        const response = await iotaClient.signAndExecuteTransaction({
+        const txBytes = await tx.build({ client: iotaClientGraphQl });
+        const response = await iotaClientGraphQl.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
             options: {
                 showEffects: true,
             },
         });
+
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
 
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully created auction for name: ${name}`);
@@ -387,14 +414,16 @@ export async function bidOnExistingAuction({
             name,
         );
 
-        const txBytes = await tx.build({ client: iotaClient });
-        const response = await iotaClient.signAndExecuteTransaction({
+        const txBytes = await tx.build({ client: iotaClientGraphQl });
+        const response = await iotaClientGraphQl.signAndExecuteTransaction({
             transaction: txBytes,
             signer,
             options: {
                 showEffects: true,
             },
         });
+
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
 
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully bid on existing auction for name: ${name}`);
@@ -414,4 +443,68 @@ export function generateRandomName(name: string) {
 export function generateRandomSubname(subname: string, parentName: string) {
     const random = Math.floor(Math.random() * 10_000);
     return `${subname}${random}.${parentName}`;
+}
+
+interface CreateCouponOptions {
+    code: string;
+    type: 'fixed' | 'percentage';
+    value: bigint;
+}
+
+export async function createCoupon({ code, type, value }: CreateCouponOptions) {
+    const couponCodeHash = bytesToHex(blake2b(code, { dkLen: 32 }));
+
+    const couponsPackageId = iotaNamesClient.getPackage('couponsPackageId');
+    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
+    const adminCapId = iotaNamesClient.getPackage('adminCap');
+    const adminAddress = iotaNamesClient.getPackage('adminAddress');
+
+    const functionName =
+        type === 'fixed' ? 'admin_add_fixed_coupon' : 'admin_add_percentage_coupon';
+
+    const command = `iota client ptb \
+        --move-call ${couponsPackageId}::rules::new_empty_rules \
+        --assign empty_rules \
+        --move-call ${couponsPackageId}::coupon_house::${functionName} \
+            @${adminCapId} \
+            @${iotaNamesObjectId} \
+            '"${couponCodeHash}"' \
+            ${value.toString()} \
+            empty_rules \
+        --gas-budget 50000000 \
+        --sender @${adminAddress}`;
+
+    console.log(`Creating ${type} coupon "${code}" with hash ${couponCodeHash}...`);
+
+    try {
+        const output = execSync(command, { encoding: 'utf-8' });
+        console.log(`Created ${type} coupon "${code}" successfully`);
+        return output;
+    } catch (error) {
+        console.error(`Failed to create coupon "${code}":`, error);
+        throw error;
+    }
+}
+
+export async function checkAddressBalanceWithRetries(address: string): Promise<void> {
+    for (let attempt = 1; attempt <= 5; attempt++) {
+        let totalBalance: string | null = null;
+
+        try {
+            const balanceResponse = await iotaClientGraphQl.getBalance({ owner: address });
+            totalBalance = balanceResponse.totalBalance;
+        } catch (error) {
+            console.error(`Error checking balance for address ${address}:`, error);
+        }
+
+        if (totalBalance && !totalBalance.startsWith('0')) {
+            console.log(`Address ${address} has balance: ${totalBalance} IOTA`);
+            break;
+        }
+
+        console.log(
+            `Attempt ${attempt}: Address ${address} balance is zero. Retrying in 2 seconds...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+    }
 }

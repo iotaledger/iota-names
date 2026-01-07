@@ -39,7 +39,7 @@ export function useRefreshAuctions(auctions: AuctionDetails[]) {
                 await Promise.all(invalidatePromises);
             }
 
-            toast.success('Refreshed successfully!');
+            toast.success('Refreshed successfully');
         } catch (error) {
             toast.error('Failed to refresh data');
         } finally {

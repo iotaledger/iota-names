@@ -142,9 +142,15 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
+            const currentExpiration = nameRecord?.nameRecord?.expirationDate
+                ? new Date(nameRecord.nameRecord.expirationDate)
+                : new Date();
+            currentExpiration.setFullYear(currentExpiration.getFullYear() + (renewYears || 0));
+            const expirationTime = currentExpiration.getTime();
+
             ampli.renewedName({
                 name,
-                expiration: renewYears || 0, // tbd replace with more meaningful name renewYears
+                expirationTime,
                 renewYears: renewYears || 0,
             });
             toast.success('Name renewed successfully');
