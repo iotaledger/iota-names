@@ -742,7 +742,9 @@ test.describe.serial('Name Management Tests', () => {
         await page.bringToFront();
 
         await expect(
-            page.getByText(`@${name} is now publicly visible.`, { exact: false }),
+            page.getByText(`@${normalizeIotaName(name, 'at')} is now publicly visible.`, {
+                exact: false,
+            }),
         ).toBeVisible({
             timeout: 30_000,
         });
