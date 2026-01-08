@@ -7,6 +7,7 @@ import { Close } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -30,8 +31,11 @@ import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog'
 
 import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from '../NamePurchaseCard';
+import { NameAvailabilityStatus, NamePurchaseCard } from '../name-purchase-card';
 import { SearchStylized } from '../search-component/SearchStylized';
+
+const NAME_REQUEST_FORM_URL =
+    'https://docs.google.com/forms/d/e/1FAIpQLSc4LDyCu7QbKDrE1CPfINLO9QSrOsPcZW8sPP-4Zt73N-3fUg/viewform';
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
@@ -228,28 +232,36 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                     ) : isNameTaken && name ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
+                            status={NameAvailabilityStatus.Unavailable}
                             statusMessage="Name is already taken."
                             testId="unavailable-purchase-card"
                         />
                     ) : isForbiddenName(name, blockedList) ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
-                            disableHoverEffect
+                            status={NameAvailabilityStatus.Unavailable}
+                            disableStatusHoverEffect
                             statusMessage="Name is blocked and cannot be purchased."
                         />
                     ) : isForbiddenName(name, reservedList) ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
-                            disableHoverEffect
-                            statusMessage="Name is reserved and cannot be purchased."
-                        />
+                            disableStatusHoverEffect
+                            status={NameAvailabilityStatus.Reserved}
+                            statusMessage="Submit a request to claim."
+                        >
+                            <Link
+                                href={NAME_REQUEST_FORM_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button type={ButtonType.Primary} text="Claim" />
+                            </Link>
+                        </NamePurchaseCard>
                     ) : nameRecordData?.type === 'not-priced' ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
+                            status={NameAvailabilityStatus.Unavailable}
                             statusMessage="Name is not available."
                         />
                     ) : (
@@ -312,7 +324,11 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
         <>
             <NamePurchaseCard
                 name={name}
-                isAvailable={isAllowedToBid}
+                status={
+                    isAllowedToBid
+                        ? NameAvailabilityStatus.Available
+                        : NameAvailabilityStatus.Unavailable
+                }
                 price={formattedBidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
@@ -373,7 +389,7 @@ function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) 
             {isAvailable && (
                 <NamePurchaseCard
                     name={name}
-                    isAvailable={true}
+                    status={NameAvailabilityStatus.Available}
                     price={formattedPurchasePrice}
                     priceSupportingText="Price"
                     testId="purchase-name-card"
