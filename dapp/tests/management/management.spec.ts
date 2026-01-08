@@ -705,7 +705,6 @@ test.describe.serial('Name Management Tests', () => {
     });
 
     test('Set Public Name', async ({ appPage: page, context, sharedState }) => {
-        test.setTimeout(120_000);
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('default');
         const responsePurchase = await purchaseName(name, keypair);
