@@ -741,7 +741,9 @@ test.describe.serial('Name Management Tests', () => {
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
 
-        await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
+        await expect(
+            page.getByText(`@${name} is now publicly visible.`, { exact: false }),
+        ).toBeVisible({
             timeout: 30_000,
         });
         await dialog.getByRole('button', { name: 'Finish' }).click();
