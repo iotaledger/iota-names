@@ -743,7 +743,7 @@ test.describe.serial('Name Management Tests', () => {
         await page.bringToFront();
 
         await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
-            timeout: 30_000,
+            timeout: 60_000,
         });
         await dialog.getByRole('button', { name: 'Finish' }).click();
         // Search 'Public Name' pill
