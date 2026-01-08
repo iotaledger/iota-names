@@ -1,8 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashSet;
-use std::str::FromStr;
+use std::{collections::HashSet, str::FromStr};
 
 use iota_names::config::IotaNamesConfig;
 use iota_protocol_config::Chain;
@@ -59,10 +58,9 @@ impl IotaNamesExtendedConfig {
     pub fn from_env() -> anyhow::Result<Self> {
         let iota_names_config = IotaNamesConfig::from_env()?;
 
-        let event_package_ids: Vec<IotaAddress> = serde_json::from_str(
+        let event_package_ids: HashSet<IotaAddress> = serde_json::from_str(
             &std::env::var("EVENT_PACKAGE_IDS").unwrap_or_else(|_| "[]".to_string()),
         )?;
-        let event_package_ids: HashSet<IotaAddress> = event_package_ids.into_iter().collect();
 
         Ok(Self::new(
             std::env::var("IOTA_NAMES_AUCTION_PACKAGE_ADDRESS")?.parse()?,

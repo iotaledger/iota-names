@@ -90,5 +90,5 @@ outputLines.push(formatEnvVar('EVENT_PACKAGE_IDS', JSON.stringify(eventPackageId
 if (file) {
     fs.writeFileSync(file, outputLines.join('\n') + '\n');
 } else {
-    outputLines.forEach(line => console.log(line));
+    outputLines.forEach((line) => console.log(line));
 }

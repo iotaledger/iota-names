@@ -12,6 +12,7 @@ Run the following commands also from the root directory.
 ### Set the environment variables
 
 ```bash
+# localnet
 cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env && cd ..
 # testnet
 cd scripts && pnpm run envsForIndexer testnet ../indexer/docker/.env && cd ..
