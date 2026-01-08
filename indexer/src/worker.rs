@@ -282,7 +282,11 @@ impl IotaNamesWorker {
             "Processing checkpoint: {}",
             checkpoint.checkpoint_summary.sequence_number
         );
-        if checkpoint.checkpoint_summary.sequence_number % 10_000 == 0 {
+        if checkpoint
+            .checkpoint_summary
+            .sequence_number
+            .is_multiple_of(10_000)
+        {
             debug!(
                 "Processing checkpoint: {}",
                 checkpoint.checkpoint_summary.sequence_number
