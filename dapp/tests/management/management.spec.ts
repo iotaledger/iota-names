@@ -705,6 +705,7 @@ test.describe.serial('Name Management Tests', () => {
     });
 
     test('Set Public Name', async ({ appPage: page, context, sharedState }) => {
+        test.setTimeout(120_000);
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
         const name = generateRandomName('default');
         const responsePurchase = await purchaseName(name, keypair);
@@ -743,7 +744,7 @@ test.describe.serial('Name Management Tests', () => {
         await page.bringToFront();
 
         await expect(page.getByText('Address linked successfully', { exact: false })).toBeVisible({
-            timeout: 60_000,
+            timeout: 30_000,
         });
         await dialog.getByRole('button', { name: 'Finish' }).click();
         // Search 'Public Name' pill
