@@ -7,7 +7,6 @@ use iota_names::config::IotaNamesConfig;
 use iota_protocol_config::Chain;
 use iota_types::base_types::{IotaAddress, ObjectID};
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
