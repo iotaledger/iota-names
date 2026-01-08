@@ -690,8 +690,8 @@ test.describe.serial('Name Management Tests', () => {
         await page.getByText('Connect to Address', { exact: true }).click();
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
-        const publicLabel = dialog.getByText('Use as your public name', { exact: true });
-        await expect(publicLabel).toBeVisible();
+        await expect(dialog.getByText('Use as your public name')).toBeVisible();
+
         const publicNameCheckbox = dialog.getByRole('checkbox');
         await expect(publicNameCheckbox).toBeChecked({ timeout: 10_000 });
         await publicNameCheckbox.click();
