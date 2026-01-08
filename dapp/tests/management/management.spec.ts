@@ -734,9 +734,7 @@ test.describe.serial('Name Management Tests', () => {
         const dialog = page.getByRole('dialog');
         await expect(dialog.getByText('Connect to Address')).toBeVisible();
 
-        await dialog.getByRole('button', { name: /use current address/i }).click();
         await expect(dialog.getByText('Use as your public name')).toBeVisible();
-
         await dialog.getByText('Use as your public name').click();
 
         await dialog.getByRole('button', { name: 'Apply' }).click();
