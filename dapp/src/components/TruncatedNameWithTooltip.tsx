@@ -1,26 +1,50 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { Copy } from '@iota/apps-ui-icons';
 import { Tooltip, TooltipPosition } from '@iota/apps-ui-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
+
+import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 
 interface TruncatedNameWithTooltipProps {
     name: string;
     tooltipPosition?: TooltipPosition;
+    valueToCopy?: string;
+    enableCopy?: boolean;
 }
 
 export function TruncatedNameWithTooltip({
     name,
     tooltipPosition = TooltipPosition.Bottom,
+    valueToCopy = name,
+    enableCopy = true,
 }: TruncatedNameWithTooltipProps) {
     const truncated = normalizeIotaName(name, 'at', { truncateLongParts: true });
     const full = normalizeIotaName(name, 'at', { truncateLongParts: false });
     const showTooltip = truncated !== full;
 
-    const content = <span>{truncated}</span>;
+    function handleCopy() {
+        if (enableCopy) {
+            copyToClipboard(valueToCopy);
+        }
+    }
+
+    const content = (
+        <span
+            onClick={handleCopy}
+            className="group inline-flex items-center gap-x-xs cursor-pointer"
+        >
+            <span className="truncate">{truncated}</span>
+
+            {enableCopy && (
+                <Copy className="w-4 h-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 text-names-neutral-92" />
+            )}
+        </span>
+    );
 
     return showTooltip ? (
-        <div className=" w-full [&>div]:break-words [&>div]:w-full">
+        <div className="w-full [&>div]:break-words [&>div]:w-full">
             <Tooltip text={full} position={tooltipPosition}>
                 {content}
             </Tooltip>
