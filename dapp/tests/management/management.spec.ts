@@ -749,7 +749,7 @@ test.describe.serial('Name Management Tests', () => {
         });
         await dialog.getByRole('button', { name: 'Finish' }).click();
         // Search 'Public Name' pill
-        await page.reload();
+        await page.getByTestId('refresh-button').click();
         const reloadedNameCard = page
             .getByTestId('name-card')
             .filter({ hasText: normalizeIotaName(name, 'at') });
