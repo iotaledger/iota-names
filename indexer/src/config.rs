@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
 use std::str::FromStr;
 
 use iota_names::config::IotaNamesConfig;
@@ -23,7 +24,7 @@ pub struct IotaNamesExtendedConfig {
     pub auction_house_id: ObjectID,
     /// List of package addresses for events. Not strictly defined to support
     /// new versions
-    pub event_package_ids: Vec<IotaAddress>,
+    pub event_package_ids: HashSet<IotaAddress>,
     pub iota_names_config: IotaNamesConfig,
 }
 
@@ -41,7 +42,7 @@ impl IotaNamesExtendedConfig {
         subnames_package_address: IotaAddress,
         subname_proxy_package_address: IotaAddress,
         auction_house_id: ObjectID,
-        event_package_ids: Vec<IotaAddress>,
+        event_package_ids: HashSet<IotaAddress>,
         iota_names_config: IotaNamesConfig,
     ) -> Self {
         Self {
@@ -61,6 +62,7 @@ impl IotaNamesExtendedConfig {
         let event_package_ids: Vec<IotaAddress> = serde_json::from_str(
             &std::env::var("EVENT_PACKAGE_IDS").unwrap_or_else(|_| "[]".to_string()),
         )?;
+        let event_package_ids: HashSet<IotaAddress> = event_package_ids.into_iter().collect();
 
         Ok(Self::new(
             std::env::var("IOTA_NAMES_AUCTION_PACKAGE_ADDRESS")?.parse()?,
@@ -104,14 +106,23 @@ impl IotaNamesExtendedConfig {
             IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
+        let iota_names_config = IotaNamesConfig::testnet();
+        let mut event_package_ids = HashSet::new();
+        event_package_ids.insert(auction_package_address);
+        event_package_ids.insert(coupons_package_address);
+        event_package_ids.insert(subnames_package_address);
+        event_package_ids.insert(subname_proxy_package_address);
+        event_package_ids.insert(iota_names_config.package_address);
+        event_package_ids.insert(iota_names_config.payments_package_address);
+
         Self::new(
             auction_package_address,
             coupons_package_address,
             subnames_package_address,
             subname_proxy_package_address,
             auction_house_id,
-            vec![],
-            IotaNamesConfig::testnet(),
+            event_package_ids,
+            iota_names_config,
         )
     }
 
@@ -135,14 +146,23 @@ impl IotaNamesExtendedConfig {
             IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
+        let iota_names_config = IotaNamesConfig::devnet();
+        let mut event_package_ids = HashSet::new();
+        event_package_ids.insert(auction_package_address);
+        event_package_ids.insert(coupons_package_address);
+        event_package_ids.insert(subnames_package_address);
+        event_package_ids.insert(subname_proxy_package_address);
+        event_package_ids.insert(iota_names_config.package_address);
+        event_package_ids.insert(iota_names_config.payments_package_address);
+
         Self::new(
             auction_package_address,
             coupons_package_address,
             subnames_package_address,
             subname_proxy_package_address,
             auction_house_id,
-            vec![],
-            IotaNamesConfig::devnet(),
+            event_package_ids,
+            iota_names_config,
         )
     }
 
@@ -150,12 +170,6 @@ impl IotaNamesExtendedConfig {
     pub fn is_iota_names_package(&self, package_address: impl Into<IotaAddress>) -> bool {
         let package_address = package_address.into();
 
-        package_address == self.auction_package_address
-            || package_address == self.coupons_package_address
-            || package_address == self.iota_names_config.package_address
-            || package_address == self.iota_names_config.payments_package_address
-            || package_address == self.subnames_package_address
-            || package_address == self.subname_proxy_package_address
-            || self.event_package_ids.contains(&package_address)
+        self.event_package_ids.contains(&package_address)
     }
 }

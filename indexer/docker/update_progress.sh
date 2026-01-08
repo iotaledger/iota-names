@@ -28,8 +28,6 @@ echo "Copying updated file to volume..."
 sudo cp /tmp/progress_store /var/lib/docker/volumes/docker_indexer_progress/_data/progress_store
 
 echo "Restarting the container..."
-# docker-compose up -d
-# echo "Done. Indexer is running with progress set to $NEW_VALUE."
 
 docker-compose up
 
