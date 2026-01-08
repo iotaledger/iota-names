@@ -361,6 +361,7 @@ export async function setPublicName(name: string, signer: Signer) {
             showEffects: true,
         },
     });
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetPublic.digest });
     console.log(`Set name: ${name} as public name for address: ${address}`);
     return responseSetPublic;
 }

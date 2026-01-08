@@ -693,8 +693,10 @@ test.describe.serial('Name Management Tests', () => {
         await expect(dialog.getByText('Use as your public name')).toBeVisible();
 
         const publicNameCheckbox = dialog.getByRole('checkbox');
-        await expect(publicNameCheckbox).toBeChecked({ timeout: 10_000 });
+        await expect(publicNameCheckbox).toBeChecked({ checked: true, timeout: 10_000 });
         await publicNameCheckbox.click();
+        await expect(publicNameCheckbox).toBeChecked({ checked: false, timeout: 10_000 });
+
         await dialog.getByRole('button', { name: 'Apply' }).click();
 
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
