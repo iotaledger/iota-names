@@ -7,6 +7,7 @@ use iota_names::config::IotaNamesConfig;
 use iota_protocol_config::Chain;
 use iota_types::base_types::{IotaAddress, ObjectID};
 use serde::{Deserialize, Serialize};
+use serde_json;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
@@ -21,6 +22,9 @@ pub struct IotaNamesExtendedConfig {
     pub subname_proxy_package_address: IotaAddress,
     /// ID of the `AuctionHouse` object.
     pub auction_house_id: ObjectID,
+    /// List of package addresses for events. Not strictly defined to support
+    /// new versions
+    pub event_package_ids: Vec<IotaAddress>,
     pub iota_names_config: IotaNamesConfig,
 }
 
@@ -38,6 +42,7 @@ impl IotaNamesExtendedConfig {
         subnames_package_address: IotaAddress,
         subname_proxy_package_address: IotaAddress,
         auction_house_id: ObjectID,
+        event_package_ids: Vec<IotaAddress>,
         iota_names_config: IotaNamesConfig,
     ) -> Self {
         Self {
@@ -46,6 +51,7 @@ impl IotaNamesExtendedConfig {
             subnames_package_address,
             subname_proxy_package_address,
             auction_house_id,
+            event_package_ids,
             iota_names_config,
         }
     }
@@ -53,12 +59,17 @@ impl IotaNamesExtendedConfig {
     pub fn from_env() -> anyhow::Result<Self> {
         let iota_names_config = IotaNamesConfig::from_env()?;
 
+        let event_package_ids: Vec<IotaAddress> = serde_json::from_str(
+            &std::env::var("EVENT_PACKAGE_IDS").unwrap_or_else(|_| "[]".to_string()),
+        )?;
+
         Ok(Self::new(
             std::env::var("IOTA_NAMES_AUCTION_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_COUPONS_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS")?.parse()?,
             std::env::var("IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID")?.parse()?,
+            event_package_ids,
             iota_names_config,
         ))
     }
@@ -100,6 +111,7 @@ impl IotaNamesExtendedConfig {
             subnames_package_address,
             subname_proxy_package_address,
             auction_house_id,
+            vec![],
             IotaNamesConfig::testnet(),
         )
     }
@@ -130,6 +142,7 @@ impl IotaNamesExtendedConfig {
             subnames_package_address,
             subname_proxy_package_address,
             auction_house_id,
+            vec![],
             IotaNamesConfig::devnet(),
         )
     }
@@ -144,5 +157,6 @@ impl IotaNamesExtendedConfig {
             || package_address == self.iota_names_config.payments_package_address
             || package_address == self.subnames_package_address
             || package_address == self.subname_proxy_package_address
+            || self.event_package_ids.contains(&package_address)
     }
 }
