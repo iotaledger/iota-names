@@ -7,7 +7,7 @@ services:
       args:
         - GIT_REVISION
         - BUILD_DATE
-        - PROFILE=dev
+        - PROFILE=release
     image: iota-names-indexer:dev
     ports:
       - "9189:9189/tcp" # Metrics
@@ -43,13 +43,17 @@ services:
     command:
       - "start"
       - "--prometheus-url=http://prometheus:9090"
+      - "--num-workers=10"
       # Localnet values:
       # - "--node-url=http://host.docker.internal:9000"
       # - "--checkpoint-url=http://host.docker.internal:9000"
       # Devnet values:
       - "--node-url=https://api.devnet.iota.cafe"
       - "--checkpoint-url=https://checkpoints.devnet.iota.cafe"
-      # "--reset-metrics"
+      # Testnet values:
+      # - "--node-url=https://api.testnet.iota.cafe"
+      # - "--checkpoint-url=https://checkpoints.testnet.iota.cafe"
+      # - "--reset-metrics"
 
   prometheus:
     image: prom/prometheus:latest
