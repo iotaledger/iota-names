@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::IotaNamesExtendedConfig;
 
+#[derive(Debug)]
 pub(crate) enum IotaNamesEvent {
     // `auctions`
     AuctionStarted(AuctionStartedEvent),
@@ -36,7 +37,7 @@ impl IotaNamesEvent {
         event: &Event,
         config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        if !config.is_iota_names_package(event.package_id) {
+        if !config.is_iota_names_package(event.type_.address) {
             return Ok(None);
         }
 
@@ -77,7 +78,7 @@ impl IotaNamesEvent {
 
 // `auctions`
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuctionStartedEvent {
     pub name: Name,
     pub start_timestamp_ms: u64,
@@ -86,20 +87,20 @@ pub(crate) struct AuctionStartedEvent {
     pub bidder: IotaAddress,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuctionBidEvent {
     pub name: Name,
     pub bid: u64,
     pub bidder: IotaAddress,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuctionExtendedEvent {
     pub name: Name,
     pub end_timestamp_ms: u64,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuctionFinalizedEvent {
     pub name: Name,
     pub start_timestamp_ms: u64,
@@ -110,14 +111,14 @@ pub(crate) struct AuctionFinalizedEvent {
 
 // `coupons`
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum CouponKind {
     Percentage = 0,
     Fixed = 1,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CouponAppliedEvent {
     pub kind: CouponKind,
     pub discount: u64,
@@ -125,48 +126,48 @@ pub struct CouponAppliedEvent {
 
 // `iota-names`
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct NameRecordAddedEvent {
     pub name: Name,
     pub name_record: NameRecord,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct NameRecordRemovedEvent {
     pub name: Name,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct TargetAddressSetEvent {
     pub name: Name,
     pub target_address: Option<IotaAddress>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ReverseLookupSetEvent {
     pub default_address: IotaAddress,
     pub default_name: Name,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ReverseLookupUnsetEvent {
     pub default_address: IotaAddress,
     pub default_name: Name,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct UserDataSetEvent {
     pub key: String,
     pub value: String,
     pub new: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct UserDataUnsetEvent {
     pub key: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct TransactionEvent {
     pub app: String,
     pub name: Name,
@@ -181,7 +182,7 @@ pub(crate) struct TransactionEvent {
 
 // `subnames`
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NodeSubnameCreatedEvent {
     pub name: Name,
     pub expiration_timestamp_ms: u64,
@@ -189,18 +190,18 @@ pub struct NodeSubnameCreatedEvent {
     pub allow_time_extension: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NodeSubnameBurnedEvent {
     pub name: Name,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LeafSubnameCreatedEvent {
     pub name: Name,
     pub target: IotaAddress,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LeafSubnameRemovedEvent {
     pub name: Name,
 }
