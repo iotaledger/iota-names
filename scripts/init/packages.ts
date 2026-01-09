@@ -104,7 +104,7 @@ export const Packages = (network: string) => {
                             [5, 63],
                         ],
                         prices: [
-                            500 * Number(NANOS_PER_IOTA),
+                            1500 * Number(NANOS_PER_IOTA),
                             250 * Number(NANOS_PER_IOTA),
                             50 * Number(NANOS_PER_IOTA),
                         ],
@@ -126,7 +126,7 @@ export const Packages = (network: string) => {
                             [5, 63],
                         ],
                         prices: [
-                            500 * Number(NANOS_PER_IOTA),
+                            1500 * Number(NANOS_PER_IOTA),
                             250 * Number(NANOS_PER_IOTA),
                             50 * Number(NANOS_PER_IOTA),
                         ],
