@@ -1,9 +1,6 @@
 services:
   iota-names-indexer:
     container_name: iota-names-indexer
-    depends_on:
-      prometheus:
-        condition: service_started
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -40,6 +37,7 @@ services:
       - IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS=${IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS}
       - IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS=${IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS}
       - IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID=${IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID}
+      - EVENT_PACKAGE_IDS=${EVENT_PACKAGE_IDS}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command:

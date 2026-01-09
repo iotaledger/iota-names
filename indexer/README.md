@@ -12,7 +12,10 @@ Run the following commands also from the root directory.
 ### Set the environment variables
 
 ```bash
-cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd ..
+# localnet
+cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env && cd ..
+# testnet
+cd scripts && pnpm run envsForIndexer testnet ../indexer/docker/.env && cd ..
 ```
 
 ### Build the indexer image

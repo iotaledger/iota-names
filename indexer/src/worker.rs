@@ -32,7 +32,7 @@ use move_core_types::{
 };
 use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
-use tracing::{debug, info, warn};
+use tracing::{debug, info, trace, warn};
 
 use crate::{
     IotaNamesMetrics,
@@ -277,10 +277,20 @@ impl IotaNamesWorker {
     }
 
     async fn process_checkpoint(&self, checkpoint: &CheckpointData) -> anyhow::Result<()> {
-        debug!(
+        trace!(
             "Processing checkpoint: {}",
             checkpoint.checkpoint_summary.sequence_number
         );
+        if checkpoint
+            .checkpoint_summary
+            .sequence_number
+            .is_multiple_of(10_000)
+        {
+            debug!(
+                "Processing checkpoint: {}",
+                checkpoint.checkpoint_summary.sequence_number
+            );
+        }
 
         let mut iota_names_balance = false;
         let mut auction_house_balance = false;
@@ -311,7 +321,14 @@ impl IotaNamesWorker {
             if let Some(events) = &transaction.events {
                 for event in events.data.iter() {
                     match IotaNamesEvent::try_from_event(event, &self.extended_config) {
-                        Ok(Some(event)) => self.process_event(event)?,
+                        Ok(Some(event)) => {
+                            debug!(
+                                "Processing event in checkpoint {}: {event:?}",
+                                checkpoint.checkpoint_summary.sequence_number
+                            );
+
+                            self.process_event(event)?
+                        }
                         Err(e) => warn!("parsing event failed: {e}"),
                         _ => {}
                     }
