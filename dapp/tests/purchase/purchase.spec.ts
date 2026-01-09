@@ -94,8 +94,11 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByPlaceholder('Check name availability').fill(denormalizedName);
 
         const namePurchaseCard = page.getByTestId('unavailable-purchase-card');
-        await expect(namePurchaseCard).toContainText('@' + denormalizedName);
-        await expect(namePurchaseCard).toContainText('Unavailable');
-        await expect(namePurchaseCard).toContainText('Name is already taken.');
+        const nameFromCard = namePurchaseCard.getByTestId('name-purchase-card-name');
+        await expect(nameFromCard).toContainText('@' + denormalizedName);
+        const nameStatus = namePurchaseCard.getByTestId('name-purchase-card-status');
+        await expect(nameStatus).toContainText('Unavailable');
+        const nameMessage = namePurchaseCard.getByTestId('name-purchase-card-status-message');
+        await expect(nameMessage).toContainText('Name is already taken.');
     });
 });

@@ -55,7 +55,10 @@ export function NamePurchaseCard({
                     bgCard,
                 )}
             >
-                <div className="flex text-headline-sm sm:text-headline-md gap-xxs">
+                <div
+                    className="flex text-headline-sm sm:text-headline-md gap-xxs"
+                    data-testid="name-purchase-card-name"
+                >
                     <span className="text-names-neutral-50">@</span>
                     <h2 className={clsx('truncate w-full overflow-hidden', textColorStatus)}>
                         {nameWithOutAt}
@@ -63,11 +66,15 @@ export function NamePurchaseCard({
                 </div>
                 <div className="flex justify-between space-x-4 h-auto w-full">
                     <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
-                        <div className={clsx('text-body-md capitalize', textColorStatus)}>
+                        <div
+                            className={clsx('text-body-md capitalize', textColorStatus)}
+                            data-testid="name-purchase-card-status"
+                        >
                             {status}
                         </div>
                         {statusMessage && (
                             <p
+                                data-testid="name-purchase-card-status-message"
                                 className={clsx(
                                     'text-names-neutral-70 transition-opacity duration-100',
                                     isAvailable
