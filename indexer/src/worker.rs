@@ -311,8 +311,6 @@ impl IotaNamesWorker {
             }
         }
 
-        let mut event_checkpoint_logged = false;
-
         for transaction in &checkpoint.transactions {
             let TransactionEffects::V1(effects) = &transaction.effects;
 
@@ -324,14 +322,11 @@ impl IotaNamesWorker {
                 for event in events.data.iter() {
                     match IotaNamesEvent::try_from_event(event, &self.extended_config) {
                         Ok(Some(event)) => {
-                            if !event_checkpoint_logged {
-                                debug!(
-                                    "Event in checkpoint: {}",
-                                    checkpoint.checkpoint_summary.sequence_number
-                                );
-                                event_checkpoint_logged = true;
-                            }
-                            debug!("Processing event: {event:?}");
+                            debug!(
+                                "Processing event in checkpoint {}: {event:?}",
+                                checkpoint.checkpoint_summary.sequence_number
+                            );
+
                             self.process_event(event)?
                         }
                         Err(e) => warn!("parsing event failed: {e}"),

@@ -105,13 +105,14 @@ impl IotaNamesExtendedConfig {
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
         let iota_names_config = IotaNamesConfig::testnet();
-        let mut event_package_ids = HashSet::new();
-        event_package_ids.insert(auction_package_address);
-        event_package_ids.insert(coupons_package_address);
-        event_package_ids.insert(subnames_package_address);
-        event_package_ids.insert(subname_proxy_package_address);
-        event_package_ids.insert(iota_names_config.package_address);
-        event_package_ids.insert(iota_names_config.payments_package_address);
+        let event_package_ids = HashSet::from([
+            auction_package_address,
+            coupons_package_address,
+            subnames_package_address,
+            subname_proxy_package_address,
+            iota_names_config.package_address,
+            iota_names_config.payments_package_address,
+        ]);
 
         Self::new(
             auction_package_address,
@@ -145,13 +146,14 @@ impl IotaNamesExtendedConfig {
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
         let iota_names_config = IotaNamesConfig::devnet();
-        let mut event_package_ids = HashSet::new();
-        event_package_ids.insert(auction_package_address);
-        event_package_ids.insert(coupons_package_address);
-        event_package_ids.insert(subnames_package_address);
-        event_package_ids.insert(subname_proxy_package_address);
-        event_package_ids.insert(iota_names_config.package_address);
-        event_package_ids.insert(iota_names_config.payments_package_address);
+        let event_package_ids = HashSet::from([
+            auction_package_address,
+            coupons_package_address,
+            subnames_package_address,
+            subname_proxy_package_address,
+            iota_names_config.package_address,
+            iota_names_config.payments_package_address,
+        ]);
 
         Self::new(
             auction_package_address,
