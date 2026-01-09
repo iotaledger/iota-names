@@ -213,7 +213,7 @@ jobs:
 
           cd ..
           INDEXER_ENV_FILE="$(mktemp)"
-          pnpm --dir=scripts ts-node utils/envs.ts localnet bash | sed 's/^export //' > "$INDEXER_ENV_FILE"
+          cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env && cd ..
 
           docker pull ghcr.io/iotaledger/iota-names/iota-names-indexer:latest
           docker rm -f localnet-iota-names-indexer || true
