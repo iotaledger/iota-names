@@ -22,7 +22,7 @@ pub struct IotaNamesExtendedConfig {
     /// ID of the `AuctionHouse` object.
     pub auction_house_id: ObjectID,
     /// List of package addresses for events. Not strictly defined to support
-    /// new versions
+    /// new versions.
     pub event_package_ids: HashSet<IotaAddress>,
     pub iota_names_config: IotaNamesConfig,
 }
