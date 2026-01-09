@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export enum NameAvailabilityStatus {
-    Available = 'available',
-    Unavailable = 'unavailable',
-    Reserved = 'reserved',
+    Available = 'Available',
+    Unavailable = 'Unavailable',
+    Reserved = 'Reserved',
 }
