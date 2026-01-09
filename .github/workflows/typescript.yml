@@ -213,7 +213,7 @@ jobs:
 
           cd ..
           INDEXER_ENV_FILE="$(mktemp)"
-          cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env && cd ..
+          cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env bash "$INDEXER_ENV_FILE"&& cd ..
 
           docker pull ghcr.io/iotaledger/iota-names/iota-names-indexer:latest
           docker rm -f localnet-iota-names-indexer || true
