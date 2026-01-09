@@ -1,16 +1,13 @@
 services:
   iota-names-indexer:
     container_name: iota-names-indexer
-    depends_on:
-      prometheus:
-        condition: service_started
     build:
       context: ..
       dockerfile: docker/Dockerfile
       args:
         - GIT_REVISION
         - BUILD_DATE
-        - PROFILE=dev
+        - PROFILE=release
     image: iota-names-indexer:dev
     ports:
       - "9189:9189/tcp" # Metrics
@@ -40,18 +37,23 @@ services:
       - IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS=${IOTA_NAMES_SUBNAMES_PACKAGE_ADDRESS}
       - IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS=${IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS}
       - IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID=${IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID}
+      - EVENT_PACKAGE_IDS=${EVENT_PACKAGE_IDS}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command:
       - "start"
       - "--prometheus-url=http://prometheus:9090"
+      - "--num-workers=10"
       # Localnet values:
       # - "--node-url=http://host.docker.internal:9000"
       # - "--checkpoint-url=http://host.docker.internal:9000"
       # Devnet values:
       - "--node-url=https://api.devnet.iota.cafe"
       - "--checkpoint-url=https://checkpoints.devnet.iota.cafe"
-      # "--reset-metrics"
+      # Testnet values:
+      # - "--node-url=https://api.testnet.iota.cafe"
+      # - "--checkpoint-url=https://checkpoints.testnet.iota.cafe"
+      # - "--reset-metrics"
 
   prometheus:
     image: prom/prometheus:latest
