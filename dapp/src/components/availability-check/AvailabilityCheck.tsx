@@ -42,7 +42,7 @@ interface RecentSearch {
 }
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
-const DEBOUNCE_DELAY = 500;
+const DEBOUNCE_DELAY = 750;
 
 export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const pathname = usePathname();
