@@ -32,7 +32,11 @@ export function Navbar() {
     const ROUTES = isConnected ? [...PROTECTED_ROUTES, ...PUBLIC_ROUTES] : PUBLIC_ROUTES;
 
     return (
-        <nav id="top-navbar" className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg">
+        <nav
+            id="top-navbar"
+            data-testid="top-navbar"
+            className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg"
+        >
             <div className="px-lg py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
                     <div className="flex flex-row gap-x-lg items-center">
