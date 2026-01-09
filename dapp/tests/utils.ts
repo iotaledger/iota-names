@@ -344,10 +344,15 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     return responseSetAvatar;
 }
 
-export async function setPublicName(name: string, signer: Signer) {
+export async function connectAndSetPublicName(name: string, nft: string, signer: Signer) {
     const address = signer.toIotaAddress();
     const tx = new Transaction();
     const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
     iotaNamesTx.setPublic(name);
     iotaNamesTx.transaction.setSender(address);
     const txBytes = await iotaNamesTx.transaction.build({

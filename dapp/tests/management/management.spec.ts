@@ -12,6 +12,7 @@ import { expect, test } from '../helpers/fixtures';
 import { iotaNamesClient } from '../setup/utils';
 import {
     addSubnameName,
+    connectAndSetPublicName,
     connectName,
     connectWallet,
     createCoupon,
@@ -26,7 +27,6 @@ import {
     renewName,
     requestFaucetTokens,
     setAvatar,
-    setPublicName,
 } from '../utils';
 
 test.describe.serial('Name Management Tests', () => {
@@ -669,9 +669,7 @@ test.describe.serial('Name Management Tests', () => {
         const record = await iotaNamesClient.getNameRecord(name);
         if (!record) throw new Error('Name record not found');
 
-        const responseConnect = await connectName(name, record.nftId, keypair);
-        expect(responseConnect.effects?.status.status).toBe('success');
-        const responseSetPublic = await setPublicName(name, keypair);
+        const responseSetPublic = await connectAndSetPublicName(name, record.nftId, keypair);
         expect(responseSetPublic.effects?.status.status).toBe('success');
 
         await page.goto('/my-names');
