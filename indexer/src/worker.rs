@@ -141,7 +141,6 @@ impl IotaNamesWorker {
     }
 
     fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
-        debug!("Processing event: {event:?}");
         match event {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
@@ -312,6 +311,8 @@ impl IotaNamesWorker {
             }
         }
 
+        let mut event_checkpoint_logged = false;
+
         for transaction in &checkpoint.transactions {
             let TransactionEffects::V1(effects) = &transaction.effects;
 
@@ -323,10 +324,14 @@ impl IotaNamesWorker {
                 for event in events.data.iter() {
                     match IotaNamesEvent::try_from_event(event, &self.extended_config) {
                         Ok(Some(event)) => {
-                            debug!(
-                                "Event in checkpoint: {}",
-                                checkpoint.checkpoint_summary.sequence_number
-                            );
+                            if !event_checkpoint_logged {
+                                debug!(
+                                    "Event in checkpoint: {}",
+                                    checkpoint.checkpoint_summary.sequence_number
+                                );
+                                event_checkpoint_logged = true;
+                            }
+                            debug!("Processing event: {event:?}");
                             self.process_event(event)?
                         }
                         Err(e) => warn!("parsing event failed: {e}"),
