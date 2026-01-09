@@ -17,7 +17,8 @@
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
-        "envs": "ts-node utils/envs.ts"
+        "envs": "ts-node utils/envs.ts",
+        "envsForIndexer": "ts-node utils/envsForIndexer.ts"
     },
     "keywords": [],
     "author": "",

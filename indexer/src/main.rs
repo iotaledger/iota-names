@@ -143,6 +143,9 @@ impl Command {
                         IotaNamesExtendedConfig::from_chain(&chain)
                     }
                 };
+                if iota_names_config.event_package_ids.is_empty() {
+                    panic!("No EVENT_PACKAGE_IDS provided in the environment variables");
+                }
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
