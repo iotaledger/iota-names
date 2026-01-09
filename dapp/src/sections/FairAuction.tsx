@@ -51,7 +51,7 @@ export function FairAuction() {
                         </div>
                     </div>
                     <CircleGradient position="top-left" />
-                    <div className="flex flex-col md:flex-row gap-6 md:gap-[72px] items-center md:items-start z-[1] relative">
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-[72px] items-center md:items-start relative">
                         <div className="flex flex-col justify-center gap-xl md:gap-2xl flex-1">
                             <div className="flex flex-col gap-xs">
                                 <h2 className="text-headline-lg text-names-primary-100">
