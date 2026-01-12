@@ -69,7 +69,7 @@ export function NamePurchaseCard({
                         {nameWithOutAt}
                     </h2>
                 </div>
-                <div className="flex justify-between space-x-4 h-auto w-full">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 h-auto w-full">
                     <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
                         <div
                             className={clsx('text-body-md capitalize', textColorStatus)}
@@ -93,7 +93,7 @@ export function NamePurchaseCard({
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-row gap-md">
+                    <div className="flex flex-wrap flex-row gap-xs sm:gap-md">
                         {priceNanos && (
                             <div className="flex flex-col items-start">
                                 <div className="flex items-baseline gap-md">
@@ -116,7 +116,7 @@ export function NamePurchaseCard({
                                 )}
                             </div>
                         )}
-                        <div className="flex w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
+                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
                             {children}
                         </div>
                     </div>
