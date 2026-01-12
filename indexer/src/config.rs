@@ -100,7 +100,7 @@ impl IotaNamesExtendedConfig {
             IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
         let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
 
-        let iota_names_config = IotaNamesConfig::testnet();
+        let iota_names_config = IotaNamesConfig::mainnet();
         let event_package_ids = HashSet::from([
             auction_package_address,
             coupons_package_address,
