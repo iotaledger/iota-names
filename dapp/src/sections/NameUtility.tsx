@@ -1,6 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import simplifiedTransactions from '@/animations/landing/simplified-safer-trans_optimized.json';
+import unlimitedSubnames from '@/animations/landing/unlimited-subnames_optimized.json';
 import { CircleGradient } from '@/components/CircleGradient';
 import { ImageCard, ImageCardSize } from '@/components/ImageCard';
 
@@ -8,12 +10,12 @@ const WHY_IOTA_NAMES = [
     {
         title: 'Simplified, Safer Transactions',
         body: 'Replace long, error-prone hashes with names people can recognize and remember',
-        image: '/landing-page/simplified-safer.png',
+        lottie: simplifiedTransactions,
     },
     {
         title: 'Unlimited Subnames, Infinite Utility',
         body: 'Unlimited subnames let you set up custom tags like wallet@yourname or dev@yourname - ideal for services, roles, or communities',
-        image: '/landing-page/unlimited-subnames.png',
+        lottie: unlimitedSubnames,
     },
 ];
 

@@ -3,6 +3,8 @@
 
 import clsx from 'clsx';
 
+import { LottieAnimation } from './loaders/Lottie';
+
 export enum ImageCardSize {
     Large = 'large',
     Small = 'small',
@@ -13,12 +15,14 @@ interface ImageCardprops {
     image?: string;
     alt?: string;
     size?: ImageCardSize;
+    lottie?: React.ComponentProps<typeof LottieAnimation>['animationData'];
 }
 export function ImageCard({
     title,
     body,
     image,
     alt,
+    lottie,
     size = ImageCardSize.Small,
 }: ImageCardprops): JSX.Element {
     const isLarge = size === ImageCardSize.Large;
@@ -26,11 +30,15 @@ export function ImageCard({
     const isCentered = isLarge ? 'text-center' : 'text-start';
     return (
         <div className="w-full flex flex-col items-center overflow-hidden rounded-3xl bg-names-neutral-6">
-            <img
-                src={image}
-                alt={alt || image}
-                className="w-full h-auto object-cover aspect-video"
-            />
+            {lottie ? (
+                <LottieAnimation animationData={lottie} />
+            ) : (
+                <img
+                    src={image}
+                    alt={alt || image}
+                    className="w-full h-auto object-cover aspect-video"
+                />
+            )}
 
             <div
                 className={clsx(
