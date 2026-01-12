@@ -3,7 +3,8 @@
 	"scripts": {
 		"dev": "next",
 		"build": "next build",
-		"start": "next start"
+		"start": "next start",
+		"clean": "rm -rf .next"
 	},
 	"dependencies": {
 		"autoprefixer": "^10.4.19",
