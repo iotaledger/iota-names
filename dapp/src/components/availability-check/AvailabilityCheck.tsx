@@ -26,7 +26,6 @@ import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { ConnectButton } from '../buttons/ConnectButton';
@@ -307,9 +306,6 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
     // If there is no auction yet, then we use the purchase price as minimum
     const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
-    const formattedBidPrice = bidPrice
-        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
-        : undefined;
 
     return (
         <>
@@ -320,7 +316,7 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                         ? NameAvailabilityStatus.Available
                         : NameAvailabilityStatus.Unavailable
                 }
-                price={formattedBidPrice}
+                priceNanos={bidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
                 testId="auction-card"
@@ -369,11 +365,6 @@ function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) 
     }
 
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
-    const formattedPurchasePrice = purchasePrice
-        ? formatNanosToIota(purchasePrice, {
-              showIotaSymbol: false,
-          })
-        : undefined;
 
     return (
         <>
@@ -381,7 +372,7 @@ function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) 
                 <NamePurchaseCard
                     name={name}
                     status={NameAvailabilityStatus.Available}
-                    price={formattedPurchasePrice}
+                    priceNanos={purchasePrice}
                     priceSupportingText="Price"
                     testId="purchase-name-card"
                 >
