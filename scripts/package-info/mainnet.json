@@ -1,34 +1,34 @@
 {
-  "adminAddress": "0xe0f49be393bfebfa72940c1b2ee0dba53c2a003cea0380b352b06fa925903ecc",
-  "adminCap": "0xdb6122602b71b04995feff7017553e0958d04daeba77bae66df407d8ae8d8611",
-  "auctionPackageId": {
-    "v1": "0x7f58de1c1a2664390d410382c8958098374baa0c6a937e2faac21ea783fe6824"
-  },
-  "auctionHouseObjectId": "0x3694c17bbcf60c916b2484a76e9a3f7289d214fd7a43b554dcdce0c2ffc04295",
-  "coins": {
-    "IOTA": {
-      "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
-      "metadataId": "0xd02db1bb647dfcc94f35b82a14e8bab07661be3e6d4b022bdc7ee63eed0728f8"
-    }
-  },
-  "iotaNamesObjectId": "0xa14e5d0481a7aa346157078e6facba3cd895d97038cd87b9f2cc24b0c6102d75",
-  "packageId": {
-    "v1": "0x6d2c743607ef275bd6934fe5c2a7e5179cca6fbd2049cfa79de2310b74f3cf83"
-  },
-  "paymentsPackageId": {
-    "v1": "0x53d3d37f00949a1baad95fa4fca0b3d0d70ff6121be316f9e46d37c2d29c71eb"
-  },
-  "publisherId": "0xf2a07cc3ee5dce4e3bab9bf63f39976ea6ac53eb3c5876b4ccecfb0d0376fd54",
-  "registryTableId": "0xa773cef7d762871354f6ae19ad174dfb1153d2d247c4886ada0b5330b9543b57",
-  "reverseRegistryTableId": "0x18fa62ab8b0ab95ae61088082bd5db796863016fda8f3205b1ea7d13b1792317",
-  "couponsPackageId": {
-    "v1": "0x6c16703f7b8fc1bfd90b0d412edf3dcc898787b51068eef28d7e38b454638f4e"
-  },
-  "subnamesPackageId": {
-    "v1": "0x772859a9d860acc1e49905cf3bd4bedd932cf2a172c3802714dbea5b2acc6420"
-  },
-  "tempSubnameProxyPackageId": {
-    "v1": "0x868e32df312bd642086e4745c1d05aaafc1a51d0e001a7be399e3894a6714b9f"
-  },
-  "upgradeCap": "0x1a1175e4214a62bc74d9d225116b8bd84557d08aec65b7a5ca7d522208c160ff"
+    "adminAddress": "0xe0f49be393bfebfa72940c1b2ee0dba53c2a003cea0380b352b06fa925903ecc",
+    "adminCap": "0xdb6122602b71b04995feff7017553e0958d04daeba77bae66df407d8ae8d8611",
+    "auctionPackageId": {
+        "v1": "0x7f58de1c1a2664390d410382c8958098374baa0c6a937e2faac21ea783fe6824"
+    },
+    "auctionHouseObjectId": "0x3694c17bbcf60c916b2484a76e9a3f7289d214fd7a43b554dcdce0c2ffc04295",
+    "coins": {
+        "IOTA": {
+            "type": "0x0000000000000000000000000000000000000000000000000000000000000002::iota::IOTA",
+            "metadataId": "0xd02db1bb647dfcc94f35b82a14e8bab07661be3e6d4b022bdc7ee63eed0728f8"
+        }
+    },
+    "iotaNamesObjectId": "0xa14e5d0481a7aa346157078e6facba3cd895d97038cd87b9f2cc24b0c6102d75",
+    "packageId": {
+        "v1": "0x6d2c743607ef275bd6934fe5c2a7e5179cca6fbd2049cfa79de2310b74f3cf83"
+    },
+    "paymentsPackageId": {
+        "v1": "0x53d3d37f00949a1baad95fa4fca0b3d0d70ff6121be316f9e46d37c2d29c71eb"
+    },
+    "publisherId": "0xf2a07cc3ee5dce4e3bab9bf63f39976ea6ac53eb3c5876b4ccecfb0d0376fd54",
+    "registryTableId": "0xa773cef7d762871354f6ae19ad174dfb1153d2d247c4886ada0b5330b9543b57",
+    "reverseRegistryTableId": "0x18fa62ab8b0ab95ae61088082bd5db796863016fda8f3205b1ea7d13b1792317",
+    "couponsPackageId": {
+        "v1": "0x6c16703f7b8fc1bfd90b0d412edf3dcc898787b51068eef28d7e38b454638f4e"
+    },
+    "subnamesPackageId": {
+        "v1": "0x772859a9d860acc1e49905cf3bd4bedd932cf2a172c3802714dbea5b2acc6420"
+    },
+    "tempSubnameProxyPackageId": {
+        "v1": "0x868e32df312bd642086e4745c1d05aaafc1a51d0e001a7be399e3894a6714b9f"
+    },
+    "upgradeCap": "0x1a1175e4214a62bc74d9d225116b8bd84557d08aec65b7a5ca7d522208c160ff"
 }
