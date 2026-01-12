@@ -1,23 +1,26 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import establish from '@/animations/landing/establish-your-present_optimized.json';
+import oneName from '@/animations/landing/one-name-everywhere_optimized.json';
+import ownTransfer from '@/animations/landing/own-transfer_optimized.json';
 import { ImageCard } from '@/components/ImageCard';
 
 const WHY_IOTA_NAMES = [
     {
         title: 'Establish Your Presence',
         body: 'Secure a company, product, or service name before someone else does - protect your namespace early',
-        image: '/landing-page/establish-your-present.png',
+        lottie: establish,
     },
     {
         title: 'Own. Transfer. Build On.',
         body: 'Your IOTA Names is a true on-chain asset - own it, sell it or transfer it',
-        image: '/landing-page/own-transfer.png',
+        lottie: ownTransfer,
     },
     {
         title: 'One Name, Everywhere',
         body: 'Send payments and interact across any wallet or dApp with a familiar @name, not 64-character hashes, just simple, seamless UX',
-        image: '/landing-page/one-name.png',
+        lottie: oneName,
     },
 ];
 

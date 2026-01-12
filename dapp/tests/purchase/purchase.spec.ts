@@ -28,8 +28,8 @@ test.describe.serial('Purchase Name Tests', () => {
         sharedState.wallet.mnemonic = mnemonic;
     });
 
-    test('Can purchase a name making it default', async ({ appPage: page, context }) => {
-        const nameToPurchase = `e2edefault`;
+    test('Can purchase a name making it public', async ({ appPage: page, context }) => {
+        const nameToPurchase = `e2epublic`;
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
@@ -41,7 +41,7 @@ test.describe.serial('Purchase Name Tests', () => {
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
 
-        await page.getByText('Set name as Display Name').click();
+        await page.getByText('Set name as Public Name').click();
         await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
 
@@ -94,8 +94,11 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByPlaceholder('Check name availability').fill(denormalizedName);
 
         const namePurchaseCard = page.getByTestId('unavailable-purchase-card');
-        await expect(namePurchaseCard).toContainText('@' + denormalizedName);
-        await expect(namePurchaseCard).toContainText('Unavailable');
-        await expect(namePurchaseCard).toContainText('Name is already taken.');
+        const nameFromCard = namePurchaseCard.getByTestId('name-purchase-card-name');
+        await expect(nameFromCard).toContainText('@' + denormalizedName);
+        const nameStatus = namePurchaseCard.getByTestId('name-purchase-card-status');
+        await expect(nameStatus).toContainText(/Unavailable/i);
+        const nameMessage = namePurchaseCard.getByTestId('name-purchase-card-status-message');
+        await expect(nameMessage).toContainText('Name is already taken.');
     });
 });
