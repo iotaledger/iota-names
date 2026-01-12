@@ -29,8 +29,7 @@ pub struct IotaNamesExtendedConfig {
 
 impl Default for IotaNamesExtendedConfig {
     fn default() -> Self {
-        // TODO change to mainnet https://github.com/iotaledger/iota/issues/6532
-        Self::testnet()
+        Self::mainnet()
     }
 }
 
@@ -75,14 +74,52 @@ impl IotaNamesExtendedConfig {
 
     pub fn from_chain(chain: &Chain) -> Self {
         match chain {
-            // TODO switch to mainnet https://github.com/iotaledger/iota/issues/6532
-            Chain::Mainnet => Self::testnet(),
+            Chain::Mainnet => Self::mainnet(),
             Chain::Testnet => Self::testnet(),
             Chain::Unknown => Self::devnet(),
         }
     }
 
-    // TODO add mainnet https://github.com/iotaledger/iota/issues/6532
+    // Create a config based on the package and object ids published on mainnet.
+    pub fn mainnet() -> Self {
+        const AUCTION_PACKAGE_ADDRESS: &str =
+            "0x7f58de1c1a2664390d410382c8958098374baa0c6a937e2faac21ea783fe6824";
+        const COUPONS_PACKAGE_ADDRESS: &str =
+            "0x6c16703f7b8fc1bfd90b0d412edf3dcc898787b51068eef28d7e38b454638f4e";
+        const SUBNAMES_PACKAGE_ADDRESS: &str =
+            "0x772859a9d860acc1e49905cf3bd4bedd932cf2a172c3802714dbea5b2acc6420";
+        const TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS: &str =
+            "0x868e32df312bd642086e4745c1d05aaafc1a51d0e001a7be399e3894a6714b9f";
+        const AUCTION_HOUSE_ID: &str =
+            "0x3694c17bbcf60c916b2484a76e9a3f7289d214fd7a43b554dcdce0c2ffc04295";
+
+        let auction_package_address = IotaAddress::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
+        let coupons_package_address = IotaAddress::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
+        let subnames_package_address = IotaAddress::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
+        let subname_proxy_package_address =
+            IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
+        let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
+
+        let iota_names_config = IotaNamesConfig::testnet();
+        let event_package_ids = HashSet::from([
+            auction_package_address,
+            coupons_package_address,
+            subnames_package_address,
+            subname_proxy_package_address,
+            iota_names_config.package_address,
+            iota_names_config.payments_package_address,
+        ]);
+
+        Self::new(
+            auction_package_address,
+            coupons_package_address,
+            subnames_package_address,
+            subname_proxy_package_address,
+            auction_house_id,
+            event_package_ids,
+            iota_names_config,
+        )
+    }
 
     // Create a config based on the package and object ids published on testnet.
     pub fn testnet() -> Self {

@@ -10,15 +10,12 @@ export const queryRegistryTables = async (
     iotaNamesPackageId: string,
 ) => {
     const table = await client.getDynamicFieldObject({
-        parentObjectId: iotaNames,
+        parentId: iotaNames,
         name: {
             type: `${iotaNamesPackageId}::iota_names::RegistryKey<${iotaNamesPackageId}::registry::Registry>`,
             value: {
                 dummy_field: false,
             },
-        },
-        options: {
-            showContent: true,
         },
     });
 
