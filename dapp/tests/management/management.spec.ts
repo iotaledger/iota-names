@@ -220,10 +220,8 @@ test.describe.serial('Name Management Tests', () => {
         await dialog.getByRole('button', { name: 'Apply' }).click();
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
-
-        await expect(page.getByText('Successfully connected', { exact: false })).toBeVisible({
-            timeout: 30_000,
-        });
+        await expect(dialog.getByText('Address linked successfully')).toBeVisible();
+        await dialog.getByRole('button', { name: 'Finish' }).click();
 
         await page.close();
     });
