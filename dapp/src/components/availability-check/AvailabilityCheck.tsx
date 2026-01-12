@@ -8,7 +8,7 @@ import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps
 import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
@@ -42,7 +42,7 @@ interface RecentSearch {
 }
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
-const DEBOUNCE_DELAY = 500;
+const DEBOUNCE_DELAY = 750;
 
 export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const pathname = usePathname();
@@ -56,7 +56,6 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
         return storedRecentSearches ? (JSON.parse(storedRecentSearches) as RecentSearch[]) : [];
     });
-    const isOnEnterSearchRef = useRef<boolean>(false);
 
     const name = debouncedSearchValue ? `${debouncedSearchValue}.iota` : '';
 
@@ -106,14 +105,8 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     }, [name]);
 
     useEffect(() => {
-        if (
-            isOnEnterSearchRef.current &&
-            nameRecordData &&
-            searchValue &&
-            name === `${searchValue}.iota`
-        ) {
+        if (nameRecordData && searchValue && name === `${searchValue}.iota`) {
             updateRecentSearch(searchValue, isNameTaken);
-            isOnEnterSearchRef.current = false;
         }
     }, [nameRecordData, isNameTaken, name, searchValue]);
 
@@ -153,8 +146,6 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         const fullName = `${searchValue}.iota`;
         if (fullName === name && nameRecordData) {
             updateRecentSearch(searchValue, isNameTaken);
-        } else {
-            isOnEnterSearchRef.current = true;
         }
     }, [searchValue, validationError, isNameTaken, name, nameRecordData]);
 
