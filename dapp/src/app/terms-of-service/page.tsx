@@ -8,7 +8,7 @@ import { getDefaultNetwork } from '@/config/config';
 function getEffectiveDate() {
     switch (getDefaultNetwork()) {
         case Network.Mainnet:
-            return 'TBD';
+            return '12th January 2026';
         default:
             return '25 August 2025';
     }
