@@ -3,6 +3,9 @@
 
 import { CheckmarkFilled } from '@iota/apps-ui-icons';
 
+import builtForBuilders from '@/animations/landing/build_for_builders_optimized.json';
+import { LottieAnimation } from '@/components/loaders/Lottie';
+
 interface FeatureItemProps {
     text: string;
 }
@@ -41,8 +44,8 @@ export function BuiltForBuilders() {
                             <FeatureItem key={index} text={text} />
                         ))}
                     </div>
-                    <div className="w-full flex justify-center">
-                        <img src="/landing-page/built-for-builders.png" width={554} />
+                    <div className="flex justify-center">
+                        <LottieAnimation animationData={builtForBuilders} />
                     </div>
                 </div>
             </div>
