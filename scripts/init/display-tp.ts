@@ -45,7 +45,7 @@ export const createDisplay = ({
                 `{${isSubname ? 'nft.' : ''}name_str}`,
                 getImageUrl(isSubname, network),
                 'IOTA-Names - Name It. Own It.',
-                'https://testnet.iotanames.com',
+                'https://iotanames.com',
             ]),
         ],
         typeArguments: [isSubname ? subnameRegistration : nameRegistration],
