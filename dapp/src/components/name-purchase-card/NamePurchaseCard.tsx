@@ -93,7 +93,7 @@ export function NamePurchaseCard({
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-wrap sm:flex-row gap-xs sm:gap-md">
+                    <div className="flex flex-wrap sm:flex-row gap-md">
                         {priceNanos && (
                             <div className="flex flex-col items-start">
                                 <div className="flex items-baseline gap-md">
