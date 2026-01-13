@@ -80,7 +80,7 @@ export async function createWallet(page: Page) {
     };
 }
 
-export async function requestFaucetTokens(recipient: string) {
+export async function requestFaucetTokens(recipient: string, blockUntilBalance: boolean = true) {
     const currentNetwork = CONFIG.network;
     const networkConfig = getNetwork(currentNetwork);
 
@@ -97,6 +97,10 @@ export async function requestFaucetTokens(recipient: string) {
 
     if (res.error) {
         throw new Error(`Faucet error: ${res.error}`);
+    }
+
+    if (blockUntilBalance) {
+        await checkAddressBalanceWithRetries(recipient);
     }
 }
 
@@ -122,6 +126,8 @@ export async function purchaseName(name: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchase.digest });
 
     console.log(`Purchased name: ${name} with address: ${address}`);
     return responsePurchase;
@@ -155,6 +161,8 @@ export async function addSubnameName(
         },
     });
 
+    await iotaClientGraphQl.waitForTransaction({ digest: responsePurchaseSubname.digest });
+
     console.log(`Purchased subname: ${subname} with address: ${address}`);
     return responsePurchaseSubname;
 }
@@ -187,6 +195,8 @@ export async function editSetup(
         },
     });
 
+    await iotaClientGraphQl.waitForTransaction({ digest: responseEditSetup.digest });
+
     console.log(
         `Edit permissions of subname: ${subname} with permissions: allowCreateChildren: ${allowChildCreation}, allowTimeExtension: ${allowTimeExtension}`,
     );
@@ -213,6 +223,8 @@ export async function connectName(name: string, nft: string, signer: Signer) {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseConnect.digest });
 
     console.log(`Connected name: ${name} to address: ${address}`);
     return responseConnect;
@@ -241,6 +253,9 @@ export async function renewName(name: string, parentNftId: string, signer: Signe
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseRenew.digest });
+
     console.log(`Renewed name: ${name} with address: ${address}`);
     return responseRenew;
 }
@@ -293,6 +308,9 @@ export async function mintNft(
     if (resultMint.effects?.status.status !== 'success') {
         throw new Error(resultMint.effects?.status.error || 'Mint execution failed');
     }
+
+    await iotaClientGraphQl.waitForTransaction({ digest: resultMint.digest });
+
     return resultMint;
 }
 
@@ -319,6 +337,9 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
             showEffects: true,
         },
     });
+
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetAvatar.digest });
+
     console.log(`Avatar set to address: ${address}`);
     return responseSetAvatar;
 }
@@ -362,6 +383,8 @@ export async function createAndSendAuctionTransaction({
             },
         });
 
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
+
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully created auction for name: ${name}`);
 
@@ -399,6 +422,8 @@ export async function bidOnExistingAuction({
                 showEffects: true,
             },
         });
+
+        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
 
         console.log('Transaction sent. Digest:', response.digest);
         console.log(`Successfully bid on existing auction for name: ${name}`);
@@ -458,5 +483,28 @@ export async function createCoupon({ code, type, value }: CreateCouponOptions) {
     } catch (error) {
         console.error(`Failed to create coupon "${code}":`, error);
         throw error;
+    }
+}
+
+export async function checkAddressBalanceWithRetries(address: string): Promise<void> {
+    for (let attempt = 1; attempt <= 5; attempt++) {
+        let totalBalance: string | null = null;
+
+        try {
+            const balanceResponse = await iotaClientGraphQl.getBalance({ owner: address });
+            totalBalance = balanceResponse.totalBalance;
+        } catch (error) {
+            console.error(`Error checking balance for address ${address}:`, error);
+        }
+
+        if (totalBalance && !totalBalance.startsWith('0')) {
+            console.log(`Address ${address} has balance: ${totalBalance} IOTA`);
+            break;
+        }
+
+        console.log(
+            `Attempt ${attempt}: Address ${address} balance is zero. Retrying in 2 seconds...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 }

@@ -36,8 +36,13 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     // Expected lists
     let expectedPriceList;
-    // TODO: Mainnet
-    if (network.id === Network.Testnet) {
+    if (network.id === Network.Mainnet) {
+        expectedPriceList = new Map([
+            [[3, 3], 1500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else if (network.id === Network.Testnet) {
         expectedPriceList = new Map([
             [[3, 3], 500000000000],
             [[4, 4], 250000000000],
@@ -52,8 +57,13 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     }
 
     let expectedRenewalPriceList;
-    // TODO: Mainnet
-    if (network.id === Network.Testnet) {
+    if (network.id === Network.Mainnet) {
+        expectedRenewalPriceList = new Map([
+            [[3, 3], 1500000000000],
+            [[4, 4], 250000000000],
+            [[5, 63], 50000000000],
+        ]);
+    } else if (network.id === Network.Testnet) {
         expectedRenewalPriceList = new Map([
             [[3, 3], 500000000000],
             [[4, 4], 250000000000],
