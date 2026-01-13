@@ -407,6 +407,18 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                                 );
                             }
 
+                            case 'unset-public': {
+                                return (
+                                    <div
+                                        className="flex flex-row items-center gap-xs"
+                                        key={update.type}
+                                    >
+                                        <CheckmarkFilled className="size-5 text-names-neutral-50" />
+                                        <span className="text-body-md text-names-neutral-92">{`${cleanName} is no longer publicly visible.`}</span>
+                                    </div>
+                                );
+                            }
+
                             case 'set-target-address': {
                                 return (
                                     <div
