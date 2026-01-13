@@ -693,7 +693,10 @@ test.describe.serial('Name Management Tests', () => {
 
         const publicNameCheckbox = dialog.getByRole('checkbox');
         await expect(publicNameCheckbox).toBeChecked({ checked: true, timeout: 10_000 });
-        await publicNameCheckbox.click();
+        await dialog.getByText('Use as your public name').click();
+        await expect(
+            dialog.getByText('Name connected to ' + (sharedState.wallet.address ?? '')),
+        ).toBeVisible();
         await expect(publicNameCheckbox).toBeChecked({ checked: false, timeout: 10_000 });
 
         await dialog.getByRole('button', { name: 'Apply' }).click();
