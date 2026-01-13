@@ -703,4 +703,61 @@ test.describe.serial('Name Management Tests', () => {
 
         await page.close();
     });
+
+    test('Set Public Name', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('default');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responseConnect = await connectName(name, record.nftId, keypair);
+        expect(responseConnect.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+
+        await expect(dialog.getByText('Use as your public name')).toBeVisible();
+        await dialog.getByText('Use as your public name').click();
+
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+
+        await expect(
+            page.getByText(`${normalizeIotaName(name, 'at')} is now publicly visible.`, {
+                exact: false,
+            }),
+        ).toBeVisible({
+            timeout: 30_000,
+        });
+        await dialog.getByRole('button', { name: 'Finish' }).click();
+        // Search 'Public Name' pill
+        await page.getByTestId('refresh-button').click();
+        const reloadedNameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await expect(reloadedNameCard).toBeVisible({ timeout: 10_000 });
+
+        const publicNamePill = reloadedNameCard.getByText('Public Name', { exact: true });
+        await expect(publicNamePill).toBeVisible();
+
+        await page.close();
+    });
 });
