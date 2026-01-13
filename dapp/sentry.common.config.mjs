@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export const IS_PROD = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
+export const IS_SENTRY_ENABLED = IS_PROD && process.env.NEXT_PUBLIC_SENTRY_ENABLED === 'true';
 
 export const SENTRY_DSN = IS_PROD
     ? 'https://880b00b12c5d12e3fbabfc2f9dc83344@o4508279186718720.ingest.de.sentry.io/4510205355360337'
