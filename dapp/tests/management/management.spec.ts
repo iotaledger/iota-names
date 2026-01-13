@@ -691,18 +691,21 @@ test.describe.serial('Name Management Tests', () => {
         await expect(dialog.getByText('Use as your public name')).toBeVisible();
         await expect(dialog.getByRole('checkbox')).toBeVisible();
 
-        const publicNameCheckbox = dialog.getByRole('checkbox');
-        await expect(publicNameCheckbox).toBeChecked({ checked: true, timeout: 10_000 });
+        const enabledPublicNameCheckbox = dialog.getByRole('checkbox');
+        await expect(enabledPublicNameCheckbox).toBeChecked({ checked: true, timeout: 10_000 });
         await dialog.getByText('Use as your public name').click();
-        await expect(
-            dialog.getByText('Name connected to ' + (sharedState.wallet.address ?? '')),
-        ).toBeVisible();
-        await expect(publicNameCheckbox).toBeChecked({ checked: false, timeout: 10_000 });
+        const disabledPublicNameCheckbox = dialog.getByRole('checkbox');
+        await expect(disabledPublicNameCheckbox).toBeChecked({ checked: false, timeout: 10_000 });
 
         await dialog.getByRole('button', { name: 'Apply' }).click();
 
         (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
         await page.bringToFront();
+        await expect(
+            page.getByText(`${normalizeIotaName(name, 'at')} is no longer publicly visible.`),
+        ).toBeVisible({
+            timeout: 10_000,
+        });
         await dialog.getByRole('button', { name: 'Finish' }).click();
 
         await page.close();
