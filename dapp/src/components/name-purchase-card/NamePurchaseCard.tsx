@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { IotaLogoSmall } from '@iota/apps-ui-icons';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
@@ -14,7 +15,6 @@ interface NamePurchaseCardProps {
     name: string;
     statusMessage?: string;
     priceNanos?: number | bigint;
-    priceSymbol?: string;
     priceSupportingText?: string;
     status: NameAvailabilityStatus;
     disableStatusHoverEffect?: boolean;
@@ -27,7 +27,6 @@ export function NamePurchaseCard({
     priceNanos,
     priceSupportingText,
     status,
-    priceSymbol,
     children,
     disableStatusHoverEffect,
     testId,
@@ -35,7 +34,6 @@ export function NamePurchaseCard({
     const bgCard = BG_COLORS[status];
 
     const textColorStatus = TEXT_COLORS[status];
-    const defaultPriceSymbol = priceSymbol ?? 'IOTA';
     const fiatPrice = useCalculatePriceInFiat(priceNanos || 0);
     const formattedPrice = priceNanos
         ? formatNanosToIota(priceNanos, {
@@ -95,28 +93,23 @@ export function NamePurchaseCard({
                     </div>
                     <div className="flex flex-wrap sm:flex-row gap-md">
                         {priceNanos && (
-                            <div className="flex flex-col items-start">
-                                <div className="flex items-baseline gap-md">
-                                    <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
-                                        {formattedPrice}
-                                        <span className="text-names-neutral-70">
-                                            {defaultPriceSymbol}
-                                        </span>
-                                    </p>
-                                    {fiatPrice && (
-                                        <span className="text-label-sm text-names-neutral-50 items-center flex mr-md">
-                                            (${fiatPrice} USD)
-                                        </span>
-                                    )}
+                            <div className="flex flex-col items-start bg-names-neutral-12 py-sm pl-sm pr-xs rounded-[32px]">
+                                <div className="flex items-center gap-xxs">
+                                    <IotaLogoSmall className="w-5 h-5 bg-iota-primary-30 rounded-full p-0.5" />
+                                    <div className="items-baseline gap-xxxs flex">
+                                        <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
+                                            {formattedPrice}
+                                        </p>
+                                        {fiatPrice && (
+                                            <span className="text-label-md text-names-neutral-50 items-center flex">
+                                                ${fiatPrice}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
-                                {priceSupportingText && (
-                                    <p className="text-label-sm text-names-neutral-70">
-                                        {priceSupportingText}
-                                    </p>
-                                )}
                             </div>
                         )}
-                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
+                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto whitespace-nowrap ">
                             {children}
                         </div>
                     </div>
