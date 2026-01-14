@@ -31,6 +31,7 @@ pub enum AuctionSortBy {
     #[default]
     Name,
     Bid,
+    Ending,
 }
 
 impl std::str::FromStr for AuctionSortBy {
@@ -40,8 +41,9 @@ impl std::str::FromStr for AuctionSortBy {
         Ok(match s {
             "name" => AuctionSortBy::Name,
             "bid" => AuctionSortBy::Bid,
+            "ending" => AuctionSortBy::Ending,
             _ => Err(anyhow::anyhow!(
-                "Invalid sort by descriptor. Expected `name` or `bid`, found `{s}`"
+                "Invalid sort by descriptor. Expected `name`, `bid`, or `ending`, found `{s}`"
             ))?,
         })
     }
