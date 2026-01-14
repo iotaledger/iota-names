@@ -164,4 +164,50 @@ test.describe.serial('Purchase Name Tests', () => {
             timeout: 5_000,
         });
     });
+    test('Buy with a different expiration time', async ({ appPage: page, context }) => {
+        const YEARS = 5;
+        // Name bought when initializing localnet with scripts/tests/register-name.ts
+        const name = generateRandomName('expi');
+        const denormalizedName = denormalizeName(name);
+
+        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Check name availability').fill(denormalizedName);
+
+        const namePurchaseCard = page.getByTestId('purchase-name-card');
+        await expect(namePurchaseCard).toContainText('@' + denormalizedName);
+
+        await namePurchaseCard.hover();
+        await namePurchaseCard.getByRole('button', { name: 'Buy' }).click();
+
+        const initialExpirationTime = (
+            await page.getByTestId('registration-expiration').innerText()
+        ).split('\n')[1];
+
+        const select = page.getByTestId('purchase-years-select');
+        await expect(select).toContainText('1 Year');
+        await select.click({ timeout: 5_000 });
+        await page.getByText(`${YEARS} Years`).click({ timeout: 5_000 });
+
+        const expirationTime = (
+            await page.getByTestId('registration-expiration').innerText()
+        ).split('\n')[1];
+
+        expect(expirationTime).not.toBe(initialExpirationTime);
+        const expirationYears = new Date(expirationTime).getFullYear() - new Date().getFullYear();
+        expect(expirationYears).toBe(YEARS);
+
+        await page.getByRole('button', { name: 'Buy' }).click();
+
+        const walletConfirmationPage = context.waitForEvent('page');
+        const walletPopup = await walletConfirmationPage;
+
+        await walletPopup.waitForLoadState('domcontentloaded');
+        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
+        await approveBtn.click();
+
+        await walletPopup.waitForEvent('close', { timeout: 10_000 });
+        await expect(page.getByText(/Successfully registered name/i)).toBeVisible({
+            timeout: 5_000,
+        });
+    });
 });

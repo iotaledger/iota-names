@@ -5,7 +5,7 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import clsx from 'clsx';
 
 import { useCalculatePriceInFiat } from '@/hooks';
-import { parseIotaToNanos } from '@/lib/utils';
+import { formatNanosToIota } from '@/lib/utils';
 
 import { BG_COLORS, TEXT_COLORS } from './constants';
 import { NameAvailabilityStatus } from './enums';
@@ -13,7 +13,7 @@ import { NameAvailabilityStatus } from './enums';
 interface NamePurchaseCardProps {
     name: string;
     statusMessage?: string;
-    price?: string;
+    priceNanos?: number | bigint;
     priceSymbol?: string;
     priceSupportingText?: string;
     status: NameAvailabilityStatus;
@@ -24,7 +24,7 @@ interface NamePurchaseCardProps {
 export function NamePurchaseCard({
     name,
     statusMessage,
-    price,
+    priceNanos,
     priceSupportingText,
     status,
     priceSymbol,
@@ -36,8 +36,13 @@ export function NamePurchaseCard({
 
     const textColorStatus = TEXT_COLORS[status];
     const defaultPriceSymbol = priceSymbol ?? 'IOTA';
-    const priceInNanos = parseIotaToNanos(price || '0');
-    const fiatPrice = useCalculatePriceInFiat(priceInNanos);
+    const fiatPrice = useCalculatePriceInFiat(priceNanos || 0);
+    const formattedPrice = priceNanos
+        ? formatNanosToIota(priceNanos, {
+              showIotaSymbol: false,
+          })
+        : undefined;
+
     const isAvailable = status === NameAvailabilityStatus.Available;
 
     const [_, nameWithOutAt] = normalizeIotaName(name).split('@');
@@ -64,7 +69,7 @@ export function NamePurchaseCard({
                         {nameWithOutAt}
                     </h2>
                 </div>
-                <div className="flex justify-between space-x-4 h-auto w-full">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 h-auto w-full">
                     <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
                         <div
                             className={clsx('text-body-md capitalize', textColorStatus)}
@@ -88,12 +93,12 @@ export function NamePurchaseCard({
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-row gap-md">
-                        {price && (
+                    <div className="flex flex-wrap sm:flex-row gap-md">
+                        {priceNanos && (
                             <div className="flex flex-col items-start">
                                 <div className="flex items-baseline gap-md">
                                     <p className="text-body-lg text-names-neutral-92 flex items-baseline gap-xxs font-bold">
-                                        {price}
+                                        {formattedPrice}
                                         <span className="text-names-neutral-70">
                                             {defaultPriceSymbol}
                                         </span>
@@ -111,7 +116,7 @@ export function NamePurchaseCard({
                                 )}
                             </div>
                         )}
-                        <div className="flex w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
+                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto whitespace-nowrap overflow-hidden">
                             {children}
                         </div>
                     </div>
