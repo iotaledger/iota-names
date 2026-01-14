@@ -72,6 +72,16 @@ const SORT_OPTIONS = [
         sort: 'desc' as const,
         sortBy: 'name' as const,
     },
+    {
+        label: 'Ending: soonest first',
+        sort: 'asc' as const,
+        sortBy: 'ending' as const,
+    },
+    {
+        label: 'Ending: latest first',
+        sort: 'desc' as const,
+        sortBy: 'ending' as const,
+    },
 ];
 
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];

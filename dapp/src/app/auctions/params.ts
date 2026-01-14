@@ -23,7 +23,8 @@ export const paramsSchema = z.object({
         z.enum(['asc', 'desc']).default('asc'),
     ),
     sortBy: z.preprocess(
-        (v: unknown) => (typeof v === 'string' && ['bid', 'name'].includes(v) ? v : undefined),
-        z.enum(['bid', 'name']).default('bid'),
+        (v: unknown) =>
+            typeof v === 'string' && ['bid', 'name', 'ending'].includes(v) ? v : undefined,
+        z.enum(['bid', 'name', 'ending']).default('bid'),
     ),
 });
