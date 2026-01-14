@@ -7,8 +7,9 @@ import { Close } from '@iota/apps-ui-icons';
 import { Button, ButtonType, Chip, ChipType, LoadingIndicator } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import { validateIotaName } from '@iota/iota-names-sdk';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
 import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
@@ -25,13 +26,15 @@ import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { denormalizeName } from '@/lib/utils/format/formatNames';
-import { formatNanosToIota } from '@/lib/utils/format/formatNanosToIota';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { ConnectButton } from '../buttons/ConnectButton';
 import { PurchaseNameDialog } from '../dialogs/PurchaseNameDialog';
-import { NamePurchaseCard } from '../NamePurchaseCard';
+import { NameAvailabilityStatus, NamePurchaseCard } from '../name-purchase-card';
 import { SearchStylized } from '../search-component/SearchStylized';
+
+const NAME_REQUEST_FORM_URL =
+    'https://docs.google.com/forms/d/e/1FAIpQLSc4LDyCu7QbKDrE1CPfINLO9QSrOsPcZW8sPP-4Zt73N-3fUg/viewform';
 
 interface AvailabilityCheckProps {
     autoFocusInput?: boolean;
@@ -42,7 +45,7 @@ interface RecentSearch {
 }
 
 const RECENT_SEARCHES_STORAGE_KEY = 'iota-names-recent-searches';
-const DEBOUNCE_DELAY = 500;
+const DEBOUNCE_DELAY = 750;
 
 export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const pathname = usePathname();
@@ -56,7 +59,6 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         const storedRecentSearches = localStorage.getItem(RECENT_SEARCHES_STORAGE_KEY);
         return storedRecentSearches ? (JSON.parse(storedRecentSearches) as RecentSearch[]) : [];
     });
-    const isOnEnterSearchRef = useRef<boolean>(false);
 
     const name = debouncedSearchValue ? `${debouncedSearchValue}.iota` : '';
 
@@ -106,14 +108,8 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     }, [name]);
 
     useEffect(() => {
-        if (
-            isOnEnterSearchRef.current &&
-            nameRecordData &&
-            searchValue &&
-            name === `${searchValue}.iota`
-        ) {
+        if (nameRecordData && searchValue && name === `${searchValue}.iota`) {
             updateRecentSearch(searchValue, isNameTaken);
-            isOnEnterSearchRef.current = false;
         }
     }, [nameRecordData, isNameTaken, name, searchValue]);
 
@@ -153,8 +149,6 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         const fullName = `${searchValue}.iota`;
         if (fullName === name && nameRecordData) {
             updateRecentSearch(searchValue, isNameTaken);
-        } else {
-            isOnEnterSearchRef.current = true;
         }
     }, [searchValue, validationError, isNameTaken, name, nameRecordData]);
 
@@ -228,28 +222,36 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                     ) : isNameTaken && name ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
+                            status={NameAvailabilityStatus.Unavailable}
                             statusMessage="Name is already taken."
                             testId="unavailable-purchase-card"
                         />
                     ) : isForbiddenName(name, blockedList) ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
-                            disableHoverEffect
+                            status={NameAvailabilityStatus.Unavailable}
+                            disableStatusHoverEffect
                             statusMessage="Name is blocked and cannot be purchased."
                         />
                     ) : isForbiddenName(name, reservedList) ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
-                            disableHoverEffect
-                            statusMessage="Name is reserved and cannot be purchased."
-                        />
+                            disableStatusHoverEffect
+                            status={NameAvailabilityStatus.Reserved}
+                            statusMessage="Submit a request to claim."
+                        >
+                            <Link
+                                href={NAME_REQUEST_FORM_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button type={ButtonType.Primary} text="Claim" />
+                            </Link>
+                        </NamePurchaseCard>
                     ) : nameRecordData?.type === 'not-priced' ? (
                         <NamePurchaseCard
                             name={name}
-                            isAvailable={false}
+                            status={NameAvailabilityStatus.Unavailable}
                             statusMessage="Name is not available."
                         />
                     ) : (
@@ -304,16 +306,17 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
     // If there is no auction yet, then we use the purchase price as minimum
     const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
-    const formattedBidPrice = bidPrice
-        ? formatNanosToIota(bidPrice, { showIotaSymbol: false })
-        : undefined;
 
     return (
         <>
             <NamePurchaseCard
                 name={name}
-                isAvailable={isAllowedToBid}
-                price={formattedBidPrice}
+                status={
+                    isAllowedToBid
+                        ? NameAvailabilityStatus.Available
+                        : NameAvailabilityStatus.Unavailable
+                }
+                priceNanos={bidPrice}
                 priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
                 testId="auction-card"
@@ -362,19 +365,14 @@ function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) 
     }
 
     const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
-    const formattedPurchasePrice = purchasePrice
-        ? formatNanosToIota(purchasePrice, {
-              showIotaSymbol: false,
-          })
-        : undefined;
 
     return (
         <>
             {isAvailable && (
                 <NamePurchaseCard
                     name={name}
-                    isAvailable={true}
-                    price={formattedPurchasePrice}
+                    status={NameAvailabilityStatus.Available}
+                    priceNanos={purchasePrice}
                     priceSupportingText="Price"
                     testId="purchase-name-card"
                 >

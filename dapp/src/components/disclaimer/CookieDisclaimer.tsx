@@ -28,7 +28,7 @@ export function CookieDisclaimer() {
         <>
             {amplitudeConsentStatus === 'pending' && (
                 <div
-                    className="fixed bg-names-neutral-6 max-w-none w-full flex flex-col !py-6 !px-8 max-md:space-y-4 max-md:px-0 bottom-0 right-0 rounded-none shadow-2xl md:flex-row md:space-x-4 md:py-4 md:px-6 md:bottom-6 md:right-6 md:rounded-md md:max-w-lg border border-transparent"
+                    className="fixed z-50 bg-names-neutral-6 max-w-none w-full flex flex-col !py-6 !px-8 max-md:space-y-4 max-md:px-0 bottom-0 right-0 rounded-none shadow-2xl md:flex-row md:space-x-4 md:py-4 md:px-6 md:bottom-6 md:right-6 md:rounded-md md:max-w-lg border border-transparent"
                     style={{
                         background:
                             'linear-gradient(#0a0d23, #0a0d23) padding-box, var(--names-gradient-primary) border-box',
