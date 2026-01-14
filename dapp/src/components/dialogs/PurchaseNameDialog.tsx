@@ -261,7 +261,8 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
 
-    const hasErrors = updateNameError || coinBalanceError;
+    const txError = updateNameError || coinBalanceError || updateNameData?.effects.status.error;
+    const hasErrors = !!(txError || updateNameData?.effects.status.status === 'failure');
 
     const isLoadingData =
         isNameRecordLoading ||
@@ -309,13 +310,13 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {updateNameError ? (
+                            {txError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
                                     icon={<Warning />}
                                     title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                    supportingText={getUserFriendlyErrorMessage(txError)}
                                 />
                             ) : null}
                             <Panel bgColor="bg-names-neutral-10">

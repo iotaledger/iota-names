@@ -193,6 +193,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
     const showAddressWarning = !!addressName && addressName !== name && editIsPublicName;
     const errorMessage =
         editTargetAddress && !isValidAddressOrEmpty ? 'Not a valid IOTA address' : undefined;
+    const txError = updateNameError || updateNameTransaction?.effects.status.error;
+
     return (
         <Dialog open onOpenChange={setOpen}>
             <DialogContent containerId="overlay-portal-container" position={DialogPosition.Right}>
@@ -320,13 +322,13 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {updateNameError ? (
+                            {txError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
                                     icon={<Warning />}
                                     title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                    supportingText={getUserFriendlyErrorMessage(txError)}
                                 />
                             ) : null}
                             <div className="flex w-full flex-row gap-x-xs">

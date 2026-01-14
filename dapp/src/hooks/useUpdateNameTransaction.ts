@@ -203,17 +203,13 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                 client,
             });
 
-            const txDryRun = await client.dryRunTransactionBlock({
+            const dryRun = await client.dryRunTransactionBlock({
                 transactionBlock: txBytes,
             });
 
-            if (txDryRun.effects.status.status !== 'success') {
-                throw new Error(txDryRun.effects.status.error || 'Transaction dry run failed');
-            }
-
             return {
                 txBytes,
-                txDryRun,
+                txDryRun: dryRun,
             };
         },
         enabled: !!address && !!updates.length,
@@ -222,6 +218,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
             return {
                 transaction: Transaction.from(txBytes),
                 gasSummary: getGasSummary(txDryRun),
+                effects: txDryRun.effects,
             };
         },
     });

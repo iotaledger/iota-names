@@ -208,6 +208,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
     const hasEmptyRequiredFields = hasSelectedEmptyFields();
     const hasValidationErrors = Object.values(validationErrors).some((error) => error);
     const isLoading = isUpdateNameLoading || isSigning || isSaving;
+    const txError = updateNameError || updateNameTransaction?.effects.status.error;
     const disableApply =
         isLoading ||
         updates.length === 0 ||
@@ -261,13 +262,13 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                     </div>
                 </DialogBody>
                 <div className="flex flex-col gap-y-md gap-2 p-md--rs">
-                    {updateNameError ? (
+                    {txError ? (
                         <InfoBox
                             type={InfoBoxType.Error}
                             style={InfoBoxStyle.Elevated}
                             icon={<Warning />}
                             title="Error"
-                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                            supportingText={getUserFriendlyErrorMessage(txError)}
                         />
                     ) : null}
                     <div className="flex w-full flex-row gap-x-xs">

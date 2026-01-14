@@ -184,6 +184,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
         }
         return selectedAsset?.objectId === currentAvatar;
     })();
+    const txError = updateNameError || updateNameTransaction?.effects.status.error;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -309,13 +310,13 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                     </div>
                 </DialogBody>
                 <div className="flex flex-col gap-y-md gap-2 p-md--rs">
-                    {updateNameError ? (
+                    {txError ? (
                         <InfoBox
                             type={InfoBoxType.Error}
                             style={InfoBoxStyle.Elevated}
                             icon={<Warning />}
                             title="Error"
-                            supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                            supportingText={getUserFriendlyErrorMessage(txError)}
                         />
                     ) : null}
                     <div className="flex w-full flex-row gap-x-xs">

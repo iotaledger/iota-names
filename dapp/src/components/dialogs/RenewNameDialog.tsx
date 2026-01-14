@@ -232,6 +232,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
     const disableEdit = isSendingTransaction || isSigning || renewOptions.length === 0;
     const disableSave = isLoading || !canRenew || !renewYears || !updateNameTransaction;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
+    const txError = updateNameError || updateNameTransaction?.effects.status.error;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -277,13 +278,13 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                             )}
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {updateNameError ? (
+                            {txError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
                                     icon={<Warning />}
                                     title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                    supportingText={getUserFriendlyErrorMessage(txError)}
                                 />
                             ) : null}
                             <div className="flex flex-row gap-x-sm w-full">

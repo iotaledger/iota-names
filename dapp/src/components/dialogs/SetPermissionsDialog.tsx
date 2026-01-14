@@ -164,6 +164,7 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
 
     const disableEdit = isNameRecordLoading || isSendingTransaction || isExpired;
     const disableSave = updates.length === 0 || isLoading || isExpired || !updateNameTransaction;
+    const txError = updateNameError || updateNameTransaction?.effects.status.error;
 
     return (
         <Dialog open onOpenChange={setOpen}>
@@ -199,13 +200,13 @@ export function SetPermissionsDialog({ name, setOpen }: CreateSubnameProps) {
                             </div>
                         </div>
                         <div className="flex flex-col w-full gap-y-md">
-                            {updateNameError ? (
+                            {txError ? (
                                 <InfoBox
                                     type={InfoBoxType.Error}
                                     style={InfoBoxStyle.Elevated}
                                     icon={<Warning />}
                                     title="Error"
-                                    supportingText={getUserFriendlyErrorMessage(updateNameError)}
+                                    supportingText={getUserFriendlyErrorMessage(txError)}
                                 />
                             ) : null}
                             <div className="flex w-full flex-row gap-x-xs">
