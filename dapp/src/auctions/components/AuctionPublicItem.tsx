@@ -41,6 +41,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
     const normalizedName = normalizeIotaName(auction.name);
     const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
     const isCensored = normalizedName !== censoredName;
+    const valueToCopy = isCensored ? normalizedName : censoredName;
 
     const shouldCensor = isCensored;
 
@@ -90,7 +91,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             blurImage={shouldCensor}
             testId="name-card"
         >
-            <NameCardBody name={censoredName}>
+            <NameCardBody name={censoredName} valueToCopy={valueToCopy}>
                 {auction.hasUserParticipated ? (
                     <div className="absolute top-2 left-2" data-testid="auction-status-badge">
                         <AuctionStatusBadge status={auctionStatus} />
