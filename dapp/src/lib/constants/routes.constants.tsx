@@ -38,7 +38,7 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
         icon: <Discord />,
     },
     {
-        path: 'https://x.com/iota',
+        path: 'https://x.com/iotanames',
         icon: <SmX />,
     },
 ];

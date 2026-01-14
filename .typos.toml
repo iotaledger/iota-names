@@ -11,6 +11,10 @@ extend-ignore-identifiers-re = [
   "^[a-zA-Z0-9_]{56,}$",
 ]
 
+[default.extend-words]
+packageid = "packageid"
+pont = "pont"
+
 [files]
 extend-exclude = [
   "scripts/init/labels-to-block.txt",

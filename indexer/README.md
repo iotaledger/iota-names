@@ -12,7 +12,10 @@ Run the following commands also from the root directory.
 ### Set the environment variables
 
 ```bash
-cd scripts && pnpm ts-node utils/envs.ts localnet > ../indexer/docker/.env && cd ..
+# localnet
+cd scripts && pnpm run envsForIndexer localnet ../indexer/docker/.env && cd ..
+# testnet
+cd scripts && pnpm run envsForIndexer testnet ../indexer/docker/.env && cd ..
 ```
 
 ### Build the indexer image
@@ -80,4 +83,49 @@ Returns all names that a specific address has bid on.
 
 ```bash
 curl http://localhost:3030/auctions/0x111111111504e9350e635d65cd38ccd2c029434c6a3a480d8947a9ba6a15b215
+```
+
+### Get Auctions
+
+```
+GET /auctions
+```
+
+Returns a paginated list of all auctions, with optional filtering and sorting.
+
+**Parameters:**
+
+- `page` (optional): Page number (0-based, default: 0)
+- `pageSize` (optional): Number of items per page (default: 50, max: 100)
+- `sort` (optional): Sort order (`asc` or `desc`, default: `asc`)
+- `sortBy` (optional): Sort field (`name`, `bid`, or `ending`, default: `name`)
+- `search` (optional): Search term to filter names
+- `status` (optional): Filter by auction status (`active`, `finished`, or `claimed`)
+
+**Response:**
+
+```json
+{
+  "names": [
+    "thoralf.iota",
+    "branmuffins.iota",
+    "brah.iota",
+    "114514.iota",
+    "pont.iota",
+    "ulim1408.iota",
+    "space.iota",
+    "cards.iota",
+    "iot.iota",
+    "dex.iota"
+  ],
+  "page": 0,
+  "pageSize": 10,
+  "totalItems": 391
+}
+```
+
+**Example with sorting by ending time:**
+
+```bash
+curl http://localhost:3030/auctions?sortBy=ending&sort=asc&pageSize=10
 ```

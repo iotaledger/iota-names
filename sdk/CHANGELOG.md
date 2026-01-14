@@ -1,5 +1,11 @@
 # @iota/iota-names-sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- 1e2545a: Use the pre `@noble/hashes` 1.8.0 `blake2b` module name
+
 ## 0.5.0
 
 ### Minor Changes

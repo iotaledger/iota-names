@@ -72,7 +72,7 @@ test.describe('Name Validation tests', () => {
         });
     });
 
-    test("Restricted names can't be registered", async ({ appPage: page }) => {
+    test('Reserved names shows up', async ({ appPage: page }) => {
         const RESERVED_NAME = generateRandomName('tooling');
         await addToDenyList([denormalizeName(RESERVED_NAME)], 'reserved', true);
 
@@ -87,11 +87,11 @@ test.describe('Name Validation tests', () => {
             timeout: 10_000,
         });
 
-        await expect(dialog.getByText('Unavailable')).toBeVisible({
+        await expect(dialog.getByText('Reserved')).toBeVisible({
             timeout: 10_000,
         });
 
-        await expect(dialog.getByText('Name is reserved and cannot be purchased.')).toBeVisible({
+        await expect(dialog.getByText('Submit a request to claim.')).toBeVisible({
             timeout: 10_000,
         });
     });

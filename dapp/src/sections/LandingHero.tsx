@@ -18,11 +18,11 @@ export function LandingHero() {
     return (
         <div className="relative min-h-[700px] md:min-h-[560px] overflow-hidden">
             <Video
-                src="/hero-landing.mp4"
+                src="https://files.iota.org/media/iota-names/homepage_hero.mp4"
                 isAutoPlayEnabled
                 disableControls
                 className="absolute inset-0 w-full h-full object-cover z-[-1]"
-                poster="/poster-hero.png"
+                poster="https://files.iota.org/media/iota-names/homepage_hero_poster.jpg"
             />
 
             <div className="container w-full h-full pt-[200px] pb-20 flex flex-col items-center justify-center gap-y-2xl text-center">
