@@ -276,8 +276,9 @@ export default function AuctionsPage(): JSX.Element {
                             placeholder="Search auction"
                             type={InputType.Text}
                             value={searchQuery}
-                            onChange={(e) => setParam('search', e.target.value)}
+                            onChange={(e) => setParam('search', e.target.value.toLowerCase())}
                             trailingElement={<Search className="text-names-neutral-92 w-6 h-6" />}
+                            autoCapitalize="none"
                         />
                     </div>
                     <Button
