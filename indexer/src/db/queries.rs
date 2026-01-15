@@ -206,6 +206,16 @@ pub fn get_auctions(
         (SortOrder::Desc, AuctionSortBy::Bid) => {
             query.order((dsl::max(bids::bid).desc(), names::id.desc()))
         }
+        (SortOrder::Asc, AuctionSortBy::Ending) => query.order((
+            // Put already ended auctions at the end when sorting ascending
+            auctions::expiration_timestamp
+                .gt(now.timestamp_millis())
+                .desc(),
+            auctions::expiration_timestamp.asc(),
+        )),
+        (SortOrder::Desc, AuctionSortBy::Ending) => {
+            query.order(auctions::expiration_timestamp.desc())
+        }
     };
     Ok(query
         .load::<(Name, Option<i64>)>(conn)?

@@ -51,7 +51,7 @@ export interface UseAuctionsOptions {
      * Sort field for auctions.
      * Only applies when fetching all auctions (not user-specific).
      */
-    sortBy?: 'bid' | 'name';
+    sortBy?: 'bid' | 'name' | 'ending';
 
     /**
      * Current page number.
