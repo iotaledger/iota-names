@@ -54,7 +54,7 @@ export function NamePurchaseCard({
         >
             <div
                 className={clsx(
-                    'group flex h-full w-full flex-col justify-between rounded-[15px] p-md--rs gap-y-sm',
+                    'group flex h-full w-full flex-col justify-between rounded-[15px] p-md--rs gap-y-xs md:gap-y-sm',
                     bgCard,
                 )}
             >
@@ -67,8 +67,8 @@ export function NamePurchaseCard({
                         {nameWithOutAt}
                     </h2>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 h-auto w-full">
-                    <div className="flex flex-row gap-2 text-body-md items-center min-h-12">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:space-x-4 h-auto w-full gap-lg">
+                    <div className="flex flex-row gap-2 text-body-md items-center">
                         <div
                             className={clsx('text-body-md capitalize', textColorStatus)}
                             data-testid="name-purchase-card-status"
@@ -91,7 +91,7 @@ export function NamePurchaseCard({
                             </p>
                         )}
                     </div>
-                    <div className="flex flex-wrap sm:flex-row gap-md">
+                    <div className="flex flex-wrap sm:flex-row gap-md justify-end">
                         {priceNanos && (
                             <div className="flex flex-col items-start bg-names-neutral-12 py-sm pl-sm pr-xs rounded-[32px]">
                                 <div className="flex items-center gap-xxs">
@@ -109,7 +109,8 @@ export function NamePurchaseCard({
                                 </div>
                             </div>
                         )}
-                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto whitespace-nowrap ">
+
+                        <div className="flex flex-col sm:flex-row w-0 group-hover:w-auto group-hover:min-w-[80px] whitespace-nowrap overflow-hidden [&>*]:flex-1">
                             {children}
                         </div>
                     </div>
