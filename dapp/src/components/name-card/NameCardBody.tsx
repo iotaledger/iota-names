@@ -20,7 +20,7 @@ export function NameCardBody({
                 {name}
             </h4>
 
-            <div className="flex flex-col gap-y-md">{children}</div>
+            <div className="flex flex-col gap-y-xs">{children}</div>
         </div>
     );
 }
