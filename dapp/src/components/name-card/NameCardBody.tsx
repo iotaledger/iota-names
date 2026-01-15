@@ -30,7 +30,7 @@ export function NameCardBody({
                 <Copy className="w-4 h-4 opacity-0 transition-opacity group-hover:opacity-100 text-names-neutral-92 shrink-0" />
             </p>
 
-            <div className="flex flex-col gap-y-md">{children}</div>
+            <div className="flex flex-col gap-y-xs">{children}</div>
         </div>
     );
 }
