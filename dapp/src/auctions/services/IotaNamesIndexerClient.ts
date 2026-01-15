@@ -58,7 +58,7 @@ export class IotaNamesIndexerClient {
         status: 'all' | 'active' | 'finished',
         search?: string,
         sort?: 'asc' | 'desc',
-        sortBy?: 'bid' | 'name',
+        sortBy?: 'bid' | 'name' | 'ending',
         page: number = 0,
         pageSize: number = 50,
     ): Promise<AuctionsResponse> {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
-import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
+import { Button, ButtonType, Card, CardType } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { MouseEvent, useMemo } from 'react';
@@ -127,9 +127,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
                 ) : (
                     <ClaimedAuctionBody auction={auction} />
                 )}
-                <div className="my-4">
-                    <Divider type={DividerType.Horizontal} />
-                </div>
                 <AuctionTimeRemaining auction={auction} />
             </NameCardBody>
         </NameCard>
