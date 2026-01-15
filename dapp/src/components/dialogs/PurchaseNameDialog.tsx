@@ -292,7 +292,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                                 </div>
                             </Panel>
                             {isRegisterWithYearsSupported ? (
-                                <div className="relative">
+                                <div data-testid="purchase-years-select" className="relative">
                                     <Select
                                         options={purchaseOptions}
                                         value={purchaseYears?.toString()}
@@ -331,29 +331,49 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
                             <div className="flex flex-row gap-x-sm w-full">
                                 {finalPriceIota && fiatPriceResult ? (
                                     <>
-                                        <DisplayStats
-                                            label="Registration Expires"
-                                            value={
-                                                <LabelText text={expirationDate} label={`\u00A0`} /> // \u00A0 for alignment
-                                            }
-                                        />
-                                        <DisplayStats
-                                            label="Total Due"
-                                            value={
-                                                <LabelText
-                                                    text={finalPriceIota}
-                                                    label={`($${fiatPriceResult} USD)`}
-                                                />
-                                            }
-                                        />
+                                        <div
+                                            data-testid="registration-expiration"
+                                            className="w-full"
+                                        >
+                                            <DisplayStats
+                                                label="Registration Expires"
+                                                value={
+                                                    <LabelText
+                                                        text={expirationDate}
+                                                        label={`\u00A0`}
+                                                    /> // \u00A0 for alignment
+                                                }
+                                            />
+                                        </div>
+                                        <div data-testid="total-due" className="w-full">
+                                            <DisplayStats
+                                                label="Total Due"
+                                                value={
+                                                    <LabelText
+                                                        text={finalPriceIota}
+                                                        label={`($${fiatPriceResult} USD)`}
+                                                    />
+                                                }
+                                            />
+                                        </div>
                                     </>
                                 ) : finalPriceIota && !fiatPriceResult ? (
                                     <>
-                                        <DisplayStats
-                                            label="Registration Expires"
-                                            value={expirationDate}
-                                        />
-                                        <DisplayStats label="Total Due" value={finalPriceIota} />
+                                        <div
+                                            data-testid="registration-expiration"
+                                            className="w-full"
+                                        >
+                                            <DisplayStats
+                                                label="Registration Expires"
+                                                value={expirationDate}
+                                            />
+                                        </div>
+                                        <div data-testid="total-due" className="w-full">
+                                            <DisplayStats
+                                                label="Total Due"
+                                                value={finalPriceIota}
+                                            />
+                                        </div>
                                     </>
                                 ) : (
                                     <LoadingIndicator />
