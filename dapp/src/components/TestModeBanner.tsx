@@ -5,21 +5,25 @@
 import { Close, Warning } from '@iota/apps-ui-icons';
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
 import { useIotaClientContext } from '@iota/dapp-kit';
-import { useState } from 'react';
+import clsx from 'clsx';
 
-export function TestModeBanner({ onDismiss }: { onDismiss?: () => void }) {
+export function TestModeBanner({
+    isBannerVisible,
+    onDismiss,
+}: {
+    isBannerVisible: boolean;
+    onDismiss?: () => void;
+}) {
     const { network } = useIotaClientContext();
-    const [isDismissed, setIsDismissed] = useState(false);
 
     const shouldShowBanner =
         network !== 'mainnet' && network !== 'localnet' && network !== 'custom';
 
-    if (isDismissed || !shouldShowBanner) {
+    if (!shouldShowBanner || !isBannerVisible) {
         return null;
     }
 
     const handleDismiss = () => {
-        setIsDismissed(true);
         onDismiss?.();
     };
 
@@ -28,10 +32,15 @@ export function TestModeBanner({ onDismiss }: { onDismiss?: () => void }) {
     };
 
     return (
-        <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-200 z-[60] h-[104px] md:h-[48px]">
+        <div
+            className={clsx(
+                'fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-200 z-[60] h-[104px] md:h-[48px]',
+            )}
+            data-testmode-banner={isBannerVisible}
+        >
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full h-full px-md py-xs md:py-sm gap-xs md:gap-0">
                 <div className="flex items-center gap-xs flex-1 w-full md:w-auto">
-                    <Warning className="w-3 h-3 text-yellow-700 flex-shrink-0" />
+                    <Warning className="w-4 h-4 text-yellow-700 flex-shrink-0" />
                     <div className="flex flex-col">
                         <p className="text-sm font-medium text-yellow-800">Test Mode Active</p>
                         <p className="text-xs text-yellow-700">

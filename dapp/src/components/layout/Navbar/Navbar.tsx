@@ -8,7 +8,7 @@ import { Input, InputType } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { NamesLogoWeb } from '@/components/svgs';
 import { TestModeBanner } from '@/components/TestModeBanner';
@@ -26,14 +26,6 @@ export function Navbar() {
 
     const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
-    useEffect(() => {
-        if (isBannerVisible) {
-            document.body.classList.add('banner-visible');
-        } else {
-            document.body.classList.remove('banner-visible');
-        }
-    }, [isBannerVisible]);
-
     function toggleSearchDialog() {
         open({
             autoFocusInput: true,
@@ -44,7 +36,10 @@ export function Navbar() {
 
     return (
         <>
-            <TestModeBanner onDismiss={() => setIsBannerVisible(false)} />
+            <TestModeBanner
+                isBannerVisible={isBannerVisible}
+                onDismiss={() => setIsBannerVisible(false)}
+            />
             <nav
                 id="top-navbar"
                 data-testid="top-navbar"

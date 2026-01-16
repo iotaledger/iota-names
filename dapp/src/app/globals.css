@@ -67,6 +67,6 @@ body {
     transition: padding-top 300ms ease-in-out;
 }
 
-body.banner-visible {
+body:has(div[data-testmode-banner='true']) {
     @apply pt-[70px] md:pt-[40px];
 }
