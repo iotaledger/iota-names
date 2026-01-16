@@ -8,7 +8,7 @@ import { Input, InputType } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { NamesLogoWeb } from '@/components/svgs';
 import { TestModeBanner } from '@/components/TestModeBanner';
@@ -26,6 +26,14 @@ export function Navbar() {
 
     const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
+    useEffect(() => {
+        if (isBannerVisible) {
+            document.body.classList.add('banner-visible');
+        } else {
+            document.body.classList.remove('banner-visible');
+        }
+    }, [isBannerVisible]);
+
     function toggleSearchDialog() {
         open({
             autoFocusInput: true,
@@ -40,7 +48,7 @@ export function Navbar() {
             <nav
                 id="top-navbar"
                 data-testid="top-navbar"
-                className={`fixed left-0 w-full z-50 backdrop-blur-lg transition-all duration-300 ${isBannerVisible ? 'top-[32px]' : 'top-0'}`}
+                className={`fixed left-0 w-full z-50 backdrop-blur-lg transition-all duration-300 ${isBannerVisible ? 'top-[104px] md:top-[48px]' : 'top-0'}`}
             >
                 <div className="px-lg py-md flex flex-col gap-y-sm">
                     <div className="flex flex-row justify-between items-center gap-x-md">

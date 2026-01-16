@@ -61,3 +61,12 @@ body[data-scroll-locked] #top-navbar {
     background-origin: border-box;
     background-clip: padding-box, border-box;
 }
+
+/* Content wrapper padding based on banner visibility */
+body {
+    transition: padding-top 300ms ease-in-out;
+}
+
+body.banner-visible {
+    @apply pt-[70px] md:pt-[40px];
+}

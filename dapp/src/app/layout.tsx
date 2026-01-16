@@ -36,7 +36,7 @@ export default function RootLayout({
                     <Suspense>
                         <ConnectionGuard>
                             <Navbar />
-                            {children}
+                            <div className="transition-all duration-300">{children}</div>
                             <AvailabilityCheckDialog />
                             <Footer />
                         </ConnectionGuard>
