@@ -72,6 +72,16 @@ const SORT_OPTIONS = [
         sort: 'desc' as const,
         sortBy: 'name' as const,
     },
+    {
+        label: 'Ending: soonest first',
+        sort: 'asc' as const,
+        sortBy: 'ending' as const,
+    },
+    {
+        label: 'Ending: latest first',
+        sort: 'desc' as const,
+        sortBy: 'ending' as const,
+    },
 ];
 
 const PAGE_SIZES_RANGE = [10, 20, 50, 100];
@@ -266,8 +276,9 @@ export default function AuctionsPage(): JSX.Element {
                             placeholder="Search auction"
                             type={InputType.Text}
                             value={searchQuery}
-                            onChange={(e) => setParam('search', e.target.value)}
+                            onChange={(e) => setParam('search', e.target.value.toLowerCase())}
                             trailingElement={<Search className="text-names-neutral-92 w-6 h-6" />}
+                            autoCapitalize="none"
                         />
                     </div>
                     <Button
