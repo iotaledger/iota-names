@@ -6,7 +6,6 @@
 import { Close, Warning } from '@iota/apps-ui-icons';
 import { Button, ButtonSize, ButtonType } from '@iota/apps-ui-kit';
 import { useIotaClientContext } from '@iota/dapp-kit';
-import clsx from 'clsx';
 
 export function TestModeBanner({
     isBannerVisible,
@@ -34,9 +33,7 @@ export function TestModeBanner({
 
     return (
         <div
-            className={clsx(
-                'fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-200 z-[60] h-[104px] md:h-[48px]',
-            )}
+            className="bg-yellow-100 border-b border-yellow-200 z-[60] h-[104px] md:h-[48px]"
             data-testmode-banner={isBannerVisible}
         >
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full h-full px-md py-xs md:py-sm gap-xs md:gap-0">

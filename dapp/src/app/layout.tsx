@@ -36,11 +36,10 @@ export default function RootLayout({
                 <AppProviders>
                     <Suspense>
                         <ConnectionGuard>
-                            <StickyHeader>
-                                {children}
-                                <AvailabilityCheckDialog />
-                                <Footer />
-                            </StickyHeader>
+                            <StickyHeader />
+                            {children}
+                            <AvailabilityCheckDialog />
+                            <Footer />
                         </ConnectionGuard>
                     </Suspense>
                 </AppProviders>

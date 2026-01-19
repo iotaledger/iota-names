@@ -35,7 +35,7 @@ export function Navbar({ isBannerVisible }: { isBannerVisible: boolean }) {
         <nav
             id="top-navbar"
             data-testid="top-navbar"
-            className={`fixed left-0 w-full z-50 backdrop-blur-lg transition-all duration-300 ${isBannerVisible ? 'top-[104px] md:top-[48px]' : 'top-0'}`}
+            className="w-full z-50 backdrop-blur-lg transition-all duration-300"
         >
             <div className="px-lg py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
