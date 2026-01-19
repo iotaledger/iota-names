@@ -4,20 +4,21 @@
 import { resolve } from 'path';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import { formatAddress, NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { formatDate } from '@/lib/utils/format/formatDate';
 
 import { expect, test } from '../helpers/fixtures';
+import { addToCouponList } from '../setup/toggleSmartContract';
 import { iotaNamesClient } from '../setup/utils';
 import {
     addSubnameName,
     connectAndSetPublicName,
     connectName,
     connectWallet,
-    createCoupon,
     createWallet,
     editSetup,
+    generateRandomCoupon,
     generateRandomName,
     generateRandomSubname,
     getAddressByIndexPath,
@@ -716,12 +717,8 @@ test.describe.serial('Name Management Tests', () => {
         const responsePurchase = await purchaseName(name, keypair);
         expect(responsePurchase.effects?.status.status).toBe('success');
 
-        const couponCode = 'FIXED_1000';
-        await createCoupon({
-            code: couponCode,
-            type: 'fixed',
-            value: BigInt(1000) * NANOS_PER_IOTA,
-        });
+        const couponCode = generateRandomCoupon('E2E100OFF');
+        await addToCouponList(couponCode);
 
         await page.goto('/my-names');
         await expect(
