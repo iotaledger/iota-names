@@ -20,13 +20,9 @@ export function TruncatedNameWithTooltip({
     const full = normalizeIotaName(name, 'at', { truncateLongParts: false });
     const showTooltip = truncated !== full;
 
-    function handleCopy() {
-        copyToClipboard(name);
-    }
-
     const content = (
         <div
-            onClick={handleCopy}
+            onClick={() => copyToClipboard(name)}
             className="group inline-flex items-center gap-x-xs cursor-pointer"
         >
             <span className="truncate">{truncated}</span>
