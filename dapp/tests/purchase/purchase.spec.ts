@@ -8,7 +8,14 @@ import { expect } from '@playwright/test';
 import { denormalizeName } from '@/lib/utils';
 
 import { test } from '../helpers/fixtures';
-import { connectWallet, createWallet, generateRandomName, requestFaucetTokens } from '../utils';
+import { addToCouponList } from '../setup/toggleSmartContract';
+import {
+    connectWallet,
+    createWallet,
+    generateRandomCoupon,
+    generateRandomName,
+    requestFaucetTokens,
+} from '../utils';
 
 test.describe.serial('Purchase Name Tests', () => {
     test.beforeAll(async ({ appPage, context, extensionPage, extensionName, sharedState }) => {
@@ -102,6 +109,61 @@ test.describe.serial('Purchase Name Tests', () => {
         await expect(nameMessage).toContainText('Name is already taken.');
     });
 
+    test('Test with a coupon', async ({ appPage: page, context }) => {
+        const couponCode = generateRandomCoupon('E2E100OFF');
+        const name = generateRandomName('coupon');
+
+        await addToCouponList(couponCode);
+        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Check name availability').fill(name);
+
+        const purchaseCardLocator = page.getByTestId('purchase-name-card');
+
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.hover();
+        await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
+        await expect(page.getByTestId('name-purchase-title')).toContainText(
+            '@' + denormalizeName(name),
+        );
+
+        await page.getByPlaceholder('Have a discount code?').fill(couponCode);
+        await page.getByRole('button', { name: '+ Apply Coupon' }).click();
+
+        await expect(page.getByRole('button', { name: couponCode })).toBeVisible({
+            timeout: 5_000,
+        });
+
+        await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+
+        await expect(page.getByText('Successfully registered name')).toBeVisible({
+            timeout: 30_000,
+        });
+    });
+
+    test('Test with an invalid coupon', async ({ appPage: page, context }) => {
+        const couponCode = generateRandomCoupon('E2E100OFF');
+        const name = generateRandomName('invalid');
+
+        await page.getByPlaceholder('Search for your IOTA name').click();
+        await page.getByPlaceholder('Check name availability').fill(name);
+
+        const purchaseCardLocator = page.getByTestId('purchase-name-card');
+
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.hover();
+        await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
+        await expect(page.getByTestId('name-purchase-title')).toContainText(
+            '@' + denormalizeName(name),
+        );
+
+        await page.getByPlaceholder('Have a discount code?').fill(couponCode);
+        await page.getByRole('button', { name: '+ Apply Coupon' }).click();
+
+        await expect(page.getByText('Invalid coupon')).toBeVisible({
+            timeout: 5_000,
+        });
+    });
     test('Buy with a different expiration time', async ({ appPage: page, context }) => {
         const YEARS = 5;
         // Name bought when initializing localnet with scripts/tests/register-name.ts
