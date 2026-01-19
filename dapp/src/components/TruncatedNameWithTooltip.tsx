@@ -10,37 +10,29 @@ import { copyToClipboard } from '@/lib/utils/copyToClipboard';
 interface TruncatedNameWithTooltipProps {
     name: string;
     tooltipPosition?: TooltipPosition;
-    valueToCopy?: string;
-    enableCopy?: boolean;
 }
 
 export function TruncatedNameWithTooltip({
     name,
     tooltipPosition = TooltipPosition.Bottom,
-    valueToCopy = name,
-    enableCopy = true,
 }: TruncatedNameWithTooltipProps) {
     const truncated = normalizeIotaName(name, 'at', { truncateLongParts: true });
     const full = normalizeIotaName(name, 'at', { truncateLongParts: false });
     const showTooltip = truncated !== full;
 
     function handleCopy() {
-        if (enableCopy) {
-            copyToClipboard(valueToCopy);
-        }
+        copyToClipboard(name);
     }
 
     const content = (
-        <span
+        <div
             onClick={handleCopy}
             className="group inline-flex items-center gap-x-xs cursor-pointer"
         >
             <span className="truncate">{truncated}</span>
 
-            {enableCopy && (
-                <Copy className="w-4 h-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 text-names-neutral-92" />
-            )}
-        </span>
+            <Copy className="w-4 h-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 text-names-neutral-92" />
+        </div>
     );
 
     return showTooltip ? (

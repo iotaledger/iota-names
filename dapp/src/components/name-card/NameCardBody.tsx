@@ -21,14 +21,14 @@ export function NameCardBody({
 
     return (
         <div className="p-md flex flex-col gap-y-xs" data-testid="name-card-body">
-            <p
+            <div
                 onClick={handleCopy}
                 className="group flex items-center gap-x-xs text-names-neutral-92 text-title-md truncate overflow-hidden cursor-pointer"
             >
                 <span className="truncate cursor-pointer">{name}</span>
 
                 <Copy className="w-4 h-4 opacity-0 transition-opacity group-hover:opacity-100 text-names-neutral-92 shrink-0" />
-            </p>
+            </div>
 
             <div className="flex flex-col gap-y-xs">{children}</div>
         </div>
