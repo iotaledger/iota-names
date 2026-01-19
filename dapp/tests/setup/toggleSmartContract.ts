@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Transaction } from '@iota/iota-sdk/transactions';
+import { blake2b } from '@noble/hashes/blake2';
+import { bytesToHex } from '@noble/hashes/utils';
 import { expect } from '@playwright/test';
 
 import { adminKeypair, client, getAuthorizedSmartContractTypes, iotaNamesClient } from './utils';
 
 const envs = {
+    COUPONS: iotaNamesClient.getPackage('couponsPackageId'),
     IOTA_NAMES_PACKAGE_ADDRESS: iotaNamesClient.getPackage('packageId'),
     IOTA_NAMES_OBJECT_ID: iotaNamesClient.getPackage('iotaNamesObjectId'),
     ADMIN_CAP: iotaNamesClient.getPackage('adminCap'),
@@ -94,4 +97,54 @@ export async function toggleSmartContractMode(mode: 'auctions' | 'purchases'): P
 
     expect(finalState.isAuctionAuthorized).toBe(targetState.isAuctionAuthorized);
     expect(finalState.isPaymentAuthorized).toBe(targetState.isPaymentAuthorized);
+}
+
+export async function addToCouponList(coupon: string): Promise<void> {
+    if (!process.env.ADMIN_MNEMONIC) {
+        throw new Error('env ADMIN_MNEMONIC not set. Cannot toggle smart contract mode.');
+    }
+
+    const target = `${envs.COUPONS}::coupon_house::admin_add_percentage_coupon`;
+    const rulesTarget = `${envs.COUPONS}::rules::new_empty_rules`;
+
+    const tx = new Transaction();
+
+    const [rules] = tx.moveCall({
+        target: rulesTarget,
+        arguments: [],
+    });
+    const couponCodeHash = bytesToHex(blake2b(coupon, { dkLen: 32 }));
+
+    tx.moveCall({
+        target,
+        arguments: [
+            tx.object(envs.ADMIN_CAP),
+            tx.object(envs.IOTA_NAMES_OBJECT_ID),
+            tx.pure.string(couponCodeHash),
+            tx.pure.u64(100),
+            tx.object(rules),
+        ],
+    });
+
+    tx.setSender(adminKeypair.toIotaAddress());
+
+    const resp = await client.signAndExecuteTransaction({
+        transaction: await tx.build({
+            client,
+        }),
+        signer: adminKeypair,
+        options: {
+            showEffects: true,
+        },
+    });
+
+    if (resp.effects?.status.status === 'failure') {
+        throw new Error(
+            `Failed to add coupon ${coupon} to coupon list: ${JSON.stringify(resp.effects.status)}`,
+        );
+    }
+
+    await client.waitForTransaction({
+        digest: resp.digest,
+    });
 }
