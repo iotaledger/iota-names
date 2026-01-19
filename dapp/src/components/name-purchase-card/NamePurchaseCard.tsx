@@ -93,7 +93,7 @@ export function NamePurchaseCard({
                     </div>
                     <div className="flex flex-wrap sm:flex-row gap-md justify-end">
                         {priceNanos && (
-                            <div className="flex flex-col items-start bg-names-neutral-12 py-sm pl-sm pr-xs rounded-[32px]">
+                            <div className="flex flex-col items-start bg-names-neutral-12 py-sm pr-sm pl-xs rounded-[32px]">
                                 <div className="flex items-center gap-xxs">
                                     <IotaLogoSmall className="w-5 h-5 bg-iota-primary-30 rounded-full p-0.5" />
                                     <div className="items-baseline gap-xxxs flex">
