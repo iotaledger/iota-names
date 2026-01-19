@@ -10,7 +10,8 @@ import { Suspense } from 'react';
 
 import { ConnectionGuard } from '@/components';
 import { AvailabilityCheckDialog } from '@/components/availability-check/AvailabilityCheckDialog';
-import { Footer, Navbar } from '@/components/layout';
+import { Footer } from '@/components/layout';
+import { StickyHeader } from '@/components/layout/StickyHeader';
 import { DEFAULT_METADATA } from '@/lib/constants/metadata.constants';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { AppProviders } from '@/providers';
@@ -35,10 +36,11 @@ export default function RootLayout({
                 <AppProviders>
                     <Suspense>
                         <ConnectionGuard>
-                            <Navbar />
-                            <div className="transition-all duration-300">{children}</div>
-                            <AvailabilityCheckDialog />
-                            <Footer />
+                            <StickyHeader>
+                                {children}
+                                <AvailabilityCheckDialog />
+                                <Footer />
+                            </StickyHeader>
                         </ConnectionGuard>
                     </Suspense>
                 </AppProviders>

@@ -8,21 +8,18 @@ import { Input, InputType } from '@iota/apps-ui-kit';
 import { useCurrentWallet } from '@iota/dapp-kit';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 
 import { NamesLogoWeb } from '@/components/svgs';
-import { TestModeBanner } from '@/components/TestModeBanner';
 import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { ConnectButton } from '../../buttons/ConnectButton';
 import { NavbarMobile } from './NavbarMobile';
 
-export function Navbar() {
+export function Navbar({ isBannerVisible }: { isBannerVisible: boolean }) {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
     const { open } = useAvailabilityCheckDialog();
-    const [isBannerVisible, setIsBannerVisible] = useState(true);
 
     const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
 
@@ -35,54 +32,48 @@ export function Navbar() {
     const ROUTES = isConnected ? [...PROTECTED_ROUTES, ...PUBLIC_ROUTES] : PUBLIC_ROUTES;
 
     return (
-        <>
-            <TestModeBanner
-                isBannerVisible={isBannerVisible}
-                onDismiss={() => setIsBannerVisible(false)}
-            />
-            <nav
-                id="top-navbar"
-                data-testid="top-navbar"
-                className={`fixed left-0 w-full z-50 backdrop-blur-lg transition-all duration-300 ${isBannerVisible ? 'top-[104px] md:top-[48px]' : 'top-0'}`}
-            >
-                <div className="px-lg py-md flex flex-col gap-y-sm">
-                    <div className="flex flex-row justify-between items-center gap-x-md">
-                        <div className="flex flex-row gap-x-lg items-center">
-                            <Link href="/" aria-label="Go to homepage">
-                                <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
-                            </Link>
-                            <div className="hidden md:flex gap-x-md text-names-neutral-70 text-body-md">
-                                {ROUTES.map((route) => (
-                                    <Link
-                                        key={route.path}
-                                        href={route.path}
-                                        className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
-                                        data-testid={`${route.id}-link`}
-                                        {...('isExternal' in route ? { target: '_blank' } : {})}
-                                    >
-                                        {route.title}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="md:hidden">
-                            <NavbarMobile routes={ROUTES}>
-                                <ConnectButton />
-                            </NavbarMobile>
-                        </div>
-
-                        {isAllowedSearchOnPage && (
-                            <SearchInput isBelowMd onFocus={toggleSearchDialog} />
-                        )}
-                        <div className="hidden md:block">
-                            <ConnectButton />
+        <nav
+            id="top-navbar"
+            data-testid="top-navbar"
+            className={`fixed left-0 w-full z-50 backdrop-blur-lg transition-all duration-300 ${isBannerVisible ? 'top-[104px] md:top-[48px]' : 'top-0'}`}
+        >
+            <div className="px-lg py-md flex flex-col gap-y-sm">
+                <div className="flex flex-row justify-between items-center gap-x-md">
+                    <div className="flex flex-row gap-x-lg items-center">
+                        <Link href="/" aria-label="Go to homepage">
+                            <NamesLogoWeb className="w-32 h-2xl text-names-primary-100" />
+                        </Link>
+                        <div className="hidden md:flex gap-x-md text-names-neutral-70 text-body-md">
+                            {ROUTES.map((route) => (
+                                <Link
+                                    key={route.path}
+                                    href={route.path}
+                                    className="text-label-md hover:text-names-primary-80 md:whitespace-nowrap"
+                                    data-testid={`${route.id}-link`}
+                                    {...('isExternal' in route ? { target: '_blank' } : {})}
+                                >
+                                    {route.title}
+                                </Link>
+                            ))}
                         </div>
                     </div>
+                    <div className="md:hidden">
+                        <NavbarMobile routes={ROUTES}>
+                            <ConnectButton />
+                        </NavbarMobile>
+                    </div>
 
-                    {isAllowedSearchOnPage && <SearchInput onFocus={toggleSearchDialog} />}
+                    {isAllowedSearchOnPage && (
+                        <SearchInput isBelowMd onFocus={toggleSearchDialog} />
+                    )}
+                    <div className="hidden md:block">
+                        <ConnectButton />
+                    </div>
                 </div>
-            </nav>
-        </>
+
+                {isAllowedSearchOnPage && <SearchInput onFocus={toggleSearchDialog} />}
+            </div>
+        </nav>
     );
 }
 
