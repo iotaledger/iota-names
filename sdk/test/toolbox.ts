@@ -71,9 +71,18 @@ export async function setupIotaClient() {
         logger: (msg) => console.warn('Retrying requesting from faucet: ' + msg),
     });
 
-    const b = await client.getBalance({
-        owner: address,
-    });
+    const b = await retry(
+        () =>
+            client.getBalance({
+                owner: address,
+            }),
+        {
+            retries: 10,
+            delay: 1000,
+            logger: (msg) => console.warn('Retrying getting balance: ' + msg),
+            retryIf: (error: any) => error.message.includes('Missing response data'),
+        },
+    );
     console.log(`Balance for ${address}: ${b.totalBalance} IOTA`);
 
     const tmpDirPath = path.join(tmpdir(), 'config-');
