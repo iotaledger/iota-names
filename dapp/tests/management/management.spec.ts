@@ -13,6 +13,7 @@ import { addToCouponList } from '../setup/toggleSmartContract';
 import { iotaNamesClient } from '../setup/utils';
 import {
     addSubnameName,
+    connectAndSetPublicName,
     connectName,
     connectWallet,
     createWallet,
@@ -654,6 +655,57 @@ test.describe.serial('Name Management Tests', () => {
         ).toBeVisible({
             timeout: 10_000,
         });
+
+        await page.close();
+    });
+
+    test('Unset Public Name', async ({ appPage: page, context, sharedState }) => {
+        const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
+        const name = generateRandomName('unset');
+        const responsePurchase = await purchaseName(name, keypair);
+        expect(responsePurchase.effects?.status.status).toBe('success');
+
+        const record = await iotaNamesClient.getNameRecord(name);
+        if (!record) throw new Error('Name record not found');
+
+        const responseSetPublic = await connectAndSetPublicName(name, record.nftId, keypair);
+        expect(responseSetPublic.effects?.status.status).toBe('success');
+
+        await page.goto('/my-names');
+        await expect(
+            page.getByTestId('name-card').filter({ hasText: normalizeIotaName(name, 'at') }),
+        ).toBeVisible({ timeout: 10_000 });
+
+        const nameCard = page
+            .getByTestId('name-card')
+            .filter({ hasText: normalizeIotaName(name, 'at') });
+        await nameCard.getByTestId('name-card-avatar').hover();
+        const menuButtonLocator = nameCard.getByTestId('menu-button');
+        await expect(menuButtonLocator).toBeVisible();
+        await menuButtonLocator.click();
+
+        await page.getByText('Connect to Address', { exact: true }).click();
+        const dialog = page.getByRole('dialog');
+        await expect(dialog.getByText('Connect to Address')).toBeVisible();
+        await expect(dialog.getByText('Use as your public name')).toBeVisible();
+        await expect(dialog.getByRole('checkbox')).toBeVisible();
+
+        const enabledPublicNameCheckbox = dialog.getByRole('checkbox');
+        await expect(enabledPublicNameCheckbox).toBeChecked({ checked: true, timeout: 10_000 });
+        await dialog.getByText('Use as your public name').click();
+        const disabledPublicNameCheckbox = dialog.getByRole('checkbox');
+        await expect(disabledPublicNameCheckbox).toBeChecked({ checked: false, timeout: 10_000 });
+
+        await dialog.getByRole('button', { name: 'Apply' }).click();
+
+        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await page.bringToFront();
+        await expect(
+            page.getByText(`${normalizeIotaName(name, 'at')} is no longer publicly visible.`),
+        ).toBeVisible({
+            timeout: 10_000,
+        });
+        await dialog.getByRole('button', { name: 'Finish' }).click();
 
         await page.close();
     });
