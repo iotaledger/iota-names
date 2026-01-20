@@ -15,7 +15,6 @@ interface NamePurchaseCardProps {
     name: string;
     statusMessage?: string;
     priceNanos?: number | bigint;
-    priceSupportingText?: string;
     status: NameAvailabilityStatus;
     disableStatusHoverEffect?: boolean;
     testId?: string;
@@ -25,7 +24,6 @@ export function NamePurchaseCard({
     name,
     statusMessage,
     priceNanos,
-    priceSupportingText,
     status,
     children,
     disableStatusHoverEffect,
