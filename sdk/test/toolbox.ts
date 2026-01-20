@@ -77,8 +77,8 @@ export async function setupIotaClient() {
                 owner: address,
             }),
         {
-            retries: 10,
-            delay: 1000,
+            retries: 100,
+            delay: 50,
             logger: (msg) => console.warn('Retrying getting balance: ' + msg),
             retryIf: (error: any) => error.message.includes('Missing response data'),
         },
