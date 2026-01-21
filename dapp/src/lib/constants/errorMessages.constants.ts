@@ -7,6 +7,7 @@ export const INSUFFICIENT_COIN_BALANCE_ID = 'InsufficientCoinBalance';
 export const INVALID_IOTA_NAME = 'Invalid IOTA names';
 export const INVALID_IOTA_OBJECT_ID = 'Invalid IOTA Object id';
 export const INVALID_U64_VALUE = 'Invalid u64 value';
+const BLOCKED_OR_RESERVED_FUNCTION_NAME = 'assert_not_blocked_or_reserved';
 
 export const NO_BALANCE_GENERIC_MESSAGE = 'Make sure you have enough funds and try again.';
 
@@ -44,4 +45,5 @@ export const ERROR_PATTERNS = {
     'coupon has expired': 'Coupon has expired.',
     'number of claims cannot be zero': 'Number of claims cannot be zero.',
     'cannot be used with other coupons': 'Coupon cannot be used with other coupons.',
+    [BLOCKED_OR_RESERVED_FUNCTION_NAME]: 'This name is blocked or reserved and cannot be used.',
 };
