@@ -7,7 +7,7 @@ export const INSUFFICIENT_COIN_BALANCE_ID = 'InsufficientCoinBalance';
 export const INVALID_IOTA_NAME = 'Invalid IOTA names';
 export const INVALID_IOTA_OBJECT_ID = 'Invalid IOTA Object id';
 export const INVALID_U64_VALUE = 'Invalid u64 value';
-const BLOCKED_OR_RESERVED_FUNCTION_NAME = 'assert_not_blocked_or_reserved';
+export const BLOCKED_OR_RESERVED_FUNCTION_NAME = 'assert_not_blocked_or_reserved';
 
 export const NO_BALANCE_GENERIC_MESSAGE = 'Make sure you have enough funds and try again.';
 
