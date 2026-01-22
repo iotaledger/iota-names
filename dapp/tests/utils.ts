@@ -342,6 +342,33 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     return responseSetAvatar;
 }
 
+export async function connectAndSetPublicName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.setPublic(name);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClientGraphQl,
+    });
+
+    const responseSetPublic = await iotaClientGraphQl.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetPublic.digest });
+    console.log(`Set name: ${name} as public name for address: ${address}`);
+    return responseSetPublic;
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();

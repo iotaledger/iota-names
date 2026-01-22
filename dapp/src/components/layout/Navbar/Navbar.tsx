@@ -16,7 +16,7 @@ import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog'
 import { ConnectButton } from '../../buttons/ConnectButton';
 import { NavbarMobile } from './NavbarMobile';
 
-export function Navbar() {
+export function Navbar({ isBannerVisible }: { isBannerVisible: boolean }) {
     const { isConnected } = useCurrentWallet();
     const pathname = usePathname();
     const { open } = useAvailabilityCheckDialog();
@@ -35,7 +35,7 @@ export function Navbar() {
         <nav
             id="top-navbar"
             data-testid="top-navbar"
-            className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg"
+            className="w-full z-50 backdrop-blur-lg transition-all duration-300"
         >
             <div className="px-lg py-md flex flex-col gap-y-sm">
                 <div className="flex flex-row justify-between items-center gap-x-md">
