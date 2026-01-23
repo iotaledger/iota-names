@@ -43,7 +43,6 @@ export async function createWallet(page: Page) {
     await page.getByText('Mnemonic', { exact: true }).click();
     await page.getByTestId('password.input').fill('iotae2etests');
     await page.getByTestId('password.confirmation').fill('iotae2etests');
-    await page.getByText('I read and agree').click();
 
     await page.getByRole('button', { name: /Create Wallet/ }).click();
     await page.waitForURL(new RegExp(/accounts\/backup/));
