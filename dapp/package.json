@@ -25,6 +25,7 @@
         "@amplitude/analytics-client-common": "^2.4.3",
         "@amplitude/analytics-core": "^2.26.2",
         "@amplitude/analytics-types": "^2.10.0",
+        "@amplitude/engagement-browser": "^1.0.6",
         "@growthbook/growthbook": "^1.6.1",
         "@growthbook/growthbook-react": "^1.6.1",
         "@iota/apps-ui-icons": "^0.7.0",
