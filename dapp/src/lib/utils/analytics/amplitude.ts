@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { LogLevel } from '@amplitude/analytics-core';
+import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
 
 import { CONFIG } from '@/config';
 
@@ -54,6 +55,7 @@ export async function initAmplitude() {
                 },
             },
         }).promise;
+        ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 
         // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {

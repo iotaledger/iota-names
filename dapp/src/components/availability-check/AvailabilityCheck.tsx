@@ -317,7 +317,6 @@ function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
                         : NameAvailabilityStatus.Unavailable
                 }
                 priceNanos={bidPrice}
-                priceSupportingText="Minimum bid"
                 statusMessage={isAuctionInProgress ? 'In auction' : ''}
                 testId="auction-card"
             >
@@ -373,7 +372,6 @@ function PurchaseName({ name, nameRecordData, onCompleted }: PurchaseNameProps) 
                     name={name}
                     status={NameAvailabilityStatus.Available}
                     priceNanos={purchasePrice}
-                    priceSupportingText="Price"
                     testId="purchase-name-card"
                 >
                     {isConnected ? (

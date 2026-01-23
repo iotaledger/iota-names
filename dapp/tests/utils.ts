@@ -7,13 +7,11 @@ import type { BrowserContext, Page } from '@playwright/test';
 
 import 'dotenv/config';
 
-import { execFileSync, execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
 import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
-import { blake2b } from '@noble/hashes/blake2';
-import { bytesToHex } from '@noble/hashes/utils';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -344,6 +342,33 @@ export async function setAvatar(nameRecord: NameRecord, signer: Signer) {
     return responseSetAvatar;
 }
 
+export async function connectAndSetPublicName(name: string, nft: string, signer: Signer) {
+    const address = signer.toIotaAddress();
+    const tx = new Transaction();
+    const iotaNamesTx = new IotaNamesTransaction(iotaNamesClient, tx);
+    iotaNamesTx.setTargetAddress({
+        nft,
+        address,
+        isSubname: false,
+    });
+    iotaNamesTx.setPublic(name);
+    iotaNamesTx.transaction.setSender(address);
+    const txBytes = await iotaNamesTx.transaction.build({
+        client: iotaClientGraphQl,
+    });
+
+    const responseSetPublic = await iotaClientGraphQl.signAndExecuteTransaction({
+        transaction: txBytes,
+        signer,
+        options: {
+            showEffects: true,
+        },
+    });
+    await iotaClientGraphQl.waitForTransaction({ digest: responseSetPublic.digest });
+    console.log(`Set name: ${name} as public name for address: ${address}`);
+    return responseSetPublic;
+}
+
 export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
     const keypair = Ed25519Keypair.deriveKeypair(mnemonic, path);
     const address = keypair.getPublicKey().toIotaAddress();
@@ -445,45 +470,9 @@ export function generateRandomSubname(subname: string, parentName: string) {
     return `${subname}${random}.${parentName}`;
 }
 
-interface CreateCouponOptions {
-    code: string;
-    type: 'fixed' | 'percentage';
-    value: bigint;
-}
-
-export async function createCoupon({ code, type, value }: CreateCouponOptions) {
-    const couponCodeHash = bytesToHex(blake2b(code, { dkLen: 32 }));
-
-    const couponsPackageId = iotaNamesClient.getPackage('couponsPackageId');
-    const iotaNamesObjectId = iotaNamesClient.getPackage('iotaNamesObjectId');
-    const adminCapId = iotaNamesClient.getPackage('adminCap');
-    const adminAddress = iotaNamesClient.getPackage('adminAddress');
-
-    const functionName =
-        type === 'fixed' ? 'admin_add_fixed_coupon' : 'admin_add_percentage_coupon';
-
-    const command = `iota client ptb \
-        --move-call ${couponsPackageId}::rules::new_empty_rules \
-        --assign empty_rules \
-        --move-call ${couponsPackageId}::coupon_house::${functionName} \
-            @${adminCapId} \
-            @${iotaNamesObjectId} \
-            '"${couponCodeHash}"' \
-            ${value.toString()} \
-            empty_rules \
-        --gas-budget 50000000 \
-        --sender @${adminAddress}`;
-
-    console.log(`Creating ${type} coupon "${code}" with hash ${couponCodeHash}...`);
-
-    try {
-        const output = execSync(command, { encoding: 'utf-8' });
-        console.log(`Created ${type} coupon "${code}" successfully`);
-        return output;
-    } catch (error) {
-        console.error(`Failed to create coupon "${code}":`, error);
-        throw error;
-    }
+export function generateRandomCoupon(coupon: string) {
+    const random = Math.floor(Math.random() * 10_000);
+    return `${coupon}${random}`.toUpperCase();
 }
 
 export async function checkAddressBalanceWithRetries(address: string): Promise<void> {

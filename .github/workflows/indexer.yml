@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - run: cargo +nightly-2025-04-01 fmt --check --manifest-path indexer/Cargo.toml
+      - run: cargo +nightly-2026-01-07 fmt --check --manifest-path indexer/Cargo.toml
 
   udeps:
     name: Check unused dependencies
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - run: cargo +nightly-2025-04-01 udeps --manifest-path indexer/Cargo.toml
+      - run: cargo +nightly-2026-01-07 udeps --manifest-path indexer/Cargo.toml
 
   deny-bans-licenses-sources:
     name: Cargo deny (bans, licenses, sources)
