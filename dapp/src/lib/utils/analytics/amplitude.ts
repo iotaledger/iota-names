@@ -109,7 +109,7 @@ export function cleanAmplitudeCookies() {
 }
 
 function addAmplitudePlugins() {
-    if (!ampli.isLoaded || !IS_ENABLED) return;
+    if (!IS_ENABLED) return;
 
     ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 }
