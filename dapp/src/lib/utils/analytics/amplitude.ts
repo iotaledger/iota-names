@@ -49,7 +49,7 @@ export async function initAmplitude() {
                 },
             },
         }).promise;
-        ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
+        addAmplitudePlugins();
 
         setNetworkGroup(defaultNetwork);
     } catch (error) {
@@ -106,4 +106,10 @@ export function cleanAmplitudeCookies() {
             }
         }
     });
+}
+
+function addAmplitudePlugins() {
+    if (!ampli.isLoaded || !IS_ENABLED) return;
+
+    ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 }
