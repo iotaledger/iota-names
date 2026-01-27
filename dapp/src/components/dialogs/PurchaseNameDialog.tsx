@@ -160,6 +160,9 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
             queryClient.invalidateQueries({
                 queryKey: queryKey.publicName(account?.address || ''),
             });
+            queryClient.invalidateQueries({
+                queryKey: ['iota-name', 'default-name', account?.address],
+            });
 
             const expirationDate = new Date();
             expirationDate.setFullYear(expirationDate.getFullYear() + purchaseYears);
