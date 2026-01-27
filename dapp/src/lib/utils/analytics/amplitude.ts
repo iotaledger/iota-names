@@ -42,14 +42,11 @@ export async function initAmplitude() {
             client: {
                 configuration: {
                     autocapture: {
-                    attribution: IS_ENABLED,
-                    pageViews: IS_ENABLED,
-                    sessions: IS_ENABLED,
-                    formInteractions: IS_ENABLED,
-                    fileDownloads: IS_ENABLED,
-                    elementInteractions: IS_ENABLED,
-                    pageUrlEnrichment: IS_ENABLED,
-                    webVitals: IS_ENABLED,
+                        attribution: false,
+                        fileDownloads: IS_ENABLED,
+                        formInteractions: IS_ENABLED,
+                        pageViews: IS_ENABLED,
+                        sessions: IS_ENABLED,
                     },
                     logLevel: LogLevel.None,
                 },
