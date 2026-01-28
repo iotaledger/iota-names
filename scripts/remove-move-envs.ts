@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 // Removes all [env] sections from Move.lock files in packages/*/
 //
 // Usage: ts-node scripts/remove-move-env.ts
