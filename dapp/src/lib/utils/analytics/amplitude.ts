@@ -52,7 +52,9 @@ export async function initAmplitude() {
         }).promise;
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 
-        const sessionReplayTracking = sessionReplayPlugin();
+        const sessionReplayTracking = sessionReplayPlugin({
+            sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
+        });
         ampli.client.add(sessionReplayTracking);
 
         setNetworkGroup(defaultNetwork);
