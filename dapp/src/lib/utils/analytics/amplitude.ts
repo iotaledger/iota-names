@@ -42,7 +42,7 @@ export async function initAmplitude() {
             client: {
                 configuration: {
                     autocapture: {
-                        attribution: false,
+                        attribution: IS_ENABLED,
                         fileDownloads: IS_ENABLED,
                         formInteractions: IS_ENABLED,
                         pageViews: IS_ENABLED,
