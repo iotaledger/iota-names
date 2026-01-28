@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Clock, IotaLogoSmall, Loader } from '@iota/apps-ui-icons';
-import { Button, ButtonType, Card, CardType, Divider, DividerType } from '@iota/apps-ui-kit';
+import { Button, ButtonType, Card, CardType } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClientContext } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { MouseEvent, useMemo } from 'react';
@@ -41,6 +41,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
     const normalizedName = normalizeIotaName(auction.name);
     const censoredName = useMemo(() => censorName(normalizedName, FORBIDDEN_LIST), [auction.name]);
     const isCensored = normalizedName !== censoredName;
+    const valueToCopy = isCensored ? normalizedName : censoredName;
 
     const shouldCensor = isCensored;
 
@@ -90,7 +91,7 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
             blurImage={shouldCensor}
             testId="name-card"
         >
-            <NameCardBody name={censoredName}>
+            <NameCardBody name={censoredName} valueToCopy={valueToCopy}>
                 {auction.hasUserParticipated ? (
                     <div className="absolute top-2 left-2" data-testid="auction-status-badge">
                         <AuctionStatusBadge status={auctionStatus} />
@@ -127,9 +128,6 @@ export function AuctionPublicItem({ auction, onBidClick }: AuctionPublicItemProp
                 ) : (
                     <ClaimedAuctionBody auction={auction} />
                 )}
-                <div className="my-4">
-                    <Divider type={DividerType.Horizontal} />
-                </div>
                 <AuctionTimeRemaining auction={auction} />
             </NameCardBody>
         </NameCard>
