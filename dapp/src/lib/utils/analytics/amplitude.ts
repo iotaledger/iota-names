@@ -3,6 +3,7 @@
 
 import { LogLevel } from '@amplitude/analytics-core';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
+import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { CONFIG } from '@/config';
 
@@ -50,6 +51,9 @@ export async function initAmplitude() {
             },
         }).promise;
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
+
+        const sessionReplayTracking = sessionReplayPlugin();
+        ampli.client.add(sessionReplayTracking);
 
         setNetworkGroup(defaultNetwork);
     } catch (error) {
