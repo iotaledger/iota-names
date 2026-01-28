@@ -364,9 +364,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
     const account = useCurrentAccount();
 
     function copyAddressToClipboard() {
-        if (account?.address) {
-            copyToClipboard(account.address);
-        }
+        copyToClipboard(targetAddress);
     }
 
     const cleanName = normalizeIotaName(name, 'at', {
