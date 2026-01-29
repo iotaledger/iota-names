@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import { readFileSync } from 'node:fs';
 import cors from '@fastify/cors';
 import Fastify from 'fastify';
