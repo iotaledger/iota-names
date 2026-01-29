@@ -1,14 +1,48 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+/**
+ * Context Enrichment Plugin for Amplitude Analytics
+ *
+ * Enriches analytics events with UI context (page URL, dialog title, etc.).
+ *
+ * Uses event capture phase to snapshot UI state before handlers modify the DOM,
+ * solving the timing issue where analytics events are processed after UI changes.
+ * Cached snapshots (1s TTL) are used during async event processing.
+ *
+ * To add new context properties:
+ * 1. Extend ContextSnapshot interface in contextSnapshotCache.ts
+ * 2. Update captureContextSnapshot() to extract the property
+ * 3. Update enrichEventWithContext() to add it to events
+ * 4. Add the property to ALLOWED_PROPERTIES constant
+ */
+
 import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
+import type { ContextSnapshot } from './contextSnapshotCache';
+import { contextSnapshotCache } from './contextSnapshotCache';
+
+/** Page paths mapped to custom Amplitude event names. */
 const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
     '/': 'Landing Page Viewed',
     '/my-names': 'My Names Page Viewed',
     '/auctions': 'Auctions Page Viewed',
     '/search': 'Search Page Viewed',
 };
+
+/** Whitelisted event properties allowed to be sent to Amplitude. */
+const ALLOWED_PROPERTIES = {
+    PAGE_URL: 'page_url',
+    DIALOG_TITLE: 'dialog_title',
+    ELEMENT_TAG: '[Amplitude] Element Tag',
+    ELEMENT_TEXT: '[Amplitude] Element Text',
+    ELEMENT_HREF: '[Amplitude] Element Href',
+} as const;
+
+const EVENT_TYPE = {
+    PAGE_VIEW: '[Amplitude] Page Viewed',
+    ELEMENT_CLICK: '[Amplitude] Element Clicked',
+} as const;
 
 type ExtendedEventProperties = Event & {
     [key: string]: string;
@@ -19,99 +53,43 @@ type EnrichedEventProperties = ExtendedEventProperties & {
     dialog_title?: string;
 };
 
-const ALLOWED_PROPERTIES = {
-    PAGE_URL: 'page_url',
-    DIALOG_TITLE: 'dialog_title',
-    ELEMENT_TAG: '[Amplitude] Element Tag',
-    ELEMENT_TEXT: '[Amplitude] Element Text',
-    ELEMENT_HREF: '[Amplitude] Element Href',
-};
-
-const EVENT_TYPE = {
-    PAGE_VIEW: '[Amplitude] Page Viewed',
-    ELEMENT_CLICK: '[Amplitude] Element Clicked',
-};
-
-// Context snapshot cache for capturing UI state before it changes
-interface ContextSnapshot {
-    dialogTitle: string | null;
-    timestamp: number;
-}
-
-class ContextSnapshotCache {
-    private cache: ContextSnapshot | null = null;
-    private readonly CACHE_TTL_MS = 1000; // 1 second TTL
-
-    snapshot(dialogTitle: string | null): void {
-        this.cache = {
-            dialogTitle,
-            timestamp: Date.now(),
-        };
-    }
-
-    get(): ContextSnapshot | null {
-        if (!this.cache) return null;
-
-        // Check if cache has expired
-        const age = Date.now() - this.cache.timestamp;
-        if (age > this.CACHE_TTL_MS) {
-            this.cache = null;
-            return null;
-        }
-
-        return this.cache;
-    }
-
-    clear(): void {
-        this.cache = null;
-    }
-}
-
-const contextCache = new ContextSnapshotCache();
-
+/** Extract the title of the currently open dialog from the DOM. */
 function extractDialogTitle(): string | null {
     const dialog = document.querySelector('div[role="dialog"].dialog-content-bg');
-
     if (!dialog) {
         return null;
     }
 
-    const title = dialog?.querySelector('.header-bg-color span.text-title-lg')?.textContent?.trim();
-
-    if (title) {
-        return title;
-    }
-
-    return null;
+    const title = dialog.querySelector('.header-bg-color span.text-title-lg')?.textContent?.trim();
+    return title || null;
 }
 
-/**
- * Capture context snapshot during the capture phase of click events.
- * This runs BEFORE any click handlers execute, ensuring we capture
- * the UI state before it changes (e.g., before dialogs close).
- */
-function captureContextOnInteraction(event: MouseEvent): void {
-    // Only capture for actual clicks on elements, not just any mouse event
+/** Capture a snapshot of the current UI context. Called during event capture phase. */
+function captureContextSnapshot(): ContextSnapshot {
+    return {
+        dialogTitle: extractDialogTitle(),
+        timestamp: Date.now(),
+    };
+}
+
+/** Handle click events during capture phase to snapshot UI context before handlers modify it. */
+function handleCapturePhaseClick(event: MouseEvent): void {
     if (event.type !== 'click') return;
 
-    const dialogTitle = extractDialogTitle();
-    contextCache.snapshot(dialogTitle);
+    const snapshot = captureContextSnapshot();
+    contextSnapshotCache.set(snapshot);
 }
 
-/**
- * Setup event listeners to capture context before user interactions
- */
+/** Set up event listeners to capture UI context before user interactions. Returns cleanup function. */
 function setupContextCapture(): () => void {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
-        return () => {}; // No-op cleanup function
+        return () => {};
     }
 
-    // Use capture phase (true) to run before any bubbling handlers
-    document.addEventListener('click', captureContextOnInteraction, true);
+    document.addEventListener('click', handleCapturePhaseClick, true);
 
-    // Return cleanup function
     return () => {
-        document.removeEventListener('click', captureContextOnInteraction, true);
+        document.removeEventListener('click', handleCapturePhaseClick, true);
     };
 }
 
@@ -126,21 +104,6 @@ function isElementTag(event: Event, tagName: string): boolean {
     );
 }
 
-function filterProperties(eventProperties: EnrichedEventProperties): EnrichedEventProperties {
-    const filteredProperties: EnrichedEventProperties = { ...eventProperties };
-
-    Object.keys(filteredProperties).forEach((key) => {
-        if (!Object.values(ALLOWED_PROPERTIES).includes(key as keyof typeof ALLOWED_PROPERTIES)) {
-            delete filteredProperties[key];
-        }
-    });
-
-    return filteredProperties;
-}
-
-/**
- * Map clicked element paths to custom event names
- */
 function getClickedElementEventName(event: Event): string | null {
     const clickedElementText = (event.event_properties as ExtendedEventProperties)?.[
         ALLOWED_PROPERTIES.ELEMENT_TEXT
@@ -162,6 +125,36 @@ function getClickedElementEventName(event: Event): string | null {
     return null;
 }
 
+/** Filter event properties to only include whitelisted properties. */
+function filterProperties(eventProperties: EnrichedEventProperties): EnrichedEventProperties {
+    const filteredProperties: EnrichedEventProperties = { ...eventProperties };
+    const allowedValues = Object.values(ALLOWED_PROPERTIES) as string[];
+
+    Object.keys(filteredProperties).forEach((key) => {
+        if (!allowedValues.includes(key)) {
+            delete filteredProperties[key];
+        }
+    });
+
+    return filteredProperties;
+}
+
+/** Enrich event with UI context. Uses cached context first, falls back to current DOM state. */
+function enrichEventWithContext(eventProperties: EnrichedEventProperties): EnrichedEventProperties {
+    const cachedContext = contextSnapshotCache.get();
+    const dialogTitle = cachedContext?.dialogTitle ?? extractDialogTitle();
+
+    if (dialogTitle) {
+        eventProperties.dialog_title = dialogTitle;
+    }
+
+    return eventProperties;
+}
+
+/**
+ * Amplitude enrichment plugin that adds UI context to all events.
+ * Enriches events with page URL, dialog title, and custom event names.
+ */
 export function contextEnrichmentPlugin(): EnrichmentPlugin {
     let cleanupContextCapture: (() => void) | null = null;
 
@@ -169,24 +162,23 @@ export function contextEnrichmentPlugin(): EnrichmentPlugin {
         name: 'context-enrichment',
         type: 'enrichment',
 
+        /** Initialize the plugin and set up context capture listeners. */
         setup: async (_config: BrowserConfig) => {
-            // Setup context capture listeners during plugin initialization
             cleanupContextCapture = setupContextCapture();
             return Promise.resolve();
         },
 
+        /** Enrich each event with contextual information before sending to Amplitude. */
         execute: async (event: Event): Promise<Event> => {
-            // Don't modify events if we're not in a browser context
             if (typeof window === 'undefined' || typeof document === 'undefined') {
                 return event;
             }
 
-            // Create a copy of event properties to avoid mutations
             const enrichedEventProperties = {
                 ...event.event_properties,
             } as EnrichedEventProperties;
 
-            // Handling for autocapture page view events
+            // Transform page view events to custom named events
             if (event.event_type === EVENT_TYPE.PAGE_VIEW) {
                 const path = window.location.pathname;
                 const pageEventName = getPageViewEventName(path);
@@ -195,6 +187,7 @@ export function contextEnrichmentPlugin(): EnrichmentPlugin {
                 }
             }
 
+            // Transform element click events to custom named events
             if (event.event_type === EVENT_TYPE.ELEMENT_CLICK) {
                 const elementClickedEventName = getClickedElementEventName(event);
                 if (elementClickedEventName) {
@@ -203,38 +196,22 @@ export function contextEnrichmentPlugin(): EnrichmentPlugin {
             }
 
             enrichedEventProperties.page_url = window.location.href;
-
-            // Try to get dialog title from cache first (for events that happen during UI changes)
-            const cachedContext = contextCache.get();
-            let dialogTitle: string | null = null;
-
-            if (cachedContext?.dialogTitle) {
-                // Use cached context if available and recent
-                dialogTitle = cachedContext.dialogTitle;
-            } else {
-                // Fall back to current DOM state if no cache
-                dialogTitle = extractDialogTitle();
-            }
-
-            if (dialogTitle) {
-                enrichedEventProperties.dialog_title = dialogTitle;
-            }
+            enrichEventWithContext(enrichedEventProperties);
 
             const filteredProperties = filterProperties(enrichedEventProperties);
 
-            // Return enriched event
             return {
                 ...event,
                 event_properties: filteredProperties,
             };
         },
 
-        // Cleanup when plugin is removed/destroyed
+        /** Clean up event listeners and cache when the plugin is removed. */
         teardown: async () => {
             if (cleanupContextCapture) {
                 cleanupContextCapture();
             }
-            contextCache.clear();
+            contextSnapshotCache.clear();
             return Promise.resolve();
         },
     };
