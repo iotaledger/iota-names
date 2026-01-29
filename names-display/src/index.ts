@@ -3,7 +3,7 @@
 
 import { readFileSync } from 'node:fs';
 import cors from '@fastify/cors';
-import Fastify from 'fastify';
+import Fastify, { FastifyReply, FastifyRequest } from 'fastify';
 import * as z from 'zod';
 
 import { renderSvg } from './utils/renderSvg.js';
@@ -14,6 +14,7 @@ const expiredSvgTemplate = readFileSync(new URL('./svg/expired.svg', import.meta
 export const Params = z.object({
     name: z.string(),
     timestamp: z.coerce.number(),
+    objectId: z.string().optional(),
 });
 
 const fastify = Fastify({ logger: true, maxParamLength: 1000 });
@@ -27,7 +28,7 @@ function isExpired(timestamp: number): boolean {
     return timestamp < Date.now();
 }
 
-fastify.get('/:name/:timestamp', async (req, reply) => {
+const handleRequest = async (req: FastifyRequest, reply: FastifyReply) => {
     const params = await z.parseAsync(Params, req.params);
     const templateSvg = isExpired(params.timestamp) ? expiredSvgTemplate : baseSvgTemplate;
     try {
@@ -39,6 +40,9 @@ fastify.get('/:name/:timestamp', async (req, reply) => {
         reply.code(500);
         return 'Error generating SVG';
     }
-});
+};
+
+fastify.get('/:name/:timestamp', handleRequest);
+fastify.get('/:name/:timestamp/:objectId', handleRequest);
 
 fastify.listen({ host: '0.0.0.0', port: Number(process.env.PORT) || 3000 });
