@@ -93,6 +93,11 @@ function setupContextCapture(): () => void {
     };
 }
 
+/** Replace address patterns (0x1234...5678) with <address> placeholder. */
+function maskAddress(text: string): string {
+    return text.replace(/0x[a-fA-F0-9]{4}…[a-fA-F0-9]{4}/g, '<address>');
+}
+
 function getPageViewEventName(path: string): string | null {
     return PAGE_VIEW_EVENTS_MAP[path] || null;
 }
@@ -114,12 +119,13 @@ function getClickedElementEventName(event: Event): string | null {
 
     const isClickedLink = isElementTag(event, 'a');
     if (isClickedLink && (clickedElementText || clickedElementUrl)) {
-        return `${clickedElementText || clickedElementUrl} Link Clicked`;
+        const text = clickedElementText || clickedElementUrl;
+        return `${maskAddress(text)} Link Clicked`;
     }
 
     const isClickedButton = isElementTag(event, 'button');
     if (isClickedButton && clickedElementText) {
-        return `${clickedElementText} Button Clicked`;
+        return `${maskAddress(clickedElementText)} Button Clicked`;
     }
 
     return null;
