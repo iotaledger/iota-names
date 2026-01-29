@@ -1,6 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import * as amplitude from '@amplitude/analytics-browser';
 import { LogLevel } from '@amplitude/analytics-core';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
 
@@ -52,6 +53,12 @@ export async function initAmplitude() {
                 },
             },
         }).promise;
+
+        window.addEventListener('pagehide', () => {
+            amplitude.setTransport('beacon');
+            amplitude.flush();
+        });
+
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 
         setNetworkGroup(defaultNetwork);
