@@ -1,4 +1,4 @@
-name: Typescript Nightly checks
+name: IOTA Names Nightly checks
 
 on:
   schedule:
