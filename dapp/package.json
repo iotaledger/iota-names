@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "cross-env BUILD_ENV=\"development\" next dev -p 3005",
-        "build": "cross-env BUILD_ENV=\"production\" next build",
+        "build": "next build",
         "start": "next start -p 3005",
         "test": "vitest",
         "test:ui": "vitest --ui",

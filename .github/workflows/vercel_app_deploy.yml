@@ -36,6 +36,7 @@ env:
   NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}
   NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
   SENTRY_AUTH_TOKEN: ${{ secrets.NAMES_DAPP_SENTRY_AUTH_TOKEN }}
+  BUILD_ENV: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' && 'staging' || 'production' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
