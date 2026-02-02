@@ -3,6 +3,9 @@ name: Preview Deploy for IOTA Names
 on:
   pull_request:
     paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
       - "sdk/**"
       - "dapp/**"
       - ".github/workflows/iota_names.preview_deploy.yml"
