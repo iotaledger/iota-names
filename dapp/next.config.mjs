@@ -33,9 +33,9 @@ const nextConfig = withMDX({
     },
     experimental: {
         mdxRs: true,
-        turbo: {
-            resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
-        },
+    },
+    turbopack: {
+        resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json'],
     },
     async redirects() {
         return [
