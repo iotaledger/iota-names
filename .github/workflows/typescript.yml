@@ -14,6 +14,7 @@ on:
       - "names-display/**"
   push:
     branches: [develop]
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -61,7 +62,7 @@ jobs:
 
   sdk-test:
     name: SDK Tests
-    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    if: (github.event_name == 'workflow_call') || (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -137,7 +138,7 @@ jobs:
 
   dapp-e2e-test:
     name: Run dapp E2E Tests
-    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    if: (github.event_name == 'workflow_call') || (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: ubuntu-latest
     env:
       ADMIN_MNEMONIC: "say credit unknown distance behave outside convince embrace planet ginger phrase isolate"
@@ -258,7 +259,7 @@ jobs:
 
   names-display-test:
     name: Names Display Tests
-    if: (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
+    if: (github.event_name == 'workflow_call') || (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
     runs-on: self-hosted-x64
     defaults:
       run:
