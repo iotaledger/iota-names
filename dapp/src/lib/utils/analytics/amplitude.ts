@@ -9,6 +9,7 @@ import { CONFIG } from '@/config';
 
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
+import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
 const IS_ENABLED =
     process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
@@ -48,6 +49,11 @@ export async function initAmplitude() {
                         formInteractions: IS_ENABLED,
                         pageViews: IS_ENABLED,
                         sessions: IS_ENABLED,
+                        elementInteractions: IS_ENABLED
+                            ? {
+                                  cssSelectorAllowlist: ['button', 'a'],
+                              }
+                            : false,
                     },
                     logLevel: LogLevel.None,
                 },
@@ -60,6 +66,11 @@ export async function initAmplitude() {
         });
 
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
+
+        // Add context enrichment plugin to add page context to all events
+        if (IS_ENABLED) {
+            ampli.client.add(contextEnrichmentPlugin());
+        }
 
         setNetworkGroup(defaultNetwork);
     } catch (error) {
