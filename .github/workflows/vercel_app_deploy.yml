@@ -36,7 +36,6 @@ env:
   NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: ${{ inputs.NAMES_DAPP_DEFAULT_NETWORK }}
   NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
   SENTRY_AUTH_TOKEN: ${{ secrets.NAMES_DAPP_SENTRY_AUTH_TOKEN }}
-  BUILD_ENV: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' && 'staging' || 'production' }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -62,6 +61,8 @@ jobs:
         run: vercel pull --token=${{ secrets.VERCEL_TOKEN }} --yes --environment=${{ inputs.VERCEL_ENVIRONMENT }}
 
       - name: Build Project
+        env:
+          BUILD_ENV: ${{ inputs.VERCEL_ENVIRONMENT == 'preview' && 'staging' || 'production' }}
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=${{ inputs.VERCEL_ENVIRONMENT }}
 
       - name: Deploy to Vercel
