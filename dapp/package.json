@@ -21,10 +21,10 @@
         "inject-localnet": "node scripts/injectLocalnetConfig.mjs"
     },
     "dependencies": {
-        "@amplitude/analytics-browser": "^2.25.2",
+        "@amplitude/analytics-browser": "^2.32.2",
         "@amplitude/analytics-client-common": "^2.4.3",
-        "@amplitude/analytics-core": "^2.26.2",
-        "@amplitude/analytics-types": "^2.10.0",
+        "@amplitude/analytics-core": "^2.34.1",
+        "@amplitude/analytics-types": "^2.11.0",
         "@amplitude/engagement-browser": "^1.0.6",
         "@growthbook/growthbook": "^1.6.1",
         "@growthbook/growthbook-react": "^1.6.1",
