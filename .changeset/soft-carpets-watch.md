@@ -1,5 +1,4 @@
 ---
-'@iota/iota-names-sdk': patch
+'@iota/iota-names-sdk': minor
 ---
-
-enable and use getNormalizedMoveFunction
+Remove `isMethodSupported`
