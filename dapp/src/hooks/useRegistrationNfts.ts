@@ -1,10 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 import { useCurrentAccount } from '@iota/dapp-kit';
-import {
-    getNameRegistrationType,
-    getSubnameRegistrationType,
-} from '@iota/iota-names-sdk';
+import { getNameRegistrationType, getSubnameRegistrationType } from '@iota/iota-names-sdk';
 import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -40,10 +37,13 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
                     | Extract<IotaParsedData, { dataType: 'moveObject' }>
                     | undefined
                     | null;
-                type NameFields = undefined | { expiration_timestamp_ms?: string, name_str?: string };
-                const fields = type === 'subname'
-                    ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
-                    : (content?.fields as NameFields);
+                type NameFields =
+                    | undefined
+                    | { expiration_timestamp_ms?: string; name_str?: string };
+                const fields =
+                    type === 'subname'
+                        ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
+                        : (content?.fields as NameFields);
                 return {
                     name: data?.name ?? fields?.name_str ?? '',
                     description: data?.description,
