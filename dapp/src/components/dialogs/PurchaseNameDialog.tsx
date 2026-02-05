@@ -148,7 +148,7 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
 
             await client.waitForTransaction({
                 digest: transactionResult.digest,
-                waitMode: 'checkpoint'
+                waitMode: 'checkpoint',
             });
         },
         onSuccess() {
