@@ -4,6 +4,7 @@
 import * as amplitude from '@amplitude/analytics-browser';
 import { LogLevel } from '@amplitude/analytics-core';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
+import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { CONFIG } from '@/config';
 
@@ -70,6 +71,19 @@ export async function initAmplitude() {
         // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {
             ampli.client.add(contextEnrichmentPlugin());
+            const sessionReplayTracking = sessionReplayPlugin({
+                sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
+                privacyConfig: {
+                    defaultMaskLevel: 'medium',
+                    maskSelector: [
+                        '.amp-obfuscation', // any element with this class will be masked according to the defaultMaskLevel
+                        // specific selectors for the dropdown menu (comes from @iota/dapp-kit) to ensure it's fully masked
+                        '[data-radix-popper-content-wrapper]',
+                        '[class*="AccountDropdownMenu"]',
+                    ],
+                },
+            });
+            ampli.client.add(sessionReplayTracking);
         }
 
         setNetworkGroup(defaultNetwork);
