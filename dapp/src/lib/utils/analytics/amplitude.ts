@@ -8,8 +8,8 @@ import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
+import { attachEnvironmentPlugin } from './plugins/attachEnvironmentPlugin';
 import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
-import { createEnvironmentPlugin } from './plugins/createEnvironmentPlugin';
 
 const IS_ENABLED =
     process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
@@ -66,7 +66,7 @@ export async function initAmplitude() {
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 
         // Add environment plugin to set prefix dev events
-        ampli.client.add(createEnvironmentPlugin());
+        ampli.client.add(attachEnvironmentPlugin());
 
         // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {

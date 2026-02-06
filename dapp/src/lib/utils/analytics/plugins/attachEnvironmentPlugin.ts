@@ -3,8 +3,7 @@
 
 import { BrowserClient, BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
-const IS_DEVELOPMENT =
-    process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_BUILD_ENV !== 'production';
+const IS_DEVELOPMENT = process.env.NEXT_PUBLIC_BUILD_ENV !== 'production';
 
 const DEV_EVENT_PREFIX = 'dev_';
 
@@ -15,7 +14,7 @@ const DEV_EVENT_PREFIX = 'dev_';
  * This allows developers to test and debug events without polluting production analytics data.
  *
  */
-export function createEnvironmentPlugin(): EnrichmentPlugin<BrowserClient, BrowserConfig> {
+export function attachEnvironmentPlugin(): EnrichmentPlugin<BrowserClient, BrowserConfig> {
     return {
         name: 'environment-plugin',
         type: 'enrichment' as const,
