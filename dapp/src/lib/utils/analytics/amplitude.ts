@@ -6,8 +6,6 @@ import { LogLevel } from '@amplitude/analytics-core';
 import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
 import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
-import { CONFIG } from '@/config';
-
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
 import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
@@ -35,8 +33,6 @@ export async function initAmplitude() {
     if (ampli.isLoaded) {
         return;
     }
-
-    const defaultNetwork = CONFIG.network;
 
     try {
         await ampli.load({
@@ -85,16 +81,10 @@ export async function initAmplitude() {
             });
             ampli.client.add(sessionReplayTracking);
         }
-
-        setNetworkGroup(defaultNetwork);
     } catch (error) {
         console.error('[Amplitude] Initialization failed:', error);
         throw error;
     }
-}
-
-function setNetworkGroup(network: string): void {
-    ampli.client.setGroup('activeNetwork', network); // keep `activeNetwork` key for backward compatibility
 }
 
 /**
