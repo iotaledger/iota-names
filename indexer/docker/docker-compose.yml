@@ -64,6 +64,12 @@ services:
     restart: unless-stopped
     ports:
       - 9090:9090
+    command:
+      # default Dockerfile CLI arguments
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      # set data retention policy to 100 years
+      - "--storage.tsdb.retention.time=100y"
     volumes:
       - prometheus_data:/prometheus
       - ./assets/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
