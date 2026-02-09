@@ -21,6 +21,8 @@ services:
     depends_on:
       prometheus:
         condition: service_healthy
+      influxdb:
+        condition: service_healthy
     networks:
       - indexer-metrics-net
     volumes:
@@ -38,11 +40,15 @@ services:
       - IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS=${IOTA_NAMES_TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS}
       - IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID=${IOTA_NAMES_AUCTION_HOUSE_OBJECT_ID}
       - EVENT_PACKAGE_IDS=${EVENT_PACKAGE_IDS}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-iota-names-token}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-iota}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-iota-names}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command:
       - "start"
       - "--prometheus-url=http://prometheus:9090"
+      - "--influxdb-url=http://influxdb:8086"
       - "--num-workers=10"
       # Localnet values:
       # - "--node-url=http://host.docker.internal:9000"
@@ -83,6 +89,31 @@ services:
       retries: 8
       start_period: 30s
 
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USER:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD:-adminadmin}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-iota}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-iota-names}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-iota-names-token}
+      - DOCKER_INFLUXDB_INIT_RETENTION=0s
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - indexer-metrics-net
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
@@ -102,6 +133,7 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+  influxdb_data:
   indexer_progress:
 
 networks:

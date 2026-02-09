@@ -1,0 +1,766 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 5, "x": 0, "y": 0 },
+      "id": 7,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false, "textMode": "auto", "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "editorMode": "builder", "expr": "data_ingestion_checkpoint",
+          "instant": false, "legendFormat": "__auto", "range": true, "refId": "A"
+        }
+      ],
+      "title": "Processed Checkpoint",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 3, "w": 6, "x": 5, "y": 0 },
+      "id": 11,
+      "options": {
+        "colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false, "textMode": "auto", "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"name_record_added\" and r._field == \"length\")\n  |> group()\n  |> count()\n  |> rename(columns: {_value: \"Total\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Name Records ever created",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 3 },
+      "id": 10,
+      "panels": [],
+      "title": "General",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "description": "The IOTA balance of the IotaNames object.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 4 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"balance\" and r.source == \"iota_names\" and r._field == \"value\")\n  |> map(fn: (r) => ({r with _value: float(v: r._value) / 1000000000.0}))\n  |> set(key: \"_field\", value: \"Balance in IOTA\")",
+          "refId": "A"
+        }
+      ],
+      "title": "IOTA-Names Balance",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 4 },
+      "id": 1,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "added = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"name_record_added\" and r._field == \"length\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Record Count\", _measurement: \"records\"}))\n\nremoved = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"name_record_removed\" and r._field == \"length\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"Record Count\", _measurement: \"records\"}))\n\nunion(tables: [added, removed])\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Name Records",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 4 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "created = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"node_subname_created\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Node Subnames\", _measurement: \"subnames\"}))\n\nburned = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"node_subname_burned\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"Node Subnames\", _measurement: \"subnames\"}))\n\nunion(tables: [created, burned])\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "created = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"leaf_subname_created\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Leaf Subnames\", _measurement: \"subnames\"}))\n\nremoved = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"leaf_subname_removed\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"Leaf Subnames\", _measurement: \"subnames\"}))\n\nunion(tables: [created, removed])\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "B",
+          "hide": false
+        }
+      ],
+      "title": "Subname Records",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 10 },
+      "id": 12,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "set = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"target_address_set\" and r._field == \"set\")\n  |> map(fn: (r) => ({_time: r._time, _value: if r._value then 1 else -1, _field: \"Target Addresses\", _measurement: \"target_addresses\"}))\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "A"
+        }
+      ],
+      "title": "Target addresses",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 10 },
+      "id": 13,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "setEvt = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"reverse_lookup_set\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Default Names\", _measurement: \"defaults\"}))\n\nunsetEvt = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"reverse_lookup_unset\" and r._field == \"name\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"Default Names\", _measurement: \"defaults\"}))\n\nunion(tables: [setEvt, unsetEvt])\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "A"
+        }
+      ],
+      "title": "Default names",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 10 },
+      "id": 16,
+      "options": {
+        "displayLabels": ["percent"],
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "created = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"node_subname_created\" and r._field == \"name\")\n  |> group()\n  |> count()\n  |> set(key: \"_field\", value: \"Node\")\n\nburned = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"node_subname_burned\" and r._field == \"name\")\n  |> group()\n  |> count()\n  |> set(key: \"_field\", value: \"node_burned\")\n\nnodeTotal = join(tables: {created: created, burned: burned}, on: [\"_field\"], method: \"inner\")\n\nfrom(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"node_subname_created\" and r._field == \"name\")\n  |> group()\n  |> count()\n  |> set(key: \"_field\", value: \"Node\")",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"leaf_subname_created\" and r._field == \"name\")\n  |> group()\n  |> count()\n  |> set(key: \"_field\", value: \"Leaf\")",
+          "refId": "B",
+          "hide": false
+        }
+      ],
+      "title": "Proportion of node/leaf subnames",
+      "type": "piechart"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 16 },
+      "id": 20,
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "pieType": "pie",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"coupon_applied\" and r._field == \"discount\" and r.kind == \"percentage\")\n  |> group()\n  |> sum()\n  |> set(key: \"_field\", value: \"Percentage\")",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"coupon_applied\" and r._field == \"discount\" and r.kind == \"fixed\")\n  |> group()\n  |> sum()\n  |> set(key: \"_field\", value: \"Fixed\")",
+          "refId": "B",
+          "hide": false
+        }
+      ],
+      "title": "Coupon discounts",
+      "type": "piechart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "id": 9,
+      "panels": [],
+      "title": "Distributions",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "axisSoftMin": 0,
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "scaleDistribution": { "type": "linear" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "decimals": 0, "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 24 },
+      "id": 6,
+      "options": {
+        "barRadius": 0, "barWidth": 0.97, "fullHighlight": false, "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto", "showValue": "auto", "stacking": "none",
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+        "xField": "years", "xTickLabelRotation": 0, "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"transaction\" and r._field == \"years\" and r.is_renewal == \"true\")\n  |> group()\n  |> histogram(bins: [1.0, 2.0, 3.0, 4.0, 5.0])",
+          "refId": "A"
+        }
+      ],
+      "title": "Number of years per renewal",
+      "transformations": [
+        { "id": "convertFieldType", "options": { "conversions": [{ "destinationType": "number", "targetField": "years" }], "fields": {} } },
+        { "id": "sortBy", "options": { "fields": {}, "sort": [{ "desc": false, "field": "years" }] } }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "axisSoftMin": 0,
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "scaleDistribution": { "type": "linear" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "decimals": 0, "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 24 },
+      "id": 3,
+      "options": {
+        "barRadius": 0, "barWidth": 0.97, "fullHighlight": false, "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto", "showValue": "auto", "stacking": "none",
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+        "xField": "length", "xTickLabelRotation": 0, "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "import \"strings\"\n\nadded = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"name_record_added\" and r._field == \"length\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"count\", length: string(v: r._value)}))\n\nremoved = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"name_record_removed\" and r._field == \"length\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"count\", length: string(v: r._value)}))\n\nunion(tables: [added, removed])\n  |> group(columns: [\"length\"])\n  |> sum()\n  |> group()",
+          "refId": "A"
+        }
+      ],
+      "title": "Count per second level name length",
+      "transformations": [
+        { "id": "convertFieldType", "options": { "conversions": [{ "destinationType": "number", "targetField": "length" }], "fields": {} } },
+        { "id": "sortBy", "options": { "fields": {}, "sort": [{ "desc": false, "field": "length" }] } }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto",
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "scaleDistribution": { "type": "linear" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 24 },
+      "id": 17,
+      "options": {
+        "barRadius": 0, "barWidth": 0.97, "fullHighlight": false, "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto", "showValue": "auto", "stacking": "none",
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+        "xField": "depth", "xTickLabelRotation": 0, "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "added = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"name_record_added\" and r._field == \"depth\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"count\", depth: string(v: r._value)}))\n\nremoved = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"name_record_removed\" and r._field == \"depth\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"count\", depth: string(v: r._value)}))\n\nunion(tables: [added, removed])\n  |> group(columns: [\"depth\"])\n  |> sum()\n  |> group()",
+          "refId": "A"
+        }
+      ],
+      "title": "Name depth",
+      "type": "barchart"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto",
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "scaleDistribution": { "type": "linear" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 30 },
+      "id": 24,
+      "options": {
+        "barRadius": 0, "barWidth": 0.97, "fullHighlight": false, "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto", "showValue": "auto", "stacking": "none",
+        "text": { "valueSize": 30 },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+        "xField": "key", "xTickLabelRotation": 0, "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "setEvt = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"user_data_set\" and r._field == \"new\" and r._value == true)\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"count\", key: r.key}))\n\nunsetEvt = from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"user_data_unset\" and r._field == \"count\")\n  |> map(fn: (r) => ({_time: r._time, _value: -1, _field: \"count\", key: r.key}))\n\nunion(tables: [setEvt, unsetEvt])\n  |> group(columns: [\"key\"])\n  |> sum()\n  |> group()",
+          "refId": "A"
+        }
+      ],
+      "title": "User data keys",
+      "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "id": 8,
+      "panels": [],
+      "title": "Auctions",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "description": "The IOTA balance of the AuctionHouse object.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 37 },
+      "id": 15,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"balance\" and r.source == \"auction_house\" and r._field == \"value\")\n  |> map(fn: (r) => ({r with _value: float(v: r._value) / 1000000000.0}))\n  |> set(key: \"_field\", value: \"Balance in IOTA\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Auction House Balance",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "stacking": { "group": "A", "mode": "none" }
+          },
+          "displayName": "Duration",
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 37 },
+      "id": 18,
+      "options": {
+        "bucketSize": 60000,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"auction_finalized\" and r._field == \"duration_ms\")\n  |> set(key: \"_field\", value: \"Duration (ms)\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Auction durations",
+      "type": "histogram"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 37 },
+      "id": 19,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "showPercentChange": false, "textMode": "auto", "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"auction_finalized\" and r._field == \"duration_ms\")\n  |> group()\n  |> mean()",
+          "refId": "A"
+        }
+      ],
+      "title": "Average auction duration",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "barWidthFactor": 0.6,
+            "drawStyle": "line", "fillOpacity": 0, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false, "lineInterpolation": "linear", "lineWidth": 1, "pointSize": 5,
+            "scaleDistribution": { "type": "linear" }, "showPoints": "auto", "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 44 },
+      "id": 4,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "started = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"auction_started\" and r._field == \"starting_bid\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Auctions Started\", _measurement: \"auctions\"}))\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)\n\nstartedCount = from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"auction_started\" and r._field == \"starting_bid\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"_tmp\", _measurement: \"auctions\"}))\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)\n\nstarted",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"auction_finalized\" and r._field == \"winning_bid\")\n  |> map(fn: (r) => ({_time: r._time, _value: 1, _field: \"Auctions Finalized\", _measurement: \"auctions\"}))\n  |> group(columns: [\"_field\"])\n  |> sort(columns: [\"_time\"])\n  |> cumulativeSum()\n  |> filter(fn: (r) => r._time >= v.timeRangeStart)",
+          "refId": "B",
+          "hide": false
+        }
+      ],
+      "title": "Number of auctions started and finalized",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "description": "Bucket size is 1 IOTA",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1,
+            "stacking": { "group": "A", "mode": "none" }
+          },
+          "displayName": "Price",
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "NANOs"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 44 },
+      "id": 14,
+      "options": {
+        "bucketSize": 1000000000,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"auction_finalized\" and r._field == \"winning_bid\")\n  |> set(key: \"_field\", value: \"Price\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Final auction prices",
+      "type": "histogram"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] },
+          "unit": "IOTA"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 44 },
+      "id": 22,
+      "options": {
+        "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false },
+        "showPercentChange": false, "textMode": "auto", "wideLayout": true
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "from(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"auction_finalized\" and r._field == \"winning_bid\")\n  |> group()\n  |> map(fn: (r) => ({r with _value: float(v: r._value) / 1000000000.0}))\n  |> mean()",
+          "refId": "A"
+        }
+      ],
+      "title": "Average auction price",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "description": "Shows how many auctions received a certain number of bids.",
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text",
+            "axisLabel": "", "axisPlacement": "auto",
+            "fillOpacity": 80, "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "lineWidth": 1, "scaleDistribution": { "type": "linear" }, "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green" }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 51 },
+      "id": 23,
+      "options": {
+        "barRadius": 0, "barWidth": 0.97, "fullHighlight": false, "groupWidth": 0.7,
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "orientation": "auto", "showValue": "auto", "stacking": "none",
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" },
+        "xField": "bid_count", "xTickLabelRotation": 0, "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "influxdb" },
+          "query": "import \"experimental\"\n\nfrom(bucket: \"iota-names\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"auction_started\" and r._field == \"name\")\n  |> group(columns: [\"_value\"])\n  |> count()\n  |> rename(columns: {_value: \"bid_count\"})\n  |> group()",
+          "refId": "A"
+        }
+      ],
+      "title": "Auctions per number of bids",
+      "transformations": [
+        { "id": "convertFieldType", "options": { "conversions": [{ "destinationType": "number", "targetField": "bid_count" }], "fields": {} } },
+        { "id": "sortBy", "options": { "fields": {}, "sort": [{ "field": "bid_count" }] } }
+      ],
+      "type": "barchart"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 41,
+  "tags": [],
+  "templating": { "list": [] },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "IOTA-Names (InfluxDB)",
+  "uid": "iota-names-influxdb",
+  "version": 1
+}
