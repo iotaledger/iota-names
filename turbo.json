@@ -21,7 +21,7 @@
         "build": {
             "dependsOn": ["^build"],
             "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"],
-            "passThroughEnv": ["SENTRY_AUTH_TOKEN"]
+            "passThroughEnv": ["SENTRY_AUTH_TOKEN", "BUILD_ENV"]
         }
     }
 }

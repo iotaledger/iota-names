@@ -9,11 +9,13 @@ import { ampli } from '@/lib/utils/analytics/ampli';
 
 export function ConnectButton() {
     return (
-        <DappConnectButton
-            connectText="Connect"
-            onConnected={(args) => {
-                ampli.connectedWallet({ wallet: args.wallet.name });
-            }}
-        />
+        <div className="amp-obfuscation">
+            <DappConnectButton
+                connectText="Connect"
+                onConnected={(args) => {
+                    ampli.connectedWallet({ wallet: args.wallet.name });
+                }}
+            />
+        </div>
     );
 }
