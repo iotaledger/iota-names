@@ -10,9 +10,9 @@ import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
 import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
-const IS_ENABLED =
-    process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
-    process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
+const IS_PRODUCTION = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
+
+const IS_ENABLED = IS_PRODUCTION && process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
 /**
  * Check if user has previously given consent for cookies/tracking.
@@ -67,19 +67,21 @@ export async function initAmplitude() {
         // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {
             ampli.client.add(contextEnrichmentPlugin());
-            const sessionReplayTracking = sessionReplayPlugin({
-                sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
-                privacyConfig: {
-                    defaultMaskLevel: 'medium',
-                    maskSelector: [
-                        '.amp-obfuscation', // any element with this class will be masked according to the defaultMaskLevel
-                        // specific selectors for the dropdown menu (comes from @iota/dapp-kit) to ensure it's fully masked
-                        '[data-radix-popper-content-wrapper]',
-                        '[class*="AccountDropdownMenu"]',
-                    ],
-                },
-            });
-            ampli.client.add(sessionReplayTracking);
+            if (IS_PRODUCTION) {
+                const sessionReplayTracking = sessionReplayPlugin({
+                    sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
+                    privacyConfig: {
+                        defaultMaskLevel: 'medium',
+                        maskSelector: [
+                            '.amp-obfuscation', // any element with this class will be masked according to the defaultMaskLevel
+                            // specific selectors for the dropdown menu (comes from @iota/dapp-kit) to ensure it's fully masked
+                            '[data-radix-popper-content-wrapper]',
+                            '[class*="AccountDropdownMenu"]',
+                        ],
+                    },
+                });
+                ampli.client.add(sessionReplayTracking);
+            }
         }
     } catch (error) {
         console.error('[Amplitude] Initialization failed:', error);
