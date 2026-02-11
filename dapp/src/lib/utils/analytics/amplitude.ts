@@ -14,7 +14,6 @@ import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 const IS_PRODUCTION = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
 
 // Dev note: set IS_ENABLED=true to test Amplitude events locally
-// Session Replay is still blocked unless IS_PRODUCTION is true
 const IS_ENABLED = IS_PRODUCTION && process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
 /**
