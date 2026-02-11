@@ -10,8 +10,11 @@ import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
 import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
+// Dev note: do not change, production-only gate (Session Replay must never run outside prod)
 const IS_PRODUCTION = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
 
+// Dev note: set IS_ENABLED=true to test Amplitude events locally
+// Session Replay is still blocked unless IS_PRODUCTION is true
 const IS_ENABLED = IS_PRODUCTION && process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
 /**
@@ -67,6 +70,7 @@ export async function initAmplitude() {
         // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {
             ampli.client.add(contextEnrichmentPlugin());
+            // Session Replay runs only in production (safety gate to avoid polluting recordings)
             if (IS_PRODUCTION) {
                 const sessionReplayTracking = sessionReplayPlugin({
                     sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
