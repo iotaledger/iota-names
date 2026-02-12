@@ -26,12 +26,9 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
         context.waitForEvent('page'),
         page.getByText(new RegExp(extensionName, 'i')).click(),
     ]);
-
     await walletApprovePage.waitForLoadState('domcontentloaded');
-    const connectButton = walletApprovePage.getByRole('button', {
-        name: /Connect/i,
-    });
-
+    await walletApprovePage.getByRole('button', { name: /Continue/i }).waitFor({ timeout: 10_000 });
+    const connectButton = walletApprovePage.getByRole('button', { name: /Connect/i });
     await expect(connectButton).toBeVisible({ timeout: 10_000 });
 
     await connectButton.click();
