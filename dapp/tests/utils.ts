@@ -22,20 +22,22 @@ import { iotaClientGraphQl, iotaNamesClient } from './setup/utils';
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
     await page.getByRole('button', { name: /Connect/i }).click();
 
-    const pagePromise = context.waitForEvent('page', { timeout: 20_000 });
-    const walletButton = page.getByText(new RegExp(extensionName, 'i'));
+    const [walletApprovePage] = await Promise.all([
+        context.waitForEvent('page'),
+        page.getByText(new RegExp(extensionName, 'i')).click(),
+    ]);
 
-    await walletButton.click();
-    const walletApprovePage = await pagePromise;
-    if (walletApprovePage) {
-        await walletApprovePage.waitForLoadState('domcontentloaded');
-        await walletApprovePage.bringToFront();
-        await walletApprovePage.getByRole('button', { name: /Continue/i }).click();
-        const connectButton = walletApprovePage.getByRole('button', { name: /Connect/i });
-        await connectButton.waitFor({ state: 'visible', timeout: 10_000 });
-        await connectButton.click();
-        await page.bringToFront();
-    }
+    await walletApprovePage.waitForLoadState('domcontentloaded');
+    const connectButton = walletApprovePage.getByRole('button', {
+        name: /Connect/i,
+    });
+
+    await expect(connectButton).toBeVisible({ timeout: 10_000 });
+
+    await connectButton.click();
+    await walletApprovePage.waitForEvent('close', { timeout: 5_000 }).catch(() => {});
+
+    await page.bringToFront();
 }
 
 export async function createWallet(page: Page) {
