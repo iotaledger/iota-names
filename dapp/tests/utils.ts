@@ -27,9 +27,20 @@ export async function connectWallet(page: Page, context: BrowserContext, extensi
     await walletApprovePage.bringToFront();
 
     await walletApprovePage.getByRole('button', { name: 'Continue' }).click();
-    await walletApprovePage.getByRole('button', { name: 'Connect' }).click();
+
+    await Promise.race([
+        walletApprovePage
+            .getByRole('button', { name: 'Connect' })
+            .click()
+            .catch(() => {}),
+        walletApprovePage.waitForEvent('close'),
+    ]);
 
     await page.bringToFront();
+
+    await expect(page.getByRole('button', { name: 'Connect' })).not.toBeVisible({
+        timeout: 5_000,
+    });
 }
 
 export async function createWallet(page: Page) {
