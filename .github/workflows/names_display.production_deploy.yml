@@ -42,8 +42,6 @@ jobs:
             ghcr.io/iotaledger/iota-names/iota-names-display:${{ env.VERSION }}
             ghcr.io/iotaledger/iota-names/iota-names-display:latest
           no-cache: true
-          build-args: |
-            INVALIDATED_NAMES=${{ secrets.INVALIDATED_NAMES }}
 
       - name: Add SSH key
         if: ${{ github.event.inputs.deployment == 'true' }}

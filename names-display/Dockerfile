@@ -30,13 +30,9 @@ WORKDIR /workspace/names-display
 # Expose port
 EXPOSE 3000
 
-# Invalidated names argument
-ARG INVALIDATED_NAMES
-
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV INVALIDATED_NAMES=$INVALIDATED_NAMES
 
 # Start the application
 CMD ["pnpm", "start"]
