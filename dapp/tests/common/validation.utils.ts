@@ -1,6 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import { Transaction } from '@iota/iota-sdk/transactions';
 
 import { adminKeypair, client, iotaNamesClient } from '../setup/utils';

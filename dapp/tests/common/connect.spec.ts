@@ -1,6 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import { formatAddress } from '@iota/iota-sdk/utils';
 
 import { expect, test } from '../helpers/fixtures';

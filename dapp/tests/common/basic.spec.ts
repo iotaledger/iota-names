@@ -1,7 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import 'dotenv/config';
-
 import { CONFIG } from '@/config';
 
 import { expect, test } from '../helpers/fixtures';

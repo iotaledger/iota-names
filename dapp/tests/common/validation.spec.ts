@@ -1,6 +1,5 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 
 import { denormalizeName } from '@/lib/utils';

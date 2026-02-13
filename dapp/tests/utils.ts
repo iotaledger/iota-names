@@ -1,17 +1,14 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { getNetwork } from '@iota/iota-sdk/client';
-import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
-import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
-import type { BrowserContext, Page } from '@playwright/test';
-
-import 'dotenv/config';
-
 import { execFileSync } from 'child_process';
 import { IotaNamesTransaction, isSubname, NameRecord } from '@iota/iota-names-sdk';
+import { getNetwork } from '@iota/iota-sdk/client';
 import type { Signer } from '@iota/iota-sdk/cryptography';
+import { requestIotaFromFaucetV0 } from '@iota/iota-sdk/faucet';
+import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
+import type { BrowserContext, Page } from '@playwright/test';
 
 import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
@@ -20,19 +17,17 @@ import { expect } from './helpers/fixtures';
 import { iotaClientGraphQl, iotaNamesClient } from './setup/utils';
 
 export async function connectWallet(page: Page, context: BrowserContext, extensionName: string) {
-    await page.getByRole('button', { name: /Connect/i }).click();
+    await page.getByRole('button', { name: 'Connect' }).click();
 
-    const [walletApprovePage] = await Promise.all([
-        context.waitForEvent('page'),
-        page.getByText(new RegExp(extensionName, 'i')).click(),
-    ]);
-    await walletApprovePage.waitForLoadState('domcontentloaded');
-    await walletApprovePage.getByRole('button', { name: /Continue/i }).click({ timeout: 5_000 });
-    const connectButton = walletApprovePage.getByRole('button', { name: /Connect/i });
-    await expect(connectButton).toBeVisible({ timeout: 10_000 });
+    const pagePromise = context.waitForEvent('page', { timeout: 20_000 });
+    await page.getByText(extensionName, { exact: true }).click();
+    const walletApprovePage = await pagePromise;
 
-    await connectButton.click();
-    await walletApprovePage.waitForEvent('close', { timeout: 5_000 }).catch(() => {});
+    await walletApprovePage.waitForLoadState('load');
+    await walletApprovePage.bringToFront();
+
+    await walletApprovePage.getByRole('button', { name: 'Continue' }).click();
+    await walletApprovePage.getByRole('button', { name: 'Connect' }).click();
 
     await page.bringToFront();
 }

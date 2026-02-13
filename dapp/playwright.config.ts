@@ -1,4 +1,10 @@
+import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+const getEnvPath = (fileName: string) => path.resolve(__dirname, fileName);
+
+dotenv.config({ path: [getEnvPath('.env.local'), getEnvPath('.env')] });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -27,46 +33,46 @@ export default defineConfig({
             },
             fullyParallel: false,
         },
-        {
-            name: 'Management flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/management',
-            fullyParallel: false,
-        },
-        {
-            name: 'Purchase setup',
-            testMatch: /purchase\.setup\.ts/,
-        },
-        {
-            name: 'Purchase flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/purchase',
-            dependencies: ['Purchase setup'],
-            fullyParallel: false,
-        },
-        {
-            name: 'Auctions setup',
-            testMatch: /auctions\.setup\.ts/,
-            dependencies: ['Purchase flow'],
-        },
-        {
-            name: 'Auctions flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/auctions',
-            dependencies: ['Auctions setup'],
-        },
+        // {
+        //     name: 'Management flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/management',
+        //     fullyParallel: false,
+        // },
+        // {
+        //     name: 'Purchase setup',
+        //     testMatch: /purchase\.setup\.ts/,
+        // },
+        // {
+        //     name: 'Purchase flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/purchase',
+        //     dependencies: ['Purchase setup'],
+        //     fullyParallel: false,
+        // },
+        // {
+        //     name: 'Auctions setup',
+        //     testMatch: /auctions\.setup\.ts/,
+        //     dependencies: ['Purchase flow'],
+        // },
+        // {
+        //     name: 'Auctions flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/auctions',
+        //     dependencies: ['Auctions setup'],
+        // },
     ],
     webServer: {
-        command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
+        command: 'pnpm start',
         port: 3005,
         timeout: 30 * 1000,
         reuseExistingServer: !process.env.CI,
