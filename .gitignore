@@ -12,6 +12,7 @@ iota.log.*
 localnet.json
 
 **/.env
+**/.env.local
 node_modules
 tx-data.txt*
 .DS_STORE*
