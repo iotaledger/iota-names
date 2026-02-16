@@ -88,7 +88,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
         (Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
 
     let gas;
-    if (network.id === Network.Testnet) {
+    if (network.id === Network.Mainnet) {
+        gas = 500n;
+    } else if (network.id === Network.Testnet) {
         gas = 250n;
     } else {
         gas = 6n;
@@ -126,7 +128,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     const subNft = iotaNamesTx.createSubname({
         parentNft: nft,
-        name: 'node.' + uniqueName,
+        name: 'node-subname.' + uniqueName,
         expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
         allowChildCreation: true,
         allowTimeExtension: true,
@@ -143,10 +145,10 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // do it for sub nft too
     iotaNamesTx.createLeafSubname({
         parentNft: subNft,
-        name: 'leaf.node.' + uniqueName,
+        name: 'leaf.node-subname.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node-subname.' + uniqueName });
 
     // extend expiration a bit further for the subNft
     iotaNamesTx.extendExpiration({
@@ -156,7 +158,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     iotaNamesTx.editSetup({
         parentNft: nft,
-        name: 'node.' + uniqueName,
+        name: 'node-subname.' + uniqueName,
         allowChildCreation: true,
         allowTimeExtension: false,
     });
@@ -164,7 +166,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // let's go 2 levels deep and edit setups!
     const moreNestedNft = iotaNamesTx.createSubname({
         parentNft: subNft,
-        name: 'more.node.' + uniqueName,
+        name: 'more.node-subname.' + uniqueName,
         allowChildCreation: true,
         allowTimeExtension: true,
         expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -172,7 +174,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     iotaNamesTx.editSetup({
         parentNft: subNft,
-        name: 'more.node.' + uniqueName,
+        name: 'more.node-subname.' + uniqueName,
         allowChildCreation: false,
         allowTimeExtension: false,
     });
