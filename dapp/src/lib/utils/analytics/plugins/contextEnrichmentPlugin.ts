@@ -4,7 +4,8 @@
 /**
  * Context Enrichment Plugin for Amplitude Analytics
  *
- * Enriches analytics events with UI context (page URL, dialog title, etc.).
+ * Enriches analytics events with UI context (page URL, dialog title, etc.) and
+ * handles environment-based event prefixing for development/production separation.
  *
  * Uses event capture phase to snapshot UI state before handlers modify the DOM,
  * solving the timing issue where analytics events are processed after UI changes.
@@ -21,6 +22,10 @@ import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytic
 
 import type { ContextSnapshot } from './contextSnapshotCache';
 import { contextSnapshotCache } from './contextSnapshotCache';
+
+// Environment detection
+const IS_DEVELOPMENT = process.env.NEXT_PUBLIC_BUILD_ENV !== 'production';
+const DEV_EVENT_PREFIX = 'dev_';
 
 /** Page paths mapped to custom Amplitude event names. */
 const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
@@ -158,8 +163,8 @@ function enrichEventWithContext(eventProperties: EnrichedEventProperties): Enric
 }
 
 /**
- * Amplitude enrichment plugin that adds UI context to all events.
- * Enriches events with page URL, dialog title, and custom event names.
+ * Amplitude enrichment plugin that adds UI context to all events and handles environment separation.
+ * Enriches events with page URL, dialog title, custom event names, and development prefixing.
  */
 export function contextEnrichmentPlugin(): EnrichmentPlugin {
     let cleanupContextCapture: (() => void) | null = null;
@@ -205,6 +210,15 @@ export function contextEnrichmentPlugin(): EnrichmentPlugin {
             enrichEventWithContext(enrichedEventProperties);
 
             const filteredProperties = filterProperties(enrichedEventProperties);
+
+            // Environment handling - add prefix
+            if (
+                IS_DEVELOPMENT &&
+                event.event_type &&
+                !event.event_type.startsWith(DEV_EVENT_PREFIX)
+            ) {
+                event.event_type = DEV_EVENT_PREFIX + event.event_type;
+            }
 
             return {
                 ...event,
