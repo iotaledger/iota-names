@@ -139,6 +139,9 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.publicName(account?.address || ''),
             });
+            queryClient.invalidateQueries({
+                queryKey: ['iota-name', 'default-name', account?.address],
+            });
 
             const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
             const hasSetPublicUpdate = updates.some((update) => update.type === 'set-public');
@@ -361,9 +364,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
     const account = useCurrentAccount();
 
     function copyAddressToClipboard() {
-        if (account?.address) {
-            copyToClipboard(account.address);
-        }
+        copyToClipboard(targetAddress);
     }
 
     const cleanName = normalizeIotaName(name, 'at', {
@@ -371,7 +372,10 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
     });
 
     const isNamePublic = updates.some((update) => update.type === 'set-public');
-    const targetAddress = updates.find((update) => update.type === 'set-target-address')?.address;
+    const targetAddress =
+        updates.find((update) => update.type === 'set-target-address')?.address ??
+        account?.address ??
+        '';
     return (
         <div className="flex flex-col gap-y-md">
             <div className="flex flex-col gap-y-sm">
@@ -379,7 +383,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                 <div>
                     <Chip
                         leadingElement={<Link className="w-4 h-4" />}
-                        label={formatAddress(targetAddress || '')}
+                        label={formatAddress(targetAddress)}
                         trailingElement={<Copy className="w-4 h-4" />}
                         onClick={copyAddressToClipboard}
                         type={isNamePublic ? ChipType.Success : ChipType.Elevated}

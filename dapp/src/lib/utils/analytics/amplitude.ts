@@ -1,12 +1,14 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import * as amplitude from '@amplitude/analytics-browser';
 import { LogLevel } from '@amplitude/analytics-core';
-
-import { CONFIG } from '@/config';
+import { plugin as engagementPlugin } from '@amplitude/engagement-browser';
+import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
+import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 
 const IS_ENABLED =
     process.env.NEXT_PUBLIC_BUILD_ENV === 'production' &&
@@ -32,8 +34,6 @@ export async function initAmplitude() {
         return;
     }
 
-    const defaultNetwork = CONFIG.network;
-
     try {
         await ampli.load({
             environment: 'iotanames',
@@ -41,23 +41,50 @@ export async function initAmplitude() {
             client: {
                 configuration: {
                     autocapture: {
+                        attribution: IS_ENABLED,
+                        fileDownloads: IS_ENABLED,
+                        formInteractions: IS_ENABLED,
                         pageViews: IS_ENABLED,
                         sessions: IS_ENABLED,
+                        elementInteractions: IS_ENABLED
+                            ? {
+                                  cssSelectorAllowlist: ['button', 'a'],
+                              }
+                            : false,
                     },
                     logLevel: LogLevel.None,
                 },
             },
         }).promise;
 
-        setNetworkGroup(defaultNetwork);
+        window.addEventListener('pagehide', () => {
+            amplitude.setTransport('beacon');
+            amplitude.flush();
+        });
+
+        ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
+
+        // Add context enrichment plugin to add page context to all events
+        if (IS_ENABLED) {
+            ampli.client.add(contextEnrichmentPlugin());
+            const sessionReplayTracking = sessionReplayPlugin({
+                sampleRate: 1, // set to 1 to capture all sessions; adjust as needed (e.g., 0.1 for 10%)
+                privacyConfig: {
+                    defaultMaskLevel: 'medium',
+                    maskSelector: [
+                        '.amp-obfuscation', // any element with this class will be masked according to the defaultMaskLevel
+                        // specific selectors for the dropdown menu (comes from @iota/dapp-kit) to ensure it's fully masked
+                        '[data-radix-popper-content-wrapper]',
+                        '[class*="AccountDropdownMenu"]',
+                    ],
+                },
+            });
+            ampli.client.add(sessionReplayTracking);
+        }
     } catch (error) {
         console.error('[Amplitude] Initialization failed:', error);
         throw error;
     }
-}
-
-function setNetworkGroup(network: string): void {
-    ampli.client.setGroup('activeNetwork', network); // keep `activeNetwork` key for backward compatibility
 }
 
 /**

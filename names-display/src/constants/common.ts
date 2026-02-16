@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import TextToSVG from 'text-to-svg';
 
 export const TEXT_TO_SVG_ROBOTO = TextToSVG.loadSync(

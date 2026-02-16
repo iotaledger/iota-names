@@ -52,33 +52,6 @@ export class IotaNamesClient {
         }
     }
 
-    async isMethodSupported(
-        packageId: string,
-        module: string,
-        functionName: string,
-    ): Promise<boolean> {
-        const methodData = await this.graphQlClient.query<{
-            package: { module: { function: unknown } };
-        }>({
-            query: `query getMethod($package: IotaAddress!, $module: String!, $function: String!) {
-                package(address: $package) {
-                    module(name: $module) {
-                        function(name: $function) {
-                            name
-                        }
-                    }
-                }
-            }`,
-            variables: {
-                package: packageId,
-                module,
-                function: functionName,
-            },
-        });
-
-        return methodData.data?.package?.module?.function != null;
-    }
-
     /**
      * Get the corresponding address for the given package.
      * Sometimes new versions might contain new types,

@@ -88,7 +88,7 @@ export default function MyNamesPage(): JSX.Element {
                 return [...namesRegistrations, ...subnamesRegistrations, ...auctionCards];
             case GroupedNamesFilter.InAuction:
                 return auctionCards;
-            case GroupedNamesFilter.Owned:
+            case GroupedNamesFilter.Names:
                 return namesRegistrations;
             case GroupedNamesFilter.Subnames:
                 return subnamesRegistrations;
@@ -178,7 +178,7 @@ export default function MyNamesPage(): JSX.Element {
                             onClick={() => handleFilterSelect(value)}
                             disabled={
                                 (value === GroupedNamesFilter.InAuction && noAuctions) ||
-                                (value === GroupedNamesFilter.Owned && !names?.length) ||
+                                (value === GroupedNamesFilter.Names && !names?.length) ||
                                 (value === GroupedNamesFilter.Subnames && !subnames?.length)
                             }
                         />
