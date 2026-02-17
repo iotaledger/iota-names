@@ -31,8 +31,15 @@ const modificationsComment = `// Modifications Copyright (c) ${CURRENT_YEAR} IOT
 
 function checkHeader(node, context) {
     const sourceCode = context.getSourceCode();
-    const comments = sourceCode.getAllComments();
-    const firstComment = comments?.[0]?.value;
+    let comments = sourceCode.getAllComments();
+    let firstComment = comments?.[0];
+
+    if (firstComment?.type === 'Shebang' && firstComment?.value.includes('/usr/bin/env')) {
+        comments = comments.slice(1);
+        firstComment = comments?.[0];
+    }
+
+    firstComment = firstComment?.value;
 
     const hasValidIotaCopyrightHeader = firstComment && copyrightPattern.test(firstComment);
     const hasOldCopyrightHeader = firstComment?.includes(OLD_COPYRIGHT_HEADER);

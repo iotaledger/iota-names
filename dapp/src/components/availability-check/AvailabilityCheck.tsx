@@ -51,8 +51,8 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const pathname = usePathname();
     const router = useRouter();
     const { close } = useAvailabilityCheckDialog();
-    const { data: blockedList = [] } = useBlockedList();
-    const { data: reservedList = [] } = useReservedList();
+    const { data: blockedList = [], isLoading: isLoadingBlockedList } = useBlockedList();
+    const { data: reservedList = [], isLoading: isLoadingReservedList } = useReservedList();
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearchValue = useDebounce(searchValue, DEBOUNCE_DELAY);
     const [recentSearches, setRecentSearches] = useState<RecentSearch[]>(() => {
@@ -94,7 +94,11 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const isLoading =
         !validationError &&
         debouncedSearchValue &&
-        (isLoadingAuctionMetadata || isLoadingNameRecord || isLoadingPriceList);
+        (isLoadingAuctionMetadata ||
+            isLoadingNameRecord ||
+            isLoadingPriceList ||
+            isLoadingBlockedList ||
+            isLoadingReservedList);
 
     const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';

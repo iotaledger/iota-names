@@ -1,9 +1,8 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { useIotaClient } from '@iota/dapp-kit';
 import { useQuery } from '@tanstack/react-query';
-
-import { useIotaNamesClient } from '@/contexts';
 
 import { queryKey } from './queryKey';
 
@@ -16,11 +15,21 @@ export function useIsMethodSupported({
     module: string;
     functionName: string;
 }) {
-    const { iotaNamesClient } = useIotaNamesClient();
+    const client = useIotaClient();
+
     return useQuery({
         queryKey: [...queryKey.methodSupported(packageId, module, functionName)],
-        queryFn() {
-            return iotaNamesClient.isMethodSupported(packageId, module, functionName);
+        async queryFn() {
+            try {
+                const result = await client.getNormalizedMoveFunction({
+                    package: packageId,
+                    module,
+                    function: functionName,
+                });
+                return result != null;
+            } catch {
+                return false;
+            }
         },
     });
 }

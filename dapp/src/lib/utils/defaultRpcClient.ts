@@ -25,9 +25,7 @@ export const createIotaClient = (network: NetworkId): IotaClient => {
             unsupportedMethods: [
                 'multiGetObjects',
                 'getReferenceGasPrice',
-                'getNormalizedMoveFunction',
                 'getOwnedObjects',
-                'dryRunTransactionBlock',
                 'executeTransactionBlock',
             ],
         }),
