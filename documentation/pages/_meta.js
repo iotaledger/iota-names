@@ -1,0 +1,11 @@
+export default {
+    index: 'IOTA-Names Documentation',
+    developer: 'Developer',
+    user: 'User',
+    dapp: {
+        title: 'IOTA-Names Dapp ↗',
+        type: 'page',
+        href: 'https://iotanames.com/',
+        newWindow: true,
+    },
+};

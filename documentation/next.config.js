@@ -2,7 +2,9 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const withNextra = require('nextra')({
+const nextra = require('nextra').default;
+
+const withNextra = nextra({
   theme: 'nextra-theme-docs',
   themeConfig: './theme.config.jsx'
 })
