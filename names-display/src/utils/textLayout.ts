@@ -1,3 +1,6 @@
+// Copyright (c) 2025 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
 import { SVG_CONFIG, TEXT_TO_SVG_ROBOTO } from '../constants/common.js';
 
 function measureWidth(text: string, fontSize: number): number {

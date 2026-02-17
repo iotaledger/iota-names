@@ -139,6 +139,9 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
             queryClient.invalidateQueries({
                 queryKey: queryKey.publicName(account?.address || ''),
             });
+            queryClient.invalidateQueries({
+                queryKey: ['iota-name', 'default-name', account?.address],
+            });
 
             const hasAddressUpdate = updates.some((update) => update.type === 'set-target-address');
             const hasSetPublicUpdate = updates.some((update) => update.type === 'set-public');

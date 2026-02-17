@@ -1,12 +1,15 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
+'use client';
 
 import { Activity, Clock, RecognizedBadge } from '@iota/apps-ui-icons';
 import Lottie from 'lottie-react';
 
-import fairAuctionAnimation from '@/animations/landing/fair-auction_bg_v1.json';
+import fairAuctionDesktopAnimation from '@/animations/landing/fair-auction_bg_desktop.json';
+import fairAuctionMobileAnimation from '@/animations/landing/fair-auction_bg_mobile.json';
 import { CircleGradient } from '@/components/CircleGradient';
 import { IconCard } from '@/components/IconCard';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 const TITTLE = 'Fair Auction, Real Users';
 const BODY =
@@ -31,23 +34,31 @@ const FAIR_AUCTION = [
 ];
 
 export function FairAuction() {
+    const isDesktop = useMediaQuery('(min-width: 1024px)');
+
     return (
         <section className="relative overflow-hidden">
             <div className="container py-14 md:py-20">
                 <div className="bg-names-neutral-6 rounded-3xl py-lg md:py-[40px] px-xl md:px-2xl relative">
                     <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden rounded-3xl">
-                        <div className="h-full w-full ">
-                            <Lottie
-                                animationData={fairAuctionAnimation}
-                                loop={true}
-                                autoplay={true}
-                                style={{
-                                    height: '100%',
-                                }}
-                                rendererSettings={{
-                                    preserveAspectRatio: 'xMidYMid slice',
-                                }}
-                            />
+                        <div className="h-full w-full">
+                            {isDesktop ? (
+                                <Lottie
+                                    animationData={fairAuctionDesktopAnimation}
+                                    loop
+                                    autoplay
+                                    style={{ height: '100%' }}
+                                    rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
+                                />
+                            ) : (
+                                <Lottie
+                                    animationData={fairAuctionMobileAnimation}
+                                    loop
+                                    autoplay
+                                    style={{ height: '100%' }}
+                                    rendererSettings={{ preserveAspectRatio: 'xMidYMid slice' }}
+                                />
+                            )}
                         </div>
                     </div>
                     <CircleGradient position="top-left" />

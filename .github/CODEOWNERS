@@ -21,3 +21,4 @@
 /pnpm-lock.yaml @iotaledger/dev-tools @iotaledger/tooling
 /pnpm-workspace.yaml @iotaledger/dev-tools @iotaledger/tooling
 /prettier.config.cjs @iotaledger/tooling
+/turbo.json @iotaledger/tooling
