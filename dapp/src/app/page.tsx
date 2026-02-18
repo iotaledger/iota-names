@@ -3,22 +3,13 @@
 
 'use client';
 
-import {
-    AuctionCarousel,
-    BuiltForBuilders,
-    FairAuction,
-    LandingHero,
-    NameUtility,
-    WhyIotaNames,
-} from '@/sections';
+import { BuiltForBuilders, LandingHero, NameUtility, WhyIotaNames } from '@/sections';
 
 export default function Home() {
     return (
         <main className="flex flex-col min-h-screen">
             <LandingHero />
             <WhyIotaNames />
-            <FairAuction />
-            <AuctionCarousel />
             <NameUtility />
             <BuiltForBuilders />
         </main>
