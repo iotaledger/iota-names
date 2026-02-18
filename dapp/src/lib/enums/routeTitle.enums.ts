@@ -3,6 +3,5 @@
 
 export enum RouteTitle {
     MyNames = 'My Names',
-    Auction = 'Auctions',
     Documentation = 'Documentation',
 }

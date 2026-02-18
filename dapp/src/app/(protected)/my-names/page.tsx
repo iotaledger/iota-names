@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Refresh, Warning } from '@iota/apps-ui-icons';
+import { Add, Info, Warning } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -14,7 +14,6 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
-    LoadingIndicator,
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
@@ -22,13 +21,10 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { useAuctions } from '@/auctions';
-import { groupUserAuctions, type AuctionCard } from '@/auctions/lib/utils/groupUserAuctions';
 import { RenewSubnameDialog } from '@/components/dialogs/RenewSubameDialog';
-import { ExtendedAuctionCard } from '@/components/name-card/ExtendedAuctionCard';
 import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
-import { useGetPublicName, useRefreshAuctions, useRegistrationNfts } from '@/hooks';
+import { useGetPublicName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
@@ -59,35 +55,19 @@ export default function MyNamesPage(): JSX.Element {
         error: isSubnamesErrored,
         isLoading: isLoadingSubnames,
     } = useRegistrationNfts('subname');
-    const {
-        data: auctionDetails,
-        error: isAuctionsErrored,
-        isLoading: isLoadingAuctions,
-    } = useAuctions({
-        type: 'user',
-        userAddress: account?.address,
-        status: 'all',
-    });
-
-    const { isRefreshing, handleRefresh } = useRefreshAuctions(auctionDetails);
 
     const address = useCurrentAccount()?.address ?? '';
     const { data: publicName } = useGetPublicName(address);
 
-    const isLoadingCards = isLoadingAuctions || isLoadingSubnames || isLoadingRegistrations;
+    const isLoadingCards = isLoadingSubnames || isLoadingRegistrations;
 
-    const groupedAuctions = groupUserAuctions(auctionDetails, account?.address ?? '');
-
-    const filteredNames: (RegistrationNft | AuctionCard)[] = (() => {
-        const auctionCards = groupedAuctions ?? [];
+    const filteredNames: RegistrationNft[] = (() => {
         const namesRegistrations = names ?? [];
         const subnamesRegistrations = subnames ?? [];
 
         switch (selectedFilter) {
             case GroupedNamesFilter.All:
-                return [...namesRegistrations, ...subnamesRegistrations, ...auctionCards];
-            case GroupedNamesFilter.InAuction:
-                return auctionCards;
+                return [...namesRegistrations, ...subnamesRegistrations];
             case GroupedNamesFilter.Names:
                 return namesRegistrations;
             case GroupedNamesFilter.Subnames:
@@ -102,11 +82,8 @@ export default function MyNamesPage(): JSX.Element {
     const noCardToDisplay =
         !isLoadingCards &&
         filteredNames.length === 0 &&
-        !isAuctionsErrored &&
         !isNamesErrored &&
         !isSubnamesErrored;
-
-    const noAuctions = auctionDetails.every((auction) => auction.metadata === null);
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
@@ -148,22 +125,6 @@ export default function MyNamesPage(): JSX.Element {
                             })
                         }
                     />
-                    {selectedFilter === GroupedNamesFilter.InAuction ||
-                    selectedFilter === GroupedNamesFilter.All ? (
-                        <Button
-                            type={ButtonType.Outlined}
-                            icon={
-                                isRefreshing ? (
-                                    <LoadingIndicator size="w-5 h-5" />
-                                ) : (
-                                    <Refresh className="w-5 h-5" />
-                                )
-                            }
-                            onClick={handleRefresh}
-                            disabled={isRefreshing}
-                            testId="refresh-button"
-                        />
-                    ) : null}
                 </div>
             </div>
 
@@ -177,7 +138,6 @@ export default function MyNamesPage(): JSX.Element {
                             selected={selectedFilter === value}
                             onClick={() => handleFilterSelect(value)}
                             disabled={
-                                (value === GroupedNamesFilter.InAuction && noAuctions) ||
                                 (value === GroupedNamesFilter.Names && !names?.length) ||
                                 (value === GroupedNamesFilter.Subnames && !subnames?.length)
                             }
@@ -191,22 +151,7 @@ export default function MyNamesPage(): JSX.Element {
                 )}
             </div>
 
-            {selectedFilter === GroupedNamesFilter.InAuction && !isLoadingAuctions ? (
-                isAuctionsErrored || noAuctions ? (
-                    <div className="flex">
-                        <InfoBox
-                            style={InfoBoxStyle.Elevated}
-                            type={isAuctionsErrored ? InfoBoxType.Error : InfoBoxType.Default}
-                            supportingText={
-                                isAuctionsErrored
-                                    ? 'Failed to load auctions. Please try again later.'
-                                    : "You haven't participated in any auctions yet."
-                            }
-                            icon={isAuctionsErrored ? <Warning /> : <Info />}
-                        />
-                    </div>
-                ) : null
-            ) : noCardToDisplay ? (
+            {noCardToDisplay ? (
                 <div className="flex">
                     <InfoBox
                         style={InfoBoxStyle.Elevated}
@@ -226,32 +171,25 @@ export default function MyNamesPage(): JSX.Element {
             {((!isLoadingCards && filteredNames.length > 0) || rightPanelSelectedName) && (
                 <div className="flex flex-row items-start justify-between gap-xl">
                     <div className="gap-lg w-full flex flex-row flex-wrap items-center justify-center sm:justify-start">
-                        {filteredNames.map((nft) =>
-                            'details' in nft ? (
-                                <ExtendedAuctionCard
-                                    key={nft.details.name}
-                                    name={nft.details.name}
-                                    auctionDetails={nft.details}
-                                />
-                            ) : (
-                                <ExtendedNameCard
-                                    key={nft.name}
-                                    nft={nft}
-                                    onSubnameListClick={() => {
-                                        setRightPanelSelectedName(nft);
-                                    }}
-                                    isActive={rightPanelSelectedName?.name === nft.name}
-                                    badge={
-                                        isPublicName(nft) ? (
-                                            <Badge
-                                                type={BadgeType.PrimarySolid}
-                                                label="Public Name"
-                                            />
-                                        ) : null
-                                    }
-                                />
-                            ),
-                        )}
+                        {filteredNames.map((nft) => (
+                            <ExtendedNameCard
+                                key={nft.name}
+                                nft={nft}
+                                onSubnameListClick={() => {
+                                    setRightPanelSelectedName(nft);
+                                }}
+                                isActive={rightPanelSelectedName?.name === nft.name}
+                                badge={
+                                    isPublicName(nft) ? (
+                                        <Badge
+                                            type={BadgeType.PrimarySolid}
+                                            label="Public Name"
+                                        />
+                                    ) : null
+                                }
+                                onRenewClick={(name) => setSelectedNameForRenewal(name)}
+                            />
+                        ))}
                     </div>
 
                     {rightPanelSelectedName && (
