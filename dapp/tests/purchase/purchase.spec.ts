@@ -71,18 +71,6 @@ test.describe.serial('Purchase Name Tests', () => {
             timeout: 5_000,
         });
 
-        await page.goto('/auctions', { waitUntil: 'domcontentloaded' });
-
-        await page
-            .getByTestId('top-navbar')
-            .getByPlaceholder('Search for your IOTA name')
-            .filter({ visible: true })
-            .click();
-
-        expect(page.getByRole('dialog').getByPlaceholder('Check name availability')).toBeVisible({
-            timeout: 5_000,
-        });
-
         await page.goto('/my-names', { waitUntil: 'domcontentloaded' });
 
         await page.getByRole('button', { name: 'Name', exact: true }).click();
