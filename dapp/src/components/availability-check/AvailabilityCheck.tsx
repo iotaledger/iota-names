@@ -19,6 +19,7 @@ import {
     useReservedList,
 } from '@/hooks';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { MY_NAMES_ROUTE } from '@/lib/constants';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';

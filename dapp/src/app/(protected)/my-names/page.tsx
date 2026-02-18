@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info, Warning } from '@iota/apps-ui-icons';
+import { Add, Info } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -33,7 +33,6 @@ import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
-    const account = useCurrentAccount();
 
     const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
         null,
@@ -80,10 +79,7 @@ export default function MyNamesPage(): JSX.Element {
     const totalItemsCount = filteredNames.length;
 
     const noCardToDisplay =
-        !isLoadingCards &&
-        filteredNames.length === 0 &&
-        !isNamesErrored &&
-        !isSubnamesErrored;
+        !isLoadingCards && filteredNames.length === 0 && !isNamesErrored && !isSubnamesErrored;
 
     function handleFilterSelect(filter: GroupedNamesFilter): void {
         setSelectedFilter(filter);
@@ -181,13 +177,9 @@ export default function MyNamesPage(): JSX.Element {
                                 isActive={rightPanelSelectedName?.name === nft.name}
                                 badge={
                                     isPublicName(nft) ? (
-                                        <Badge
-                                            type={BadgeType.PrimarySolid}
-                                            label="Public Name"
-                                        />
+                                        <Badge type={BadgeType.PrimarySolid} label="Public Name" />
                                     ) : null
                                 }
-                                onRenewClick={(name) => setSelectedNameForRenewal(name)}
                             />
                         ))}
                     </div>

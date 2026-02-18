@@ -13,7 +13,6 @@ import type { Signer } from '@iota/iota-sdk/cryptography';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { NANOS_PER_IOTA } from '@iota/iota-sdk/utils';
 
-import { buildCreateAuctionTransaction, buildPlaceBidTransaction } from '@/auctions';
 import { CONFIG } from '@/config';
 
 import { expect } from './helpers/fixtures';
@@ -377,87 +376,6 @@ export function deriveAddressFromMnemonic(mnemonic: string, path?: string) {
 
 export function getAddressByIndexPath(mnemonic: string, index: number) {
     return deriveAddressFromMnemonic(mnemonic, `m/44'/4218'/0'/0'/${index}'`);
-}
-
-interface CreateAndSendAuctionTransaction {
-    name: string;
-    signer: Signer;
-    bidAmountIota?: bigint;
-}
-export async function createAndSendAuctionTransaction({
-    name,
-    signer,
-    bidAmountIota = BigInt(50),
-}: CreateAndSendAuctionTransaction) {
-    try {
-        const tx = buildCreateAuctionTransaction(
-            iotaNamesClient.getPackage('auctionPackageId'),
-            iotaNamesClient.getPackage('iotaNamesObjectId'),
-            iotaNamesClient.getPackage('auctionHouseObjectId'),
-            signer.toIotaAddress(),
-            bidAmountIota * NANOS_PER_IOTA,
-            name,
-        );
-
-        const txBytes = await tx.build({ client: iotaClientGraphQl });
-        const response = await iotaClientGraphQl.signAndExecuteTransaction({
-            transaction: txBytes,
-            signer,
-            options: {
-                showEffects: true,
-            },
-        });
-
-        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
-
-        console.log('Transaction sent. Digest:', response.digest);
-        console.log(`Successfully created auction for name: ${name}`);
-
-        return response;
-    } catch (error) {
-        console.error('Error creating initial auction:', error);
-        throw error;
-    }
-}
-
-interface BidOnExistingAuction {
-    name: string;
-    signer: Signer;
-    bidAmountIota?: bigint;
-}
-export async function bidOnExistingAuction({
-    name,
-    signer,
-    bidAmountIota = BigInt(51),
-}: BidOnExistingAuction) {
-    try {
-        const tx = buildPlaceBidTransaction(
-            iotaNamesClient.getPackage('auctionPackageId'),
-            iotaNamesClient.getPackage('auctionHouseObjectId'),
-            signer.toIotaAddress(),
-            bidAmountIota * NANOS_PER_IOTA,
-            name,
-        );
-
-        const txBytes = await tx.build({ client: iotaClientGraphQl });
-        const response = await iotaClientGraphQl.signAndExecuteTransaction({
-            transaction: txBytes,
-            signer,
-            options: {
-                showEffects: true,
-            },
-        });
-
-        await iotaClientGraphQl.waitForTransaction({ digest: response.digest });
-
-        console.log('Transaction sent. Digest:', response.digest);
-        console.log(`Successfully bid on existing auction for name: ${name}`);
-
-        return response;
-    } catch (error) {
-        console.error('Error bidding on auction:', error);
-        throw error;
-    }
 }
 
 export function generateRandomName(name: string) {
