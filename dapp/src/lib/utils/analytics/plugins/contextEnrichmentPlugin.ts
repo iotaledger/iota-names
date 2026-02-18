@@ -31,7 +31,6 @@ const DEV_EVENT_PREFIX = 'dev_';
 const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
     '/': 'Landing Page Viewed',
     '/my-names': 'My Names Page Viewed',
-    '/auctions': 'Auctions Page Viewed',
     '/search': 'Search Page Viewed',
 };
 
