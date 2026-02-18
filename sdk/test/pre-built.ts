@@ -20,7 +20,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     let sender;
     if (network.id === Network.Mainnet) {
         sender = normalizeIotaAddress(
-            '0x96e5664b870afebcef5534732a067b877cfd3a70e83384b3e61e9ab92a4d3bab',
+            '0xbb9ae3e92fd3020d8cfe76cc954da4dbd2b20f39c7077e4b4109410e8f126057',
         );
     } else {
         sender = normalizeIotaAddress('0x2');
@@ -88,7 +88,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
         (Date.now().toString(36) + Math.random().toString(36).substring(2)).repeat(2) + '.iota';
 
     let gas;
-    if (network.id === Network.Testnet) {
+    if (network.id === Network.Mainnet) {
+        gas = 500n;
+    } else if (network.id === Network.Testnet) {
         gas = 250n;
     } else {
         gas = 6n;
@@ -126,7 +128,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     const subNft = iotaNamesTx.createSubname({
         parentNft: nft,
-        name: 'node.' + uniqueName,
+        name: 'node-subname.' + uniqueName,
         expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
         allowChildCreation: true,
         allowTimeExtension: true,
@@ -143,10 +145,10 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // do it for sub nft too
     iotaNamesTx.createLeafSubname({
         parentNft: subNft,
-        name: 'leaf.node.' + uniqueName,
+        name: 'leaf.node-subname.' + uniqueName,
         targetAddress: sender,
     });
-    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node.' + uniqueName });
+    iotaNamesTx.removeLeafSubname({ parentNft: subNft, name: 'leaf.node-subname.' + uniqueName });
 
     // extend expiration a bit further for the subNft
     iotaNamesTx.extendExpiration({
@@ -156,7 +158,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     iotaNamesTx.editSetup({
         parentNft: nft,
-        name: 'node.' + uniqueName,
+        name: 'node-subname.' + uniqueName,
         allowChildCreation: true,
         allowTimeExtension: false,
     });
@@ -164,7 +166,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     // let's go 2 levels deep and edit setups!
     const moreNestedNft = iotaNamesTx.createSubname({
         parentNft: subNft,
-        name: 'more.node.' + uniqueName,
+        name: 'more.node-subname.' + uniqueName,
         allowChildCreation: true,
         allowTimeExtension: true,
         expirationTimestampMs: Date.now() + 1000 * 60 * 60 * 24 * 30,
@@ -172,7 +174,7 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
 
     iotaNamesTx.editSetup({
         parentNft: subNft,
-        name: 'more.node.' + uniqueName,
+        name: 'more.node-subname.' + uniqueName,
         allowChildCreation: false,
         allowTimeExtension: false,
     });
@@ -185,9 +187,14 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     if (network.id === Network.Mainnet) {
         tx.setGasPayment([
             {
-                objectId: '0xec38c03899fd44ed837038f1e3659b38e0cc24fd760db72130486280ee933fe1',
+                objectId: '0xc807394d03a93089862c9d9fd53235ddef034539284e821f093a968fe8868ff7',
                 version: '1',
-                digest: 'CkJeMaSxggPLp5g9xGA57zf1FeHcuQLVQHJ6Tm7ZME5o',
+                digest: 'BoPYYfhsmbW3h45FENf6QLfZoQ87vohZFVTqr9yojGpa',
+            },
+            {
+                objectId: '0x13ef83511595ac52c68b3575ee104b1a17d1bb990b8fa1495930721b18a3aa3c',
+                version: '1',
+                digest: '6R7Z1SZMixCZtZpxjLoML1k3utWQs6uJ1bEFve1rqsfK',
             },
         ]);
     } else if (network.id === Network.Testnet) {
