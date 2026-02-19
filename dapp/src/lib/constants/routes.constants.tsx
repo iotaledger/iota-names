@@ -12,6 +12,12 @@ export const MY_NAMES_ROUTE: Route = {
     id: 'my-names',
 };
 
+export const AUCTION_ROUTE: Route = {
+    title: RouteTitle.Auction,
+    path: '/auctions',
+    id: 'auctions',
+};
+
 export const DOCS_ROUTE: Route = {
     title: RouteTitle.Documentation,
     path: 'https://docs.iotanames.com',

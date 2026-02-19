@@ -11,6 +11,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { AuctionBidDialog } from '@/auctions/components/dialogs/AuctionBidDialog';
+import { useGetAuctionMetadata } from '@/auctions/hooks/useGetAuctionMetadata';
 import {
     NameRecordData,
     useBlockedList,
@@ -61,6 +63,11 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
     const name = debouncedSearchValue ? `${debouncedSearchValue}.iota` : '';
 
     const {
+        data: auctionMetadata,
+        error: auctionError,
+        isLoading: isLoadingAuctionMetadata,
+    } = useGetAuctionMetadata(name);
+    const {
         data: nameRecordData,
         error: nameError,
         isLoading: isLoadingNameRecord,
@@ -80,20 +87,22 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
         [searchValue, priceList],
     );
 
-    const errorMessageRaw = nameError?.message || priceError?.message;
+    const errorMessageRaw = auctionError?.message || nameError?.message || priceError?.message;
     const errorMessage =
         validationError || (errorMessageRaw ? getUserFriendlyErrorMessage(errorMessageRaw) : '');
 
     const isLoading =
         !validationError &&
         debouncedSearchValue &&
-        (isLoadingNameRecord ||
+        (isLoadingAuctionMetadata ||
+            isLoadingNameRecord ||
             isLoadingPriceList ||
             isLoadingBlockedList ||
             isLoadingReservedList);
 
+    const isAuctionInProgress = auctionMetadata?.isActive;
     const isUnavailable = nameRecordData?.type === 'unavailable';
-    const isNameTaken = isUnavailable;
+    const isNameTaken = isUnavailable && !isAuctionInProgress;
 
     useEffect(() => {
         if (!name) {
@@ -251,16 +260,89 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                         />
                     ) : (
                         nameRecordData && (
-                            <PurchaseName
-                                name={name}
-                                nameRecordData={nameRecordData}
-                                onCompleted={handleCompletedPurchaseOrBid}
-                            />
+                            <>
+                                <PurchaseName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleCompletedPurchaseOrBid}
+                                />
+
+                                <BidName
+                                    name={name}
+                                    nameRecordData={nameRecordData}
+                                    onCompleted={handleCompletedPurchaseOrBid}
+                                />
+                            </>
                         )
                     )}
                 </div>
             </div>
         </div>
+    );
+}
+
+interface BidNameProps {
+    name: string;
+    nameRecordData: NameRecordData;
+    onCompleted?: () => void;
+}
+function BidName({ name, nameRecordData, onCompleted }: BidNameProps) {
+    const { data: { isAuctionAuthorized } = {} } = useNamesPurchaseMode();
+    const { isConnected } = useCurrentWallet();
+    const [isAuctionBidDialogOpen, setAuctionDialogOpen] = useState(false);
+    const { data: auctionMetadata } = useGetAuctionMetadata(name);
+
+    const isAvailable = nameRecordData?.type === 'available';
+    const isUnavailable = nameRecordData?.type === 'unavailable';
+    const isAuctionInProgress = auctionMetadata?.isActive;
+    const isAllowedToBid =
+        (isAvailable && isAuctionAuthorized) || (isUnavailable && isAuctionInProgress) || false;
+
+    if (!isAllowedToBid && !isAuctionAuthorized) {
+        return null;
+    }
+
+    function handleBid() {
+        setAuctionDialogOpen(false);
+        onCompleted?.();
+    }
+
+    const purchasePrice = nameRecordData?.type === 'available' ? nameRecordData.price : undefined;
+    // If there is no auction yet, then we use the purchase price as minimum
+    const bidPrice = auctionMetadata?.minBidNanos || purchasePrice;
+
+    return (
+        <>
+            <NamePurchaseCard
+                name={name}
+                status={
+                    isAllowedToBid
+                        ? NameAvailabilityStatus.Available
+                        : NameAvailabilityStatus.Unavailable
+                }
+                priceNanos={bidPrice}
+                statusMessage={isAuctionInProgress ? 'In auction' : ''}
+                testId="auction-card"
+            >
+                {isConnected ? (
+                    <Button
+                        type={ButtonType.Primary}
+                        text="Bid"
+                        onClick={() => setAuctionDialogOpen(true)}
+                    />
+                ) : (
+                    <ConnectButton />
+                )}
+            </NamePurchaseCard>
+
+            {isAuctionBidDialogOpen && (
+                <AuctionBidDialog
+                    name={name}
+                    closeDialog={() => setAuctionDialogOpen(false)}
+                    onCompleted={handleBid}
+                />
+            )}
+        </>
     );
 }
 

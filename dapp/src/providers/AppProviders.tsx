@@ -12,7 +12,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { CookieDisclaimer } from '@/components/disclaimer/CookieDisclaimer';
 import { Toaster } from '@/components/Toaster';
 import { CONFIG } from '@/config';
-import { IotaNamesClientProvider } from '@/contexts';
+import { IotaNamesClientProvider, IotaNamesIndexerClientProvider } from '@/contexts';
 import { KioskClientProvider } from '@/contexts/KioskClientContext';
 import { captureException } from '@/instrumentation';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
@@ -74,24 +74,26 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                 >
                     <KioskClientProvider>
                         <IotaNamesClientProvider>
-                            <WalletProvider
-                                autoConnect={true}
-                                theme={[
-                                    {
-                                        selector: '.names',
-                                        variables: darkTheme,
-                                    },
-                                ]}
-                                chain={allNetworks[defaultNetwork].chain}
-                            >
-                                <ThemeProvider staticTheme={APP_STATIC_THEME}>
-                                    {children}
-                                    <Toaster />
-                                    <Suspense fallback={null}>
-                                        <CookieDisclaimer />
-                                    </Suspense>
-                                </ThemeProvider>
-                            </WalletProvider>
+                            <IotaNamesIndexerClientProvider>
+                                <WalletProvider
+                                    autoConnect={true}
+                                    theme={[
+                                        {
+                                            selector: '.names',
+                                            variables: darkTheme,
+                                        },
+                                    ]}
+                                    chain={allNetworks[defaultNetwork].chain}
+                                >
+                                    <ThemeProvider staticTheme={APP_STATIC_THEME}>
+                                        {children}
+                                        <Toaster />
+                                        <Suspense fallback={null}>
+                                            <CookieDisclaimer />
+                                        </Suspense>
+                                    </ThemeProvider>
+                                </WalletProvider>
+                            </IotaNamesIndexerClientProvider>
                         </IotaNamesClientProvider>
                     </KioskClientProvider>
                 </IotaClientProvider>
