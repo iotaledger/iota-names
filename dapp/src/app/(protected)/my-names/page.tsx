@@ -3,7 +3,7 @@
 
 'use client';
 
-import { Add, Info } from '@iota/apps-ui-icons';
+import { Add, Info, Refresh } from '@iota/apps-ui-icons';
 import {
     Badge,
     BadgeType,
@@ -14,10 +14,12 @@ import {
     InfoBox,
     InfoBoxStyle,
     InfoBoxType,
+    LoadingIndicator,
     SegmentedButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -33,6 +35,7 @@ import { GroupedNamesFilter } from './filters';
 
 export default function MyNamesPage(): JSX.Element {
     const { open } = useAvailabilityCheckDialog();
+    const queryClient = useQueryClient();
 
     const [selectedNameForRenewal, setSelectedNameForRenewal] = useState<RegistrationNft | null>(
         null,
@@ -43,6 +46,7 @@ export default function MyNamesPage(): JSX.Element {
     const [selectedFilter, setSelectedFilter] = useState<GroupedNamesFilter>(
         GroupedNamesFilter.All,
     );
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const {
         data: names,
@@ -103,6 +107,24 @@ export default function MyNamesPage(): JSX.Element {
         setRightPanelSelectedName(null);
     }
 
+    async function handleRefresh(): Promise<void> {
+        if (isRefreshing) return;
+
+        setIsRefreshing(true);
+        try {
+            // Invalidate names and subnames queries to fetch fresh data
+            await queryClient.invalidateQueries({
+                queryKey: ['iota-name', 'owned-objects'],
+            });
+
+            toast.success('Refreshed successfully');
+        } catch (error) {
+            toast.error('Failed to refresh data');
+        } finally {
+            setIsRefreshing(false);
+        }
+    }
+
     return (
         <>
             <div className="flex flex-row gap-md items-center pt-[80px] md:pt-0 btn-alt-bg">
@@ -121,6 +143,21 @@ export default function MyNamesPage(): JSX.Element {
                             })
                         }
                     />
+                    {selectedFilter === GroupedNamesFilter.All && (
+                        <Button
+                            type={ButtonType.Outlined}
+                            icon={
+                                isRefreshing ? (
+                                    <LoadingIndicator size="w-5 h-5" />
+                                ) : (
+                                    <Refresh className="w-5 h-5" />
+                                )
+                            }
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
+                            testId="refresh-button"
+                        />
+                    )}
                 </div>
             </div>
 
