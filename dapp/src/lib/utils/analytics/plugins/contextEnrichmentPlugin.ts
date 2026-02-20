@@ -20,7 +20,11 @@
 
 import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
-import { ALLOWED_BUTTON_TEXT_PATTERNS, ALLOWED_BUTTON_TEXTS } from '../constants';
+import {
+    ALLOWED_BUTTON_TEXT_PATTERNS,
+    ALLOWED_BUTTON_TEXTS,
+    ALLOWED_LINK_PATTERNS,
+} from '../constants';
 import type { ContextSnapshot } from './contextSnapshotCache';
 import { contextSnapshotCache } from './contextSnapshotCache';
 
@@ -34,6 +38,9 @@ const PAGE_VIEW_EVENTS_MAP: Record<string, string> = {
     '/my-names': 'My Names Page Viewed',
     '/auctions': 'Auctions Page Viewed',
     '/search': 'Search Page Viewed',
+    '/privacy-policy': 'Privacy Policy Page Viewed',
+    '/terms-of-service': 'Terms of Service Page Viewed',
+    '/cookie-policy': 'Cookie Policy Page Viewed',
 };
 
 /** Whitelisted event properties allowed to be sent to Amplitude. */
@@ -128,6 +135,15 @@ function matchPattern(text: string): string | null {
     return null;
 }
 
+function matchLinkPattern(url: string): string | null {
+    for (const { pattern, replaceTo } of ALLOWED_LINK_PATTERNS) {
+        if (pattern.test(url)) {
+            return replaceTo;
+        }
+    }
+    return null;
+}
+
 function getPageViewEventName(path: string): string | null {
     return PAGE_VIEW_EVENTS_MAP[path] || null;
 }
@@ -149,13 +165,23 @@ function getClickedElementEventName(event: Event): string | null {
 
     const isClickedLink = isElementTag(event, 'a');
     if (isClickedLink && (clickedElementText || clickedElementUrl)) {
-        const text = clickedElementText || clickedElementUrl;
-        return `${maskText(text)} Link Clicked`;
+        // Prioritize URL pattern matching for links
+        if (clickedElementUrl) {
+            const urlMatch = matchLinkPattern(clickedElementUrl);
+            if (urlMatch) {
+                return `${urlMatch} Link Clicked`;
+            }
+        }
+        // Fallback to text matching if URL doesn't match or isn't present
+        const text = clickedElementText || clickedElementUrl || '';
+        const maskedText = maskText(text);
+        return maskedText ? `${maskedText} Link Clicked` : null;
     }
 
     const isClickedButton = isElementTag(event, 'button');
     if (isClickedButton && clickedElementText) {
-        return `${maskText(clickedElementText)} Button Clicked`;
+        const maskedText = maskText(clickedElementText);
+        return maskedText ? `${maskedText} Button Clicked` : null;
     }
 
     return null;

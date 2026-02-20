@@ -12,6 +12,19 @@ export const ALLOWED_BUTTON_TEXT_PATTERNS: Array<{ pattern: RegExp; replaceTo: s
     { pattern: /^Delete in \d+s$/, replaceTo: 'Delete in <countdown>s' },
 ];
 
+/** Pattern matching rules for external links with replacement values */
+export const ALLOWED_LINK_PATTERNS: Array<{ pattern: RegExp; replaceTo: string }> = [
+    { pattern: /^https:\/\/[^/]*\bdiscord\b[^/]*|^https:\/\/x\.com/, replaceTo: '<social>' },
+    { pattern: /^https:\/\/docs\.iotanames\.com/, replaceTo: '<docs>' },
+    {
+        pattern: /^https:\/\/explorer\.iota\.org\/(address|object)\/0x[a-fA-F0-9]+/,
+        replaceTo: '<explorer>',
+    },
+    { pattern: /^https:\/\/docs\.google\.com\/forms\//, replaceTo: '<form>' },
+    { pattern: /^mailto:/, replaceTo: '<email>' },
+    { pattern: /^https:\/\/(iotanames\.com|files\.iota\.org)/, replaceTo: '<iota-site>' },
+];
+
 export const ALLOWED_BUTTON_TEXTS = [
     // Wallet connection
     'Connect',
