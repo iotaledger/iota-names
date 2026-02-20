@@ -56,20 +56,21 @@ export default defineConfig({
             dependencies: ['Purchase setup'],
             fullyParallel: false,
         },
-        {
-            name: 'Auctions setup',
-            testMatch: /auctions\.setup\.ts/,
-            dependencies: ['Purchase flow'],
-        },
-        {
-            name: 'Auctions flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/auctions',
-            dependencies: ['Auctions setup'],
-        },
+        // Auction tests are disabled - auction functionality is hidden from UI
+        // {
+        //     name: 'Auctions setup',
+        //     testMatch: /auctions\.setup\.ts/,
+        //     dependencies: ['Purchase flow'],
+        // },
+        // {
+        //     name: 'Auctions flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/auctions',
+        //     dependencies: ['Auctions setup'],
+        // },
     ],
     webServer: {
         command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
