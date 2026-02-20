@@ -4,6 +4,13 @@
 export const AMP_COOKIES_KEY = 'AMP_COOKIES_ACCEPTED';
 
 export const ADDRESS_REGEX = /0x[a-fA-F0-9]{4}…[a-fA-F0-9]{4}/g;
+
+/** Regex patterns for dynamic button text */
+export const ALLOWED_BUTTON_TEXT_PATTERNS: RegExp[] = [
+    /^\d+ Subnames?$/, // Matches "1 Subname", "2 Subnames", etc.
+    /^Delete in \d+s$/, // Matches "Delete in 5s", "Delete in 10s", etc.
+];
+
 export const ALLOWED_BUTTON_TEXTS = [
     // Wallet connection
     'Connect',
@@ -28,7 +35,7 @@ export const ALLOWED_BUTTON_TEXTS = [
     'New Subname',
     'Name',
     'Min',
-    '+ Apply Coupon',
+    'Apply Coupon',
     // Context menu options
     'Connect to Address',
     'Personalize Avatar',

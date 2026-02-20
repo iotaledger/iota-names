@@ -20,7 +20,7 @@
 
 import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
-import { ADDRESS_REGEX, ALLOWED_BUTTON_TEXTS } from '../constants';
+import { ADDRESS_REGEX, ALLOWED_BUTTON_TEXT_PATTERNS, ALLOWED_BUTTON_TEXTS } from '../constants';
 import type { ContextSnapshot } from './contextSnapshotCache';
 import { contextSnapshotCache } from './contextSnapshotCache';
 
@@ -118,7 +118,16 @@ function isAddress(text: string): boolean {
 }
 
 function isTextAllowed(text: string): boolean {
-    return ALLOWED_BUTTON_TEXTS.some((at) => at?.toLowerCase() === text?.toLowerCase());
+    // Check exact match against allowed texts (case-insensitive)
+    const isExactMatch = ALLOWED_BUTTON_TEXTS.some(
+        (at) => at?.toLowerCase() === text?.toLowerCase(),
+    );
+    if (isExactMatch) {
+        return true;
+    }
+
+    // Check against regex patterns for dynamic text
+    return ALLOWED_BUTTON_TEXT_PATTERNS.some((pattern) => pattern.test(text));
 }
 
 // function isUrlAllowed(text: string): boolean {
