@@ -4,6 +4,8 @@
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
 use axum::{Extension, Router, routing::get};
+use futures::StreamExt;
+use iota_graphql_client::{Client as GraphqlClient, query_types::EventFilter};
 use iota_metrics::{METRICS_ROUTE, RegistryService, histogram::Histogram};
 use prometheus::{
     IntCounter, IntCounterVec, IntGauge, IntGaugeVec, Registry,
@@ -213,6 +215,50 @@ impl IotaNamesMetrics {
             .await?;
 
         info!("Successfully restored metrics from Prometheus");
+        Ok(())
+    }
+
+    /// Backfill the `new_purchases` counter by querying historical
+    /// `TransactionEvent` events from the IOTA GraphQL API and counting
+    /// those where `is_renewal` is false.
+    ///
+    /// This is a no-op if the counter already has a value (e.g. restored from
+    /// Prometheus).
+    pub async fn backfill_purchases_from_graphql(
+        &self,
+        graphql_url: &str,
+        event_type: &str,
+    ) -> anyhow::Result<()> {
+        if self.new_purchases.get() > 0 {
+            info!(
+                "Skipping GraphQL backfill: new_purchases already has value {}",
+                self.new_purchases.get()
+            );
+            return Ok(());
+        }
+
+        let client = GraphqlClient::new(graphql_url)?;
+
+        let filter = EventFilter {
+            event_type: Some(event_type.to_string()),
+            ..Default::default()
+        };
+
+        let mut stream = client.events_stream(filter, Default::default());
+        let mut count: u64 = 0;
+
+        while let Some(result) = stream.next().await {
+            let event = result?;
+            if let Some(false) = event.json.get("is_renewal").and_then(|v| v.as_bool()) {
+                count += 1;
+            }
+        }
+
+        if count > 0 {
+            self.new_purchases.inc_by(count);
+        }
+
+        info!("Backfilled new_purchases metric with {count} historical purchases from GraphQL");
         Ok(())
     }
 

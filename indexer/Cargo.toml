@@ -30,6 +30,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = ["s
 
 bin-version = { git = "https://github.com/iotaledger/iota", package = "bin-version" }
 iota-data-ingestion-core = { git = "https://github.com/iotaledger/iota", package = "iota-data-ingestion-core" }
+iota-graphql-client = { git = "https://github.com/iotaledger/iota-rust-sdk.git", tag = "iota-sdk-graphql-client-v0.0.1-alpha.1", package = "iota-sdk-graphql-client" }
 iota-json = { git = "https://github.com/iotaledger/iota", package = "iota-json" }
 iota-json-rpc-types = { git = "https://github.com/iotaledger/iota", package = "iota-json-rpc-types" }
 iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-metrics" }
