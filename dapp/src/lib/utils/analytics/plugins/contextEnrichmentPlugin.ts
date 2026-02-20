@@ -20,7 +20,7 @@
 
 import type { BrowserConfig, EnrichmentPlugin, Event } from '@amplitude/analytics-types';
 
-import { ADDRESS_REGEX, ALLOWED_BUTTON_TEXT_PATTERNS, ALLOWED_BUTTON_TEXTS } from '../constants';
+import { ALLOWED_BUTTON_TEXT_PATTERNS, ALLOWED_BUTTON_TEXTS } from '../constants';
 import type { ContextSnapshot } from './contextSnapshotCache';
 import { contextSnapshotCache } from './contextSnapshotCache';
 
@@ -101,38 +101,32 @@ function setupContextCapture(): () => void {
 
 // const ALLOWED_URLS = [];
 
-/** Replace address patterns (0x1234...5678) with <address> placeholder. */
+/** Replace address patterns and dynamic text with placeholders, or return allowed text as-is. */
 function maskText(text: string): string {
-    if (isAddress(text)) {
-        return '<address> ';
-    }
     if (isTextAllowed(text)) {
-        return text;
+        return text.toLowerCase();
+    }
+
+    const patternMatch = matchPattern(text);
+    if (patternMatch) {
+        return patternMatch;
     }
 
     return '';
 }
 
-function isAddress(text: string): boolean {
-    return ADDRESS_REGEX.test(text);
-}
-
 function isTextAllowed(text: string): boolean {
-    // Check exact match against allowed texts (case-insensitive)
-    const isExactMatch = ALLOWED_BUTTON_TEXTS.some(
-        (at) => at?.toLowerCase() === text?.toLowerCase(),
-    );
-    if (isExactMatch) {
-        return true;
-    }
-
-    // Check against regex patterns for dynamic text
-    return ALLOWED_BUTTON_TEXT_PATTERNS.some((pattern) => pattern.test(text));
+    return ALLOWED_BUTTON_TEXTS.some((at) => at?.toLowerCase() === text?.toLowerCase());
 }
 
-// function isUrlAllowed(text: string): boolean {
-
-// }
+function matchPattern(text: string): string | null {
+    for (const { pattern, replaceTo } of ALLOWED_BUTTON_TEXT_PATTERNS) {
+        if (pattern.test(text)) {
+            return replaceTo;
+        }
+    }
+    return null;
+}
 
 function getPageViewEventName(path: string): string | null {
     return PAGE_VIEW_EVENTS_MAP[path] || null;

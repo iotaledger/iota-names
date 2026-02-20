@@ -5,10 +5,11 @@ export const AMP_COOKIES_KEY = 'AMP_COOKIES_ACCEPTED';
 
 export const ADDRESS_REGEX = /0x[a-fA-F0-9]{4}…[a-fA-F0-9]{4}/g;
 
-/** Regex patterns for dynamic button text */
-export const ALLOWED_BUTTON_TEXT_PATTERNS: RegExp[] = [
-    /^\d+ Subnames?$/, // Matches "1 Subname", "2 Subnames", etc.
-    /^Delete in \d+s$/, // Matches "Delete in 5s", "Delete in 10s", etc.
+/** Pattern matching rules for dynamic button text with replacement values */
+export const ALLOWED_BUTTON_TEXT_PATTERNS: Array<{ pattern: RegExp; replaceTo: string }> = [
+    { pattern: /0x[a-fA-F0-9]{4}…[a-fA-F0-9]{4}/g, replaceTo: '<address>' },
+    { pattern: /^\d+ Subnames?$/, replaceTo: '<count> Subname' },
+    { pattern: /^Delete in \d+s$/, replaceTo: 'Delete in <countdown>s' },
 ];
 
 export const ALLOWED_BUTTON_TEXTS = [
