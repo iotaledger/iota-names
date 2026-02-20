@@ -106,8 +106,6 @@ function setupContextCapture(): () => void {
     };
 }
 
-// const ALLOWED_URLS = [];
-
 /** Replace address patterns and dynamic text with placeholders, or return allowed text as-is. */
 function maskText(text: string): string {
     if (isTextAllowed(text)) {

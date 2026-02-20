@@ -14,7 +14,7 @@ import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
 const IS_PRODUCTION = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
 
 // Dev note: set IS_ENABLED=true to test Amplitude events locally
-const IS_ENABLED = true;
+const IS_ENABLED = IS_PRODUCTION && process.env.NEXT_PUBLIC_AMPLITUDE_ENABLED === 'true';
 
 /**
  * Check if user has previously given consent for cookies/tracking.
