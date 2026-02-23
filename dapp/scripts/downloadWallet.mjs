@@ -9,8 +9,8 @@ import dotenv from 'dotenv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const getEnvPath = (fileName) => join(__dirname, '../', fileName);
-dotenv.config({ path: [getEnvPath('.env.local'), getEnvPath('.env')] });
+dotenv.config({ path: join(__dirname, '.env') });
+dotenv.config({ path: join(__dirname, '.env.local'), override: true });
 
 const token = process.env.GITHUB_TOKEN;
 
