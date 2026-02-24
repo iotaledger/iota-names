@@ -36,10 +36,12 @@ export const FOOTER_SOCIAL_LINKS: Route[] = [
     {
         path: 'https://discord.iota.org/',
         icon: <Discord />,
+        title: 'IOTA Discord',
     },
     {
         path: 'https://x.com/iotanames',
         icon: <SmX />,
+        title: 'IOTA Names on X',
     },
 ];
 
