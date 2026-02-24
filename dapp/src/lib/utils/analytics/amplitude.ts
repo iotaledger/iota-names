@@ -48,11 +48,7 @@ export async function initAmplitude() {
                         formInteractions: IS_ENABLED,
                         pageViews: IS_ENABLED,
                         sessions: IS_ENABLED,
-                        elementInteractions: IS_ENABLED
-                            ? {
-                                  cssSelectorAllowlist: ['button', 'a'],
-                              }
-                            : false,
+                        elementInteractions: IS_ENABLED,
                     },
                     logLevel: LogLevel.None,
                 },
