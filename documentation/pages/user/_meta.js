@@ -1,6 +1,5 @@
 export default {
     'buy-without-auction': 'Buy Names',
-    registration: 'Auction',
     'renew-name': 'Renew Names',
     subname: 'Create Subnames',
     avatar: 'Update Avatars',
