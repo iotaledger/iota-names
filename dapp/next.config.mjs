@@ -39,6 +39,12 @@ const nextConfig = withMDX({
     },
     async redirects() {
         return [
+            // Redirect auctions page to home (feature hidden from UI)
+            {
+                source: '/auctions',
+                destination: '/',
+                permanent: false,
+            },
             {
                 source: '/((?!terms-of-service$).*)', // Dont redirect if the path is already /terms-of-service
                 has: [
