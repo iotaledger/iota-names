@@ -43,7 +43,7 @@ export const TEXT_CONFIG = {
     dateFormatter: FORMATTER,
 };
 
-export const DATE_CONFIG = {
+export const SUBTITLE_CONFIG = {
     paddingBottom: 18,
     paddingRight: 20,
     fontSize: 8,
