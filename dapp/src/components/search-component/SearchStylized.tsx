@@ -80,6 +80,7 @@ export const SearchStylized = forwardRef<HTMLInputElement, InputProps>(function 
                         )}
                         onClick={onClearInput}
                         tabIndex={-1}
+                        aria-label="Clear search"
                     >
                         <Close />
                     </ButtonUnstyled>

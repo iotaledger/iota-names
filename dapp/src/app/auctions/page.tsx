@@ -246,6 +246,7 @@ export default function AuctionsPage(): JSX.Element {
                             onClick={handleRefresh}
                             disabled={isRefreshing}
                             testId="refresh-button"
+                            aria-label="Refresh"
                         />
                     ) : null}
                 </div>
@@ -285,6 +286,7 @@ export default function AuctionsPage(): JSX.Element {
                         type={ButtonType.Secondary}
                         icon={<FilterList className="text-names-neutral-92 w-6 h-6" />}
                         onClick={() => setAreFiltersVisible(!areFiltersVisible)}
+                        aria-label="Sort options"
                     />
                     {areFiltersVisible && (
                         <div className="absolute right-12 top-0 z-10">
@@ -341,6 +343,7 @@ export default function AuctionsPage(): JSX.Element {
                                     icon={<ArrowLeft />}
                                     disabled={!paginationOptions.hasPrev}
                                     onClick={paginationOptions.onPrev}
+                                    aria-label="Previous page"
                                 />
                             </div>
                             <div className="flex gap-2 mx-6">
@@ -374,6 +377,7 @@ export default function AuctionsPage(): JSX.Element {
                                     icon={<ArrowRight />}
                                     disabled={!paginationOptions.hasNext}
                                     onClick={paginationOptions.onNext}
+                                    aria-label="Next page"
                                 />
                             </div>
                         </div>

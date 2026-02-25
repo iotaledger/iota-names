@@ -51,6 +51,7 @@ export function TestModeBanner({
                             icon={<Close className="text-yellow-900" />}
                             size={ButtonSize.Small}
                             type={ButtonType.Ghost}
+                            aria-label="Dismiss test mode banner"
                         />
                     </div>
                 </div>
@@ -67,6 +68,7 @@ export function TestModeBanner({
                             icon={<Close className="text-yellow-900" />}
                             size={ButtonSize.Small}
                             type={ButtonType.Ghost}
+                            aria-label="Dismiss test mode banner"
                         />
                     </div>
                 </div>
