@@ -4,7 +4,7 @@
 import { getNameType } from '@iota/iota-names-sdk';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { fromB64 } from '@iota/iota-sdk/utils';
+import { fromBase64 } from '@iota/iota-sdk/utils';
 
 import { queryKey } from '@/hooks';
 
@@ -112,7 +112,7 @@ function parseAuctionDataBcs(
     }
 
     try {
-        return AuctionFieldBcs.parse(fromB64(auctionBcsB64));
+        return AuctionFieldBcs.parse(fromBase64(auctionBcsB64));
     } catch (error) {
         return null;
     }

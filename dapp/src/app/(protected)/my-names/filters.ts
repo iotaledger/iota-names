@@ -3,7 +3,6 @@
 
 export enum GroupedNamesFilter {
     All = 'All',
-    InAuction = 'In Auction',
     Names = 'Names',
     Subnames = 'Subnames',
 }

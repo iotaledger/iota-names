@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { fromB64 } from '@iota/iota-sdk/utils';
+import { fromBase64 } from '@iota/iota-sdk/utils';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 
 import { useIotaNamesClient } from '@/contexts';
@@ -62,7 +62,7 @@ export function useAuctionHouse(): UseQueryResult<AuctionHouseData | null, Error
                 return null;
             }
 
-            const auctionHouse = AuctionHouseBcs.parse(fromB64(auctionHouseBcsB64));
+            const auctionHouse = AuctionHouseBcs.parse(fromBase64(auctionHouseBcsB64));
 
             return {
                 auctionHouseId: auctionHouseData.address,

@@ -13,7 +13,7 @@ import { Ed25519Keypair } from '@iota/iota-sdk/keypairs/ed25519';
 import { Secp256k1Keypair } from '@iota/iota-sdk/keypairs/secp256k1';
 import { Secp256r1Keypair } from '@iota/iota-sdk/keypairs/secp256r1';
 import { Transaction, UpgradePolicy } from '@iota/iota-sdk/transactions';
-import { toB64 } from '@iota/iota-sdk/utils';
+import { toBase64 } from '@iota/iota-sdk/utils';
 
 import { PackageInfo } from '../package-info/constants';
 
@@ -239,7 +239,7 @@ export const prepareMultisigTx = async (tx: Transaction, network: string, addres
     tx.build({
         client,
     }).then((bytes) => {
-        let serializedBase64 = toB64(bytes);
+        let serializedBase64 = toBase64(bytes);
 
         const output_location =
             process.env.NODE_ENV === 'development' ? './tx/tx-data-local.txt' : './tx/tx-data.txt';
