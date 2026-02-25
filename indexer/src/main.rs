@@ -63,9 +63,6 @@ enum Command {
         /// Resets metrics in case of a Prometheus error.
         #[arg(long, default_value_t = false)]
         reset_metrics: bool,
-        /// The URL of the IOTA GraphQL API to backfill metrics from.
-        #[arg(long)]
-        graphql_url: Option<String>,
     },
 }
 
@@ -80,7 +77,6 @@ impl Command {
                 api_port,
                 prometheus_url,
                 reset_metrics,
-                graphql_url,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -149,20 +145,6 @@ impl Command {
                 };
                 if iota_names_config.event_package_ids.is_empty() {
                     panic!("No EVENT_PACKAGE_IDS provided in the environment variables");
-                }
-
-                // Backfill new_purchases from GraphQL if the counter is still 0
-                if let Some(ref graphql_url) = graphql_url {
-                    let event_type = format!(
-                        "{}::payment::TransactionEvent",
-                        iota_names_config.iota_names_config.package_address
-                    );
-                    if let Err(e) = metrics
-                        .backfill_purchases_from_graphql(graphql_url, &event_type)
-                        .await
-                    {
-                        warn!("Could not backfill purchases from GraphQL: {e}");
-                    }
                 }
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
