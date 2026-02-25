@@ -95,7 +95,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     });
 
     const price = nameRecordData?.type === 'available' ? nameRecordData?.price : 0;
-    const isConnected = !!account?.address;
 
     const updates: NameUpdate[] = [];
 
@@ -247,8 +246,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
         setPurchaseYears(Number(years));
     }
 
-    if (!isConnected) return null;
-
     const usingPrice = applyDiscount ? discountedPrice : price;
     const finalPrice = new BigNumber(usingPrice ?? 0)
         .plus(updateNameData?.gasSummary?.totalGas ?? 0)
@@ -260,7 +257,6 @@ export function PurchaseNameDialog({ name, open, setOpen, onCompleted }: Purchas
     const fiatPriceResult = useCalculatePriceInFiat(finalPrice);
 
     const canPay =
-        isConnected &&
         !nameRecordError &&
         Number(coinBalance?.totalBalance) > finalPrice &&
         nameRecordData?.type === 'available';
