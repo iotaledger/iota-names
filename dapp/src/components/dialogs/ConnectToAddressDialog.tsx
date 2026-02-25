@@ -269,6 +269,8 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                         setEditIsPublicName(!editIsPublicName);
                                                     }
                                                 }}
+                                                role="button"
+                                                aria-label="Toggle use as public name"
                                             >
                                                 <div className="flex flex-row items-center gap-x-md p-md">
                                                     <div className="flex flex-col gap-y-xxs">
