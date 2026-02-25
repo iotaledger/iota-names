@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { NamesLogoWeb } from '@/components/svgs';
-import { AUCTION_ROUTE, MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
+import { MY_NAMES_ROUTE, PROTECTED_ROUTES, PUBLIC_ROUTES } from '@/lib/constants';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { ConnectButton } from '../../buttons/ConnectButton';
@@ -21,7 +21,7 @@ export function Navbar({ isBannerVisible }: { isBannerVisible: boolean }) {
     const pathname = usePathname();
     const { open } = useAvailabilityCheckDialog();
 
-    const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path, AUCTION_ROUTE.path].includes(pathname);
+    const isAllowedSearchOnPage = [MY_NAMES_ROUTE.path].includes(pathname);
 
     function toggleSearchDialog() {
         open({
