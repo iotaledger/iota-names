@@ -5,7 +5,7 @@
 import { bcs } from '@iota/iota-sdk/bcs';
 import { IotaGraphQLClient } from '@iota/iota-sdk/graphql';
 import { graphql } from '@iota/iota-sdk/graphql/schemas/2025.2';
-import { fromB64, toB64 } from '@iota/iota-sdk/utils';
+import { fromBase64, toBase64 } from '@iota/iota-sdk/utils';
 import { blake2b } from '@noble/hashes/blake2b';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 
@@ -89,7 +89,7 @@ export class IotaNamesClient {
         const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
         const packageId = this.getPackage('packageId', 'v1');
 
-        const coreConfigBcsB64 = toB64(
+        const coreConfigBcsB64 = toBase64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -136,7 +136,7 @@ export class IotaNamesClient {
         const packageId = this.getPackage('packageId', 'v1');
         const subnamesPackageId = this.getPackage('subnamesPackageId', 'v1');
 
-        const subnamesConfigBcsB64 = toB64(
+        const subnamesConfigBcsB64 = toBase64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -187,7 +187,7 @@ export class IotaNamesClient {
         const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
         const packageId = this.getPackage('packageId', 'v1');
 
-        const pricingConfigBcsB64 = toB64(
+        const pricingConfigBcsB64 = toBase64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -250,7 +250,7 @@ export class IotaNamesClient {
         const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
         const packageId = this.getPackage('packageId', 'v1');
 
-        const pricingConfigBcsB64 = toB64(
+        const pricingConfigBcsB64 = toBase64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -326,7 +326,7 @@ export class IotaNamesClient {
         const iotaNamesObjectId = this.getPackage('iotaNamesObjectId', 'v1');
         const packageId = this.getPackage('packageId', 'v1');
 
-        const denyListBcsB64 = toB64(
+        const denyListBcsB64 = toBase64(
             DummyFieldBcs.serialize({
                 dummy_field: false,
             }).toBytes(),
@@ -436,7 +436,7 @@ export class IotaNamesClient {
         const registryTableId = this.getPackage('registryTableId', 'v1');
         const packageId = this.getPackage('packageId', 'v1');
 
-        const nameBcsB64 = toB64(
+        const nameBcsB64 = toBase64(
             NameBcs.serialize({
                 labels: normalizeIotaName(name, 'dot').split('.').reverse(),
             }).toBytes(),
@@ -538,7 +538,7 @@ export class IotaNamesClient {
             throw new Error('Coupon house not found or is invalid');
         }
 
-        return CouponHouseBcs.parse(fromB64(couponsHouseDynamicFieldBcsValue));
+        return CouponHouseBcs.parse(fromBase64(couponsHouseDynamicFieldBcsValue));
     }
 
     async resolveCoupon(couponCode: string): Promise<Coupon | null> {
@@ -585,7 +585,7 @@ export class IotaNamesClient {
             return null;
         }
 
-        const couponData = CouponBcs.parse(fromB64(couponBcsBase64));
+        const couponData = CouponBcs.parse(fromBase64(couponBcsBase64));
 
         return { ...couponData, couponCode };
     }
