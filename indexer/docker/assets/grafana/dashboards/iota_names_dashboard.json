@@ -214,7 +214,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "iota_names_new_purchases",
+          "expr": "iota_names_purchases",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,

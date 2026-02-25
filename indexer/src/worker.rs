@@ -257,7 +257,7 @@ impl IotaNamesWorker {
                         .with_label_values(&[event.years.to_string()])
                         .inc();
                 } else {
-                    self.metrics.new_purchases.inc();
+                    self.metrics.purchases.inc();
                 }
             }
             // `subnames`
