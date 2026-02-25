@@ -1,4 +1,9 @@
+import path from 'path';
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '.env.local'), override: true });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -50,20 +55,21 @@ export default defineConfig({
             dependencies: ['Purchase setup'],
             fullyParallel: false,
         },
-        {
-            name: 'Auctions setup',
-            testMatch: /auctions\.setup\.ts/,
-            dependencies: ['Purchase flow'],
-        },
-        {
-            name: 'Auctions flow',
-            use: {
-                ...devices['Desktop Chrome'],
-                userAgent: 'Playwright',
-            },
-            testDir: './tests/auctions',
-            dependencies: ['Auctions setup'],
-        },
+        // Auction tests are disabled - auction functionality is hidden from UI
+        // {
+        //     name: 'Auctions setup',
+        //     testMatch: /auctions\.setup\.ts/,
+        //     dependencies: ['Purchase flow'],
+        // },
+        // {
+        //     name: 'Auctions flow',
+        //     use: {
+        //         ...devices['Desktop Chrome'],
+        //         userAgent: 'Playwright',
+        //     },
+        //     testDir: './tests/auctions',
+        //     dependencies: ['Auctions setup'],
+        // },
     ],
     webServer: {
         command: process.env.CI ? 'pnpm start' : 'pnpm run dev',
