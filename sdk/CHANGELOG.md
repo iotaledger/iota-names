@@ -1,5 +1,15 @@
 # @iota/iota-names-sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- 1e02d86: Remove `isMethodSupported`
+
+### Patch Changes
+
+- d16a60a: Stopped using deprecated APIs from `@iota/iota-sdk`
+
 ## 0.5.1
 
 ### Patch Changes
