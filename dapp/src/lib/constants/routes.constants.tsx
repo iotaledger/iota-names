@@ -26,7 +26,7 @@ export const DOCS_ROUTE: Route = {
 
 export const PROTECTED_ROUTES = [MY_NAMES_ROUTE] as const satisfies Route[];
 
-export const PUBLIC_ROUTES: Route[] = [AUCTION_ROUTE, DOCS_ROUTE] as const satisfies Route[];
+export const PUBLIC_ROUTES: Route[] = [DOCS_ROUTE] as const satisfies Route[];
 
 export const CONNECT_ROUTE: Route = {
     path: '/',
