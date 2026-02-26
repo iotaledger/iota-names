@@ -33,6 +33,7 @@ pub(crate) struct IotaNamesMetrics {
     pub auction_bid_count_distribution: IntGaugeVec,
     pub percentage_discounts: IntGauge,
     pub fixed_discounts: IntGauge,
+    pub purchases: IntCounter,
 }
 
 impl IotaNamesMetrics {
@@ -155,6 +156,12 @@ impl IotaNamesMetrics {
                 registry,
             )
             .unwrap(),
+            purchases: register_int_counter_with_registry!(
+                "iota_names_purchases",
+                "The total number of direct purchases",
+                registry,
+            )
+            .unwrap(),
         }
     }
 
@@ -199,6 +206,7 @@ impl IotaNamesMetrics {
             gauge
         );
         restore_metric!("iota_names_fixed_discounts", fixed_discounts, gauge);
+        restore_metric!("iota_names_purchases", purchases, counter);
 
         // Restore vector metrics
         self.restore_labeled_metrics(&client, prometheus_url)
