@@ -325,14 +325,21 @@ export const getObjectType = async (network: string, objectId: string): Promise<
     throw new Error('Object data not found');
 };
 
+const extractStringValues = (obj: unknown): string[] => {
+    if (typeof obj === 'string') return [obj];
+    if (typeof obj === 'object' && obj !== null) {
+        return Object.values(obj).flatMap(extractStringValues);
+    }
+    return [];
+};
+
 export const getIotaNamesAdminObjects = async (
     packageInfo: PackageInfo,
     client: IotaClient,
 ): Promise<string[]> => {
     // PackageIDs, UpgradeCap IDs, Publisher and Display objects
-    const packageValues = Object.entries(packageInfo)
-        .map(([key, value]) => value)
-        .filter((v) => typeof v === 'string');
+    // Recursively extract all string values (including nested version maps like packageId, auctionPackageId, etc.)
+    const packageValues = extractStringValues(packageInfo);
 
     const ownedObjectsPage = await client.getOwnedObjects({
         owner: packageInfo.adminAddress,
