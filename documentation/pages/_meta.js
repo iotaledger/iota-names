@@ -1,10 +1,7 @@
-{
+export default {
     "index": "IOTA-Names Documentation",
     "developer": "Developer",
-    "user": {
-        "title": "User",
-        "display": "hidden"
-    },
+    "user": "User",
     "dapp": {
         "title": "IOTA-Names Dapp ↗",
         "type": "page",
