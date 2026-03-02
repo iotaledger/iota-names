@@ -8,7 +8,7 @@ export const getImageUrl = (isSubname: boolean, network: string) => {
     const name = `{${isSubname ? 'nft.' : ''}name_str}`;
     const expiration = `{${isSubname ? 'nft.' : ''}expiration_timestamp_ms}`;
 
-    return `https://display.iotanames.com/${name}/${expiration}`;
+    return `https://display.iotanames.com/${name}/${expiration}/{id}`;
 };
 
 /** Creates the display. Should be called for both subnames and names. */
