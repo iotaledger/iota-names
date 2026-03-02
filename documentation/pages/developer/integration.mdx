@@ -28,8 +28,8 @@ IOTA-Names NFT ownership allows any address to be set as the target address. So,
 
 For off-chain resolution, use the available IOTA API endpoints: 
 
-- [JSON-RPC](https://docs.iota.org/iota-api-ref#iotax_resolvenameserviceaddress)
-- [GraphQL](https://docs.iota.org/references/iota-api/iota-graphql/reference/api/queries/resolve-iota-names-address)
+- [JSON-RPC](https://docs.iota.org/iota-api-ref#iotax_iotanameslookup)
+- [GraphQL](https://docs.iota.org/developer/references/iota-api/iota-graphql/reference/devnet/operations/queries/resolve-iota-names-address)
 
 <Callout type="info">
 For GraphQL's default name resolution, there's a [`defaultIotaName` field](https://docs.iota.org/references/iota-api/iota-graphql/reference/types/objects/address) you can use.
@@ -39,7 +39,7 @@ For GraphQL's default name resolution, there's a [`defaultIotaName` field](https
 
 Use the `iota-names` **core package** as a dependency in your Move package for on-chain name resolution.
 
-Currently, only Testnet and Devnet are supported. Add the following to your `Move.toml`:
+Testnet, Devnet, and Mainnet are supported. Add the following to your `Move.toml`:
 
 ```toml
 [dependencies]
