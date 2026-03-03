@@ -6,6 +6,12 @@ on:
     branches: [develop]
     paths:
       - "dapp/**"
+      - "sdk/**"
+      - "scripts/**"
+      - "pnpm-workspace.yaml"
+      - "pnpm-lock.yaml"
+      - "package.json"
+      - "turbo.json"
       - ".github/workflows/iota_names.staging_deploy.yml"
       - ".github/workflows/vercel_app_deploy.yml"
 
