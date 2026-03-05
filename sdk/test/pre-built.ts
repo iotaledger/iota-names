@@ -208,9 +208,9 @@ export const e2eLiveNetworkDryRunFlow = async (network_id: Network) => {
     } else if (network.id === Network.Devnet) {
         tx.setGasPayment([
             {
-                objectId: '0x6d8bd71d3b157d82de45e7e7c34f267112e5cf73a1dd7017db4f72d96edf4699',
-                version: '14008',
-                digest: 'GSAfmLfuEhMgjmocr9vt44teCjhKXHBYWSSUtTroM9oB',
+                objectId: '0x7a8610b11e0bfe5231a7aca06e0ef0321ef0afa611195ab35ba6badf7a538921',
+                version: '42',
+                digest: 'GgP7Fdc2j7RPgwsuKppUzHeZeSVR7NE9hR8tiGWNtLrE',
             },
         ]);
     }

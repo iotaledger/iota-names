@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
-import { useRouter } from 'next/router';
 import Footer from './components/footer';
 
 export default {
@@ -12,28 +11,17 @@ export default {
   project: {
     link: 'https://github.com/iotaledger/iota-names'
   },
-  useNextSeoProps() {
-    const { asPath } = useRouter();
-
-    return {
-      titleTemplate: asPath !== '/' ? '%s | IOTA-Names Docs' : 'IOTA-Names Docs',
-      description:
-        'IOTA Name Space Documentation. Integrate IOTA-Names in your projects for the IOTA blockchain.',
-      openGraph: {
-        title: 'IOTA-Names Docs',
-        description:
-          'IOTA Name Space Documentation. Integrate IOTA-Names in your projects for the IOTA blockchain.',
-        site_name: 'IOTA Name Space Docs',
-      },
-      additionalMetaTags: [{ content: 'IOTA Name Space Docs', name: 'apple-mobile-web-app-title' }],
-    };
-  },
-  feedback: {
-    content: ""
-  },
-  editLink: {
-    component: null
-  },
+  head: (
+    <>
+      <meta name="description" content="IOTA Name Space Documentation. Integrate IOTA-Names in your projects for the IOTA blockchain." />
+      <meta property="og:title" content="IOTA-Names Docs" />
+      <meta property="og:description" content="IOTA Name Space Documentation. Integrate IOTA-Names in your projects for the IOTA blockchain." />
+      <meta property="og:site_name" content="IOTA Name Space Docs" />
+      <meta name="apple-mobile-web-app-title" content="IOTA Name Space Docs" />
+    </>
+  ),
+  feedback: false,
+  editLink: false,
   footer: {
     component: Footer,
   }

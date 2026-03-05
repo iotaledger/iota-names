@@ -5,7 +5,7 @@ import { normalizeIotaName } from '@iota/iota-names-sdk';
 import z from 'zod';
 
 import {
-    DATE_CONFIG,
+    SUBTITLE_CONFIG,
     SVG_CONFIG,
     TEXT_CONFIG,
     TEXT_TO_SVG_INTER,
@@ -28,6 +28,7 @@ export const Params = z.object({
 });
 
 type RenderSvgParameters = z.infer<typeof Params> & {
+    invalidated: boolean;
     addTestDataAttributes?: boolean;
     template: string;
 };
@@ -35,6 +36,7 @@ type RenderSvgParameters = z.infer<typeof Params> & {
 export function renderSvg({
     name,
     timestamp,
+    invalidated,
     addTestDataAttributes,
     template,
 }: RenderSvgParameters) {
@@ -127,17 +129,18 @@ export function renderSvg({
         currentYPosition += lineInfo.lineHeight;
     }
 
-    const dateTestId = addTestDataAttributes ? ` data-test-date="${formattedDate}"` : '';
-    const dateX = SVG_CONFIG.svgWidth - DATE_CONFIG.paddingRight;
-    const dateY = SVG_CONFIG.svgHeight - DATE_CONFIG.paddingBottom;
-    const datePath = TEXT_TO_SVG_INTER.getD(formattedDate, {
-        x: dateX,
-        y: dateY,
-        fontSize: DATE_CONFIG.fontSize,
+    const subtitle = invalidated ? 'Invalidated' : formattedDate;
+    const subtitleTestId = addTestDataAttributes ? ` data-test-subtitle="${subtitle}"` : '';
+    const subtitleX = SVG_CONFIG.svgWidth - SUBTITLE_CONFIG.paddingRight;
+    const subtitleY = SVG_CONFIG.svgHeight - SUBTITLE_CONFIG.paddingBottom;
+    const subtitlePath = TEXT_TO_SVG_INTER.getD(subtitle, {
+        x: subtitleX,
+        y: subtitleY,
+        fontSize: SUBTITLE_CONFIG.fontSize,
         anchor: 'right bottom',
     });
 
-    svgContent += `<path d="${datePath}"${dateTestId} fill="${TEXT_CONFIG.color}"/>\n`;
+    svgContent += `<path d="${subtitlePath}"${subtitleTestId} fill="${TEXT_CONFIG.color}"/>\n`;
 
     return template.replace('{{{CONTENT}}}', svgContent);
 }

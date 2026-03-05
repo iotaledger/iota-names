@@ -1,5 +1,11 @@
 # @iota/iota-names-sdk
 
+## 0.6.1
+
+### Patch Changes
+
+- c654eb0: New devnet release.
+
 ## 0.6.0
 
 ### Minor Changes
