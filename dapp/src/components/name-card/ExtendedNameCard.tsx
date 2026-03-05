@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from '@iota/apps-ui-icons';
-import { Button, ButtonType } from '@iota/apps-ui-kit';
+import { Badge, BadgeType, Button, ButtonType } from '@iota/apps-ui-kit';
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
@@ -97,6 +97,11 @@ export function ExtendedNameCard({
                         onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
                         showAddSubnameLink={!expired && namePermissions.allowChildCreation}
                     />
+                    {expired && isNameGracePeriodExpired ? (
+                        <Badge type={BadgeType.Error} label="Expired" />
+                    ) : expired && !isNameGracePeriodExpired ? (
+                        <Badge type={BadgeType.Warning} label="Expiring" />
+                    ) : null}
 
                     <Button
                         text={buttonText}
