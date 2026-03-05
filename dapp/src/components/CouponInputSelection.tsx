@@ -35,6 +35,7 @@ export function CouponInputSelection({
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
                 {coupons.map(({ code: coupon, isInvalid: isError }) => (
                     <Chip
+                        data-amp-mask
                         key={coupon}
                         label={coupon}
                         onClick={() => onAddCoupon(coupon)}
