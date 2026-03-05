@@ -233,6 +233,7 @@ export function PersonalizeAvatarDialog({ name, setOpen }: PersonalizeAvatarDial
                                     onClick={handleUnset}
                                     disabled={disableUnset}
                                     className="text-names-neutral-70 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    aria-label="Restore avatar to default"
                                 >
                                     <span className="flex items-center gap-2">
                                         <Refresh className="h-4 w-4" />

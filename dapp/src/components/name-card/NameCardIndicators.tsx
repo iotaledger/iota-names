@@ -55,6 +55,7 @@ export function SubnameCountIndicator({
                     CLICKABLE_INDICATOR_CLASSES,
                 )}
                 onClick={onAddSubnameClick}
+                aria-label="Add subname"
             >
                 <Add className="h-4 w-4" /> Add subname
             </ButtonUnstyled>
@@ -69,6 +70,7 @@ export function SubnameCountIndicator({
                 INDICATOR_COMMON_CLASSES,
                 CLICKABLE_INDICATOR_CLASSES,
             )}
+            aria-label="View subnames"
         >
             <Subnames className="h-4 w-4" />
             {subnameCount} Subname{subnameCount !== 1 ? 's' : ''}

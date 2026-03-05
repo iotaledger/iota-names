@@ -237,6 +237,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                                 : ChipType.Outline
                                         }
                                         onClick={() => toggleMetadata(key)}
+                                        aria-label={`${metadata[key]?.selected ? 'Deselect' : 'Select'} ${label} field`}
                                     />
                                 ))}
                             </div>

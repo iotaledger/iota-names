@@ -389,6 +389,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                         trailingElement={<Copy className="w-4 h-4" />}
                         onClick={copyAddressToClipboard}
                         type={isNamePublic ? ChipType.Success : ChipType.Elevated}
+                        aria-label="Copy address to clipboard"
                     />
                 </div>
             </div>
