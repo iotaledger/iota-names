@@ -26,7 +26,7 @@ ARTIFACT_ID=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
 jq -r '.workflow_runs[0].artifacts_url' | \
 xargs curl -s -H "Authorization: token $GITHUB_TOKEN" \
      -H "Accept: application/vnd.github.v3+json" | \
-jq -r '.artifacts[0].id')
+jq -r '.artifacts | min_by(.id) | .id')
 
 if [ -z "$ARTIFACT_ID" ] || [ "$ARTIFACT_ID" = "null" ]; then
     echo "Error: No artifacts found"
