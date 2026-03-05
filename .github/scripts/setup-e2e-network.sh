@@ -7,8 +7,7 @@ set -euo pipefail
 # then restarts services with injected configs.
 # ============================================================================
 
-# TODO  Remove '-alpha' when https://github.com/iotaledger/iota/pull/9538 is in mainnet release
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.14.0-alpha}"
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.17.2}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
