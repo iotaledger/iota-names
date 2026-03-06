@@ -35,6 +35,7 @@ export function CouponInputSelection({
             <div className="flex flex-wrap gap-x-xs gap-y-xs">
                 {coupons.map(({ code: coupon, isInvalid: isError }) => (
                     <Chip
+                        data-amp-mask
                         key={coupon}
                         label={coupon}
                         onClick={() => onAddCoupon(coupon)}
@@ -57,6 +58,7 @@ export function CouponInputSelection({
                             onKeyDown={(e) => e.key === 'Enter' && addCoupon()}
                             onClearInput={() => setCoupon('')}
                             disabled={disabled}
+                            data-amp-mask
                         />
                         <ButtonUnstyled
                             className="bg-names-gradient-primary bg-clip-text text-transparent bg-[length:200%] enabled:transition-[background-position] enabled:duration-500 enabled:hover:bg-[100%] text-label-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"

@@ -44,11 +44,15 @@ export async function initAmplitude() {
                 configuration: {
                     autocapture: {
                         attribution: IS_ENABLED,
-                        fileDownloads: IS_ENABLED,
-                        formInteractions: IS_ENABLED,
+                        fileDownloads: false,
+                        formInteractions: false,
                         pageViews: IS_ENABLED,
                         sessions: IS_ENABLED,
                         elementInteractions: IS_ENABLED,
+                        frustrationInteractions: false,
+                        networkTracking: false,
+                        webVitals: false,
+                        pageUrlEnrichment: IS_ENABLED,
                     },
                     logLevel: LogLevel.None,
                 },

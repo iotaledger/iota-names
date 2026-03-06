@@ -102,6 +102,7 @@ export function GeneralInfoDialog({ name, setOpen }: GeneralInfoDialogProps) {
                                         keyText={key}
                                         value={
                                             <Link
+                                                data-amp-mask
                                                 href={href}
                                                 className="text-names-primary-80 text-body-md"
                                                 target="_blank"

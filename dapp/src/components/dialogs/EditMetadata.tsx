@@ -254,6 +254,7 @@ export function EditMetadataDialog({ name, setOpen }: EditMetadataDialogProps) {
                                                     updateMetadataData(key, value)
                                                 }
                                                 errorMessage={validationErrors[key] || undefined}
+                                                data-amp-mask
                                             />
                                         ),
                                 )}

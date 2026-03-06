@@ -70,7 +70,10 @@ export function PanelTile({
                                 </div>
 
                                 {subtitle && (
-                                    <div className="text-left text-title-sm font-normal text-names-neutral-60 break-words">
+                                    <div
+                                        data-amp-mask
+                                        className="text-left text-title-sm font-normal text-names-neutral-60 break-words"
+                                    >
                                         {subtitle}
                                     </div>
                                 )}
