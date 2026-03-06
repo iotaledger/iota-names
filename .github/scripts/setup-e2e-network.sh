@@ -7,7 +7,18 @@ set -euo pipefail
 # then restarts services with injected configs.
 # ============================================================================
 
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.17.2}"
+# Fetches the latest mainnet release version from the iotaledger/iota GitHub repo.
+# Mainnet releases follow the tag pattern vMAJOR.MINOR.PATCH with no suffix.
+# Pre-release tags (e.g. -rc, -beta, -alpha) and unrelated tags (e.g. wallet-v*)
+# are excluded by only matching tags that consist solely of vX.Y.Z.
+fetch_latest_mainnet_version() {
+    curl -s "https://api.github.com/repos/iotaledger/iota/releases" \
+        | grep '"tag_name"' \
+        | grep -oP '"tag_name":\s*"\Kv\d+\.\d+\.\d+(?=")' \
+        | head -1
+}
+
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-$(fetch_latest_mainnet_version)}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
