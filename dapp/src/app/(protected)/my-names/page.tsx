@@ -28,7 +28,11 @@ import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useGetPublicName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
-import { isGracePeriodExpired, isNameRecordCloseToExpiration } from '@/lib/utils/names';
+import {
+    isGracePeriodExpired,
+    isNameRecordCloseToExpiration,
+    isNameRecordExpired,
+} from '@/lib/utils/names';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { SubnamesDialog } from './components/SubnamesDialog';
@@ -67,7 +71,10 @@ export default function MyNamesPage(): JSX.Element {
 
     const allNames = [...(names ?? []), ...(subnames ?? [])];
     const expiringAll = allNames.filter((nft) => isNameRecordCloseToExpiration(nft));
-    const expiredAll = allNames.filter((nft) => isGracePeriodExpired(nft));
+    const expiredAll = allNames.filter(
+        (nft) => isNameRecordExpired(nft) && !isGracePeriodExpired(nft),
+    );
+    const unrenewableAll = allNames.filter((nft) => isGracePeriodExpired(nft));
     const filteredNames: RegistrationNft[] = (() => {
         const namesRegistrations = names ?? [];
         const subnamesRegistrations = subnames ?? [];
@@ -82,7 +89,7 @@ export default function MyNamesPage(): JSX.Element {
             case GroupedNamesFilter.Expiring:
                 return expiringAll;
             case GroupedNamesFilter.Expired:
-                return expiredAll;
+                return [...expiredAll, ...unrenewableAll];
 
             default:
                 return namesRegistrations;
@@ -172,21 +179,22 @@ export default function MyNamesPage(): JSX.Element {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
                 <SegmentedButton>
-                    {Object.entries(GroupedNamesFilter).map(([key, value]) => (
-                        <ButtonSegment
-                            key={key}
-                            type={ButtonSegmentType.Rounded}
-                            label={value}
-                            selected={selectedFilter === value}
-                            onClick={() => handleFilterSelect(value)}
-                            disabled={
-                                (value === GroupedNamesFilter.Names && !names?.length) ||
-                                (value === GroupedNamesFilter.Subnames && !subnames?.length) ||
-                                (value === GroupedNamesFilter.Expired && !expiredAll.length) ||
-                                (value === GroupedNamesFilter.Expiring && !expiringAll.length)
-                            }
-                        />
-                    ))}
+                    {Object.entries(GroupedNamesFilter)
+                        .filter(([, value]) => {
+                            if (value === GroupedNamesFilter.Expiring) return !!expiringAll.length;
+                            if (value === GroupedNamesFilter.Expired)
+                                return !!expiredAll.length || !!unrenewableAll.length;
+                            return true;
+                        })
+                        .map(([key, value]) => (
+                            <ButtonSegment
+                                key={key}
+                                type={ButtonSegmentType.Rounded}
+                                label={value}
+                                selected={selectedFilter === value}
+                                onClick={() => handleFilterSelect(value)}
+                            />
+                        ))}
                 </SegmentedButton>
                 {!isLoadingCards && (
                     <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
