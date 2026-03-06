@@ -9,7 +9,7 @@ import { ampli } from '@/lib/utils/analytics/ampli';
 
 export function ConnectButton() {
     return (
-        <div className="amp-obfuscation">
+        <div className="amp-obfuscation" data-amp-mask>
             <DappConnectButton
                 connectText="Connect"
                 onConnected={(args) => {

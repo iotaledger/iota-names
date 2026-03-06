@@ -103,6 +103,7 @@ export function ExtendedNameCard({
                         type={ButtonType.Secondary}
                         onClick={handleButtonClick}
                         icon={targetAddress ? <Link /> : null}
+                        data-amp-mask
                     />
                 </NameCardBody>
             </NameCard>

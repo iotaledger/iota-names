@@ -240,7 +240,7 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
                 <DialogBody>
                     <div className="flex flex-col justify-between h-full items-center">
                         <div className="flex flex-col w-full gap-y-md">
-                            <Panel bgColor="bg-names-neutral-12">
+                            <Panel bgColor="bg-names-neutral-12" data-amp-mask>
                                 <div className="px-md py-lg">
                                     <span className="text-names-neutral-100 text-headline-sm break-words">
                                         {cleanName}

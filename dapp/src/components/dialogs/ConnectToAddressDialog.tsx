@@ -225,6 +225,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                 onClearInput={() => setEditTargetAddress('')}
                                                 disabled={disableEdit}
                                                 errorMessage={errorMessage}
+                                                data-amp-mask
                                             />
                                         </div>
                                         {!isTargetingCurrentAddress && (
@@ -242,7 +243,10 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                         {nameRecord?.nameRecord.targetAddress &&
                                             !hasAddressChange &&
                                             editIsPublicName && (
-                                                <div className="flex w-full break-all">
+                                                <div
+                                                    data-amp-mask
+                                                    className="flex w-full break-all"
+                                                >
                                                     <InfoBox
                                                         type={InfoBoxType.Success}
                                                         style={InfoBoxStyle.Default}
@@ -380,7 +384,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
         <div className="flex flex-col gap-y-md">
             <div className="flex flex-col gap-y-sm">
                 <div className="text-headline-sm text-iota-neutral-100">{cleanName}</div>
-                <div>
+                <div data-amp-mask>
                     <Chip
                         leadingElement={<Link className="w-4 h-4" />}
                         label={formatAddress(targetAddress)}
