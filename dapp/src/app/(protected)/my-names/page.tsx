@@ -156,6 +156,7 @@ export default function MyNamesPage(): JSX.Element {
                             onClick={handleRefresh}
                             disabled={isRefreshing}
                             testId="refresh-button"
+                            aria-label="Refresh"
                         />
                     )}
                 </div>

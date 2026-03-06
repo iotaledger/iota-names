@@ -36,7 +36,10 @@ export function LandingHero() {
                         placeholder="Search for your IOTA name"
                         onFocus={() => open({ autoFocusInput: true })}
                         trailingElement={
-                            <ButtonUnstyled className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100">
+                            <ButtonUnstyled
+                                className="p-sm rounded-full [&_svg]:h-5 [&_svg]:w-5 bg-names-neutral-100"
+                                aria-label="Search"
+                            >
                                 <Search className="text-names-primary-0" />
                             </ButtonUnstyled>
                         }

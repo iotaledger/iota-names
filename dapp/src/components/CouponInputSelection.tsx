@@ -42,6 +42,7 @@ export function CouponInputSelection({
                         trailingElement={<Close />}
                         size={ChipSize.Small}
                         type={isError ? ChipType.Error : undefined}
+                        aria-label="Remove coupon code"
                     />
                 ))}
             </div>
