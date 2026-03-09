@@ -28,6 +28,7 @@ export const MenuButton = forwardRef<HTMLButtonElement, MenuButtonProps>(
                 className={buttonVariants({ variant })}
                 ref={ref}
                 data-testid="menu-button"
+                aria-label="More options"
                 {...props}
             >
                 <MoreHoriz className="w-5 h-5 " />

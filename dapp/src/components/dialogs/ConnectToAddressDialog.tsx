@@ -273,6 +273,7 @@ export function ConnectToAddressDialog({ name, setOpen }: ConnectToAddressDialog
                                                         setEditIsPublicName(!editIsPublicName);
                                                     }
                                                 }}
+                                                role="button"
                                             >
                                                 <div className="flex flex-row items-center gap-x-md p-md">
                                                     <div className="flex flex-col gap-y-xxs">
@@ -391,6 +392,7 @@ function UpdatesResult({ name, updates }: { name: string; updates: NameUpdate[] 
                         trailingElement={<Copy className="w-4 h-4" />}
                         onClick={copyAddressToClipboard}
                         type={isNamePublic ? ChipType.Success : ChipType.Elevated}
+                        aria-label="Copy address to clipboard"
                     />
                 </div>
             </div>

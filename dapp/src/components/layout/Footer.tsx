@@ -30,9 +30,14 @@ export function Footer() {
                                 {title}
                             </Link>
                         ))}
-                        {FOOTER_SOCIAL_LINKS.map(({ path, icon }, index) => (
-                            <div key={index} className="[&_svg]:h-6 [&_svg]:w-6">
-                                <Link href={path} target="_blank" rel="noopener noreferrer">
+                        {FOOTER_SOCIAL_LINKS.map(({ path, icon, title }) => (
+                            <div key={path} className="[&_svg]:h-6 [&_svg]:w-6">
+                                <Link
+                                    href={path}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={title}
+                                >
                                     {icon}
                                 </Link>
                             </div>

@@ -210,6 +210,8 @@ export function AvailabilityCheck({ autoFocusInput }: AvailabilityCheckProps) {
                                                 e.stopPropagation();
                                                 removeRecentSearch(searchedName);
                                             }}
+                                            role="button"
+                                            aria-label="Remove from recent searches"
                                         >
                                             <Close />
                                         </div>

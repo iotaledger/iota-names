@@ -24,6 +24,8 @@ export function NameCardBody({
             <div
                 onClick={handleCopy}
                 className="group flex items-center gap-x-xs text-names-neutral-92 text-title-md truncate overflow-hidden cursor-pointer"
+                role="button"
+                aria-label="Copy to clipboard"
             >
                 <span className="truncate cursor-pointer">{name}</span>
 

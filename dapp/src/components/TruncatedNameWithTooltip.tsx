@@ -25,6 +25,8 @@ export function TruncatedNameWithTooltip({
             data-amp-mask
             onClick={() => copyToClipboard(name)}
             className="group inline-flex items-center gap-x-xs cursor-pointer"
+            role="button"
+            aria-label="Copy name to clipboard"
         >
             <span className="truncate">{truncated}</span>
 

@@ -8,7 +8,7 @@ import { sessionReplayPlugin } from '@amplitude/plugin-session-replay-browser';
 
 import { ampli } from './ampli';
 import { AMP_COOKIES_KEY } from './constants';
-import { contextEnrichmentPlugin } from './plugins/contextEnrichmentPlugin';
+import { devPrefixPlugin } from './plugins/devPrefixPlugin';
 
 // Dev note: do not change, production-only gate (Session Replay must never run outside prod)
 const IS_PRODUCTION = process.env.NEXT_PUBLIC_BUILD_ENV === 'production';
@@ -66,9 +66,9 @@ export async function initAmplitude() {
 
         ampli.client.add(engagementPlugin({ serverZone: 'EU' }));
 
-        // Add context enrichment plugin to add page context to all events
         if (IS_ENABLED) {
-            ampli.client.add(contextEnrichmentPlugin());
+            // Add dev prefix plugin to prefix events with 'dev_' in non-production environments
+            ampli.client.add(devPrefixPlugin());
             // Session Replay runs only in production (safety gate to avoid polluting recordings)
             if (IS_PRODUCTION) {
                 const sessionReplayTracking = sessionReplayPlugin({
