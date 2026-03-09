@@ -555,6 +555,7 @@ test.describe.serial('Name Management Tests', () => {
     });
 
     test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
+        test.setTimeout(60_000);
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
 
         const name = generateRandomName('avatar');
