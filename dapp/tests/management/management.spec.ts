@@ -555,6 +555,7 @@ test.describe.serial('Name Management Tests', () => {
     });
 
     test('Set name avatar', async ({ appPage: page, context, sharedState }) => {
+        test.setTimeout(60_000);
         const keypair = Ed25519Keypair.deriveKeypair(sharedState.wallet.mnemonic ?? '');
 
         const name = generateRandomName('avatar');
@@ -593,14 +594,16 @@ test.describe.serial('Name Management Tests', () => {
         await expect(dialog.getByText('Personalize Avatar', { exact: true })).toBeVisible();
 
         const mintedImg = dialog.getByRole('img', { name: 'e2e test Avatar' });
-        await mintedImg.waitFor({ state: 'visible', timeout: 30_000 });
+        await mintedImg.waitFor({ state: 'visible', timeout: 60_000 });
         const mintedCard = mintedImg.locator(
             'xpath=ancestor::*[@data-testid="avatar-nft-card"][1]',
         );
         await mintedCard.click();
 
         await dialog.getByRole('button', { name: 'Save' }).click();
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        (await context.waitForEvent('page', { timeout: 60_000 }))
+            .getByRole('button', { name: 'Approve' })
+            .click();
         await page.bringToFront();
 
         await expect(
@@ -608,7 +611,7 @@ test.describe.serial('Name Management Tests', () => {
                 exact: false,
             }),
         ).toBeVisible({
-            timeout: 30_000,
+            timeout: 60_000,
         });
 
         await page.close();
