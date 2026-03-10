@@ -19,7 +19,7 @@
     "license": "ISC",
     "dependencies": {
         "@fastify/cors": "^11.1.0",
-        "@iota/iota-names-sdk": "workspace:^",
+        "@iota/iota-names-sdk": "^0.6.1",
         "@types/text-to-svg": "^3.1.4",
         "dotenv": "^17.3.1",
         "fastify": "^5.7.2",

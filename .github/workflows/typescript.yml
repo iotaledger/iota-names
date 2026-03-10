@@ -8,7 +8,6 @@ on:
       - "packages/**"
       - "scripts/**"
       - "build-scripts/**"
-      - "sdk/**"
       - ".eslintrc.cjs"
       - "prettier.config.cjs"
       - "dapp/**"
@@ -60,82 +59,6 @@ jobs:
       - name: Run pnpm lint
         run: |
           pnpm lint
-
-  sdk-test:
-    name: SDK Tests
-    if: (github.event_name == 'workflow_call') || (github.event_name == 'push') || (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgrespw
-          POSTGRES_DB: iota_indexer
-          POSTGRES_HOST_AUTH_METHOD: trust
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 1
-
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
-      - name: Install IOTA using Homebrew
-        run: brew install iotaledger/tap/iota
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
-        with:
-          node-version: 20
-
-      - name: Do a global PNPM install
-        run: |
-          npm install -g pnpm
-
-      - name: Install Dependencies
-        run: |
-          pnpm install
-
-      - name: Typecheck Sdk
-        run: pnpm -F @iota/iota-names-sdk typecheck
-        working-directory: ./
-
-      - name: Build SDK
-        run: |
-          pnpm sdk build
-
-      - name: Prepare local network & run SDK tests
-        env:
-          IS_CI_JOB: true
-          NETWORK: localnet
-        run: |
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
-          sleep 10
-
-          iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
-          iota client switch --env localnet
-          iota client faucet
-          sleep 5
-
-          cd scripts
-          export NETWORK=localnet
-          pnpm ts-node init/init.ts localnet
-          pnpm ts-node tests/register-name.ts
-          sleep 5
-
-          cat ./package-info/localnet.json
-
-          cd ../sdk
-          VITE_IOTA_BIN="iota" pnpm test:e2e
 
   dapp-e2e-test:
     name: Run dapp E2E Tests
@@ -282,9 +205,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: ./
-
-      - name: Build sdk
-        run: pnpm --filter @iota/iota-names-sdk run build
 
       - name: Build names-display service
         run: pnpm --filter names-display run build
