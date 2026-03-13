@@ -54,7 +54,7 @@ export type NameUpdate =
           type: 'new-subname';
           parentNftId: string;
           subname: string;
-          expirationDateParent: Date;
+          expirationDate: Date;
           allowChildCreation: boolean;
           allowTimeExtension: boolean;
       }
@@ -138,7 +138,7 @@ export function useUpdateNameTransaction({ address, updates }: UseUpdateNameTran
                         const subnameNft = iotaNamesTx.createSubname({
                             parentNft: tx.object(update.parentNftId),
                             name: update.subname,
-                            expirationTimestampMs: update.expirationDateParent.getTime(),
+                            expirationTimestampMs: update.expirationDate.getTime(),
                             allowChildCreation: update.allowChildCreation,
                             allowTimeExtension: update.allowTimeExtension,
                         });

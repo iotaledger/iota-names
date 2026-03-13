@@ -5,6 +5,8 @@
 
 import { Info, Warning } from '@iota/apps-ui-icons';
 import {
+    Badge,
+    BadgeType,
     Button,
     ButtonType,
     Checkbox,
@@ -19,6 +21,7 @@ import {
     Input,
     InputType,
     LoadingIndicator,
+    RadioButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import {
@@ -37,13 +40,17 @@ import { NameUpdate, useUpdateNameTransaction } from '@/hooks/useUpdateNameTrans
 import { RegistrationNft } from '@/lib/interfaces';
 import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
+import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
+
+import { ExpirationDate } from '../ExpirationDate';
 
 function createSubnameUpdates({
     name,
     nameRecord,
     ownedSubnames,
     newSubname,
+    expirationDate,
     allowChildCreation,
     allowTimeExtension,
 }: {
@@ -51,6 +58,7 @@ function createSubnameUpdates({
     nameRecord?: NameRecord;
     ownedSubnames?: RegistrationNft[];
     newSubname: string;
+    expirationDate: Date | null;
     allowChildCreation: boolean;
     allowTimeExtension: boolean;
 }) {
@@ -76,19 +84,19 @@ function createSubnameUpdates({
     if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
         return {
             updates: [],
-            fullSubnameName: fullSubnameName,
-            isSubnameAvailable: isSubnameAvailable,
+            fullSubnameName,
+            isSubnameAvailable,
             subnameError: isValidSubname ? isValidSubname : null,
         };
     }
     const updates: NameUpdate[] = [];
 
-    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord) {
+    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord && expirationDate) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationDateParent: nameRecord.expirationDate,
+            expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });
@@ -125,12 +133,25 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const [editSubname, setEditSubname] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+    const [isParentExpiration, setIsParentExpiration] = useState<boolean>(true);
+    const [isCustomExpiration, setIsCustomExpiration] = useState<boolean>(false);
+    const [customExpirationDate, setCustomExpirationDate] = useState<Date | null>(null);
+
+    const parentExpirationDate =
+        nameRecord && nameRecord.nameRecord ? nameRecord.nameRecord.expirationDate : null;
+
+    const expirationDate = isParentExpiration
+        ? parentExpirationDate
+        : isCustomExpiration
+          ? customExpirationDate
+          : null;
 
     const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
         name,
         nameRecord: nameRecord?.nameRecord,
         newSubname: editSubname,
         ownedSubnames,
+        expirationDate,
         allowTimeExtension: editIsAllowingRenew,
         allowChildCreation: editIsAllowSubnames,
     });
@@ -239,6 +260,46 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                           : undefined
                                 }
                             />
+                            <div className="flex flex-col gap-y-md w-full">
+                                <span className="text-label-lg text-names-neutral-92">
+                                    Expiration Date
+                                </span>
+                                <div className="flex items-center justify-between gap-x-sm">
+                                    <RadioButton
+                                        name="parent_expiration"
+                                        isChecked={isParentExpiration}
+                                        onChange={() => {
+                                            setIsCustomExpiration(false);
+                                            setIsParentExpiration(true);
+                                        }}
+                                        label="Same as parent"
+                                    />
+                                    <Badge
+                                        type={BadgeType.Neutral}
+                                        label={
+                                            parentExpirationDate
+                                                ? formatExpirationDate(parentExpirationDate)
+                                                : ''
+                                        }
+                                    />
+                                </div>
+                                <RadioButton
+                                    name="custom_expiration"
+                                    isChecked={isCustomExpiration}
+                                    onChange={() => {
+                                        setIsCustomExpiration(true);
+                                        setIsParentExpiration(false);
+                                    }}
+                                    label="Custom"
+                                />
+                                <ExpirationDate
+                                    onChange={setCustomExpirationDate}
+                                    maxDate={
+                                        parentExpirationDate ? parentExpirationDate : new Date()
+                                    }
+                                    disabled={!isCustomExpiration}
+                                />
+                            </div>
                             <div className="flex flex-col gap-y-md w-full">
                                 <span className="text-label-lg text-names-neutral-92">
                                     Permissions

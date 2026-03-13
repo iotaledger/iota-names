@@ -5,6 +5,7 @@
 export const MAX_U64 = BigInt('18446744073709551615');
 export const MIN_LABEL_SIZE = 3;
 export const GRACE_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
+export const MINIMUM_SUBNAME_DURATION = 24 * 60 * 60 * 1000;
 
 /**
  * Allowed keys for metadata.

@@ -5,6 +5,8 @@
 
 import { Info, Warning } from '@iota/apps-ui-icons';
 import {
+    Badge,
+    BadgeType,
     Button,
     ButtonType,
     Dialog,
@@ -18,10 +20,12 @@ import {
     InfoBoxType,
     LoadingIndicator,
     Panel,
+    RadioButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -38,14 +42,18 @@ import {
     isGracePeriodExpired,
 } from '@/lib/utils/names';
 
+import { ExpirationDate } from '../ExpirationDate';
+
 function createRenewUpdates({
     nameRecord,
     ownedNames = [],
     ownedSubnames = [],
+    expirationDate,
 }: {
     nameRecord?: NameRecord;
     ownedNames?: RegistrationNft[];
     ownedSubnames?: RegistrationNft[];
+    expirationDate?: Date | null;
 }) {
     const isNameSubname = nameRecord?.name ? isSubname(nameRecord.name) : false;
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -57,13 +65,11 @@ function createRenewUpdates({
         const objectId = getNameObject(ownedSubnames, nameRecord.name);
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
-            // Only allow extending the expiration time if its less than its parent
-            const expiresBeforeParent = nameRecord.expirationDate < parentObject?.expirationDate;
-            if (expiresBeforeParent) {
+            if (expirationDate && expirationDate <= parentObject?.expirationDate) {
                 updates.push({
                     type: 'renew-subname',
                     nftId: objectId,
-                    expirationDate: parentObject.expirationDate,
+                    expirationDate,
                 });
             }
         }
@@ -92,10 +98,21 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
+    const [isParentExpiration, setIsParentExpiration] = useState<boolean>(true);
+    const [isCustomExpiration, setIsCustomExpiration] = useState<boolean>(false);
+    const [customExpirationDate, setCustomExpirationDate] = useState<Date | null>(null);
+
+    const parentExpirationDate =
+        nameRecord?.nameRecord && ownedNames && ownedSubnames
+            ? (getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
+                  ?.expirationDate ?? null)
+            : null;
+
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
+        expirationDate: isParentExpiration ? parentExpirationDate : customExpirationDate,
     });
 
     const {
@@ -132,12 +149,16 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
-            const expirationTime = expirationDate ? expirationDate.getTime() : Date.now();
+            const expirationTime =
+                isParentExpiration && parentExpirationDate
+                    ? parentExpirationDate.getTime()
+                    : isCustomExpiration && customExpirationDate
+                      ? customExpirationDate.getTime()
+                      : Date.now();
 
             ampli.renewedSubname({
                 name,
-                // TODO expirationType `custom` will be added after implement https://github.com/iotaledger/iota-names/issues/915
-                expirationType: 'parent',
+                expirationType: isParentExpiration ? 'parent' : 'custom',
                 expirationTime,
             });
             toast.success('Subname renewed successfully');
@@ -152,18 +173,11 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     }
 
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = (() => {
-        if (nameRecord?.nameRecord && ownedNames && ownedSubnames) {
-            const expirationTime = getParentObject(
-                ownedNames,
-                ownedSubnames,
-                nameRecord.nameRecord.name,
-            )?.expirationDate;
-            if (expirationTime) {
-                return expirationTime;
-            }
-        }
-    })();
+    const expirationDate = isParentExpiration
+        ? parentExpirationDate
+        : isCustomExpiration
+          ? customExpirationDate
+          : null;
 
     const renewalTime =
         expirationDate && nameRecord && nameRecord.nameRecord
@@ -171,14 +185,13 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             : 0;
 
     const isBelowMinimumRenewalPeriod =
-        renewalTime >= 0 && config?.subnamesConfig
+        renewalTime >= 0 && config?.subnamesConfig && !isCustomExpiration
             ? renewalTime < config.subnamesConfig.minimum_duration
             : false;
 
     const currentExpirationDate = nameRecord?.nameRecord
         ? formatExpirationDate(nameRecord.nameRecord.expirationDate)
         : null;
-    const nextExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
     const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
@@ -202,6 +215,51 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                     </span>
                                 </div>
                             </Panel>
+                            <div className="flex flex-col gap-y-md w-full">
+                                <span className="text-label-lg text-names-neutral-92">
+                                    Expiration Date
+                                </span>
+                                <div className="flex items-center justify-between gap-x-sm">
+                                    <RadioButton
+                                        name="parent_expiration"
+                                        isChecked={isParentExpiration}
+                                        onChange={() => {
+                                            setIsCustomExpiration(false);
+                                            setIsParentExpiration(true);
+                                        }}
+                                        label="Same as parent"
+                                    />
+                                    <Badge
+                                        type={BadgeType.Neutral}
+                                        label={
+                                            parentExpirationDate
+                                                ? formatExpirationDate(parentExpirationDate)
+                                                : ''
+                                        }
+                                    />
+                                </div>
+                                <RadioButton
+                                    name="custom_expiration"
+                                    isChecked={isCustomExpiration}
+                                    onChange={() => {
+                                        setIsCustomExpiration(true);
+                                        setIsParentExpiration(false);
+                                    }}
+                                    isDisabled={
+                                        parentExpirationDate?.getTime() ===
+                                        nameRecord?.nameRecord?.expirationDate?.getTime()
+                                    }
+                                    label="Custom"
+                                />
+                                <ExpirationDate
+                                    onChange={setCustomExpirationDate}
+                                    maxDate={
+                                        parentExpirationDate ? parentExpirationDate : new Date()
+                                    }
+                                    minDate={nameRecord?.nameRecord?.expirationDate}
+                                    disabled={!isCustomExpiration}
+                                />
+                            </div>
                             {isBelowMinimumRenewalPeriod && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
@@ -230,7 +288,11 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                 {canRenew && (
                                     <DisplayStats
                                         label="Next Expiration Date"
-                                        value={nextExpirationDate}
+                                        value={
+                                            expirationDate
+                                                ? formatExpirationDate(expirationDate)
+                                                : null
+                                        }
                                     />
                                 )}
                             </div>
