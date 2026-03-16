@@ -25,8 +25,8 @@ const MONTH_NAMES = [
 
 interface ExpirationDateProps {
     onChange: (date: Date | null) => void;
-    maxDate: Date;
-    minDate?: Date;
+    maxDate: Date | null;
+    minDate: Date | null;
     disabled?: boolean;
 }
 
@@ -42,17 +42,24 @@ export function ExpirationDate({ onChange, maxDate, minDate, disabled }: Expirat
 
     const emitChange = useCallback(
         (mon: number | null, day: number | null, year: number | null) => {
-            if (mon !== null && day !== null && year !== null) {
-                const date = new Date(year, mon, day, 23, 59, 59, 999);
-                const minimumDate = new Date(
-                    (minDate ? minDate.getTime() : Date.now()) + MINIMUM_SUBNAME_DURATION,
+            if (mon !== null && day !== null && year !== null && maxDate !== null) {
+                const date = new Date(Date.UTC(year, mon, day));
+                const now = new Date();
+                const todayOnly = new Date(
+                    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
                 );
+                const minimumDate = minDate
+                    ? new Date(
+                          Math.max(minDate.getTime(), todayOnly.getTime()) +
+                              MINIMUM_SUBNAME_DURATION,
+                      )
+                    : todayOnly;
 
-                if (date < minimumDate) {
-                    setError(`Must be ${formatExpirationDate(minimumDate)} or later`);
-                    onChange(null);
-                } else if (date > maxDate) {
+                if (date > maxDate) {
                     setError("Must be less than or equal to the parent name's date");
+                    onChange(null);
+                } else if (date < minimumDate) {
+                    setError(`Must be ${formatExpirationDate(minimumDate)} or later`);
                     onChange(null);
                 } else {
                     setError(null);
@@ -88,13 +95,16 @@ export function ExpirationDate({ onChange, maxDate, minDate, disabled }: Expirat
                 id: PLACEHOLDER_ID,
                 renderLabel: () => <span className="text-body-lg text-names-neutral-40">Year</span>,
             },
-            ...Array.from({ length: maxDate.getFullYear() - currentYear + 1 }, (_, i) => {
-                const year = currentYear + i;
-                return {
-                    id: String(year),
-                    renderLabel: () => <span className="text-body-lg">{year}</span>,
-                };
-            }),
+            ...Array.from(
+                { length: (maxDate?.getFullYear() ?? currentYear) - currentYear + 1 },
+                (_, i) => {
+                    const year = currentYear + i;
+                    return {
+                        id: String(year),
+                        renderLabel: () => <span className="text-body-lg">{year}</span>,
+                    };
+                },
+            ),
         ],
         [currentYear],
     );

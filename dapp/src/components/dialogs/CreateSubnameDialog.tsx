@@ -187,6 +187,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                     name: fullSubnameName,
                     subname: editSubname,
                     parentName: name,
+                    expirationType: isParentExpiration ? 'parent' : 'custom',
                     allowToRenewExpiration: editIsAllowingRenew,
                     allowToCreateAdditionalSubnames: editIsAllowSubnames,
                 });
@@ -297,6 +298,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     maxDate={
                                         parentExpirationDate ? parentExpirationDate : new Date()
                                     }
+                                    minDate={new Date()}
                                     disabled={!isCustomExpiration}
                                 />
                             </div>

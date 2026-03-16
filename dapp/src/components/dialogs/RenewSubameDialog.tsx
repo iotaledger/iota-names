@@ -65,7 +65,10 @@ function createRenewUpdates({
         const objectId = getNameObject(ownedSubnames, nameRecord.name);
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
-            if (expirationDate && expirationDate <= parentObject?.expirationDate) {
+            if (
+                expirationDate &&
+                expirationDate.getTime() <= parentObject?.expirationDate.getTime()
+            ) {
                 updates.push({
                     type: 'renew-subname',
                     nftId: objectId,
@@ -108,11 +111,32 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                   ?.expirationDate ?? null)
             : null;
 
+    const expirationDate = isParentExpiration
+        ? parentExpirationDate
+        : isCustomExpiration
+          ? customExpirationDate
+          : null;
+
+    const renewalTime =
+        expirationDate && nameRecord && nameRecord.nameRecord
+            ? expirationDate.getTime() - nameRecord.nameRecord.expirationDate.getTime()
+            : 0;
+
+    const isBelowMinimumRenewalPeriod =
+        config?.subnamesConfig.minimum_duration && isParentExpiration
+            ? renewalTime < config.subnamesConfig.minimum_duration
+            : false;
+
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
-        expirationDate: isParentExpiration ? parentExpirationDate : customExpirationDate,
+        expirationDate:
+            isParentExpiration && !isBelowMinimumRenewalPeriod
+                ? parentExpirationDate
+                : isCustomExpiration
+                  ? customExpirationDate
+                  : null,
     });
 
     const {
@@ -173,22 +197,6 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     }
 
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = isParentExpiration
-        ? parentExpirationDate
-        : isCustomExpiration
-          ? customExpirationDate
-          : null;
-
-    const renewalTime =
-        expirationDate && nameRecord && nameRecord.nameRecord
-            ? expirationDate.getTime() - nameRecord.nameRecord.expirationDate.getTime()
-            : 0;
-
-    const isBelowMinimumRenewalPeriod =
-        renewalTime >= 0 && config?.subnamesConfig && !isCustomExpiration
-            ? renewalTime < config.subnamesConfig.minimum_duration
-            : false;
-
     const currentExpirationDate = nameRecord?.nameRecord
         ? formatExpirationDate(nameRecord.nameRecord.expirationDate)
         : null;
@@ -197,8 +205,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
 
-    const disableSave =
-        isLoading || !canRenew || !updateNameTransaction || isBelowMinimumRenewalPeriod;
+    const disableSave = isLoading || !canRenew || !updateNameTransaction;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (
@@ -246,8 +253,8 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                         setIsParentExpiration(false);
                                     }}
                                     isDisabled={
-                                        parentExpirationDate?.getTime() ===
-                                        nameRecord?.nameRecord?.expirationDate?.getTime()
+                                        parentExpirationDate?.toDateString() ===
+                                        nameRecord?.nameRecord?.expirationDate?.toDateString()
                                     }
                                     label="Custom"
                                 />
@@ -256,7 +263,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                     maxDate={
                                         parentExpirationDate ? parentExpirationDate : new Date()
                                     }
-                                    minDate={nameRecord?.nameRecord?.expirationDate}
+                                    minDate={nameRecord?.nameRecord?.expirationDate ?? null}
                                     disabled={!isCustomExpiration}
                                 />
                             </div>
@@ -266,7 +273,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                     icon={<Info />}
                                     title="This subname already has the same expiration as its parent."
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`Please extend the parent expiration first.`}
+                                    supportingText="Please extend the parent expiration first."
                                 />
                             )}
                         </div>
