@@ -5,8 +5,6 @@
 
 import { Info, Warning } from '@iota/apps-ui-icons';
 import {
-    Badge,
-    BadgeType,
     Button,
     ButtonType,
     Dialog,
@@ -20,7 +18,6 @@ import {
     InfoBoxType,
     LoadingIndicator,
     Panel,
-    RadioButton,
 } from '@iota/apps-ui-kit';
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
@@ -101,21 +98,14 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
-    const [isParentExpiration, setIsParentExpiration] = useState<boolean>(true);
-    const [isCustomExpiration, setIsCustomExpiration] = useState<boolean>(false);
-    const [customExpirationDate, setCustomExpirationDate] = useState<Date | null>(null);
+    const [expirationDate, setExpirationDate] = useState<Date | null>(null);
+    const [isParentExpiration, setIsParentExpiration] = useState(true);
 
     const parentExpirationDate =
         nameRecord?.nameRecord && ownedNames && ownedSubnames
             ? (getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
                   ?.expirationDate ?? null)
             : null;
-
-    const expirationDate = isParentExpiration
-        ? parentExpirationDate
-        : isCustomExpiration
-          ? customExpirationDate
-          : null;
 
     const renewalTime =
         expirationDate && nameRecord && nameRecord.nameRecord
@@ -131,12 +121,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
-        expirationDate:
-            isParentExpiration && !isBelowMinimumRenewalPeriod
-                ? parentExpirationDate
-                : isCustomExpiration
-                  ? customExpirationDate
-                  : null,
+        expirationDate: isParentExpiration && isBelowMinimumRenewalPeriod ? null : expirationDate,
     });
 
     const {
@@ -173,12 +158,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
-            const expirationTime =
-                isParentExpiration && parentExpirationDate
-                    ? parentExpirationDate.getTime()
-                    : isCustomExpiration && customExpirationDate
-                      ? customExpirationDate.getTime()
-                      : Date.now();
+            const expirationTime = expirationDate ? expirationDate.getTime() : Date.now();
 
             ampli.renewedSubname({
                 name,
@@ -223,48 +203,17 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                 </div>
                             </Panel>
                             <div className="flex flex-col gap-y-md w-full">
-                                <span className="text-label-lg text-names-neutral-92">
-                                    Expiration Date
-                                </span>
-                                <div className="flex items-center justify-between gap-x-sm">
-                                    <RadioButton
-                                        name="parent_expiration"
-                                        isChecked={isParentExpiration}
-                                        onChange={() => {
-                                            setIsCustomExpiration(false);
-                                            setIsParentExpiration(true);
-                                        }}
-                                        label="Same as parent"
-                                    />
-                                    <Badge
-                                        type={BadgeType.Neutral}
-                                        label={
-                                            parentExpirationDate
-                                                ? formatExpirationDate(parentExpirationDate)
-                                                : ''
-                                        }
-                                    />
-                                </div>
-                                <RadioButton
-                                    name="custom_expiration"
-                                    isChecked={isCustomExpiration}
-                                    onChange={() => {
-                                        setIsCustomExpiration(true);
-                                        setIsParentExpiration(false);
-                                    }}
-                                    isDisabled={
-                                        parentExpirationDate?.toDateString() ===
-                                        nameRecord?.nameRecord?.expirationDate?.toDateString()
-                                    }
-                                    label="Custom"
-                                />
                                 <ExpirationDate
-                                    onChange={setCustomExpirationDate}
+                                    parentExpirationDate={parentExpirationDate}
+                                    currentExpirationDate={
+                                        nameRecord ? nameRecord?.nameRecord.expirationDate : null
+                                    }
+                                    onChange={setExpirationDate}
                                     maxDate={
                                         parentExpirationDate ? parentExpirationDate : new Date()
                                     }
                                     minDate={nameRecord?.nameRecord?.expirationDate ?? null}
-                                    disabled={!isCustomExpiration}
+                                    onExpirationTypeChange={setIsParentExpiration}
                                 />
                             </div>
                             {isBelowMinimumRenewalPeriod && (

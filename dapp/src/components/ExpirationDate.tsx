@@ -2,9 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Warning } from '@iota/apps-ui-icons';
-import { InfoBox, InfoBoxStyle, InfoBoxType, Select, SelectOption } from '@iota/apps-ui-kit';
+import {
+    Badge,
+    BadgeType,
+    InfoBox,
+    InfoBoxStyle,
+    InfoBoxType,
+    RadioButton,
+    Select,
+    SelectOption,
+} from '@iota/apps-ui-kit';
 import { MINIMUM_SUBNAME_DURATION } from '@iota/iota-names-sdk';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
@@ -24,21 +33,39 @@ const MONTH_NAMES = [
 ];
 
 interface ExpirationDateProps {
-    onChange: (date: Date | null) => void;
+    parentExpirationDate: Date | null;
+    currentExpirationDate: Date | null;
     maxDate: Date | null;
     minDate: Date | null;
-    disabled?: boolean;
+    onChange: (date: Date | null) => void;
+    onExpirationTypeChange?: (isParentExpiration: boolean) => void;
 }
 
 const PLACEHOLDER_ID = '__placeholder__';
 
-export function ExpirationDate({ onChange, maxDate, minDate, disabled }: ExpirationDateProps) {
+export function ExpirationDate({
+    parentExpirationDate,
+    currentExpirationDate,
+    maxDate,
+    minDate,
+    onChange,
+    onExpirationTypeChange,
+}: ExpirationDateProps) {
     const [month, setMonth] = useState<number | null>(null);
     const [day, setDay] = useState<number | null>(null);
     const [year, setYear] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const [isParentExpiration, setIsParentExpiration] = useState<boolean>(true);
+    const [customExpirationDate, setCustomExpirationDate] = useState<Date | null>(null);
     const currentYear = new Date().getFullYear();
+
+    const parentTime = parentExpirationDate?.getTime() ?? null;
+    useEffect(() => {
+        if (isParentExpiration && parentExpirationDate) {
+            onChange(parentExpirationDate);
+        }
+    }, [parentTime, isParentExpiration]);
 
     const emitChange = useCallback(
         (mon: number | null, day: number | null, year: number | null) => {
@@ -57,16 +84,20 @@ export function ExpirationDate({ onChange, maxDate, minDate, disabled }: Expirat
 
                 if (date > maxDate) {
                     setError("Must be less than or equal to the parent name's date");
+                    setCustomExpirationDate(null);
                     onChange(null);
                 } else if (date < minimumDate) {
                     setError(`Must be ${formatExpirationDate(minimumDate)} or later`);
+                    setCustomExpirationDate(null);
                     onChange(null);
                 } else {
                     setError(null);
+                    setCustomExpirationDate(date);
                     onChange(date);
                 }
             } else {
                 setError(null);
+                setCustomExpirationDate(null);
                 onChange(null);
             }
         },
@@ -153,42 +184,79 @@ export function ExpirationDate({ onChange, maxDate, minDate, disabled }: Expirat
     };
 
     return (
-        <div className="flex flex-col gap-y-xs w-full">
-            <div className="flex flex-row gap-x-xs w-full">
-                <div className="flex-1">
-                    <Select
-                        options={monthOptions}
-                        value={month !== null ? String(month) : PLACEHOLDER_ID}
-                        onValueChange={handleChange('month')}
-                        disabled={disabled}
+        <>
+            <div className="flex flex-col gap-y-md w-full">
+                <span className="text-label-lg text-names-neutral-92">Expiration Date</span>
+                <div className="flex items-center justify-between gap-x-sm">
+                    <RadioButton
+                        name="parent_expiration"
+                        isChecked={isParentExpiration}
+                        onChange={() => {
+                            setIsParentExpiration(true);
+                            onChange(parentExpirationDate);
+                            onExpirationTypeChange?.(true);
+                        }}
+                        label="Same as parent"
+                    />
+                    <Badge
+                        type={BadgeType.Neutral}
+                        label={
+                            parentExpirationDate ? formatExpirationDate(parentExpirationDate) : ''
+                        }
                     />
                 </div>
-                <div className="flex-1">
-                    <Select
-                        options={dayOptions}
-                        value={day !== null ? String(day) : PLACEHOLDER_ID}
-                        onValueChange={handleChange('day')}
-                        disabled={disabled}
-                    />
-                </div>
-                <div className="flex-1">
-                    <Select
-                        options={yearOptions}
-                        value={year !== null ? String(year) : PLACEHOLDER_ID}
-                        onValueChange={handleChange('year')}
-                        disabled={disabled}
-                    />
-                </div>
-            </div>
-            {error && !disabled && (
-                <InfoBox
-                    type={InfoBoxType.Error}
-                    style={InfoBoxStyle.Elevated}
-                    icon={<Warning />}
-                    title="Expiration Date Invalid"
-                    supportingText={error}
+                <RadioButton
+                    name="custom_expiration"
+                    isChecked={!isParentExpiration}
+                    onChange={() => {
+                        setIsParentExpiration(false);
+                        onChange(customExpirationDate);
+                        onExpirationTypeChange?.(false);
+                    }}
+                    isDisabled={
+                        parentExpirationDate?.toDateString() ===
+                        currentExpirationDate?.toDateString()
+                    }
+                    label="Custom"
                 />
-            )}
-        </div>
+            </div>
+            <div className="flex flex-col gap-y-xs w-full">
+                <div className="flex flex-row gap-x-xs w-full">
+                    <div className="flex-1">
+                        <Select
+                            options={monthOptions}
+                            value={month !== null ? String(month) : PLACEHOLDER_ID}
+                            onValueChange={handleChange('month')}
+                            disabled={isParentExpiration}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <Select
+                            options={dayOptions}
+                            value={day !== null ? String(day) : PLACEHOLDER_ID}
+                            onValueChange={handleChange('day')}
+                            disabled={isParentExpiration}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <Select
+                            options={yearOptions}
+                            value={year !== null ? String(year) : PLACEHOLDER_ID}
+                            onValueChange={handleChange('year')}
+                            disabled={isParentExpiration}
+                        />
+                    </div>
+                </div>
+                {error && !isParentExpiration && (
+                    <InfoBox
+                        type={InfoBoxType.Error}
+                        style={InfoBoxStyle.Elevated}
+                        icon={<Warning />}
+                        title="Expiration Date Invalid"
+                        supportingText={error}
+                    />
+                )}
+            </div>
+        </>
     );
 }
