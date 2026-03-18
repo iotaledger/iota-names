@@ -66,10 +66,10 @@ export function ExtendedNameCard({
 
     const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
     const isCloseToExpire = nameRecord?.nameRecord
-        ? isNameRecordCloseToExpiration(nameRecord?.nameRecord)
+        ? isNameRecordCloseToExpiration(nameRecord.nameRecord)
         : false;
     const isNameGracePeriodExpired = nameRecord?.nameRecord
-        ? isGracePeriodExpired(nameRecord?.nameRecord)
+        ? isGracePeriodExpired(nameRecord.nameRecord)
         : false;
 
     const buttonText = (() => {
@@ -103,7 +103,7 @@ export function ExtendedNameCard({
             >
                 <NameCardBody name={label}>
                     <div className="flex items-center justify-between">
-                        {!expired && !isNameGracePeriodExpired && (
+                        {!isNameGracePeriodExpired && (
                             <SubnameCountIndicator
                                 onSubnameListClick={onSubnameListClick}
                                 subnameCount={nameTree?.subnames?.length ?? 0}
@@ -113,7 +113,7 @@ export function ExtendedNameCard({
                         )}
                         {isNameGracePeriodExpired ? (
                             <Badge type={BadgeType.Error} label="Expired | Unrenewable" />
-                        ) : expired && !isNameGracePeriodExpired ? (
+                        ) : expired ? (
                             <Badge type={BadgeType.Error} label="Expired" />
                         ) : isCloseToExpire ? (
                             <Badge type={BadgeType.Warning} label="Expiring" />

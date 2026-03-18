@@ -20,7 +20,7 @@ import {
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { RenewSubnameDialog } from '@/components/dialogs/RenewSubameDialog';
@@ -69,12 +69,19 @@ export default function MyNamesPage(): JSX.Element {
 
     const isLoadingCards = isLoadingSubnames || isLoadingRegistrations;
 
-    const allNames = [...(names ?? []), ...(subnames ?? [])];
-    const expiringAll = allNames.filter((nft) => isNameRecordCloseToExpiration(nft));
-    const expiredAll = allNames.filter(
-        (nft) => isNameRecordExpired(nft) && !isGracePeriodExpired(nft),
+    const allNames = useMemo(() => [...(names ?? []), ...(subnames ?? [])], [names, subnames]);
+    const expiringAll = useMemo(
+        () => allNames.filter((nft) => isNameRecordCloseToExpiration(nft)),
+        [allNames],
     );
-    const unrenewableAll = allNames.filter((nft) => isGracePeriodExpired(nft));
+    const expiredAll = useMemo(
+        () => allNames.filter((nft) => isNameRecordExpired(nft) && !isGracePeriodExpired(nft)),
+        [allNames],
+    );
+    const unrenewableAll = useMemo(
+        () => allNames.filter((nft) => isGracePeriodExpired(nft)),
+        [allNames],
+    );
     const filteredNames: RegistrationNft[] = (() => {
         const namesRegistrations = names ?? [];
         const subnamesRegistrations = subnames ?? [];
