@@ -258,7 +258,6 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                     maxDate={
                                         parentExpirationDate ? parentExpirationDate : new Date()
                                     }
-                                    //minDate={new Date()}
                                     onExpirationTypeChange={setIsParentExpiration}
                                 />
                             </div>
