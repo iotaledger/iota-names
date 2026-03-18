@@ -97,9 +97,6 @@ export function ExpirationDate({
                         ? new Date(minDate.getTime() + minimumDuration)
                         : new Date(now.getTime() + 2 * minimumDuration);
 
-                console.log('Selected Date:', selectedDate);
-                console.log('now:', now);
-                console.log('Minimum Date:', minimumDate);
                 if (selectedDate > maxDate) {
                     setError("Must be less than or equal to the parent name's date");
                     setCustomExpirationDate(null);
