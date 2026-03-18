@@ -12,9 +12,9 @@ import {
     Select,
     SelectOption,
 } from '@iota/apps-ui-kit';
-import { MINIMUM_SUBNAME_DURATION } from '@iota/iota-names-sdk';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useNamesConfig } from '@/hooks/useNamesConfig';
 import { formatExpirationDate } from '@/lib/utils/format/formatExpirationDate';
 
 const MONTH_NAMES = [
@@ -36,7 +36,7 @@ interface ExpirationDateProps {
     parentExpirationDate: Date | null;
     currentExpirationDate: Date | null;
     maxDate: Date | null;
-    minDate: Date | null;
+    minDate?: Date | null;
     onChange: (date: Date | null) => void;
     onExpirationTypeChange?: (isParentExpiration: boolean) => void;
 }
@@ -51,6 +51,8 @@ export function ExpirationDate({
     onChange,
     onExpirationTypeChange,
 }: ExpirationDateProps) {
+    const { data: config, isLoading: isLoadingConfig } = useNamesConfig();
+
     const [month, setMonth] = useState<number | null>(null);
     const [day, setDay] = useState<number | null>(null);
     const [year, setYear] = useState<number | null>(null);
@@ -69,31 +71,47 @@ export function ExpirationDate({
 
     const emitChange = useCallback(
         (mon: number | null, day: number | null, year: number | null) => {
-            if (mon !== null && day !== null && year !== null && maxDate !== null) {
-                const date = new Date(Date.UTC(year, mon, day));
+            if (
+                mon !== null &&
+                day !== null &&
+                year !== null &&
+                maxDate !== null &&
+                minDate !== null &&
+                !isLoadingConfig &&
+                config?.subnamesConfig
+            ) {
+                const minimumDuration = Number(config.subnamesConfig.minimum_duration);
                 const now = new Date();
-                const todayOnly = new Date(
-                    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+                const selectedDate = new Date(
+                    year,
+                    mon,
+                    day,
+                    now.getHours(),
+                    now.getMinutes(),
+                    now.getSeconds(),
+                    now.getMilliseconds(),
                 );
-                const minimumDate = minDate
-                    ? new Date(
-                          Math.max(minDate.getTime(), todayOnly.getTime()) +
-                              MINIMUM_SUBNAME_DURATION,
-                      )
-                    : todayOnly;
 
-                if (date > maxDate) {
+                const minimumDate =
+                    minDate && minDate > selectedDate
+                        ? new Date(minDate.getTime() + minimumDuration)
+                        : new Date(now.getTime() + 2 * minimumDuration);
+
+                console.log('Selected Date:', selectedDate);
+                console.log('now:', now);
+                console.log('Minimum Date:', minimumDate);
+                if (selectedDate > maxDate) {
                     setError("Must be less than or equal to the parent name's date");
                     setCustomExpirationDate(null);
                     onChange(null);
-                } else if (date < minimumDate) {
+                } else if (selectedDate < minimumDate) {
                     setError(`Must be ${formatExpirationDate(minimumDate)} or later`);
                     setCustomExpirationDate(null);
                     onChange(null);
                 } else {
                     setError(null);
-                    setCustomExpirationDate(date);
-                    onChange(date);
+                    setCustomExpirationDate(selectedDate);
+                    onChange(selectedDate);
                 }
             } else {
                 setError(null);
@@ -101,7 +119,7 @@ export function ExpirationDate({
                 onChange(null);
             }
         },
-        [onChange, maxDate],
+        [onChange, maxDate, minDate, config, isLoadingConfig],
     );
 
     const monthOptions: SelectOption[] = useMemo(
@@ -137,7 +155,7 @@ export function ExpirationDate({
                 },
             ),
         ],
-        [currentYear],
+        [currentYear, maxDate],
     );
 
     const daysInMonth = new Date(year ?? currentYear, (month ?? 0) + 1, 0).getDate();

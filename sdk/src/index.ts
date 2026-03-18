@@ -5,13 +5,7 @@
 export { IotaNamesClient } from './iota-names-client.js';
 export { IotaNamesTransaction } from './iota-names-transaction.js';
 export type { IotaNamesClientConfig, NameRecord, Coupon } from './types.js';
-export {
-    ALLOWED_METADATA,
-    MIN_LABEL_SIZE,
-    GRACE_PERIOD_MS,
-    MINIMUM_SUBNAME_DURATION,
-    packages,
-} from './constants.js';
+export { ALLOWED_METADATA, MIN_LABEL_SIZE, GRACE_PERIOD_MS, packages } from './constants.js';
 export {
     isSubname,
     isNestedSubname,

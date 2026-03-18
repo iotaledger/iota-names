@@ -114,7 +114,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
 
     const isBelowMinimumRenewalPeriod =
         config?.subnamesConfig.minimum_duration && isParentExpiration
-            ? renewalTime < config.subnamesConfig.minimum_duration
+            ? renewalTime < Number(config.subnamesConfig.minimum_duration)
             : false;
 
     const updates = createRenewUpdates({
