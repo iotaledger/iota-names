@@ -3,5 +3,5 @@ export default {
   "renew": "Renew Names",
   "avatar": "Update Avatars",
   "linked-address": "Link Addresses",
-  "tradeport": "List on TradePort"
+  "tradeport": "List Names"
 }
