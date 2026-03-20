@@ -209,10 +209,8 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                         nameRecord ? nameRecord?.nameRecord.expirationDate : null
                                     }
                                     onChange={setExpirationDate}
-                                    maxDate={
-                                        parentExpirationDate ? parentExpirationDate : new Date()
-                                    }
-                                    minDate={nameRecord?.nameRecord?.expirationDate ?? null}
+                                    maxDate={parentExpirationDate}
+                                    minDate={nameRecord?.nameRecord?.expirationDate}
                                     onExpirationTypeChange={setIsParentExpiration}
                                 />
                             </div>

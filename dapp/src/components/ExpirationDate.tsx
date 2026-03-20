@@ -93,7 +93,7 @@ export function ExpirationDate({
                 );
 
                 const minimumDate =
-                    minDate && minDate > selectedDate
+                    minDate && minDate > selectedDate && minDate > now
                         ? new Date(minDate.getTime() + minimumDuration)
                         : new Date(now.getTime() + 2 * minimumDuration);
 
@@ -236,7 +236,7 @@ export function ExpirationDate({
                 />
             </div>
             <div className="flex flex-col gap-y-xs w-full">
-                <div className="flex flex-row gap-x-xs w-full">
+                <div className="flex flex-row gap-x-xs w-full [&_ul]:max-h-72 [&_ul]:overflow-y-auto">
                     <div className="flex-1">
                         <Select
                             options={monthOptions}
