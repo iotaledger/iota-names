@@ -2,5 +2,6 @@ export default {
   "registration": "Register Names",
   "renew": "Renew Names",
   "avatar": "Update Avatars",
-  "linked-address": "Link Addresses"
+  "linked-address": "Link Addresses",
+  "tradeport": "List Names"
 }
