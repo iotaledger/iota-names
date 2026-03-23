@@ -59,18 +59,14 @@ export function ExtendedNameCard({
         | undefined;
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
-    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
+    const isNameSubname = isSubname(nft.name);
     const namePermissions = nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : { allowChildCreation: true, allowTimeExtension: true };
 
-    const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
-    const isCloseToExpire = nameRecord?.nameRecord
-        ? isNameRecordCloseToExpiration(nameRecord.nameRecord)
-        : false;
-    const isNameGracePeriodExpired = nameRecord?.nameRecord
-        ? isGracePeriodExpired(nameRecord.nameRecord)
-        : false;
+    const expired = isNameRecordExpired(nft);
+    const isCloseToExpire = isNameRecordCloseToExpiration(nft);
+    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
 
     const buttonText = (() => {
         if (expired && !isNameGracePeriodExpired) {
