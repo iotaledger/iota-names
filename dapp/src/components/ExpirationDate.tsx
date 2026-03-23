@@ -42,6 +42,7 @@ interface ExpirationDateProps {
 }
 
 const PLACEHOLDER_ID = '__placeholder__';
+type DateField = 'month' | 'day' | 'year';
 
 export function ExpirationDate({
     parentExpirationDate,
@@ -76,7 +77,7 @@ export function ExpirationDate({
                 day !== null &&
                 year !== null &&
                 maxDate !== null &&
-                minDate !== null &&
+                minDate != null &&
                 !isLoadingConfig &&
                 config?.subnamesConfig
             ) {
@@ -173,7 +174,6 @@ export function ExpirationDate({
         [daysInMonth],
     );
 
-    type DateField = 'month' | 'day' | 'year';
     const setters: Record<DateField, (v: number) => void> = {
         month: setMonth,
         day: setDay,
