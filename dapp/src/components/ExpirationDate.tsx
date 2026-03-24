@@ -77,7 +77,6 @@ export function ExpirationDate({
                 day !== null &&
                 year !== null &&
                 maxDate !== null &&
-                minDate != null &&
                 !isLoadingConfig &&
                 config?.subnamesConfig
             ) {
