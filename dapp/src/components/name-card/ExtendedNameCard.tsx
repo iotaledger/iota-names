@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Link } from '@iota/apps-ui-icons';
-import { Button, ButtonType } from '@iota/apps-ui-kit';
+import { Badge, BadgeType, Button, ButtonType } from '@iota/apps-ui-kit';
 import { isSubname, normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
 
@@ -12,7 +12,12 @@ import { useNamesPurchaseMode } from '@/hooks/useNamesPurchaseMode';
 import { useNameTree } from '@/hooks/useNameTree';
 import { RegistrationNft } from '@/lib/interfaces';
 import { getNameMenuOptions } from '@/lib/utils/getNameMenuOptions';
-import { getNamePermissions, isGracePeriodExpired, isNameRecordExpired } from '@/lib/utils/names';
+import {
+    getNamePermissions,
+    isGracePeriodExpired,
+    isNameRecordCloseToExpiration,
+    isNameRecordExpired,
+} from '@/lib/utils/names';
 
 import { NameDialogId } from '../dialogs/enums';
 import { NameDialogsController } from '../dialogs/NameDialogsController';
@@ -54,13 +59,15 @@ export function ExtendedNameCard({
         | undefined;
 
     const targetAddress = nameRecord?.nameRecord?.targetAddress;
-    const expired = nameRecord?.nameRecord ? isNameRecordExpired(nameRecord.nameRecord) : false;
+    const isNameSubname = isSubname(nft.name);
     const namePermissions = nameRecord
         ? getNamePermissions(nameRecord.nameRecord)
         : { allowChildCreation: true, allowTimeExtension: true };
 
-    const isNameSubname = nameRecord?.nameRecord ? isSubname(nameRecord.nameRecord.name) : false;
+    const expired = isNameRecordExpired(nft);
+    const isCloseToExpire = isNameRecordCloseToExpiration(nft);
     const isNameGracePeriodExpired = isGracePeriodExpired(nft);
+
     const buttonText = (() => {
         if (expired && !isNameGracePeriodExpired) {
             return 'Renew Name';
@@ -91,16 +98,29 @@ export function ExtendedNameCard({
                 testId="name-card"
             >
                 <NameCardBody name={label}>
-                    <SubnameCountIndicator
-                        onSubnameListClick={onSubnameListClick}
-                        subnameCount={nameTree?.subnames?.length ?? 0}
-                        onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
-                        showAddSubnameLink={!expired && namePermissions.allowChildCreation}
-                    />
+                    <div className="flex items-center justify-between">
+                        {!isNameGracePeriodExpired && (
+                            <SubnameCountIndicator
+                                onSubnameListClick={onSubnameListClick}
+                                subnameCount={nameTree?.subnames?.length ?? 0}
+                                onAddSubnameClick={() => openDialog(NameDialogId.CreateSubname)}
+                                showAddSubnameLink={namePermissions.allowChildCreation}
+                            />
+                        )}
+                        {isNameGracePeriodExpired ? (
+                            <Badge type={BadgeType.Error} label="Expired | Unrenewable" />
+                        ) : expired ? (
+                            <Badge type={BadgeType.Error} label="Expired" />
+                        ) : isCloseToExpire ? (
+                            <Badge type={BadgeType.Warning} label="Expiring" />
+                        ) : null}
+                    </div>
 
                     <Button
                         text={buttonText}
-                        type={ButtonType.Secondary}
+                        type={
+                            isNameGracePeriodExpired ? ButtonType.Destructive : ButtonType.Secondary
+                        }
                         onClick={handleButtonClick}
                         icon={targetAddress ? <Link /> : null}
                         data-amp-mask

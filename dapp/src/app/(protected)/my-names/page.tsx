@@ -20,7 +20,7 @@ import {
 import { useCurrentAccount } from '@iota/dapp-kit';
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { RenewSubnameDialog } from '@/components/dialogs/RenewSubameDialog';
@@ -28,6 +28,11 @@ import { ExtendedNameCard } from '@/components/name-card/ExtendedNameCard';
 import { CardSkeletonLoader } from '@/components/skeletons/CardSkeletonLoader';
 import { useGetPublicName, useRegistrationNfts } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
+import {
+    isGracePeriodExpired,
+    isNameRecordCloseToExpiration,
+    isNameRecordExpired,
+} from '@/lib/utils/names';
 import { useAvailabilityCheckDialog } from '@/stores/useAvailabilityCheckDialog';
 
 import { SubnamesDialog } from './components/SubnamesDialog';
@@ -64,6 +69,19 @@ export default function MyNamesPage(): JSX.Element {
 
     const isLoadingCards = isLoadingSubnames || isLoadingRegistrations;
 
+    const allNames = useMemo(() => [...(names ?? []), ...(subnames ?? [])], [names, subnames]);
+    const expiringAll = useMemo(
+        () => allNames.filter((nft) => isNameRecordCloseToExpiration(nft)),
+        [allNames],
+    );
+    const expiredAll = useMemo(
+        () => allNames.filter((nft) => isNameRecordExpired(nft) && !isGracePeriodExpired(nft)),
+        [allNames],
+    );
+    const unrenewableAll = useMemo(
+        () => allNames.filter((nft) => isGracePeriodExpired(nft)),
+        [allNames],
+    );
     const filteredNames: RegistrationNft[] = (() => {
         const namesRegistrations = names ?? [];
         const subnamesRegistrations = subnames ?? [];
@@ -75,6 +93,11 @@ export default function MyNamesPage(): JSX.Element {
                 return namesRegistrations;
             case GroupedNamesFilter.Subnames:
                 return subnamesRegistrations;
+            case GroupedNamesFilter.Expiring:
+                return expiringAll;
+            case GroupedNamesFilter.Expired:
+                return [...expiredAll, ...unrenewableAll];
+
             default:
                 return namesRegistrations;
         }
@@ -164,19 +187,22 @@ export default function MyNamesPage(): JSX.Element {
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-md">
                 <SegmentedButton>
-                    {Object.entries(GroupedNamesFilter).map(([key, value]) => (
-                        <ButtonSegment
-                            key={key}
-                            type={ButtonSegmentType.Rounded}
-                            label={value}
-                            selected={selectedFilter === value}
-                            onClick={() => handleFilterSelect(value)}
-                            disabled={
-                                (value === GroupedNamesFilter.Names && !names?.length) ||
-                                (value === GroupedNamesFilter.Subnames && !subnames?.length)
-                            }
-                        />
-                    ))}
+                    {Object.entries(GroupedNamesFilter)
+                        .filter(([, value]) => {
+                            if (value === GroupedNamesFilter.Expiring) return !!expiringAll.length;
+                            if (value === GroupedNamesFilter.Expired)
+                                return !!expiredAll.length || !!unrenewableAll.length;
+                            return true;
+                        })
+                        .map(([key, value]) => (
+                            <ButtonSegment
+                                key={key}
+                                type={ButtonSegmentType.Rounded}
+                                label={value}
+                                selected={selectedFilter === value}
+                                onClick={() => handleFilterSelect(value)}
+                            />
+                        ))}
                 </SegmentedButton>
                 {!isLoadingCards && (
                     <p className="text-label-md whitespace-nowrap text-names-neutral-70 ml-2 sm:ml-0">
