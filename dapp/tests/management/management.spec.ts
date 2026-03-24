@@ -152,11 +152,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await dialog.getByRole('button', { name: 'Create' }).click();
@@ -219,11 +219,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(
@@ -283,11 +283,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(today.getDate());
         const yearNum = String(today.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(dialog.getByText('or later', { exact: false })).toBeVisible();
@@ -432,11 +432,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await dialog.getByRole('button', { name: 'Create' }).click();
@@ -489,11 +489,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(
@@ -540,11 +540,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(today.getDate());
         const yearNum = String(today.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(dialog.getByText('or later', { exact: false })).toBeVisible();
@@ -912,11 +912,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await dialog.getByRole('button', { name: 'Renew' }).click();
@@ -984,11 +984,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(targetDate.getDate());
         const yearNum = String(targetDate.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(
@@ -1048,11 +1048,11 @@ test.describe.serial('Name Management Tests', () => {
         const dayNum = String(today.getDate());
         const yearNum = String(today.getFullYear());
 
-        await dialog.getByText('Month').click();
+        await dialog.getByRole('button', { name: 'Month' }).click();
         await dialog.getByText(monthName, { exact: true }).click();
-        await dialog.getByText('Day').click();
+        await dialog.getByRole('button', { name: 'Day' }).click();
         await dialog.getByText(dayNum, { exact: true }).click();
-        await dialog.getByText('Year').click();
+        await dialog.getByRole('button', { name: 'Year' }).click();
         await dialog.getByText(yearNum, { exact: true }).click();
 
         await expect(dialog.getByText('or later', { exact: false })).toBeVisible();
