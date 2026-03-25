@@ -5,4 +5,6 @@ export enum GroupedNamesFilter {
     All = 'All',
     Names = 'Names',
     Subnames = 'Subnames',
+    Expiring = 'Expiring',
+    Expired = 'Expired',
 }

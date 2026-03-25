@@ -5,7 +5,7 @@ export default {
     "dapp": {
         "title": "IOTA-Names Dapp ↗",
         "type": "page",
-        "href": "https://testnet.iotanames.com/",
+        "href": "https://iotanames.com/",
         "newWindow": true
     }
 }
