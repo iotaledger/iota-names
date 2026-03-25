@@ -21,8 +21,7 @@ import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
 
-import { ampli } from './analytics/ampli';
-import { getNamePermissions, isGracePeriodExpired } from './names';
+import { getNamePermissions } from './names';
 
 export function getNameMenuOptions(
     nft: RegistrationNft,
@@ -33,7 +32,7 @@ export function getNameMenuOptions(
 ): MenuListItem[] {
     const nameRecord = record as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
     const isNameSubname = isSubname(nft.name);
-    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
+    const isNameGracePeriodExpired = !nft.isRenewable;
     const namePermissions =
         isNameSubname && nameRecord
             ? getNamePermissions(nameRecord.nameRecord)
@@ -71,8 +70,7 @@ export function getNameMenuOptions(
             isDisabled: !namePermissions.allowChildCreation,
         },
         {
-            isHidden: !nft.isRenewable || nft.isSubname,
-            onClick: () => ampli.howToListNameClicked(),
+            isHidden: isNameGracePeriodExpired || nft.isSubname,
             children: (
                 <Link
                     href="https://docs.iotanames.com/user/tradeport"
