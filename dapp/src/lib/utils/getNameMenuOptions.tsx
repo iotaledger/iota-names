@@ -1,8 +1,19 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Add, Assets, Calendar, Edit, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    Add,
+    Assets,
+    Calendar,
+    Edit,
+    Info,
+    Link as LinkSvg,
+    Settings,
+    Trade,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
+import Link from 'next/link';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
@@ -10,6 +21,7 @@ import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
 
+import { ampli } from './analytics/ampli';
 import { getNamePermissions, isGracePeriodExpired } from './names';
 
 export function getNameMenuOptions(
@@ -30,7 +42,7 @@ export function getNameMenuOptions(
     return [
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
-            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+            children: <DropdownMenuOption icon={<LinkSvg />} label="Connect to Address" />,
             isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
@@ -57,6 +69,21 @@ export function getNameMenuOptions(
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
             isHidden: !namePermissions.allowChildCreation || nft.isExpired,
             isDisabled: !namePermissions.allowChildCreation,
+        },
+        {
+            onClick: () => {
+                ampli.howToListNameClicked();
+            },
+            children: (
+                <Link
+                    href="https://docs.iotanames.com/user/tradeport"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <DropdownMenuOption icon={<Trade />} label="How to List Name" />
+                </Link>
+            ),
+            isHidden: nft.isExpired,
         },
         {
             onClick: () => onOpen(NameDialogId.RenewName),

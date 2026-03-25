@@ -250,6 +250,10 @@ export class DomainClaimed implements BaseEvent {
     }
 }
 
+export class HowToListNameClicked implements BaseEvent {
+    event_type = 'how to list name clicked';
+}
+
 export class OpenedIotaNames implements BaseEvent {
     event_type = 'opened iota names';
 
@@ -511,6 +515,21 @@ export class Ampli {
     options?: EventOptions,
   ) {
     return this.track(new DomainClaimed(properties), options);
+  }
+
+  /**
+   * how to list name clicked
+   *
+   * [View in Tracking Plan](https://data.eu.amplitude.com/iota-foundation/IOTA%20Names/events/main/latest/how%20to%20list%20name%20clicked)
+   *
+   * Event has no description in tracking plan.
+   *
+   * @param options Amplitude event options.
+   */
+  howToListNameClicked(
+    options?: EventOptions,
+  ) {
+    return this.track(new HowToListNameClicked(), options);
   }
 
   /**
