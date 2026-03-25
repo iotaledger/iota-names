@@ -71,9 +71,8 @@ export function getNameMenuOptions(
             isDisabled: !namePermissions.allowChildCreation,
         },
         {
-            onClick: () => {
-                ampli.howToListNameClicked();
-            },
+            isHidden: !nft.isRenewable || nft.isSubname,
+            onClick: () => ampli.howToListNameClicked(),
             children: (
                 <Link
                     href="https://docs.iotanames.com/user/tradeport"
@@ -83,7 +82,6 @@ export function getNameMenuOptions(
                     <DropdownMenuOption icon={<Trade />} label="How to List Name" />
                 </Link>
             ),
-            isHidden: nft.isExpired,
         },
         {
             onClick: () => onOpen(NameDialogId.RenewName),

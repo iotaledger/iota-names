@@ -11,11 +11,15 @@ export function getTargetExpirationDate(renewYears: number): string {
     return formatExpirationDate(new Date(today.setFullYear(today.getFullYear() + renewYears)));
 }
 
-export function isNameRecordExpired(nameRecord: NameRecord | RegistrationNft) {
+export function isNameRecordExpired(
+    nameRecord: Pick<NameRecord | RegistrationNft, 'expirationDate'>,
+) {
     return nameRecord.expirationDate < new Date();
 }
 
-export function isGracePeriodExpired(nameRecord: NameRecord | RegistrationNft) {
+export function isGracePeriodExpired(
+    nameRecord: Pick<NameRecord | RegistrationNft, 'expirationDate'>,
+) {
     return nameRecord.expirationDate.getTime() + GRACE_PERIOD_MS < Date.now();
 }
 

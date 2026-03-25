@@ -9,6 +9,7 @@ export interface RegistrationNft {
     projectUrl?: string;
     expirationDate: Date;
     isExpired: boolean;
+    isRenewable: boolean;
     isSubname: boolean;
     id: string;
 }
