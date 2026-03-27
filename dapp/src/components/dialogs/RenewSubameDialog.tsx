@@ -22,6 +22,7 @@ import {
 import { useCurrentAccount, useIotaClient, useSignAndExecuteTransaction } from '@iota/dapp-kit';
 import { isSubname, NameRecord, normalizeIotaName } from '@iota/iota-names-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { NameRecordData, queryKey, useNameRecord, useRegistrationNfts } from '@/hooks';
@@ -38,14 +39,18 @@ import {
     isGracePeriodExpired,
 } from '@/lib/utils/names';
 
+import { ExpirationDate } from '../ExpirationDate';
+
 function createRenewUpdates({
     nameRecord,
     ownedNames = [],
     ownedSubnames = [],
+    expirationDate,
 }: {
     nameRecord?: NameRecord;
     ownedNames?: RegistrationNft[];
     ownedSubnames?: RegistrationNft[];
+    expirationDate?: Date | null;
 }) {
     const isNameSubname = nameRecord?.name ? isSubname(nameRecord.name) : false;
     const namePermissions = nameRecord ? getNamePermissions(nameRecord) : null;
@@ -57,13 +62,14 @@ function createRenewUpdates({
         const objectId = getNameObject(ownedSubnames, nameRecord.name);
         const parentObject = getParentObject(ownedNames, ownedSubnames, nameRecord.name);
         if (objectId && parentObject) {
-            // Only allow extending the expiration time if its less than its parent
-            const expiresBeforeParent = nameRecord.expirationDate < parentObject?.expirationDate;
-            if (expiresBeforeParent) {
+            if (
+                expirationDate &&
+                expirationDate.getTime() <= parentObject?.expirationDate.getTime()
+            ) {
                 updates.push({
                     type: 'renew-subname',
                     nftId: objectId,
-                    expirationDate: parentObject.expirationDate,
+                    expirationDate,
                 });
             }
         }
@@ -92,10 +98,30 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     const { data: ownedNames } = useRegistrationNfts('name');
     const { data: ownedSubnames } = useRegistrationNfts('subname');
 
+    const [expirationDate, setExpirationDate] = useState<Date | null>(null);
+    const [isParentExpiration, setIsParentExpiration] = useState(true);
+
+    const parentExpirationDate =
+        nameRecord?.nameRecord && ownedNames && ownedSubnames
+            ? (getParentObject(ownedNames, ownedSubnames, nameRecord.nameRecord.name)
+                  ?.expirationDate ?? null)
+            : null;
+
+    const renewalTime =
+        expirationDate && nameRecord && nameRecord.nameRecord
+            ? expirationDate.getTime() - nameRecord.nameRecord.expirationDate.getTime()
+            : 0;
+
+    const isBelowMinimumRenewalPeriod =
+        config?.subnamesConfig.minimum_duration && isParentExpiration
+            ? renewalTime < Number(config.subnamesConfig.minimum_duration)
+            : false;
+
     const updates = createRenewUpdates({
         nameRecord: nameRecord?.nameRecord,
         ownedNames,
         ownedSubnames,
+        expirationDate: isParentExpiration && isBelowMinimumRenewalPeriod ? null : expirationDate,
     });
 
     const {
@@ -136,8 +162,7 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
 
             ampli.renewedSubname({
                 name,
-                // TODO expirationType `custom` will be added after implement https://github.com/iotaledger/iota-names/issues/915
-                expirationType: 'parent',
+                expirationType: isParentExpiration ? 'parent' : 'custom',
                 expirationTime,
             });
             toast.success('Subname renewed successfully');
@@ -152,40 +177,15 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
     }
 
     const canRenew = nameRecord && updates.length > 0;
-    const expirationDate = (() => {
-        if (nameRecord?.nameRecord && ownedNames && ownedSubnames) {
-            const expirationTime = getParentObject(
-                ownedNames,
-                ownedSubnames,
-                nameRecord.nameRecord.name,
-            )?.expirationDate;
-            if (expirationTime) {
-                return expirationTime;
-            }
-        }
-    })();
-
-    const renewalTime =
-        expirationDate && nameRecord && nameRecord.nameRecord
-            ? expirationDate.getTime() - nameRecord.nameRecord.expirationDate.getTime()
-            : 0;
-
-    const isBelowMinimumRenewalPeriod =
-        renewalTime >= 0 && config?.subnamesConfig
-            ? renewalTime < config.subnamesConfig.minimum_duration
-            : false;
-
     const currentExpirationDate = nameRecord?.nameRecord
         ? formatExpirationDate(nameRecord.nameRecord.expirationDate)
         : null;
-    const nextExpirationDate = expirationDate ? formatExpirationDate(expirationDate) : null;
 
     const isLoadingData = isLoadingNameRecord || isLoadingConfig;
     const isLoading =
         isLoadingUpdateNameTransaction || isSendingTransaction || isSigning || isLoadingData;
 
-    const disableSave =
-        isLoading || !canRenew || !updateNameTransaction || isBelowMinimumRenewalPeriod;
+    const disableSave = isLoading || !canRenew || !updateNameTransaction;
     const cleanName = normalizeIotaName(nameRecord?.nameRecord?.name || name);
 
     return (
@@ -202,13 +202,25 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                     </span>
                                 </div>
                             </Panel>
+                            <div className="flex flex-col gap-y-md w-full">
+                                <ExpirationDate
+                                    parentExpirationDate={parentExpirationDate}
+                                    currentExpirationDate={
+                                        nameRecord ? nameRecord?.nameRecord.expirationDate : null
+                                    }
+                                    onChange={setExpirationDate}
+                                    maxDate={parentExpirationDate}
+                                    minDate={nameRecord?.nameRecord?.expirationDate}
+                                    onExpirationTypeChange={setIsParentExpiration}
+                                />
+                            </div>
                             {isBelowMinimumRenewalPeriod && (
                                 <InfoBox
                                     type={InfoBoxType.Warning}
                                     icon={<Info />}
                                     title="This subname already has the same expiration as its parent."
                                     style={InfoBoxStyle.Default}
-                                    supportingText={`Please extend the parent expiration first.`}
+                                    supportingText="Please extend the parent expiration first."
                                 />
                             )}
                         </div>
@@ -230,7 +242,11 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
                                 {canRenew && (
                                     <DisplayStats
                                         label="Next Expiration Date"
-                                        value={nextExpirationDate}
+                                        value={
+                                            expirationDate
+                                                ? formatExpirationDate(expirationDate)
+                                                : null
+                                        }
                                     />
                                 )}
                             </div>
