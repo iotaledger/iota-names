@@ -11,6 +11,6 @@ type NetworkBasedFeature = {
 };
 
 export function useFeatureEnabledByNetwork(feature: Feature, network: Network): boolean {
-    const featureValue = useFeatureValue<NetworkBasedFeature>(feature, null);
+    const featureValue = useFeatureValue<NetworkBasedFeature>(feature, {} as NetworkBasedFeature);
     return featureValue?.[network] ?? false;
 }
