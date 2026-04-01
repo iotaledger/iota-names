@@ -3,7 +3,7 @@
 
 'use client';
 
-import { GrowthBookProvider } from '@growthbook/growthbook-react';
+import { AppsBackendClientProvider } from '@iota/apps-backend-client';
 import { darkTheme, IotaClientProvider, WalletProvider } from '@iota/dapp-kit';
 import { getAllNetworks } from '@iota/iota-sdk/client';
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -18,12 +18,10 @@ import { captureException } from '@/instrumentation';
 import { APP_STATIC_THEME } from '@/lib/constants/theme.constants';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getAmplitudeConsentStatus, initAmplitude } from '@/lib/utils/analytics/amplitude';
+import { appsBackendClient } from '@/lib/utils/appsBackendClient';
 import { createIotaClient } from '@/lib/utils/defaultRpcClient';
-import { growthbook } from '@/lib/utils/growthbook';
 
 import { ThemeProvider } from './ThemeProvider';
-
-growthbook.init();
 
 export function AppProviders({ children }: React.PropsWithChildren) {
     const [queryClient] = useState(
@@ -65,7 +63,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <GrowthBookProvider growthbook={growthbook}>
+            <AppsBackendClientProvider client={appsBackendClient}>
                 <IotaClientProvider
                     networks={allNetworks}
                     createClient={createIotaClient}
@@ -97,7 +95,7 @@ export function AppProviders({ children }: React.PropsWithChildren) {
                         </IotaNamesClientProvider>
                     </KioskClientProvider>
                 </IotaClientProvider>
-            </GrowthBookProvider>
+            </AppsBackendClientProvider>
         </QueryClientProvider>
     );
 }

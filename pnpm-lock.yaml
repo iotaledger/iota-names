@@ -133,12 +133,9 @@ importers:
       '@amplitude/plugin-session-replay-browser':
         specifier: ^1.25.10
         version: 1.25.10(@amplitude/rrweb@2.0.0-alpha.35)(rollup@4.59.0)
-      '@growthbook/growthbook':
-        specifier: ^1.6.1
-        version: 1.6.1
-      '@growthbook/growthbook-react':
-        specifier: ^1.6.1
-        version: 1.6.1(react@19.2.4)
+      '@iota/apps-backend-client':
+        specifier: ^0.2.0
+        version: 0.2.0(react@19.2.4)
       '@iota/apps-ui-icons':
         specifier: ^0.7.0
         version: 0.7.0(react@19.2.4)
@@ -1874,16 +1871,6 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@growthbook/growthbook-react@1.6.1':
-    resolution: {integrity: sha512-ZxE0R+TslhTymMjyJiLMgvrKxZ+DqPzDuUjN8dZdAJQtlGUnGDn99pcF7lwYStZBPVZ3ncwNCQ9piEqU3i7AXg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: ^16.8.0-0 || ^17.0.0-0 || ^18.0.0-0 || ^19.0.0-0
-
-  '@growthbook/growthbook@1.6.1':
-    resolution: {integrity: sha512-GSvb7bNaBTfH54AZ0oQdnoyV/ZxN9NhDEIHOsRUiM+CSOPiodz0i8/+1O6Wg0wFEVgBxS5CGWffyd74fym43Xw==}
-    engines: {node: '>=10'}
-
   '@headlessui/react@2.2.9':
     resolution: {integrity: sha512-Mb+Un58gwBn0/yWZfyrCh0TJyurtT+dETj7YHleylHk5od3dv2XqETPGWMyQ5/7sYN7oWdyM1u9MvC0OC8UmzQ==}
     engines: {node: '>=10'}
@@ -2066,6 +2053,14 @@ packages:
       '@types/node': '>=18'
     peerDependenciesMeta:
       '@types/node':
+        optional: true
+
+  '@iota/apps-backend-client@0.2.0':
+    resolution: {integrity: sha512-XlY2TU+DsotA3e1cRYB2AuUSfqw86wwP1PvoifPp5LecH+VP/0P+CCw9CiMo41ymVlIivNg2zy6tEy4dnJyXoA==}
+    peerDependencies:
+      react: ^18 || ^19
+    peerDependenciesMeta:
+      react:
         optional: true
 
   '@iota/apps-ui-icons@0.7.0':
@@ -5177,10 +5172,6 @@ packages:
   doctrine@3.0.0:
     resolution: {integrity: sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==}
     engines: {node: '>=6.0.0'}
-
-  dom-mutator@0.6.0:
-    resolution: {integrity: sha512-iCt9o0aYfXMUkz/43ZOAUFQYotjGB+GNbYJiJdz4TgXkyToXbbRy5S6FbTp72lRBtfpUMwEc1KmpFEU4CZeoNg==}
-    engines: {node: '>=10'}
 
   dompurify@3.3.1:
     resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
@@ -10820,15 +10811,6 @@ snapshots:
     dependencies:
       graphql: 16.11.0
 
-  '@growthbook/growthbook-react@1.6.1(react@19.2.4)':
-    dependencies:
-      '@growthbook/growthbook': 1.6.1
-      react: 19.2.4
-
-  '@growthbook/growthbook@1.6.1':
-    dependencies:
-      dom-mutator: 0.6.0
-
   '@headlessui/react@2.2.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@floating-ui/react': 0.26.28(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -10975,6 +10957,10 @@ snapshots:
       iconv-lite: 0.7.0
     optionalDependencies:
       '@types/node': 20.17.27
+
+  '@iota/apps-backend-client@0.2.0(react@19.2.4)':
+    optionalDependencies:
+      react: 19.2.4
 
   '@iota/apps-ui-icons@0.7.0(react@19.2.4)':
     dependencies:
@@ -14566,8 +14552,6 @@ snapshots:
   doctrine@3.0.0:
     dependencies:
       esutils: 2.0.3
-
-  dom-mutator@0.6.0: {}
 
   dompurify@3.3.1:
     optionalDependencies:
