@@ -7,14 +7,7 @@ set -euo pipefail
 # Adds binaries to PATH (and GITHUB_PATH if running in GitHub Actions).
 # ============================================================================
 
-fetch_latest_mainnet_version() {
-    curl -s "https://api.github.com/repos/iotaledger/iota/releases" \
-        | grep '"tag_name"' \
-        | grep -oP '"tag_name":\s*"\Kv\d+\.\d+\.\d+(?=")' \
-        | head -1
-}
-
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-$(fetch_latest_mainnet_version)}"
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.19.1}"
 
 echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
 
