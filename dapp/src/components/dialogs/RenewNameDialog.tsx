@@ -142,6 +142,10 @@ export function RenewNameDialog({ setOpen, name, onRenew }: RenewDialogProps) {
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
+
             const currentExpiration = nameRecord?.nameRecord?.expirationDate
                 ? new Date(nameRecord.nameRecord.expirationDate)
                 : new Date();
