@@ -7,18 +7,6 @@ set -euo pipefail
 # then restarts services with injected configs.
 # ============================================================================
 
-# Fetches the latest mainnet release version from the iotaledger/iota GitHub repo.
-# Mainnet releases follow the tag pattern vMAJOR.MINOR.PATCH with no suffix.
-# Pre-release tags (e.g. -rc, -beta, -alpha) and unrelated tags (e.g. wallet-v*)
-# are excluded by only matching tags that consist solely of vX.Y.Z.
-fetch_latest_mainnet_version() {
-    curl -s "https://api.github.com/repos/iotaledger/iota/releases" \
-        | grep '"tag_name"' \
-        | grep -oP '"tag_name":\s*"\Kv\d+\.\d+\.\d+(?=")' \
-        | head -1
-}
-
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-$(fetch_latest_mainnet_version)}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,27 +46,7 @@ wait_for_url() {
 }
 
 download_binaries() {
-    echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
-
-    local os_name arch_name
-    os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
-    arch_name=$(uname -m)
-
-    [[ "$os_name" == "darwin" ]] && os_name="macos"
-    [[ "$arch_name" == "aarch64" ]] && arch_name="arm64"
-
-    local asset_name="iota-$IOTA_BINARY_VERSION-${os_name}-${arch_name}.tgz"
-    local download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_VERSION/$asset_name"
-
-    echo "Downloading from: $download_url"
-    curl -sL "$download_url" -o iota.tgz
-    tar -zxvf iota.tgz
-    chmod +x ./iota ./iota-indexer ./iota-graphql-rpc
-
-    export PATH="$(pwd):$PATH"
-    [[ -n "${GITHUB_PATH:-}" ]] && echo "$(pwd)" >> "$GITHUB_PATH"
-
-    echo "Binaries downloaded and added to PATH"
+    source "$SCRIPT_DIR/download-iota-binary.sh"
 }
 
 # ============================================================================
