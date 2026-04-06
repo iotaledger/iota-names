@@ -24,7 +24,7 @@ Prerequisites:
 1. Start a local IOTA network in one terminal:
 
 ```bash
-iota start --force-regenesis --with-faucet
+iota-localnet start --force-regenesis --with-faucet
 ```
 
 2. In another terminal, create a new environment for the local network and switch to it:
@@ -73,7 +73,7 @@ All in one:
 ```bash
 docker start postgres || docker run -d --name postgres -e POSTGRES_PASSWORD=postgrespw -e POSTGRES_INITDB_ARGS="-U postgres" -p 5432:5432 postgres:15 -c max_connections=1000
 # Run network in the background without logs
-iota start --force-regenesis --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql > /dev/null 2>&1 &
+iota-localnet start --force-regenesis --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql > /dev/null 2>&1 &
 iota client new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125
 iota client switch --env localnet
 # wait for the network to start

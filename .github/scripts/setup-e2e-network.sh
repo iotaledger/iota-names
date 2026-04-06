@@ -56,7 +56,7 @@ start_initial_network() {
     echo "=== Phase 1: Starting initial network ==="
 
     # Start iota node with force-regenesis for fresh state
-    ./iota start \
+    ./iota-localnet start \
         --network.config "$CONFIG_DIR" \
         --with-faucet \
         --faucet-amount 100000000000000 > iota-node.log 2>&1 &
@@ -182,7 +182,7 @@ restart_with_configs() {
     echo "=== Phase 4: Restarting services with configs ==="
 
     # Restart iota
-    ./iota start \
+    ./iota-localnet start \
         --network.config "$CONFIG_DIR" \
         --with-faucet \
         --faucet-amount 100000000000000 >> iota-node.log 2>&1 &
