@@ -134,8 +134,8 @@ importers:
         specifier: ^1.25.10
         version: 1.25.10(@amplitude/rrweb@2.0.0-alpha.35)(rollup@4.59.0)
       '@iota/apps-backend-client':
-        specifier: ^0.1.0
-        version: 0.1.0(react@19.2.4)
+        specifier: ^0.2.1
+        version: 0.2.1(react@19.2.4)
       '@iota/apps-ui-icons':
         specifier: ^0.7.0
         version: 0.7.0(react@19.2.4)
@@ -2055,8 +2055,8 @@ packages:
       '@types/node':
         optional: true
 
-  '@iota/apps-backend-client@0.1.0':
-    resolution: {integrity: sha512-9hCrLszNw8C1544VPdvXW+1BvCj6R6wO9ejx21bYPCHxJeqyZmOiiAZaD7rd72JDMjIbHGV0yezZdt0MWtRKCw==}
+  '@iota/apps-backend-client@0.2.1':
+    resolution: {integrity: sha512-n1wOmf9e7UYyc17AJRtjorNgB5782bXxn/r6OvkxGbP8tMfqjv1+ADU/FeTGmFLZkASsoSzY+kzBPWOi63sW/A==}
     peerDependencies:
       react: ^18 || ^19
     peerDependenciesMeta:
@@ -10958,7 +10958,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.17.27
 
-  '@iota/apps-backend-client@0.1.0(react@19.2.4)':
+  '@iota/apps-backend-client@0.2.1(react@19.2.4)':
     optionalDependencies:
       react: 19.2.4
 
