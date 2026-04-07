@@ -46,7 +46,7 @@ jobs:
         run: vercel pull --token=${{ secrets.VERCEL_TOKEN }} --yes --environment=preview
 
       - name: Build Project
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=preview
 
       - name: Deploy to Vercel
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7

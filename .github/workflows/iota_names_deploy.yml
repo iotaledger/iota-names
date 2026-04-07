@@ -154,7 +154,7 @@ jobs:
             vercel build --prod $VERCEL_FLAGS
             vercel deploy --prod --prebuilt $VERCEL_FLAGS
           else
-            vercel build $VERCEL_FLAGS
+            vercel build --target="$VERCEL_ENV" $VERCEL_FLAGS
             URL=$(vercel deploy --prebuilt $VERCEL_FLAGS)
             if [ -n "$ALIAS" ]; then
               vercel alias set "$URL" "$ALIAS" $VERCEL_FLAGS
