@@ -158,6 +158,10 @@ export function RenewSubnameDialog({ setOpen, name, onRenew }: RenewDialogProps)
             queryClient.invalidateQueries({
                 queryKey: queryKey.getObject(name),
             });
+            queryClient.invalidateQueries({
+                queryKey: queryKey.ownedObjects(account?.address || ''),
+            });
+
             const expirationTime = expirationDate ? expirationDate.getTime() : Date.now();
 
             ampli.renewedSubname({

@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/typescript.yml"
+      - ".github/scripts/download-iota-binary.sh"
       - ".github/scripts/setup-e2e-network.sh"
       - "packages/**"
       - "scripts/**"
@@ -85,14 +86,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
-      - name: Install IOTA using Homebrew
-        run: brew install iotaledger/tap/iota
-
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
@@ -112,6 +105,10 @@ jobs:
       - name: Build SDK
         run: |
           pnpm sdk build
+
+      - name: Download IOTA Binary
+        run: |
+          .github/scripts/download-iota-binary.sh
 
       - name: Prepare local network & run SDK tests
         env:
