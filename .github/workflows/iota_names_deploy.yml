@@ -68,9 +68,9 @@ jobs:
               APPS_BACKEND_SECRET="STAGING_APPS_BACKEND"
               VERCEL_ENV="preview"
               case "$NETWORK" in
-                devnet)  ENVIRONMENT="Staging devnet — names-dapp" ;;
-                testnet) ENVIRONMENT="Staging testnet — names-dapp" ;;
-                mainnet) ENVIRONMENT="Staging mainnet — names-dapp" ;;
+                devnet)  ENVIRONMENT="Staging devnet - names-dapp" ;;
+                testnet) ENVIRONMENT="Staging testnet - names-dapp" ;;
+                mainnet) ENVIRONMENT="Staging mainnet - names-dapp" ;;
               esac
               ;;
             rc)
@@ -78,8 +78,8 @@ jobs:
               APPS_BACKEND_SECRET="RC_APPS_BACKEND"
               VERCEL_ENV="preview"
               case "$NETWORK" in
-                testnet) ENVIRONMENT="RC testnet — names-dapp" ;;
-                mainnet) ENVIRONMENT="RC mainnet — names-dapp" ;;
+                testnet) ENVIRONMENT="RC testnet - names-dapp" ;;
+                mainnet) ENVIRONMENT="RC mainnet - names-dapp" ;;
               esac
               ;;
             prod)
@@ -87,11 +87,11 @@ jobs:
               APPS_BACKEND_SECRET="PROD_APPS_BACKEND"
               case "$NETWORK" in
                 testnet)
-                  ENVIRONMENT="Production testnet — names-dapp"
+                  ENVIRONMENT="Production testnet - names-dapp"
                   VERCEL_ENV="production-testnet"
                   ;;
                 mainnet)
-                  ENVIRONMENT="Production mainnet — names-dapp"
+                  ENVIRONMENT="Production mainnet - names-dapp"
                   VERCEL_ENV="production"
                   ;;
               esac
