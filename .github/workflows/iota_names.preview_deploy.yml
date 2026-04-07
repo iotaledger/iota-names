@@ -29,7 +29,6 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
       NEXT_PUBLIC_APPS_BACKEND: ${{ secrets.STAGING_APPS_BACKEND }}
-      BUILD_ENV: staging
       NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
       NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: devnet
       NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
@@ -46,7 +45,10 @@ jobs:
         run: vercel pull --token=${{ secrets.VERCEL_TOKEN }} --yes --environment=preview
 
       - name: Build Project
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=preview
+        env:
+          BUILD_ENV: staging
+        run:
+          vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=preview
 
       - name: Deploy to Vercel
         uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
