@@ -9,19 +9,53 @@ on:
       - "sdk/**"
       - "dapp/**"
       - ".github/workflows/iota_names.preview_deploy.yml"
-      - ".github/workflows/vercel_app_deploy.yml"
+      - ".github/workflows/iota_names_deploy.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   deploy-preview:
     if: (github.event.pull_request.draft == false || contains(github.event.pull_request.body, '[run-ci]'))
-    uses: ./.github/workflows/vercel_app_deploy.yml
-    with:
-      VERCEL_ENVIRONMENT: preview
-      NAMES_DAPP_DEFAULT_NETWORK: devnet
-    secrets:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+      issues: write
+
+    env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
-      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
-      NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
-      NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
+      NEXT_PUBLIC_APPS_BACKEND: ${{ secrets.STAGING_APPS_BACKEND }}
+      NEXT_PUBLIC_NAMES_DAPP_CONFIG: ${{ secrets.NAMES_DAPP_CONFIG }}
+      NEXT_PUBLIC_NAMES_DAPP_DEFAULT_NETWORK: devnet
+      NEXT_PUBLIC_NAMES_DAPP_FORBIDDEN_LIST: ${{ secrets.NAMES_DAPP_FORBIDDEN_LIST }}
+
+    steps:
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+
+      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
+
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@canary
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --token=${{ secrets.VERCEL_TOKEN }} --yes --environment=preview
+
+      - name: Build Project
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --target=preview
+
+      - name: Deploy to Vercel
+        uses: iotaledger/deploy-to-vercel-action@9c73fe8ff3eb32d6ba30d623ac1b0c5708a25bb7
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREBUILT: true
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_PROJECT_ID: ${{ secrets.IOTA_NAMES_VERCEL_PROJECT_ID }}
+          DELETE_EXISTING_COMMENT: true
+          VERCEL_TARGET: preview
+          CREATE_COMMENT: true

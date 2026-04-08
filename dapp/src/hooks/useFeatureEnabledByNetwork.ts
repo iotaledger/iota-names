@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { useFeature } from '@growthbook/growthbook-react';
+import { useFeatureValue } from '@iota/apps-backend-client';
 import type { Network } from '@iota/iota-sdk/client';
 
 import { Feature } from '../lib/enums';
@@ -11,6 +11,6 @@ type NetworkBasedFeature = {
 };
 
 export function useFeatureEnabledByNetwork(feature: Feature, network: Network): boolean {
-    const featureFlag = useFeature<NetworkBasedFeature>(feature)?.value;
-    return featureFlag?.[network] ?? false;
+    const featureValue = useFeatureValue<NetworkBasedFeature>(feature, {} as NetworkBasedFeature);
+    return featureValue[network] ?? false;
 }
