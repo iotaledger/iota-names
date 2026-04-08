@@ -7,7 +7,7 @@ set -euo pipefail
 # Adds binaries to PATH (and GITHUB_PATH if running in GitHub Actions).
 # ============================================================================
 
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.20.0-rc}"
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.20.1}"
 
 echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
 
