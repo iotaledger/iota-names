@@ -70,7 +70,7 @@ start_initial_network() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --remote-store-url "http://127.0.0.1:9000/api/v1" \
         --reset-db > indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
@@ -83,7 +83,7 @@ start_initial_network() {
         --db-url "$DB_URL" \
         --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --rpc-address "0.0.0.0:9124" > indexer-reader.log 2>&1 &
     PID_INDEXER_READER=$!
     PIDS+=("$PID_INDEXER_READER")
@@ -195,7 +195,7 @@ restart_with_configs() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --remote-store-url "http://127.0.0.1:9000/api/v1" \
         --reset-db >> indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
@@ -208,7 +208,7 @@ restart_with_configs() {
         --db-url "$DB_URL" \
         --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --rpc-address "0.0.0.0:9124" \
         --iota-names-package-address "$IOTA_NAMES_PACKAGE_ADDRESS" \
         --iota-names-object-id "$IOTA_NAMES_OBJECT_ID" \
