@@ -13,7 +13,6 @@ export * from './useUpdateNameTransaction';
 export * from './useTokenPrice';
 export * from './useCoinMetadata';
 export * from './useFeatureEnabledByNetwork';
-export * from './useAppsBackend';
 export * from './useCalculatePriceInFiat';
 export * from './useRefreshAuctions';
 export * from './useDenyList';
