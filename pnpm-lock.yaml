@@ -154,8 +154,8 @@ importers:
         specifier: workspace:^
         version: link:../sdk
       '@iota/iota-sdk':
-        specifier: ^1.11.0
-        version: 1.11.0(typescript@5.8.3)
+        specifier: ^1.12.0
+        version: 1.12.0(typescript@5.8.3)
       '@iota/kiosk':
         specifier: ^0.7.0
         version: 0.7.0(typescript@5.8.3)
@@ -363,8 +363,8 @@ importers:
         specifier: 3.0.0
         version: 3.0.0
       '@iota/iota-sdk':
-        specifier: ^1.11.0
-        version: 1.11.0(typescript@5.8.3)
+        specifier: ^1.12.0
+        version: 1.12.0(typescript@5.8.3)
       '@iota/kiosk':
         specifier: ^0.4.6
         version: 0.4.6(typescript@5.8.3)
