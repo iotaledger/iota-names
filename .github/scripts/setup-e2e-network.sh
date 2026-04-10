@@ -56,6 +56,7 @@ start_initial_network() {
     echo "=== Phase 1: Starting initial network ==="
 
     # Generate network config first
+    mkdir -p "$CONFIG_DIR"
     ./iota-localnet genesis \
         --working-dir "$CONFIG_DIR" \
         --epoch-duration-ms "$EPOCH_DURATION_MS"
