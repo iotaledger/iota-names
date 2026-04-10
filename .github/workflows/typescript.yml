@@ -115,7 +115,7 @@ jobs:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
+          iota-localnet start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
           sleep 10
 
           iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125

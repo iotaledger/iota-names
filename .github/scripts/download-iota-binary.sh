@@ -7,7 +7,7 @@ set -euo pipefail
 # Adds binaries to PATH (and GITHUB_PATH if running in GitHub Actions).
 # ============================================================================
 
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.19.1}"
+IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-v1.20.1}"
 
 echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
 
@@ -23,7 +23,22 @@ download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_
 echo "Downloading from: $download_url"
 curl -sL "$download_url" -o iota.tgz
 tar -zxvf iota.tgz
-chmod +x ./iota ./iota-indexer ./iota-graphql-rpc
+
+required_binaries=(
+    "./iota"
+    "./iota-localnet"
+    "./iota-indexer"
+    "./iota-graphql-rpc"
+)
+
+for binary in "${required_binaries[@]}"; do
+    if [[ ! -f "$binary" ]]; then
+        echo "ERROR: required binary not found after extraction: $binary"
+        exit 1
+    fi
+done
+
+chmod +x "${required_binaries[@]}"
 
 export PATH="$(pwd):$PATH"
 [[ -n "${GITHUB_PATH:-}" ]] && echo "$(pwd)" >> "$GITHUB_PATH"
