@@ -21,6 +21,9 @@ const GROWTHBOOK_ENVIRONMENTS = {
 const environment =
     (process.env.NEXT_PUBLIC_BUILD_ENV as keyof typeof GROWTHBOOK_ENVIRONMENTS) || 'production';
 
+console.log('GrowthBook environment:', environment);
+console.log('Apps backend:', getAppsBackend());
+
 export const growthbook = new GrowthBook({
     // If you want to develop locally, you can set the API host to this:
     apiHost: getAppsBackend(),
