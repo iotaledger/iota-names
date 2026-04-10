@@ -57,7 +57,7 @@ start_initial_network() {
 
     # Generate network config first
     ./iota-localnet genesis \
-        --network.config "$CONFIG_DIR" \
+        --working-dir "$CONFIG_DIR" \
         --epoch-duration-ms "$EPOCH_DURATION_MS"
 
     # Enable gRPC API so the indexer can sync checkpoints from the node.
