@@ -70,7 +70,6 @@ start_initial_network() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --remote-store-url "http://127.0.0.1:9000/api/v1" \
         --reset-db > indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
@@ -195,7 +194,6 @@ restart_with_configs() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --live-checkpoints-store-url "http://127.0.0.1:9000" \
         --remote-store-url "http://127.0.0.1:9000/api/v1" \
         --reset-db >> indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
