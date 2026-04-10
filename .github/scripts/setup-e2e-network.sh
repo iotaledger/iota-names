@@ -55,7 +55,16 @@ download_binaries() {
 start_initial_network() {
     echo "=== Phase 1: Starting initial network ==="
 
-    # Start iota node with force-regenesis for fresh state
+    # Generate network config first
+    ./iota-localnet genesis \
+        --network.config "$CONFIG_DIR" \
+        --epoch-duration-ms "$EPOCH_DURATION_MS"
+
+    # Enable gRPC API so the indexer can sync checkpoints from the node.
+    # Will be enabled by default in future: https://github.com/iotaledger/iota/issues/10777
+    sed -i 's/enable-grpc-api: false/enable-grpc-api: true/' "$CONFIG_DIR/fullnode.yaml"
+
+    # Start iota node
     ./iota-localnet start \
         --network.config "$CONFIG_DIR" \
         --with-faucet \
@@ -70,7 +79,7 @@ start_initial_network() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --remote-store-url "http://127.0.0.1:9000/api/v1" \
+        --remote-store-url "http://127.0.0.1:50051" \
         --reset-db > indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
     PIDS+=("$PID_INDEXER_WRITER")
@@ -91,7 +100,7 @@ start_initial_network() {
 
     # Start graphql (no config yet)
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9000" \
+        --node-rpc-url "http://127.0.0.1:50051" \
         --prom-port 9186 \
         --port 9125 > graphql.log 2>&1 &
     PID_GRAPHQL=$!
@@ -194,7 +203,7 @@ restart_with_configs() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --remote-store-url "http://127.0.0.1:9000/api/v1" \
+        --remote-store-url "http://127.0.0.1:50051" \
         --reset-db >> indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
     PIDS+=("$PID_INDEXER_WRITER")
@@ -220,7 +229,7 @@ restart_with_configs() {
 
     # Restart graphql with config file
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9000" \
+        --node-rpc-url "http://127.0.0.1:50051" \
         --port 9125 \
         --prom-port 9186 \
         --config "$GRAPHQL_CONFIG" >> graphql.log 2>&1 &
