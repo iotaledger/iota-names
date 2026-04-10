@@ -48,7 +48,7 @@
     },
     "devDependencies": {
         "@iota/build-scripts": "workspace:^",
-        "@iota/graphql-transport": "^0.14.0",
+        "@iota/graphql-transport": "^0.15.0",
         "@types/tmp": "^0.2.6",
         "ts-retry-promise": "^0.8.1",
         "tsx": "^4.19.3",
