@@ -1,7 +1,7 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// rust
+// rust, trigger e2e tests...
 
 import '@iota/dapp-kit/dist/index.css';
 import './globals.css';
