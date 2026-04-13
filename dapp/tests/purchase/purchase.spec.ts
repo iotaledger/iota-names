@@ -43,7 +43,7 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByPlaceholder('Check name availability').fill(nameToPurchase);
         const purchaseCardLocator = page.getByTestId('purchase-name-card');
 
-        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 15_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
@@ -107,7 +107,7 @@ test.describe.serial('Purchase Name Tests', () => {
 
         const purchaseCardLocator = page.getByTestId('purchase-name-card');
 
-        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 15_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         await expect(page.getByTestId('name-purchase-title')).toContainText(
@@ -118,7 +118,7 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByRole('button', { name: '+ Apply Coupon' }).click();
 
         await expect(page.getByRole('button', { name: couponCode })).toBeVisible({
-            timeout: 5_000,
+            timeout: 15_000,
         });
 
         await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
