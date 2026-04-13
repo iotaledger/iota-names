@@ -22,7 +22,7 @@ mkdir -p "$OUTPUT_DIR"
 echo "Finding latest wallet production build artifact..."
 ARTIFACT_ID=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
      -H "Accept: application/vnd.github.v3+json" \
-     "https://api.github.com/repos/$OWNER/$REPO/actions/workflows/apps_wallet_prod_build.yml/runs?status=success&per_page=1" | \
+     "https://api.github.com/repos/$OWNER/$REPO/actions/workflows/apps_wallet_build.yml/runs?status=success&per_page=1" | \
 jq -r '.workflow_runs[0].artifacts_url' | \
 xargs curl -s -H "Authorization: token $GITHUB_TOKEN" \
      -H "Accept: application/vnd.github.v3+json" | \
