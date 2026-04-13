@@ -18,12 +18,12 @@ fi
 
 mkdir -p "$OUTPUT_DIR"
 
-# Get the latest successful artifact ID from the workflow
-echo "Finding latest wallet production build artifact..."
+# Get the latest successful artifact ID from a tag-triggered workflow run
+echo "Finding latest wallet production build artifact from a tag..."
 ARTIFACT_ID=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
      -H "Accept: application/vnd.github.v3+json" \
-     "https://api.github.com/repos/$OWNER/$REPO/actions/workflows/apps_wallet_build.yml/runs?status=success&per_page=1" | \
-jq -r '.workflow_runs[0].artifacts_url' | \
+     "https://api.github.com/repos/$OWNER/$REPO/actions/workflows/apps_wallet_build.yml/runs?status=success&event=push&per_page=10" | \
+jq -r '[.workflow_runs[] | select(.head_branch | test("^wallet-v"))] | .[0].artifacts_url' | \
 xargs curl -s -H "Authorization: token $GITHUB_TOKEN" \
      -H "Accept: application/vnd.github.v3+json" | \
 jq -r '.artifacts[] | select(.name | test("chrome")) | .id')
