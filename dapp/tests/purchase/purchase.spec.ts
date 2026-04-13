@@ -3,11 +3,10 @@
 
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
-import { expect } from '@playwright/test';
 
 import { denormalizeName } from '@/lib/utils';
 
-import { test } from '../helpers/fixtures';
+import { expect, test } from '../helpers/fixtures';
 import { addToCouponList } from '../setup/toggleSmartContract';
 import {
     connectWallet,
@@ -49,8 +48,12 @@ test.describe.serial('Purchase Name Tests', () => {
         await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
 
         await page.getByText('Set name as Public Name').click();
-        await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
 
         const normalizedName = normalizeIotaName(nameToPurchase + '.iota', 'at', {
             truncateLongParts: true,
@@ -121,8 +124,12 @@ test.describe.serial('Purchase Name Tests', () => {
             timeout: 5_000,
         });
 
-        await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
 
         await expect(page.getByText('Successfully registered name')).toBeVisible({
             timeout: 30_000,
@@ -184,16 +191,13 @@ test.describe.serial('Purchase Name Tests', () => {
         const expirationYears = new Date(expirationTime).getFullYear() - new Date().getFullYear();
         expect(expirationYears).toBe(YEARS);
 
-        await page.getByRole('button', { name: 'Buy' }).click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
 
-        const walletConfirmationPage = context.waitForEvent('page');
-        const walletPopup = await walletConfirmationPage;
-
-        await walletPopup.waitForLoadState('domcontentloaded');
-        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
-        await approveBtn.click();
-
-        await walletPopup.waitForEvent('close', { timeout: 10_000 });
         await expect(page.getByText(/Successfully registered name/i)).toBeVisible({
             timeout: 5_000,
         });
