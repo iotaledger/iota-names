@@ -13,7 +13,6 @@ import {
     Warning,
 } from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
-import Link from 'next/link';
 
 import { NameDialogId } from '@/components/dialogs/enums';
 import { DropdownMenuOption } from '@/components/DropdownMenuOptions';
@@ -71,15 +70,13 @@ export function getNameMenuOptions(
         },
         {
             isHidden: isNameGracePeriodExpired || nft.isSubname,
-            children: (
-                <Link
-                    href="https://docs.iotanames.com/user/tradeport"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <DropdownMenuOption icon={<Trade />} label="How to List Name" />
-                </Link>
-            ),
+            onClick: () =>
+                window.open(
+                    'https://docs.iotanames.com/user/tradeport',
+                    '_blank',
+                    'noopener noreferrer',
+                ),
+            children: <DropdownMenuOption icon={<Trade />} label="How to List Name" />,
         },
         {
             onClick: () => onOpen(NameDialogId.RenewName),

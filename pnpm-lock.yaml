@@ -138,11 +138,11 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1(react@19.2.4)
       '@iota/apps-ui-icons':
-        specifier: ^0.7.0
-        version: 0.7.0(react@19.2.4)
+        specifier: ^0.7.5
+        version: 0.7.5(react@19.2.4)
       '@iota/apps-ui-kit':
-        specifier: ^0.9.3
-        version: 0.9.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        specifier: ^0.9.4
+        version: 0.9.4(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@iota/dapp-kit':
         specifier: ^0.9.0
         version: 0.9.0(@tanstack/react-query@5.76.1(react@19.2.4))(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(babel-plugin-macros@3.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.8.3)
@@ -2066,18 +2066,18 @@ packages:
       '@types/node':
         optional: true
 
-  '@iota/apps-ui-icons@0.7.0':
-    resolution: {integrity: sha512-X5DoNYjDgli9Q8FrkL82O6jGMCBs982Qtj8Bf+cFEIl5J+WFxuk71lMghiIAtjxPKAPMikLK49xAZLulK1AxgA==}
+  '@iota/apps-ui-icons@0.7.4':
+    resolution: {integrity: sha512-F04Nr93yJL8q94Yp2UDb1dUVmx1LsKNijBeEYBNVxOolKuJyRtrjckPJ0ZOPGjBtd7E6znHbmQvMNrqjzM8+vQ==}
     peerDependencies:
       react: ^18 || ^19
 
-  '@iota/apps-ui-icons@0.7.3':
-    resolution: {integrity: sha512-eGIB5HM3QXhMH6D9i0ceXvYj+HV2qDdbBI0KlK+4poivDRpKH1LPUWIGEZ465x/aPu5awhWJpsFcJxIVMxsBRw==}
+  '@iota/apps-ui-icons@0.7.5':
+    resolution: {integrity: sha512-AfH7X9wMXdiAvTNIqkH1w3jILJRF0Ht06EryAWT12UcrkEgnzotSE0MYEaOOxtPPT72KDjU+8rD+OkGhNaSNlQ==}
     peerDependencies:
       react: ^18 || ^19
 
-  '@iota/apps-ui-kit@0.9.3':
-    resolution: {integrity: sha512-Dx95JPNhQmlIjKwxmQxFDJBpf8gWuezTsE0llXSs80nFjJqJyEm7YG/B/4VjAtki7MPyC6ZNgEWhB7sIHaXMEw==}
+  '@iota/apps-ui-kit@0.9.4':
+    resolution: {integrity: sha512-MJKXnOyn89ky+1cCwOatPfytj1eRVYoc/gcwK/9vKYdoXTiPnkmx/bRNA2Qqd0iO3aLuBj0vs9d3CeIIb8vtow==}
     peerDependencies:
       react: ^18 || ^19
       react-dom: ^18 || ^19
@@ -10978,19 +10978,19 @@ snapshots:
     optionalDependencies:
       '@types/node': 20.17.27
 
-  '@iota/apps-ui-icons@0.7.0(react@19.2.4)':
+  '@iota/apps-ui-icons@0.7.4(react@19.2.4)':
     dependencies:
       react: 19.2.4
 
-  '@iota/apps-ui-icons@0.7.3(react@19.2.4)':
+  '@iota/apps-ui-icons@0.7.5(react@19.2.4)':
     dependencies:
       react: 19.2.4
 
-  '@iota/apps-ui-kit@0.9.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@iota/apps-ui-kit@0.9.4(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@fontsource-variable/roboto-flex': 5.2.6
       '@fontsource/inter': 5.2.6
-      '@iota/apps-ui-icons': 0.7.3(react@19.2.4)
+      '@iota/apps-ui-icons': 0.7.4(react@19.2.4)
       '@radix-ui/react-dialog': 1.1.14(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@radix-ui/react-visually-hidden': 1.2.3(@types/react-dom@18.3.7(@types/react@18.3.21))(@types/react@18.3.21)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       classnames: 2.5.1
