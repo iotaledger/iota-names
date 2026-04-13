@@ -39,11 +39,14 @@ import { getUserFriendlyErrorMessage } from '@/lib/utils';
 import { ampli } from '@/lib/utils/analytics/ampli';
 import { getNameObject, isNameRecordExpired } from '@/lib/utils/names';
 
+import { ExpirationDate } from '../ExpirationDate';
+
 function createSubnameUpdates({
     name,
     nameRecord,
     ownedSubnames,
     newSubname,
+    expirationDate,
     allowChildCreation,
     allowTimeExtension,
 }: {
@@ -51,6 +54,7 @@ function createSubnameUpdates({
     nameRecord?: NameRecord;
     ownedSubnames?: RegistrationNft[];
     newSubname: string;
+    expirationDate: Date | null;
     allowChildCreation: boolean;
     allowTimeExtension: boolean;
 }) {
@@ -76,19 +80,19 @@ function createSubnameUpdates({
     if (fullSubnameName && newSubname && (isValidSubname || !nftId || !isSubnameAvailable)) {
         return {
             updates: [],
-            fullSubnameName: fullSubnameName,
-            isSubnameAvailable: isSubnameAvailable,
+            fullSubnameName,
+            isSubnameAvailable,
             subnameError: isValidSubname ? isValidSubname : null,
         };
     }
     const updates: NameUpdate[] = [];
 
-    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord) {
+    if (nftId && fullSubnameName && isSubnameAvailable && nameRecord && expirationDate) {
         updates.push({
             type: 'new-subname',
             subname: fullSubnameName,
             parentNftId: nftId,
-            expirationDateParent: nameRecord.expirationDate,
+            expirationDate,
             allowChildCreation,
             allowTimeExtension,
         });
@@ -125,12 +129,18 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
     const [editSubname, setEditSubname] = useState('');
     const [editIsAllowingRenew, setEditIsAllowingRenew] = useState<boolean>(false);
     const [editIsAllowSubnames, setEditIsAllowSubnames] = useState<boolean>(false);
+    const [expirationDate, setExpirationDate] = useState<Date | null>(null);
+    const [isParentExpiration, setIsParentExpiration] = useState(true);
+
+    const parentExpirationDate =
+        nameRecord && nameRecord.nameRecord ? nameRecord.nameRecord.expirationDate : null;
 
     const { updates, fullSubnameName, isSubnameAvailable, subnameError } = createSubnameUpdates({
         name,
         nameRecord: nameRecord?.nameRecord,
         newSubname: editSubname,
         ownedSubnames,
+        expirationDate,
         allowTimeExtension: editIsAllowingRenew,
         allowChildCreation: editIsAllowSubnames,
     });
@@ -166,6 +176,7 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                     name: fullSubnameName,
                     subname: editSubname,
                     parentName: name,
+                    expirationType: isParentExpiration ? 'parent' : 'custom',
                     allowToRenewExpiration: editIsAllowingRenew,
                     allowToCreateAdditionalSubnames: editIsAllowSubnames,
                 });
@@ -240,6 +251,15 @@ export function CreateSubnameDialog({ name, setOpen }: CreateSubnameProps) {
                                           : undefined
                                 }
                             />
+                            <div className="flex flex-col gap-y-md w-full">
+                                <ExpirationDate
+                                    onChange={setExpirationDate}
+                                    parentExpirationDate={parentExpirationDate}
+                                    currentExpirationDate={null}
+                                    maxDate={parentExpirationDate}
+                                    onExpirationTypeChange={setIsParentExpiration}
+                                />
+                            </div>
                             <div className="flex flex-col gap-y-md w-full">
                                 <span className="text-label-lg text-names-neutral-92">
                                     Permissions

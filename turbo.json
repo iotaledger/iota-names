@@ -21,7 +21,12 @@
         "build": {
             "dependsOn": ["^build"],
             "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"],
-            "passThroughEnv": ["SENTRY_AUTH_TOKEN", "BUILD_ENV", "INVALIDATED_NAMES"]
+            "passThroughEnv": [
+                "SENTRY_AUTH_TOKEN",
+                "BUILD_ENV",
+                "NEXT_PUBLIC_APPS_BACKEND",
+                "INVALIDATED_NAMES"
+            ]
         }
     }
 }

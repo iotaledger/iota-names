@@ -93,6 +93,7 @@ export interface CreatedSubnameProperties {
     allowToRenewExpiration?: boolean;
     name: string;
     parentName?: string;
+    expirationType?: string;
     subname?: string;
     /**
      * | Rule | Value |

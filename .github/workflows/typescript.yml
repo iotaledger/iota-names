@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/typescript.yml"
+      - ".github/scripts/download-iota-binary.sh"
       - ".github/scripts/setup-e2e-network.sh"
       - "packages/**"
       - "scripts/**"
@@ -85,14 +86,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
-
-      - name: Install IOTA using Homebrew
-        run: brew install iotaledger/tap/iota
-
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
           node-version: 20
@@ -113,12 +106,16 @@ jobs:
         run: |
           pnpm sdk build
 
+      - name: Download IOTA Binary
+        run: |
+          .github/scripts/download-iota-binary.sh
+
       - name: Prepare local network & run SDK tests
         env:
           IS_CI_JOB: true
           NETWORK: localnet
         run: |
-          iota start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
+          iota-localnet start --with-faucet --faucet-amount 100000000000000 --with-indexer --with-graphql --force-regenesis --epoch-duration-ms 120000 > /dev/null 2>&1 &
           sleep 10
 
           iota client --yes new-env --alias localnet --rpc http://127.0.0.1:9000 --graphql http://127.0.0.1:9125

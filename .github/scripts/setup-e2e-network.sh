@@ -7,18 +7,6 @@ set -euo pipefail
 # then restarts services with injected configs.
 # ============================================================================
 
-# Fetches the latest mainnet release version from the iotaledger/iota GitHub repo.
-# Mainnet releases follow the tag pattern vMAJOR.MINOR.PATCH with no suffix.
-# Pre-release tags (e.g. -rc, -beta, -alpha) and unrelated tags (e.g. wallet-v*)
-# are excluded by only matching tags that consist solely of vX.Y.Z.
-fetch_latest_mainnet_version() {
-    curl -s "https://api.github.com/repos/iotaledger/iota/releases" \
-        | grep '"tag_name"' \
-        | grep -oP '"tag_name":\s*"\Kv\d+\.\d+\.\d+(?=")' \
-        | head -1
-}
-
-IOTA_BINARY_VERSION="${IOTA_BINARY_VERSION:-$(fetch_latest_mainnet_version)}"
 EPOCH_DURATION_MS="${EPOCH_DURATION_MS:-10000}"
 CONFIG_DIR="${CONFIG_DIR:-$(pwd)/persisted-localnet}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -58,27 +46,7 @@ wait_for_url() {
 }
 
 download_binaries() {
-    echo "=== Downloading IOTA binaries (version: $IOTA_BINARY_VERSION) ==="
-
-    local os_name arch_name
-    os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
-    arch_name=$(uname -m)
-
-    [[ "$os_name" == "darwin" ]] && os_name="macos"
-    [[ "$arch_name" == "aarch64" ]] && arch_name="arm64"
-
-    local asset_name="iota-$IOTA_BINARY_VERSION-${os_name}-${arch_name}.tgz"
-    local download_url="https://github.com/iotaledger/iota/releases/download/$IOTA_BINARY_VERSION/$asset_name"
-
-    echo "Downloading from: $download_url"
-    curl -sL "$download_url" -o iota.tgz
-    tar -zxvf iota.tgz
-    chmod +x ./iota ./iota-indexer ./iota-graphql-rpc
-
-    export PATH="$(pwd):$PATH"
-    [[ -n "${GITHUB_PATH:-}" ]] && echo "$(pwd)" >> "$GITHUB_PATH"
-
-    echo "Binaries downloaded and added to PATH"
+    source "$SCRIPT_DIR/download-iota-binary.sh"
 }
 
 # ============================================================================
@@ -87,8 +55,18 @@ download_binaries() {
 start_initial_network() {
     echo "=== Phase 1: Starting initial network ==="
 
-    # Start iota node with force-regenesis for fresh state
-    ./iota start \
+    # Generate network config first
+    mkdir -p "$CONFIG_DIR"
+    ./iota-localnet genesis \
+        --working-dir "$CONFIG_DIR" \
+        --epoch-duration-ms "$EPOCH_DURATION_MS"
+
+    # Enable gRPC API so the indexer can sync checkpoints from the node.
+    # Will be enabled by default in future: https://github.com/iotaledger/iota/issues/10777
+    sed -i 's/enable-grpc-api: false/enable-grpc-api: true/' "$CONFIG_DIR/fullnode.yaml"
+
+    # Start iota node
+    ./iota-localnet start \
         --network.config "$CONFIG_DIR" \
         --with-faucet \
         --faucet-amount 100000000000000 > iota-node.log 2>&1 &
@@ -102,8 +80,7 @@ start_initial_network() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --rpc-client-url "http://127.0.0.1:9000" \
-        --remote-store-url "http://127.0.0.1:9000/api/v1" \
+        --remote-store-url "http://127.0.0.1:50051" \
         --reset-db > indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
     PIDS+=("$PID_INDEXER_WRITER")
@@ -115,7 +92,7 @@ start_initial_network() {
         --db-url "$DB_URL" \
         --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --rpc-client-url "http://127.0.0.1:50051" \
         --rpc-address "0.0.0.0:9124" > indexer-reader.log 2>&1 &
     PID_INDEXER_READER=$!
     PIDS+=("$PID_INDEXER_READER")
@@ -124,7 +101,7 @@ start_initial_network() {
 
     # Start graphql (no config yet)
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9000" \
+        --node-rpc-url "http://127.0.0.1:50051" \
         --prom-port 9186 \
         --port 9125 > graphql.log 2>&1 &
     PID_GRAPHQL=$!
@@ -214,7 +191,7 @@ restart_with_configs() {
     echo "=== Phase 4: Restarting services with configs ==="
 
     # Restart iota
-    ./iota start \
+    ./iota-localnet start \
         --network.config "$CONFIG_DIR" \
         --with-faucet \
         --faucet-amount 100000000000000 >> iota-node.log 2>&1 &
@@ -227,8 +204,7 @@ restart_with_configs() {
     ./iota-indexer \
         --db-url "$DB_URL" \
         indexer \
-        --rpc-client-url "http://127.0.0.1:9000" \
-        --remote-store-url "http://127.0.0.1:9000/api/v1" \
+        --remote-store-url "http://127.0.0.1:50051" \
         --reset-db >> indexer-writer.log 2>&1 &
     PID_INDEXER_WRITER=$!
     PIDS+=("$PID_INDEXER_WRITER")
@@ -240,7 +216,7 @@ restart_with_configs() {
         --db-url "$DB_URL" \
         --metrics-address "0.0.0.0:9185" \
         json-rpc-service \
-        --rpc-client-url "http://127.0.0.1:9000" \
+        --rpc-client-url "http://127.0.0.1:50051" \
         --rpc-address "0.0.0.0:9124" \
         --iota-names-package-address "$IOTA_NAMES_PACKAGE_ADDRESS" \
         --iota-names-object-id "$IOTA_NAMES_OBJECT_ID" \
@@ -254,7 +230,7 @@ restart_with_configs() {
 
     # Restart graphql with config file
     ./iota-graphql-rpc start-server \
-        --node-rpc-url "http://127.0.0.1:9000" \
+        --node-rpc-url "http://127.0.0.1:50051" \
         --port 9125 \
         --prom-port 9186 \
         --config "$GRAPHQL_CONFIG" >> graphql.log 2>&1 &
