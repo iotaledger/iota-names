@@ -2,7 +2,7 @@
     "name": "@iota/iota-names-sdk",
     "author": "IOTA Foundation <info@iota.org>",
     "description": "IOTA-Names SDK",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "license": "Apache-2.0",
     "private": false,
     "main": "./dist/cjs/index.js",

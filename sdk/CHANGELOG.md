@@ -1,5 +1,12 @@
 # @iota/iota-names-sdk
 
+## 0.6.2
+
+### Patch Changes
+
+- 9375551: Patch immutable dependency.
+- 441ec0f: Update ts-sdk.
+
 ## 0.6.1
 
 ### Patch Changes
