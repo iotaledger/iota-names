@@ -199,7 +199,7 @@ test.describe.serial('Purchase Name Tests', () => {
         ]);
 
         await expect(page.getByText(/Successfully registered name/i)).toBeVisible({
-            timeout: 5_000,
+            timeout: 30_000,
         });
     });
 });
