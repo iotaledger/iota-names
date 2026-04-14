@@ -45,7 +45,10 @@ test.describe.serial('Purchase Name Tests', () => {
         await purchaseCardLocator.waitFor({ state: 'visible', timeout: 15_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
+        const normalizedName = normalizeIotaName(nameToPurchase, 'at', {
+            truncateLongParts: true,
+        });
+        await expect(page.getByTestId('name-purchase-title')).toContainText(normalizedName);
 
         await page.getByText('Set name as Public Name').click();
         await Promise.race([
@@ -55,9 +58,6 @@ test.describe.serial('Purchase Name Tests', () => {
                 .click(),
         ]);
 
-        const normalizedName = normalizeIotaName(nameToPurchase, 'at', {
-            truncateLongParts: true,
-        });
         await expect(page.getByText(`Successfully registered name ${normalizedName}`)).toBeVisible({
             timeout: 30_000,
         });
