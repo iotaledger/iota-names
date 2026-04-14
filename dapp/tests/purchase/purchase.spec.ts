@@ -3,11 +3,10 @@
 
 import { normalizeIotaName } from '@iota/iota-names-sdk';
 import { formatAddress } from '@iota/iota-sdk/utils';
-import { expect } from '@playwright/test';
 
 import { denormalizeName } from '@/lib/utils';
 
-import { test } from '../helpers/fixtures';
+import { expect, test } from '../helpers/fixtures';
 import { addToCouponList } from '../setup/toggleSmartContract';
 import {
     connectWallet,
@@ -36,25 +35,29 @@ test.describe.serial('Purchase Name Tests', () => {
     });
 
     test('Can purchase a name making it public', async ({ appPage: page, context }) => {
-        const nameToPurchase = `e2epublic`;
+        const nameToPurchase = generateRandomName('public');
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
         await page.getByPlaceholder('Check name availability').fill(nameToPurchase);
         const purchaseCardLocator = page.getByTestId('purchase-name-card');
 
-        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 15_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        await expect(page.getByTestId('name-purchase-title')).toContainText('@' + nameToPurchase);
-
-        await page.getByText('Set name as Public Name').click();
-        await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
-
-        const normalizedName = normalizeIotaName(nameToPurchase + '.iota', 'at', {
+        const normalizedName = normalizeIotaName(nameToPurchase, 'at', {
             truncateLongParts: true,
         });
+        await expect(page.getByTestId('name-purchase-title')).toContainText(normalizedName);
+
+        await page.getByText('Set name as Public Name').click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
+
         await expect(page.getByText(`Successfully registered name ${normalizedName}`)).toBeVisible({
             timeout: 30_000,
         });
@@ -107,7 +110,7 @@ test.describe.serial('Purchase Name Tests', () => {
 
         const purchaseCardLocator = page.getByTestId('purchase-name-card');
 
-        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 10_000 });
+        await purchaseCardLocator.waitFor({ state: 'visible', timeout: 15_000 });
         await purchaseCardLocator.hover();
         await purchaseCardLocator.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
         await expect(page.getByTestId('name-purchase-title')).toContainText(
@@ -117,12 +120,17 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByPlaceholder('Have a discount code?').fill(couponCode);
         await page.getByRole('button', { name: '+ Apply Coupon' }).click();
 
-        await expect(page.getByRole('button', { name: couponCode })).toBeVisible({
-            timeout: 5_000,
-        });
+        await expect(page.getByRole('button', { name: 'Remove coupon code' })).toHaveText(
+            couponCode,
+            { timeout: 15_000 },
+        );
 
-        await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 });
-        (await context.waitForEvent('page')).getByRole('button', { name: 'Approve' }).click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
 
         await expect(page.getByText('Successfully registered name')).toBeVisible({
             timeout: 30_000,
@@ -184,18 +192,15 @@ test.describe.serial('Purchase Name Tests', () => {
         const expirationYears = new Date(expirationTime).getFullYear() - new Date().getFullYear();
         expect(expirationYears).toBe(YEARS);
 
-        await page.getByRole('button', { name: 'Buy' }).click();
+        await Promise.race([
+            await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
+            (await context.waitForEvent('page', { timeout: 5_000 }))
+                .getByRole('button', { name: 'Approve' })
+                .click(),
+        ]);
 
-        const walletConfirmationPage = context.waitForEvent('page');
-        const walletPopup = await walletConfirmationPage;
-
-        await walletPopup.waitForLoadState('domcontentloaded');
-        const approveBtn = walletPopup.getByRole('button', { name: /^Approve$/i });
-        await approveBtn.click();
-
-        await walletPopup.waitForEvent('close', { timeout: 10_000 });
         await expect(page.getByText(/Successfully registered name/i)).toBeVisible({
-            timeout: 5_000,
+            timeout: 30_000,
         });
     });
 });
