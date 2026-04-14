@@ -55,7 +55,7 @@ test.describe.serial('Purchase Name Tests', () => {
                 .click(),
         ]);
 
-        const normalizedName = normalizeIotaName(nameToPurchase + '.iota', 'at', {
+        const normalizedName = normalizeIotaName(nameToPurchase, 'at', {
             truncateLongParts: true,
         });
         await expect(page.getByText(`Successfully registered name ${normalizedName}`)).toBeVisible({
