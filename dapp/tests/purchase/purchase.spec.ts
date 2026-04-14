@@ -35,7 +35,7 @@ test.describe.serial('Purchase Name Tests', () => {
     });
 
     test('Can purchase a name making it public', async ({ appPage: page, context }) => {
-        const nameToPurchase = `e2epublic`;
+        const nameToPurchase = generateRandomName('public');
 
         await page.getByPlaceholder('Search for your IOTA name').filter({ visible: true }).click();
 
@@ -120,9 +120,10 @@ test.describe.serial('Purchase Name Tests', () => {
         await page.getByPlaceholder('Have a discount code?').fill(couponCode);
         await page.getByRole('button', { name: '+ Apply Coupon' }).click();
 
-        await expect(page.getByRole('button', { name: couponCode })).toBeVisible({
-            timeout: 15_000,
-        });
+        await expect(page.getByRole('button', { name: 'Remove coupon code' })).toHaveText(
+            couponCode,
+            { timeout: 15_000 },
+        );
 
         await Promise.race([
             await page.getByRole('button', { name: 'Buy' }).click({ timeout: 10_000 }),
