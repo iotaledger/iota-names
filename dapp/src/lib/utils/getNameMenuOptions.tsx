@@ -1,7 +1,17 @@
 // Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Add, Assets, Calendar, Edit, Info, Link, Settings, Warning } from '@iota/apps-ui-icons';
+import {
+    Add,
+    Assets,
+    Calendar,
+    Edit,
+    Info,
+    Link as LinkSvg,
+    Settings,
+    Trade,
+    Warning,
+} from '@iota/apps-ui-icons';
 import { isSubname } from '@iota/iota-names-sdk';
 
 import { NameDialogId } from '@/components/dialogs/enums';
@@ -10,7 +20,7 @@ import { NameRecordData } from '@/hooks';
 import { RegistrationNft } from '@/lib/interfaces';
 import { MenuListItem } from '@/lib/types/components';
 
-import { getNamePermissions, isGracePeriodExpired } from './names';
+import { getNamePermissions } from './names';
 
 export function getNameMenuOptions(
     nft: RegistrationNft,
@@ -21,7 +31,7 @@ export function getNameMenuOptions(
 ): MenuListItem[] {
     const nameRecord = record as Extract<NameRecordData, { type: 'unavailable' }> | undefined;
     const isNameSubname = isSubname(nft.name);
-    const isNameGracePeriodExpired = isGracePeriodExpired(nft);
+    const isNameGracePeriodExpired = !nft.isRenewable;
     const namePermissions =
         isNameSubname && nameRecord
             ? getNamePermissions(nameRecord.nameRecord)
@@ -30,7 +40,7 @@ export function getNameMenuOptions(
     return [
         {
             onClick: () => onOpen(NameDialogId.ConnectToAddress),
-            children: <DropdownMenuOption icon={<Link />} label="Connect to Address" />,
+            children: <DropdownMenuOption icon={<LinkSvg />} label="Connect to Address" />,
             isHidden: nft.isExpired,
             hideBottomBorder: true,
         },
@@ -57,6 +67,16 @@ export function getNameMenuOptions(
             children: <DropdownMenuOption icon={<Add />} label="Create Subname" />,
             isHidden: !namePermissions.allowChildCreation || nft.isExpired,
             isDisabled: !namePermissions.allowChildCreation,
+        },
+        {
+            isHidden: isNameGracePeriodExpired || nft.isSubname,
+            onClick: () =>
+                window.open(
+                    'https://docs.iotanames.com/user/tradeport',
+                    '_blank',
+                    'noopener noreferrer',
+                ),
+            children: <DropdownMenuOption icon={<Trade />} label="How to List Name" />,
         },
         {
             onClick: () => onOpen(NameDialogId.RenewName),

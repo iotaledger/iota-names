@@ -58,7 +58,7 @@ export function ContextMenuDropdown({ visible, position, options, dropdownRef }:
             <Dropdown>
                 {options
                     .filter((option) => !option.isHidden)
-                    .map((item, index) => (
+                    .map(({ isHidden, ...item }, index) => (
                         <ListItem key={index} {...item} />
                     ))}
             </Dropdown>

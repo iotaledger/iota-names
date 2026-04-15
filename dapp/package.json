@@ -28,7 +28,7 @@
         "@amplitude/engagement-browser": "^1.0.6",
         "@amplitude/plugin-session-replay-browser": "^1.25.10",
         "@iota/apps-backend-client": "^0.2.1",
-        "@iota/apps-ui-icons": "^0.7.4",
+        "@iota/apps-ui-icons": "^0.7.5",
         "@iota/apps-ui-kit": "^0.9.4",
         "@iota/dapp-kit": "^0.10.0",
         "@iota/graphql-transport": "^0.15.0",

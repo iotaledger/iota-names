@@ -6,6 +6,7 @@ import { IotaParsedData } from '@iota/iota-sdk/client';
 
 import { useIotaNamesClient } from '@/contexts';
 import { RegistrationNft } from '@/lib/interfaces/registration.interfaces';
+import { isGracePeriodExpired } from '@/lib/utils/names';
 
 import { useGetAllOwnedObjects } from './useGetAllOwnedObjects';
 
@@ -44,16 +45,16 @@ export function useRegistrationNfts(type: RegistrationNftType = 'name') {
                     type === 'subname'
                         ? (content?.fields as { nft: { fields: NameFields } }).nft.fields
                         : (content?.fields as NameFields);
+                const expirationDate = new Date(Number(fields?.expiration_timestamp_ms) || 0);
                 return {
                     name: data?.name ?? fields?.name_str ?? '',
                     description: data?.description,
                     imageUrl: data?.image_url,
                     link: data?.link,
                     projectUrl: data?.project_url,
-                    isExpired:
-                        !!fields?.expiration_timestamp_ms &&
-                        new Date(Number(fields?.expiration_timestamp_ms)) < new Date(),
-                    expirationDate: new Date(Number(fields?.expiration_timestamp_ms) || 0),
+                    isExpired: !!fields?.expiration_timestamp_ms && expirationDate < new Date(),
+                    expirationDate,
+                    isRenewable: !isGracePeriodExpired({ expirationDate }),
                     id: nameRecord.objectId,
                     isSubname: type === 'subname',
                 } satisfies RegistrationNft;
