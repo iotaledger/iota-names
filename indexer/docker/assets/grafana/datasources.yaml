@@ -13,3 +13,19 @@ datasources:
     editable: false
     jsonData:
       httpMethod: GET
+
+  - name: InfluxDB
+    type: influxdb
+    uid: influxdb
+    access: proxy
+    orgId: 1
+    url: http://influxdb:8086
+    isDefault: true
+    version: 1
+    editable: false
+    jsonData:
+      version: Flux
+      organization: iota
+      defaultBucket: iota-names
+    secureJsonData:
+      token: ${INFLUXDB_TOKEN:-iota-names-token}

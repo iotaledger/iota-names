@@ -39,6 +39,7 @@ use crate::{
     config::IotaNamesExtendedConfig,
     db::{pool::DbConnectionPool, queries},
     events::{CouponKind, IotaNamesEvent},
+    influxdb::{BalanceUpdate, InfluxDb},
 };
 
 pub(crate) async fn run_iota_names_reader(
@@ -104,6 +105,7 @@ pub(crate) struct IotaNamesWorker {
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
     balance_object_id: ObjectID,
+    influxdb: Option<Arc<InfluxDb>>,
 }
 
 impl IotaNamesWorker {
@@ -112,6 +114,7 @@ impl IotaNamesWorker {
         extended_config: IotaNamesExtendedConfig,
         metrics: Arc<IotaNamesMetrics>,
         token: CancellationToken,
+        influxdb: Option<Arc<InfluxDb>>,
     ) -> anyhow::Result<Self> {
         let config_type = StructTag::from_str(&format!(
             "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
@@ -137,10 +140,11 @@ impl IotaNamesWorker {
             metrics,
             token,
             balance_object_id,
+            influxdb,
         })
     }
 
-    fn process_event(&self, event: IotaNamesEvent) -> anyhow::Result<()> {
+    fn process_event(&self, event: &IotaNamesEvent) -> anyhow::Result<()> {
         match event {
             // `auctions`
             IotaNamesEvent::AuctionStarted(event) => {
@@ -294,16 +298,31 @@ impl IotaNamesWorker {
             );
         }
 
+        let timestamp_ms = checkpoint.checkpoint_summary.timestamp_ms;
+
+        let mut balance_updates = Vec::new();
         let mut iota_names_balance = false;
         let mut auction_house_balance = false;
         for object in checkpoint.latest_live_output_objects() {
             if object.id() == self.balance_object_id {
                 let balance = get_iota_names_balance(object)?;
-                self.metrics.balance.set(balance.value() as _);
+                let value = balance.value() as i64;
+                self.metrics.balance.set(value);
+                balance_updates.push(BalanceUpdate {
+                    source: "iota_names",
+                    value,
+                    timestamp_ms,
+                });
                 iota_names_balance = true;
             } else if object.id() == self.extended_config.auction_house_id {
                 let balance = get_auction_house_balance(object)?;
-                self.metrics.auction_house_balance.set(balance.value() as _);
+                let value = balance.value() as i64;
+                self.metrics.auction_house_balance.set(value);
+                balance_updates.push(BalanceUpdate {
+                    source: "auction_house",
+                    value,
+                    timestamp_ms,
+                });
                 auction_house_balance = true;
             } else {
                 continue;
@@ -312,6 +331,8 @@ impl IotaNamesWorker {
                 break;
             }
         }
+
+        let mut influxdb_events = Vec::new();
 
         for transaction in &checkpoint.transactions {
             let TransactionEffects::V1(effects) = &transaction.effects;
@@ -329,12 +350,21 @@ impl IotaNamesWorker {
                                 checkpoint.checkpoint_summary.sequence_number
                             );
 
-                            self.process_event(event)?
+                            self.process_event(&event)?;
+                            influxdb_events.push((event, timestamp_ms));
                         }
                         Err(e) => warn!("parsing event failed: {e}"),
                         _ => {}
                     }
                 }
+            }
+        }
+
+        if let Some(influxdb) = &self.influxdb {
+            if !influxdb_events.is_empty() || !balance_updates.is_empty() {
+                influxdb
+                    .write_events(&influxdb_events, &balance_updates)
+                    .await;
             }
         }
 

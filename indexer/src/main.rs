@@ -5,6 +5,7 @@ mod api;
 mod config;
 mod db;
 mod events;
+mod influxdb;
 mod metrics;
 mod worker;
 
@@ -26,6 +27,7 @@ use crate::{
     api::start_api_server,
     config::IotaNamesExtendedConfig,
     db::pool::{DbConnectionPool, DbConnectionPoolConfig},
+    influxdb::InfluxDb,
     metrics::{IotaNamesMetrics, PrometheusServer},
     worker::{IotaNamesWorker, run_iota_names_reader},
 };
@@ -63,6 +65,20 @@ enum Command {
         /// Resets metrics in case of a Prometheus error.
         #[arg(long, default_value_t = false)]
         reset_metrics: bool,
+        /// The URL of the InfluxDB v2 instance (e.g. http://localhost:8086).
+        /// When set, events are written to InfluxDB with actual on-chain
+        /// timestamps.
+        #[arg(long, env = "INFLUXDB_URL")]
+        influxdb_url: Option<String>,
+        /// The InfluxDB authentication token.
+        #[arg(long, env = "INFLUXDB_TOKEN", default_value = "")]
+        influxdb_token: String,
+        /// The InfluxDB organization.
+        #[arg(long, env = "INFLUXDB_ORG", default_value = "iota")]
+        influxdb_org: String,
+        /// The InfluxDB bucket to write to.
+        #[arg(long, env = "INFLUXDB_BUCKET", default_value = "iota-names")]
+        influxdb_bucket: String,
     },
 }
 
@@ -77,6 +93,10 @@ impl Command {
                 api_port,
                 prometheus_url,
                 reset_metrics,
+                influxdb_url,
+                influxdb_token,
+                influxdb_org,
+                influxdb_bucket,
             } => {
                 info!("Starting IOTA Names Indexer");
 
@@ -146,6 +166,11 @@ impl Command {
                 if iota_names_config.event_package_ids.is_empty() {
                     panic!("No EVENT_PACKAGE_IDS provided in the environment variables");
                 }
+                let influxdb = influxdb_url.map(|url| {
+                    info!("InfluxDB enabled at {url}");
+                    Arc::new(InfluxDb::new(&url, &influxdb_token, &influxdb_org, &influxdb_bucket))
+                });
+
                 info!("Starting with IOTA-Names config: {iota_names_config:#?}");
                 tasks.spawn(async move {
                     let worker = IotaNamesWorker::new(
@@ -153,6 +178,7 @@ impl Command {
                         iota_names_config,
                         metrics,
                         handle.clone(),
+                        influxdb,
                     )?;
 
                     tokio::select! {
