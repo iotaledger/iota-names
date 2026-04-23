@@ -2,9 +2,8 @@
 // Modifications Copyright (c) 2025 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { ALLOWED_METADATA } from '@iota/iota-names-sdk';
 import { TransactionArgument, type Transaction } from '@iota/iota-sdk/transactions';
-
-import { ALLOWED_METADATA } from '../../sdk/src/constants';
 
 /**
  * A helper to authorize any app in the IotaNames object.

@@ -1,24 +1,13 @@
 # Default fallback, if no other path below this matches
 * @iotaledger/dev-tools
 
-/.github/workflows/ @iotaledger/dev-tools @iotaledger/tooling
-/.changeset/ @iotaledger/tooling
+/.github/workflows/ @iotaledger/dev-tools
 
-/build-scripts/ @iotaledger/tooling
-/dapp/ @iotaledger/tooling
 /documentation/ @iotaledger/devrel
 /indexer/ @iotaledger/dev-tools
-/linting/ @iotaledger/tooling
-/names-display/ @iotaledger/tooling
 /packages/ @iotaledger/dev-tools
 /scripts/ @iotaledger/dev-tools
-/sdk/ @iotaledger/tooling
 
-/.eslintrc.cjs @iotaledger/tooling
-/.prettierignore @iotaledger/tooling
-/.lintstagedrc.json @iotaledger/tooling
-/package.json @iotaledger/dev-tools @iotaledger/tooling
-/pnpm-lock.yaml @iotaledger/dev-tools @iotaledger/tooling
-/pnpm-workspace.yaml @iotaledger/dev-tools @iotaledger/tooling
-/prettier.config.cjs @iotaledger/tooling
-/turbo.json @iotaledger/tooling
+/package.json @iotaledger/dev-tools
+/pnpm-lock.yaml @iotaledger/dev-tools
+/pnpm-workspace.yaml @iotaledger/dev-tools

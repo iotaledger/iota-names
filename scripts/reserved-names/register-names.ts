@@ -6,7 +6,8 @@ import { bcs } from '@iota/iota-sdk/bcs';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { IOTA_CLOCK_OBJECT_ID, isValidIotaAddress } from '@iota/iota-sdk/utils';
 
-import { isValidIotaName, normalizeIotaName } from '../../sdk/src/utils';
+import { isValidIotaName, normalizeIotaName } from '@iota/iota-names-sdk';
+
 import { signAndExecute } from '../utils/utils';
 
 const YEARS_TO_RESERVE = 1;
