@@ -5,7 +5,6 @@
     "description": "This repository holds the IOTA-Names contracts (both the core and all system packages).",
     "main": "index.js",
     "devDependencies": {
-        "@changesets/cli": "^2.29.5",
         "@ianvs/prettier-plugin-sort-imports": "^4.4.2",
         "@types/node": "^22.16.0",
         "@typescript-eslint/eslint-plugin": "^8.35.1",
@@ -14,7 +13,6 @@
         "eslint-config-react-app": "^7.0.1",
         "eslint-import-resolver-typescript": "^3.10.1",
         "eslint-plugin-import": "^2.32.0",
-        "eslint-plugin-license-check": "link:linting/license-check",
         "eslint-plugin-prettier": "^5.5.1",
         "eslint-plugin-require-extensions": "^0.1.3",
         "eslint-plugin-tsdoc": "^0.4.0",
@@ -28,7 +26,6 @@
         "typescript": "^5.8.3"
     },
     "scripts": {
-        "release": "pnpm --filter @iota/iota-names build && pnpm changeset publish",
         "test": "echo \"Error: no test specified\" && exit 1",
         "prettier:check": "prettier -c --ignore-unknown .",
         "prettier:fix": "prettier -w --ignore-unknown .",
@@ -37,12 +34,7 @@
         "eslint:fix": "pnpm run eslint:check --fix",
         "lint": "pnpm run eslint:check && pnpm run prettier:check",
         "lint:fix": "pnpm run eslint:fix && pnpm run prettier:fix",
-        "sdk": "turbo --filter ./sdk",
-        "dapp": "turbo --filter ./dapp",
-        "names-display": "turbo --filter ./names-display",
-        "prepare": "husky",
-        "changeset-publish": "pnpm changeset publish",
-        "changeset-version": "pnpm changeset version"
+        "prepare": "husky"
     },
     "author": "",
     "license": "Apache-2.0",

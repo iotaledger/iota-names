@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 module.exports = {
-    plugins: ['unused-imports', 'prettier', 'require-extensions', 'license-check'],
+    plugins: ['unused-imports', 'prettier', 'require-extensions'],
     extends: [
         'react-app',
         'eslint:recommended',
@@ -68,7 +68,6 @@ module.exports = {
                 ignoreRestSiblings: true,
             },
         ],
-        'license-check/license-check': 'error',
     },
     parserOptions: {
         ecmaVersion: 2020,

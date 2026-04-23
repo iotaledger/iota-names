@@ -1,8 +1,4 @@
 packages:
-  - "sdk"
-  - "build-scripts"
   - "scripts"
   - "documentation/**"
-  - "dapp"
-  - "names-display"
 minimumReleaseAge: 1440
