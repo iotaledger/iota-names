@@ -11,7 +11,7 @@ description = "IOTA-Names Indexer"
 anyhow = "1.0"
 async-trait = "0.1"
 axum = { version = "0.8", default-features = false, features = ["tokio", "http1", "http2", "json", "matched-path", "original-uri", "form", "query", "ws", "macros"] }
-bcs = "0.1"
+bcs = "0.2.1"
 chrono = "0.4.41"
 clap = { version = "4.4", features = ["derive", "wrap_help", "env"] }
 diesel = { version = "2.2.0", features = ["sqlite", "returning_clauses_for_sqlite_3_35", "r2d2"] }
@@ -19,12 +19,12 @@ diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15"
 futures = "0.3"
 prometheus = "0.14"
-reqwest = { version = "0.12", features = ["json"] }
+reqwest = { version = "0.13.4", features = ["json"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
-tokio = "1.47"
+tokio = { version = "1.47", features = ["signal"] }
 tokio-util = "0.7"
-tower-http = { version = "0.6.6", features = ["cors"] }
+tower-http = { version = "0.6.11", features = ["cors"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["std", "fmt", "ansi", "smallvec", "tracing-log", "local-time", "env-filter"] }
 
@@ -36,6 +36,7 @@ iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-met
 iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
 iota-protocol-config = { git = "https://github.com/iotaledger/iota", package = "iota-protocol-config" }
 iota-sdk = { git = "https://github.com/iotaledger/iota", package = "iota-sdk" }
+iota-sdk-ext = { git = "https://github.com/iotaledger/iota-rust-sdk", package = "iota-sdk", default-features = false, features = ["types", "serde"], rev = "e7af68b7ed6428dbb1e2bb434c6692993d41e9c3" }
 iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types" }
 move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types" }
 
