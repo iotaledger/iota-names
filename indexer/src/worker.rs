@@ -330,7 +330,7 @@ impl IotaNamesWorker {
                         }
                     }
                 }
-                _ => unreachable!(
+                _ => unimplemented!(
                     "a new TransactionEffects variant has been added and must be handled"
                 ),
             }
