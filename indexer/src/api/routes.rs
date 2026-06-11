@@ -8,7 +8,7 @@ use axum::{
     extract::{Path, State},
     routing::get,
 };
-use iota_types::base_types::IotaAddress;
+use iota_sdk_ext::types::Address;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::{
@@ -48,7 +48,7 @@ async fn get_auctions_for_address(
         status,
     }: BidderNamesPagination,
 ) -> Result<AuctionsResponse, ApiError> {
-    IotaAddress::from_str(&address_str)
+    Address::from_str(&address_str)
         .map_err(|_| ApiError::BadRequest("Invalid IOTA address".to_string()))?;
 
     let mut conn = state.pool.get_connection()?;

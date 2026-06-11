@@ -5,25 +5,25 @@ use std::{collections::HashSet, str::FromStr};
 
 use iota_names::config::IotaNamesConfig;
 use iota_protocol_config::Chain;
-use iota_types::base_types::{IotaAddress, ObjectID};
+use iota_sdk_ext::types::{Address, ObjectId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "kebab-case")]
 pub struct IotaNamesExtendedConfig {
     /// Address of the `auction` package.
-    pub auction_package_address: IotaAddress,
+    pub auction_package_address: Address,
     /// Address of the `coupons` package.
-    pub coupons_package_address: IotaAddress,
+    pub coupons_package_address: Address,
     /// Address of the `subnames` package.
-    pub subnames_package_address: IotaAddress,
+    pub subnames_package_address: Address,
     /// Address of the `temp-subname-proxy` package
-    pub subname_proxy_package_address: IotaAddress,
+    pub subname_proxy_package_address: Address,
     /// ID of the `AuctionHouse` object.
-    pub auction_house_id: ObjectID,
+    pub auction_house_id: ObjectId,
     /// List of package addresses for events. Not strictly defined to support
     /// new versions.
-    pub event_package_ids: HashSet<IotaAddress>,
+    pub event_package_ids: HashSet<Address>,
     pub iota_names_config: IotaNamesConfig,
 }
 
@@ -35,12 +35,12 @@ impl Default for IotaNamesExtendedConfig {
 
 impl IotaNamesExtendedConfig {
     pub fn new(
-        auction_package_address: IotaAddress,
-        coupons_package_address: IotaAddress,
-        subnames_package_address: IotaAddress,
-        subname_proxy_package_address: IotaAddress,
-        auction_house_id: ObjectID,
-        event_package_ids: HashSet<IotaAddress>,
+        auction_package_address: Address,
+        coupons_package_address: Address,
+        subnames_package_address: Address,
+        subname_proxy_package_address: Address,
+        auction_house_id: ObjectId,
+        event_package_ids: HashSet<Address>,
         iota_names_config: IotaNamesConfig,
     ) -> Self {
         Self {
@@ -57,7 +57,7 @@ impl IotaNamesExtendedConfig {
     pub fn from_env() -> anyhow::Result<Self> {
         let iota_names_config = IotaNamesConfig::from_env()?;
 
-        let event_package_ids: HashSet<IotaAddress> = serde_json::from_str(
+        let event_package_ids: HashSet<Address> = serde_json::from_str(
             &std::env::var("EVENT_PACKAGE_IDS").unwrap_or_else(|_| "[]".to_string()),
         )?;
 
@@ -93,12 +93,12 @@ impl IotaNamesExtendedConfig {
         const AUCTION_HOUSE_ID: &str =
             "0x3694c17bbcf60c916b2484a76e9a3f7289d214fd7a43b554dcdce0c2ffc04295";
 
-        let auction_package_address = IotaAddress::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
-        let coupons_package_address = IotaAddress::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
-        let subnames_package_address = IotaAddress::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
+        let auction_package_address = Address::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
+        let coupons_package_address = Address::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
+        let subnames_package_address = Address::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
         let subname_proxy_package_address =
-            IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
-        let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
+            Address::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
+        let auction_house_id = ObjectId::from_str(AUCTION_HOUSE_ID).unwrap();
 
         let iota_names_config = IotaNamesConfig::mainnet();
         let event_package_ids = HashSet::from([
@@ -134,12 +134,12 @@ impl IotaNamesExtendedConfig {
         const AUCTION_HOUSE_ID: &str =
             "0x2292ea885039babe8c320f19e0b7546ebdef2b2f6cf2be600bf994cdb51e0050";
 
-        let auction_package_address = IotaAddress::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
-        let coupons_package_address = IotaAddress::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
-        let subnames_package_address = IotaAddress::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
+        let auction_package_address = Address::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
+        let coupons_package_address = Address::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
+        let subnames_package_address = Address::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
         let subname_proxy_package_address =
-            IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
-        let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
+            Address::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
+        let auction_house_id = ObjectId::from_str(AUCTION_HOUSE_ID).unwrap();
 
         let iota_names_config = IotaNamesConfig::testnet();
         let event_package_ids = HashSet::from([
@@ -175,12 +175,12 @@ impl IotaNamesExtendedConfig {
         const AUCTION_HOUSE_ID: &str =
             "0xeca91f398c120aa04736d0c8e67400c824c28890d3fbe2d9ddff2f57e539fa15";
 
-        let auction_package_address = IotaAddress::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
-        let coupons_package_address = IotaAddress::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
-        let subnames_package_address = IotaAddress::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
+        let auction_package_address = Address::from_str(AUCTION_PACKAGE_ADDRESS).unwrap();
+        let coupons_package_address = Address::from_str(COUPONS_PACKAGE_ADDRESS).unwrap();
+        let subnames_package_address = Address::from_str(SUBNAMES_PACKAGE_ADDRESS).unwrap();
         let subname_proxy_package_address =
-            IotaAddress::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
-        let auction_house_id = ObjectID::from_str(AUCTION_HOUSE_ID).unwrap();
+            Address::from_str(TEMP_SUBNAME_PROXY_PACKAGE_ADDRESS).unwrap();
+        let auction_house_id = ObjectId::from_str(AUCTION_HOUSE_ID).unwrap();
 
         let iota_names_config = IotaNamesConfig::devnet();
         let event_package_ids = HashSet::from([
@@ -204,7 +204,7 @@ impl IotaNamesExtendedConfig {
     }
 
     /// Checks whether the given package address is an IOTA-Names one.
-    pub fn is_iota_names_package(&self, package_address: impl Into<IotaAddress>) -> bool {
+    pub fn is_iota_names_package(&self, package_address: impl Into<Address>) -> bool {
         let package_address = package_address.into();
 
         self.event_package_ids.contains(&package_address)

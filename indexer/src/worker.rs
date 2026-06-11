@@ -15,20 +15,18 @@ use iota_json::IotaJsonValue;
 use iota_json_rpc_types::{IotaObjectDataOptions, IotaTransactionBlockResponseOptions};
 use iota_names::name::Name;
 use iota_sdk::IotaClientBuilder;
+use iota_sdk_ext::types::{Address, ExecutionStatus, ObjectId, StructTag, TypeTag};
 use iota_types::{
-    Identifier, TypeTag,
     balance::Balance,
-    base_types::ObjectID,
     collection_types::LinkedTable,
     dynamic_field::Field,
     effects::{TransactionEffects, TransactionEffectsAPI},
-    execution_status::ExecutionStatus,
     full_checkpoint_content::CheckpointData,
     object::Object,
 };
 use move_core_types::{
     annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
-    language_storage::StructTag,
+    identifier::Identifier,
 };
 use prometheus::Registry;
 use tokio_util::sync::CancellationToken;
@@ -73,28 +71,22 @@ pub(crate) async fn run_iota_names_reader(
         ..Default::default()
     };
     // Localnet does not support remote store, so we use the REST API
-    if checkpoint_url.contains("localhost") || checkpoint_url.contains("host.docker.internal") {
-        executor
-            .run(
-                // path to a local directory where checkpoints are stored.
-                PathBuf::from("./data/chk"),
-                Some(format!("{checkpoint_url}/api/v1")),
-                // optional remote store access options.
-                vec![],
-                reader_options,
-            )
-            .await?;
+    let remote_url = if checkpoint_url.contains("localhost")
+        || checkpoint_url.contains("host.docker.internal")
+    {
+        RemoteUrl::Fullnode(format!("{checkpoint_url}/api/v1"))
     } else {
-        let config = CheckpointReaderConfig {
-            remote_store_url: Some(RemoteUrl::HybridHistoricalStore {
-                historical_url: format!("{checkpoint_url}/ingestion/historical"),
-                live_url: Some(format!("{checkpoint_url}/ingestion/live")),
-            }),
-            ingestion_path: Some(PathBuf::from("./data/chk")),
-            reader_options,
-        };
-        executor.run_with_config(config).await?;
-    }
+        RemoteUrl::HybridHistoricalStore {
+            historical_url: format!("{checkpoint_url}/ingestion/historical"),
+            live_url: Some(format!("{checkpoint_url}/ingestion/live")),
+        }
+    };
+    let config = CheckpointReaderConfig {
+        remote_store_url: Some(remote_url),
+        ingestion_path: Some(PathBuf::from("./data/chk")),
+        reader_options,
+    };
+    executor.run_with_config(config).await?;
     Ok(())
 }
 
@@ -103,7 +95,7 @@ pub(crate) struct IotaNamesWorker {
     extended_config: IotaNamesExtendedConfig,
     metrics: Arc<IotaNamesMetrics>,
     token: CancellationToken,
-    balance_object_id: ObjectID,
+    balance_object_id: ObjectId,
 }
 
 impl IotaNamesWorker {
@@ -117,8 +109,9 @@ impl IotaNamesWorker {
             "{}::iota_names::BalanceKey<0x2::iota::IOTA>",
             extended_config.iota_names_config.package_address,
         ))?;
+
         let layout = MoveTypeLayout::Struct(Box::new(MoveStructLayout {
-            type_: config_type.clone(),
+            type_: iota_types::iota_sdk_types_conversions::struct_tag_sdk_to_core(&config_type),
             fields: vec![MoveFieldLayout::new(
                 Identifier::from_str("dummy_field")?,
                 MoveTypeLayout::Bool,
@@ -314,27 +307,32 @@ impl IotaNamesWorker {
         }
 
         for transaction in &checkpoint.transactions {
-            let TransactionEffects::V1(effects) = &transaction.effects;
+            match &transaction.effects {
+                TransactionEffects::V1(effects) => {
+                    if *effects.status() != ExecutionStatus::Success {
+                        continue;
+                    }
 
-            if *effects.status() != ExecutionStatus::Success {
-                continue;
-            }
+                    if let Some(events) = &transaction.events {
+                        for event in events.0.iter() {
+                            match IotaNamesEvent::try_from_event(event, &self.extended_config) {
+                                Ok(Some(event)) => {
+                                    debug!(
+                                        "Processing event in checkpoint {}: {event:?}",
+                                        checkpoint.checkpoint_summary.sequence_number
+                                    );
 
-            if let Some(events) = &transaction.events {
-                for event in events.data.iter() {
-                    match IotaNamesEvent::try_from_event(event, &self.extended_config) {
-                        Ok(Some(event)) => {
-                            debug!(
-                                "Processing event in checkpoint {}: {event:?}",
-                                checkpoint.checkpoint_summary.sequence_number
-                            );
-
-                            self.process_event(event)?
+                                    self.process_event(event)?
+                                }
+                                Err(e) => warn!("parsing event failed: {e}"),
+                                _ => {}
+                            }
                         }
-                        Err(e) => warn!("parsing event failed: {e}"),
-                        _ => {}
                     }
                 }
+                _ => unimplemented!(
+                    "a new TransactionEffects variant has been added and must be handled"
+                ),
             }
         }
 
@@ -384,12 +382,7 @@ fn map_panic(payload: Box<dyn std::any::Any + Send + 'static>) -> anyhow::Error 
 
 fn get_iota_names_balance(object: &Object) -> anyhow::Result<Balance> {
     Ok(bcs::from_bytes::<Field<MoveTypeLayout, Balance>>(
-        object
-            .as_inner()
-            .data
-            .try_as_move()
-            .expect("invalid move object")
-            .contents(),
+        object.as_inner().data.as_struct().contents(),
     )?
     .value)
 }
@@ -398,20 +391,12 @@ fn get_auction_house_balance(object: &Object) -> anyhow::Result<Balance> {
     #[expect(dead_code)]
     #[derive(serde::Deserialize)]
     struct AuctionHouse {
-        pub id: ObjectID,
+        pub id: ObjectId,
         pub balance: Balance,
         pub auctions: LinkedTable<Name>,
     }
 
-    Ok(bcs::from_bytes::<AuctionHouse>(
-        object
-            .as_inner()
-            .data
-            .try_as_move()
-            .expect("invalid move object")
-            .contents(),
-    )?
-    .balance)
+    Ok(bcs::from_bytes::<AuctionHouse>(object.as_inner().data.as_struct().contents())?.balance)
 }
 
 async fn initialize_progress_store(
@@ -446,12 +431,12 @@ async fn initialize_progress_store(
 
 async fn get_package_deployment_checkpoint(
     client: &iota_sdk::IotaClient,
-    package_address: &iota_types::base_types::IotaAddress,
+    package_address: &Address,
 ) -> anyhow::Result<u64> {
     let object_response = client
         .read_api()
         .get_object_with_options(
-            ObjectID::from(*package_address),
+            ObjectId::from(*package_address),
             IotaObjectDataOptions::default().with_previous_transaction(),
         )
         .await?;

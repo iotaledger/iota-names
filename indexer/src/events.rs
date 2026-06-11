@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_names::{name::Name, registry::NameRecord};
-use iota_types::{base_types::IotaAddress, collection_types::VecMap, event::Event};
+use iota_sdk_ext::types::{Address, Event};
+use iota_types::collection_types::VecMap;
 use serde::{Deserialize, Serialize};
 
 use crate::config::IotaNamesExtendedConfig;
@@ -37,11 +38,11 @@ impl IotaNamesEvent {
         event: &Event,
         config: &IotaNamesExtendedConfig,
     ) -> anyhow::Result<Option<Self>> {
-        if !config.is_iota_names_package(event.type_.address) {
+        if !config.is_iota_names_package(event.type_.address()) {
             return Ok(None);
         }
 
-        Ok(Some(match event.type_.name.as_str() {
+        Ok(Some(match event.type_.name().as_str() {
             // `auctions`
             "AuctionStartedEvent" => Self::AuctionStarted(bcs::from_bytes(&event.contents)?),
             "AuctionBidEvent" => Self::AuctionBid(bcs::from_bytes(&event.contents)?),
@@ -71,7 +72,7 @@ impl IotaNamesEvent {
             "LeafSubnameRemovedEvent" => {
                 Self::LeafSubnameRemoved(bcs::from_bytes(&event.contents)?)
             }
-            _ => anyhow::bail!("Invalid event type: {}", event.type_.name),
+            _ => anyhow::bail!("Invalid event type: {}", event.type_.name()),
         }))
     }
 }
@@ -84,14 +85,14 @@ pub(crate) struct AuctionStartedEvent {
     pub start_timestamp_ms: u64,
     pub end_timestamp_ms: u64,
     pub starting_bid: u64,
-    pub bidder: IotaAddress,
+    pub bidder: Address,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AuctionBidEvent {
     pub name: Name,
     pub bid: u64,
-    pub bidder: IotaAddress,
+    pub bidder: Address,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -106,7 +107,7 @@ pub(crate) struct AuctionFinalizedEvent {
     pub start_timestamp_ms: u64,
     pub end_timestamp_ms: u64,
     pub winning_bid: u64,
-    pub winner: IotaAddress,
+    pub winner: Address,
 }
 
 // `coupons`
@@ -140,18 +141,18 @@ pub(crate) struct NameRecordRemovedEvent {
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct TargetAddressSetEvent {
     pub name: Name,
-    pub target_address: Option<IotaAddress>,
+    pub target_address: Option<Address>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ReverseLookupSetEvent {
-    pub default_address: IotaAddress,
+    pub default_address: Address,
     pub default_name: Name,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct ReverseLookupUnsetEvent {
-    pub default_address: IotaAddress,
+    pub default_address: Address,
     pub default_name: Name,
 }
 
@@ -198,7 +199,7 @@ pub struct NodeSubnameBurnedEvent {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LeafSubnameCreatedEvent {
     pub name: Name,
-    pub target: IotaAddress,
+    pub target: Address,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
