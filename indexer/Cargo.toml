@@ -36,9 +36,17 @@ iota-metrics = { git = "https://github.com/iotaledger/iota", package = "iota-met
 iota-names = { git = "https://github.com/iotaledger/iota", package = "iota-names" }
 iota-protocol-config = { git = "https://github.com/iotaledger/iota", package = "iota-protocol-config" }
 iota-sdk = { git = "https://github.com/iotaledger/iota", package = "iota-sdk" }
-iota-sdk-ext = { git = "https://github.com/iotaledger/iota-rust-sdk", package = "iota-sdk", default-features = false, features = ["types", "serde"], rev = "e7af68b7ed6428dbb1e2bb434c6692993d41e9c3" }
+iota-sdk-ext = { git = "https://github.com/iotaledger/iota-rust-sdk", package = "iota-sdk", default-features = false, features = ["types", "serde"], rev = "00c80ad362124bbabd6409bed4e7dd2a7fefd61b" }
 iota-types = { git = "https://github.com/iotaledger/iota", package = "iota-types" }
 move-core-types = { git = "https://github.com/iotaledger/iota", package = "move-core-types" }
+prometheus-filtered = { git = "https://github.com/iotaledger/iota", package = "prometheus-filtered" }
 
 [features]
 default = []
+
+# Mirrors the patch in the iotaledger/iota workspace: fastcrypto-tbls is only
+# published on git and pulls fastcrypto via an in-repo path dep. Upstream's
+# [patch] is not inherited by dependents, so it has to be repeated here to keep
+# a single fastcrypto in the graph.
+[patch."https://github.com/MystenLabs/fastcrypto"]
+fastcrypto = "=0.1.11"

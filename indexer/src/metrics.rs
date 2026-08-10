@@ -6,10 +6,11 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use axum::{Extension, Router, routing::get};
 use iota_metrics::{METRICS_ROUTE, RegistryService, histogram::Histogram};
 use prometheus::{
-    IntCounter, IntCounterVec, IntGauge, IntGaugeVec, Registry,
-    register_int_counter_vec_with_registry, register_int_counter_with_registry,
-    register_int_gauge_vec_with_registry, register_int_gauge_with_registry,
+    IntCounter, IntCounterVec, IntGauge, IntGaugeVec, register_int_counter_vec_with_registry,
+    register_int_counter_with_registry, register_int_gauge_vec_with_registry,
+    register_int_gauge_with_registry,
 };
+use prometheus_filtered::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::info;
 

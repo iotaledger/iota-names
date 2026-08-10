@@ -15,20 +15,18 @@ use iota_json::IotaJsonValue;
 use iota_json_rpc_types::{IotaObjectDataOptions, IotaTransactionBlockResponseOptions};
 use iota_names::name::Name;
 use iota_sdk::IotaClientBuilder;
-use iota_sdk_ext::types::{Address, ExecutionStatus, ObjectId, StructTag, TypeTag};
+use iota_sdk_ext::types::{
+    Address, ExecutionStatus, ObjectId, StructTag, TransactionEffects, TypeTag,
+};
 use iota_types::{
-    balance::Balance,
-    collection_types::LinkedTable,
-    dynamic_field::Field,
-    effects::{TransactionEffects, TransactionEffectsAPI},
-    full_checkpoint_content::CheckpointData,
-    object::Object,
+    balance::Balance, collection_types::LinkedTable, dynamic_field::Field,
+    effects::TransactionEffectsAPI, full_checkpoint_content::CheckpointData, object::Object,
 };
 use move_core_types::{
     annotated_value::{MoveFieldLayout, MoveStructLayout, MoveTypeLayout},
     identifier::Identifier,
 };
-use prometheus::Registry;
+use prometheus_filtered::Registry;
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, info, trace, warn};
 
